@@ -1,0 +1,1 @@
+{"version":3,"file":"isCachingEnabled.js","sourceRoot":"","sources":["../src/isCachingEnabled.ts"],"names":[],"mappings":";;;AAAA,IAAI,cAAc,GAAG,IAAI,CAAC;AAE1B,uEAAuE;AACvE,SAAgB,iBAAiB,CAAC,OAAgB;IAChD,cAAc,GAAG,OAAO,CAAC;AAC3B,CAAC;AAFD,8CAEC;AAED,SAAgB,gBAAgB;IAC9B,OAAO,cAAc,CAAC;AACxB,CAAC;AAFD,4CAEC"}

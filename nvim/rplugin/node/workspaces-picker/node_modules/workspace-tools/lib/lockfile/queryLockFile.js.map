@@ -1,0 +1,1 @@
+{"version":3,"file":"queryLockFile.js","sourceRoot":"","sources":["../../src/lockfile/queryLockFile.ts"],"names":[],"mappings":";;;AAAA,mDAAgD;AAGhD,SAAgB,aAAa,CAAC,IAAY,EAAE,YAAoB,EAAE,IAAgB;IAChF,MAAM,qBAAqB,GAAG,IAAA,6BAAa,EAAC,IAAI,EAAE,YAAY,CAAC,CAAC;IAChE,OAAO,IAAI,CAAC,MAAM,CAAC,qBAAqB,CAAC,CAAC;AAC5C,CAAC;AAHD,sCAGC"}
