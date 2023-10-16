@@ -119,11 +119,12 @@ echo "-------------------------------------"
 echo "-> Installing and Setting up docker"
 echo "-------------------------------------"
 echo ""
-yay -S docker-desktop
+yay -S docker-desktop docker-compose
 ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 docker --version
 systemctl --user enable docker-desktop
+docker compose version
 echo "You also have to login into docker-desktop"
 
 echo ""
