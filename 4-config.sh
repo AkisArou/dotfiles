@@ -116,16 +116,26 @@ sudo systemctl enable fstrim.timer
 
 echo ""
 echo "-------------------------------------"
-echo "-> Installing and Setting up docker"
+echo "-> Setting up docker"
 echo "-------------------------------------"
 echo ""
-yay -S docker-desktop docker-compose
 ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 docker --version
 systemctl --user enable docker-desktop
 docker compose version
 echo "You also have to login into docker-desktop"
+echo "https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users"
+
+
+reload_shell_configuration
+
+echo ""
+echo "-------------------------------------"
+echo "-> Installing yarn globally"
+echo "-------------------------------------"
+echo ""
+npm i -g yarn
 
 echo ""
 echo "-------------------------------------"

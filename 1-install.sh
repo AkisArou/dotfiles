@@ -131,6 +131,8 @@ packagesYay=(
     "git-delta"
     "gnome-terminal"
     "docker-desktop"
+    "docker-compose"
+    "jetbrains-toolbox"
 );
   
 # ------------------------------------------------------
