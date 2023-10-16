@@ -1,0 +1,1 @@
+/home/akisarou/dotfiles/zsh/.config/zsh/aliases.zsh

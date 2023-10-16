@@ -70,7 +70,7 @@ Darwin)
 	;;
 
 Linux)
-	alias ls='ls --color=auto'
+	alias ls='ls -la --color=auto'
 	;;
 
 CYGWIN* | MINGW32* | MSYS* | MINGW*)

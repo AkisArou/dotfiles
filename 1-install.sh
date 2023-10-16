@@ -129,6 +129,8 @@ packagesYay=(
     "genymotion" 
     "lazygit" 
     "git-delta"
+    "gnome-terminal"
+    "docker-desktop"
 );
   
 # ------------------------------------------------------

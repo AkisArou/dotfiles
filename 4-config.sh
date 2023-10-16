@@ -1,5 +1,12 @@
 #!/bin/bash
 
+reload_shell_configuration() {
+  echo "Reloading shell configuration"
+  . "${HOME}/.zshrc" 2>/dev/null
+  . "${HOME}/.bash_profile" 2>/dev/null
+  echo "Shell configuration reloaded"
+}
+
 echo ""
 echo "-------------------------------------"
 echo "-> Setting up gnome settings"
@@ -43,6 +50,8 @@ asdf plugin add java https://github.com/halcyon/asdf-java.git
 asdf plugin-add maven
 asdf plugin-add helm https://github.com/Antiarchitect/asdf-helm.git
 asdf plugin add kotlin https://github.com/asdf-community/asdf-kotlin.git
+
+reload_shell_configuration
 
 # Read .tool-versions file and install the specified versions
 asdf install
@@ -107,8 +116,22 @@ sudo systemctl enable fstrim.timer
 
 echo ""
 echo "-------------------------------------"
-echo "-> Enabling firewall"
+echo "-> Installing and Setting up docker"
 echo "-------------------------------------"
 echo ""
-sudo ufw enable
-sudo ufw status verbose
+yay -S docker-desktop
+ls -al /dev/kvm
+sudo usermod -aG kvm $USER
+docker --version
+systemctl --user enable docker-desktop
+echo "You also have to login into docker-desktop"
+
+echo ""
+echo "-------------------------------------"
+echo "-> Changing shell to zsh"
+echo "-------------------------------------"
+echo ""
+sudo chsh -s /usr/bin/zsh
+echo "Reboot to get zsh shell"
+
+

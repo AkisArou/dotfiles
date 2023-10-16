@@ -1,8 +1,7 @@
 lastupdatecheck: 0
 recentrepos:
-- /home/akisarou/projects/archinstall
+- /home/akisarou/dotfiles
 - /home/akisarou/nable/nable-solutions
-- /home/akisarou/projects/my-nodejs-pnpm-test
 startuppopupversion: 5
 customcommandshistory: []
 hidecommandlog: false
