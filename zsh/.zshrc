@@ -8,6 +8,7 @@ HISTFILE=~/.zsh_history
 # source
 plug "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
 plug "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
+plug "$HOME/dotfiles/zsh/.config/zsh/functions.zsh"
 
 # plugins
 plug "zsh-users/zsh-autosuggestions"

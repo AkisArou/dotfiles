@@ -24,6 +24,7 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.inlayHints.enumMemberValues.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
   "tsserver.experimental.enableProjectDiagnostics": false,
   "tsserver.maxTsServerMemory": 15000,
   "tsserver.enableTracing": false,
