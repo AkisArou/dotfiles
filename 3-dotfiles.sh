@@ -161,6 +161,14 @@ echo "-------------------------------------"
 echo ""
 _installSymLink .tool-versions ~/.tool-versions ~/dotfiles/.tool-versions ~/.tool-versions
 
+echo "-------------------------------------"
+echo "-> Creating iptables "
+echo "-------------------------------------"
+echo ""
+sudo rm /etc/iptables/iptables.rules
+_installSymLink iptables /etc/iptables/iptables.rules ~/dotfiles/iptables/iptables.rules /etc/iptables/iptables.rules
+sudo systemctl restart iptables
+
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------

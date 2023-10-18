@@ -11,3 +11,4 @@ export MANWIDTH=999
 export PATH="$HOME/.local/share/neovim/bin":$PATH
 export XDG_CURRENT_DESKTOP="Wayland"
 export PATH="/usr/lib/ccache/bin/:$PATH"
+export ANDROID_HOME="$HOME/Android/Sdk"

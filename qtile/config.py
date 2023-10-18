@@ -65,17 +65,17 @@ mod = "mod4"
 keys = [
 
     # Focus
-    Key([mod], "H", lazy.layout.left(), desc="Move focus to left"),
-    Key([mod], "L", lazy.layout.right(), desc="Move focus to right"),
-    Key([mod], "J", lazy.layout.down(), desc="Move focus down"),
-    Key([mod], "L", lazy.layout.up(), desc="Move focus up"),
+    Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
+    Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
+    Key([mod], "j", lazy.layout.down(), desc="Move focus down"),
+    Key([mod], "k", lazy.layout.up(), desc="Move focus up"),
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window around"),
     
     # Move
-    Key([mod, "shift"], "Left", lazy.layout.shuffle_left(), desc="Move window to the left"),
-    Key([mod, "shift"], "Right", lazy.layout.shuffle_right(), desc="Move window to the right"),
-    Key([mod, "shift"], "Down", lazy.layout.shuffle_down(), desc="Move window down"),
-    Key([mod, "shift"], "Up", lazy.layout.shuffle_up(), desc="Move window up"),
+    Key([mod, "shift"], "h", lazy.layout.shuffle_left(), desc="Move window to the left"),
+    Key([mod, "shift"], "l", lazy.layout.shuffle_right(), desc="Move window to the right"),
+    Key([mod, "shift"], "j", lazy.layout.shuffle_down(), desc="Move window down"),
+    Key([mod, "shift"], "l", lazy.layout.shuffle_up(), desc="Move window up"),
 
     # Swap
     Key([mod, "shift"], "h", lazy.layout.swap_left()),

@@ -10,7 +10,7 @@
 # ----------------------------------------------------- 
 
 # My screen resolution
-xrandr --rate 120
+xrandr --output DisplayPort-1 --mode 5120x1440 --rate 120
 
 # For Virtual Machine 
 # xrandr --outout Virtual-1 --mode 1920x1080
