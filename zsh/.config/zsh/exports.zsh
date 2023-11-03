@@ -10,5 +10,13 @@ export MANPAGER='nvim +Man!'
 export MANWIDTH=999
 export PATH="$HOME/.local/share/neovim/bin":$PATH
 export XDG_CURRENT_DESKTOP="Wayland"
+export XDG_SESSION_DESKTOP="hyprland"
+export XDG_SESSION_TYPE="wayland"
 export PATH="/usr/lib/ccache/bin/:$PATH"
 export ANDROID_HOME="$HOME/Android/Sdk"
+
+# Mozilla specific for wayland
+# export MOZ_ENABLE_WAYLAND=1
+# export MOZ_WAYLAND_USE_VAAPI=1
+# export MOZ_DBUS_REMOTE=1
+
