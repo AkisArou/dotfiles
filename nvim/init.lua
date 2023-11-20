@@ -1,7 +1,3 @@
-require "keymaps"
-
-require "Lazy"
-require "autocommands"
-require "options"
-require "workspace-picker"
-
+-- bootstrap lazy.nvim, LazyVim and your plugins
+require("config.lazy")
+require("workspace-picker")

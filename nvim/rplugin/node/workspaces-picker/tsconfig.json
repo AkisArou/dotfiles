@@ -1,6 +1,10 @@
 {
   "compilerOptions": {
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["index.js"]
+  "include": [
+    "index.js"
+  ]
 }
