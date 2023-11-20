@@ -1,3 +1,4 @@
+local Util = require("lazyvim.util")
 -- every spec file under the "plugins" directory will be loaded automatically by lazy.nvim
 --
 -- In your plugin files, you can:
@@ -119,6 +120,10 @@ return {
   -- add telescope-fzf-native
   {
     "telescope.nvim",
+    keys = {
+      { "<leader>ff", Util.telescope("files", { cwd = false }), desc = "Find Files (root dir)" },
+      { "<leader>fF", Util.telescope("files"), desc = "Find Files (cwd)" },
+    },
     dependencies = {
       "nvim-telescope/telescope-fzf-native.nvim",
       build = "make",
@@ -232,25 +237,18 @@ return {
 
   {
     "nvim-neo-tree/neo-tree.nvim",
-    config = function()
-      -- If you want icons for diagnostic errors, you'll need to define them somewhere:
-      vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
-      vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
-      vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
-      vim.fn.sign_define("DiagnosticSignHint", { text = "󰌵", texthl = "DiagnosticSignHint" })
-
-      require("neo-tree").setup({
-        window = {
-          mappings = {
-            ["l"] = "open",
-            ["h"] = "close_node",
-          },
+    keys = {
+      { "<leader>e", "<leader>fE", desc = "Explorer NeoTree (root dir)", remap = true },
+      { "<leader>E", "<leader>fe", desc = "Explorer NeoTree (cwd)", remap = true },
+    },
+    opts = {
+      window = {
+        mappings = {
+          ["l"] = "open",
+          ["h"] = "close_node",
         },
-        filesystem = {
-          hijack_netrw_behavior = "disabled",
-        },
-      })
-    end,
+      },
+    },
   },
 
   {
