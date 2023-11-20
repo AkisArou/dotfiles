@@ -1,15 +1,3 @@
-#/bin/bash
-#  ___           _        _ _  
-# |_ _|_ __  ___| |_ __ _| | | 
-#  | || '_ \/ __| __/ _` | | | 
-#  | || | | \__ \ || (_| | | | 
-# |___|_| |_|___/\__\__,_|_|_| 
-#                              
-# by Stephan Raabe (2023) 
-# ----------------------------------------------------- 
-# Install Script for required packages
-# ------------------------------------------------------
-
 # ------------------------------------------------------
 # Load Library
 # ------------------------------------------------------
@@ -21,33 +9,32 @@ echo "  | ||  _ \/ __| __/ _  | | | "
 echo "  | || | | \__ \ || (_| | | | "
 echo " |___|_| |_|___/\__\__,_|_|_| "
 echo "                              "
-echo "by Stephan Raabe (2023)"
 echo "-------------------------------------"
 echo ""
 
 # ------------------------------------------------------
 # Check if yay is installed
 # ------------------------------------------------------
-if sudo pacman -Qs yay > /dev/null ; then
-    echo "yay is installed. You can proceed with the installation"
+if sudo pacman -Qs yay >/dev/null; then
+	echo "yay is installed. You can proceed with the installation"
 else
-    echo "yay is not installed. Will be installed now!"
-    git clone https://aur.archlinux.org/yay-git.git ~/yay-git
-    cd ~/yay-git
-    makepkg -si
-    cd ~/dotfiles/
-    clear
-    echo "yay has been installed successfully."
-    echo ""
-    echo "  ___           _        _ _  "
-    echo " |_ _|_ __  ___| |_ __ _| | | "
-    echo "  | ||  _ \/ __| __/ _  | | | "
-    echo "  | || | | \__ \ || (_| | | | "
-    echo " |___|_| |_|___/\__\__,_|_|_| "
-    echo "                              "
-    echo "by Stephan Raabe (2023)"
-    echo "-------------------------------------"
-    echo ""
+	echo "yay is not installed. Will be installed now!"
+	git clone https://aur.archlinux.org/yay-git.git ~/yay-git
+	cd ~/yay-git
+	makepkg -si
+	cd ~/dotfiles/
+	clear
+	echo "yay has been installed successfully."
+	echo ""
+	echo "  ___           _        _ _  "
+	echo " |_ _|_ __  ___| |_ __ _| | | "
+	echo "  | ||  _ \/ __| __/ _  | | | "
+	echo "  | || | | \__ \ || (_| | | | "
+	echo " |___|_| |_|___/\__\__,_|_|_| "
+	echo "                              "
+	echo "by Stephan Raabe (2023)"
+	echo "-------------------------------------"
+	echo ""
 fi
 
 # ------------------------------------------------------
@@ -55,16 +42,18 @@ fi
 # ------------------------------------------------------
 
 while true; do
-    read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
-    case $yn in
-        [Yy]* )
-            echo "Installation started."
-        break;;
-        [Nn]* ) 
-            exit;
-        break;;
-        * ) echo "Please answer yes or no.";;
-    esac
+	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
+	case $yn in
+	[Yy]*)
+		echo "Installation started."
+		break
+		;;
+	[Nn]*)
+		exit
+		break
+		;;
+	*) echo "Please answer yes or no." ;;
+	esac
 done
 
 # ------------------------------------------------------
@@ -74,81 +63,81 @@ echo ""
 echo "-> Install main packages"
 
 packagesPacman=(
-    "pacman-contrib"
-    "alacritty" 
-    "rofi" 
-    "chromium" 
-    "nitrogen" 
-    "dunst" 
-    "mpv" 
-    "freerdp" 
-    "xfce4-power-manager" 
-    "thunar" 
-    "mousepad" 
-    "ttf-font-awesome" 
-    "ttf-fira-sans" 
-    "ttf-fira-code" 
-    "ttf-firacode-nerd" 
-    "figlet" 
-    "lxappearance" 
-    "breeze" 
-    "breeze-gtk" 
-    "vlc" 
-    "exa" 
-    "python-pip" 
-    "python-psutil" 
-    "python-rich" 
-    "python-click" 
-    "xdg-desktop-portal-gtk"
-    "pavucontrol" 
-    "tumbler" 
-    "xautolock" 
-    "blueman"
-    "nautilus"
-    "bat"
-    "zsh"
-);
+	"pacman-contrib"
+	"alacritty"
+	"rofi"
+	"chromium"
+	"nitrogen"
+	"dunst"
+	"mpv"
+	"freerdp"
+	"xfce4-power-manager"
+	"thunar"
+	"mousepad"
+	"ttf-font-awesome"
+	"ttf-fira-sans"
+	"ttf-fira-code"
+	"ttf-firacode-nerd"
+	"figlet"
+	"lxappearance"
+	"breeze"
+	"breeze-gtk"
+	"vlc"
+	"exa"
+	"python-pip"
+	"python-psutil"
+	"python-rich"
+	"python-click"
+	"xdg-desktop-portal-gtk"
+	"pavucontrol"
+	"tumbler"
+	"xautolock"
+	"blueman"
+	"nautilus"
+	"bat"
+	"zsh"
+)
 
 packagesYay=(
-    "brave-bin" 
-    "pfetch" 
-    "bibata-cursor-theme" 
-    "trizen"
-    "kora-icon-theme"
-    "base-devel"
-    "ripgrep" 
-    "fd" 
-    "snapd" 
-    "neovim" 
-    "visual-studio-code-bin" 
-    "caprine" 
-    "tmux" 
-    "watchman" 
-    "virtualbox" 
-    "linux-lts-headers" 
-    "genymotion" 
-    "lazygit" 
-    "git-delta"
-    "gnome-terminal"
-    "docker-desktop"
-    "docker-compose"
-    "jetbrains-toolbox"
-);
-  
+	"brave-bin"
+	"pfetch"
+	"bibata-cursor-theme"
+	"trizen"
+	"kora-icon-theme"
+	"base-devel"
+	"ripgrep"
+	"fd"
+	"snapd"
+	"neovim"
+	"visual-studio-code-bin"
+	"caprine"
+	"tmux"
+	"watchman"
+	"virtualbox"
+	"linux-lts-headers"
+	"genymotion"
+	"lazygit"
+	"git-delta"
+	"gnome-terminal"
+	"docker-desktop"
+	"docker-compose"
+	"jetbrains-toolbox"
+)
+
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-_installPackagesPacman "${packagesPacman[@]}";
-_installPackagesYay "${packagesYay[@]}";
+_installPackagesPacman "${packagesPacman[@]}"
+_installPackagesYay "${packagesYay[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
 # ------------------------------------------------------
 # Install pywal
 # ------------------------------------------------------
 if [ -f /usr/bin/wal ]; then
-    echo "pywal already installed."
+	echo "pywal already installed."
 else
-    yay --noconfirm -S pywal
+	yay --noconfirm -S pywal
 fi
 
 clear
@@ -167,17 +156,19 @@ clear
 echo ""
 echo "-> Install login screen"
 while true; do
-    read -p "Do you want to install the custom login promt? (Yy/Nn): " yn
-    case $yn in
-        [Yy]* )
-            sudo cp ~/dotfiles/login/issue /etc/issue
-            echo "Login promt installed."
-        break;;
-        [Nn]* ) 
-            echo "Custom login promt skipped."
-        break;;
-        * ) echo "Please answer yes or no.";;
-    esac
+	read -p "Do you want to install the custom login promt? (Yy/Nn): " yn
+	case $yn in
+	[Yy]*)
+		sudo cp ~/dotfiles/login/issue /etc/issue
+		echo "Login promt installed."
+		break
+		;;
+	[Nn]*)
+		echo "Custom login promt skipped."
+		break
+		;;
+	*) echo "Please answer yes or no." ;;
+	esac
 done
 
 # ------------------------------------------------------
@@ -186,28 +177,30 @@ done
 echo ""
 echo "-> Install wallapers"
 while true; do
-    read -p "Do you want to clone the wallpapers? (Yy/Nn): " yn
-    case $yn in
-        [Yy]* )
-            if [ -d ~/wallpaper/ ]; then
-                echo "wallpaper folder already exists."
-            else
-                git clone https://gitlab.com/stephan-raabe/wallpaper.git ~/wallpaper
-                echo "wallpaper installed."
-            fi
-            echo "Wallpaper installed."
-        break;;
-        [Nn]* ) 
-            if [ -d ~/wallpaper/ ]; then
-                echo "wallpaper folder already exists."
-            else
-                mkdir ~/wallpaper
-            fi
-            cp ~/dotfiles/wallpapers/* ~/wallpaper
-            echo "Default wallpaper installed."
-        break;;
-        * ) echo "Please answer yes or no.";;
-    esac
+	read -p "Do you want to clone the wallpapers? (Yy/Nn): " yn
+	case $yn in
+	[Yy]*)
+		if [ -d ~/wallpaper/ ]; then
+			echo "wallpaper folder already exists."
+		else
+			git clone https://gitlab.com/stephan-raabe/wallpaper.git ~/wallpaper
+			echo "wallpaper installed."
+		fi
+		echo "Wallpaper installed."
+		break
+		;;
+	[Nn]*)
+		if [ -d ~/wallpaper/ ]; then
+			echo "wallpaper folder already exists."
+		else
+			mkdir ~/wallpaper
+		fi
+		cp ~/dotfiles/wallpapers/* ~/wallpaper
+		echo "Default wallpaper installed."
+		break
+		;;
+	*) echo "Please answer yes or no." ;;
+	esac
 done
 
 # ------------------------------------------------------

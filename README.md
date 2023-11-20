@@ -1,6 +1,6 @@
 # ML4W dotfiles
 
-This is the configuration of my Arch linux based installation for Hyprland (Wayland) and Qtile (Xorg).
+This is the configuration of my Arch linux based installation with Qtile (Wayland & Xorg).
 
 ## Common Packages
 
@@ -9,31 +9,16 @@ This is the configuration of my Arch linux based installation for Hyprland (Wayl
 - Prompt: starship
 - Icons: Font Awesome
 - Menus: Rofi
-- Colorscheme: pywal (dynamic)
 - Browsers: brave, chromium
 - Filemanager: Neutilus, ranger, Thunar
 - Cursor: Bibata Modern Classic
 - Icons: Kora-Icon-Theme
 - Theme: Breeze-dark
-- Virtual Machine: qemu (Windows 11 with looking glass and xrdp)
-
-## Hyprland
-
-- Status Bar: waybar
-- Screenshots: grim & slurp
-- Clipboard Manager: cliphist
-- Logout: wlogout
-- Screenlock: swaylock-effects
 
 ## Qtile
-
 - Compositor: picom
-- Status Bar: polybar
 - Screenshots: scrot
 
-## Templating
-
-Included is a pywal configuration that changes the color scheme based on a randomly selected wallpaper. With the key binding SuperKey + Shift + w you can change the wallpaper. SuperKey + Ctrl + w opens rofi with a list of installed wallpapers for your individual selection. See also the .bashrc and the key bindings on Hyprland and Qtile for more alias definitions.
 
 ## Screenshots & Video
 
@@ -68,8 +53,6 @@ cd dotfiles
 # Install all required packages
 ./1-install.sh
 
-# Install hyprland window manager
-./2-install-hyprland.sh
 # OR/AND Install qtile window manager
 ./2-install-qtile.sh
 

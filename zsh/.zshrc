@@ -44,9 +44,6 @@ fpath=(${ASDF_DIR}/completions $fpath)
 # initialise completions with ZSH's compinit
 autoload -Uz compinit && compinit
 
-# PYWAL
-cat ~/.cache/wal/sequences
-
 # PFETCH
 echo ""
 pfetch

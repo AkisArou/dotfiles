@@ -4,7 +4,6 @@
 # | |_| || |  | || |___| |___  | |__| (_) | | | |  _| | (_| |
 #  \__\_\|_| |___|_____|_____|  \____\___/|_| |_|_| |_|\__, |
 #                                                      |___/ 
-
 # Icons: https://fontawesome.com/search?o=r&m=free
 
 import os
@@ -31,17 +30,13 @@ home = str(Path.home())
 # --------------------------------------------------------
 # Define Bar
 # --------------------------------------------------------
-wm_bar = "polybar"
-# wm_bar = "qtile"
+wm_bar = "qtile"
 
 # --------------------------------------------------------
 # Check for VirtualBox
 # --------------------------------------------------------
 
-if (os.path.isfile("/usr/bin/VBoxService")):
-    terminal = "terminator"
-else:
-    terminal = "alacritty"        
+terminal = "alacritty"        
 
 # --------------------------------------------------------
 # Check for Desktop/Laptop
@@ -54,7 +49,6 @@ platform = int(os.popen("cat /sys/class/dmi/id/chassis_type").read())
 # Set default apps
 # --------------------------------------------------------
 
-# terminal = guess_terminal(terminal)
 browser = "brave"
 
 # --------------------------------------------------------
@@ -63,7 +57,6 @@ browser = "brave"
 mod = "mod4"
 
 keys = [
-
     # Focus
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
@@ -114,11 +107,6 @@ keys = [
     Key([mod, "control"], "Return", lazy.spawn(home + "/dotfiles/scripts/applauncher.sh"), desc="Launch Rofi"),
     Key([mod], "b", lazy.spawn(browser), desc="Launch Browser"),
     Key([mod, "control"], "b", lazy.spawn(home + "/dotfiles/scripts/bravebookmarks.sh"), desc="Rofi Brave Bookmarks"),
-    Key([mod], "v", lazy.spawn(home + "/dotfiles/scripts/looking-glass.sh"), desc="Start Looking Glass Client"),
-    Key([mod, "shift"], "w", lazy.spawn(home + "/dotfiles/scripts/updatewal.sh"), desc="Update Theme and Wallpaper"),
-    Key([mod, "control"], "w", lazy.spawn(home + "/dotfiles/scripts/wallpaper.sh"), desc="Select Theme and Wallpaper"),
-    Key([mod, "control"], "t", lazy.spawn(home + "/dotfiles/scripts/templates.sh"), desc="Select Tempate and copy to clipboard"),
-#    Key([], 'F10', lazy.spawn("brave --app=https://chat.openai.com"), desc="Open ChatGPT")
 ]
 
 # --------------------------------------------------------
@@ -136,48 +124,13 @@ groups = [
 dgroups_key_binder = simple_key_binder(mod)
 
 # --------------------------------------------------------
-# Scratchpads
-# --------------------------------------------------------
-
-groups.append(ScratchPad("6", [
-    DropDown("chatgpt", "chromium --app=https://chat.openai.com", x=0.3, y=0.1, width=0.40, height=0.4, on_focus_lost_hide=False ),
-    DropDown("mousepad", "mousepad", x=0.3, y=0.1, width=0.40, height=0.4, on_focus_lost_hide=False ),
-    DropDown("terminal", "alacritty", x=0.3, y=0.1, width=0.40, height=0.4, on_focus_lost_hide=False ),
-    DropDown("scrcpy", "scrcpy -d", x=0.8, y=0.05, width=0.15, height=0.6, on_focus_lost_hide=False )
-]))
-
-keys.extend([
-    Key([mod], 'F10', lazy.group["6"].dropdown_toggle("chatgpt")),
-    Key([mod], 'F11', lazy.group["6"].dropdown_toggle("mousepad")),
-    Key([mod], 'F12', lazy.group["6"].dropdown_toggle("terminal")),
-    Key([mod], 'F9', lazy.group["6"].dropdown_toggle("scrcpy"))
-])
-
-# --------------------------------------------------------
-# Pywal Colors
-# --------------------------------------------------------
-
-colors = os.path.expanduser('~/.cache/wal/colors.json')
-colordict = json.load(open(colors))
-ColorZ=(colordict['colors']['color0'])
-ColorA=(colordict['colors']['color1'])
-ColorB=(colordict['colors']['color2'])
-ColorC=(colordict['colors']['color3'])
-ColorD=(colordict['colors']['color4'])
-ColorE=(colordict['colors']['color5'])
-ColorF=(colordict['colors']['color6'])
-ColorG=(colordict['colors']['color7'])
-ColorH=(colordict['colors']['color8'])
-ColorI=(colordict['colors']['color9'])
-
-# --------------------------------------------------------
 # Setup Layout Theme
 # --------------------------------------------------------
 
 layout_theme = { 
     "border_width": 3,
-    "margin": 15,
-    "border_focus": ColorC,
+    "margin": 6,
+    "border_focus": "FFFFFF",
     "border_normal": "FFFFFF",
     "single_border_width": 3
 }
@@ -232,7 +185,7 @@ widget_list = [
     ),
     widget.TextBox(
         text='  ',
-        foreground=ColorC,
+        foreground="FFFFFF",
     ),
     widget.WindowName(),
     widget.Systray(),
@@ -245,14 +198,14 @@ widget_list = [
     ),
     widget.TextBox(
         text='|',
-        foreground=ColorC,
+        foreground="FFFFFF",
     ),
     widget.Volume(
         fmt='Vol: {}',
     ),
     widget.TextBox(
         text='|',
-        foreground=ColorC,
+        foreground="FFFFFF",
     ),
     widget.Memory(
         measure_mem='G',
@@ -264,19 +217,19 @@ widget_list = [
     ),
     widget.TextBox(
         text='|',
-        foreground=ColorC,
+        foreground="FFFFFF",
     ),
     widget.Battery(),
     widget.TextBox(
         text='|',
-        foreground=ColorC,
+        foreground="FFFFFF",
     ),
     widget.Clock(
         format="%Y-%m-%d %a %I:%M %p",
     ),
     widget.TextBox(
         text='|',
-        foreground=ColorC,
+        foreground="FFFFFF",
     ),
     widget.QuickExit(
         default_text=" ",
@@ -293,20 +246,17 @@ if (platform == 3):
 # Screens
 # --------------------------------------------------------
 
-if (wm_bar == "polybar"):
-    screens = [Screen(top=bar.Gap(size=28))]
-else:
-    screens = [
-        Screen(
-            top=bar.Bar(
-    		widget_list,
-                24,
-                opacity=0.7,
-                border_width=[3, 0, 3, 0],
-                margin=[0,0,0,0]
-            ),
+screens = [
+    Screen(
+        top=bar.Bar(
+        widget_list,
+            24,
+            opacity=0.7,
+            border_width=[3, 0, 3, 0],
+            margin=[0,0,0,0]
         ),
-    ]
+    ),
+]
 
 # --------------------------------------------------------
 # Drag floating layouts
@@ -324,7 +274,7 @@ mouse = [
 
 floating_layout = layout.Floating(
     border_width=3,
-    border_focus=ColorC,
+    border_focus="FFFFFF",
     border_normal="FFFFFF",
     float_rules=[
         # Run the utility of `xprop` to see the wm class and name of an X client.
@@ -356,15 +306,6 @@ auto_minimize = True
 
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
-
-# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
-# string besides java UI toolkits; you can see several discussions on the
-# mailing lists, GitHub issues, and other WM documentation that suggest setting
-# this string if your java app doesn't work correctly. We may as well just lie
-# and say that we're a working one by default.
-#
-# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
-# java that happens to be on java's whitelist.
 
 # --------------------------------------------------------
 # Windows Manager Name

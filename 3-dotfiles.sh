@@ -1,15 +1,4 @@
 #!/bin/bash
-#      _       _    __ _ _           
-#   __| | ___ | |_ / _(_) | ___  ___ 
-#  / _` |/ _ \| __| |_| | |/ _ \/ __|
-# | (_| | (_) | |_|  _| | |  __/\__ \
-#  \__,_|\___/ \__|_| |_|_|\___||___/
-#                                    
-# by Stephan Raabe (2023)
-# ------------------------------------------------------
-# Install Script for dotfiles and configuration
-# yay must be installed
-# ------------------------------------------------------
 
 # ------------------------------------------------------
 # Load Library
@@ -22,7 +11,6 @@ echo " / _' |/ _ \| __| |_| | |/ _ \/ __| "
 echo "| (_| | (_) | |_|  _| | |  __/\__ \ "
 echo " \__,_|\___/ \__|_| |_|_|\___||___/ "
 echo "                                    "
-echo "by Stephan Raabe (2023)"
 echo "-------------------------------------"
 echo ""
 echo "The script will ask for permission to remove existing folders and files."
@@ -34,16 +22,18 @@ echo ""
 # Confirm Start
 # ------------------------------------------------------
 while true; do
-    read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
-    case $yn in
-        [Yy]* )
-            echo "Installation started."
-        break;;
-        [Nn]* ) 
-            exit;
-        break;;
-        * ) echo "Please answer yes or no.";;
-    esac
+	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
+	case $yn in
+	[Yy]*)
+		echo "Installation started."
+		break
+		;;
+	[Nn]*)
+		exit
+		break
+		;;
+	*) echo "Please answer yes or no." ;;
+	esac
 done
 
 # ------------------------------------------------------
@@ -53,10 +43,10 @@ echo ""
 echo "-> Check if .config folder exists"
 
 if [ -d ~/.config ]; then
-    echo ".config folder already exists."
+	echo ".config folder already exists."
 else
-    mkdir ~/.config
-    echo ".config folder created."
+	mkdir ~/.config
+	echo ".config folder created."
 fi
 
 # ------------------------------------------------------
@@ -75,9 +65,8 @@ _installSymLink ranger ~/.config/ranger ~/dotfiles/ranger/ ~/.config
 _installSymLink nvim ~/.config/nvim ~/dotfiles/nvim/ ~/.config
 _installSymLink rofi ~/.config/rofi ~/dotfiles/rofi/ ~/.config
 _installSymLink dunst ~/.config/dunst ~/dotfiles/dunst/ ~/.config
-_installSymLink wal ~/.config/wal ~/dotfiles/wal/ ~/.config
 wal -i screenshots/
-echo "Pywal templates initiated!"
+
 echo ""
 echo "-------------------------------------"
 echo "-> Install GTK dotfiles"
@@ -95,20 +84,7 @@ echo "-------------------------------------"
 echo ""
 
 _installSymLink qtile ~/.config/qtile ~/dotfiles/qtile/ ~/.config
-_installSymLink polybar ~/.config/polybar ~/dotfiles/polybar/ ~/.config
-_installSymLink picom ~/.config/picom ~/dotfiles/picom/ ~/.config
 _installSymLink .xinitrc ~/.xinitrc ~/dotfiles/qtile/.xinitrc ~/.xinitrc
-
-echo "-------------------------------------"
-echo "-> Install Hyprland dotfiles"
-echo "-------------------------------------"
-echo ""
-
-_installSymLink hypr ~/.config/hypr ~/dotfiles/hypr/ ~/.config
-_installSymLink waybar ~/.config/waybar ~/dotfiles/waybar/ ~/.config
-_installSymLink swaylock ~/.config/swaylock ~/dotfiles/swaylock/ ~/.config
-_installSymLink wlogout ~/.config/wlogout ~/dotfiles/wlogout/ ~/.config
-_installSymLink swappy ~/.config/swappy ~/dotfiles/swappy/ ~/.config
 
 echo "-------------------------------------"
 echo "-> Install Neovim config"
@@ -142,7 +118,6 @@ _installSymLink .zshrc ~/.zshrc ~/dotfiles/zsh/.zshrc ~/.zshrc
 _installSymLink zsh-aliases ~/.config/zsh/aliases.zsh ~/dotfiles/zsh/.config/zsh/aliases.zsh
 _installSymLink zsh-exports ~/.config/zsh/exports.zsh ~/dotfiles/zsh/.config/zsh/exports.zsh
 _installSymLink zsh-functions ~/.config/zsh/functions.zsh ~/dotfiles/zsh/.config/zsh/functions.zsh
-
 
 echo "-------------------------------------"
 echo "-> Install .ideavimrc config"

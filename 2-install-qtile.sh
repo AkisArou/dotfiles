@@ -1,10 +1,10 @@
 #!/bin/bash
-#   ___ _____ ___ _     _____        
-#  / _ \_   _|_ _| |   | ____|  
-# | | | || |  | || |   |  _|   
-# | |_| || |  | || |___| |___  
-#  \__\_\|_| |___|_____|_____| 
-#                               
+#   ___ _____ ___ _     _____
+#  / _ \_   _|_ _| |   | ____|
+# | | | || |  | || |   |  _|
+# | |_| || |  | || |___| |___
+#  \__\_\|_| |___|_____|_____|
+#
 # by Stephan Raabe (2023)
 # ------------------------------------------------------
 # Install Script for Qtile
@@ -16,26 +16,28 @@
 source $(dirname "$0")/scripts/library.sh
 clear
 echo "  ___ _____ ___ _     _____  "
-echo " / _ \_   _|_ _| |   | ____| "     
+echo " / _ \_   _|_ _| |   | ____| "
 echo "| | | || |  | || |   |  _|   "
 echo "| |_| || |  | || |___| |___  "
 echo " \__\_\|_| |___|_____|_____| "
-echo "                             " 
+echo "                             "
 echo "by Stephan Raabe (2023)"
 echo "------------------------------------------------------"
 echo ""
 
 while true; do
-    read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
-    case $yn in
-        [Yy]* )
-            echo "Installation started."
-        break;;
-        [Nn]* ) 
-            exit;
-        break;;
-        * ) echo "Please answer yes or no.";;
-    esac
+	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
+	case $yn in
+	[Yy]*)
+		echo "Installation started."
+		break
+		;;
+	[Nn]*)
+		exit
+		break
+		;;
+	*) echo "Please answer yes or no." ;;
+	esac
 done
 echo ""
 
@@ -46,16 +48,14 @@ echo ""
 echo "-> Install main packages"
 
 packagesPacman=(
-    "qtile" 
-    "polybar"
-    "picom"
-    "scrot"
-    "slock"
-);
+	"qtile"
+	"scrot"
+	"slock"
+)
 
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-_installPackagesPacman "${packagesPacman[@]}";
+_installPackagesPacman "${packagesPacman[@]}"
 
 echo "DONE! Please reboot your system!"
