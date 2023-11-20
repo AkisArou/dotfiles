@@ -388,6 +388,13 @@ return {
   },
 
   {
+    {
+      "echasnovski/mini.bufremove",
+      keys = {},
+    },
+  },
+
+  {
     "hrsh7th/nvim-cmp",
     opts = function()
       vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })

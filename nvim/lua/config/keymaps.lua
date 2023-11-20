@@ -16,6 +16,13 @@ keymap("v", "K", ":m '<-2<CR>gv=gv")
 keymap("n", "<C-d>", "<C-d>zz")
 keymap("n", "<C-u>", "<C-u>zz")
 
+-- Buffer close all
+function closeAllBuffers()
+  vim.cmd("BufferLineCloseOthers")
+  require("mini.bufremove").delete()
+end
+keymap("n", "<leader>ba", "<cmd>lua closeAllBuffers()<CR>", { desc = "Delete all" })
+
 -- Better paste
 keymap("v", "p", "P", opts)
 
