@@ -216,18 +216,19 @@ widget_list = [
         foreground="#94e2d5",
     ),
 ]
-
-if (platform == 3):
-    del widget_list[10:12]
-
+#
+# if (platform == 3):
+#     del widget_list[10:12]
+#
 # --------------------------------------------------------
 # Screens
 # --------------------------------------------------------
 
 screens = [
     Screen(
-        top=bar.Bar(
-        widget_list,
+        top= bar.Bar(
+            widget_list,
+            24
         ),
     ),
 ]
@@ -269,7 +270,7 @@ floating_layout = layout.Floating(
 dgroups_app_rules = []  # type: list
 follow_mouse_focus = True
 bring_front_click = False
-cursor_warp = False
+# cursor_warp = False
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 reconfigure_screens = True

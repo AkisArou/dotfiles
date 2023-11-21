@@ -80,8 +80,6 @@ packagesPacman=(
 	"ttf-firacode-nerd"
 	"figlet"
 	"lxappearance"
-	"breeze"
-	"breeze-gtk"
 	"vlc"
 	"exa"
 	"python-pip"
@@ -101,7 +99,6 @@ packagesPacman=(
 packagesYay=(
 	"brave-bin"
 	"pfetch"
-	"bibata-cursor-theme"
 	"trizen"
 	"kora-icon-theme"
 	"base-devel"
@@ -122,6 +119,7 @@ packagesYay=(
 	"docker-desktop"
 	"docker-compose"
 	"jetbrains-toolbox"
+	"gtk-engine-murrine"
 )
 
 # ------------------------------------------------------
