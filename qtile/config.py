@@ -130,8 +130,8 @@ dgroups_key_binder = simple_key_binder(mod)
 layout_theme = { 
     "border_width": 3,
     "margin": 6,
-    "border_focus": "FFFFFF",
-    "border_normal": "FFFFFF",
+    "border_focus": "#94e2d5",
+    "border_normal": "#FFFFFF",
     "single_border_width": 3
 }
 
@@ -173,69 +173,47 @@ extension_defaults = widget_defaults.copy()
 
 widget_list = [
     widget.GroupBox(
-        highlight_method='block',
-        highlight='ffffff',
-        block_border='ffffff',
-        highlight_color=['ffffff','ffffff'],
-        block_highlight_text_color='000000',
-        foreground='ffffff',
+        active="#94e2d5",
+        background="#181825",
+        borderwidth=3,
+        font="Ubuntu Bold",
+        fontsize=15,
+        foreground="#cba6f7",
+        highlight_method="line",
+        inactive="#b4befe",
+        margin_x=0,
+        margin_y=3,
+        other_screen_border="#89b4fa",
+        padding_x=3,
+        padding_y=5,
         rounded=False,
-        this_current_screen_border='ffffff',
-        active='ffffff'
+        this_current_screen_border="#f38ba8",
+        this_screen_border="#89b4fa",
     ),
-    widget.TextBox(
-        text='  ',
-        foreground="FFFFFF",
-    ),
-    widget.WindowName(),
+    widget.WindowName(foreground="#94e2d5", background="#181825", padding = 20),
     widget.Systray(),
-    widget.TextBox(
-        text='',
-        fontsize=18,
-        foreground='ffffff',
-        desc='Notes',
-        mouse_callbacks={"Button1": lambda: qtile.cmd_spawn(terminal + ' -e vim ' + home + '/notes.txt')},
-    ),
-    widget.TextBox(
-        text='|',
-        foreground="FFFFFF",
-    ),
     widget.Volume(
         fmt='Vol: {}',
-    ),
-    widget.TextBox(
-        text='|',
-        foreground="FFFFFF",
+        background="#181825",
+        foreground="#94e2d5"
     ),
     widget.Memory(
         measure_mem='G',
-        format="{MemUsed:.0f}{mm} ({MemTotal:.0f}{mm})"
+        format="{MemUsed:.0f}{mm} ({MemTotal:.0f}{mm})",
+        background="#181825",
+        foreground="#cba6f7"
     ),
     widget.DF(
         visible_on_warn=False,
-        format="{p} {uf}{m} ({r:.0f}%)"
-    ),
-    widget.TextBox(
-        text='|',
-        foreground="FFFFFF",
-    ),
-    widget.Battery(),
-    widget.TextBox(
-        text='|',
-        foreground="FFFFFF",
+        format="{p} {uf}{m} ({r:.0f}%)",
+        background="#181825",
+        foreground="#89b4fa"
+
     ),
     widget.Clock(
         format="%Y-%m-%d %a %I:%M %p",
-    ),
-    widget.TextBox(
-        text='|',
-        foreground="FFFFFF",
-    ),
-    widget.QuickExit(
-        default_text=" ",
-        fontsize=20,
-        countdown_start=3,
-        countdown_format="{}"
+        background="#181825",
+        foreground="#94e2d5",
     ),
 ]
 
@@ -250,10 +228,6 @@ screens = [
     Screen(
         top=bar.Bar(
         widget_list,
-            24,
-            opacity=0.7,
-            border_width=[3, 0, 3, 0],
-            margin=[0,0,0,0]
         ),
     ),
 ]
