@@ -1,10 +1,10 @@
 #!/bin/bash
 
 reload_shell_configuration() {
-  echo "Reloading shell configuration"
-  . "${HOME}/.zshrc" 2>/dev/null
-  . "${HOME}/.bash_profile" 2>/dev/null
-  echo "Shell configuration reloaded"
+	echo "Reloading shell configuration"
+	. "${HOME}/.zshrc" 2>/dev/null
+	. "${HOME}/.bash_profile" 2>/dev/null
+	echo "Shell configuration reloaded"
 }
 
 echo ""
@@ -12,14 +12,14 @@ echo "-------------------------------------"
 echo "-> Setting up gnome settings"
 echo "-------------------------------------"
 echo ""
-if command -v gsettings &> /dev/null; then
-  gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 30
-  gsettings set org.gnome.desktop.peripherals.keyboard delay 250
-  gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
-  # Do not group applications
-  gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
+if command -v gsettings &>/dev/null; then
+	gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 30
+	gsettings set org.gnome.desktop.peripherals.keyboard delay 250
+	gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
+	# Do not group applications
+	gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
+	gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 fi
-
 
 echo ""
 echo "-------------------------------------"
@@ -58,10 +58,10 @@ asdf install
 
 # Set installed versions as global
 while read -r line; do
-  plugin=$(echo $line | cut -d " " -f 1)
-  version=$(echo $line | cut -d " " -f 2)
-  asdf global $plugin $version
-done < ~/.tool-versions
+	plugin=$(echo $line | cut -d " " -f 1)
+	version=$(echo $line | cut -d " " -f 2)
+	asdf global $plugin $version
+done <~/.tool-versions
 
 ### NodeJS
 NODE_VERSION=$(cat ~/.tool-versions | grep nodejs | cut -d " " -f 2)
@@ -127,7 +127,6 @@ docker compose version
 echo "You also have to login into docker-desktop"
 echo "https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users"
 
-
 reload_shell_configuration
 
 echo ""
@@ -144,5 +143,3 @@ echo "-------------------------------------"
 echo ""
 sudo chsh -s /usr/bin/zsh
 echo "Reboot to get zsh shell"
-
-

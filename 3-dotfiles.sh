@@ -78,12 +78,10 @@ _installSymLink gtk-4.0 ~/.config/gtk-4.0/ ~/dotfiles/gtk/gtk-4.0/ ~/.config/
 _installSymLink .Xresouces ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xresources
 
 echo "-------------------------------------"
-echo "-> Install Qtile dotfiles"
+echo "-> Install Sway dotfiles"
 echo "-------------------------------------"
 echo ""
-
-_installSymLink qtile ~/.config/qtile ~/dotfiles/qtile/ ~/.config
-_installSymLink .xinitrc ~/.xinitrc ~/dotfiles/qtile/.xinitrc ~/.xinitrc
+_installSymLink sway ~/.config/sway ~/dotfiles/sway/ ~/.config
 
 echo "-------------------------------------"
 echo "-> Install Neovim config"

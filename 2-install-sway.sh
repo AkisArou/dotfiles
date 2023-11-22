@@ -9,15 +9,6 @@
 source $(dirname "$0")/scripts/library.sh
 clear
 
-echo "  ___ _____ ___ _     _____  "
-echo "  _____      ____ _ _   _ "
-echo ""/ __\ \ /\ / / _` | | | |""
-echo ""\__ \\ V  V / (_| | |_| |""
-echo " |___/ \_/\_/ \__,_|\__, |"
-echo "                     __/ |"
-echo "                    |___/ "
-echo ""
-
 while true; do
 	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
 	case $yn in

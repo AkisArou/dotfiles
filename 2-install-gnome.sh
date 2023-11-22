@@ -1,3 +1,5 @@
+source $(dirname "$0")/scripts/library.sh
+
 while true; do
 	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
 	case $yn in
@@ -31,3 +33,4 @@ packagesPacman=(
 _installPackagesPacman "${packagesPacman[@]}"
 
 echo "DONE! Please reboot your system!"
+
