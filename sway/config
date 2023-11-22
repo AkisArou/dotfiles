@@ -172,20 +172,22 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 # Status Bar:
 #
 # Read `man 5 sway-bar` for more information about this section.
-bar {
-    position top
-
-    # When the status_command prints a new line to stdout, swaybar updates.
-    # The default just shows the current date and time.
-    status_command while date +'%Y-%m-%d %I:%M %p'; do sleep 1000; done
-
-    colors {
-        statusline #ffffff
-        background #181825
-        inactive_workspace #32323200 #32323200 #94e2d5
-    }
+# bar {
+#     position top
+#
+#     # When the status_command prints a new line to stdout, swaybar updates.
+#     # The default just shows the current date and time.
+#     status_command while date +'%Y-%m-%d %I:%M %p'; do sleep 1000; done
+#
+#     colors {
+#         statusline #ffffff
+#         background #181825
+#         inactive_workspace #32323200 #32323200 #94e2d5
+#     }
+# }
+bar { 
+     swaybar_command waybar
 }
-
 #
 # Window style:
 #
@@ -204,4 +206,9 @@ input type:touchpad {
     natural_scroll enabled
 }
 
+input "type:keyboard" {
+    xkb_layout us,gr
+    xkb_variant ,
+    xkb_options grp:alt_shift_toggle
+}
 include /etc/sway/config.d/*

@@ -14,6 +14,8 @@ export XDG_SESSION_DESKTOP="hyprland"
 export XDG_SESSION_TYPE="wayland"
 export PATH="/usr/lib/ccache/bin/:$PATH"
 export ANDROID_HOME="$HOME/Android/Sdk"
+export XKB_DEFAULT_LAYOUT="us,gr"
+export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 
 # Mozilla specific for wayland
 # export MOZ_ENABLE_WAYLAND=1

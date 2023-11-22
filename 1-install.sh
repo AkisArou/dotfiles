@@ -109,6 +109,7 @@ packagesYay=(
 	"visual-studio-code-bin"
 	"caprine"
 	"tmux"
+	"waybar"
 	"watchman"
 	"virtualbox"
 	"linux-lts-headers"
