@@ -130,25 +130,6 @@ _installPackagesYay "${packagesYay[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
 # ------------------------------------------------------
-# Install pywal
-# ------------------------------------------------------
-if [ -f /usr/bin/wal ]; then
-	echo "pywal already installed."
-else
-	yay --noconfirm -S pywal
-fi
-
-clear
-
-# ------------------------------------------------------
-# Install .bashrc
-# ------------------------------------------------------
-# echo ""
-# echo "-> Install .bashrc"
-#
-# _installSymLink .bashrc ~/.bashrc ~/dotfiles/.bashrc ~/.bashrc
-
-# ------------------------------------------------------
 # Install custom issue (login prompt)
 # ------------------------------------------------------
 echo ""
@@ -168,46 +149,6 @@ while true; do
 	*) echo "Please answer yes or no." ;;
 	esac
 done
-
-# ------------------------------------------------------
-# Install wallpapers
-# ------------------------------------------------------
-echo ""
-echo "-> Install wallapers"
-while true; do
-	read -p "Do you want to clone the wallpapers? (Yy/Nn): " yn
-	case $yn in
-	[Yy]*)
-		if [ -d ~/wallpaper/ ]; then
-			echo "wallpaper folder already exists."
-		else
-			git clone https://gitlab.com/stephan-raabe/wallpaper.git ~/wallpaper
-			echo "wallpaper installed."
-		fi
-		echo "Wallpaper installed."
-		break
-		;;
-	[Nn]*)
-		if [ -d ~/wallpaper/ ]; then
-			echo "wallpaper folder already exists."
-		else
-			mkdir ~/wallpaper
-		fi
-		cp ~/dotfiles/wallpapers/* ~/wallpaper
-		echo "Default wallpaper installed."
-		break
-		;;
-	*) echo "Please answer yes or no." ;;
-	esac
-done
-
-# ------------------------------------------------------
-# Init pywal
-# ------------------------------------------------------
-echo ""
-echo "-> Init pywal"
-wal -i ~/dotfiles/wallpapers/default.jpg
-echo "pywal initiated."
 
 # ------------------------------------------------------
 # DONE
