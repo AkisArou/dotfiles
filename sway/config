@@ -209,8 +209,12 @@ input type:touchpad {
 input "type:keyboard" {
     xkb_layout us,gr
     xkb_variant ,
-    xkb_options grp:alt_shift_toggle
+    xkb_options "grp:win_space_toggle"
 }
+
+output * scale 2
+
+# set seat0 xcursor_theme Adwaita 24
 
 # Audio
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
@@ -220,5 +224,13 @@ bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
 # brightness
 bindsym XF86MonBrightnessUp exec brightnessctl set +5%
 bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+
+# Power menu
+bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
+
+exec swayidle -w \
+	timeout 1800 'swaylock -f' \
+	timeout 1805 'swaymsg "output * power off"' \
+	resume 'swaymsg "output * power on"'
 
 include /etc/sway/config.d/*

@@ -32,7 +32,10 @@ echo ""
 echo "-> Install main packages"
 
 packagesPacman=(
-  "sway"
+	"sway"
+	"swaylock"
+	"rofi"
+	"rofi-power-menu"
 )
 
 # ------------------------------------------------------

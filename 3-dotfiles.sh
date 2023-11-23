@@ -76,6 +76,8 @@ _installSymLink gtk-2.0 ~/.config/gtk-2.0/ ~/dotfiles/gtk/.gtkrc-2.0/ ~/.gtkrc-2
 _installSymLink gtk-3.0 ~/.config/gtk-3.0/ ~/dotfiles/gtk/gtk-3.0/ ~/.config/
 _installSymLink gtk-4.0 ~/.config/gtk-4.0/ ~/dotfiles/gtk/gtk-4.0/ ~/.config/
 _installSymLink .Xresouces ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xresources
+# For sway
+_installSymLink .Xdefaults ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xdefaults
 
 echo "-------------------------------------"
 echo "-> Install Sway dotfiles"
