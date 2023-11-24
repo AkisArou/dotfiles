@@ -246,6 +246,8 @@ return {
         mappings = {
           ["l"] = "open",
           ["h"] = "close_node",
+          ["z"] = "",
+          ["<S-W>"] = "close_all_nodes",
         },
       },
     },

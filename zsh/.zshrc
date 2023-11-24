@@ -30,6 +30,7 @@ plug "zsh-users/zsh-syntax-highlighting"
 bindkey '^ ' autosuggest-accept
 
 export PATH="$HOME/.local/bin":$PATH
+export PATH="$HOME/.config/emacs/bin":$PATH
 
 if command -v bat &> /dev/null; then
   alias cat="bat -pp --theme \"Visual Studio Dark+\"" 
