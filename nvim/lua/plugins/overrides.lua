@@ -390,9 +390,17 @@ return {
   },
 
   {
-    {
-      "echasnovski/mini.bufremove",
-      keys = {},
+    "echasnovski/mini.bufremove",
+    keys = {},
+  },
+
+  {
+    "echasnovski/mini.pairs",
+    opts = {
+      mappings = {
+        ["<"] = { action = "open", pair = "<>", neigh_pattern = "[^\\]." },
+        [">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+      },
     },
   },
 
