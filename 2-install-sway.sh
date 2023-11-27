@@ -39,6 +39,7 @@ packagesPacman=(
 
 packagesYay=(
 	"rofi-power-menu"
+	"swaybg"
 )
 
 # ------------------------------------------------------

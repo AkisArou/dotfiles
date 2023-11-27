@@ -123,6 +123,8 @@ ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 docker --version
 systemctl --user enable docker-desktop
+sudo systemctl enable docker.service
+sudo systemctl enable containerd.service
 docker compose version
 echo "You also have to login into docker-desktop"
 echo "https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users"

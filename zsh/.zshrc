@@ -1,6 +1,10 @@
 #!/bin/sh
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
+# Automatically initialise sway
+# if [ -z "${WAYLAND_DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+#   exec sway
+# fi
 
 # history
 HISTFILE=~/.zsh_history
