@@ -35,6 +35,9 @@ packagesPacman=(
 	"sway"
 	"swaylock"
 	"rofi"
+)
+
+packagesYay=(
 	"rofi-power-menu"
 )
 
@@ -42,5 +45,6 @@ packagesPacman=(
 # Install required packages
 # ------------------------------------------------------
 _installPackagesPacman "${packagesPacman[@]}"
+_installPackagesYay "${packagesYay[@]}"
 
 echo "DONE! Please reboot your system!"

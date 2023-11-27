@@ -212,7 +212,11 @@ input "type:keyboard" {
     xkb_options "grp:win_space_toggle"
 }
 
-output * scale 2
+output DP-2 {
+    mode 5120x1440@129.999Hz
+}
+
+# output * scale 2
 
 # set seat0 xcursor_theme Adwaita 24
 
