@@ -329,3 +329,10 @@ if [ "$funcstack[1]" = "_docker" ]; then
     _docker
 fi
 
+
+# bun completions
+[ -s "/home/akisarou/.bun/_bun" ] && source "/home/akisarou/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
