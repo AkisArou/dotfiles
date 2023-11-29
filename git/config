@@ -3,6 +3,10 @@
 [user]
   name = AkisArou
   email = akisarou90@gmail.com
+
+[includeIf "gitdir:~/nable/nable-solutions/.git"]
+  path = ./config-nable
+
 [color]
   # Enable colors in color-supporting terminals
   ui = auto
