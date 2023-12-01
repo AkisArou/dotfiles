@@ -18,7 +18,7 @@ set $menu "rofi -show drun"
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /home/akisarou/dotfiles/wallpapers/30106.jpg fill
+output * bg $HOME/dotfiles/wallpapers/30106.jpg fill
 #
 # Example configuration:
 #
