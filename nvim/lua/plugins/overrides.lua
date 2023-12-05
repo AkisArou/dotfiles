@@ -268,6 +268,9 @@ return {
             tailwindCSS = {
               classAttributes = { "class", "className", "style" },
               experimental = {
+                configFile = {
+                  ["packages/shared/react/react-ui-data-centric/tailwind.config.ts"] = "packages/**",
+                },
                 classRegex = {
                   "tw`([^`]*)",
                   { "tw.style\\(([^)]*)\\)", "'([^']*)'" },
