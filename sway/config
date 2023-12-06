@@ -232,6 +232,9 @@ bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
 # Power menu
 bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
 
+# wlsunset
+bindsym $mod+Shift+n exec ~/dotfiles/scripts/toggle-wlsunset.sh
+
 exec swayidle -w \
 	timeout 1800 'swaylock -f' \
 	timeout 1805 'swaymsg "output * power off"' \

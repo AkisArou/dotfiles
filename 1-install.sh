@@ -69,6 +69,7 @@ packagesPacman=(
 	"freerdp"
 	"thunar"
 	"ttf-hack-nerd"
+	"ttf-font-awesome"
 	"ttf-nerd-fonts-input"
 	"figlet"
 	"vlc"

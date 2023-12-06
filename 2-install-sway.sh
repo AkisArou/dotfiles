@@ -40,6 +40,8 @@ packagesPacman=(
 packagesYay=(
 	"rofi-power-menu"
 	"swaybg"
+	"wlsunset"
+	"wl-clipboard"
 )
 
 # ------------------------------------------------------
