@@ -305,19 +305,18 @@ label:focus {
 
 #custom-updates {
     background-color: #2980b9;
+    color: black;
 }
 
 #custom-updates.green {
-    background-color: green;
+    background-color: #66cc99;
 }
 
 #custom-updates.yellow {
     background-color: #ff9a3c;
-    color: black;
 }
 
 #custom-updates.red {
     background-color: #dc2f2f;
-    color: black;
 }
 
