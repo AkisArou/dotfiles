@@ -83,6 +83,7 @@ button:hover {
 #pulseaudio,
 #wireplumber,
 #custom-media,
+#custom-updates,
 #tray,
 #mode,
 #idle_inhibitor,
@@ -300,3 +301,23 @@ label:focus {
 #privacy-item.audio-out {
     background-color: #0069d4;
 }
+
+
+#custom-updates {
+    background-color: #2980b9;
+}
+
+#custom-updates.green {
+    background-color: green;
+}
+
+#custom-updates.yellow {
+    background-color: #ff9a3c;
+    color: black;
+}
+
+#custom-updates.red {
+    background-color: #dc2f2f;
+    color: black;
+}
+

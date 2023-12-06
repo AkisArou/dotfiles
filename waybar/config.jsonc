@@ -15,8 +15,9 @@
     "sway/window"
   ],
   "modules-right": [
+    "custom/updates",
     "mpd",
-    "idle_inhibitor",
+    // "idle_inhibitor",
     "bluetooth",
     "pulseaudio",
     "network",
@@ -224,5 +225,17 @@
     "escape": true,
     "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
     // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+  },
+  // Updates Count
+  "custom/updates": {
+    "format": "  {}",
+    "tooltip-format": "{}",
+    "escape": true,
+    "return-type": "json",
+    "exec": "~/dotfiles/scripts/updates.sh",
+    "restart-interval": 60,
+    "on-click": "alacritty -e ~/dotfiles/scripts/installupdates.sh",
+    "on-click-right": "~/dotfiles/.settings/software.sh",
+    "tooltip": false
   }
 }

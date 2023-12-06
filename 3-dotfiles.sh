@@ -86,6 +86,12 @@ echo ""
 _installSymLink sway ~/.config/sway ~/dotfiles/sway/ ~/.config
 
 echo "-------------------------------------"
+echo "-> Install Waybar dotfiles"
+echo "-------------------------------------"
+echo ""
+_installSymLink waybar ~/.config/waybar ~/dotfiles/waybar/ ~/.config
+
+echo "-------------------------------------"
 echo "-> Install Neovim config"
 echo "-------------------------------------"
 echo ""
