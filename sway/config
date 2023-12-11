@@ -96,6 +96,9 @@ exec swayidle -w \
 #
 # Workspaces:
 #
+    bindgesture swipe:right workspace prev
+    bindgesture swipe:left workspace next
+
     # Switch to workspace
     bindsym $mod+1 workspace number 1
     bindsym $mod+2 workspace number 2
@@ -234,6 +237,9 @@ bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
 
 # wlsunset
 bindsym $mod+Shift+n exec ~/dotfiles/scripts/toggle-wlsunset.sh
+
+# toggle bluetooth device
+bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
 
 exec swayidle -w \
 	timeout 1800 'swaylock -f' \
