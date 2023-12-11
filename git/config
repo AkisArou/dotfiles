@@ -172,3 +172,5 @@
 
 [init]
 	defaultBranch = main
+[credentials]
+	helper = --help
