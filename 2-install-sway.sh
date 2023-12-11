@@ -38,6 +38,7 @@ packagesPacman=(
 )
 
 packagesYay=(
+	"swayidle"
 	"rofi-power-menu"
 	"swaybg"
 	"wlsunset"
