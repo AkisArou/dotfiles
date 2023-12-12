@@ -16,8 +16,6 @@ while getopts ":s" opt; do
 	esac
 done
 
-silent_mode=false
-
 # Check if SSH agent is running
 if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AGENT_PID" ]; then
 	! $silent_mode && echo "Starting SSH agent..."
@@ -25,15 +23,6 @@ if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AGENT_PID" ]; then
 fi
 
 ssh_key_path="$HOME/.ssh/id_rsa"
-added_keys=$(ssh-add -l)
-
-# Check if already added
-if [ -n "$added_keys" ]; then
-	! $silent_mode && echo "SSH keys are added."
-	exit 0
-else
-	! $silent_mode && echo "No SSH keys added."
-fi
 
 # Check if SSH key exists
 if [ -f "$ssh_key_path" ]; then
