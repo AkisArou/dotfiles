@@ -26,9 +26,12 @@ plug "zap-zsh/fzf"
 plug "zap-zsh/exa"
 plug "zsh-users/zsh-syntax-highlighting"
 #
-# eval "$(starship init zsh)"
 
-# plug "spaceship-prompt/spaceship-prompt"
+if [ -z "$SSH_AUTH_SOCK" ] ; then
+ eval `ssh-agent -s`
+ ssh-add
+ ssh-add -l
+fi
 
 # keybinds
 bindkey '^ ' autosuggest-accept
@@ -339,5 +342,5 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 
 
-~/dotfiles/scripts/add-ssh-key-to-agent.sh -s
+# ~/dotfiles/scripts/add-ssh-key-to-agent.sh -s
 
