@@ -10,7 +10,7 @@
 HISTFILE=~/.zsh_history
 
 # source
-source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"
+~/dotfiles/scripts/add-ssh-key-to-agent.sh -s
 
 plug "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
 plug "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
