@@ -10,8 +10,6 @@
 HISTFILE=~/.zsh_history
 
 # source
-~/dotfiles/scripts/add-ssh-key-to-agent.sh -s
-
 plug "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
 plug "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
 plug "$HOME/dotfiles/zsh/.config/zsh/functions.zsh"
@@ -338,3 +336,8 @@ fi
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+
+~/dotfiles/scripts/add-ssh-key-to-agent.sh -s
+
