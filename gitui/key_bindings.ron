@@ -43,6 +43,5 @@
 
     abort_merge: Some(( code: Char('M'), modifiers: ( bits: 1,),)),
 
-    // Fake key to disable force push
-    force_push: Some(( code: F(1111111), modifiers: ( bits: 0,),)),
+    force_push: Some(( code: F(11), modifiers: ( bits: 0,),)),
 )
