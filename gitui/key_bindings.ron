@@ -43,5 +43,5 @@
 
     abort_merge: Some(( code: Char('M'), modifiers: ( bits: 1,),)),
 
-    force_push: None
+    force_push: Some(( code: F(11), modifiers: ( bits: 0,),)),
 )
