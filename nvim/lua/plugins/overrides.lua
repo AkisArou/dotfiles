@@ -30,7 +30,9 @@ return {
       -- opts.config.header = vim.split(logo, "\n")
     end,
   },
-
+  { "ellisonleao/gruvbox.nvim" },
+  { "rose-pine/neovim", name = "rose-pine" },
+  { "EdenEast/nightfox.nvim" },
   {
     "christoomey/vim-tmux-navigator",
     event = "VimEnter",
@@ -248,6 +250,11 @@ return {
           ["h"] = "close_node",
           ["z"] = "",
           ["<S-W>"] = "close_all_nodes",
+        },
+      },
+      default_component_configs = {
+        file_size = {
+          enabled = false,
         },
       },
     },
