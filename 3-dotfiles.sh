@@ -65,7 +65,7 @@ _installSymLink ranger ~/.config/ranger ~/dotfiles/ranger/ ~/.config
 _installSymLink nvim ~/.config/nvim ~/dotfiles/nvim/ ~/.config
 _installSymLink rofi ~/.config/rofi ~/dotfiles/rofi/ ~/.config
 _installSymLink dunst ~/.config/dunst ~/dotfiles/dunst/ ~/.config
-wal -i screenshots/
+_installSymLink ssh ~/.ssh/config ~/dotfiles/ssh/config ~/.ssh/config
 
 echo ""
 echo "-------------------------------------"

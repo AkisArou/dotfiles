@@ -14,6 +14,8 @@ plug "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
 plug "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
 plug "$HOME/dotfiles/zsh/.config/zsh/functions.zsh"
 
+source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"
+
 # plugins
 plug "zsh-users/zsh-autosuggestions"
 # plug "hlissner/zsh-autopair"
@@ -26,12 +28,6 @@ plug "zap-zsh/fzf"
 plug "zap-zsh/exa"
 plug "zsh-users/zsh-syntax-highlighting"
 #
-
-if [ -z "$SSH_AUTH_SOCK" ] ; then
- eval `ssh-agent -s`
- ssh-add
- ssh-add -l
-fi
 
 # keybinds
 bindkey '^ ' autosuggest-accept
