@@ -16,6 +16,8 @@ while getopts ":s" opt; do
 	esac
 done
 
+silent_mode=false
+
 # Check if SSH agent is running
 if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AGENT_PID" ]; then
 	! $silent_mode && echo "Starting SSH agent..."
