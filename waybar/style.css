@@ -257,9 +257,9 @@ label:focus {
 
 #language {
   background: #00b093;
-  color: #740864;
+  color: #000;
+  font-weight: bold;
   padding: 0 5px;
-  margin: 0 5px;
   min-width: 16px;
 }
 
