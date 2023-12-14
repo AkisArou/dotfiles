@@ -33,10 +33,22 @@ return {
   { "ellisonleao/gruvbox.nvim" },
   { "rose-pine/neovim", name = "rose-pine" },
   { "EdenEast/nightfox.nvim" },
+
   {
     "christoomey/vim-tmux-navigator",
     event = "VimEnter",
     branch = "master",
+  },
+
+  {
+    "folke/flash.nvim",
+    opts = {
+      modes = {
+        search = {
+          enabled = false,
+        },
+      },
+    },
   },
 
   {
