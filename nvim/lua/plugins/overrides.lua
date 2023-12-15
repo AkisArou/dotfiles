@@ -33,10 +33,22 @@ return {
   { "ellisonleao/gruvbox.nvim" },
   { "rose-pine/neovim", name = "rose-pine" },
   { "EdenEast/nightfox.nvim" },
+
   {
     "christoomey/vim-tmux-navigator",
     event = "VimEnter",
     branch = "master",
+  },
+
+  {
+    "folke/flash.nvim",
+    opts = {
+      modes = {
+        search = {
+          enabled = false,
+        },
+      },
+    },
   },
 
   {
@@ -266,13 +278,35 @@ return {
       inlay_hints = { enabled = true },
       ---@type lspconfig.options
       servers = {
-        cssls = {},
+        cssls = {
+          settings = {
+            css = {
+              validate = true,
+              lint = {
+                unknownAtRules = "ignore",
+              },
+            },
+            scss = {
+              validate = true,
+              lint = {
+                unknownAtRules = "ignore",
+              },
+            },
+            less = {
+              validate = true,
+              lint = {
+                unknownAtRules = "ignore",
+              },
+            },
+          },
+        },
         tailwindcss = {
           root_dir = function(...)
             return require("lspconfig.util").root_pattern(".git")(...)
           end,
           settings = {
             tailwindCSS = {
+              validate = true,
               classAttributes = { "class", "className", "style" },
               experimental = {
                 configFile = {

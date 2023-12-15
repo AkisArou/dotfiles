@@ -106,6 +106,7 @@ packagesYay=(
 	"docker-compose"
 	"jetbrains-toolbox"
 	"fzf"
+	"jq"
 )
 
 # ------------------------------------------------------

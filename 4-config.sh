@@ -140,6 +140,14 @@ npm i -g yarn
 
 echo ""
 echo "-------------------------------------"
+echo "-> Installing global npm packages"
+echo "-------------------------------------"
+echo ""
+npm i -g npm-workspaces-lsp
+npm i -g css-variables-language-server
+
+echo ""
+echo "-------------------------------------"
 echo "-> Changing shell to zsh"
 echo "-------------------------------------"
 echo ""
