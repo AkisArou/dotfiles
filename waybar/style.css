@@ -77,7 +77,6 @@ button:hover {
 #cpu,
 #memory,
 #disk,
-#temperature,
 #backlight,
 #network,
 #pulseaudio,
@@ -205,15 +204,6 @@ label:focus {
 
 #custom-media.custom-vlc {
   background-color: #ffa000;
-}
-
-#temperature {
-  background-color: #7dcfff;
-  color: #000;
-}
-
-#temperature.critical {
-  background-color: #eb4d4b;
 }
 
 #tray {
