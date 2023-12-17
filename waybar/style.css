@@ -5,7 +5,7 @@
 }
 
 window#waybar {
-  background-color: rgba(43, 48, 59, 0.5);
+  background-color: rgba(43, 48, 59, 0.8);
   border-bottom: 3px solid rgba(100, 114, 125, 0.5);
   color: #ffffff;
   transition-property: background-color;
@@ -91,8 +91,8 @@ button:hover {
 #bluetooth,
 #mpd {
   padding: 0 10px;
-  color: #000;
-  font-weight: 500;
+  color: lightgray;
+  /* font-weight: 500; */
   border-right: 1px solid gray;
 }
 
