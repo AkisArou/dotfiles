@@ -155,6 +155,72 @@ return {
         },
       },
     },
-    setup = {},
+    npm_workspaces_lsp = {},
+    css_variables_language_server = {},
   },
+  config = function()
+    local lspconfig = require("lspconfig")
+    local configs = require("lspconfig.configs")
+
+    if not configs.npm_workspaces_lsp then
+      configs.npm_workspaces_lsp = {
+        default_config = {
+          cmd = { "npx", "npm-workspaces-lsp", "--stdio" },
+          filetypes = { "json" },
+          root_dir = function(fname)
+            return lspconfig.util.find_git_ancestor(fname)
+          end,
+          autostart = true,
+          settings = {},
+        },
+      }
+    end
+
+    if not configs.css_variables_language_server then
+      local file_path = os.getenv("HOME")
+        .. "/.asdf/installs/nodejs/20.10.0/lib/node_modules/css-variables-language-server/dist/index.js"
+
+      configs.css_variables_language_server = {
+        default_config = {
+          cmd = {
+            "node",
+            file_path,
+            "--nolazy",
+            "--stdio",
+          },
+          filetypes = {
+            "css",
+            "less",
+            "sass",
+            "scss",
+            "stylus",
+          },
+          root_dir = function(fname)
+            return lspconfig.util.find_git_ancestor(fname)
+          end,
+          autostart = true,
+          settings = {
+            lookupFiles = { "**/*.less", "**/*.scss", "**/*.sass", "**/*.css" },
+            blacklistFolders = {
+              "**/.cache",
+              "**/.DS_Store",
+              "**/.git",
+              "**/.hg",
+              "**/.next",
+              "**/.svn",
+              "**/bower_components",
+              "**/CVS",
+              "**/dist",
+              "**/node_modules",
+              "**/tests",
+              "**/tmp",
+            },
+          },
+        },
+      }
+    end
+
+    lspconfig.npm_workspaces_lsp.setup({})
+    lspconfig.css_variables_language_server.setup({})
+  end,
 }

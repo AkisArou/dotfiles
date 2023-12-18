@@ -107,6 +107,7 @@ packagesYay=(
 	"jetbrains-toolbox"
 	"fzf"
 	"jq"
+	"watchman"
 )
 
 # ------------------------------------------------------
