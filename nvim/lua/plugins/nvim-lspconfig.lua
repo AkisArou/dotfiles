@@ -1,3 +1,5 @@
+local util = require("util.util")
+
 return {
   "neovim/nvim-lspconfig",
   opts = {
@@ -177,8 +179,7 @@ return {
     end
 
     if not configs.css_variables_language_server then
-      local file_path = os.getenv("HOME")
-        .. "/.asdf/installs/nodejs/20.10.0/lib/node_modules/css-variables-language-server/dist/index.js"
+      local file_path = util.get_css_variables_language_server_path()
 
       configs.css_variables_language_server = {
         default_config = {
@@ -221,6 +222,8 @@ return {
     end
 
     lspconfig.npm_workspaces_lsp.setup({})
-    lspconfig.css_variables_language_server.setup({})
+    lspconfig.css_variables_language_server.setup({
+      capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    })
   end,
 }
