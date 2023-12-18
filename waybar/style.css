@@ -238,7 +238,8 @@ label:focus {
 }
 
 #custom-updates.green {
-  background-color: #66cc99;
+  color: lightgray;
+  /* background-color: #66cc99; */
 }
 
 #custom-updates.yellow {
