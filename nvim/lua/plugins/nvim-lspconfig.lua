@@ -158,7 +158,7 @@ return {
     npm_workspaces_lsp = {},
     css_variables_language_server = {},
   },
-  config = function()
+  init = function()
     local lspconfig = require("lspconfig")
     local configs = require("lspconfig.configs")
 
