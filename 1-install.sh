@@ -108,6 +108,7 @@ packagesYay=(
 	"fzf"
 	"jq"
 	"watchman"
+	"microsoft-edge-stable-bin"
 )
 
 # ------------------------------------------------------
