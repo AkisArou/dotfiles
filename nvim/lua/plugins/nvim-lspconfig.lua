@@ -1,5 +1,7 @@
 local util = require("util.util")
 
+-- vim.lsp.set_log_level("debug")
+
 return {
   "neovim/nvim-lspconfig",
   opts = {
@@ -55,6 +57,10 @@ return {
         single_file_support = false,
         settings = {
           typescript = {
+            tsserver = {
+              maxTsServerMemory = 10000,
+              nodePath = "/home/akisarou/.asdf/installs/nodejs/20.10.0/bin/node",
+            },
             updateImportsOnFileMove = "always",
             enablePromptUseWorkspaceTsdk = true,
             preferences = {
