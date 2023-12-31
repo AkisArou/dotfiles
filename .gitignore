@@ -1,4 +1,5 @@
 __pycache__/
+node_modules/
 bookmarks
 lazygit/state.yml
 lazy-lock.json
