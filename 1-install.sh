@@ -107,7 +107,7 @@ packagesYay=(
 	"jetbrains-toolbox"
 	"fzf"
 	"jq"
-	"watchman"
+	"watchman-bin"
 	"microsoft-edge-stable-bin"
 )
 
