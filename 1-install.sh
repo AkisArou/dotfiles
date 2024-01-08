@@ -109,6 +109,7 @@ packagesYay=(
 	"jq"
 	"watchman-bin"
 	"microsoft-edge-stable-bin"
+	"rar"
 )
 
 # ------------------------------------------------------
