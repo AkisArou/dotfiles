@@ -4,69 +4,51 @@
 " | |\  |  __/ (_) \ V /| | | | | | | 
 " |_| \_|\___|\___/ \_/ |_|_| |_| |_| 
 "                                     
-" by Stephan Raabe (2023) 
 " ----------------------------------------------------- 
-
-" Add line numbers
-set number
-
-" Disable compatibility with vi which can cause unexpected issues.
-set nocompatible
-
-" Enable type file detection. Vim will be able to try to detect the type of file in use.
-filetype on
-
-" Enable plugins and load plugin for the detected file type.
-filetype plugin on
-
-" Load an indent file for the detected file type.
-filetype indent on
-
-" Turn syntax highlighting on.
-syntax on
-
-" Set shift width to 4 spaces.
-set shiftwidth=4
-
-" Set tab width to 4 columns.
-set tabstop=4
-
-" Use space characters instead of tabs.
-set expandtab
-
-" Do not save backup files.
+let g:neovide_scale_factor = 0.51
 set nobackup
-
-" Do not let cursor scroll below or above N number of lines when scrolling.
-set scrolloff=10
-
-" Set Mouse support
-set mouse=a
-
-" Do not wrap lines. Allow long lines to extend as far as the line goes.
-" set nowrap
-
-" While searching though a file incrementally highlight matching characters as you type.
-set incsearch
-
-" Ignore capital letters during search.
-set ignorecase
-
-" Override the ignorecase option if searching for capital letters.
-" This will allow you to search specifically for capital letters.
-set smartcase
-
-" Show partial command you type in the last line of the screen.
-set showcmd
-
-" Show the mode you are on the last line.
-set showmode
-
-" Show matching words during a search.
-set showmatch
-
-" Use highlighting when doing a search.
+set clipboard=unnamedplus
+set cmdheight=1
+set completeopt=menuone,noselect
+set conceallevel=0
+set fileencoding=utf-8
 set hlsearch
+set ignorecase
+set mouse=a
+set pumheight=10
+set noshowmode
+set showtabline=0
+set smartcase
+set smartindent
+set splitbelow
+set splitright
+set noswapfile
+set termguicolors
+set timeout timeoutlen=300
+set undofile
+set updatetime=300
+set nowritebackup
+set expandtab
+set shiftwidth=2
+set tabstop=2
+set cursorline
+set number
+set norelativenumber
+set laststatus=3
+set noshowcmd
+set noruler
+set numberwidth=4
+set signcolumn=yes
+set nowrap
+set scrolloff=8
+set sidescrolloff=8
+set guifont=monospace:h17
+set fillchars+=eob: 
+set shortmess+=c
+set whichwrap+=<,>,[,],h,l
+set iskeyword+=-
+set formatoptions-=cro
+set linebreak
+set guicursor+=a:blinkon500
 
-" Set the commands to save in history default number is 20.
-set history=1000
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
