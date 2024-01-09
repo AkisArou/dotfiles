@@ -19,11 +19,18 @@ local file_path = util.get_css_variables_language_server_path()
 
 -- Patch lsp (null TypeError in line 249)
 local com = "grep -F "
-  .. "settings = settings || defaultSettings;"
-  .. " "
-  .. file_path
-  .. " || "
-  .. "sed -i '249i\\   settings = settings || defaultSettings;"
-  .. file_path
+    .. "settings = settings || defaultSettings;"
+    .. " "
+    .. file_path
+    .. " || "
+    .. "sed -i '249i\\   settings = settings || defaultSettings;"
+    .. file_path
 
 vim.fn.system(com)
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function()
+    vim.cmd("CocCommand eslint.executeAutofix")
+    vim.cmd("CocCommand tsserver.executeAutofix")
+  end,
+})

@@ -46,6 +46,11 @@ return {
     "nvim-lint",
     enabled = false,
     enable = false
+  },
+  {
+    "conform.nvim",
+    enabled = false,
+    enable = false
   }
 }
 
