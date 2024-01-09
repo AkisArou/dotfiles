@@ -1,4 +1,4 @@
-local util = require("util.util")
+-- local util = require("util.util")
 
 -- Autocmds are automatically loaded on the VeryLazy event
 -- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
@@ -15,20 +15,21 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- CSS variables lsp
 
-local file_path = util.get_css_variables_language_server_path()
-
--- Patch lsp (null TypeError in line 249)
-local com = "grep -F "
-    .. "settings = settings || defaultSettings;"
-    .. " "
-    .. file_path
-    .. " || "
-    .. "sed -i '249i\\   settings = settings || defaultSettings;"
-    .. file_path
-
-vim.fn.system(com)
+-- local file_path = util.get_css_variables_language_server_path()
+--
+-- -- Patch lsp (null TypeError in line 249)
+-- local com = "grep -F "
+--     .. "settings = settings || defaultSettings;"
+--     .. " "
+--     .. file_path
+--     .. " || "
+--     .. "sed -i '249i\\   settings = settings || defaultSettings;"
+--     .. file_path
+--
+-- vim.fn.system(com)
 
 vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = { "*.json", "*.jsonc", "*.ts", "*.tsx", "*.js", "*.jsx" },
   callback = function()
     vim.cmd("CocCommand eslint.executeAutofix")
     vim.cmd("CocCommand tsserver.executeAutofix")

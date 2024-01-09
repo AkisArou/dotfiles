@@ -1,6 +1,6 @@
 local M = {
   "neoclide/coc.nvim",
-  event = "BufEnter",
+  event = "VimEnter",
   branch = "release",
 }
 

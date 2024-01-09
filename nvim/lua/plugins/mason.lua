@@ -1,5 +1,7 @@
 return {
   "williamboman/mason.nvim",
+  enabled = false,
+  enable = false,
   opts = {
     ensure_installed = {
       "stylua",
