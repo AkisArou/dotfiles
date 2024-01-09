@@ -13,9 +13,7 @@
     "sh",
     "lua"
   ],
-  "workspace.rootPatterns": [
-    ".git"
-  ],
+  "workspace.rootPatterns": [".git"],
   "tsserver.useLocalTsdk": true,
   "tsserver.log": "off",
   "tsserver.trace.server": "off",
@@ -37,13 +35,8 @@
   "suggest.localityBonus": true,
   "suggest.selection": "first",
   "coc.preferences.enableLinkedEditing": false,
-  "list.source.files.args": [
-    "--hidden",
-    "--files"
-  ],
-  "list.source.files.excludePatterns": [
-    "**/.git/**"
-  ],
+  "list.source.files.args": ["--hidden", "--files"],
+  "list.source.files.excludePatterns": ["**/.git/**"],
   "suggest.completionItemKindLabels": {
     "keyword": "\uf1de",
     "variable": "\ue79be",
@@ -154,16 +147,9 @@
     "vitest"
   ],
   "tailwindCSS.headwind.runOnSave": true,
-  "tailwindCSS.classAttributes": [
-    "class",
-    "className",
-    "style"
-  ],
+  "tailwindCSS.classAttributes": ["class", "className", "style"],
   "tailwindCSS.experimental.classRegex": [
     "tw`([^`]*)",
-    [
-      "tw.style\\(([^)]*)\\)",
-      "'([^']*)'"
-    ]
+    ["tw.style\\(([^)]*)\\)", "'([^']*)'"]
   ]
 }
