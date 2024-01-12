@@ -24,9 +24,9 @@ return {
     enable = false,
   },
   { "folke/neodev.nvim",                 enabled = false, enable = false },
-  { "mason.nvim",                        enabled = false, enable = false },
+  -- { "mason.nvim",                        enabled = false, enable = false },
   { "williamboman/mason-lspconfig.nvim", enabled = false, enable = false },
-  { "williamboman/mason.nvim",           enabled = false, enable = false },
+  -- { "williamboman/mason.nvim",           enabled = false, enable = false },
 
   { "hrsh7th/cmp-nvim-lsp",              enabled = false, enable = false },
   { "hrsh7th/cmp-buffer",                enabled = false, enable = false },
