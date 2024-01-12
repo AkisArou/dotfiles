@@ -14,6 +14,7 @@
     "lua"
   ],
   "workspace.rootPatterns": [".git"],
+  "coc.preferences.formatOnSave": true,
   "tsserver.useLocalTsdk": true,
   "tsserver.log": "off",
   "tsserver.trace.server": "off",
@@ -25,6 +26,7 @@
   "typescript.inlayHints.enumMemberValues.enabled": true,
   "typescript.implementationsCodeLens.enabled": true,
   "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.format.enable": false,
   "tsserver.experimental.enableProjectDiagnostics": false,
   "tsserver.maxTsServerMemory": 15000,
   "tsserver.enableTracing": false,
@@ -32,6 +34,7 @@
   "javascript.inlayHints.variableTypes.enabled": true,
   "eslint.packageManager": "npm",
   "eslint.debug": false,
+  "eslint.autoFixOnSave": true,
   "suggest.localityBonus": true,
   "suggest.selection": "first",
   "coc.preferences.enableLinkedEditing": false,

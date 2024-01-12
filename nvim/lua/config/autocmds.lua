@@ -29,17 +29,8 @@ vim.api.nvim_create_autocmd("FileType", {
 -- vim.fn.system(com)
 
 vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = { "*.json", "*.jsonc" },
-  callback = function()
-    vim.cmd("Format")
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
   callback = function()
-    vim.cmd("Format")
-    vim.cmd("CocCommand eslint.executeAutofix")
     vim.cmd("CocCommand tsserver.executeAutofix")
   end,
 })
