@@ -148,13 +148,6 @@ npm i -g css-variables-language-server
 
 echo ""
 echo "-------------------------------------"
-echo "-> Edit brave desktop file
-echo "-------------------------------------"
-echo ""
-sudo ~/dotfiles/scripts/edit-brave-exec.sh
-
-echo ""
-echo "-------------------------------------"
 echo "-> Changing shell to zsh"
 echo "-------------------------------------"
 echo ""

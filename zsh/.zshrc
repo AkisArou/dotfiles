@@ -3,6 +3,7 @@ if command -v termium > /dev/null 2>&1; then
   eval "$(termium shell-hook show pre)"
 fi
 ### End of Codeium integration
+
 #!/bin/sh
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
@@ -344,6 +345,7 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 
 # ~/dotfiles/scripts/add-ssh-key-to-agent.sh -s
+
 
 
 ### Added by Codeium. These lines cannot be automatically removed if modified
