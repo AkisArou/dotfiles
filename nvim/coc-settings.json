@@ -13,6 +13,7 @@
     "sh",
     "lua"
   ],
+  "coc.preferences.formatOnSave": true,
   "workspace.rootPatterns": [".git"],
   "tsserver.useLocalTsdk": true,
   "typescript.format.enable": false,
@@ -81,6 +82,7 @@
     "FABRNP",
     "Fontisto",
     "Geocode",
+    "Gstyle",
     "IHTTP",
     "Instantiator",
     "Ionicon",
@@ -153,7 +155,7 @@
     "vitest"
   ],
   "css.lint.unknownAtRules": "ignore",
-  "tailwindCSS.headwind.runOnSave": true,
+  "tailwindCSS.headwind.runOnSave": false,
   "tailwindCSS.classAttributes": ["class", "className", "style"],
   "tailwindCSS.experimental.classRegex": [
     "tw`([^`]*)",

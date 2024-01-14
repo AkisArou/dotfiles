@@ -4,7 +4,7 @@ local M = {
   branch = "release",
 }
 
-vim.g.coc_root_patterns = { ".git", "package.json", "tsconfig.json" }
+vim.g.coc_root_patterns = { ".git", "package.json", "tsconfig.json", "tailwind.config.ts", "tailwind.config.js" }
 
 vim.g.coc_global_extensions = {
   "coc-tsserver",
