@@ -11,7 +11,8 @@
     "ts",
     "js",
     "sh",
-    "lua"
+    "lua",
+    "json"
   ],
   "coc.preferences.formatOnSave": true,
   "workspace.rootPatterns": [".git"],
