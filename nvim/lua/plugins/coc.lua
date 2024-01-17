@@ -1,10 +1,10 @@
 local M = {
   "neoclide/coc.nvim",
-  event = "BufEnter",
-  branch = "release"
+  event = "VimEnter",
+  branch = "release",
 }
 
-vim.g.coc_root_patterns = { ".git" }
+vim.g.coc_root_patterns = { ".git", "package.json", "tsconfig.json", "tailwind.config.ts", "tailwind.config.js" }
 
 vim.g.coc_global_extensions = {
   "coc-tsserver",
@@ -26,7 +26,7 @@ vim.g.coc_global_extensions = {
   "coc-highlight",
   "coc-pairs",
   "coc-lists",
-  "@yaegassy/coc-tailwindcss3"
+  "@yaegassy/coc-tailwindcss3",
 }
 
 function M.config()
@@ -45,8 +45,8 @@ function M.config()
   local keyset = vim.keymap.set
   -- Autocomplete
   function _G.check_back_space()
-    local col = vim.fn.col('.') - 1
-    return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') ~= nil
+    local col = vim.fn.col(".") - 1
+    return col == 0 or vim.fn.getline("."):sub(col, col):match("%s") ~= nil
   end
 
   -- Use Tab for trigger completion with characters ahead and navigate
@@ -84,30 +84,27 @@ function M.config()
   keyset("n", "gi", ":Telescope coc implementations<CR>", { silent = true })
   keyset("n", "gr", ":Telescope coc references<CR>", { silent = true })
 
-
   -- Use K to show documentation in preview window
   function _G.show_docs()
-    local cw = vim.fn.expand('<cword>')
-    if vim.fn.index({ 'vim', 'help' }, vim.bo.filetype) >= 0 then
-      vim.api.nvim_command('h ' .. cw)
-    elseif vim.api.nvim_eval('coc#rpc#ready()') then
-      vim.fn.CocActionAsync('doHover')
+    local cw = vim.fn.expand("<cword>")
+    if vim.fn.index({ "vim", "help" }, vim.bo.filetype) >= 0 then
+      vim.api.nvim_command("h " .. cw)
+    elseif vim.api.nvim_eval("coc#rpc#ready()") then
+      vim.fn.CocActionAsync("doHover")
     else
-      vim.api.nvim_command('!' .. vim.o.keywordprg .. ' ' .. cw)
+      vim.api.nvim_command("!" .. vim.o.keywordprg .. " " .. cw)
     end
   end
 
-  keyset("n", "K", '<CMD>lua _G.show_docs()<CR>', { silent = true })
-
+  keyset("n", "K", "<CMD>lua _G.show_docs()<CR>", { silent = true })
 
   -- Highlight the symbol and its references on a CursorHold event(cursor is idle)
   vim.api.nvim_create_augroup("CocGroup", {})
   vim.api.nvim_create_autocmd("CursorHold", {
     group = "CocGroup",
     command = "silent call CocActionAsync('highlight')",
-    desc = "Highlight symbol under cursor on CursorHold"
+    desc = "Highlight symbol under cursor on CursorHold",
   })
-
 
   -- Symbol renaming
   keyset("n", "<leader>cr", "<Plug>(coc-rename)", { silent = true })
@@ -118,13 +115,12 @@ function M.config()
   keyset("x", "<leader>cf", "<Plug>(coc-format-selected)", { silent = true })
   keyset("n", "<leader>cf", "<CMD>Format<CR>", { silent = true })
 
-
   -- Setup formatexpr specified filetype(s)
   vim.api.nvim_create_autocmd("FileType", {
     group = "CocGroup",
     pattern = "typescript,json",
     command = "setl formatexpr=CocAction('formatSelected')",
-    desc = "Setup formatexpr specified filetype(s)."
+    desc = "Setup formatexpr specified filetype(s).",
   })
 
   -- Update signature help on jump placeholder
@@ -132,7 +128,7 @@ function M.config()
     group = "CocGroup",
     pattern = "CocJumpPlaceholder",
     command = "call CocActionAsync('showSignatureHelp')",
-    desc = "Update signature help on jump placeholder"
+    desc = "Update signature help on jump placeholder",
   })
 
   -- Apply codeAction to the selected region
@@ -156,7 +152,6 @@ function M.config()
   -- Run the Code Lens actions on the current line
   keyset("n", "<leader>cl", "<Plug>(coc-codelens-action)", opts)
 
-
   -- Map function and class text objects
   -- NOTE: Requires 'textDocument.documentSymbol' support from the language server
   keyset("x", "if", "<Plug>(coc-funcobj-i)", opts)
@@ -168,31 +163,26 @@ function M.config()
   keyset("x", "ac", "<Plug>(coc-classobj-a)", opts)
   keyset("o", "ac", "<Plug>(coc-classobj-a)", opts)
 
-
   -- Remap <C-f> and <C-b> to scroll float windows/popups
   ---@diagnostic disable-next-line: redefined-local
   local opts = { silent = true, nowait = true, expr = true }
   keyset("n", "<C-f>", 'coc#float#has_scroll() ? coc#float#scroll(1) : "<C-f>"', opts)
   keyset("n", "<C-b>", 'coc#float#has_scroll() ? coc#float#scroll(0) : "<C-b>"', opts)
-  keyset("i", "<C-f>",
-    'coc#float#has_scroll() ? "<c-r>=coc#float#scroll(1)<cr>" : "<Right>"', opts)
-  keyset("i", "<C-b>",
-    'coc#float#has_scroll() ? "<c-r>=coc#float#scroll(0)<cr>" : "<Left>"', opts)
+  keyset("i", "<C-f>", 'coc#float#has_scroll() ? "<c-r>=coc#float#scroll(1)<cr>" : "<Right>"', opts)
+  keyset("i", "<C-b>", 'coc#float#has_scroll() ? "<c-r>=coc#float#scroll(0)<cr>" : "<Left>"', opts)
   keyset("v", "<C-f>", 'coc#float#has_scroll() ? coc#float#scroll(1) : "<C-f>"', opts)
   keyset("v", "<C-b>", 'coc#float#has_scroll() ? coc#float#scroll(0) : "<C-b>"', opts)
-
 
   -- Use CTRL-S for selections ranges
   -- Requires 'textDocument/selectionRange' support of language server
   keyset("n", "<C-s>", "<Plug>(coc-range-select)", { silent = true })
   keyset("x", "<C-s>", "<Plug>(coc-range-select)", { silent = true })
 
-
   -- Add `:Format` command to format current buffer
   vim.api.nvim_create_user_command("Format", "call CocAction('format')", {})
 
   -- " Add `:Fold` command to fold current buffer
-  vim.api.nvim_create_user_command("Fold", "call CocAction('fold', <f-args>)", { nargs = '?' })
+  vim.api.nvim_create_user_command("Fold", "call CocAction('fold', <f-args>)", { nargs = "?" })
 
   -- Add `:OR` command for organize imports of the current buffer
   vim.api.nvim_create_user_command("OR", "call CocActionAsync('runCommand', 'editor.action.organizeImport')", {})

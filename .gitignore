@@ -11,3 +11,5 @@ debug
 foo.*
 *.log
 nvim/data
+.netrwhist
+vim/sessions/

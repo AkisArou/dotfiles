@@ -8,7 +8,7 @@ set $down j
 set $up k
 set $right l
 set $term alacritty
-set $browser brave
+set $browser /usr/bin/brave --remote-debugging-port=9229
 set $menu "rofi -show drun"
 
 exec --no-startup-id $HOME/dotfiles/sway/config.d/gaps.sh

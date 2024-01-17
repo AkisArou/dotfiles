@@ -1,0 +1,11 @@
+{
+  "name": "workspaces-picker",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/node": "*"
+  },
+  "dependencies": {
+    "neovim": "^4.10.1",
+    "workspace-tools": "latest"
+  }
+}
