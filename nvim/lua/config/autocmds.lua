@@ -28,10 +28,10 @@ vim.api.nvim_create_autocmd("FileType", {
 --
 -- vim.fn.system(com)
 
-vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
-  callback = function()
-    vim.cmd("CocCommand tsserver.executeAutofix")
-    vim.cmd("CocCommand eslint.executeAutofix")
-  end,
-})
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--   pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+--   callback = function()
+--     -- vim.cmd("CocCommand tsserver.executeAutofix")
+--     -- vim.cmd("CocCommand eslint.executeAutofix")
+--   end,
+-- })
