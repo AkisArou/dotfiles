@@ -67,6 +67,22 @@ return {
           -- "urlFilter= "https://localhost:5173/*",
           webRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/back-office",
           port = 9229
+        },
+        {
+          type = "chrome",
+          request = "launch",
+          name = "Volunteer: Launch Back Office",
+          runtimeExecutable = "/usr/bin/brave",
+          url = "http://localhost:4200",
+          webRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/back-office"
+        },
+        {
+          type = "chrome",
+          request = "attach",
+          name = "Volunteer: Attach Back Office",
+          -- "urlFilter= "https://localhost:5173/*",
+          webRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/back-office",
+          port = 9229
         }
       }
     end

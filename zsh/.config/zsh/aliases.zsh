@@ -3,7 +3,7 @@ alias zsh-update-plugins="find "$ZDOTDIR/plugins" -type d -exec test -e '{}/.git
 alias nvimrc='nvim ~/.config/nvim/'
 
 alias Qtile='startx'
-alias v='nvim'
+alias v='nvim --listen /tmp/nvim.pipe'
 alias ts='~/dotfiles/scripts/snapshot.sh'
 alias wifi='nmtui'
 alias rw='~/dotfiles/waybar/reload.sh'
