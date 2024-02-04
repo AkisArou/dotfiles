@@ -8,6 +8,11 @@ return {
   { "ellisonleao/gruvbox.nvim" },
   { "rose-pine/neovim", name = "rose-pine" },
   { "EdenEast/nightfox.nvim" },
+  {
+    "rcarriga/nvim-notify",
+    enabled = false,
+    enable = false,
+  }
   -- {
   --   "pmizio/typescript-tools.nvim",
   --   dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
