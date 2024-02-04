@@ -26,7 +26,7 @@ vim.g.coc_global_extensions = {
   "coc-highlight",
   "coc-pairs",
   "coc-lists",
-  "@yaegassy/coc-tailwindcss3",
+  "@yaegassy/coc-tailwindcss3"
 }
 
 function M.config()

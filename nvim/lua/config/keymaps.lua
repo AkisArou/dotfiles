@@ -19,8 +19,8 @@ keymap("n", "<C-u>", "<C-u>zz")
 
 -- Buffer close all
 function CloseAllBuffers()
-  vim.cmd("BufferLineCloseOthers")
-  require("mini.bufremove").delete()
+    vim.cmd("BufferLineCloseOthers")
+    require("mini.bufremove").delete()
 end
 
 keymap("n", "<leader>ba", "<cmd>lua CloseAllBuffers()<CR>", { desc = "Delete all" })
@@ -40,10 +40,10 @@ keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
 -- lazygit
 keymap("n", "<leader>gg", function()
-  Util.terminal({ "gitui" })
+    Util.terminal({ "gitui" })
 end, { desc = "GitUI" })
 
 -- Microsoft To Do
 keymap("n", "<leader>td", function()
-  Util.terminal({ "tod0" })
+    Util.terminal({ "tod0" })
 end, { desc = "Microsoft To Do" })
