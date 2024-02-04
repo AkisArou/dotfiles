@@ -22,6 +22,7 @@ function CloseAllBuffers()
   vim.cmd("BufferLineCloseOthers")
   require("mini.bufremove").delete()
 end
+
 keymap("n", "<leader>ba", "<cmd>lua CloseAllBuffers()<CR>", { desc = "Delete all" })
 
 -- Better paste
@@ -41,3 +42,8 @@ keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 keymap("n", "<leader>gg", function()
   Util.terminal({ "gitui" })
 end, { desc = "GitUI" })
+
+-- Microsoft To Do
+keymap("n", "<leader>td", function()
+  Util.terminal({ "tod0" })
+end, { desc = "Microsoft To Do" })

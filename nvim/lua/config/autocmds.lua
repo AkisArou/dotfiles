@@ -28,6 +28,23 @@ vim.api.nvim_create_autocmd("FileType", {
 --
 -- vim.fn.system(com)
 
+<<<<<<< HEAD
+-- vim.api.nvim_create_autocmd("BufWritePre", {
+--   pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+--   callback = function()
+--     vim.cmd("CocCommand tsserver.executeAutofix")
+--     vim.cmd("CocCommand eslint.executeAutofix")
+--   end,
+-- })
+||||||| change file pickers layout for telescope
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+  callback = function()
+    vim.cmd("CocCommand tsserver.executeAutofix")
+    vim.cmd("CocCommand eslint.executeAutofix")
+  end,
+})
+=======
 -- vim.api.nvim_create_autocmd("BufWritePre", {
 --   pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
 --   callback = function()
@@ -35,3 +52,4 @@ vim.api.nvim_create_autocmd("FileType", {
 --     -- vim.cmd("CocCommand eslint.executeAutofix")
 --   end,
 -- })
+>>>>>>> main

@@ -110,6 +110,8 @@ packagesYay=(
 	"watchman-bin"
 	"microsoft-edge-stable-bin"
 	"rar"
+  "tod0"
+  "github-cli"
 )
 
 # ------------------------------------------------------

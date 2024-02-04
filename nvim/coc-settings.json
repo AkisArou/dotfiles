@@ -15,7 +15,7 @@
     "json"
   ],
   "coc.preferences.formatOnSave": true,
-  "workspace.rootPatterns": [".git"],
+  "workspace.rootPatterns": [".git", "tsconfig.json"],
   "tsserver.useLocalTsdk": true,
   "typescript.format.enable": true,
   "tsserver.log": "off",
@@ -86,6 +86,7 @@
     "Geocode",
     "Gstyle",
     "IHTTP",
+    "Inspectable",
     "Instantiator",
     "Ionicon",
     "JSONs",
