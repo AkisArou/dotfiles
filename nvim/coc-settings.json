@@ -1,4 +1,14 @@
 {
+  "languageserver": {
+    "go": {
+      "command": "~/go/bin/gopls",
+      "rootPatterns": ["go.work", "go.mod", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["go"],
+      "initializationOptions": {
+        "usePlaceholders": true
+      }
+    }
+  },
   "coc.preferences.formatOnSaveFiletypes": [
     "prisma",
     "css",
@@ -36,7 +46,7 @@
   "eslint.enable": true,
   "eslint.packageManager": "npm",
   "eslint.debug": false,
-  "eslint.autoFixOnSave": true,
+  "eslint.autoFixOnSave": false,
   "suggest.localityBonus": true,
   "suggest.selection": "first",
   "coc.preferences.enableLinkedEditing": false,
