@@ -2,9 +2,10 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "tokyonight",
+      colorscheme = "vscode",
     },
   },
+  {"Mofiqul/vscode.nvim"},
   { "ellisonleao/gruvbox.nvim" },
   { "rose-pine/neovim", name = "rose-pine" },
   { "EdenEast/nightfox.nvim" },
