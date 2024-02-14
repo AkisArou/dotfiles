@@ -52,4 +52,4 @@ function PickDepWorkspace(workspaces, target)
     :find()
 end
 
-vim.keymap.set("n", "<leader>l", ":GetPnpmWorkspaces<CR>")
+-- vim.keymap.set("n", "<leader>l", ":GetPnpmWorkspaces<CR>")
