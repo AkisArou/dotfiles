@@ -3,6 +3,7 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   dependencies = {
     "hrsh7th/cmp-nvim-lsp",
+    "b0o/SchemaStore.nvim",
     { "antosha417/nvim-lsp-file-operations", config = true },
   },
   config = function()
@@ -77,46 +78,46 @@ return {
     })
 
     -- configure typescript server with plugin
-    lspconfig["tsserver"].setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-      root_dir = function(...)
-        return require("lspconfig.util").root_pattern(".git")(...)
-      end,
-      single_file_support = false,
-      settings = {
-        typescript = {
-          tsserver = {
-            maxTsServerMemory = 10000,
-          },
-          updateImportsOnFileMove = "always",
-          enablePromptUseWorkspaceTsdk = true,
-          preferences = {
-            includePackageJsonAutoImports = "on",
-          },
-          inlayHints = {
-            includeInlayParameterNameHints = "literal",
-            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-            includeInlayFunctionParameterTypeHints = true,
-            includeInlayVariableTypeHints = false,
-            includeInlayPropertyDeclarationTypeHints = true,
-            includeInlayFunctionLikeReturnTypeHints = true,
-            includeInlayEnumMemberValueHints = true,
-          },
-        },
-        javascript = {
-          inlayHints = {
-            includeInlayParameterNameHints = "all",
-            includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-            includeInlayFunctionParameterTypeHints = true,
-            includeInlayVariableTypeHints = true,
-            includeInlayPropertyDeclarationTypeHints = true,
-            includeInlayFunctionLikeReturnTypeHints = true,
-            includeInlayEnumMemberValueHints = true,
-          },
-        },
-      },
-    })
+    -- lspconfig["tsserver"].setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   root_dir = function(...)
+    --     return require("lspconfig.util").root_pattern(".git")(...)
+    --   end,
+    --   single_file_support = false,
+    --   settings = {
+    --     typescript = {
+    --       tsserver = {
+    --         maxTsServerMemory = 10000,
+    --       },
+    --       updateImportsOnFileMove = "always",
+    --       enablePromptUseWorkspaceTsdk = true,
+    --       preferences = {
+    --         includePackageJsonAutoImports = "on",
+    --       },
+    --       inlayHints = {
+    --         includeInlayParameterNameHints = "literal",
+    --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+    --         includeInlayFunctionParameterTypeHints = true,
+    --         includeInlayVariableTypeHints = false,
+    --         includeInlayPropertyDeclarationTypeHints = true,
+    --         includeInlayFunctionLikeReturnTypeHints = true,
+    --         includeInlayEnumMemberValueHints = true,
+    --       },
+    --     },
+    --     javascript = {
+    --       inlayHints = {
+    --         includeInlayParameterNameHints = "all",
+    --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+    --         includeInlayFunctionParameterTypeHints = true,
+    --         includeInlayVariableTypeHints = true,
+    --         includeInlayPropertyDeclarationTypeHints = true,
+    --         includeInlayFunctionLikeReturnTypeHints = true,
+    --         includeInlayEnumMemberValueHints = true,
+    --       },
+    --     },
+    --   },
+    -- })
 
     -- configure css server
     lspconfig["cssls"].setup({
@@ -199,17 +200,33 @@ return {
     lspconfig["biome"].setup({})
 
     lspconfig["jsonls"].setup({
-      -- lazy-load schemastore when needed
-      on_new_config = function(new_config)
-        new_config.settings.json.schemas = new_config.settings.json.schemas or {}
-        vim.list_extend(new_config.settings.json.schemas, require("schemastore").json.schemas())
-      end,
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = { "json", "jsonc" },
       settings = {
         json = {
+          schemas = require("schemastore").json.schemas(),
           format = {
             enable = true,
           },
           validate = { enable = true },
+        },
+      },
+    })
+
+    lspconfig["yamlls"].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      settings = {
+        yaml = {
+          schemaStore = {
+            -- You must disable built-in schemaStore support if you want to use
+            -- this plugin and its advanced options like `ignore`.
+            enable = false,
+            -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
+            url = "",
+          },
+          schemas = require("schemastore").yaml.schemas(),
         },
       },
     })
