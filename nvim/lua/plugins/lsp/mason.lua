@@ -24,6 +24,7 @@ return {
     mason_lspconfig.setup({
       -- list of servers for mason to install
       ensure_installed = {
+        "vtsls",
         "lua_ls",
         "jsonls",
         "html",
@@ -31,7 +32,7 @@ return {
         "emmet_ls",
         "tailwindcss",
         "cssmodules_ls",
-        "tsserver",
+        -- "tsserver",
         "prismals",
         "dockerls",
         "docker_compose_language_service",

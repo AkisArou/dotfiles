@@ -7,6 +7,8 @@ return {
     { "antosha417/nvim-lsp-file-operations", config = true },
   },
   config = function()
+    vim.diagnostic.config({ update_in_insert = true })
+
     -- import lspconfig plugin
     local lspconfig = require("lspconfig")
 
@@ -75,6 +77,15 @@ return {
     lspconfig["html"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
+    })
+
+    -- configure typescript server
+    -- require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
+
+    lspconfig["vtsls"].setup({
+      root_dir = function(...)
+        return require("lspconfig.util").root_pattern(".git")(...)
+      end,
     })
 
     -- configure typescript server with plugin
