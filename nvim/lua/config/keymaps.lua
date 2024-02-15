@@ -1,13 +1,15 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
-
-local Util = require("lazyvim.util")
 local keymap = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
 keymap("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
--- keymap("n", "<leader>w", ":w", opts)
+keymap("n", "<leader>w", ":w<CR>", opts)
+keymap("n", "<leader>l", ":Lazy<CR>", opts)
+
+-- Resize window using <ctrl> arrow keys
+keymap("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
+keymap("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
+keymap("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
+keymap("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
 -- Move blocks
 keymap("v", "J", ":m '>+1<CR>gv=gv")
@@ -19,8 +21,8 @@ keymap("n", "<C-u>", "<C-u>zz")
 
 -- Buffer close all
 function CloseAllBuffers()
-    vim.cmd("BufferLineCloseOthers")
-    require("mini.bufremove").delete()
+  vim.cmd("BufferLineCloseOthers")
+  require("mini.bufremove").delete()
 end
 
 keymap("n", "<leader>ba", "<cmd>lua CloseAllBuffers()<CR>", { desc = "Delete all" })
@@ -39,11 +41,11 @@ keymap("v", ">", ">gv", opts)
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
 -- lazygit
-keymap("n", "<leader>gg", function()
-    Util.terminal({ "gitui" })
-end, { desc = "GitUI" })
-
--- Microsoft To Do
-keymap("n", "<leader>td", function()
-    Util.terminal({ "tod0" })
-end, { desc = "Microsoft To Do" })
+-- keymap("n", "<leader>gg", function()
+--   Util.terminal({ "gitui" })
+-- end, { desc = "GitUI" })
+--
+-- -- Microsoft To Do
+-- keymap("n", "<leader>td", function()
+--   Util.terminal({ "tod0" })
+-- end, { desc = "Microsoft To Do" })

@@ -1,6 +1,7 @@
 return {
   {
     "jay-babu/mason-nvim-dap.nvim",
+    enabled = false,
     opts = {
       automatic_installation = true,
       ensure_installed = {
@@ -11,7 +12,8 @@ return {
   },
   {
     "mfussenegger/nvim-dap",
-    event = "VimEnter",
+    event = "VeryLazy",
+    enabled = false,
     opts = function()
       local dap = require("dap")
       if not dap.adapters["pwa-node"] then
