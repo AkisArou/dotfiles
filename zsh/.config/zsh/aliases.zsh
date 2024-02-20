@@ -2,12 +2,11 @@
 alias zsh-update-plugins="find "$ZDOTDIR/plugins" -type d -exec test -e '{}/.git' ';' -print0 | xargs -I {} -0 git -C {} pull -q"
 alias nvimrc='nvim ~/.config/nvim/'
 
-alias Qtile='startx'
+alias ta='tmux a'
 alias v='nvim --listen /tmp/nvim.pipe'
 alias ts='~/dotfiles/scripts/snapshot.sh'
 alias wifi='nmtui'
 alias rw='~/dotfiles/waybar/reload.sh'
-alias wallp='~/dotfiles/scripts/updatewal.sh'
 alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
 alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
