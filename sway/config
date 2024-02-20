@@ -31,10 +31,12 @@ input type:touchpad {
     natural_scroll enabled
 }
 
+
 input "type:keyboard" {
     xkb_layout us,gr
     xkb_variant ,
     xkb_options "grp:win_space_toggle"
+    xkb_options ctrl:nocaps
 }
 
 ### Idle configuration
@@ -197,4 +199,3 @@ bindsym $mod+Shift+n exec ~/dotfiles/scripts/toggle-wlsunset.sh
 
 # toggle bluetooth device
 bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
-
