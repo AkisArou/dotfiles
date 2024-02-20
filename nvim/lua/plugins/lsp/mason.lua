@@ -29,7 +29,7 @@ return {
         "jsonls",
         "html",
         "cssls",
-        "emmet_ls",
+        "emmet_language_server",
         "tailwindcss",
         "cssmodules_ls",
         -- "tsserver",
