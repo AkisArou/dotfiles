@@ -6,8 +6,8 @@ return {
     vim.o.timeoutlen = 500
   end,
   opts = {
-    defaults = {
-      ["<leader>d"] = { name = "+debug" },
-    },
+    -- defaults = {
+    --   ["<leader>d"] = { name = "+debug" },
+    -- },
   },
 }
