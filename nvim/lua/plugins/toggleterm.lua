@@ -22,8 +22,8 @@ return {
       plain:toggle()
     end
 
-    vim.api.nvim_set_keymap("n", "<leader>gg", "<cmd>lua _gitui_toggle()<CR>", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<leader>td", "<cmd>lua _tod0_toggle()<CR>", { noremap = true, silent = true })
-    vim.api.nvim_set_keymap("n", "<leader>tt", "<cmd>lua _plain_term()<CR>", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<leader>gg", "<cmd>lua GitUIToggle()<CR>", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<leader>td", "<cmd>lua Tod0Toggle()<CR>", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("n", "<leader>tt", "<cmd>lua TogglePlainTerm()<CR>", { noremap = true, silent = true })
   end,
 }
