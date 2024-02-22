@@ -58,9 +58,6 @@ alias archlinx-fix-keys="sudo pacman-key --init && sudo pacman-key --populate ar
 # systemd
 alias mach_list_systemctl="systemctl list-unit-files --state=enabled"
 
-alias m="git checkout master"
-alias s="git checkout stable"
-
 case "$(uname -s)" in
 
 Darwin)
