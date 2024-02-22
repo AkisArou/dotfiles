@@ -1,6 +1,6 @@
 return {
   "mbbill/undotree",
-  event = "VimEnter",
+  event = "VeryLazy",
   config = function()
     vim.cmd([[
         if has("persistent_undo")

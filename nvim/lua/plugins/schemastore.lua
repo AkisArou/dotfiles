@@ -1,5 +1,5 @@
 return {
   "b0o/SchemaStore.nvim",
-  event = "VimEnter",
+  event = "VeryLazy",
   version = false, -- last release is way too old
 }

@@ -1,5 +1,6 @@
 return {
   "akinsho/toggleterm.nvim",
+  event = "VeryLazy",
   version = "*",
   opts = function()
     local Terminal = require("toggleterm.terminal").Terminal
