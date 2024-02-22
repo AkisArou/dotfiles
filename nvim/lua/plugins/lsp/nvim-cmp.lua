@@ -1,6 +1,5 @@
 return {
   "hrsh7th/nvim-cmp",
-  event = "VeryLazy",
   dependencies = {
     { "hrsh7th/cmp-buffer" },
     { "saadparwaiz1/cmp_luasnip" },
