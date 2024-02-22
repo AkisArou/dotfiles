@@ -2,12 +2,18 @@ return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
   dependencies = {
+    "folke/neodev.nvim",
     "hrsh7th/cmp-nvim-lsp",
     "b0o/SchemaStore.nvim",
     { "antosha417/nvim-lsp-file-operations", config = true },
   },
   config = function()
     vim.diagnostic.config({ update_in_insert = true })
+
+    -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
+    require("neodev").setup({
+      -- add any options here, or leave empty to use the default settings
+    })
 
     -- import lspconfig plugin
     local lspconfig = require("lspconfig")
