@@ -2,7 +2,7 @@ local M = {
   "neoclide/coc.nvim",
   event = "VimEnter",
   branch = "release",
-  enabled = false
+  enabled = false,
 }
 
 vim.g.coc_root_patterns = { ".git", "package.json", "tsconfig.json", "tailwind.config.ts", "tailwind.config.js" }
@@ -27,7 +27,7 @@ vim.g.coc_global_extensions = {
   "coc-highlight",
   "coc-pairs",
   "coc-lists",
-  "@yaegassy/coc-tailwindcss3"
+  "@yaegassy/coc-tailwindcss3",
 }
 
 function M.config()
@@ -45,6 +45,7 @@ function M.config()
 
   local keyset = vim.keymap.set
   -- Autocomplete
+  ---@diagnostic disable-next-line: duplicate-set-field
   function _G.check_back_space()
     local col = vim.fn.col(".") - 1
     return col == 0 or vim.fn.getline("."):sub(col, col):match("%s") ~= nil
@@ -86,6 +87,7 @@ function M.config()
   keyset("n", "gr", ":Telescope coc references<CR>", { silent = true })
 
   -- Use K to show documentation in preview window
+  ---@diagnostic disable-next-line: duplicate-set-field
   function _G.show_docs()
     local cw = vim.fn.expand("<cword>")
     if vim.fn.index({ "vim", "help" }, vim.bo.filetype) >= 0 then
@@ -134,6 +136,7 @@ function M.config()
 
   -- Apply codeAction to the selected region
   -- Example: `<leader>aap` for current paragraph
+  ---@diagnostic disable-next-line: redefined-local
   local opts = { silent = true, nowait = true }
   keyset("x", "<leader>a", "<Plug>(coc-codeaction-selected)", opts)
   keyset("n", "<leader>a", "<Plug>(coc-codeaction-selected)", opts)

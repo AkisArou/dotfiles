@@ -44,6 +44,7 @@ return {
     { "<c-space>", desc = "Increment selection" },
     { "<bs>", desc = "Decrement selection", mode = "x" },
   },
+  ---@diagnostic disable-next-line: undefined-doc-name
   ---@type TSConfig
   ---@diagnostic disable-next-line: missing-fields
   opts = {
@@ -100,11 +101,13 @@ return {
       },
     },
   },
+  ---@diagnostic disable-next-line: undefined-doc-name
   ---@param opts TSConfig
   config = function(_, opts)
     if type(opts.ensure_installed) == "table" then
       ---@type table<string, boolean>
       local added = {}
+      ---@diagnostic disable-next-line: inject-field
       opts.ensure_installed = vim.tbl_filter(function(lang)
         if added[lang] then
           return false

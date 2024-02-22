@@ -6,19 +6,19 @@ return {
 
     local gitui = Terminal:new({ cmd = "gitui", hidden = true, direction = "float" })
 
-    function _gitui_toggle()
+    function GitUIToggle()
       gitui:toggle()
     end
 
     local tod0 = Terminal:new({ cmd = "tod0", hidden = true, direction = "float" })
 
-    function _tod0_toggle()
+    function Tod0Toggle()
       tod0:toggle()
     end
 
     local plain = Terminal:new({ hidden = true, direction = "float" })
 
-    function _plain_term()
+    function TogglePlainTerm()
       plain:toggle()
     end
 
