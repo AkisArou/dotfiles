@@ -13,6 +13,14 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- highlight yanked text for 200ms using the "Visual" highlight group
+vim.cmd([[
+  augroup highlight_yank
+  autocmd!
+  au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
+  augroup END
+]])
+
 -- CSS variables lsp
 
 -- local file_path = util.get_css_variables_language_server_path()
@@ -27,11 +35,3 @@ vim.api.nvim_create_autocmd("FileType", {
 --     .. file_path
 --
 -- vim.fn.system(com)
-
--- vim.api.nvim_create_autocmd("BufWritePre", {
---   pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
---   callback = function()
---     -- vim.cmd("CocCommand tsserver.executeAutofix")
---     -- vim.cmd("CocCommand eslint.executeAutofix")
---   end,
--- })
