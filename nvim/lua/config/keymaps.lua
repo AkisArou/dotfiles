@@ -39,13 +39,3 @@ keymap("v", ">", ">gv", opts)
 
 -- Undo
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
-
--- lazygit
--- keymap("n", "<leader>gg", function()
---   Util.terminal({ "gitui" })
--- end, { desc = "GitUI" })
---
--- -- Microsoft To Do
--- keymap("n", "<leader>td", function()
---   Util.terminal({ "tod0" })
--- end, { desc = "Microsoft To Do" })
