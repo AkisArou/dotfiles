@@ -1,7 +1,8 @@
+#!/bin/bash
 # ------------------------------------------------------
 # Load Library
 # ------------------------------------------------------
-source $(dirname "$0")/scripts/library.sh
+source "$(dirname "$0")/scripts/library.sh"
 clear
 echo "  ___           _        _ _  "
 echo " |_ _|_ __  ___| |_ __ _| | | "
@@ -20,9 +21,9 @@ if sudo pacman -Qs yay >/dev/null; then
 else
 	echo "yay is not installed. Will be installed now!"
 	git clone https://aur.archlinux.org/yay-git.git ~/yay-git
-	cd ~/yay-git
+	cd ~/yay-git || exit
 	makepkg -si
-	cd ~/dotfiles/
+	cd ~/dotfiles/ || return
 	clear
 	echo "yay has been installed successfully."
 	echo ""
@@ -41,7 +42,7 @@ fi
 # ------------------------------------------------------
 
 while true; do
-	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
+	read -p -r "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
 	case $yn in
 	[Yy]*)
 		echo "Installation started."
@@ -49,7 +50,6 @@ while true; do
 		;;
 	[Nn]*)
 		exit
-		break
 		;;
 	*) echo "Please answer yes or no." ;;
 	esac
@@ -110,8 +110,8 @@ packagesYay=(
 	"watchman-bin"
 	"microsoft-edge-stable-bin"
 	"rar"
-  "tod0"
-  "github-cli"
+	"tod0"
+	"github-cli"
 )
 
 # ------------------------------------------------------
@@ -127,15 +127,15 @@ zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) 
 echo ""
 echo "-> Install login screen"
 while true; do
-	read -p "Do you want to install the custom login promt? (Yy/Nn): " yn
+	read -p -r "Do you want to install the custom login prompt? (Yy/Nn): " yn
 	case $yn in
 	[Yy]*)
 		sudo cp ~/dotfiles/login/issue /etc/issue
-		echo "Login promt installed."
+		echo "Login prompt installed."
 		break
 		;;
 	[Nn]*)
-		echo "Custom login promt skipped."
+		echo "Custom login prompt skipped."
 		break
 		;;
 	*) echo "Please answer yes or no." ;;

@@ -6,11 +6,11 @@
 # ------------------------------------------------------
 # Confirm Start
 # ------------------------------------------------------
-source $(dirname "$0")/scripts/library.sh
+source "$(dirname "$0")/scripts/library.sh"
 clear
 
 while true; do
-	read -p "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
+	read -p -r "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
 	case $yn in
 	[Yy]*)
 		echo "Installation started."
@@ -18,7 +18,6 @@ while true; do
 		;;
 	[Nn]*)
 		exit
-		break
 		;;
 	*) echo "Please answer yes or no." ;;
 	esac

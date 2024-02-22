@@ -2,8 +2,7 @@
 
 reload_shell_configuration() {
 	echo "Reloading shell configuration"
-	. "${HOME}/.zshrc" 2>/dev/null
-	. "${HOME}/.bash_profile" 2>/dev/null
+	. "$${HOME}/.zshrc" 2>/dev/null
 	echo "Shell configuration reloaded"
 }
 
@@ -58,19 +57,19 @@ asdf install
 
 # Set installed versions as global
 while read -r line; do
-	plugin=$(echo $line | cut -d " " -f 1)
-	version=$(echo $line | cut -d " " -f 2)
-	asdf global $plugin $version
+	plugin=$(echo "$line" | cut -d " " -f 1)
+	version=$(echo "$line" | cut -d " " -f 2)
+	asdf global "$plugin" "$version"
 done <~/.tool-versions
 
 ### NodeJS
 NODE_VERSION=$(cat ~/.tool-versions | grep nodejs | cut -d " " -f 2)
-asdf global nodejs $NODE_VERSION
+asdf global nodejs "$NODE_VERSION"
 
 ### Java
 JAVA_VERSION=$(cat ~/.tool-versions | grep java | cut -d " " -f 2)
 
-asdf global java $JAVA_VERSION
+asdf global java "$JAVA_VERSION"
 echo "Set global java version"
 . ~/.asdf/plugins/java/set-java-home.zsh
 . ~/.asdf/plugins/java/set-java-home.bash
@@ -78,12 +77,12 @@ echo "Set global java version"
 
 ### Maven
 MAVEN_VERSION=$(cat ~/.tool-versions | grep maven | cut -d " " -f 2)
-asdf global maven $MAVEN_VERSION
+asdf global maven "$MAVEN_VERSION"
 echo "Set global maven version"
 
 ### Kotlin
 KOTLIN_VERSION=$(cat ~/.tool-versions | grep kotlin | cut -d " " -f 2)
-asdf global kotlin $KOTLIN_VERSION
+asdf global kotlin "$KOTLIN_VERSION"
 echo "Set global kotlin version"
 
 echo ""
