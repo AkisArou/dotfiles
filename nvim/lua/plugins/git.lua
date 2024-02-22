@@ -13,5 +13,11 @@ return {
     neogit.setup({})
 
     vim.keymap.set("n", "<leader>gs", vim.cmd.Neogit)
+
+    vim.keymap.set("n", "<leader>gdf", function()
+      vim.cmd("DiffviewFileHistory %")
+    end, { desc = "DiffviewFileHistory current file" })
+
+    vim.keymap.set("n", "<leader>gdc", vim.cmd.DiffviewClose, { desc = "DiffviewClose" })
   end,
 }
