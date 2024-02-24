@@ -29,8 +29,8 @@ return {
         formatting.codespell,
         formatting.prismaFmt,
         diagnostics.hadolint,
-        diagnostics.shellcheck,
-        code_actions.shellcheck,
+        -- diagnostics.shellcheck,
+        -- code_actions.shellcheck,
       },
       -- configure format on save
       on_attach = function(current_client, bufnr)
