@@ -6,6 +6,7 @@ return {
     "hrsh7th/cmp-nvim-lsp",
     "b0o/SchemaStore.nvim",
     { "antosha417/nvim-lsp-file-operations", config = true },
+    "yioneko/nvim-vtsls",
   },
   config = function()
     vim.diagnostic.config({ update_in_insert = true })
@@ -86,12 +87,32 @@ return {
     })
 
     -- configure typescript server
-    -- require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
+    require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
 
     lspconfig["vtsls"].setup({
       root_dir = function(...)
         return require("lspconfig.util").root_pattern(".git")(...)
       end,
+      settings = {
+        -- vtsls = {
+        --   typescript = {
+        --     tsserver = {
+        --       maxTsServerMemory = 10000,
+        --     },
+        --     preferences = {
+        --       includePackageJsonAutoImports = "on",
+        --     },
+        --   },
+        -- },
+        typescript = {
+          tsserver = {
+            maxTsServerMemory = 10000,
+          },
+          preferences = {
+            includePackageJsonAutoImports = "on",
+          },
+        },
+      },
     })
 
     -- configure typescript server with plugin
