@@ -94,16 +94,9 @@ return {
         return require("lspconfig.util").root_pattern(".git")(...)
       end,
       settings = {
-        -- vtsls = {
-        --   typescript = {
-        --     tsserver = {
-        --       maxTsServerMemory = 10000,
-        --     },
-        --     preferences = {
-        --       includePackageJsonAutoImports = "on",
-        --     },
-        --   },
-        -- },
+        vtsls = {
+          autoUseWorkspaceTsdk = true,
+        },
         typescript = {
           tsserver = {
             maxTsServerMemory = 10000,
