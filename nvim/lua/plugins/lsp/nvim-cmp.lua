@@ -13,6 +13,7 @@ return {
         })
       end,
     },
+    { "davidsierradz/cmp-conventionalcommits" },
   },
   opts = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
@@ -50,6 +51,7 @@ return {
         { name = "nvim_lsp" },
         { name = "path" },
         { name = "luasnip" },
+        { name = "conventionalcommits" },
       }, {
         { name = "buffer" },
       }),

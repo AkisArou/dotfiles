@@ -26,7 +26,7 @@ return {
         formatting.biome,
         formatting.rustywind,
         formatting.shfmt,
-        formatting.codespell,
+        -- formatting.codespell,
         formatting.prismaFmt,
         diagnostics.hadolint,
         -- diagnostics.shellcheck,
