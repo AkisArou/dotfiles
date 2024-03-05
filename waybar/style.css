@@ -5,7 +5,7 @@
 }
 
 window#waybar {
-  background-color: rgba(43, 48, 59, 0.8);
+  background-color: rgba(0, 0, 0, 0.94);
   border-bottom: 3px solid rgba(100, 114, 125, 0.5);
   color: #ffffff;
   transition-property: background-color;
@@ -14,24 +14,6 @@ window#waybar {
 
 window#waybar.hidden {
   opacity: 0.2;
-}
-
-/*
-window#waybar.empty {
-    background-color: transparent;
-}
-window#waybar.solo {
-    background-color: #FFFFFF;
-}
-*/
-
-window#waybar.termite {
-  background-color: #3F3F3F;
-}
-
-window#waybar.chromium {
-  background-color: #000000;
-  border: none;
 }
 
 button {
@@ -59,7 +41,7 @@ button:hover {
 }
 
 #workspaces button.focused {
-  background-color: #64727D;
+  background-color: rgb(30, 30, 30);
   box-shadow: inset 0 -3px #ffffff;
 }
 
@@ -93,7 +75,7 @@ button:hover {
   padding: 0 10px;
   color: lightgray;
   /* font-weight: 500; */
-  border-right: 1px solid gray;
+  /* border-right: 1px solid gray; */
 }
 
 #window,
