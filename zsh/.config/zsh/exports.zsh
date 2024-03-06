@@ -19,7 +19,6 @@ export PATH="/usr/lib/ccache/bin/:$PATH"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
-export XKB_DEFAULT_OPTIONS=ctrl:nocaps,
 
 # export GH_TOKEN=$(gh auth token)
 
