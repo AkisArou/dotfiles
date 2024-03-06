@@ -87,6 +87,12 @@ echo ""
 _installSymLink sway ~/.config/sway ~/dotfiles/sway/ ~/.config
 
 echo "-------------------------------------"
+echo "-> Install Swaylock dotfiles"
+echo "-------------------------------------"
+echo ""
+_installSymLink swaylock ~/.config/swaylock ~/dotfiles/swaylock/ ~/.config
+
+echo "-------------------------------------"
 echo "-> Install Waybar dotfiles"
 echo "-------------------------------------"
 echo ""
