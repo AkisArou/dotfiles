@@ -73,6 +73,7 @@ echo "-------------------------------------"
 echo "-> Install GTK dotfiles"
 echo "-------------------------------------"
 echo ""
+_installSymLink gtk ~/.config/gtk-2.0/ ~/dotfiles/gtk/.gtkrc-2.0/ ~/.gtkrc-2.0
 _installSymLink gtk-2.0 ~/.config/gtk-2.0/ ~/dotfiles/gtk/.gtkrc-2.0/ ~/.gtkrc-2.0
 _installSymLink gtk-3.0 ~/.config/gtk-3.0/ ~/dotfiles/gtk/gtk-3.0/ ~/.config/
 _installSymLink gtk-4.0 ~/.config/gtk-4.0/ ~/dotfiles/gtk/gtk-4.0/ ~/.config/
@@ -99,16 +100,16 @@ echo ""
 _installSymLink waybar ~/.config/waybar ~/dotfiles/waybar/ ~/.config
 
 echo "-------------------------------------"
-echo "-> Install Neovim config"
+echo "-> Install Nvim config"
 echo "-------------------------------------"
 echo ""
-_installSymLink neovim ~/.config/neovim ~/dotfiles/neovim/ ~/.config
+_installSymLink nvim ~/.config/nvim ~/dotfiles/nvim/ ~/.config
 
 echo "-------------------------------------"
-echo "-> Install Kitty config"
+echo "-> Install pcmanfm config"
 echo "-------------------------------------"
 echo ""
-_installSymLink kitty ~/.config/neovim ~/dotfiles/neovim/ ~/.config
+_installSymLink pcmanfm ~/.config/pcmanfm ~/dotfiles/pcmanfm/ ~/.config
 
 echo "-------------------------------------"
 echo "-> Install Git config"
