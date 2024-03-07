@@ -67,7 +67,7 @@ packagesPacman=(
 	"chromium"
 	"dunst"
 	"freerdp"
-	"thunar"
+	"pcmanfm"
 	"ttf-hack-nerd"
 	"ttf-font-awesome"
 	"ttf-nerd-fonts-input"
