@@ -35,6 +35,7 @@ return {
       vim.cmd("DiffviewFileHistory %")
     end, { desc = "DiffviewFileHistory current file" })
 
+    vim.keymap.set("n", "<leader>gdo", vim.cmd.DiffviewOpen, { desc = "DiffviewOpen" })
     vim.keymap.set("n", "<leader>gdc", vim.cmd.DiffviewClose, { desc = "DiffviewClose" })
   end,
 }
