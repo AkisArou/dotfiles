@@ -112,6 +112,7 @@ packagesYay=(
 	"rar"
 	"tod0"
 	"github-cli"
+	"wireplumber"
 )
 
 # ------------------------------------------------------
