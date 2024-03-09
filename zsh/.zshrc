@@ -50,7 +50,7 @@ autoload -Uz compinit && compinit
 
 # PFETCH
 echo ""
-pfetch
+neofetch
 
 ###-begin-npm-completion-###
 #
