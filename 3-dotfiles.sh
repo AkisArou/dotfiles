@@ -164,6 +164,13 @@ sudo rm /etc/iptables/iptables.rules
 _installSymLink iptables /etc/iptables/iptables.rules ~/dotfiles/iptables/iptables.rules /etc/iptables/iptables.rules
 sudo systemctl restart iptables
 
+echo "-------------------------------------"
+echo "->  Brave/Chromium configs "
+echo "-------------------------------------"
+echo ""
+_installSymLink brave-flags ~/.config/brave-flags.conf ~/dotfiles/brave-flags.conf ~/.config
+_installSymLink chromium-flags ~/.config/chromium-flags.conf ~/dotfiles/chromium-flags.conf ~/.config
+
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------

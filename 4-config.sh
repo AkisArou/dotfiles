@@ -18,6 +18,7 @@ if command -v gsettings &>/dev/null; then
 	# Do not group applications
 	gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
 	gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+	dconf write /org/gnome/desktop/interface/color-scheme \'prefer-dark\'
 fi
 
 echo ""

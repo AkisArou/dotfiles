@@ -15,6 +15,7 @@ export PATH="$HOME/.local/share/neovim/bin":$PATH
 export XDG_CURRENT_DESKTOP="Wayland"
 export XDG_SESSION_DESKTOP="hyprland"
 export XDG_SESSION_TYPE="wayland"
+export XDG_CONFIG_HOME="$HOME/.config"
 export PATH="/usr/lib/ccache/bin/:$PATH"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export XKB_DEFAULT_LAYOUT="us,gr"
