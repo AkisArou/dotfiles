@@ -185,7 +185,7 @@ return {
             configFile = {
               ["packages/shared/react/shad/tailwind.config.ts"] = "packages/**",
               ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = {
-                "apps/client/assistant-prm-airport/back-office/**",
+                -- "apps/client/assistant-prm-airport/back-office/**",
                 "packages/assistant-prm-airport/**",
               },
             },
