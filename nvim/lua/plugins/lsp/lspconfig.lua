@@ -183,11 +183,8 @@ return {
           classAttributes = { "class", "className", "style" },
           experimental = {
             configFile = {
-              ["packages/shared/react/shad/tailwind.config.ts"] = "packages/**",
-              ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = {
-                -- "apps/client/assistant-prm-airport/back-office/**",
-                "packages/assistant-prm-airport/**",
-              },
+              ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = "packages/assistant-prm-airport/**",
+              ["packages/shared/react/fluentui/tailwind.config.ts"] = "packages/shared/react/fluentui/**",
             },
             classRegex = {
               "tw`([^`]*)",
