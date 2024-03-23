@@ -2,7 +2,7 @@ return {
   "folke/trouble.nvim",
   event = "VeryLazy",
   cmd = { "TroubleToggle", "Trouble" },
-  opts = { use_diagnostic_signs = true },
+  opts = { use_diagnostic_signs = true, auto_close = true },
   keys = {
     { "<leader>xx", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics (Trouble)" },
     { "<leader>xX", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics (Trouble)" },
