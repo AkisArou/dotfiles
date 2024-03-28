@@ -19,23 +19,6 @@ echo "Symbolic links will be created from ~/dotfiles into your home and .config 
 echo ""
 
 # ------------------------------------------------------
-# Confirm Start
-# ------------------------------------------------------
-while true; do
-	read -p -r "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
-	case $yn in
-	[Yy]*)
-		echo "Installation started."
-		break
-		;;
-	[Nn]*)
-		exit
-		;;
-	*) echo "Please answer yes or no." ;;
-	esac
-done
-
-# ------------------------------------------------------
 # Create .config folder
 # ------------------------------------------------------
 echo ""
