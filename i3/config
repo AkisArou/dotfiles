@@ -16,6 +16,8 @@ set $up k
 set $right l
 set $term alacritty
 set $browser /usr/bin/brave --remote-debugging-port=9229
+set $menu "rofi -show drun"
+# set $menu "--no-startup-id dmenu_run"
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -73,7 +75,7 @@ bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
 bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec --no-startup-id dmenu_run
+bindsym $mod+d exec $menu
 # A more modern dmenu replacement is rofi:
 # bindcode $mod+40 exec "rofi -modi drun,run -show drun"
 # There also is i3-dmenu-desktop which only displays applications shipping a
@@ -204,14 +206,14 @@ bar {
 
 for_window [class="^.*"] border pixel 3
 
-for_window [window_role="About"] floating enable
-for_window [window_role="Organizer"] floating enable
-for_window [window_role="Preferences"] floating enable
-for_window [window_role="bubble"] floating enable
-for_window [window_role="page-info"] floating enable
-for_window [window_role="pop-up"] floating enable
-for_window [window_role="task_dialog"] floating enable
-for_window [window_role="toolbox"] floating enable
-for_window [window_role="webconsole"] floating enable
-for_window [window_type="dialog"] floating enable
-for_window [window_type="menu"] floating enable
+# for_window [window_role="About"] floating enable
+# for_window [window_role="Organizer"] floating enable
+# for_window [window_role="Preferences"] floating enable
+# for_window [window_role="bubble"] floating enable
+# for_window [window_role="page-info"] floating enable
+# for_window [window_role="pop-up"] floating enable
+# for_window [window_role="task_dialog"] floating enable
+# for_window [window_role="toolbox"] floating enable
+# for_window [window_role="webconsole"] floating enable
+# for_window [window_type="dialog"] floating enable
+# for_window [window_type="menu"] floating enable
