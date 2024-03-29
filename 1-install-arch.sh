@@ -65,6 +65,7 @@ packagesPacman=(
 	"bluez-utils"
 	"bat"
 	"zsh"
+	"brightnessctl"
 )
 
 packagesYay=(
