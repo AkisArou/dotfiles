@@ -4,7 +4,7 @@ return {
   config = function()
     local cwd = vim.fn.getcwd()
     require("tsc").setup({
-      use_trouble_qflist = true,
+      use_trouble_qflist = false,
       auto_start_watch_mode = true,
       -- bin_path = cwd .. " ./node-modules/.bin/tsc " .. cwd,
       raw = "--build " .. cwd .. "/tsconfig.json --watch",
