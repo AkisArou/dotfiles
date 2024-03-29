@@ -61,6 +61,8 @@ packagesPacman=(
 	"pavucontrol"
 	"tumbler"
 	"blueman"
+	"bluez"
+	"bluez-utils"
 	"bat"
 	"zsh"
 )
