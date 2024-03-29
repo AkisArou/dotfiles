@@ -5,6 +5,7 @@ packagesPacman=(
 
 packagesYay=(
 	"xorg-xinput"
+	"rofi"
 )
 
 # ------------------------------------------------------
