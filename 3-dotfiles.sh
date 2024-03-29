@@ -116,12 +116,6 @@ _installSymLink zsh-exports ~/.config/zsh/exports.zsh ~/dotfiles/zsh/.config/zsh
 _installSymLink zsh-functions ~/.config/zsh/functions.zsh ~/dotfiles/zsh/.config/zsh/functions.zsh
 
 echo "-------------------------------------"
-echo "-> Install kanshi"
-echo "-------------------------------------"
-echo ""
-_installSymLink kanshi ~/kanshi ~/dotfiles/kanshi/ ~/dotfiles/kanshi/
-
-echo "-------------------------------------"
 echo "-> Install .ideavimrc config"
 echo "-------------------------------------"
 echo ""
@@ -138,14 +132,6 @@ echo "-> Install asdf tool-versions"
 echo "-------------------------------------"
 echo ""
 _installSymLink .tool-versions ~/.tool-versions ~/dotfiles/.tool-versions ~/.tool-versions
-
-echo "-------------------------------------"
-echo "-> Creating iptables "
-echo "-------------------------------------"
-echo ""
-sudo rm /etc/iptables/iptables.rules
-_installSymLink iptables /etc/iptables/iptables.rules ~/dotfiles/iptables/iptables.rules /etc/iptables/iptables.rules
-sudo systemctl restart iptables
 
 echo "-------------------------------------"
 echo "->  Brave/Chromium configs "

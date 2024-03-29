@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 reload_shell_configuration() {
 	echo "Reloading shell configuration"
