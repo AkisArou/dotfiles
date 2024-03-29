@@ -66,6 +66,12 @@ bindsym $mod+b exec $browser
 # kill focused window
 bindsym $mod+q kill
 
+# Power menu
+bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
+
+# toggle bluetooth device
+bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
+
 # start dmenu (a program launcher)
 bindsym $mod+d exec --no-startup-id dmenu_run
 # A more modern dmenu replacement is rofi:
