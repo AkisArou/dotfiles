@@ -53,6 +53,15 @@ _installSymLink ssh ~/.ssh/config ~/dotfiles/ssh/config ~/.ssh/config
 
 echo ""
 echo "-------------------------------------"
+echo "-> Install X11 dotfiles"
+echo "-------------------------------------"
+echo ""
+_installSymLink xorg.conf /etc/X11/xorg.conf ~/dotfiles/xorg/xorg.conf /etc/X11/xorg.conf
+_installSymLink .xinitrc ~/.xinitrc ~/dotfiles/xorg/.xinitrc ~/.xinitrc
+_installSymLink .zprofile ~/.zprofile ~/dotfiles/zsh/.config/zsh/.zprofile ~/.zprofile
+
+echo ""
+echo "-------------------------------------"
 echo "-> Install GTK dotfiles"
 echo "-------------------------------------"
 echo ""
@@ -61,8 +70,14 @@ _installSymLink gtk-2.0 ~/.config/gtk-2.0/ ~/dotfiles/gtk/.gtkrc-2.0/ ~/.gtkrc-2
 _installSymLink gtk-3.0 ~/.config/gtk-3.0/ ~/dotfiles/gtk/gtk-3.0/ ~/.config/
 _installSymLink gtk-4.0 ~/.config/gtk-4.0/ ~/dotfiles/gtk/gtk-4.0/ ~/.config/
 _installSymLink .Xresouces ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xresources
-# For sway
-_installSymLink .Xdefaults ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xdefaults
+# # For sway
+# _installSymLink .Xdefaults ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xdefaults
+
+echo "-------------------------------------"
+echo "-> Install i3 dotfiles"
+echo "-------------------------------------"
+echo ""
+_installSymLink i3 ~/.config/i3 ~/dotfiles/i3/ ~/.config/i3
 
 echo "-------------------------------------"
 echo "-> Install Sway dotfiles"

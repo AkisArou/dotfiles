@@ -38,24 +38,6 @@ else
 fi
 
 # ------------------------------------------------------
-# Confirm Start
-# ------------------------------------------------------
-
-while true; do
-	read -p -r "DO YOU WANT TO START THE INSTALLATION NOW? (Yy/Nn): " yn
-	case $yn in
-	[Yy]*)
-		echo "Installation started."
-		break
-		;;
-	[Nn]*)
-		exit
-		;;
-	*) echo "Please answer yes or no." ;;
-	esac
-done
-
-# ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
 echo ""
@@ -84,6 +66,8 @@ packagesPacman=(
 )
 
 packagesYay=(
+	"zip"
+	"unzip"
 	"brave-bin"
 	"pfetch"
 	"trizen"
@@ -95,7 +79,6 @@ packagesYay=(
 	"visual-studio-code-bin"
 	"caprine"
 	"tmux"
-	"waybar"
 	"virtualbox"
 	"linux-lts-headers"
 	"genymotion"
@@ -127,21 +110,8 @@ zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) 
 # ------------------------------------------------------
 echo ""
 echo "-> Install login screen"
-while true; do
-	read -p -r "Do you want to install the custom login prompt? (Yy/Nn): " yn
-	case $yn in
-	[Yy]*)
-		sudo cp ~/dotfiles/login/issue /etc/issue
-		echo "Login prompt installed."
-		break
-		;;
-	[Nn]*)
-		echo "Custom login prompt skipped."
-		break
-		;;
-	*) echo "Please answer yes or no." ;;
-	esac
-done
+sudo cp ~/dotfiles/login/issue /etc/issue
+echo "Login prompt installed."
 
 # ------------------------------------------------------
 # DONE

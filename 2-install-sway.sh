@@ -37,6 +37,7 @@ packagesPacman=(
 )
 
 packagesYay=(
+	"waybar"
 	"swayidle"
 	"rofi-power-menu"
 	"swaybg"
