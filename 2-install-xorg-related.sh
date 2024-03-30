@@ -7,6 +7,7 @@ packagesYay=(
 	"xorg-xinput"
 	"rofi"
 	"rofi-power-menu"
+	"nitrogen"
 )
 
 # ------------------------------------------------------
