@@ -16,7 +16,7 @@ set $up k
 set $right l
 set $term alacritty
 set $browser /usr/bin/brave --remote-debugging-port=9229
-set $menu "rofi -show drun"
+set $menu "rofi -show drun -dpi 177"
 # set $menu "--no-startup-id dmenu_run"
 
 # Font for window titles. Will also be used by the bar unless a different font
@@ -72,7 +72,7 @@ bindsym $mod+b exec $browser
 bindsym $mod+q kill
 
 # Power menu
-bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu -dpi 177
 
 # toggle bluetooth device
 bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh

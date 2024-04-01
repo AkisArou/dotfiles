@@ -2,14 +2,14 @@ configuration {
   display-drun: "Applications:";
   display-window: "Windows:";
   drun-display-format: "{name}";
-  font: "Fira Sans Medium 12";
+  font: "Hack Nerd Font 12";
   modi: "window,run,drun";
 }
 
 @theme "/dev/null"
 
 * {
-  bg: #1e1e2e66;
+  bg: #000;
   bg-alt: #585b7066;
   bg-selected: #31324466;
 

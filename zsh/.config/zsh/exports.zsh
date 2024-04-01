@@ -22,6 +22,8 @@ export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 export GTK_THEME="Colorful-Dark-GTK"
 export GTK_PATH="$HOME/dotfiles/gtk"
+export QT_SCALE_FACTOR=2
+export QT_FONT_DPI=243
 export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git'"
 
 # export GH_TOKEN=$(gh auth token)
