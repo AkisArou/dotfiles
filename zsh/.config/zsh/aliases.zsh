@@ -6,7 +6,6 @@ alias ta='tmux a'
 alias v='nvim --listen /tmp/nvim.pipe'
 alias r='ranger'
 alias ts='~/dotfiles/scripts/snapshot.sh'
-alias wifi='nmtui'
 alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
 alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
@@ -51,22 +50,3 @@ alias archlinx-fix-keys="sudo pacman-key --init && sudo pacman-key --populate ar
 
 # systemd
 alias mach_list_systemctl="systemctl list-unit-files --state=enabled"
-
-case "$(uname -s)" in
-
-Darwin)
-	# echo 'Mac OS X'
-	alias ls='ls -G'
-	;;
-
-Linux)
-	alias ls='ls -la --color=auto'
-	;;
-
-CYGWIN* | MINGW32* | MSYS* | MINGW*)
-	# echo 'MS Windows'
-	;;
-*)
-	# echo 'Other OS'
-	;;
-esac
