@@ -8,6 +8,8 @@ packagesYay=(
 	"rofi"
 	"rofi-power-menu"
 	"nitrogen"
+	"wmctrl"
+	"xdotool"
 )
 
 # ------------------------------------------------------

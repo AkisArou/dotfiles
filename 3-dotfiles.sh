@@ -59,6 +59,7 @@ echo ""
 _installSymLink xorg.conf /etc/X11/xorg.conf ~/dotfiles/xorg/xorg.conf /etc/X11/xorg.conf
 _installSymLink .xinitrc ~/.xinitrc ~/dotfiles/xorg/.xinitrc ~/.xinitrc
 _installSymLink .zprofile ~/.zprofile ~/dotfiles/zsh/.config/zsh/.zprofile ~/.zprofile
+_installSymLink libinput-gestures ~/.config/libinput-gestures.conf ~/dotfiles/libinput-gestures.conf ~/.config/libinput-gestures.conf
 
 echo ""
 echo "-------------------------------------"
