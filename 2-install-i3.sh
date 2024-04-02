@@ -1,21 +1,25 @@
 #!/bin/bash
 #
-packagesPacman=(
-)
+source "$(dirname "$0")/scripts/library.sh"
 
 packagesYay=(
+	"xorg"
+	"xorg-xinit"
 	"xorg-xinput"
+	"i3-wm"
+	"i3status"
+	"i3blocks"
+	"i3lock"
+	"i3status-rust"
 	"rofi"
 	"rofi-power-menu"
 	"nitrogen"
-	"wmctrl"
-	"xdotool"
+	"xclip"
 )
 
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-_installPackagesPacman "${packagesPacman[@]}"
 _installPackagesYay "${packagesYay[@]}"
 
 echo "DONE! Please reboot your system!"

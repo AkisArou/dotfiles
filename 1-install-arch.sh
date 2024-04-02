@@ -43,7 +43,8 @@ fi
 echo ""
 echo "-> Install main packages"
 
-packagesPacman=(
+packagesYay=(
+	"openssh"
 	"pacman-contrib"
 	"alacritty"
 	"chromium"
@@ -52,7 +53,7 @@ packagesPacman=(
 	"pcmanfm-gtk3"
 	"ttf-hack-nerd"
 	"ttf-font-awesome"
-	"ttf-nerd-fonts-input"
+	#	"ttf-nerd-fonts-input"
 	"figlet"
 	"vlc"
 	"exa"
@@ -66,9 +67,7 @@ packagesPacman=(
 	"bat"
 	"zsh"
 	"brightnessctl"
-)
 
-packagesYay=(
 	"zip"
 	"unzip"
 	"brave-bin"
@@ -104,7 +103,6 @@ packagesYay=(
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-_installPackagesPacman "${packagesPacman[@]}"
 _installPackagesYay "${packagesYay[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
