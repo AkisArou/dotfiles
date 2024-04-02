@@ -10,6 +10,7 @@
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
 exec --no-startup-id xset r rate 220 33
+exec --no-startup-id libinput-gestures-setup autostart start
 
 set $mod Mod4
 set $left h
