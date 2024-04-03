@@ -15,6 +15,8 @@ packagesYay=(
 	"rofi-power-menu"
 	"nitrogen"
 	"xclip"
+	"xdg-desktop-portal-gtk"
+	"xf86-video-intel"
 )
 
 # ------------------------------------------------------
