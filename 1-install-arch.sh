@@ -47,6 +47,7 @@ echo "-> Install main packages"
 # Install Packages
 # ------------------------------------------------------
 packagesYay=(
+	"bleachbit"
 	"wget"
 	"curl"
 	"ranger"
