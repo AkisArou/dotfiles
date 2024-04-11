@@ -1,6 +1,7 @@
 return {
   "dmmulroy/tsc.nvim",
   event = "VimEnter",
+  enabled = false,
   config = function()
     local cwd = vim.fn.getcwd()
     require("tsc").setup({
