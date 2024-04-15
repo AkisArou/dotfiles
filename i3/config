@@ -209,7 +209,7 @@ bindsym $mod+Control+$right resize grow width 10 px or 10 ppt
 bar {
         status_command i3status-rs
         position       top
-        font pango:Hack Nerd FOnt 9
+        font pango:Hack Nerd Font 9
 }
 
 for_window [class="^.*"] border pixel 3
