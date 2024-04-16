@@ -26,5 +26,6 @@ return {
     -- vim.api.nvim_set_keymap("n", "<leader>gg", "<cmd>lua GitUIToggle()<CR>", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("n", "<leader>td", "<cmd>lua Tod0Toggle()<CR>", { noremap = true, silent = true })
     vim.api.nvim_set_keymap("n", "<leader>tt", "<cmd>lua TogglePlainTerm()<CR>", { noremap = true, silent = true })
+    vim.api.nvim_set_keymap("t", "<Esc><Esc>", "<cmd>lua TogglePlainTerm()<CR>", { desc = "Exit terminal mode" })
   end,
 }
