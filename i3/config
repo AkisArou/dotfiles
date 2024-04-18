@@ -211,7 +211,7 @@ bar {
     position       top
     font pango:Hack Nerd Font 9
     colors {
-      background #222222
+      background #121212
     }
 }
 
