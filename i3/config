@@ -89,6 +89,8 @@ bindsym $mod+d exec $menu
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
+bindsym $mod+p exec flameshot gui
+
 # change focus
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
