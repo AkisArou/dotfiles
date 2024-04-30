@@ -39,3 +39,7 @@ keymap("v", ">", ">gv", opts)
 
 -- Undo
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
+
+-- Key mappings for moving tabs left and right
+vim.api.nvim_set_keymap("n", "<S-A-h>", "<cmd>BufferLineMovePrev<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<S-A-l>", "<cmd>BufferLineMoveNext<CR>", { noremap = true, silent = true })
