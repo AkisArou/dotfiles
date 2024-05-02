@@ -100,7 +100,7 @@ packagesYay=(
 	"zip"
 	"unzip"
 	"brave-bin"
-	"pfetch"
+	"fastfetch"
 	"trizen"
 	"base-devel"
 	"ripgrep"
