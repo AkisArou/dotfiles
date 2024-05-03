@@ -1,12 +1,6 @@
 fastfetch
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
-# source
-source "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
-source "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
-source "$HOME/dotfiles/zsh/.config/zsh/functions.zsh"
-source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"
-
 # plugins
 plug "zsh-users/zsh-autosuggestions"
 plug "zap-zsh/supercharge"
@@ -33,3 +27,10 @@ source "$HOME/dotfiles/zsh/docker-completion.sh"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+# source
+source "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
+source "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
+source "$HOME/dotfiles/zsh/.config/zsh/functions.zsh"
+source "$HOME/dotfiles/zsh/.config/zsh/history.zsh"
+source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"

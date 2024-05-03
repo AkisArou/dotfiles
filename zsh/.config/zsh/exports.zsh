@@ -1,8 +1,3 @@
-# HISTFILE="$XDG_DATA_HOME"/zsh/history
-HISTFILE=~/.zsh_history
-HISTSIZE=1000000
-SAVEHIST=1000000
-
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.local/bin":$PATH
@@ -13,8 +8,18 @@ export PATH="$HOME/.local/share/neovim/bin":$PATH
 export PATH="$HOME/.config/emacs/bin":$PATH
 
 export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_DATA_HOME="$HOME/.local/share"
+export XDG_STATE_HOME="$HOME/.local/state"
+export XDG_DATA_DIRS="/usr/local/share:/usr/share:/var/lib/snapd/desktop"
+export XDG_CONFIG_DIRS="/etc/xdg"
+#export XDG_CURRENT_DESKTOP="Wayland"
+#export XDG_SESSION_DESKTOP="hyprland"
+#export XDG_SESSION_TYPE="wayland"
+
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
+
 export TERMINAL="alacritty"
 export EDITOR="nvim"
 export LAUNCH_EDITOR="/home/$(echo $USER)/dotfiles/scripts/launch-editor.sh"
@@ -27,10 +32,6 @@ export GTK_PATH="$HOME/dotfiles/gtk"
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
 export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git'"
-#export XDG_CURRENT_DESKTOP="Wayland"
-#export XDG_SESSION_DESKTOP="hyprland"
-#export XDG_SESSION_TYPE="wayland"
-
 
 export GH_TOKEN=$(gh auth token)
 
