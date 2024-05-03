@@ -32,16 +32,17 @@ return {
         --  to disable file types use
         --  "formatting.prettier.with({disabled_filetypes: {}})" (see null-ls docs)
         formatting.stylua,
-        formatting.biome.with({
-          args = {
-            "check",
-            "--apply",
-            "--formatter-enabled=true",
-            "--organize-imports-enabled=true",
-            "--skip-errors",
-            "$FILENAME",
-          },
-        }),
+        formatting.biome,
+        --   .with({
+        --   args = {
+        --     "check",
+        --     "--apply",
+        --     "--formatter-enabled=true",
+        --     "--organize-imports-enabled=true",
+        --     "--skip-errors",
+        --     "$FILENAME",
+        --   },
+        -- }),
         formatting.rustywind,
         formatting.shfmt,
         -- formatting.codespell,
