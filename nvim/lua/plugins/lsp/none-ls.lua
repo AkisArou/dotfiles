@@ -33,10 +33,12 @@ return {
         --  "formatting.prettier.with({disabled_filetypes: {}})" (see null-ls docs)
         formatting.stylua,
         formatting.biome,
-        --   .with({
+        --   with({
         --   args = {
         --     "check",
+        --     "--stdin-file-path",
         --     "--apply",
+        --     "--linter-enabled=false",
         --     "--formatter-enabled=true",
         --     "--organize-imports-enabled=true",
         --     "--skip-errors",
