@@ -13,17 +13,9 @@ plug "zsh-users/zsh-syntax-highlighting"
 # keybinds
 bindkey '^ ' autosuggest-accept
 
-# asdf
-. "$HOME/.asdf/asdf.sh"
-
-# append completions to fpath
-fpath=(${ASDF_DIR}/completions $fpath)
-# initialise completions with ZSH's compinit
-autoload -Uz compinit && compinit
-
-
 source "$HOME/dotfiles/zsh/npm-completion.sh"
 source "$HOME/dotfiles/zsh/docker-completion.sh"
+source "$HOME/dotfiles/zsh/asdf.sh"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
