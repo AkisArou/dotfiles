@@ -128,9 +128,7 @@ echo "-> Install zsh config"
 echo "-------------------------------------"
 echo ""
 _installSymLink .zshrc ~/.zshrc ~/dotfiles/zsh/.zshrc ~/.zshrc
-_installSymLink zsh-aliases ~/.config/zsh/aliases.zsh ~/dotfiles/zsh/.config/zsh/aliases.zsh
-_installSymLink zsh-exports ~/.config/zsh/exports.zsh ~/dotfiles/zsh/.config/zsh/exports.zsh
-_installSymLink zsh-functions ~/.config/zsh/functions.zsh ~/dotfiles/zsh/.config/zsh/functions.zsh
+_installSymLink .zprofile ~/.zprofile ~/dotfiles/zsh/.zprofile ~/.zprofile
 
 echo "-------------------------------------"
 echo "-> Install .ideavimrc config"

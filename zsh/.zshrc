@@ -29,8 +29,8 @@ source "$HOME/dotfiles/zsh/docker-completion.sh"
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # source
-source "$HOME/dotfiles/zsh/.config/zsh/aliases.zsh"
-source "$HOME/dotfiles/zsh/.config/zsh/exports.zsh"
-source "$HOME/dotfiles/zsh/.config/zsh/functions.zsh"
-source "$HOME/dotfiles/zsh/.config/zsh/history.zsh"
+source "$HOME/dotfiles/zsh/aliases.zsh"
+source "$HOME/dotfiles/zsh/exports.zsh"
+source "$HOME/dotfiles/zsh/functions.zsh"
+source "$HOME/dotfiles/zsh/history.zsh"
 source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"
