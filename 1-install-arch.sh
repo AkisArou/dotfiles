@@ -82,6 +82,7 @@ packagesYay=(
 	"pcmanfm-gtk3"
 	"ttf-hack-nerd"
 	"ttf-font-awesome"
+	"noto-fonts-emoji"
 	"terminus-font"
 	#	"ttf-nerd-fonts-input"
 	"figlet"
