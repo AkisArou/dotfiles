@@ -185,6 +185,7 @@ return {
             configFile = {
               ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = "packages/assistant-prm-airport/**",
               ["packages/shared/react/fluentui/tailwind.config.ts"] = "packages/shared/react/fluentui/**",
+              ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
             },
             classRegex = {
               "tw`([^`]*)",
