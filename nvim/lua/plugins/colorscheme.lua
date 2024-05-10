@@ -4,10 +4,10 @@ local themes = {
     repo = "sainnhe/gruvbox-material",
     branch = "master",
     config = function()
-      vim.g.gruvbox_material_background = 'hard'
+      vim.g.gruvbox_material_background = "hard"
       vim.g.gruvbox_material_better_performance = 1
       vim.g.gruvbox_material_foreground = "original"
-    end
+    end,
   },
   tokyonight = {
     name = "tokyonight",
@@ -17,9 +17,9 @@ local themes = {
       vim.opt.background = "dark"
       require("tokyonight").setup({
         style = "storm",
-        light_style = "day"
+        light_style = "day",
       })
-    end
+    end,
   },
   catpuccin = {
     name = "catppuccin",
@@ -33,7 +33,7 @@ local themes = {
           dark = "mocha",
         },
       })
-    end
+    end,
   },
   vscode = {
     name = "vscode",
@@ -41,21 +41,20 @@ local themes = {
     branch = "main",
     config = function()
       -- For dark theme (neovim's default)
-      vim.o.background = 'dark'
+      vim.o.background = "dark"
       -- For light theme
       -- vim.o.background = 'light'
 
-      local c = require('vscode.colors').get_colors()
-      require('vscode').setup()
-      require('vscode').load()
-    end
+      local c = require("vscode.colors").get_colors()
+      require("vscode").setup()
+      require("vscode").load()
+    end,
   },
   papercolor = {
     name = "papercolor",
     repo = "NLKNguyen/papercolor-theme",
     branch = "master",
-    config = function()
-    end
+    config = function() end,
   },
   onenord = {
     name = "onenord",
@@ -64,13 +63,13 @@ local themes = {
     config = function()
       local colors = require("onenord.colors").load()
 
-      require('onenord').setup({
+      require("onenord").setup({
         theme = "dark",
         custom_highlights = {
-          ["@parameter"] = { fg = colors.cyan }
-        }
+          ["@parameter"] = { fg = colors.cyan },
+        },
       })
-    end
+    end,
   },
   nordic = {
     name = "nordic",
@@ -78,7 +77,7 @@ local themes = {
     branch = "main",
     config = function()
       require("nordic").load()
-    end
+    end,
   },
   dracula = {
     name = "dracula",
@@ -86,14 +85,13 @@ local themes = {
     branch = "main",
     config = function()
       require("dracula").setup()
-    end
+    end,
   },
   nightfly = {
     name = "nightfly",
     repo = "bluz71/vim-nightfly-guicolors",
     priority = 1000, -- make sure to load this before all the other start plugins
-    config = function()
-    end,
+    config = function() end,
   },
   monokai_nightasty = {
     name = "monokai-nightasty",
@@ -103,12 +101,12 @@ local themes = {
     config = function()
       vim.opt.background = "light"
     end,
-  }
+  },
 }
 
 local selectedTheme = themes.vscode
 
-if vim.fn.has('termguicolors') == 1 then
+if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true
 end
 
@@ -118,7 +116,7 @@ local M = {
   selectedTheme.repo,
   commit = selectedTheme.commit,
   event = "VimEnter",
-  lazy = false,    -- make sure we load this during startup if it is your main colorscheme
+  lazy = false, -- make sure we load this during startup if it is your main colorscheme
   priority = 1000, -- make sure to load this before all the other start plugins
 }
 
@@ -134,4 +132,3 @@ function M.config()
 end
 
 return M
-

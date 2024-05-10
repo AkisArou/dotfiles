@@ -44,7 +44,7 @@ return {
             "$FILENAME",
           },
         }),
-        formatting.rustywind,
+        -- formatting.rustywind,
         formatting.shfmt,
         -- formatting.codespell,
         formatting.clang_format,
