@@ -44,7 +44,7 @@ return {
             "$FILENAME",
           },
         }),
-        formatting.rustywind,
+        -- formatting.rustywind,
         formatting.shfmt,
         -- formatting.codespell,
         formatting.clang_format,
@@ -64,11 +64,12 @@ return {
             callback = function()
               -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
               -- on later neovim version, you should use vim.lsp.buf.format({ async = false }) instead
+              vim.cmd("TailwindSort")
               vim.lsp.buf.format({
                 async = false,
-                filter = function(cl)
-                  return cl.name == "null-ls"
-                end,
+                -- filter = function(cl)
+                --   return cl.name == "null-ls"
+                -- end,
               })
             end,
           })
