@@ -108,7 +108,7 @@ packagesYay=(
 	"ripgrep"
 	"fd"
 	"snapd"
-	"neovim"
+	"neovim-git"
 	"visual-studio-code-bin"
 	"caprine"
 	"tmux"
