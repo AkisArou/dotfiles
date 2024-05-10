@@ -13,10 +13,10 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-vim.api.nvim_create_autocmd("BufWriteCmd", {
-  pattern = { "*.tsx", "*.jsx", "*.css" },
-  command = "TailwindSort",
-})
+-- vim.api.nvim_create_autocmd("BufWriteCmd", {
+--   pattern = { "*.tsx", "*.jsx", "*.css" },
+--   command = "TailwindSort",
+-- })
 
 -- highlight yanked text for 200ms using the "Visual" highlight group
 vim.cmd([[
