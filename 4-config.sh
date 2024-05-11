@@ -6,8 +6,8 @@ echo "-> Setting up gnome settings"
 echo "-------------------------------------"
 echo ""
 if command -v gsettings &>/dev/null; then
-	gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 30
-	gsettings set org.gnome.desktop.peripherals.keyboard delay 250
+	gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
+	gsettings set org.gnome.desktop.peripherals.keyboard delay 220
 	gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
 	# Do not group applications
 	gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
@@ -93,10 +93,11 @@ reload_shell_configuration
 
 echo ""
 echo "-------------------------------------"
-echo "-> Installing yarn globally"
+echo "-> NodeJS"
 echo "-------------------------------------"
 echo ""
-npm i -g yarn
+corepack enable pnpm
+corepack enable yarn
 
 echo ""
 echo "-------------------------------------"
