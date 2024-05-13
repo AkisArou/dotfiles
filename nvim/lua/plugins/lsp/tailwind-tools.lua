@@ -3,6 +3,7 @@ return {
   "luckasRanarison/tailwind-tools.nvim",
   dependencies = { "nvim-treesitter/nvim-treesitter" },
   -- enabled = false,
+  lazy = true,
   opts = {
     conceal = {
       enabled = false, -- can be toggled by commands

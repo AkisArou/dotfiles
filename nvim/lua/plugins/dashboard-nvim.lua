@@ -1,5 +1,6 @@
 return {
   "nvimdev/dashboard-nvim",
+  lazy = false,
   config = function()
     require("dashboard").setup({
       config = {

@@ -1,5 +1,6 @@
 return {
   "hrsh7th/nvim-cmp",
+  lazy = true,
   dependencies = {
     "luckasRanarison/tailwind-tools.nvim",
     "onsails/lspkind-nvim",

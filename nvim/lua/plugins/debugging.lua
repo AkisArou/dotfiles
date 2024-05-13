@@ -1,5 +1,6 @@
 return {
   {
+    lazy = true,
     "jay-babu/mason-nvim-dap.nvim",
     dependencies = "mason.nvim",
     cmd = { "DapInstall", "DapUninstall" },
