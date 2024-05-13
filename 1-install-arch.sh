@@ -129,6 +129,8 @@ packagesYay=(
 	"tod0"
 	"github-cli"
 	"wireplumber"
+	"udisks2"
+	"fwupd"
 )
 
 # ------------------------------------------------------
