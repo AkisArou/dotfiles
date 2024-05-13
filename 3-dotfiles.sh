@@ -155,6 +155,12 @@ echo ""
 _installSymLink brave-flags ~/.config/brave-flags.conf ~/dotfiles/brave-flags.conf ~/.config
 _installSymLink chromium-flags ~/.config/chromium-flags.conf ~/dotfiles/chromium-flags.conf ~/.config
 
+echo "-------------------------------------"
+echo "->  Pipewire"
+echo "-------------------------------------"
+echo ""
+_installSymLink pipewire ~/.config/pipewire ~/dotfiles/pipewire ~/.config
+
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
