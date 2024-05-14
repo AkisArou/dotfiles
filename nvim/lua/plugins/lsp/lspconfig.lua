@@ -13,23 +13,18 @@ return {
     vim.diagnostic.config({ update_in_insert = true })
 
     -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
-    require("neodev").setup({
-      -- add any options here, or leave empty to use the default settings
-    })
+    require("neodev").setup({})
 
-    -- import lspconfig plugin
     local lspconfig = require("lspconfig")
 
-    -- import cmp-nvim-lsp plugin
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
-    local keymap = vim.keymap -- for conciseness
+    local keymap = vim.keymap
 
     local opts = { noremap = true, silent = true }
     local on_attach = function(_, bufnr)
       opts.buffer = bufnr
 
-      -- set keybinds
       opts.desc = "Show LSP references"
       keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts) -- show definition, references
 
@@ -70,24 +65,19 @@ return {
       keymap.set("n", "<leader>cl", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
     end
 
-    -- used to enable autocompletion (assign to every lsp server config)
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
-    -- Change the Diagnostic symbols in the sign column (gutter)
-    -- (not in youtube nvim video)
     local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
       local hl = "DiagnosticSign" .. type
       vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
     end
 
-    -- configure html server
     lspconfig["html"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
     })
 
-    -- configure typescript server
     require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
 
     lspconfig["vtsls"].setup({
@@ -151,7 +141,6 @@ return {
     --   },
     -- })
 
-    -- configure css server
     lspconfig["cssls"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
@@ -171,7 +160,6 @@ return {
       },
     })
 
-    -- configure tailwindcss server
     lspconfig["tailwindcss"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
@@ -197,31 +185,26 @@ return {
       },
     })
 
-    -- configure prisma orm server
     lspconfig["prismals"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
     })
 
-    -- configure emmet language server
     lspconfig["emmet_language_server"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
       filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "svelte" },
     })
 
-    -- configure lua server (with special settings)
     lspconfig["lua_ls"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
-      settings = { -- custom settings for lua
+      settings = {
         Lua = {
-          -- make the language server recognize "vim" global
           diagnostics = {
             globals = { "vim" },
           },
           workspace = {
-            -- make language server aware of runtime files
             library = {
               [vim.fn.expand("$VIMRUNTIME/lua")] = true,
               [vim.fn.stdpath("config") .. "/lua"] = true,
@@ -285,6 +268,7 @@ return {
       capabilities = capabilities,
       on_attach = on_attach,
     })
+
     -- lspconfig["css_variables_language_server"].setup({})
 
     lspconfig["clangd"].setup({

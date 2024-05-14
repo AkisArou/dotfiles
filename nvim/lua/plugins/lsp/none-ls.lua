@@ -1,7 +1,7 @@
 return {
-  "nvimtools/none-ls.nvim", -- configure formatters & linters
+  "nvimtools/none-ls.nvim",
   lazy = true,
-  event = { "BufReadPre", "BufNewFile" }, -- to enable uncomment this
+  event = { "BufReadPre", "BufNewFile" },
   keys = {
     {
       "<leader>cf",
@@ -15,22 +15,14 @@ return {
     local null_ls = require("null-ls")
     local null_ls_utils = require("null-ls.utils")
 
-    -- for conciseness
-    local formatting = null_ls.builtins.formatting -- to setup formatters
-    local diagnostics = null_ls.builtins.diagnostics -- to setup linters
-    -- local code_actions = null_ls.builtins.code_actions -- to setup linters
+    local formatting = null_ls.builtins.formatting
+    local diagnostics = null_ls.builtins.diagnostics
 
-    -- to setup format on save
     local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
-    -- configure null_ls
     null_ls.setup({
-      -- add package.json as identifier for root (for typescript monorepos)
       root_dir = null_ls_utils.root_pattern(".git"),
-      -- setup formatters & linters
       sources = {
-        --  to disable file types use
-        --  "formatting.prettier.with({disabled_filetypes: {}})" (see null-ls docs)
         formatting.stylua,
         formatting.biome.with({
           args = {
@@ -46,14 +38,13 @@ return {
         }),
         formatting.rustywind,
         formatting.shfmt,
-        -- formatting.codespell,
+        formatting.codespell,
         formatting.clang_format,
-        formatting.prismaFmt,
+        formatting.prisma_format,
         diagnostics.hadolint,
         -- diagnostics.shellcheck,
         -- code_actions.shellcheck,
       },
-      -- configure format on save
 
       on_attach = function(client, bufnr)
         if client.supports_method("textDocument/formatting") then
@@ -64,10 +55,6 @@ return {
             callback = function(args)
               -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
               -- on later neovim version, you should use vim.lsp.buf.format({ async = false }) instead
-
-              -- if args.file:sub(-3) == "tsx" then
-              --   vim.cmd("TailwindSort")
-              -- end
 
               vim.lsp.buf.format({
                 async = false,
