@@ -44,7 +44,7 @@ return {
             "$FILENAME",
           },
         }),
-        -- formatting.rustywind,
+        formatting.rustywind,
         formatting.shfmt,
         -- formatting.codespell,
         formatting.clang_format,
@@ -61,15 +61,19 @@ return {
           vim.api.nvim_create_autocmd("BufWritePre", {
             group = augroup,
             buffer = bufnr,
-            callback = function()
+            callback = function(args)
               -- on 0.8, you should use vim.lsp.buf.format({ bufnr = bufnr }) instead
               -- on later neovim version, you should use vim.lsp.buf.format({ async = false }) instead
-              vim.cmd("TailwindSort")
+
+              -- if args.file:sub(-3) == "tsx" then
+              --   vim.cmd("TailwindSort")
+              -- end
+
               vim.lsp.buf.format({
                 async = false,
-                -- filter = function(cl)
-                --   return cl.name == "null-ls"
-                -- end,
+                filter = function(cl)
+                  return cl.name == "null-ls"
+                end,
               })
             end,
           })

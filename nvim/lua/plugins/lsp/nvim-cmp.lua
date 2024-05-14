@@ -2,7 +2,7 @@ return {
   "hrsh7th/nvim-cmp",
   lazy = true,
   dependencies = {
-    "luckasRanarison/tailwind-tools.nvim",
+    -- "luckasRanarison/tailwind-tools.nvim",
     "onsails/lspkind-nvim",
     "hrsh7th/cmp-buffer",
     "saadparwaiz1/cmp_luasnip",
@@ -22,7 +22,7 @@ return {
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
     local cmp = require("cmp")
     local defaults = require("cmp.config.default")()
-    local lspkind = require("lspkind")
+    -- local lspkind = require("lspkind")
 
     return {
       -- formatting = {
