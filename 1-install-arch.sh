@@ -47,6 +47,7 @@ echo "-> Install main packages"
 # Install Packages
 # ------------------------------------------------------
 packagesYay=(
+	"usbutils"
 	"tldr"
 	"bleachbit"
 	"wget"
