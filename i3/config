@@ -21,7 +21,7 @@ set $left h
 set $down j
 set $up k
 set $right l
-set $term alacritty
+set $term ~/dotfiles/alacritty/alacritty.zsh
 set $browser /usr/bin/brave --remote-debugging-port=9229
 set $menu "rofi -show drun -dpi 177"
 # set $menu "--no-startup-id dmenu_run"
@@ -70,7 +70,7 @@ floating_modifier $mod
 
 # move tiling windows via drag & drop by left-clicking into the title bar,
 # or left-clicking anywhere into the window while holding the floating modifier.
-tiling_drag modifier titlebar
+# tiling_drag modifier titlebar
 
 # start a terminal
 bindsym $mod+Return exec $term

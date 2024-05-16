@@ -128,7 +128,6 @@ packagesYay=(
 	"microsoft-edge-stable-bin"
 	"rar"
 	"tod0"
-	"github-cli"
 	"wireplumber"
 	"udisks2"
 	"fwupd"
