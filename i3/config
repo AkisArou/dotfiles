@@ -10,6 +10,7 @@
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
 # exec --no-startup-id libinput-gestures-setup autostart start
+exec --no-startup-id ~/dotfiles/xorg/xrandr.zsh
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 

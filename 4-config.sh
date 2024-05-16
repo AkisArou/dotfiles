@@ -36,12 +36,20 @@ echo "-------------------------------------"
 echo "-> Setting up asdf"
 echo "-------------------------------------"
 echo ""
-# git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
-
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
 
 source ~/.zshrc
 
+## Add asdf plugins
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf plugin add java https://github.com/halcyon/asdf-java.git
+asdf plugin-add maven
+asdf plugin-add helm https://github.com/Antiarchitect/asdf-helm.git
+asdf plugin add kotlin https://github.com/asdf-community/asdf-kotlin.git
+
+
 # Read .tool-versions file and install the specified versions
+cd ~
 asdf install
 
 echo ""
@@ -89,13 +97,13 @@ docker compose version
 echo "You also have to login into docker-desktop"
 echo "https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users"
 
-reload_shell_configuration
-
 echo ""
 echo "-------------------------------------"
 echo "-> NodeJS"
 echo "-------------------------------------"
 echo ""
+corepack install -g pnpm
+corepack install -g yarn
 corepack enable pnpm
 corepack enable yarn
 
@@ -106,11 +114,3 @@ echo "-------------------------------------"
 echo ""
 npm i -g npm-workspaces-lsp
 npm i -g css-variables-language-server
-
-echo ""
-echo "-------------------------------------"
-echo "-> Changing shell to zsh"
-echo "-------------------------------------"
-echo ""
-sudo chsh -s /usr/bin/zsh
-echo "Reboot to get zsh shell"
