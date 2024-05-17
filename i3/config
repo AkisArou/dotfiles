@@ -239,4 +239,4 @@ floating_minimum_size 400 x 300
 floating_maximum_size 1400 x 1400
 
 
-exec --no-startup-id xset r rate 220 33
+# exec --no-startup-id xset r rate 220 33
