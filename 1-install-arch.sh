@@ -116,7 +116,6 @@ packagesYay=(
 	"virtualbox"
 	"linux-headers"
 	"genymotion"
-	"lazygit"
 	"git-delta"
 	"gnome-terminal"
 	"docker-desktop"

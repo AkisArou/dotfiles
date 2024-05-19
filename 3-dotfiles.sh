@@ -118,12 +118,6 @@ echo ""
 _installSymLink git ~/.config/git ~/dotfiles/git/ ~/.config
 
 echo "-------------------------------------"
-echo "-> Install Lazygit config"
-echo "-------------------------------------"
-echo ""
-_installSymLink lazygit ~/.config/lazygit ~/dotfiles/lazygit/ ~/.config
-
-echo "-------------------------------------"
 echo "-> Install zsh config"
 echo "-------------------------------------"
 echo ""
