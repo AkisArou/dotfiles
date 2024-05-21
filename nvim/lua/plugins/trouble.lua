@@ -6,6 +6,7 @@ return {
     use_diagnostic_signs = true,
     auto_close = true,
     auto_jump = {},
+    position = "right", -- position of the list can be: bottom, top, left, right
   },
   keys = {
     { "<leader>xx", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics (Trouble)" },
