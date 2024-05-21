@@ -11,7 +11,7 @@ end
 
 local DEFAULT_CONFIG = {
   auto_open_qflist = true,
-  auto_close_qflist = false,
+  auto_close_qflist = true,
   auto_focus_qflist = false,
   use_trouble_qflist = true,
   bin_path = utils.find_tsc_bin(),
