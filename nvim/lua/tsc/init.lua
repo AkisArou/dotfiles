@@ -19,7 +19,6 @@ local DEFAULT_CONFIG = {
   args = nil,
   hide_progress_notifications_from_history = true,
   spinner = { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" },
-  pretty_errors = true,
 }
 
 local DEFAULT_NOTIFY_OPTIONS = {
