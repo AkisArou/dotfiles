@@ -51,6 +51,11 @@ local function format_notification_msg(msg, spinner_idx)
 end
 
 M.run = function()
+  if is_running then
+    -- vim.notify(format_notification_msg("Type-checking already in progress"), vim.log.levels.WARN, get_notify_options())
+    return
+  end
+
   -- Closed over state
   local tsc = config.bin_path
   local errors = {}
@@ -69,15 +74,13 @@ M.run = function()
     return
   end
 
-  if is_running then
-    vim.notify(format_notification_msg("Type-checking already in progress"), vim.log.levels.WARN, get_notify_options())
-    return
-  end
-
   is_running = true
 
+  local icons = require("nvim-web-devicons")
+
   if config.enable_progress_notifications then
-    vim.notify("👀 Watching your project for changes, kick back and relax 🚀", nil, get_notify_options())
+    vim.notify("  " .. icons.get_icon_by_filetype("typescript") .. "  Compiling...", nil, get_notify_options())
+    -- vim.notify("👀 Building & Watching  🇹🇸, kick back and relax 🚀", nil, get_notify_options())
   end
 
   local function on_stdout(_, output)

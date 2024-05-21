@@ -7,6 +7,8 @@ require("config.filetype")
 local cwd = vim.fn.getcwd()
 local project = cwd .. "/tsconfig.json"
 
-require("tsc.init").setup({
-  args = "--build " .. project .. " --watch",
-})
+if cwd:match("nable%-solutions") then
+  require("tsc.init").setup({
+    args = "--build " .. project .. " --watch",
+  })
+end
