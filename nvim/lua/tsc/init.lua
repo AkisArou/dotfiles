@@ -28,6 +28,7 @@ local DEFAULT_NOTIFY_OPTIONS = {
 
 local config = {}
 local is_running = false
+local pid
 
 local function get_notify_options(...)
   local overrides = {}
@@ -147,7 +148,13 @@ M.run = function()
     stdout_buffered = false,
   }
 
-  vim.fn.jobstart(tsc .. " " .. config.args, opts)
+  pid = vim.fn.jobstart(tsc .. " " .. config.args, opts)
+end
+
+function M.stop()
+  if pid then
+    vim.fn.jobstop(pid)
+  end
 end
 
 function M.is_running()
@@ -160,6 +167,10 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("TSC", function()
     M.run()
   end, { desc = "Run `tsc` asynchronously and load the results into a qflist", force = true })
+
+  vim.api.nvim_create_user_command("TSCStop", function()
+    M.stop()
+  end, { desc = "Stop `tsc` compilation", force = true })
 
   vim.api.nvim_create_user_command("TSCOpen", function()
     utils.open_qflist(config.use_trouble_qflist, config.auto_focus_qflist)
