@@ -81,6 +81,8 @@ return {
     require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
 
     lspconfig["vtsls"].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
       root_dir = function(...)
         return require("lspconfig.util").root_pattern(".git")(...)
       end,

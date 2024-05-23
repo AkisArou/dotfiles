@@ -22,17 +22,8 @@ return {
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
     local cmp = require("cmp")
     local defaults = require("cmp.config.default")()
-    -- local lspkind = require("lspkind")
 
     return {
-      -- formatting = {
-      --   format = lspkind.cmp_format({
-      --     before = require("tailwind-tools.cmp").lspkind_format,
-      --     maxwidth = 50,
-      --     ellipsis_char = "...",
-      --     symbol_map = { Codeium = "" },
-      --   }),
-      -- },
       completion = {
         completeopt = "menu,menuone,noinsert",
       },
@@ -63,9 +54,8 @@ return {
         { name = "nvim_lsp" },
         { name = "path" },
         { name = "luasnip" },
-        { name = "conventionalcommits" },
-      }, {
         { name = "buffer" },
+        { name = "conventionalcommits" },
       }),
       -- experimental = {
       --   ghost_text = {
