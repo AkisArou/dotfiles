@@ -11,8 +11,6 @@ end
 
 local DEFAULT_CONFIG = {
   auto_open_qflist = true,
-  auto_close_qflist = true,
-  auto_focus_qflist = false,
   use_trouble_qflist = true,
   bin_path = utils.find_tsc_bin(),
   enable_progress_notifications = true,
@@ -91,8 +89,6 @@ M.run = function()
 
     utils.set_qflist(errors, {
       auto_open = config.auto_open_qflist,
-      auto_close = config.auto_close_qflist,
-      auto_focus = config.auto_focus_qflist,
       use_trouble = config.use_trouble_qflist,
     })
 
@@ -173,7 +169,7 @@ function M.setup(opts)
   end, { desc = "Stop `tsc` compilation", force = true })
 
   vim.api.nvim_create_user_command("TSCOpen", function()
-    utils.open_qflist(config.use_trouble_qflist, config.auto_focus_qflist)
+    utils.open_qflist(config.use_trouble_qflist)
   end, { desc = "Open the results in a qflist", force = true })
 
   vim.api.nvim_create_user_command("TSCClose", function()

@@ -46,13 +46,13 @@ M.parse_tsc_output = function(output)
 end
 
 M.set_qflist = function(errors, opts)
-  local DEFAULT_OPTS = { auto_open = true, auto_close = false, use_trouble = false }
+  local DEFAULT_OPTS = { use_trouble = false }
   local final_opts = vim.tbl_extend("force", DEFAULT_OPTS, opts or {})
 
   vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
 
-  if #errors > 0 and final_opts.auto_open then
-    M.open_qflist(final_opts.use_trouble, final_opts.auto_focus)
+  if #errors > 0 then
+    M.open_qflist(final_opts.use_trouble)
   end
 
   if #errors == 0 then
@@ -61,26 +61,25 @@ M.set_qflist = function(errors, opts)
       trouble.refresh()
     end
 
-    if final_opts.auto_close then
-      M.close_qflist(final_opts.use_trouble)
-    end
+    M.close_qflist(final_opts.use_trouble)
   end
 end
 
 --- open the qflist
 --- @param use_trouble boolean: if trouble should be used as qflist provider
---- @param auto_focus boolean: if the qflist should be focused on open
 --- @return nil
-M.open_qflist = function(use_trouble, auto_focus)
-  local win = vim.api.nvim_get_current_win()
+M.open_qflist = function(use_trouble)
   if use_trouble and trouble ~= nil then
-    trouble.open("quickfix")
+    require("trouble").open({
+      mode = "quickfix",
+      win = {
+        position = "right",
+      },
+      focus = false,
+    })
+    -- vim.cmd("lua Trouble quickfix toggle focus=false win.position=right<cr>")
   else
     vim.cmd("copen")
-  end
-
-  if not auto_focus then
-    vim.api.nvim_set_current_win(win)
   end
 end
 
