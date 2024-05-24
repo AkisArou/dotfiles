@@ -23,7 +23,41 @@ return {
     local cmp = require("cmp")
     local defaults = require("cmp.config.default")()
 
+    local cmp_kinds = {
+      Text = "  ",
+      Method = "  ",
+      Function = "  ",
+      Constructor = "  ",
+      Field = "  ",
+      Variable = "  ",
+      Class = "  ",
+      Interface = "  ",
+      Module = "  ",
+      Property = "  ",
+      Unit = "  ",
+      Value = "  ",
+      Enum = "  ",
+      Keyword = "  ",
+      Snippet = "  ",
+      Color = "  ",
+      File = "  ",
+      Reference = "  ",
+      Folder = "  ",
+      EnumMember = "  ",
+      Constant = "  ",
+      Struct = "  ",
+      Event = "  ",
+      Operator = "  ",
+      TypeParameter = "  ",
+    }
+
     return {
+      formatting = {
+        format = function(_, vim_item)
+          vim_item.kind = (cmp_kinds[vim_item.kind] or "") .. vim_item.kind
+          return vim_item
+        end,
+      },
       completion = {
         completeopt = "menu,menuone,noinsert",
       },
