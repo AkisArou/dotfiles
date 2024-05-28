@@ -130,6 +130,8 @@ packagesYay=(
 	"wireplumber"
 	"udisks2"
 	"fwupd"
+	"ueberzugpp"
+	"imagemagick"
 )
 
 # ------------------------------------------------------
