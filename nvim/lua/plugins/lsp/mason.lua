@@ -35,6 +35,7 @@ return {
         "yamlls",
         "biome",
         "clangd",
+        "mdx_analyzer",
       },
       automatic_installation = true,
     })

@@ -284,6 +284,9 @@ return {
     lspconfig["mdx_analyzer"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
+      root_dir = function(...)
+        return require("lspconfig.util").root_pattern(".git")(...)
+      end,
     })
   end,
 }
