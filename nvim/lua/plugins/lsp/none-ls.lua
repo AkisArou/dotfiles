@@ -38,7 +38,6 @@ return {
         }),
         formatting.rustywind,
         formatting.shfmt,
-        formatting.codespell,
         formatting.clang_format,
         formatting.prisma_format,
         diagnostics.hadolint,
