@@ -62,6 +62,53 @@ return {
       Operator = "  ",
       TypeParameter = "  ",
     }
+    local buffer_cmp = {
+      name = "buffer",
+      option = {
+        get_bufnrs = function()
+          local buf = vim.api.nvim_get_current_buf()
+          local byte_size = vim.api.nvim_buf_get_offset(buf, vim.api.nvim_buf_line_count(buf))
+          if byte_size > 1024 * 1024 then -- 1 Megabyte max
+            return {}
+          end
+          return { buf }
+        end,
+      },
+    }
+
+    local default_cmp_sources = cmp.config.sources({
+      { name = "nvim_lsp" },
+      { name = "path" },
+      { name = "luasnip" },
+      { name = "conventionalcommits" },
+      { name = "npm", keyword_length = 4 },
+    })
+
+    vim.api.nvim_create_augroup("buffercmp", { clear = true })
+
+    vim.api.nvim_create_autocmd("BufEnter", {
+      callback = function()
+        if vim.bo.filetype == "typescriptreact" or vim.bo.filetype == "typescript" then
+          local sources = default_cmp_sources
+          for i = #sources, 1, -1 do
+            if sources[i].name == "buffer" then
+              table.remove(sources, i)
+            end
+          end
+
+          cmp.setup.buffer({
+            sources = sources,
+          })
+        else
+          local sources = default_cmp_sources
+          sources[#sources + 1] = buffer_cmp
+          cmp.setup.buffer({
+            sources = sources,
+          })
+        end
+      end,
+      group = "buffercmp",
+    })
 
     return {
       formatting = {
@@ -101,14 +148,7 @@ return {
           fallback()
         end,
       }),
-      sources = cmp.config.sources({
-        { name = "nvim_lsp" },
-        { name = "path" },
-        { name = "luasnip" },
-        { name = "buffer" },
-        { name = "conventionalcommits" },
-        { name = "npm", keyword_length = 4 },
-      }),
+      sources = default_cmp_sources,
       -- experimental = {
       --   ghost_text = {
       --     hl_group = "CmpGhostText",
