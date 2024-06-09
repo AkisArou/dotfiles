@@ -1,10 +1,10 @@
 export BUN_INSTALL="$HOME/.bun"
 
 export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="$HOME/.local/bin":$PATH
-export PATH="/usr/bin":$PATH
-export PATH="/usr/bin/go/bin":$PATH
-export PATH="$HOME/.local/share/neovim/bin":$PATH
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="/usr/bin:$PATH"
+export PATH="/usr/bin/go/bin:$PATH"
+export PATH="$HOME/.local/share/neovim/bin:$PATH"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
