@@ -175,7 +175,7 @@ return {
           experimental = {
             configFile = {
               ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = "packages/assistant-prm-airport/**",
-              ["packages/shared/react/fluentui/tailwind.config.ts"] = "packages/shared/react/fluentui/**",
+              ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
               ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
             },
             classRegex = {
