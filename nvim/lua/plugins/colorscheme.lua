@@ -148,7 +148,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes.doomone
+local selectedTheme = themes.vscode
 
 if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true
