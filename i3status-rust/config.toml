@@ -19,17 +19,19 @@ aur_command = "yay -Qua"
 
 [[block]]
 block = "cpu"
+format = " CPU $utilization "
 info_cpu = 20
 warning_cpu = 50
 critical_cpu = 90
 
 [[block]]
 block = "memory"
-format = " $icon $mem_total_used_percents.eng(w:2) "
+format = " MEM $mem_total_used_percents.eng(w:2) "
 format_alt = " $icon_swap $swap_used_percents.eng(w:2) "
 
 [[block]]
 block = "sound"
+format = " VOL {$volume.eng(w:2) |}"
 [[block.click]]
 button = "left"
 cmd = "pavucontrol"
