@@ -17,6 +17,7 @@ packagesYay=(
 	"xclip"
 	"xdg-desktop-portal-gtk"
 	"xf86-video-intel"
+	"polybar"
 )
 
 # ------------------------------------------------------
