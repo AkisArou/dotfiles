@@ -13,7 +13,7 @@ interval = 600
 error_interval = 300
 format = " $icon $total updates available "
 format_singular = " $icon $total update available "
-format_up_to_date = " $icon system OK"
+format_up_to_date = " $icon system OK "
 # aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
 aur_command = "yay -Qua"
 
