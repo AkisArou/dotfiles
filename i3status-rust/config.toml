@@ -2,9 +2,17 @@ icons_format = "{icon}"
 
 [theme]
 theme = "native"
+[theme.overrides]
+idle_bg = "#1e1e2e"
+idle_fg = "#cdd6f4"
+good_bg = "#1e1e2e"
+good_fg= "#1e1e2e"
+warning_bg= "#1e1e2e"
+critical_bg= "#1e1e2e"
+info_bg= "#1e1e2e"
 
 [icons]
-icons = "awesome4"
+icons = "awesome6"
 
 [[block]]
 block = "packages"
