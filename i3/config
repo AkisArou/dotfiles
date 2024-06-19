@@ -14,6 +14,7 @@ exec --no-startup-id ~/dotfiles/xorg/xrandr.zsh
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
+exec_always --no-startup-id polybar default
 
 
 set $mod Mod4
@@ -185,14 +186,14 @@ bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
-bar {
-    status_command i3status-rs
-    position       top
-    font pango:Hack Nerd Font 9
-    colors {
-      background #000000
-    }
-}
+# bar {
+#     status_command i3status-rs
+#     position       top
+#     font pango:Hack Nerd Font 9
+#     colors {
+#       background #000000
+#     }
+# }
 
 for_window [class="^.*"] border pixel 3
 
