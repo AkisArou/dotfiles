@@ -16,6 +16,9 @@ format_singular = " $icon $total update available "
 format_up_to_date = " $icon system OK "
 # aur_command should output available updates to stdout (ie behave as echo -ne "update\n")
 aur_command = "yay -Qua"
+[[block.click]]
+button = "left"
+cmd = "alacritty -e zsh -c 'yay'"
 
 [[block]]
 block = "cpu"
