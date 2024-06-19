@@ -34,11 +34,5 @@ export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git'"
 
 export NODE_OPTIONS="--max-old-space-size=8192"
 
-# export GH_TOKEN=$(gh auth token)
-
-# export XDG_CURRENT_DESKTOP="Wayland"
-# export XDG_SESSION_DESKTOP="hyprland"
-# export XDG_SESSION_TYPE="wayland"
-# export MOZ_ENABLE_WAYLAND=1
-# export MOZ_WAYLAND_USE_VAAPI=1
-# export MOZ_DBUS_REMOTE=1
+export DESKTOP_IP="192.168.1.2"
+export LAPTOP_IP="192.168.1.3"
