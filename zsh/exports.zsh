@@ -34,5 +34,5 @@ export FZF_DEFAULT_COMMAND="rg --files --hidden --follow --glob '!.git'"
 
 export NODE_OPTIONS="--max-old-space-size=8192"
 
-export DESKTOP_IP="192.168.1.2"
-export LAPTOP_IP="192.168.1.3"
+export @DESKTOP="192.168.1.2"
+export @LAPTOP="192.168.1.3"
