@@ -132,6 +132,7 @@ packagesYay=(
 	"fwupd"
 	"ueberzugpp"
 	"imagemagick"
+	"ttf-meslo-nerd"
 )
 
 # ------------------------------------------------------

@@ -2,7 +2,7 @@
 size = 10
 
 [font.normal]
-family = "Hack Nerd Font"
+family = "MesloLGS Nerd Font"
 # family = "Input Mono Condensed"
 style = "Regular"
 
