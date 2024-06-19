@@ -1,9 +1,3 @@
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
 nnoremap <SPACE> <Nop>
 let mapleader=" "
 
@@ -79,27 +73,11 @@ set whichwrap+=<,>,[,],h,l
 set iskeyword+=-
 set formatoptions-=cro
 set linebreak
-set guicursor+=a:blinkon500
-
 set encoding=utf-8
-" Some servers have issues with backup files, see #649
 set nobackup
 set nowritebackup
-
-" Having longer updatetime (default is 4000 ms = 4s) leads to noticeable
-" delays and poor user experience
 set updatetime=300
-
-" Always show the signcolumn, otherwise it would shift the text each time
-" diagnostics appear/become resolved
 set signcolumn=yes
-
-" call plug#begin()
-" 
-" Plug 'morhetz/gruvbox'
-" 
-" call plug#end()
-
 set background=dark
-" colorscheme gruvbox
 
+colorscheme habamax

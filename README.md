@@ -1,21 +1,20 @@
 # dotfiles
 
-This is the configuration of my Arch linux based installation with Sway or Gnome
+This is the configuration of my Arch linux
 
 ## Common Packages
-
+- WM: i3
+- Bar: polybar | i3status-rust
 - Terminal: alacritty
-- Editor: nvim with lazyvim
-- Icons: Font Awesome
-- Menus: Rofi
-- Browsers: brave, chromium
-- Filemanager: ranger, Thunar
+- Editor: nvim (configured for web dev) & vim
+- Menus: rofi
+- Browsers: brave, chromium, edge
+- Filemanager: ranger, pcmanfm
+- Notifications: dunst
+- Shell: zsh
 
-## Sway
-	- swaylock
-	- rofi
-	- rofi-power-menu
-	- swaybg
-	- wlsunset
-	- wl-clipboard
-
+Also:
+- docker data-root at $HOME/docker
+- gtk themes
+- git config
++ various scripts
