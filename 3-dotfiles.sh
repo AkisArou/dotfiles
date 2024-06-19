@@ -156,6 +156,12 @@ echo ""
 _installSymLink pipewire ~/.config/pipewire ~/dotfiles/pipewire ~/.config
 
 echo "-------------------------------------"
+echo "->  Polybar"
+echo "-------------------------------------"
+echo ""
+_installSymLink polybar ~/.config/polybar ~/dotfiles/polybar ~/.config
+
+echo "-------------------------------------"
 echo "->  Docker"
 echo "-------------------------------------"
 echo ""
