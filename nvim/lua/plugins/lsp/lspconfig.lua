@@ -211,10 +211,10 @@ return {
 
     local configs = require("lspconfig.configs")
 
-    if not configs.npm_workspaces_lsp then
-      configs.npm_workspaces_lsp = {
+    if not configs.npm_workspaces_language_server then
+      configs.npm_workspaces_language_server = {
         default_config = {
-          cmd = { "npx", "npm-workspaces-lsp", "--stdio" },
+          cmd = { "npx", "npm-workspaces-language-server", "--stdio" },
           filetypes = { "json" },
           root_dir = function(fname)
             return lspconfig.util.find_git_ancestor(fname)
@@ -225,7 +225,7 @@ return {
       }
     end
 
-    lspconfig["npm_workspaces_lsp"].setup({
+    lspconfig["npm_workspaces_language_server"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
     })

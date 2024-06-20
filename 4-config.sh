@@ -112,5 +112,5 @@ echo "-------------------------------------"
 echo "-> Installing global npm packages"
 echo "-------------------------------------"
 echo ""
-npm i -g npm-workspaces-lsp
+npm i -g npm-workspaces-language-server
 npm i -g css-variables-language-server

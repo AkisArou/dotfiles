@@ -6,19 +6,6 @@ return {
     "hrsh7th/cmp-buffer",
     "saadparwaiz1/cmp_luasnip",
     {
-      "David-Kunz/cmp-npm",
-      dependencies = { "nvim-lua/plenary.nvim" },
-      lazy = false,
-      ft = "json",
-      config = function()
-        require("cmp-npm").setup({
-          ignore = {},
-          -- only_semantic_versions = true,
-          only_latest_version = true,
-        })
-      end,
-    },
-    {
       "hrsh7th/cmp-path",
       config = function()
         require("cmp").setup({
@@ -81,7 +68,6 @@ return {
       { name = "path" },
       { name = "luasnip" },
       { name = "conventionalcommits" },
-      { name = "npm", keyword_length = 4 },
     })
 
     vim.api.nvim_create_augroup("buffercmp", { clear = true })
@@ -111,17 +97,6 @@ return {
     })
 
     return {
-      formatting = {
-        format = function(entry, vim_item)
-          vim_item.kind = (cmp_kinds[vim_item.kind] or "") .. vim_item.kind
-
-          if entry.source.name == "npm" then
-            vim_item.kind = "NPM"
-          end
-
-          return vim_item
-        end,
-      },
       completion = {
         completeopt = "menu,menuone,noinsert",
       },
