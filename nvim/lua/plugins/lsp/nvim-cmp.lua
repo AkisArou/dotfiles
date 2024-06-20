@@ -97,6 +97,13 @@ return {
     })
 
     return {
+      formatting = {
+        format = function(_, vim_item)
+          vim_item.kind = (cmp_kinds[vim_item.kind] or "") .. vim_item.kind
+
+          return vim_item
+        end,
+      },
       completion = {
         completeopt = "menu,menuone,noinsert",
       },
