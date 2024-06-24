@@ -1,6 +1,6 @@
 alias ta='tmux a'
 alias v='nvim --listen /tmp/nvim.pipe'
-alias r='ranger'
+alias r='yazi'
 alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
 alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
