@@ -9,7 +9,7 @@ This is the configuration of my Arch linux
 - Editor: nvim (configured for web dev) & vim
 - Menus: rofi
 - Browsers: brave, chromium, edge
-- Filemanager: ranger, pcmanfm
+- Filemanager: yazi, pcmanfm
 - Notifications: dunst
 - Shell: zsh
 

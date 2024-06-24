@@ -43,7 +43,6 @@ echo "-------------------------------------"
 echo ""
 
 _installSymLink alacritty ~/.config/alacritty ~/dotfiles/alacritty/ ~/.config
-_installSymLink ranger ~/.config/ranger ~/dotfiles/ranger/ ~/.config
 _installSymLink nvim ~/.config/nvim ~/dotfiles/nvim/ ~/.config
 _installSymLink .vimrc ~/.config/.vimrc ~/dotfiles/vim/.vimrc ~/.vimrc
 _installSymLink vim ~/.config/.vim ~/dotfiles/vim/ ~/.vim

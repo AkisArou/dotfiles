@@ -52,7 +52,7 @@ packagesYay=(
 	"bleachbit"
 	"wget"
 	"curl"
-	"ranger"
+	"yazi"
 	"htop"
 	"firewalld"
 	"openbsd-netcat"
