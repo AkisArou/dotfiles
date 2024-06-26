@@ -48,6 +48,7 @@ return {
       "stylua",
       "shellcheck",
       "clang-format",
+      "prettier",
     }
 
     local mr = require("mason-registry")
