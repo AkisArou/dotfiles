@@ -1,6 +1,5 @@
 return {
   "hrsh7th/nvim-cmp",
-  lazy = true,
   dependencies = {
     "onsails/lspkind-nvim",
     "hrsh7th/cmp-buffer",
@@ -103,9 +102,6 @@ return {
 
           return vim_item
         end,
-      },
-      completion = {
-        completeopt = "menu,menuone,noinsert",
       },
       snippet = {
         expand = function(args)
