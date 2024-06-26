@@ -27,6 +27,12 @@ return {
           highlight = "Directory",
           text_align = "left",
         },
+        {
+          filetype = "NvimTree",
+          text = "Nvim Tree",
+          separator = true,
+          text_align = "left",
+        },
       },
     },
   },
