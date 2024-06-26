@@ -3,11 +3,14 @@
 FONT_FAMILY="MesloLGS Nerd Font Mono"
 
 if [[ "$HOST" == "akisarou-desktop" ]]; then
-	export POLY_FONT="$FONT_FAMILY:size=10"
-	export POLY_BAR_HEIGHT="20pt"
+	POLY_FONT="$FONT_FAMILY":size=10
+	POLY_BAR_HEIGHT="20pt"
 else
-	export POLY_FONT="$FONT_FAMILY:size=20"
-	export POLY_BAR_HEIGHT="30pt"
+	POLY_FONT="$FONT_FAMILY":size=20
+	POLY_BAR_HEIGHT="30pt"
 fi
+
+export POLY_FONT
+export POLY_BAR_HEIGHT
 
 polybar default &
