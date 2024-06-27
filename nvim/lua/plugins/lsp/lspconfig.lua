@@ -96,6 +96,7 @@ return {
           },
           preferences = {
             includePackageJsonAutoImports = "on",
+            importModuleSpecifier = "non-relative",
           },
         },
       },
