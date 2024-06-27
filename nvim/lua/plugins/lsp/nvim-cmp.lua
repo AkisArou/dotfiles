@@ -96,6 +96,10 @@ return {
     })
 
     return {
+      preselect = cmp.PreselectMode.Item,
+      completion = {
+        completeopt = "menu,menuone,noinsert",
+      },
       formatting = {
         format = function(_, vim_item)
           vim_item.kind = (cmp_kinds[vim_item.kind] or "") .. vim_item.kind
