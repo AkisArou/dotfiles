@@ -5,9 +5,10 @@ require("config.keymaps")
 require("config.filetype")
 
 local cwd = vim.fn.getcwd()
-local project = cwd .. "/tsconfig.json"
 
 if cwd:match("nable%-solutions") then
+  local project = cwd .. "/tsconfig.json"
+
   require("tsc.init").setup({
     args = "--build " .. project .. " --watch",
   })
