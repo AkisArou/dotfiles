@@ -83,7 +83,7 @@ return {
     end
 
     -- Toggle Adaptive Width
-    local VIEW_WIDTH_FIXED = 30
+    local VIEW_WIDTH_FIXED = 50
     local view_width_max = VIEW_WIDTH_FIXED -- fixed to start
 
     local function toggle_width_adaptive()
