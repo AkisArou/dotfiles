@@ -4,6 +4,7 @@ return {
     local root_file = require("conform.util").root_file({ ".git" })
 
     require("conform").setup({
+      notify_on_error = false,
       formatters_by_ft = {
         lua = { "stylua" },
         javascript = { { "biome", "prettier" } },
