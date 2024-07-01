@@ -7,6 +7,10 @@ export PATH="/usr/bin/go/bin:$PATH"
 export PATH="$HOME/.local/share/neovim/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 
+export ANDROID_HOME="$HOME/Android/Sdk"
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -25,7 +29,6 @@ export LAUNCH_EDITOR="/home/$(echo $USER)/dotfiles/scripts/launch-editor.sh"
 export BROWSER="brave"
 export MANPAGER='nvim +Man!'
 export MANWIDTH=999
-export ANDROID_HOME="$HOME/Android/Sdk"
 export GTK_THEME="Colorful-Dark-GTK"
 export GTK_PATH="$HOME/dotfiles/gtk"
 export QT_SCALE_FACTOR=2
