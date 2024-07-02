@@ -64,8 +64,15 @@ return {
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>cl", ":LspRestart<CR>", opts)
 
+      local remove_unused_imports = function()
+        vim.cmd("VtsExec remove_unused_imports")
+        vim.lsp.buf.format({
+          async = true,
+        })
+      end
+
       opts.desc = "Remove unused imports"
-      keymap.set("n", "<leader>cqi", ":VtsExec remove_unused_imports<CR>", opts)
+      keymap.set("n", "<leader>cqi", remove_unused_imports, opts)
     end
 
     local capabilities = cmp_nvim_lsp.default_capabilities()
