@@ -63,6 +63,9 @@ return {
 
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>cl", ":LspRestart<CR>", opts)
+
+      opts.desc = "Remove unused imports"
+      keymap.set("n", "<leader>cqi", ":VtsExec remove_unused_imports<CR>", opts)
     end
 
     local capabilities = cmp_nvim_lsp.default_capabilities()

@@ -9,6 +9,7 @@ return {
   },
   {
     "3rd/image.nvim",
+    enabled = false,
     dependencies = { "luarocks.nvim" },
     config = function()
       require("image").setup({
