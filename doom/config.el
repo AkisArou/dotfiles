@@ -83,3 +83,6 @@
 
 (use-package! lsp-tailwindcss)
 (add-hook 'before-save-hook 'lsp-tailwindcss-rustywind-before-save)
+
+(define-key evil-insert-state-map (kbd "C-c") 'evil-normal-state)
+(define-key evil-normal-state-map (kbd "C-c") 'evil-normal-state)
