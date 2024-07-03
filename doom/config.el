@@ -96,7 +96,7 @@
       :n "SPC b a" #'doom/kill-all-buffers
       :n "SPC b o" #'doom/kill-other-buffers
 
-      :n "SPC e" #'neotree-toggle
+      :n "SPC e" #'+treemacs/toggle
 
       :n "g r" #'+lookup/references
       :n "K"   #'+lookup/documentation
@@ -107,16 +107,9 @@
 
 (setq confirm-kill-emacs nil)
 
-;; (after! neotree
-;;   (setq neo-smart-open t)
-;;   (evil-define-key 'normal neotree-mode-map (kbd "W") #'neotree-collapse-all)
-;;   (evil-define-key 'normal neotree-mode-map (kbd "H") #'neotree-hidden-file-toggle)
-;;   (evil-define-key 'normal neotree-mode-map (kbd "a") #'neotree-create-node)
-;;   (evil-define-key 'normal neotree-mode-map (kbd "d") #'neotree-delete-node)
-;;   (evil-define-key 'normal neotree-mode-map (kbd "l") #'neotree-enter)
-;;   (evil-define-key 'normal neotree-mode-map (kbd "h") #'+neotree/collapse-or-up))
-
-;; (when (display-graphic-p)
-;;   (require 'all-the-icons))
-
-;; (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+(after! treemacs
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "C-l") #'evil-window-right)
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "SPC e") #'+treemacs/toggle)
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "W") #'treemacs-collapse-project)
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "H") #'treemacs-toggle-show-dotfiles)
+  )
