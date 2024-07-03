@@ -13,6 +13,7 @@ plug "zsh-users/zsh-syntax-highlighting"
 # keybinds
 bindkey '^ ' autosuggest-accept
 
+# completions
 source "$HOME/dotfiles/zsh/npm-completion.sh"
 source "$HOME/dotfiles/zsh/docker-completion.sh"
 source "$HOME/dotfiles/zsh/asdf.sh"
