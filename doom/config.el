@@ -86,3 +86,10 @@
 
 (define-key evil-insert-state-map (kbd "C-c") 'evil-normal-state)
 (define-key evil-normal-state-map (kbd "C-c") 'evil-normal-state)
+
+(after! treemacs
+  (define-key treemacs-mode-map (kbd "C-h") nil)
+  (define-key treemacs-mode-map (kbd "C-l") nil))
+
+(map! :n "C-h" #'evil-window-left
+      :n "C-l" #'evil-window-right)
