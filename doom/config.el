@@ -90,29 +90,33 @@
 
 (map! :nv "C-h" #'evil-window-left
       :nv "C-l" #'evil-window-right
-      :n "C-j" #'evil-window-down
-      :n "C-k" #'evil-window-up
+      :n  "C-j" #'evil-window-down
+      :n  "C-k" #'evil-window-up
 
       :n "SPC b a" #'doom/kill-all-buffers
       :n "SPC b o" #'doom/kill-other-buffers
 
       :n "SPC e" #'neotree-toggle
-      )
 
-(map! :nv "H" #'centaur-tabs-backward)
-(map! :nv "L" #'centaur-tabs-forward)
+      :n "g r" #'+lookup/references
+      :n "K"   #'+lookup/documentation
+
+      :nv "H" #'centaur-tabs-backward
+      :nv "L" #'centaur-tabs-forward
+      )
 
 (setq confirm-kill-emacs nil)
 
-(after! neotree
-  (evil-define-key 'normal neotree-mode-map (kbd "W") #'neotree-collapse-all)
-  (evil-define-key 'normal neotree-mode-map (kbd "H") #'neotree-hidden-file-toggle)
-  (evil-define-key 'normal neotree-mode-map (kbd "a") #'neotree-create-node)
-  (evil-define-key 'normal neotree-mode-map (kbd "d") #'neotree-delete-node)
-  (evil-define-key 'normal neotree-mode-map (kbd "l") #'neotree-enter)
-  (evil-define-key 'normal neotree-mode-map (kbd "h") #'+neotree/collapse-or-up))
+;; (after! neotree
+;;   (setq neo-smart-open t)
+;;   (evil-define-key 'normal neotree-mode-map (kbd "W") #'neotree-collapse-all)
+;;   (evil-define-key 'normal neotree-mode-map (kbd "H") #'neotree-hidden-file-toggle)
+;;   (evil-define-key 'normal neotree-mode-map (kbd "a") #'neotree-create-node)
+;;   (evil-define-key 'normal neotree-mode-map (kbd "d") #'neotree-delete-node)
+;;   (evil-define-key 'normal neotree-mode-map (kbd "l") #'neotree-enter)
+;;   (evil-define-key 'normal neotree-mode-map (kbd "h") #'+neotree/collapse-or-up))
 
-(when (display-graphic-p)
-  (require 'all-the-icons))
+;; (when (display-graphic-p)
+;;   (require 'all-the-icons))
 
-(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+;; (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
