@@ -121,22 +121,6 @@
 
 (with-eval-after-load 'company
   (define-key company-active-map (kbd "TAB") 'company-complete-selection)
-  (define-key company-active-map (kbd "<tab>") 'company-complete-selection))
-
-
-;; (after! company-fuzzy
-;;   (global-company-fuzzy-mode 1)
-;;   (setq company-fuzzy-sorting-backend 'alphabetic
-;;         company-fuzzy-reset-selection t
-;;         company-fuzzy-prefix-on-top nil
-;;         company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@")))
-
-;; (after! company
-;;   (global-company-fuzzy-mode 1)
-;;   (use-package company-fuzzy
-;;     :config
-;;     (setq company-fuzzy-sorting-backend 'alphabetic
-;;           company-fuzzy-reset-selection t
-;;           company-fuzzy-prefix-on-top nil
-;;           company-fuzzy-trigger-symbols '("." "->" "<" "\"" "'" "@"))
-;;     :hook (company-mode . company-fuzzy-mode)))
+  (define-key company-active-map (kbd "<tab>") 'company-complete-selection)
+  (global-company-fuzzy-mode t)
+  )

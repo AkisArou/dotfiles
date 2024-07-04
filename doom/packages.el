@@ -59,4 +59,4 @@
 
 (package! super-save)
 
-;; (package! company-fuzzy)
+(package! company-fuzzy)
