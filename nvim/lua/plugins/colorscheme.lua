@@ -148,7 +148,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes.vscode
+local selectedTheme = themes.dracula
 
 if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true
