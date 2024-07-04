@@ -78,8 +78,7 @@
 (use-package! lsp-biome
   :init
   (setq lsp-biome-organize-imports-on-save t)
-  (setq lsp-biome-organize-imports-on-save t)
-  )
+  (setq lsp-biome-organize-imports-on-save t))
 
 (use-package! lsp-tailwindcss)
 (add-hook 'before-save-hook 'lsp-tailwindcss-rustywind-before-save)
@@ -111,5 +110,15 @@
   (evil-define-key 'treemacs treemacs-mode-map (kbd "C-l") #'evil-window-right)
   (evil-define-key 'treemacs treemacs-mode-map (kbd "SPC e") #'+treemacs/toggle)
   (evil-define-key 'treemacs treemacs-mode-map (kbd "W") #'treemacs-collapse-project)
-  (evil-define-key 'treemacs treemacs-mode-map (kbd "H") #'treemacs-toggle-show-dotfiles)
-  )
+  (evil-define-key 'treemacs treemacs-mode-map (kbd "H") #'treemacs-toggle-show-dotfiles))
+
+(super-save-mode +1)
+
+(setq auto-save-default nil)
+
+(after! super-save
+  (setq super-save-auto-save-when-idle t))
+
+(with-eval-after-load 'company
+  (define-key company-active-map (kbd "TAB") 'company-complete-selection)
+  (define-key company-active-map (kbd "<tab>") 'company-complete-selection))

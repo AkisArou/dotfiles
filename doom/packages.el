@@ -56,3 +56,5 @@
 (package! lsp-tailwindcss :recipe (:host github :repo "merrickluo/lsp-tailwindcss"))
 
 (package! all-the-icons)
+
+(package! super-save)
