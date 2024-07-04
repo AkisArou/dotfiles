@@ -1,4 +1,3 @@
-;; (setq doom-theme 'doom-one)
 (setq doom-theme 'doom-dracula)
 
 (setq display-line-numbers-type t)
@@ -67,28 +66,30 @@
   (evil-define-key 'treemacs treemacs-mode-map (kbd "W") #'treemacs-collapse-project)
   (evil-define-key 'treemacs treemacs-mode-map (kbd "H") #'treemacs-toggle-show-dotfiles))
 
+;;
+;; orderless
+;;
+
+(with-eval-after-load 'orderless
+  (setq completion-styles '(orderless flex))
+  )
 
 ;;
 ;; corfu
 ;;
 
-;; TAB-only configuration
-(use-package! corfu
-  :custom
-  (corfu-auto t)               ;; Enable auto completion
-  (corfu-preselect 'directory) ;; Select the first candidate, except for directories
+(with-eval-after-load 'corfu
+  (unless (display-graphic-p)
+    (corfu-terminal-mode +1))
 
-  ;; Free the RET key for less intrusive behavior.
-  :bind
-  (:map corfu-map
-        ;; Option 1: Unbind RET completely
-        ("RET" . nil)
-        ;; Option 2: Use RET only in shell modes
-        ;; ("RET" . (menu-item "" nil :filter corfu-insert-shell-filter))
+  (setq corfu-auto t)               ;; Enable auto completion
+  (setq corfu-preselect 'directory) ;; Select the first candidate, except for directories
+
+  (map! :map corfu-map
+        :i "TAB" #'corfu-insert
+        :i "tab" #'corfu-insert
+        :i "backspace" nil
         )
+  )
 
-  :init
-  (global-corfu-mode))
-
-(unless (display-graphic-p)
-  (corfu-terminal-mode +1))
+(global-corfu-mode 1)
