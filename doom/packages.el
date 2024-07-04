@@ -58,3 +58,5 @@
 (package! all-the-icons)
 
 (package! super-save)
+
+;; (package! company-fuzzy)
