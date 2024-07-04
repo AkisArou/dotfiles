@@ -88,7 +88,6 @@
   (map! :map corfu-map
         :i "TAB" #'corfu-insert
         :i "tab" #'corfu-insert
-        :i "backspace" nil
         )
   )
 
