@@ -1,5 +1,18 @@
 #!/bin/zsh
 
+
+echo ""
+echo "-------------------------------------"
+echo "-> Enabling systemctl daemons"
+echo "-------------------------------------"
+echo ""
+sudo systemctl enable bluetooth
+sudo systemctl enable sshd
+sudo systemctl enable avahi-daemon
+sudo systemctl enable firewalld
+sudo systemctl enable acpid
+
+
 echo ""
 echo "-------------------------------------"
 echo "-> Setting up gnome settings"
@@ -113,4 +126,3 @@ echo "-> Installing global npm packages"
 echo "-------------------------------------"
 echo ""
 npm i -g npm-workspaces-language-server
-npm i -g css-variables-language-server

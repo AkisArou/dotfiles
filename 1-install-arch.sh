@@ -133,6 +133,7 @@ packagesYay=(
 	"ueberzugpp"
 	"imagemagick"
 	"ttf-meslo-nerd"
+  "preload"
 )
 
 # ------------------------------------------------------
@@ -148,6 +149,18 @@ echo ""
 echo "-> Install login screen"
 sudo cp ~/dotfiles/login/issue /etc/issue
 echo "Login prompt installed."
+
+# ------------------------------------------------------
+# Add user to wheel
+# ------------------------------------------------------
+clear
+echo "Uncomment %wheel group in sudoers (around line 85):"
+echo "Before: #%wheel ALL=(ALL:ALL) ALL"
+echo "After:  %wheel ALL=(ALL:ALL) ALL"
+echo ""
+read -p "Open sudoers now?" c
+EDITOR=vim sudo -E visudo
+usermod -aG wheel $username
 
 # ------------------------------------------------------
 # DONE
