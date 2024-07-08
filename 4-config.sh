@@ -115,10 +115,10 @@ echo "-------------------------------------"
 echo "-> NodeJS"
 echo "-------------------------------------"
 echo ""
-corepack install -g pnpm
-corepack install -g yarn
 corepack enable pnpm
 corepack enable yarn
+asdf reshim nodejs
+corepack use pnpm@latest
 
 echo ""
 echo "-------------------------------------"
