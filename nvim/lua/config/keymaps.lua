@@ -20,12 +20,10 @@ keymap("n", "<C-d>", "<C-d>zz")
 keymap("n", "<C-u>", "<C-u>zz")
 
 -- Buffer close all
-function CloseAllBuffers()
+keymap("n", "<leader>ba", function()
   vim.cmd("BufferLineCloseOthers")
   require("mini.bufremove").delete()
-end
-
-keymap("n", "<leader>ba", "<cmd>lua CloseAllBuffers()<CR>", { desc = "Delete all" })
+end, { desc = "Delete all" })
 
 -- Better paste
 keymap("v", "p", "P", opts)
@@ -41,5 +39,5 @@ keymap("v", ">", ">gv", opts)
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
 -- Key mappings for moving tabs left and right
-vim.api.nvim_set_keymap("n", "<S-A-h>", "<cmd>BufferLineMovePrev<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<S-A-l>", "<cmd>BufferLineMoveNext<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<S-A-h>", "<cmd>BufferLineMovePrev<CR>", opts)
+vim.api.nvim_set_keymap("n", "<S-A-l>", "<cmd>BufferLineMoveNext<CR>", opts)
