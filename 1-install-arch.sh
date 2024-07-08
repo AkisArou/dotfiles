@@ -85,7 +85,6 @@ packagesYay=(
 	"ttf-font-awesome"
 	"noto-fonts-emoji"
 	"terminus-font"
-	#	"ttf-nerd-fonts-input"
 	"figlet"
 	"vlc"
 	"exa"
@@ -99,7 +98,6 @@ packagesYay=(
 	"bat"
 	"zsh"
 	"brightnessctl"
-
 	"zip"
 	"unzip"
 	"brave-bin"
@@ -134,6 +132,7 @@ packagesYay=(
 	"imagemagick"
 	"ttf-meslo-nerd"
   "preload"
+  "pnpm-shell-completion"
 )
 
 # ------------------------------------------------------

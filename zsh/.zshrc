@@ -17,6 +17,7 @@ bindkey '^ ' autosuggest-accept
 source "$HOME/dotfiles/zsh/npm-completion.sh"
 source "$HOME/dotfiles/zsh/docker-completion.sh"
 source "$HOME/dotfiles/zsh/asdf.sh"
+source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
