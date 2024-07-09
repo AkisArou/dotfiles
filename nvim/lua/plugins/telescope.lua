@@ -30,7 +30,7 @@ return {
     vim.keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<CR>", { desc = "Fuzzy find recent files" })
     vim.keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<CR>", { desc = "Find string in cwd" })
     vim.keymap.set("n", "<leader>fg", "<cmd>Telescope grep_string<CR>", { desc = "Find string under cursor in cwd" })
-    vim.keymap.set("n", "<leader>fc", "<cmd>Telescope git_commits<CR>", { desc = "Find string under cursor in cwd" })
+    vim.keymap.set("n", "<leader>fc", "<cmd>Telescope git_commits<CR>", { desc = "Git commits" })
     vim.keymap.set("n", "<leader>fd", "<cmd>Telescope diagnostics bufnr=0<CR>", { desc = "Document diagnostics" })
     vim.keymap.set("n", "<leader>fq", "<cmd>Telescope quickfix<CR>", { desc = "Quickfix" })
     vim.keymap.set("n", "<leader>sD", "<cmd>Telescope diagnostics<CR>", { desc = "Workspace diagnostics" })
