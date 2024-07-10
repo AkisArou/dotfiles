@@ -45,3 +45,7 @@ export MOZ_USE_XINPUT2=1
 if [[ "$HOST" == "archlinux-xps" ]]; then
   export VDPAU_DRIVER=va_gl
 fi
+
+if [ -f ~/.env ]; then
+    export $(cat ~/.env | xargs)
+fi

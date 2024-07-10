@@ -131,6 +131,7 @@ packagesYay=(
 	"ttf-meslo-nerd"
   "preload"
   "pnpm-shell-completion"
+  "wol"
 )
 
 # ------------------------------------------------------

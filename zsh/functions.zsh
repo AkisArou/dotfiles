@@ -14,3 +14,11 @@ kill_process_by_port() {
         echo "Usage: kill_process_by_port <port>"
     fi
 }
+
+wake_desktop() {
+ wol $DESKTOP_MAC
+}
+
+sus_desktop() {
+  ssh $DESKTOP 'sudo -S systemctl suspend'
+}
