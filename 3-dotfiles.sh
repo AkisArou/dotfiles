@@ -172,6 +172,18 @@ echo "-------------------------------------"
 echo ""
 _installSymLink doom ~/.config/doom ~/dotfiles/doom ~/.config
 
+echo "-------------------------------------"
+echo "->  Firefox"
+echo "-------------------------------------"
+echo ""
+PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
+
+if [ -z "$PROFILE_DIR" ]; then
+    echo "Firefox profile directory not found."
+    exit 1
+fi
+
+_installSymLink firefox "$PROFILE_DIR"/prefs.js ~/dotfiles/firefox/prefs.js $PROFILE_DIR
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
