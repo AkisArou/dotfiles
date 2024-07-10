@@ -39,3 +39,11 @@ export NODE_OPTIONS="--max-old-space-size=8192"
 
 export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
+
+export MOZ_USE_XINPUT2=1
+
+
+
+if [[ "$HOST" == "archlinux-xps" ]]; then
+  export VDPAU_DRIVER=va_gl
+fi
