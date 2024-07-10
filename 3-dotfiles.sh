@@ -182,7 +182,7 @@ if [ -z "$PROFILE_DIR" ]; then
 fi
 
 _installSymLink firefox "$PROFILE_DIR"/user.js ~/dotfiles/firefox/user.js $PROFILE_DIR
-_installSymLink firefox /usr/lib/firefox/distribution/policies.json ~/dotfiles/firefox/policies.json /usr/lib/firefox/distribution
+sudo ln -s ~/dotfiles/firefox/policies.json  /usr/lib/firefox/distribution/policies.json
 
 # ------------------------------------------------------
 # DONE
