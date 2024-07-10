@@ -24,8 +24,7 @@ set $down j
 set $up k
 set $right l
 set $term ~/dotfiles/alacritty/alacritty.zsh
-# set $browser /usr/bin/brave --remote-debugging-port=9229
-set $browser /usr/bin/firefox
+set $browser /usr/bin/brave --remote-debugging-port=9229
 set $menu "rofi -show drun -dpi 177"
 # set $menu "--no-startup-id dmenu_run"
 
