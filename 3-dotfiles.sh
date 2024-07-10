@@ -183,7 +183,7 @@ if [ -z "$PROFILE_DIR" ]; then
     exit 1
 fi
 
-_installSymLink firefox "$PROFILE_DIR"/prefs.js ~/dotfiles/firefox/prefs.js $PROFILE_DIR
+_installSymLink firefox "$PROFILE_DIR"/user.js ~/dotfiles/firefox/user.js $PROFILE_DIR
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
