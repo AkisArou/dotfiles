@@ -11,6 +11,7 @@ packagesYay=(
 	"i3blocks"
 	"i3lock"
 	"i3status-rust"
+  "xidlehook"
 	"rofi"
 	"rofi-power-menu"
 	"nitrogen"

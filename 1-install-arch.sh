@@ -57,7 +57,6 @@ packagesYay=(
 	"openbsd-netcat"
 	"acpi"
 	"acpi_call"
-	"acpid"
 	"rsync"
 	"pipewire"
 	"pipewire-alsa"

@@ -27,9 +27,8 @@ if [ -f "$usermodmap" ]; then
 	xmodmap "$usermodmap"
 fi
 
-xclock -geometry 50x50-1+1 &
-
 # invoke global X session script
 #. /etc/X11/Xsession
 [[ -f ~/.Xresources ]] && xrdb -merge -I$HOME ~/.Xresources
 exec i3
+
