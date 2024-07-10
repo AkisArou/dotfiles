@@ -7,3 +7,4 @@ user_pref("gfx.x11-egl.force-enabled", true);
 user_pref("gfx.webrender.all", true);
 user_pref("media.rdd-ffvpx.enabled", true);
 user_pref("media.rdd-vpx.enabled", true);
+user_pref("full-screen-api.warning.timeout", 0);
