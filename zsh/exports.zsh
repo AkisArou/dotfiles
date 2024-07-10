@@ -42,8 +42,6 @@ export LAPTOP="192.168.1.3"
 
 export MOZ_USE_XINPUT2=1
 
-
-
 if [[ "$HOST" == "archlinux-xps" ]]; then
   export VDPAU_DRIVER=va_gl
 fi
