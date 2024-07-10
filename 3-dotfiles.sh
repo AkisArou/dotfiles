@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# ------------------------------------------------------
-# Load Library
-# ------------------------------------------------------
 source "$(dirname "$0")/scripts/library.sh"
+
 clear
 echo "     _       _    __ _ _            "
 echo "  __| | ___ | |_ / _(_) | ___  ___  "
@@ -184,6 +182,8 @@ if [ -z "$PROFILE_DIR" ]; then
 fi
 
 _installSymLink firefox "$PROFILE_DIR"/user.js ~/dotfiles/firefox/user.js $PROFILE_DIR
+_installSymLink firefox /usr/lib/firefox/distribution/policies.json ~/dotfiles/firefox/policies.json /usr/lib/firefox/distribution
+
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
