@@ -10,7 +10,6 @@ sudo systemctl enable bluetooth
 sudo systemctl enable sshd
 sudo systemctl enable avahi-daemon
 sudo systemctl enable firewalld
-sudo systemctl enable acpid
 
 
 echo ""
