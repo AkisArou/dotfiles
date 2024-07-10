@@ -3,3 +3,7 @@ user_pref("browser.download.always_ask_before_handling_new_types", true);
 user_pref("media.ffmpeg.vaapi.enabled", true);
 user_pref("media.hardware-video-decoding.force-enabled", true);
 user_pref("browser.fullscreen.autohide", false);
+user_pref("gfx.x11-egl.force-enabled", true);
+user_pref("gfx.webrender.all", true);
+user_pref("media.rdd-ffvpx.enabled", true);
+user_pref("media.rdd-vpx.enabled", true);
