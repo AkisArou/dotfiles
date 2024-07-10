@@ -11,7 +11,7 @@ fi
 xidlehook \
   --not-when-fullscreen \
   --not-when-audio \
-  --timer 60 \
+  --timer 120 \
     'xrandr --output "$PRIMARY_DISPLAY" --brightness .1' \
     'xrandr --output "$PRIMARY_DISPLAY" --brightness 1' \
   --timer $SUSPEND_TIME \
