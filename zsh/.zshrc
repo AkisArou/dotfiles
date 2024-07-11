@@ -28,3 +28,10 @@ source "$HOME/dotfiles/zsh/exports.zsh"
 source "$HOME/dotfiles/zsh/functions.zsh"
 source "$HOME/dotfiles/zsh/history.zsh"
 source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"
+
+
+_fzf_complete_pnpm() {
+  _fzf_complete --multi --reverse --prompt="pnpm run> " -- "$@" < <(
+    cat package.json | jq -r '.scripts | keys[]'
+  )
+}
