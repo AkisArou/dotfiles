@@ -132,6 +132,7 @@ packagesYay=(
   "preload"
   "pnpm-shell-completion"
   "wol"
+  "ghostscript"
 )
 
 # ------------------------------------------------------
