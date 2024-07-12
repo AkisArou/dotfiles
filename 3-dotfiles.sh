@@ -61,15 +61,10 @@ _installSymLink libinput-gestures ~/.config/libinput-gestures.conf ~/dotfiles/li
 
 echo ""
 echo "-------------------------------------"
-echo "-> Install GTK dotfiles"
+echo "-> Install GTK themes"
 echo "-------------------------------------"
 echo ""
-_installSymLink gtk ~/.config/gtk ~/dotfiles/gtk/Colorful-Dark-GTK/gtk ~/.config/gtk
-_installSymLink gtk-2.0 ~/.config/gtk-2.0 ~/dotfiles/gtk/Colorful-Dark-GTK/gtk-2.0 ~/.config/gtk-2.0
-_installSymLink gtk-3.0 ~/.config/gtk-3.0 ~/dotfiles/gtk/Colorful-Dark-GTK/gtk-3.0 ~/.config/gtk-3.0
-_installSymLink gtk-4.0 ~/.config/gtk-4.0 ~/dotfiles/gtk/Colorful-Dark-GTK/gtk-4.0 ~/.config/gtk-4.0
-# For sway
-_installSymLink .Xdefaults ~/.Xresources ~/dotfiles/gtk/.Xresources ~/.Xdefaults
+~/dotfiles/gtk/install-dracula.sh
 
 echo "-------------------------------------"
 echo "-> Install i3 dotfiles"
