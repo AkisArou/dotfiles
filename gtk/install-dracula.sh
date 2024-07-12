@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+### THEME
+
 THEME_URL="https://github.com/dracula/gtk/archive/master.zip"
 CONFIG_DIR="$HOME/.config"
 TEMP_ZIP="/tmp/Dracula.zip"
