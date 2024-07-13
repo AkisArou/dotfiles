@@ -98,7 +98,7 @@ packagesYay=(
 	"brightnessctl"
 	"zip"
 	"unzip"
-	"brave-bin"
+	"brave"
 	"fastfetch"
 	"trizen"
 	"base-devel"
