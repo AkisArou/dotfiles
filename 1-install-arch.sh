@@ -133,6 +133,7 @@ packagesYay=(
   "pnpm-shell-completion"
   "wol"
   "ghostscript"
+  "libreoffice-still"
 )
 
 # ------------------------------------------------------
