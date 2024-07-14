@@ -72,24 +72,6 @@ _installSymLink i3 ~/.config/i3 ~/dotfiles/i3/ ~/.config/i3
 _installSymLink i3status-rust ~/.config/i3status-rust ~/dotfiles/i3status-rust ~/.config/i3status-rust
 
 echo "-------------------------------------"
-echo "-> Install Sway dotfiles"
-echo "-------------------------------------"
-echo ""
-_installSymLink sway ~/.config/sway ~/dotfiles/sway/ ~/.config
-
-echo "-------------------------------------"
-echo "-> Install Swaylock dotfiles"
-echo "-------------------------------------"
-echo ""
-_installSymLink swaylock ~/.config/swaylock ~/dotfiles/swaylock/ ~/.config
-
-echo "-------------------------------------"
-echo "-> Install Waybar dotfiles"
-echo "-------------------------------------"
-echo ""
-_installSymLink waybar ~/.config/waybar ~/dotfiles/waybar/ ~/.config
-
-echo "-------------------------------------"
 echo "-> Install Nvim config"
 echo "-------------------------------------"
 echo ""
@@ -132,12 +114,12 @@ echo "-------------------------------------"
 echo ""
 _installSymLink .tool-versions ~/.tool-versions ~/dotfiles/.tool-versions ~/.tool-versions
 
-echo "-------------------------------------"
-echo "->  Brave/Chromium configs "
-echo "-------------------------------------"
-echo ""
-_installSymLink brave-flags ~/.config/brave-flags.conf ~/dotfiles/brave-flags.conf ~/.config
-_installSymLink chromium-flags ~/.config/chromium-flags.conf ~/dotfiles/chromium-flags.conf ~/.config
+# echo "-------------------------------------"
+# echo "->  Brave/Chromium configs "
+# echo "-------------------------------------"
+# echo ""
+# _installSymLink brave-flags ~/.config/brave-flags.conf ~/dotfiles/brave-flags.conf ~/.config
+# _installSymLink chromium-flags ~/.config/chromium-flags.conf ~/dotfiles/chromium-flags.conf ~/.config
 
 echo "-------------------------------------"
 echo "->  Pipewire"
