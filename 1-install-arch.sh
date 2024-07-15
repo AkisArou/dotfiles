@@ -134,6 +134,7 @@ packagesYay=(
   "wol"
   "ghostscript"
   "libreoffice-still"
+  "kitty"
 )
 
 # ------------------------------------------------------
