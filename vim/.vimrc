@@ -80,4 +80,4 @@ set updatetime=300
 set signcolumn=yes
 set background=dark
 
-colorscheme habamax
+colorscheme wildcharm
