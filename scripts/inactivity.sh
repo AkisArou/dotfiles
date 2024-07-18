@@ -2,7 +2,7 @@
 
 export PRIMARY_DISPLAY="$(xrandr | awk '/ primary/{print $1}')"
 
-if [[ "$HOST" == "archlinux-xps" ]]; then
+if [[ "$HOST" == "arch-xps" ]]; then
   export SUSPEND_TIME=1800
 else
   export SUSPEND_TIME=$((3600*3))
