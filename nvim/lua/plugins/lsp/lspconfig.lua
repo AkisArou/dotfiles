@@ -95,7 +95,7 @@ return {
         },
         typescript = {
           tsserver = {
-            maxTsServerMemory = 10000,
+            maxTsServerMemory = 16000,
           },
           preferences = {
             includePackageJsonAutoImports = "on",
