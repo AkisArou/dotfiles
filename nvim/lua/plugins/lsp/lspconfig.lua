@@ -84,7 +84,6 @@ return {
     require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
 
     lspconfig["vtsls"].setup({
-      single_file_support = false,
       capabilities = capabilities,
       on_attach = on_attach,
       root_dir = function(...)
