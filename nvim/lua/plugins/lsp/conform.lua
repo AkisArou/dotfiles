@@ -2,7 +2,7 @@ return {
   "stevearc/conform.nvim",
   config = function()
     local root_file = require("conform.util").root_file({ ".git" })
-    local conform = require("confrm")
+    local conform = require("conform")
 
     local format_react = function(bufnr)
       if conform.get_formatter_info("biome", bufnr).available then
