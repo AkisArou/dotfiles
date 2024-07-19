@@ -87,7 +87,7 @@ return {
       capabilities = capabilities,
       on_attach = on_attach,
       root_dir = function(...)
-        return require("lspconfig.util").root_pattern(".git")(...)
+        return require("lspconfig.util").root_pattern(".git", "package.json", "tsconfig.json")(...)
       end,
       settings = {
         vtsls = {
@@ -128,7 +128,12 @@ return {
       capabilities = capabilities,
       on_attach = on_attach,
       root_dir = function(...)
-        return require("lspconfig.util").root_pattern(".git")(...)
+        return require("lspconfig.util").root_pattern(
+          ".git",
+          "tailwind.config.js",
+          "tailwind.config.ts",
+          "tailwind.config.cjs"
+        )(...)
       end,
       settings = {
         tailwindCSS = {
@@ -220,8 +225,8 @@ return {
         default_config = {
           cmd = { "npx", "npm-workspaces-language-server", "--stdio" },
           filetypes = { "json" },
-          root_dir = function(fname)
-            return lspconfig.util.find_git_ancestor(fname)
+          root_dir = function(...)
+            return require("lspconfig.util").root_pattern(".git", "package.json")(...)
           end,
           autostart = true,
           settings = {},
