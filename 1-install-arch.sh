@@ -107,7 +107,6 @@ packagesYay=(
 	"snapd"
 	"neovim"
 	"visual-studio-code-bin"
-	"caprine"
 	"tmux"
 	"linux-headers"
 	"genymotion"
