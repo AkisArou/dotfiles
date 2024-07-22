@@ -29,14 +29,6 @@ fi
 
 echo ""
 echo "-------------------------------------"
-echo "-> Setting up VirtualBox"
-echo "-------------------------------------"
-echo ""
-sudo usermod -a -G vboxusers $USER
-modprobe vboxdrv
-
-echo ""
-echo "-------------------------------------"
 echo "-> Setting up tmux"
 echo "-------------------------------------"
 echo ""

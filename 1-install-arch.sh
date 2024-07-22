@@ -109,7 +109,6 @@ packagesYay=(
 	"visual-studio-code-bin"
 	"caprine"
 	"tmux"
-	"virtualbox"
 	"linux-headers"
 	"genymotion"
 	"git-delta"
