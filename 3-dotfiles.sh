@@ -160,6 +160,13 @@ fi
 _installSymLink firefox "$PROFILE_DIR"/user.js ~/dotfiles/firefox/user.js $PROFILE_DIR
 sudo ln -s ~/dotfiles/firefox/policies.json  /usr/lib/firefox/distribution/policies.json
 
+
+echo "-------------------------------------"
+echo "->  yazi"
+echo "-------------------------------------"
+echo ""
+_installSymLink yazi ~/.config/yazi ~/dotfiles/yazi ~/.config
+
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
