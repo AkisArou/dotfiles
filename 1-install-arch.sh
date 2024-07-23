@@ -133,7 +133,6 @@ packagesYay=(
   "ghostscript"
   "libreoffice-still"
   "kitty"
-  "ripdrag-git"
 )
 
 # ------------------------------------------------------
