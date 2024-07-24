@@ -2,55 +2,23 @@
 size = 10
 
 [font.normal]
-family = "MesloLGS Nerd Font"
-# family = "Input Mono Condensed"
+family = "MesloLGS Nerd Font Mono"
 style = "Regular"
 
-# For Input Mono Condensed
-# [font.offset]
-# x = 0
-# y = 1
+[font.bold]
+family = "MesloLGS Nerd Font Mono"
+style = "Bold"
+
+[font.bold_italic]
+family = "MesloLGS Nerd Font Mono"
+style = "Bold Italic"
+
+[font.italic]
+family = "MesloLGS Nerd Font Mono"
+style = "Italic"
 
 [window]
 opacity = 1
-
-# VSCode theme
-
-# # Default Colours
-# [colors.primary]
-# background = '#1a1a1a'
-# foreground = '#FFFFFF'
-#
-# # Normal Colours
-# [colors.normal]
-# black   = '#000000'
-# red     = '#d16969'
-# green   = '#4EC9B0'
-# yellow  = '#d7ba7d'
-# blue    = '#569cd6'
-# magenta = '#C586C0'
-# cyan    = '#9CDCFE'
-# white   = '#c4c5b5'
-#
-# # Bright Colours
-# [colors.bright]
-# black   = '#625e4c'
-# red     = '#f4005f'
-# green   = '#98e024'
-# yellow  = '#e0d561'
-# blue    = '#9d65ff'
-# magenta = '#f4005f'
-# cyan    = '#58d1eb'
-# white   = '#f6f6ef'
-
-# Dracula theme for Alacritty
-# https://draculatheme.com/alacritty
-#
-# Color palette
-# https://spec.draculatheme.com
-#
-# Instructions
-# https://github.com/alacritty/alacritty/blob/master/extra/man/alacritty.5.scd
 
 [colors.primary]
 
