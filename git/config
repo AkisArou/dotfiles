@@ -46,6 +46,7 @@
   unmerged = magenta bold reverse
   untracked = red
   updated = green bold
+
 [alias]
   # List available aliases
   aliases = !git config --get-regexp alias | sed -re 's/alias\\.(\\S*)\\s(.*)$/\\1 = \\2/g'
