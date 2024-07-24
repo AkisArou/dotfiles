@@ -26,7 +26,8 @@ format_up_to_date = " $icon system OK "
 aur_command = "yay -Qua"
 [[block.click]]
 button = "left"
-cmd = "alacritty -e zsh -c 'yay'"
+# cmd = "alacritty -e zsh -c 'yay'"
+cmd = "kitty -e zsh -c 'yay'"
 
 [[block]]
 block = "cpu"
