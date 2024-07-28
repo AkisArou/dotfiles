@@ -254,5 +254,11 @@ return {
         return require("lspconfig.util").root_pattern(".git")(...)
       end,
     })
+
+    lspconfig["pyright"].setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      filetypes = { "python" },
+    })
   end,
 }

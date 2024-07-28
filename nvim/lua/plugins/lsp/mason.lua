@@ -36,6 +36,7 @@ return {
         "biome",
         "clangd",
         "mdx_analyzer",
+        "pyright",
       },
       automatic_installation = true,
     })
@@ -49,6 +50,7 @@ return {
       "shellcheck",
       "clang-format",
       "prettier",
+      "black",
     }
 
     local mr = require("mason-registry")

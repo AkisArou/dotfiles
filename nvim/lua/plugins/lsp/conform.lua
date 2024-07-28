@@ -27,6 +27,7 @@ return {
         yaml = { "prettier" },
         markdown = { "prettier" },
         ["markdown.mdx"] = { "prettier" },
+        python = { "black" },
       },
       format_on_save = {
         lsp_format = "fallback",
