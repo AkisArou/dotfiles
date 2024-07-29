@@ -42,7 +42,15 @@ return {
       keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
 
       opts.desc = "Show LSP definitions"
-      keymap.set("n", "gd", ":FzfLua lsp_definitions<CR>", opts)
+      keymap.set("n", "gd", function()
+        require("fzf-lua").lsp_definitions({
+          winopts = {
+            preview = {
+              layout = "vertical",
+            },
+          },
+        })
+      end, opts)
 
       opts.desc = "Show LSP implementations"
       keymap.set("n", "gi", ":FzfLua lsp_implementations<CR>", opts)
