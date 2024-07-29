@@ -89,9 +89,7 @@ ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 sudo usermod -aG docker $USER
 docker --version
-systemctl --user enable docker-desktop
 sudo systemctl enable docker.service
-sudo systemctl enable containerd.service
 docker context use default
 docker compose version
 

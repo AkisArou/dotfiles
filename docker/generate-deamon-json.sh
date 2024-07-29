@@ -8,5 +8,6 @@ sudo mkdir -p /etc/docker
 
 # Write the configuration to daemon.json
 echo "{
-  \"data-root\": \"$HOME_DIR/docker\"
+  \"data-root\": \"$HOME_DIR/docker\",
+  \"bip\": \"192.168.1.1/24\"
 }" | sudo tee /etc/docker/daemon.json >/dev/null

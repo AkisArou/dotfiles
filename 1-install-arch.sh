@@ -112,7 +112,7 @@ packagesYay=(
 	"genymotion"
 	"git-delta"
 	"gnome-terminal"
-	"docker-desktop"
+	"docker"
 	"docker-compose"
 	"jetbrains-toolbox"
 	"fzf"
