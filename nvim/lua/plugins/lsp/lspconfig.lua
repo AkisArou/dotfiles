@@ -18,8 +18,6 @@ return {
 
     local lspconfig = require("lspconfig")
 
-    local fzf_lua = require("lspconfig")
-
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
     local keymap = vim.keymap
@@ -29,19 +27,19 @@ return {
       opts.buffer = bufnr
 
       opts.desc = "Show LSP references"
-      keymap.set("n", "gr", fzf_lua.lsp_references, opts)
+      keymap.set("n", "gr", ":FzfLua lsp_references<CR>", opts)
 
       opts.desc = "Go to declaration"
       keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
 
       opts.desc = "Show LSP definitions"
-      keymap.set("n", "gd", fzf_lua.lsp_definitions, opts)
+      keymap.set("n", "gd", ":FzfLua lsp_definitions<CR>", opts)
 
       opts.desc = "Show LSP implementations"
-      keymap.set("n", "gi", fzf_lua.lsp_implementations, opts)
+      keymap.set("n", "gi", ":FzfLua lsp_implementations<CR>", opts)
 
       opts.desc = "Show LSP type definitions"
-      keymap.set("n", "gt", fzf_lua.typedefs, opts)
+      keymap.set("n", "gt", ":FzfLua typedefs<CR>", opts)
 
       opts.desc = "See available code actions"
       keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
@@ -50,7 +48,7 @@ return {
       keymap.set("n", "<leader>cr", vim.lsp.buf.rename, opts)
 
       opts.desc = "Show buffer diagnostics"
-      keymap.set("n", "<leader>cb", fzf_lua.lsp_document_diagnostics, opts)
+      keymap.set("n", "<leader>cb", ":FzfLua lsp_document_diagnostics<CR>", opts)
 
       opts.desc = "Show line diagnostics"
       keymap.set("n", "<leader>cd", vim.diagnostic.open_float, opts)
