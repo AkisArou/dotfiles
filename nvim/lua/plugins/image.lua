@@ -9,8 +9,7 @@ return {
   },
   {
     "3rd/image.nvim",
-    enabled = false,
-    -- enabled = os.getenv("TERMINAL") == "kitty",
+    enabled = os.getenv("TERMINAL") == "kitty",
     dependencies = { "luarocks.nvim" },
     config = function()
       require("image").setup({
