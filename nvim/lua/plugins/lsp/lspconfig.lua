@@ -8,6 +8,7 @@ return {
     "b0o/SchemaStore.nvim",
     { "antosha417/nvim-lsp-file-operations", config = true },
     "yioneko/nvim-vtsls",
+    "ibhagwan/fzf-lua",
   },
   config = function()
     vim.diagnostic.config({ update_in_insert = true })
@@ -16,6 +17,8 @@ return {
     require("neodev").setup({})
 
     local lspconfig = require("lspconfig")
+
+    local fzf_lua = require("lspconfig")
 
     local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
@@ -26,19 +29,19 @@ return {
       opts.buffer = bufnr
 
       opts.desc = "Show LSP references"
-      keymap.set("n", "gr", "<cmd>Telescope lsp_references<CR>", opts)
+      keymap.set("n", "gr", fzf_lua.lsp_references, opts)
 
       opts.desc = "Go to declaration"
       keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
 
       opts.desc = "Show LSP definitions"
-      keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts)
+      keymap.set("n", "gd", fzf_lua.lsp_definitions, opts)
 
       opts.desc = "Show LSP implementations"
-      keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts)
+      keymap.set("n", "gi", fzf_lua.lsp_implementations, opts)
 
       opts.desc = "Show LSP type definitions"
-      keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts)
+      keymap.set("n", "gt", fzf_lua.typedefs, opts)
 
       opts.desc = "See available code actions"
       keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
@@ -47,7 +50,7 @@ return {
       keymap.set("n", "<leader>cr", vim.lsp.buf.rename, opts)
 
       opts.desc = "Show buffer diagnostics"
-      keymap.set("n", "<leader>cb", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
+      keymap.set("n", "<leader>cb", fzf_lua.lsp_document_diagnostics, opts)
 
       opts.desc = "Show line diagnostics"
       keymap.set("n", "<leader>cd", vim.diagnostic.open_float, opts)
