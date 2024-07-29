@@ -94,8 +94,6 @@ sudo systemctl enable docker.service
 sudo systemctl enable containerd.service
 docker context use default
 docker compose version
-echo "You also have to login into docker-desktop"
-echo "https://docs.docker.com/desktop/get-started/#credentials-management-for-linux-users"
 
 echo ""
 echo "-------------------------------------"
