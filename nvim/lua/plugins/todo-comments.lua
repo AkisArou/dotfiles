@@ -3,7 +3,6 @@ return {
   dependencies = { "nvim-lua/plenary.nvim" },
   cmd = {
     "TodoTrouble",
-    -- "TodoTelescope",
   },
   event = "VeryLazy",
   opts = {},
@@ -13,7 +12,6 @@ return {
     { "[t", function() require("todo-comments").jump_prev() end, desc = "Previous todo comment" },
     { "<leader>xt", "<cmd>TodoTrouble<cr>", desc = "Todo (Trouble)" },
     { "<leader>xT", "<cmd>TodoTrouble keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (Trouble)" },
-    -- { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo" },
-    -- { "<leader>sT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
+    { "<leader>xf", "<cmd>:lua require('fzf-lua').grep({search='TODO|PERF|NOTE|FIX:', no_esc=true})<cr>", desc = "Todo/Fix/Fixme (fzf-lua)" },
   },
 }
