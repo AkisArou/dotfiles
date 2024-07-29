@@ -27,7 +27,16 @@ return {
       opts.buffer = bufnr
 
       opts.desc = "Show LSP references"
-      keymap.set("n", "gr", ":FzfLua lsp_references<CR>", opts)
+
+      keymap.set("n", "gr", function()
+        require("fzf-lua").lsp_references({
+          winopts = {
+            preview = {
+              layout = "vertical",
+            },
+          },
+        })
+      end, opts)
 
       opts.desc = "Go to declaration"
       keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
