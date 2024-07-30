@@ -4,17 +4,7 @@ return {
     "onsails/lspkind-nvim",
     "hrsh7th/cmp-buffer",
     "saadparwaiz1/cmp_luasnip",
-    {
-      "hrsh7th/cmp-path",
-      config = function()
-        require("cmp").setup({
-          sources = {
-            { name = "path" },
-          },
-        })
-      end,
-    },
-    { "davidsierradz/cmp-conventionalcommits" },
+    "hrsh7th/cmp-path",
   },
   opts = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
@@ -60,30 +50,24 @@ return {
           return { buf }
         end,
       },
+      group_index = 2,
     }
 
     local default_cmp_sources = cmp.config.sources({
       { name = "nvim_lsp" },
-      { name = "path" },
+      {
+        name = "path",
+        option = {
+          trailing_slash = true,
+        },
+      },
       { name = "luasnip" },
-      { name = "conventionalcommits" },
     })
-
-    vim.api.nvim_create_augroup("buffercmp", { clear = true })
 
     vim.api.nvim_create_autocmd("BufEnter", {
       callback = function()
         if vim.bo.filetype == "typescriptreact" or vim.bo.filetype == "typescript" then
-          local sources = default_cmp_sources
-          for i = #sources, 1, -1 do
-            if sources[i].name == "buffer" then
-              table.remove(sources, i)
-            end
-          end
-
-          cmp.setup.buffer({
-            sources = sources,
-          })
+          return
         else
           local sources = default_cmp_sources
           sources[#sources + 1] = buffer_cmp
@@ -92,7 +76,6 @@ return {
           })
         end
       end,
-      group = "buffercmp",
     })
 
     return {
