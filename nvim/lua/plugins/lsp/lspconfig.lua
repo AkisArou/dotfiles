@@ -242,7 +242,7 @@ return {
       configs.npm_workspaces_language_server = {
         default_config = {
           cmd = { "npx", "npm-workspaces-language-server", "--stdio" },
-          filetypes = { "json" },
+          filetypes = { "json", "packagejson" },
           root_dir = function(...)
             return require("lspconfig.util").root_pattern(".git", "package.json")(...)
           end,
