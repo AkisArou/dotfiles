@@ -24,8 +24,8 @@ source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # source
-source "$HOME/dotfiles/zsh/aliases.zsh"
-source "$HOME/dotfiles/zsh/exports.zsh"
-source "$HOME/dotfiles/zsh/functions.zsh"
-source "$HOME/dotfiles/zsh/history.zsh"
+source "$HOME/dotfiles/zsh/aliases.sh"
+source "$HOME/dotfiles/zsh/exports.sh"
+source "$HOME/dotfiles/zsh/functions.sh"
+source "$HOME/dotfiles/zsh/history.sh"
 source "$HOME/dotfiles/scripts/add-ssh-key-to-agent.sh"
