@@ -66,7 +66,7 @@ bindsym $mod+b exec $browser
 bindsym $mod+q kill
 
 # Power menu
-bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu -dpi 177
+bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu.sh
 
 # toggle bluetooth device
 bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
