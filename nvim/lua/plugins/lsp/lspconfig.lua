@@ -255,6 +255,7 @@ return {
     lspconfig["npm_workspaces_language_server"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
+      filetypes = { "json", "packagejson" },
     })
 
     lspconfig["clangd"].setup({
