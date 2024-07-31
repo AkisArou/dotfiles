@@ -8,6 +8,7 @@ return {
 
     vim.keymap.set("n", "<leader>ff", function()
       fzf_lua.files({
+        cmd = "fd --type f --exclude node_modules",
         winopts = {
           preview = {
             layout = "vertical",

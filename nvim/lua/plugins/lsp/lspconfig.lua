@@ -30,6 +30,7 @@ return {
 
       keymap.set("n", "gr", function()
         require("fzf-lua").lsp_references({
+          ignore_current_line = true,
           winopts = {
             preview = {
               layout = "vertical",
@@ -44,6 +45,7 @@ return {
       opts.desc = "Show LSP definitions"
       keymap.set("n", "gd", function()
         require("fzf-lua").lsp_definitions({
+          jump_to_single_result = true,
           winopts = {
             preview = {
               layout = "vertical",
