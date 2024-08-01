@@ -1,6 +1,8 @@
 nnoremap <SPACE> <Nop>
 let mapleader=" "
 
+nnoremap <leader>w :w<CR>
+
 " Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
 
@@ -82,4 +84,3 @@ set background=dark
 
 colorscheme wildcharm
 
-nnoremap <leader>w :w<CR>
