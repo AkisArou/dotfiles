@@ -81,3 +81,5 @@ set signcolumn=yes
 set background=dark
 
 colorscheme wildcharm
+
+nnoremap <leader>w :w<CR>
