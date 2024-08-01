@@ -3,13 +3,14 @@ return {
   dependencies = {
     "onsails/lspkind-nvim",
     "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-nvim-lsp-signature-help",
     "saadparwaiz1/cmp_luasnip",
     "hrsh7th/cmp-path",
   },
   opts = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
     local cmp = require("cmp")
-    local defaults = require("cmp.config.default")()
+    -- local defaults = require("cmp.config.default")()
 
     local cmp_kinds = {
       Text = "  ",
@@ -43,7 +44,7 @@ return {
       -- Group 1
       {
         { name = "nvim_lsp" },
-
+        { name = "nvim_lsp_signature_help" },
         {
           name = "path",
           option = {
@@ -113,7 +114,17 @@ return {
       --     hl_group = "CmpGhostText",
       --   },
       -- },
-      sorting = defaults.sorting,
+      sorting = {
+        comparators = {
+          cmp.config.compare.offset,
+          cmp.config.compare.exact,
+          cmp.config.compare.score,
+          cmp.config.compare.kind,
+          cmp.config.compare.sort_text,
+          cmp.config.compare.length,
+          cmp.config.compare.order,
+        },
+      },
     }
   end,
 }
