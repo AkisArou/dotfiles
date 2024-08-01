@@ -39,7 +39,7 @@ return {
       TypeParameter = "  ",
     }
 
-    local sources = cmp.config.sources({
+    local sources = cmp.config.sources(
       -- Group 1
       {
         { name = "nvim_lsp" },
@@ -67,8 +67,8 @@ return {
           },
         },
         { name = "luasnip" },
-      },
-    })
+      }
+    )
 
     return {
       preselect = cmp.PreselectMode.Item,
