@@ -38,44 +38,36 @@ return {
       Operator = "  ",
       TypeParameter = "  ",
     }
-    local buffer_cmp = {
-      name = "buffer",
-      option = {
-        get_bufnrs = function()
-          local buf = vim.api.nvim_get_current_buf()
-          local byte_size = vim.api.nvim_buf_get_offset(buf, vim.api.nvim_buf_line_count(buf))
-          if byte_size > 1024 * 1024 then -- 1 Megabyte max
-            return {}
-          end
-          return { buf }
-        end,
-      },
-      group_index = 2,
-    }
 
-    local default_cmp_sources = cmp.config.sources({
-      { name = "nvim_lsp" },
+    local sources = cmp.config.sources({
+      -- Group 1
       {
-        name = "path",
-        option = {
-          trailing_slash = true,
+        { name = "nvim_lsp" },
+
+        {
+          name = "path",
+          option = {
+            trailing_slash = true,
+          },
         },
       },
-      { name = "luasnip" },
-    })
-
-    vim.api.nvim_create_autocmd("BufEnter", {
-      callback = function()
-        if vim.bo.filetype == "typescriptreact" or vim.bo.filetype == "typescript" then
-          return
-        else
-          local sources = default_cmp_sources
-          sources[#sources + 1] = buffer_cmp
-          cmp.setup.buffer({
-            sources = sources,
-          })
-        end
-      end,
+      -- Group 2
+      {
+        {
+          name = "buffer",
+          option = {
+            get_bufnrs = function()
+              local buf = vim.api.nvim_get_current_buf()
+              local byte_size = vim.api.nvim_buf_get_offset(buf, vim.api.nvim_buf_line_count(buf))
+              if byte_size > 1024 * 1024 then -- 1 Megabyte max
+                return {}
+              end
+              return { buf }
+            end,
+          },
+        },
+        { name = "luasnip" },
+      },
     })
 
     return {
@@ -115,7 +107,7 @@ return {
           fallback()
         end,
       }),
-      sources = default_cmp_sources,
+      sources = sources,
       -- experimental = {
       --   ghost_text = {
       --     hl_group = "CmpGhostText",
