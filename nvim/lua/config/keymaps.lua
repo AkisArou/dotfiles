@@ -21,6 +21,7 @@ keymap("n", "<C-u>", "<C-u>zz")
 
 -- Buffer close all
 keymap("n", "<leader>ba", function()
+  vim.cmd("wa")
   vim.cmd("BufferLineCloseOthers")
   require("mini.bufremove").delete()
 end, { desc = "Delete all" })
