@@ -4,7 +4,9 @@ return {
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local fzf_lua = require("fzf-lua")
-    fzf_lua.setup({})
+    fzf_lua.setup({
+      fzf_opts = { ["--cycle"] = true },
+    })
 
     vim.keymap.set("n", "<leader>ff", function()
       fzf_lua.files({
