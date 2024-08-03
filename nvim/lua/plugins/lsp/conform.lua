@@ -1,7 +1,8 @@
 return {
   "stevearc/conform.nvim",
   config = function()
-    local root_file = require("conform.util").root_file({ ".git" })
+    local util = require("conform.util")
+    local root_file = util.root_file({ ".git" })
     local conform = require("conform")
 
     local format_react = function(bufnr)
@@ -11,6 +12,12 @@ return {
         return { "prettier", "rustywind" }
       end
     end
+
+    local prisma =  {
+      command = util.from_node_modules("prisma"),
+      stdin = false,
+      args = { "format", "--schema", "$FILENAME" }
+    }
 
     conform.setup({
       notify_on_error = false,
@@ -28,12 +35,14 @@ return {
         markdown = { "prettier" },
         ["markdown.mdx"] = { "prettier" },
         python = { "black" },
+        prisma = {"prisma"}
       },
       format_on_save = {
         lsp_format = "fallback",
         timeout_ms = 1000,
       },
       formatters = {
+        prisma  = prisma,
         biome = {
           cwd = root_file,
           args = {
