@@ -25,7 +25,7 @@ export TERMINAL="kitty"
 export TERM="xterm-256color"
 export EDITOR="nvim"
 export VISUAL="nvim"
-export LAUNCH_EDITOR="/home/$(echo $USER)/dotfiles/scripts/launch-editor.sh"
+export LAUNCH_EDITOR="/home/$(echo "$USER")/dotfiles/scripts/launch-editor.sh"
 export BROWSER="brave"
 export MANPAGER='nvim +Man!'
 export MANWIDTH=999
@@ -47,5 +47,5 @@ if [[ "$HOST" == "archlinux-xps" ]]; then
 fi
 
 if [ -f ~/.env ]; then
-    export $(cat ~/.env | xargs)
+  export $(cat ~/.env | xargs)
 fi

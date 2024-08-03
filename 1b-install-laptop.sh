@@ -2,9 +2,8 @@
 
 source "$(dirname "$0")/scripts/library.sh"
 
-
 packagesYay=(
-	"intel-media-driver"
+  "intel-media-driver"
   "intel-gpu-tools"
   "libva-utils"
   "vdpauinfo"

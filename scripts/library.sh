@@ -13,105 +13,105 @@
 # Function: Is package installed
 # ------------------------------------------------------
 _isInstalledPacman() {
-	package="$1"
-	check="$(sudo pacman -Qs --color always "${package}" | grep "local" | grep "${package} ")"
-	if [ -n "${check}" ]; then
-		echo 0 #'0' means 'true' in Bash
-		return #true
-	fi
-	echo 1 #'1' means 'false' in Bash
-	return #false
+  package="$1"
+  check="$(sudo pacman -Qs --color always "${package}" | grep "local" | grep "${package} ")"
+  if [ -n "${check}" ]; then
+    echo 0 #'0' means 'true' in Bash
+    return #true
+  fi
+  echo 1 #'1' means 'false' in Bash
+  return #false
 }
 
 _islnstalledYay() {
-	package="$1"
-	check="$(yay -Qs --color always "${package}" | grep "local" | grep "${package} ")"
-	if [ -n "${check}" ]; then
-		echo 0 #'0' means 'true' in Bash
-		return #true
-	fi
-	echo 1 #'1' means 'false' in Bash
-	return #false
+  package="$1"
+  check="$(yay -Qs --color always "${package}" | grep "local" | grep "${package} ")"
+  if [ -n "${check}" ]; then
+    echo 0 #'0' means 'true' in Bash
+    return #true
+  fi
+  echo 1 #'1' means 'false' in Bash
+  return #false
 }
 
 # ------------------------------------------------------
 # Function Install all package if not installed
 # ------------------------------------------------------
 _installPackagesPacman() {
-	toInstall=()
+  toInstall=()
 
-	for pkg; do
-		if [[ $(_isInstalledPacman "${pkg}") == 0 ]]; then
-			echo "${pkg} is already installed."
-			continue
-		fi
+  for pkg; do
+    if [[ $(_isInstalledPacman "${pkg}") == 0 ]]; then
+      echo "${pkg} is already installed."
+      continue
+    fi
 
-		toInstall+=("${pkg}")
-	done
+    toInstall+=("${pkg}")
+  done
 
-	if [[ "${toInstall[@]}" == "" ]]; then
-		# echo "All pacman packages are already installed.";
-		return
-	fi
+  if [[ "${toInstall[@]}" == "" ]]; then
+    # echo "All pacman packages are already installed.";
+    return
+  fi
 
-	printf "Packages not installed:\n%s\n" "${toInstall[@]}"
-	sudo pacman --noconfirm -S "${toInstall[@]}"
+  printf "Packages not installed:\n%s\n" "${toInstall[@]}"
+  sudo pacman --noconfirm -S "${toInstall[@]}"
 }
 
 _installPackagesYay() {
-	toInstall=()
+  toInstall=()
 
-	for pkg; do
-		if [[ $(_islnstalledYay "${pkg}") == 0 ]]; then
-			echo "${pkg} is already installed."
-			continue
-		fi
+  for pkg; do
+    if [[ $(_islnstalledYay "${pkg}") == 0 ]]; then
+      echo "${pkg} is already installed."
+      continue
+    fi
 
-		toInstall+=("${pkg}")
-	done
+    toInstall+=("${pkg}")
+  done
 
-	if [[ "${toInstall[@]}" == "" ]]; then
-		# echo "All packages are already installed.";
-		return
-	fi
+  if [[ "${toInstall[@]}" == "" ]]; then
+    # echo "All packages are already installed.";
+    return
+  fi
 
-	printf "AUR ackages not installed:\n%s\n" "${toInstall[@]}"
-	yay --noconfirm -S "${toInstall[@]}"
+  printf "AUR ackages not installed:\n%s\n" "${toInstall[@]}"
+  yay --noconfirm -S "${toInstall[@]}"
 }
 
 # ------------------------------------------------------
 # Create symbolic links
 # ------------------------------------------------------
 _installSymLink() {
-	name="$1"
-	symlink="$2"
-	linksource="$3"
-	linktarget="$4"
+  name="$1"
+  symlink="$2"
+  linksource="$3"
+  linktarget="$4"
 
-	echo "Installing ${name}"
+  echo "Installing ${name}"
 
-	if [ -L "${symlink}" ]; then
-		rm "${symlink}"
-		ln -s "${linksource}" "${linktarget}"
-		echo "Symlink ${linksource} -> ${linktarget} created."
-		echo ""
-	else
-		if [ -d "${symlink}" ]; then
-			rm -rf "${symlink}"/
-			ln -s "${linksource}" "${linktarget}"
-			echo "Symlink for directory ${linksource} -> ${linktarget} created."
-			echo ""
-		else
-			if [ -f "${symlink}" ]; then
-				rm "${symlink}"
-				ln -s "${linksource}" "${linktarget}"
-				echo "Symlink to file ${linksource} -> ${linktarget} created."
-				echo ""
-			else
-				ln -s "${linksource}" "${linktarget}"
-				echo "New symlink ${linksource} -> ${linktarget} created."
-				echo ""
-			fi
-		fi
-	fi
+  if [ -L "${symlink}" ]; then
+    rm "${symlink}"
+    ln -s "${linksource}" "${linktarget}"
+    echo "Symlink ${linksource} -> ${linktarget} created."
+    echo ""
+  else
+    if [ -d "${symlink}" ]; then
+      rm -rf "${symlink}"/
+      ln -s "${linksource}" "${linktarget}"
+      echo "Symlink for directory ${linksource} -> ${linktarget} created."
+      echo ""
+    else
+      if [ -f "${symlink}" ]; then
+        rm "${symlink}"
+        ln -s "${linksource}" "${linktarget}"
+        echo "Symlink to file ${linksource} -> ${linktarget} created."
+        echo ""
+      else
+        ln -s "${linksource}" "${linktarget}"
+        echo "New symlink ${linksource} -> ${linktarget} created."
+        echo ""
+      fi
+    fi
+  fi
 }

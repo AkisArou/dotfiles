@@ -43,9 +43,7 @@ return {
 
     local extra = {
       "shfmt",
-      "codespell",
       "rustywind",
-      "hadolint",
       "stylua",
       "shellcheck",
       "clang-format",

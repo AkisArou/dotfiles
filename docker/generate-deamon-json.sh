@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get the current user's home directory
-HOME_DIR=$(eval echo ~$USER)
+HOME_DIR=$(eval echo ~"$USER")
 
 # Ensure the /etc/docker directory exists
 sudo mkdir -p /etc/docker

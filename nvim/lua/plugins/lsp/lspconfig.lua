@@ -238,6 +238,10 @@ return {
       },
     })
 
+    lspconfig["dockerls"].setup({})
+
+    lspconfig["docker_compose_language_service"].setup({})
+
     local configs = require("lspconfig.configs")
 
     if not configs.npm_workspaces_language_server then

@@ -23,10 +23,10 @@ echo ""
 echo "-> Check if .config folder exists"
 
 if [ -d ~/.config ]; then
-	echo ".config folder already exists."
+  echo ".config folder already exists."
 else
-	mkdir ~/.config
-	echo ".config folder created."
+  mkdir ~/.config
+  echo ".config folder created."
 fi
 
 # ------------------------------------------------------
@@ -153,13 +153,12 @@ echo ""
 PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
 
 if [ -z "$PROFILE_DIR" ]; then
-    echo "Firefox profile directory not found."
-    exit 1
+  echo "Firefox profile directory not found."
+  exit 1
 fi
 
-_installSymLink firefox "$PROFILE_DIR"/user.js ~/dotfiles/firefox/user.js $PROFILE_DIR
-sudo ln -s ~/dotfiles/firefox/policies.json  /usr/lib/firefox/distribution/policies.json
-
+_installSymLink firefox "$PROFILE_DIR"/user.js ~/dotfiles/firefox/user.js "$PROFILE_DIR"
+sudo ln -s ~/dotfiles/firefox/policies.json /usr/lib/firefox/distribution/policies.json
 
 echo "-------------------------------------"
 echo "->  yazi"

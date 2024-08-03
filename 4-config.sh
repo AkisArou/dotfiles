@@ -1,6 +1,5 @@
 #!/bin/zsh
 
-
 echo ""
 echo "-------------------------------------"
 echo "-> Enabling systemctl daemons"
@@ -11,20 +10,19 @@ sudo systemctl enable sshd
 sudo systemctl enable avahi-daemon
 sudo systemctl enable firewalld
 
-
 echo ""
 echo "-------------------------------------"
 echo "-> Setting up gnome settings"
 echo "-------------------------------------"
 echo ""
 if command -v gsettings &>/dev/null; then
-	gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
-	gsettings set org.gnome.desktop.peripherals.keyboard delay 220
-	gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
-	# Do not group applications
-	gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
-	gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-	dconf write /org/gnome/desktop/interface/color-scheme \'prefer-dark\'
+  gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
+  gsettings set org.gnome.desktop.peripherals.keyboard delay 220
+  gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
+  # Do not group applications
+  gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
+  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+  dconf write /org/gnome/desktop/interface/color-scheme \'prefer-dark\'
 fi
 
 echo ""
@@ -46,7 +44,6 @@ source ~/.zshrc
 
 ## Add asdf plugins
 asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-
 
 # Read .tool-versions file and install the specified versions
 cd ~

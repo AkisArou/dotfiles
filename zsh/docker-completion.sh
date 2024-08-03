@@ -55,7 +55,7 @@ _docker()
     __docker_debug "About to call: eval ${requestComp}"
 
     # Use eval to handle any environment variables and such
-    out=$(eval ${requestComp} 2>/dev/null)
+    out=$(eval "${requestComp}" 2>/dev/null)
     __docker_debug "completion output: ${out}"
 
     # Extract the directive integer following a : from the last line
@@ -141,7 +141,7 @@ _docker()
         local filteringCmd
         filteringCmd='_files'
         for filter in ${completions[@]}; do
-            if [ ${filter[1]} != '*' ]; then
+            if [ "${filter[1]}" != '*' ]; then
                 # zsh requires a glob pattern to do file filtering
                 filter="\*.$filter"
             fi
@@ -157,7 +157,7 @@ _docker()
         subdir="${completions[1]}"
         if [ -n "$subdir" ]; then
             __docker_debug "Listing directories in $subdir"
-            pushd "${subdir}" >/dev/null 2>&1
+            pushd "${subdir}" >/dev/null 2>&1 || exit
         else
             __docker_debug "Listing directories in ."
         fi
@@ -166,12 +166,12 @@ _docker()
         _arguments '*:dirname:_files -/'" ${flagPrefix}"
         result=$?
         if [ -n "$subdir" ]; then
-            popd >/dev/null 2>&1
+            popd >/dev/null 2>&1 || exit
         fi
         return $result
     else
         __docker_debug "Calling _describe"
-        if eval _describe "completions" completions $flagPrefix $noSpace; then
+        if eval _describe "completions" completions "$flagPrefix" "$noSpace"; then
             __docker_debug "_describe found some completions"
 
             # Return the success of having called _describe

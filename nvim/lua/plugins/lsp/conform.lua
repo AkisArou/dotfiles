@@ -13,10 +13,10 @@ return {
       end
     end
 
-    local prisma =  {
+    local prisma = {
       command = util.from_node_modules("prisma"),
       stdin = false,
-      args = { "format", "--schema", "$FILENAME" }
+      args = { "format", "--schema", "$FILENAME" },
     }
 
     conform.setup({
@@ -35,14 +35,16 @@ return {
         markdown = { "prettier" },
         ["markdown.mdx"] = { "prettier" },
         python = { "black" },
-        prisma = {"prisma"}
+        prisma = { "prisma" },
+        zsh = { "shfmt", "shellcheck" },
+        sh = { "shfmt", "shellcheck" },
       },
       format_on_save = {
         lsp_format = "fallback",
         timeout_ms = 1000,
       },
       formatters = {
-        prisma  = prisma,
+        prisma = prisma,
         biome = {
           cwd = root_file,
           args = {
