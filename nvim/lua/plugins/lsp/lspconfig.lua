@@ -7,6 +7,11 @@ return {
     "hrsh7th/cmp-nvim-lsp",
     "b0o/SchemaStore.nvim",
     { "antosha417/nvim-lsp-file-operations", config = true },
+    {
+      "pmizio/typescript-tools.nvim",
+      dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+      opts = {},
+    },
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
   },
@@ -101,29 +106,64 @@ return {
       on_attach = on_attach,
     })
 
-    require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
-
-    lspconfig["vtsls"].setup({
-      capabilities = capabilities,
+    require("typescript-tools").setup({
       on_attach = on_attach,
+      capabilities = capabilities,
       root_dir = function(...)
         return require("lspconfig.util").root_pattern(".git", "package.json", "tsconfig.json")(...)
       end,
       settings = {
-        vtsls = {
-          autoUseWorkspaceTsdk = true,
+        publish_diagnostic_on = "change",
+        expose_as_code_action = "all",
+        tsserver_max_memory = "auto",
+        -- described below
+        tsserver_format_options = {},
+        tsserver_file_preferences = {
+          includePackageJsonAutoImports = "on",
+          importModuleSpecifier = "non-relative",
         },
-        typescript = {
-          tsserver = {
-            maxTsServerMemory = 16000,
-          },
-          preferences = {
-            includePackageJsonAutoImports = "on",
-            importModuleSpecifier = "non-relative",
-          },
+        -- mirror of VSCode's `typescript.suggest.completeFunctionCalls`
+        complete_function_calls = false,
+        include_completions_with_insert_text = true,
+        -- CodeLens
+        -- WARNING: Experimental feature also in VSCode, because it might hit performance of server.
+        -- possible values: ("off"|"all"|"implementations_only"|"references_only")
+        code_lens = "off",
+        -- by default code lenses are displayed on all referencable values and for some of you it can
+        -- be too much this option reduce count of them by removing member references from lenses
+        disable_member_code_lens = true,
+        -- JSXCloseTag
+        -- WARNING: it is disabled by default (maybe you configuration or distro already uses nvim-ts-autotag,
+        -- that maybe have a conflict if enable this feature. )
+        jsx_close_tag = {
+          enable = false,
+          filetypes = { "javascriptreact", "typescriptreact" },
         },
       },
     })
+    -- require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
+    --
+    -- lspconfig["vtsls"].setup({
+    --   capabilities = capabilities,
+    --   on_attach = on_attach,
+    --   root_dir = function(...)
+    --     return require("lspconfig.util").root_pattern(".git", "package.json", "tsconfig.json")(...)
+    --   end,
+    --   settings = {
+    --     vtsls = {
+    --       autoUseWorkspaceTsdk = true,
+    --     },
+    --     typescript = {
+    --       tsserver = {
+    --         maxTsServerMemory = 16000,
+    --       },
+    --       preferences = {
+    --         includePackageJsonAutoImports = "on",
+    --         importModuleSpecifier = "non-relative",
+    --       },
+    --     },
+    --   },
+    -- })
 
     lspconfig["cssls"].setup({
       capabilities = capabilities,
