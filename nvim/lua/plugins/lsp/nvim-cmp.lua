@@ -40,36 +40,32 @@ return {
       TypeParameter = "  ",
     }
 
-    local sources = cmp.config.sources(
-      -- Group 1
+    local sources = cmp.config.sources({
+      { name = "nvim_lsp", group_index = 1 },
+      { name = "nvim_lsp_signature_help", group_index = 1 },
       {
-        { name = "nvim_lsp" },
-        { name = "nvim_lsp_signature_help" },
-        {
-          name = "path",
-          option = {
-            trailing_slash = true,
-          },
+        name = "path",
+        option = {
+          trailing_slash = true,
         },
+        group_index = 1,
       },
-      -- Group 2
       {
-        -- {
-        --   name = "buffer",
-        --   option = {
-        --     get_bufnrs = function()
-        --       local buf = vim.api.nvim_get_current_buf()
-        --       local byte_size = vim.api.nvim_buf_get_offset(buf, vim.api.nvim_buf_line_count(buf))
-        --       if byte_size > 1024 * 1024 then -- 1 Megabyte max
-        --         return {}
-        --       end
-        --       return { buf }
-        --     end,
-        --   },
-        -- },
-        -- { name = "luasnip" },
-      }
-    )
+        name = "buffer",
+        option = {
+          get_bufnrs = function()
+            local buf = vim.api.nvim_get_current_buf()
+            local byte_size = vim.api.nvim_buf_get_offset(buf, vim.api.nvim_buf_line_count(buf))
+            if byte_size > 1024 * 1024 then -- 1 Megabyte max
+              return {}
+            end
+            return { buf }
+          end,
+        },
+        group_index = 2,
+      },
+      { name = "luasnip", group_index = 2 },
+    })
 
     return {
       preselect = cmp.PreselectMode.Item,
