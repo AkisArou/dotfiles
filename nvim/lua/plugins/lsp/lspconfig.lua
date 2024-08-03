@@ -7,11 +7,7 @@ return {
     "hrsh7th/cmp-nvim-lsp",
     "b0o/SchemaStore.nvim",
     { "antosha417/nvim-lsp-file-operations", config = true },
-    {
-      "pmizio/typescript-tools.nvim",
-      dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
-      opts = {},
-    },
+    "pmizio/typescript-tools.nvim",
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
   },
