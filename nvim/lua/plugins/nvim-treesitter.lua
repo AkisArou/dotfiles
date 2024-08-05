@@ -81,6 +81,8 @@ return {
       "toml",
       "vim",
       "vimdoc",
+      "editorconfig",
+      "tmux",
     },
     incremental_selection = {
       enable = true,
