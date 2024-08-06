@@ -7,7 +7,7 @@ return {
     "saadparwaiz1/cmp_luasnip",
     "hrsh7th/cmp-path",
   },
-  opts = function()
+  config = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
     local cmp = require("cmp")
     -- local defaults = require("cmp.config.default")()
@@ -67,11 +67,12 @@ return {
       { name = "luasnip", group_index = 2 },
     })
 
-    return {
+    cmp.setup({
       preselect = cmp.PreselectMode.Item,
       completion = {
         completeopt = "menu,menuone,noinsert",
       },
+      ---@diagnostic disable-next-line: missing-fields
       formatting = {
         format = function(_, vim_item)
           vim_item.kind = (cmp_kinds[vim_item.kind] or "") .. vim_item.kind
@@ -110,17 +111,6 @@ return {
       --     hl_group = "CmpGhostText",
       --   },
       -- },
-      sorting = {
-        comparators = {
-          cmp.config.compare.offset,
-          cmp.config.compare.exact,
-          cmp.config.compare.score,
-          cmp.config.compare.kind,
-          cmp.config.compare.sort_text,
-          cmp.config.compare.length,
-          cmp.config.compare.order,
-        },
-      },
-    }
+    })
   end,
 }
