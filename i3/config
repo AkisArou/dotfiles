@@ -3,7 +3,7 @@
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
 # exec --no-startup-id libinput-gestures-setup autostart start
-exec --no-startup-id ~/dotfiles/xorg/xrandr.zsh
+exec --no-startup-id ~/dotfiles/xorg/xrandr.sh
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
@@ -18,7 +18,7 @@ set $left h
 set $down j
 set $up k
 set $right l
-# set $term ~/dotfiles/alacritty/alacritty.zsh
+# set $term ~/dotfiles/alacritty/alacritty.sh
 set $term ~/dotfiles/kitty/kitty.sh
 set $browser /usr/bin/brave --remote-debugging-port=9229
 set $menu ~/dotfiles/rofi/init.sh
