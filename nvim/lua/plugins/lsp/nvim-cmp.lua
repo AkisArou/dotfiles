@@ -53,6 +53,7 @@ return {
       },
       {
         name = "buffer",
+        Keyword_length = 10,
         option = {
           get_bufnrs = function()
             local buf = vim.api.nvim_get_current_buf()
