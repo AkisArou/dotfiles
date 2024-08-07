@@ -10,8 +10,8 @@ return {
   },
   config = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
+
     local cmp = require("cmp")
-    -- local defaults = require("cmp.config.default")()
 
     local cmp_kinds = {
       Text = "  ",
@@ -130,11 +130,6 @@ return {
           fallback()
         end,
       }),
-      -- experimental = {
-      --   ghost_text = {
-      --     hl_group = "CmpGhostText",
-      --   },
-      -- },
     })
 
     -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
