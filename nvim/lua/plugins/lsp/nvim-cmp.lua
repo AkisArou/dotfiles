@@ -3,9 +3,10 @@ return {
   dependencies = {
     "onsails/lspkind-nvim",
     "hrsh7th/cmp-buffer",
+    "hrsh7th/cmp-path",
+    "hrsh7th/cmp-cmdline",
     "hrsh7th/cmp-nvim-lsp-signature-help",
     "saadparwaiz1/cmp_luasnip",
-    "hrsh7th/cmp-path",
   },
   config = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
@@ -40,7 +41,7 @@ return {
       TypeParameter = "  ",
     }
 
-    local sources = cmp.config.sources({
+    local default_cmp_sources = cmp.config.sources({
       { name = "nvim_lsp", group_index = 1 },
       { name = "nvim_lsp_signature_help", group_index = 1 },
       {
@@ -65,6 +66,30 @@ return {
         group_index = 2,
       },
       { name = "luasnip", group_index = 2 },
+    })
+
+    vim.api.nvim_create_augroup("buffercmp", { clear = true })
+
+    vim.api.nvim_create_autocmd("BufEnter", {
+      callback = function()
+        if vim.bo.filetype == "typescriptreact" or vim.bo.filetype == "typescript" then
+          local sources = default_cmp_sources
+          for i = #sources, 1, -1 do
+            if sources[i].name == "buffer" then
+              table.remove(sources, i)
+            end
+          end
+
+          cmp.setup.buffer({
+            sources = sources,
+          })
+        else
+          cmp.setup.buffer({
+            sources = default_cmp_sources,
+          })
+        end
+      end,
+      group = "buffercmp",
     })
 
     cmp.setup({
@@ -105,12 +130,31 @@ return {
           fallback()
         end,
       }),
-      sources = sources,
       -- experimental = {
       --   ghost_text = {
       --     hl_group = "CmpGhostText",
       --   },
       -- },
+    })
+
+    -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+    cmp.setup.cmdline({ "/", "?" }, {
+      mapping = cmp.mapping.preset.cmdline(),
+      sources = {
+        { name = "buffer" },
+      },
+    })
+
+    -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+    cmp.setup.cmdline(":", {
+      mapping = cmp.mapping.preset.cmdline(),
+      sources = cmp.config.sources({
+        { name = "path" },
+      }, {
+        { name = "cmdline" },
+      }),
+      ---@diagnostic disable-next-line: missing-fields
+      matching = { disallow_symbol_nonprefix_matching = false },
     })
   end,
 }
