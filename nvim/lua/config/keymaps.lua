@@ -16,8 +16,8 @@ keymap("v", "J", ":m '>+1<CR>gv=gv")
 keymap("v", "K", ":m '<-2<CR>gv=gv")
 
 -- Cursor stays in place when moving screen
-keymap("n", "<C-d>", "<C-d>zz")
-keymap("n", "<C-u>", "<C-u>zz")
+keymap("n", "<C-d>", "m`<C-d>zz")
+keymap("n", "<C-u>", "m`<C-u>zz")
 
 -- Buffer close all
 keymap("n", "<leader>ba", function()
