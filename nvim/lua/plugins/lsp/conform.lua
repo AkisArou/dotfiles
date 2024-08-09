@@ -34,7 +34,6 @@ return {
         yaml = { "prettier" },
         markdown = { "prettier" },
         ["markdown.mdx"] = { "prettier" },
-        python = { "black" },
         prisma = { "prisma" },
         zsh = { "shfmt", "shellcheck" },
         sh = { "shfmt", "shellcheck" },

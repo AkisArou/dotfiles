@@ -28,7 +28,6 @@ return {
         "emmet_language_server",
         "tailwindcss",
         "cssmodules_ls",
-        -- "tsserver",
         "prismals",
         "dockerls",
         "docker_compose_language_service",
@@ -36,7 +35,6 @@ return {
         "biome",
         "clangd",
         "mdx_analyzer",
-        "pyright",
       },
       automatic_installation = true,
     })
@@ -48,7 +46,6 @@ return {
       "shellcheck",
       "clang-format",
       "prettier",
-      "black",
     }
 
     local mr = require("mason-registry")
