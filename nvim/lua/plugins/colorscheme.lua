@@ -15,10 +15,14 @@ local themes = {
     commit = "e52c41314e83232840d6970e6b072f9fba242eb9",
     config = function()
       vim.opt.background = "dark"
-      require("tokyonight").setup({
-        style = "storm",
-        light_style = "day",
-      })
+      -- require("tokyonight").setup({
+      --   style = "night",
+      --   light_style = "day",
+      -- })
+
+      vim.cmd([[
+        colorscheme tokyonight-night
+      ]])
     end,
   },
   catpuccin = {
@@ -137,18 +141,9 @@ local themes = {
       vim.g.doom_one_plugin_lspsaga = false
     end,
   },
-  sonokai = {
-    name = "sonokai",
-    repo = "sainnhe/sonokai",
-    config = function()
-      -- Optionally configure and load the colorscheme
-      -- directly inside the plugin declaration.
-      vim.g.sonokai_enable_italic = true
-    end,
-  },
 }
 
-local selectedTheme = themes.dracula
+local selectedTheme = themes.tokyonight
 
 if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true

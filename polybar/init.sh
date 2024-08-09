@@ -13,4 +13,5 @@ fi
 export POLY_FONT
 export POLY_BAR_HEIGHT
 
+killall polybar
 polybar default &
