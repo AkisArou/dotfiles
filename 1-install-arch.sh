@@ -120,7 +120,6 @@ packagesYay=(
   "watchman-bin"
   "microsoft-edge-stable-bin"
   "rar"
-  "tod0"
   "wireplumber"
   "udisks2"
   "fwupd"
