@@ -78,12 +78,6 @@ echo ""
 _installSymLink nvim ~/.config/nvim ~/dotfiles/nvim/ ~/.config
 
 echo "-------------------------------------"
-echo "-> Install pcmanfm config"
-echo "-------------------------------------"
-echo ""
-_installSymLink pcmanfm ~/.config/pcmanfm ~/dotfiles/pcmanfm/ ~/.config
-
-echo "-------------------------------------"
 echo "-> Install Git config"
 echo "-------------------------------------"
 echo ""
