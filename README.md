@@ -5,7 +5,7 @@ This is the configuration of my Arch linux
 ## Common Packages
 
 - WM: i3
-- Bar: polybar | i3status-rust
+- Bar: polybar
 - Terminal: kitty | alacritty
 - Editor: nvim (configured for web dev) & vim
 - Menus: rofi

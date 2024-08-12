@@ -70,7 +70,6 @@ echo "-> Install i3 dotfiles"
 echo "-------------------------------------"
 echo ""
 _installSymLink i3 ~/.config/i3 ~/dotfiles/i3/ ~/.config/i3
-_installSymLink i3status-rust ~/.config/i3status-rust ~/dotfiles/i3status-rust ~/.config/i3status-rust
 
 echo "-------------------------------------"
 echo "-> Install Nvim config"
