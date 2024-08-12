@@ -21,7 +21,7 @@ export XDG_CONFIG_DIRS="/etc/xdg"
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 
-export TERMINAL="kitty"
+export TERMINAL="st"
 export TERM="xterm-256color"
 export EDITOR="nvim"
 export VISUAL="nvim"
