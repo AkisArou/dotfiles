@@ -1174,7 +1174,7 @@ xinit(int cols, int rows)
 
 	/* adjust fixed window geometry */
 	win.w = 2 * borderpx + cols * win.cw;
-	win.h = 2 * borderpx + rows * win.ch;
+	win.h = 2000;
 	if (xw.gm & XNegative)
 		xw.l += DisplayWidth(xw.dpy, xw.scr) - win.w - 2;
 	if (xw.gm & YNegative)
