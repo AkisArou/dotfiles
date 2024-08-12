@@ -6,7 +6,7 @@ This is the configuration of my Arch linux
 
 - WM: i3
 - Bar: polybar
-- Terminal: kitty | alacritty
+- Terminal: st | kitty | alacritty
 - Editor: nvim (configured for web dev) & vim
 - Menus: rofi
 - Browsers: brave, chromium, edge, firefox
