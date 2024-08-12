@@ -33,7 +33,7 @@ return {
         "docker_compose_language_service",
         "yamlls",
         "biome",
-        "clangd",
+        -- "clangd",
         "mdx_analyzer",
       },
       automatic_installation = true,
@@ -44,7 +44,7 @@ return {
       "rustywind",
       "stylua",
       "shellcheck",
-      "clang-format",
+      -- "clang-format",
       "prettier",
     }
 

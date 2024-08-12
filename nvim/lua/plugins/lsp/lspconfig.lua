@@ -263,24 +263,24 @@ return {
       filetypes = { "json", "packagejson" },
     })
 
-    lspconfig["clangd"].setup({
-      on_attach = function(client, bufnr)
-        client.server_capabilities.signatureHelpProvider = false
-        on_attach(client, bufnr)
-      end,
-      root_dir = function(...)
-        return require("lspconfig.util").root_pattern(
-          ".clangd",
-          ".clang-tidy",
-          ".clang-format",
-          "compile_commands.json",
-          "compile_flags.txt",
-          "configure.ac",
-          ".git"
-        )(...)
-      end,
-      capabilities = capabilities,
-    })
+    -- lspconfig["clangd"].setup({
+    --   on_attach = function(client, bufnr)
+    --     client.server_capabilities.signatureHelpProvider = false
+    --     on_attach(client, bufnr)
+    --   end,
+    --   root_dir = function(...)
+    --     return require("lspconfig.util").root_pattern(
+    --       ".clangd",
+    --       ".clang-tidy",
+    --       ".clang-format",
+    --       "compile_commands.json",
+    --       "compile_flags.txt",
+    --       "configure.ac",
+    --       ".git"
+    --     )(...)
+    --   end,
+    --   capabilities = capabilities,
+    -- })
 
     lspconfig["mdx_analyzer"].setup({
       capabilities = capabilities,
