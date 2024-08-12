@@ -19,7 +19,8 @@ set $down j
 set $up k
 set $right l
 # set $term ~/dotfiles/alacritty/alacritty.sh
-set $term ~/dotfiles/kitty/kitty.sh
+# set $term ~/dotfiles/kitty/kitty.sh
+ set $term /usr/local/bin/st
 set $browser /usr/bin/brave --remote-debugging-port=9229
 set $menu ~/dotfiles/rofi/init.sh
 
