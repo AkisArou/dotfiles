@@ -50,7 +50,7 @@ if [ -z "$PROFILE_DIR" ]; then
 fi
 #
 create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
-create_symlink "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
+sudo -E ln -s "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
 
 ./docker/generate-deamon-json.sh
 
