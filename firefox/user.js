@@ -8,3 +8,7 @@ user_pref("media.rdd-vpx.enabled", true);
 user_pref("gfx.x11-egl.force-enabled", true);
 user_pref("gfx.webrender.all", true);
 user_pref("full-screen-api.warning.timeout", 0);
+user_pref("media.autoplay.default", 0); // 0 = Allow all, 1 = Block non-muted media, 5 = Block all
+user_pref("media.autoplay.allow-muted", true); // Allow muted autoplay
+user_pref("media.autoplay.blocking_policy", 0); // Disable any blocking policy for autoplay
+user_pref("browser.startup.page", 3); // 3 = Restore previous session
