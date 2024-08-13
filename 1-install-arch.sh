@@ -102,7 +102,6 @@ packagesYay=(
   "base-devel"
   "ripgrep"
   "fd"
-  "snapd"
   "neovim"
   "visual-studio-code-bin"
   "tmux"
