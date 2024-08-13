@@ -252,6 +252,7 @@ static char *opt_io    = NULL;
 static char *opt_line  = NULL;
 static char *opt_name  = NULL;
 static char *opt_title = NULL;
+static char *opt_chscale = NULL;
 
 static uint buttons; /* bit field of pressed buttons */
 static int cursorblinks = 0;
@@ -2076,7 +2077,7 @@ run(void)
 void
 usage(void)
 {
-	die("usage: %s [-aiv] [-c class] [-f font] [-g geometry]"
+	die("usage: %s [-s chscale] [-aiv] [-c class] [-f font] [-g geometry]"
 	    " [-n name] [-o file]\n"
 	    "          [-T title] [-t title] [-w windowid]"
 	    " [[-e] command [args ...]]\n"
@@ -2133,6 +2134,13 @@ main(int argc, char *argv[])
 	case 'v':
 		die("%s " VERSION "\n", argv0);
 		break;
+  case 's':
+    char *arg = EARGF(NULL);  // Get the argument, but don't call usage() if missing
+    if (arg)
+        chscale = atof(arg);  // Convert and assign if an argument is provided
+    else
+        chscale = 1.0;        // Use default value if no argument is provided
+    break;
 	default:
 		usage();
 	} ARGEND;

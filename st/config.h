@@ -28,7 +28,7 @@ char *vtiden = "\033[?6c";
 /* Kerning / character bounding-box multipliers */
 static float cwscale = 1.0;
 // "Hack ?" for unwanted bottom space
-static float chscale = 0.9;
+float chscale = 0.9;
 
 /*
  * word delimiter string
