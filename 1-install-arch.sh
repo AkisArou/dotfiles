@@ -71,7 +71,6 @@ packagesYay=(
   "dialog"
   "wpa_supplicant"
   "iwd"
-  "iwgtk"
   "openssh"
   "pacman-contrib"
   "alacritty"
