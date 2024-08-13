@@ -89,7 +89,6 @@ packagesYay=(
   "xdg-desktop-portal-gtk"
   "pavucontrol"
   "tumbler"
-  "blueman"
   "bluez"
   "bluez-utils"
   "bat"
