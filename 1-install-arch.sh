@@ -25,22 +25,7 @@ else
   cd ~/dotfiles/ || return
   clear
   echo "yay has been installed successfully."
-  echo ""
-  echo "  ___           _        _ _  "
-  echo " |_ _|_ __  ___| |_ __ _| | | "
-  echo "  | ||  _ \/ __| __/ _  | | | "
-  echo "  | || | | \__ \ || (_| | | | "
-  echo " |___|_| |_|___/\__\__,_|_|_| "
-  echo "                              "
-  echo "-------------------------------------"
-  echo ""
 fi
-
-# ------------------------------------------------------
-# Install required packages
-# ------------------------------------------------------
-echo ""
-echo "-> Install main packages"
 
 # ------------------------------------------------------
 # Install Packages
