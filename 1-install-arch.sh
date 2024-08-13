@@ -109,15 +109,15 @@ packagesYay=(
 )
 
 # ------------------------------------------------------
-# ST
-# ------------------------------------------------------
-sudo make -C ~/dotfiles/st clean install
-
-# ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
 installPackagesYay "${packagesYay[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
+
+# ------------------------------------------------------
+# ST
+# ------------------------------------------------------
+sudo make -C ~/dotfiles/st clean install
 
 # ------------------------------------------------------
 # Install custom issue (login prompt)
@@ -130,17 +130,19 @@ echo "Login prompt installed."
 # ------------------------------------------------------
 # Add user to wheel
 # ------------------------------------------------------
-clear
-echo "Uncomment %wheel group in sudoers (around line 85):"
-echo "Before: #%wheel ALL=(ALL:ALL) ALL"
-echo "After:  %wheel ALL=(ALL:ALL) ALL"
-echo ""
-read -p "Open sudoers now?" c
-EDITOR=vim sudo -E visudo
-usermod -aG wheel "$username"
+echo "Uncommenting %wheel group in sudoers..."
+
+sudo sed -i.bak 's/^#\s*\(%wheel\s\+ALL=(ALL:ALL)\s\+ALL\)/\1/' /etc/sudoers
+
+if grep -q '^%wheel ALL=(ALL:ALL) ALL' /etc/sudoers; then
+  echo "Success: %wheel group has been uncommented in sudoers."
+else
+  echo "Error: Failed to uncomment %wheel group in sudoers."
+fi
+
+sudo usermod -aG wheel "$USER"
 
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
-clear
 echo "DONE!"
