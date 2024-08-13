@@ -20,6 +20,6 @@ packagesYay=(
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-_installPackagesYay "${packagesYay[@]}"
+installPackagesYay "${packagesYay[@]}"
 
 echo "DONE! Please reboot your system!"

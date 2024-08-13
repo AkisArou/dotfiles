@@ -10,4 +10,4 @@ packagesYay=(
   "libvdpau-va-gl"
 )
 
-_installPackagesYay "${packagesYay[@]}"
+installPackagesYay "${packagesYay[@]}"

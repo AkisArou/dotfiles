@@ -5,10 +5,11 @@ echo "-------------------------------------"
 echo "-> Enabling systemctl daemons"
 echo "-------------------------------------"
 echo ""
-sudo systemctl enable bluetooth
-sudo systemctl enable sshd
-sudo systemctl enable avahi-daemon
-sudo systemctl enable firewalld
+sudo systemctl enable --now bluetooth
+sudo systemctl enable --now sshd
+sudo systemctl enable --now avahi-daemon
+sudo systemctl enable --now firewalld
+sudo systemctl enable --now acpid
 
 echo ""
 echo "-------------------------------------"

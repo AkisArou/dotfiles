@@ -1,47 +1,21 @@
 #!/bin/bash
-#  _     _ _
-# | |   (_) |__  _ __ __ _ _ __ _   _
-# | |   | | '_ \| '__/ _` | '__| | | |
-# | |___| | |_) | | | (_| | |  | |_| |
-# |_____|_|_.__/|_|  \__,_|_|   \__, |
-#                               |___/
-#
-# by Stephan Raabe (2023)
-# -----------------------------------------------------
 
-# ------------------------------------------------------
-# Function: Is package installed
-# ------------------------------------------------------
-_isInstalledPacman() {
-  package="$1"
-  check="$(sudo pacman -Qs --color always "${package}" | grep "local" | grep "${package} ")"
-  if [ -n "${check}" ]; then
-    echo 0 #'0' means 'true' in Bash
-    return #true
-  fi
-  echo 1 #'1' means 'false' in Bash
-  return #false
-}
-
-_islnstalledYay() {
+islnstalledYay() {
   package="$1"
   check="$(yay -Qs --color always "${package}" | grep "local" | grep "${package} ")"
   if [ -n "${check}" ]; then
-    echo 0 #'0' means 'true' in Bash
-    return #true
+    echo 0
+    return
   fi
-  echo 1 #'1' means 'false' in Bash
-  return #false
+  echo 1
+  return
 }
 
-# ------------------------------------------------------
-# Function Install all package if not installed
-# ------------------------------------------------------
-_installPackagesPacman() {
+installPackagesYay() {
   toInstall=()
 
   for pkg; do
-    if [[ $(_isInstalledPacman "${pkg}") == 0 ]]; then
+    if [[ $(islnstalledYay "${pkg}") == 0 ]]; then
       echo "${pkg} is already installed."
       continue
     fi
@@ -50,68 +24,55 @@ _installPackagesPacman() {
   done
 
   if [[ "${toInstall[@]}" == "" ]]; then
-    # echo "All pacman packages are already installed.";
     return
   fi
 
-  printf "Packages not installed:\n%s\n" "${toInstall[@]}"
-  sudo pacman --noconfirm -S "${toInstall[@]}"
-}
-
-_installPackagesYay() {
-  toInstall=()
-
-  for pkg; do
-    if [[ $(_islnstalledYay "${pkg}") == 0 ]]; then
-      echo "${pkg} is already installed."
-      continue
-    fi
-
-    toInstall+=("${pkg}")
-  done
-
-  if [[ "${toInstall[@]}" == "" ]]; then
-    # echo "All packages are already installed.";
-    return
-  fi
-
-  printf "AUR ackages not installed:\n%s\n" "${toInstall[@]}"
+  printf "Packages to install:\n%s\n" "${toInstall[@]}"
   yay --noconfirm -S "${toInstall[@]}"
 }
 
-# ------------------------------------------------------
-# Create symbolic links
-# ------------------------------------------------------
-_installSymLink() {
-  name="$1"
-  symlink="$2"
-  linksource="$3"
-  linktarget="$4"
+create_symlink() {
+  local target=$1
+  local link_name=$2
 
-  echo "Installing ${name}"
+  # Check if the target exists
+  if [[ ! -e $target ]]; then
+    echo "Error: Target '$target' does not exist."
+    return 1
+  fi
 
-  if [ -L "${symlink}" ]; then
-    rm "${symlink}"
-    ln -s "${linksource}" "${linktarget}"
-    echo "Symlink ${linksource} -> ${linktarget} created."
-    echo ""
-  else
-    if [ -d "${symlink}" ]; then
-      rm -rf "${symlink}"/
-      ln -s "${linksource}" "${linktarget}"
-      echo "Symlink for directory ${linksource} -> ${linktarget} created."
-      echo ""
-    else
-      if [ -f "${symlink}" ]; then
-        rm "${symlink}"
-        ln -s "${linksource}" "${linktarget}"
-        echo "Symlink to file ${linksource} -> ${linktarget} created."
-        echo ""
+  # Check if the link name already exists
+  if [[ -e $link_name || -L $link_name ]]; then
+    if [[ -L $link_name ]]; then
+      # It's a symlink, check if it points to the same target
+      existing_target=$(readlink "$link_name")
+      if [[ $existing_target == $target ]]; then
+        echo "Symlink '$link_name' already exists and points to '$target'."
+        return 0
       else
-        ln -s "${linksource}" "${linktarget}"
-        echo "New symlink ${linksource} -> ${linktarget} created."
-        echo ""
+        echo "Warning: Symlink '$link_name' points to a different target '$existing_target'."
+        read -p "Do you want to replace it? (y/n) " choice
+        if [[ $choice != "y" ]]; then
+          echo "Skipping '$link_name'."
+          return 1
+        fi
+        # Remove the old symlink
+        rm -f "$link_name"
       fi
+    else
+      # It's not a symlink, back it up or remove it
+      echo "Warning: '$link_name' already exists and is not a symlink."
+      read -p "Do you want to back it up and replace it? (y/n) " choice
+      if [[ $choice != "y" ]]; then
+        echo "Skipping '$link_name'."
+        return 1
+      fi
+      mv "$link_name" "${link_name}.bak"
+      echo "Backed up '$link_name' to '${link_name}.bak'."
     fi
   fi
+
+  # Create the symlink
+  ln -s "$target" "$link_name"
+  echo "Created symlink: '$link_name' -> '$target'."
 }

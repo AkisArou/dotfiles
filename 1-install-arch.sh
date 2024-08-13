@@ -49,8 +49,8 @@ packagesYay=(
   "fwupd"
   "linux-headers"
   "base-devel"
-  "usbutils"
   "acpi"
+  "acpid"
   "acpi_call"
   "firewalld"
   "wol"
@@ -131,7 +131,7 @@ sudo make -C ~/dotfiles/st clean install
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-_installPackagesYay "${packagesYay[@]}"
+installPackagesYay "${packagesYay[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
 # ------------------------------------------------------
