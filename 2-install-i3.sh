@@ -7,7 +7,6 @@ packagesYay=(
   "xorg-xinit"
   "xorg-xinput"
   "i3-wm"
-  "i3blocks"
   "i3lock"
   "xidlehook"
   "rofi"
