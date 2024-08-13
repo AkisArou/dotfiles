@@ -29,29 +29,28 @@ create_symlink "$HOME/dotfiles/vim/.vimrc" "$HOME/.vimrc"
 create_symlink "$HOME/dotfiles/rofi" "$HOME/.config/rofi"
 create_symlink "$HOME/dotfiles/dunst" "$HOME/.config/dunst"
 create_symlink "$HOME/dotfiles/ssh/config" "$HOME/.ssh/config"
-# create_symlink "$HOME/dotfiles/xorg/.xinitrc" "$HOME/.xinitrc"
-# create_symlink "$HOME/dotfiles/xorg/.Xresources" "$HOME/.Xresources"
-# create_symlink "$HOME/dotfiles/zsh/.zprofile" "$HOME/.zprofile"
-# create_symlink "$HOME/dotfiles/i3" "$HOME/.config/i3"
-# create_symlink "$HOME/dotfiles/git" "$HOME/.config/git"
-# create_symlink "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"
+create_symlink "$HOME/dotfiles/xorg/.xinitrc" "$HOME/.xinitrc"
+create_symlink "$HOME/dotfiles/xorg/.Xresources" "$HOME/.Xresources"
+create_symlink "$HOME/dotfiles/zsh/.zprofile" "$HOME/.zprofile"
+create_symlink "$HOME/dotfiles/i3" "$HOME/.config/i3"
+create_symlink "$HOME/dotfiles/git" "$HOME/.config/git"
+create_symlink "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"
 create_symlink "$HOME/dotfiles/.ideavimrc" "$HOME/.ideavimrc"
-# create_symlink "$HOME/dotfiles/.tmux.conf" "$HOME/.tmux.conf"
-# create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
-# create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
-# create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
-# create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
-# create_symlink "$HOME/dotfiles/yazi" "$HOME/.config/yazi"
+create_symlink "$HOME/dotfiles/.tmux.conf" "$HOME/.tmux.conf"
+create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
+create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
+create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
+create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 #
-# PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
+PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
+
+if [ -z "$PROFILE_DIR" ]; then
+  echo "Firefox profile directory not found."
+  exit 1
+fi
 #
-# if [ -z "$PROFILE_DIR" ]; then
-#   echo "Firefox profile directory not found."
-#   exit 1
-# fi
-#
-# create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
-# sudo ln -s "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
+create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
+create_symlink "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
 #
 # ./docker/generate-deamon-json.sh
 #
