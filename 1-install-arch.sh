@@ -36,7 +36,6 @@ packagesYay=(
   "base-devel"
   "acpi"
   "acpid"
-  "acpi_call"
   "firewalld"
   "wol"
   "rsync"
