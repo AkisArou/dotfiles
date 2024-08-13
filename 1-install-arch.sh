@@ -123,11 +123,11 @@ packagesYay=(
   "fwupd"
   "ueberzugpp"
   "imagemagick"
+  "ghostscript"
   "ttf-meslo-nerd"
   "preload"
   "pnpm-shell-completion"
   "wol"
-  "ghostscript"
   "libreoffice-still"
   "kitty"
 )
