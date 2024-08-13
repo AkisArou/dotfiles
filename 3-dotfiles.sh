@@ -41,7 +41,7 @@ create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
 create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
-#
+
 PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
 
 if [ -z "$PROFILE_DIR" ]; then
@@ -51,7 +51,7 @@ fi
 #
 create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
 create_symlink "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
-#
-# ./docker/generate-deamon-json.sh
-#
-# echo "DONE! Please reboot your system and run 4-config.sh!"
+
+./docker/generate-deamon-json.sh
+
+echo "DONE! Please reboot your system and run 4-config.sh!"
