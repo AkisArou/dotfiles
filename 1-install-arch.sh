@@ -86,7 +86,6 @@ packagesYay=(
   "zip"
   "unzip"
   "rar"
-  "trizen"
   "fastfetch"
   "ripgrep"
   "fd"
