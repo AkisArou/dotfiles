@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 userresources=$HOME/.Xresources
 usermodmap=$HOME/.Xmodmap
@@ -29,7 +29,10 @@ fi
 
 export XDG_SESSION_TYPE="x11"
 
-# invoke global X session script
-#. /etc/X11/Xsession
 [[ -f ~/.Xresources ]] && xrdb -merge -I"$HOME" ~/.Xresources
+
+if [ "$HOST" = "arch-xps" ]; then
+  xrdb -merge <<<"Xft.dpi: 192"
+fi
+
 exec i3
