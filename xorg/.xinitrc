@@ -9,26 +9,27 @@ sysmodmap=/etc/X11/xinit/.Xmodmap
 
 if [ -f $sysresources ]; then
 
-	xrdb -merge $sysresources
+  xrdb -merge $sysresources
 
 fi
 
 if [ -f $sysmodmap ]; then
-	xmodmap $sysmodmap
+  xmodmap $sysmodmap
 fi
 
 if [ -f "$userresources" ]; then
 
-	xrdb -merge "$userresources"
+  xrdb -merge "$userresources"
 
 fi
 
 if [ -f "$usermodmap" ]; then
-	xmodmap "$usermodmap"
+  xmodmap "$usermodmap"
 fi
+
+export XDG_SESSION_TYPE="x11"
 
 # invoke global X session script
 #. /etc/X11/Xsession
-[[ -f ~/.Xresources ]] && xrdb -merge -I$HOME ~/.Xresources
+[[ -f ~/.Xresources ]] && xrdb -merge -I"$HOME" ~/.Xresources
 exec i3
-
