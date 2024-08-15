@@ -32,6 +32,7 @@ fi
 # ------------------------------------------------------
 packagesYay=(
   "fwupd"
+  "udisks2" # Needed for fwupd
   "linux-headers"
   "base-devel"
   "acpi"
