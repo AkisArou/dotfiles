@@ -1,20 +1,7 @@
 return {
   {
-    lazy = true,
-    "jay-babu/mason-nvim-dap.nvim",
-    dependencies = "mason.nvim",
-    cmd = { "DapInstall", "DapUninstall" },
-    opts = {
-      automatic_installation = true,
-      ensure_installed = {
-        "js",
-        "chrome",
-      },
-    },
-  },
-  {
     "mfussenegger/nvim-dap",
-    event = "VeryLazy",
+    -- event = "VeryLazy",
     dependencies = {
       { "rcarriga/nvim-dap-ui" },
       { "nvim-neotest/nvim-nio" },
@@ -178,33 +165,41 @@ return {
         dapui.close({})
       end
 
-      if not dap.adapters["pwa-node"] then
-        require("dap").adapters["pwa-node"] = {
-          type = "server",
-          host = "localhost",
-          port = "${port}",
-          executable = {
-            command = "node",
-            -- 💀 Make sure to update this path to point to your installation
-            args = {
-              require("mason-registry").get_package("js-debug-adapter"):get_install_path()
-                .. "/js-debug/src/dapDebugServer.js",
-              "${port}",
-            },
-          },
-        }
-      end
+      dap.adapters.firefox = {
+        type = "executable",
+        command = "node",
+        args = {
+          require("mason-registry").get_package("firefox-debug-adapter"):get_install_path()
+            .. "/dist/adapter.bundle.js",
+          "${port}",
+        },
+      }
 
-      if not dap.adapters.chrome then
-        dap.adapters.chrome = {
-          type = "executable",
+      dap.configurations.typescriptreact = {
+        {
+          name = "Debug with Firefox",
+          type = "firefox",
+          request = "launch",
+          reAttach = true,
+          url = "http://localhost:5173",
+          webRoot = "${workspaceFolder}",
+          firefoxExecutable = "/usr/bin/firefox",
+        },
+      }
+
+      dap.adapters["pwa-node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
           command = "node",
           args = {
-            require("mason-registry").get_package("chrome-debug-adapter"):get_install_path()
-              .. "/out/src/chromeDebug.js",
+            require("mason-registry").get_package("js-debug-adapter"):get_install_path()
+              .. "/js-debug/src/dapDebugServer.js",
+            "${port}",
           },
-        }
-      end
+        },
+      }
 
       dap.configurations["typescript"] = {
         {
