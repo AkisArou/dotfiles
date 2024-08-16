@@ -54,6 +54,7 @@ create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
 sudo -E ln -s "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
 
 # LibreWolf
+# Policies for extensions should be handled manually for now
 create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$HOME/.librewolf/librewolf.overrides.cfg"
 
 ./docker/generate-deamon-json.sh
