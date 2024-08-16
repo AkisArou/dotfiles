@@ -24,3 +24,4 @@ user_pref("full-screen-api.warning.timeout", 0);
 user_pref("layout.css.always_underline_links", false);
 user_pref("general.smoothScroll", true);
 user_pref("general.smoothScroll.msdPhysics.enabled", true);
+user_pref("layout.css.prefers-color-scheme.content-override", 2);
