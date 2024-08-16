@@ -68,6 +68,7 @@ packagesYay=(
   "chromium"
   "microsoft-edge-stable-bin"
   "firefox"
+  "librewolf-bin"
   "dunst"
   "pcmanfm-gtk3"
   "ttf-hack-nerd"
