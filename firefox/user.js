@@ -7,7 +7,6 @@ user_pref("privacy.donottrackheader.enabled", true);
 user_pref("privacy.trackingprotection.enabled", true);
 user_pref("privacy.trackingprotection.emailtracking.enabled", true);
 user_pref("privacy.trackingprotection.socialtracking.enabled", true);
-user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("browser.download.always_ask_before_handling_new_types", true);
 user_pref("browser.startup.page", 3); // 3 = Restore previous session
 user_pref("browser.quitShortcut.disabled", true);

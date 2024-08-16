@@ -42,7 +42,7 @@ create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 
-# FIREFOX
+# Firefox
 PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
 
 if [ -z "$PROFILE_DIR" ]; then
@@ -52,6 +52,9 @@ fi
 #
 create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
 sudo -E ln -s "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
+
+# LibreWolf
+create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$HOME/.librewolf/librewolf.overrides.cfg"
 
 ./docker/generate-deamon-json.sh
 
