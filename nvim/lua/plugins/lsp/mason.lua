@@ -2,18 +2,6 @@ return {
   "williamboman/mason.nvim",
   dependencies = {
     "williamboman/mason-lspconfig.nvim",
-    {
-      "jay-babu/mason-nvim-dap.nvim",
-      dependencies = "mason.nvim",
-      cmd = { "DapInstall", "DapUninstall" },
-      opts = {
-        automatic_installation = true,
-        ensure_installed = {
-          "js",
-          "firefox",
-        },
-      },
-    },
   },
   lazy = true,
   config = function()

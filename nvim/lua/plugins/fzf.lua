@@ -25,6 +25,5 @@ return {
     vim.keymap.set("n", "<leader>fc", fzf_lua.git_commits, { desc = "Git commits" })
     vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
     vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
-    vim.keymap.set("n", "<leader>df", fzf_lua.dap_configurations, { desc = "Configurations" })
   end,
 }
