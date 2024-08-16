@@ -42,6 +42,7 @@ create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 
+# FIREFOX
 PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
 
 if [ -z "$PROFILE_DIR" ]; then
