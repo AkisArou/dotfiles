@@ -36,7 +36,6 @@ packagesYay=(
   "linux-headers"
   "base-devel"
   "acpi"
-  "acpid"
   "firewalld"
   "wol"
   "rsync"
