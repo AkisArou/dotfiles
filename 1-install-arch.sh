@@ -35,6 +35,7 @@ packagesYay=(
   "udisks2" # Needed for fwupd
   "linux-headers"
   "base-devel"
+  "posix"
   "acpi"
   "firewalld"
   "wol"
