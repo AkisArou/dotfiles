@@ -1,5 +1,6 @@
 return {
   "nvim-tree/nvim-tree.lua",
+  enabled = false,
   dependencies = {
     {
       "antosha417/nvim-lsp-file-operations",

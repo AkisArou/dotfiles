@@ -25,3 +25,4 @@ user_pref("layout.css.always_underline_links", false);
 user_pref("general.smoothScroll", true);
 user_pref("general.smoothScroll.msdPhysics.enabled", true);
 user_pref("layout.css.prefers-color-scheme.content-override", 2);
+user_pref("media.videocontrols.picture-in-picture.enabled", false);
