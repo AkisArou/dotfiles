@@ -1,12 +1,23 @@
 return {
   "nvim-neo-tree/neo-tree.nvim",
-  -- branch = "v3.x",
+  branch = "v3.x",
   event = "VeryLazy",
   enabled = true,
   dependencies = {
     "nvim-lua/plenary.nvim",
     "nvim-tree/nvim-web-devicons",
     "MunifTanjim/nui.nvim",
+    dependencies = {
+      {
+        "antosha417/nvim-lsp-file-operations",
+        dependencies = {
+          "nvim-lua/plenary.nvim",
+        },
+        config = function()
+          require("lsp-file-operations").setup()
+        end,
+      },
+    },
   },
   config = function()
     vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
