@@ -63,8 +63,10 @@ export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
 
 export MOZ_USE_XINPUT2=1
+export MOZ_WEBRENDER=1
+export MOZ_X11_EGL=1
 
-if [[ "$HOST" == "archlinux-xps" ]]; then
+if [[ "$HOST" == "arch-xps" ]]; then
   export VDPAU_DRIVER=va_gl
 fi
 

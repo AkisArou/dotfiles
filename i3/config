@@ -23,7 +23,7 @@ set $right l
 set $term ~/dotfiles/st/launch.sh
 # set $browser /usr/bin/brave --remote-debugging-port=9229
 # set $browser /usr/bin/firefox
-set $browser /usr/bin/librewolf
+set $browser ~/dotfiles/librewolf/launch.sh
 set $menu ~/dotfiles/rofi/init.sh
 
 # Font for window titles. Will also be used by the bar unless a different font
