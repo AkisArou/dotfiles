@@ -34,6 +34,8 @@ export XDG_SESSION_TYPE="x11"
 if [ "$HOST" = "arch-xps" ]; then
   xrdb -merge <<<"Xft.dpi: 192"
   export VDPAU_DRIVER=va_gl
+else
+  export XCURSOR_SIZE=24
 fi
 
 exec i3
