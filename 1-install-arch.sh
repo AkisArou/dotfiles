@@ -31,6 +31,7 @@ fi
 # Install Packages
 # ------------------------------------------------------
 packages=(
+  "mesa"
   "audit"
   "git"
   "fwupd"
