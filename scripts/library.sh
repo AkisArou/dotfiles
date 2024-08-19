@@ -2,7 +2,7 @@
 
 is_package_installed() {
   package="$1"
-  check="$(yay -Qs --color always "${package}" | grep "local" | grep "${package} ")"
+  check="$(paru -Qs --color always "${package}" | grep "local" | grep "${package} ")"
   if [ -n "${check}" ]; then
     echo 0
     return
@@ -28,7 +28,7 @@ install_packages() {
   fi
 
   printf "Packages to install:\n%s\n" "${toInstall[@]}"
-  yay --noconfirm -S "${toInstall[@]}"
+  paru --noconfirm -S "${toInstall[@]}"
 }
 
 create_symlink() {
@@ -81,7 +81,7 @@ find_extra_packages() {
   local -n packages_in_list="$1"
 
   # Read explicitly installed packages into an array
-  IFS=$'\n' read -r -d '' -a explicit_packages < <(yay -Qe | awk '{print $1}' && printf '\0')
+  IFS=$'\n' read -r -d '' -a explicit_packages < <(paru -Qe | awk '{print $1}' && printf '\0')
 
   local missing_packages=()
   local extra_packages=()
@@ -117,7 +117,7 @@ find_removed_packages() {
   local -n packages_in_list="$1"
 
   # Read explicitly installed packages into an array
-  IFS=$'\n' read -r -d '' -a explicit_packages < <(yay -Qe | awk '{print $1}' && printf '\0')
+  IFS=$'\n' read -r -d '' -a explicit_packages < <(paru -Qe | awk '{print $1}' && printf '\0')
 
   local missing_packages=()
   local extra_packages=()

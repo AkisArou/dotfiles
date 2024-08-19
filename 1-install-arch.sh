@@ -13,18 +13,18 @@ echo "-------------------------------------"
 echo ""
 
 # ------------------------------------------------------
-# Check if yay is installed
+# Paru
 # ------------------------------------------------------
-if sudo pacman -Qs yay >/dev/null; then
-  echo "yay is installed. You can proceed with the installation"
+if sudo pacman -Qs paru >/dev/null; then
+  echo "paru is installed..."
 else
-  echo "yay is not installed. Will be installed now!"
-  git clone https://aur.archlinux.org/yay-git.git ~/yay-git
-  cd ~/yay-git || exit
+  echo "paru is not installed. Will be installed now!"
+  git clone https://aur.archlinux.org/paru.git ~/paru
+  cd paru || exit
   makepkg -si
   cd ~/dotfiles/ || return
   clear
-  echo "yay has been installed successfully."
+  echo "paru has been installed successfully."
 fi
 
 # ------------------------------------------------------
@@ -125,13 +125,14 @@ zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) 
 # ------------------------------------------------------
 # ST
 # ------------------------------------------------------
+echo "Making st..."
 sudo make -C ~/dotfiles/st clean install
 
 # ------------------------------------------------------
 # Install custom issue (login prompt)
 # ------------------------------------------------------
 echo ""
-echo "-> Install login screen"
+echo "Installing login screen..."
 sudo cp ~/dotfiles/login/issue /etc/issue
 echo "Login prompt installed."
 
