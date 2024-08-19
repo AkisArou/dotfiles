@@ -6,6 +6,7 @@ packages=(
   "xf86-video-amdgpu"
   "radeonsi"
   "radeontop"
+  "mesa-vdpau"
 )
 
 install_packages "${packages[@]}"
