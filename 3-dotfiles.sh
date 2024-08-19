@@ -57,7 +57,14 @@ sudo ln -sf "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution
 
 # LibreWolf
 # Policies for extensions should be handled manually for now
-create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$HOME/.librewolf/librewolf.overrides.cfg"
+LIBREWOLF_CONFIG="$HOME/.librewolf/librewolf.overrides.cfg"
+
+# Create the destination file if it doesn't exist
+if [ ! -f "$LIBREWOLF_CONFIG" ]; then
+  mkdir -p "$(dirname "$LIBREWOLF_CONFIG")"
+  touch "$LIBREWOLF_CONFIG"
+fi
+create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CONFIG"
 
 ./docker/generate-deamon-json.sh
 
