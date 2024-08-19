@@ -2,7 +2,7 @@
 #
 source "$(dirname "$0")/scripts/library.sh"
 
-packagesYay=(
+packages=(
   "xorg"
   "xorg-xinit"
   "xorg-xinput"
@@ -13,13 +13,12 @@ packagesYay=(
   "rofi-power-menu"
   "nitrogen"
   "xclip"
-  "xf86-video-intel"
   "polybar"
 )
 
 # ------------------------------------------------------
 # Install required packages
 # ------------------------------------------------------
-installPackagesYay "${packagesYay[@]}"
+install_packages "${packages[@]}"
 
 echo "DONE! Please reboot your system!"

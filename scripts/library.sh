@@ -1,6 +1,6 @@
 #!/bin/bash
 
-islnstalledYay() {
+is_package_installed() {
   package="$1"
   check="$(yay -Qs --color always "${package}" | grep "local" | grep "${package} ")"
   if [ -n "${check}" ]; then
@@ -11,11 +11,11 @@ islnstalledYay() {
   return
 }
 
-installPackagesYay() {
+install_packages() {
   toInstall=()
 
   for pkg; do
-    if [[ $(islnstalledYay "${pkg}") == 0 ]]; then
+    if [[ $(is_package_installed "${pkg}") == 0 ]]; then
       echo "${pkg} is already installed."
       continue
     fi
@@ -75,4 +75,77 @@ create_symlink() {
   # Create the symlink
   ln -s "$target" "$link_name"
   echo "Created symlink: '$link_name' -> '$target'."
+}
+
+find_extra_packages() {
+  local -n packages_in_list="$1"
+
+  # Read explicitly installed packages into an array
+  IFS=$'\n' read -r -d '' -a explicit_packages < <(yay -Qe | awk '{print $1}' && printf '\0')
+
+  local missing_packages=()
+  local extra_packages=()
+  #
+  # Check each explicitly installed package against the provided list
+  for item2 in "${explicit_packages[@]}"; do
+    local found=false
+
+    for item1 in "${packages_in_list[@]}"; do
+      if [[ "$item2" == "$item1" ]]; then
+        found=true
+        break
+      fi
+    done
+
+    if [[ "$found" == false ]]; then
+      extra_packages+=("$item2")
+    fi
+  done
+
+  # Output the extra packages
+  if [ ${#extra_packages[@]} -eq 0 ]; then
+    echo "No extra explicitly installed packages found."
+  else
+    echo "Explicitly installed packages not in the provided list:"
+    for package in "${extra_packages[@]}"; do
+      echo "$package"
+    done
+  fi
+}
+
+find_removed_packages() {
+  local -n packages_in_list="$1"
+
+  # Read explicitly installed packages into an array
+  IFS=$'\n' read -r -d '' -a explicit_packages < <(yay -Qe | awk '{print $1}' && printf '\0')
+
+  local missing_packages=()
+  local extra_packages=()
+
+  # Check each package in the provided list
+  for item1 in "${packages_in_list[@]}"; do
+    local found=false
+
+    for item2 in "${explicit_packages[@]}"; do
+      if [[ "$item1" == "$item2" ]]; then
+        found=true
+        break
+      fi
+    done
+
+    if [[ "$found" == false ]]; then
+      missing_packages+=("$item1")
+    fi
+  done
+
+  # Output the missing packages
+  if [ ${#missing_packages[@]} -eq 0 ]; then
+    echo "All explicitly installed packages are in the provided list."
+  else
+    echo "Packages in the provided list but not installed explicitly:"
+    for package in "${missing_packages[@]}"; do
+      echo "$package"
+    done
+  fi
+
 }

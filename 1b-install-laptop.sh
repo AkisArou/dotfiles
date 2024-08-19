@@ -2,9 +2,10 @@
 
 source "$(dirname "$0")/scripts/library.sh"
 
-packagesYay=(
+packages=(
+  "xf86-video-intel"
   "intel-media-driver"
   "intel-gpu-tools"
 )
 
-installPackagesYay "${packagesYay[@]}"
+install_packages "${packages[@]}"

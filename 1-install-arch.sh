@@ -30,10 +30,13 @@ fi
 # ------------------------------------------------------
 # Install Packages
 # ------------------------------------------------------
-packagesYay=(
+packages=(
+  "audit"
+  "git"
   "fwupd"
   "udisks2" # Needed for fwupd
   "linux-headers"
+  "base"
   "base-devel"
   "posix"
   "acpi"
@@ -79,7 +82,7 @@ packagesYay=(
   "ttf-meslo-nerd"
   "noto-fonts-emoji"
   "terminus-font"
-  "exa"
+  "eza"
   "bat"
   "python-pip"
   "xdg-desktop-portal-gtk"
@@ -90,6 +93,7 @@ packagesYay=(
   "zip"
   "unzip"
   "rar"
+  "flameshot"
   "fastfetch"
   "ripgrep"
   "fd"
@@ -112,10 +116,10 @@ packagesYay=(
   "libreoffice-still"
 )
 
-# ------------------------------------------------------
-# Install required packages
-# ------------------------------------------------------
-installPackagesYay "${packagesYay[@]}"
+------------------------------------------------------
+Install required packages
+------------------------------------------------------
+install_packages "${packages[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
 # ------------------------------------------------------
