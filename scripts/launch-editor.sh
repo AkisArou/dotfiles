@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 filename=$1
 line=$2
 column=$3
