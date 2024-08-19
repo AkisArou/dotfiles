@@ -1,20 +1,10 @@
 return {
-
-  {
-    "vhyrro/luarocks.nvim",
-    priority = 1001, -- this plugin needs to run before anything else
-    opts = {
-      rocks = { "magick" },
-    },
-  },
-  {
-    "3rd/image.nvim",
-    enabled = os.getenv("TERMINAL") == "kitty",
-    dependencies = { "luarocks.nvim" },
-    config = function()
-      require("image").setup({
-        backend = "kitty",
-      })
-    end,
-  },
+  "3rd/image.nvim",
+  enabled = true,
+  dependencies = { "leafo/magick" },
+  config = function()
+    require("image").setup({
+      backend = "ueberzug",
+    })
+  end,
 }
