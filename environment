@@ -1,0 +1,8 @@
+#
+# This file is parsed by pam_env module
+#
+# Syntax: simple "KEY=VAL" pairs on separate lines
+#
+MOZ_USE_XINPUT2=1
+MOZ_WEBRENDER=1
+MOZ_X11_EGL=1

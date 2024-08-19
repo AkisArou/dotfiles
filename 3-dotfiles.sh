@@ -22,6 +22,8 @@ fi
 # ------------------------------------------------------
 # Create symbolic links
 # ------------------------------------------------------
+sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
+
 create_symlink "$HOME/dotfiles/alacritty" "$HOME/.config/alacritty"
 create_symlink "$HOME/dotfiles/kitty" "$HOME/.config/kitty"
 create_symlink "$HOME/dotfiles/nvim" "$HOME/.config/nvim"
@@ -51,7 +53,7 @@ if [ -z "$PROFILE_DIR" ]; then
 fi
 #
 create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
-sudo -E ln -s "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
+sudo ln -sf "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
 
 # LibreWolf
 # Policies for extensions should be handled manually for now

@@ -3,8 +3,8 @@
 source "$(dirname "$0")/scripts/library.sh"
 
 packagesYay=(
-  "intel-media-driver"
-  "intel-gpu-tools"
+  "radeonsi"
+  "radeontop"
 )
 
 installPackagesYay "${packagesYay[@]}"
