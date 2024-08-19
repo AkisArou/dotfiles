@@ -4,7 +4,8 @@ Xft.rgba: rgb
 Xft.autohint: true
 Xft.hintstyle: hintfull
 Xft.lcdfilter: lcdfilter
-
+Xcursor.theme: default
+Xcursor.size: 24
 ! TokyoNight colors for Xresources
 
 *background: #24283b
