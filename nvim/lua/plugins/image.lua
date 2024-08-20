@@ -1,6 +1,6 @@
 return {
   "3rd/image.nvim",
-  enabled = true,
+  enabled = false,
   dependencies = { "leafo/magick" },
   config = function()
     require("image").setup({
