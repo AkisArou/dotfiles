@@ -20,7 +20,7 @@ if sudo pacman -Qs paru >/dev/null; then
 else
   echo "paru is not installed. Will be installed now!"
   git clone https://aur.archlinux.org/paru.git ~/paru
-  cd paru || exit
+  cd ~/paru || exit
   makepkg -si
   cd ~/dotfiles/ || return
   clear
