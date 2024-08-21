@@ -7,7 +7,7 @@ This is the configuration of my Arch linux
 - WM: i3
 - Bar: polybar
 - Terminal: st | kitty | alacritty
-- Editor: nvim (configured for web dev) & vim
+- Editor: nvim (configured for web dev) & vim (basic config)
 - Menus: rofi
 - Browsers: brave, chromium, edge, firefox
 - Filemanager: yazi, pcmanfm
@@ -20,4 +20,4 @@ Also:
 - gtk themes
 - git config
 
-* various scripts
+* various helper scripts
