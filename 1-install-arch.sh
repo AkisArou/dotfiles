@@ -162,4 +162,4 @@ sudo usermod -aG wheel "$USER"
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
-echo "DONE!"
+echo "DONE! set zsh as your default shell if not yet"
