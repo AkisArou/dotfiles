@@ -24,6 +24,7 @@ else
   makepkg -si
   cd ~/dotfiles/ || return
   clear
+  rm -rf ~/paru
   echo "paru has been installed successfully."
 fi
 
