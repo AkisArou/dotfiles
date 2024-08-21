@@ -141,9 +141,15 @@ local themes = {
       vim.g.doom_one_plugin_lspsaga = false
     end,
   },
+  gruber = {
+    name = "gruber-darker",
+    repo = "blazkowolf/gruber-darker.nvim",
+    branch = "main",
+    config = function() end,
+  },
 }
 
-local selectedTheme = themes.tokyonight
+local selectedTheme = themes.gruber
 
 if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true
