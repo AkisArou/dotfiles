@@ -1,3 +1,4 @@
+alias sudo = "sudo -E"
 alias ta='tmux a'
 alias v='nvim --listen /tmp/nvim.pipe'
 alias r='yazi'
