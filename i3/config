@@ -36,12 +36,6 @@ exec --no-startup-id nitrogen --set-auto ~/dotfiles/wallpapers/arch-tokyonight.p
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
 
-exec --no-startup-id iwgtk -i
-
-exec --no-startup-id blueman-applet
-
-exec --no-startup-id snixembed --fork
-
 exec --no-startup-id flameshot
 
 # Use pactl to adjust volume in PulseAudio.
