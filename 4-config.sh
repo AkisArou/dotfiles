@@ -31,7 +31,8 @@ echo "-> Setting up tmux"
 echo "-------------------------------------"
 echo ""
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-rm -rf ~/.tmux/plugins/tpm/.git
+~/.tmux/plugins/tpm/scripts/install_plugins.sh
+tmux source ~/.tmux.conf
 
 echo ""
 echo "-------------------------------------"
