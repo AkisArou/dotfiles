@@ -44,7 +44,9 @@ create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 
+# ------------------------------------------------------
 # Firefox
+# ------------------------------------------------------
 PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
 
 if [ -z "$PROFILE_DIR" ]; then
@@ -55,17 +57,23 @@ fi
 create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
 sudo ln -sf "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
 
-# LibreWolf
-# Policies for extensions should be handled manually for now
+# ------------------------------------------------------
+# Librewolf
+# ------------------------------------------------------
+#
+### Policies for extensions should be handled manually for now
 LIBREWOLF_CONFIG="$HOME/.librewolf/librewolf.overrides.cfg"
 
-# Create the destination file if it doesn't exist
 if [ ! -f "$LIBREWOLF_CONFIG" ]; then
   mkdir -p "$(dirname "$LIBREWOLF_CONFIG")"
   touch "$LIBREWOLF_CONFIG"
 fi
+
 create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CONFIG"
 
+# ------------------------------------------------------
+# Docker
+# ------------------------------------------------------
 ./docker/generate-deamon-json.sh
 
 echo "DONE! Please reboot your system and run 4-config.sh!"
