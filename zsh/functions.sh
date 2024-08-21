@@ -1,4 +1,4 @@
-kill_process_by_port() {
+kill_by_port() {
   if [[ -n "$1" ]]; then
     local port="$1"
     local process_id
