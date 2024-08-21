@@ -4,25 +4,15 @@ vim.filetype.add({
     env = "dotenv",
     tiltfile = "tiltfile",
     Tiltfile = "tiltfile",
+    ["mdx"] = "markdown.mdx",
   },
   filename = {
     [".env"] = "dotenv",
     ["tsconfig.json"] = "jsonc",
     [".yamlfmt"] = "yaml",
+    ["librewolf.overrides.cfg"] = "javascript",
   },
   pattern = {
     ["%.env%.[%w_.-]+"] = "dotenv",
-  },
-})
-
-vim.filetype.add({
-  extension = {
-    mdx = "mdx",
-  },
-})
-
-vim.filetype.add({
-  extension = {
-    ["mdx"] = "markdown.mdx",
   },
 })
