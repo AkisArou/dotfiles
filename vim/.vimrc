@@ -2,6 +2,7 @@ nnoremap <SPACE> <Nop>
 let mapleader=" "
 
 nnoremap <leader>w :w<CR>
+nnoremap <leader>h :nohl<CR>
 
 " Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
