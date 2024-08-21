@@ -24,5 +24,31 @@ sus_desktop() {
 }
 
 paru() {
-  command paru "$@" && ~/dotfiles/polybar/scripts/refresh-updates.sh
+  if [ "$#" -eq 0 ]; then
+    # No arguments provided, just run paru
+    command paru && ~/dotfiles/polybar/scripts/refresh-updates.sh
+    return $?
+  else
+    local command="$1"
+
+    if [[ "$command" == "-Syu" ]]; then
+      command paru -Syu && ~/dotfiles/polybar/scripts/refresh-updates.sh
+      return $?
+    else
+      shift
+      local args="$@"
+
+      # Run paru with the provided command and arguments
+      if command paru "$command" "$args"; then
+        # Run refresh-updates.sh only if the command is related to installing, removing, or updating
+        if [[ "$command" == "-S" || "$command" == "-R" ]]; then
+          ~/dotfiles/polybar/scripts/refresh-updates.sh
+        fi
+      else
+        # Return the exit status of paru if it fails
+        return $?
+      fi
+    fi
+
+  fi
 }
