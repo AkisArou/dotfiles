@@ -52,7 +52,7 @@ asdf install
 
 echo ""
 echo "-------------------------------------"
-echo "-> Modified system for vite web build tool"
+echo "-> Modified system for vite"
 echo "-------------------------------------"
 echo ""
 # Check current limit
@@ -93,7 +93,7 @@ docker compose version
 
 echo ""
 echo "-------------------------------------"
-echo "-> NodeJS"
+echo "-> Configuring NodeJS"
 echo "-------------------------------------"
 echo ""
 corepack enable pnpm
@@ -101,9 +101,5 @@ corepack enable yarn
 asdf reshim nodejs
 corepack use pnpm@latest
 
-echo ""
-echo "-------------------------------------"
-echo "-> Installing global npm packages"
-echo "-------------------------------------"
-echo ""
+echo "Installing global npm packages..."
 npm i -g npm-workspaces-language-server
