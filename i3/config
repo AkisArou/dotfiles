@@ -20,6 +20,7 @@ set $left h
 set $down j
 set $up k
 set $right l
+
 set $term ~/dotfiles/st/launch.sh
 set $browser /usr/bin/librewolf
 set $menu ~/dotfiles/rofi/init.sh
