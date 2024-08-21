@@ -26,8 +26,8 @@ keymap("n", "<leader>ba", function()
   require("mini.bufremove").delete()
 end, { desc = "Delete all" })
 
--- -- Better paste
--- keymap("v", "p", "P", opts)
+-- Better paste
+keymap("v", "p", "P", opts)
 
 -- delete char without copying
 keymap("n", "x", '"_x')
