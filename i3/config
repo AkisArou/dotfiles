@@ -2,14 +2,16 @@
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
-# exec --no-startup-id libinput-gestures-setup autostart start
+# Start XDG autostart .desktop files using dex. See also
+# https://wiki.archlinux.org/index.php/XDG_Autostart
+exec --no-startup-id dex --autostart --environment i3
 exec --no-startup-id ~/dotfiles/xorg/xrandr.sh
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id ~/dotfiles/scripts/inactivity.sh
-
-
+exec --no-startup-id nitrogen --set-auto ~/dotfiles/wallpapers/arch-tokyonight.png
+exec --no-startup-id flameshot
 exec_always --no-startup-id ~/dotfiles/polybar/init.sh
 
 
@@ -18,25 +20,13 @@ set $left h
 set $down j
 set $up k
 set $right l
-# set $term ~/dotfiles/alacritty/alacritty.sh
-# set $term ~/dotfiles/kitty/kitty.sh
 set $term ~/dotfiles/st/launch.sh
-# set $browser /usr/bin/brave --remote-debugging-port=9229
-# set $browser /usr/bin/firefox
 set $browser /usr/bin/librewolf
 set $menu ~/dotfiles/rofi/init.sh
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:monospace 8
-exec --no-startup-id nitrogen --set-auto ~/dotfiles/wallpapers/arch-tokyonight.png
-
-
-# Start XDG autostart .desktop files using dex. See also
-# https://wiki.archlinux.org/index.php/XDG_Autostart
-exec --no-startup-id dex --autostart --environment i3
-
-exec --no-startup-id flameshot
 
 # Use pactl to adjust volume in PulseAudio.
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
