@@ -22,3 +22,7 @@ wake_desktop() {
 sus_desktop() {
   ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
+
+paru() {
+  command paru "$@" && ~/dotfiles/polybar/scripts/refresh-updates.sh
+}

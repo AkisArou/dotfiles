@@ -9,7 +9,6 @@ alias fgrep='grep -F --color=auto'
 alias egrep='grep -E --color=auto'
 alias ip='ip -color=auto'
 alias e='emacs -nw'
-alias paru='paru && ~/dotfiles/polybar/scripts/refresh-updates.sh'
 
 alias copy='xclip -sel clip'
 
