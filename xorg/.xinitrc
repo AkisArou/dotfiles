@@ -23,8 +23,6 @@ if [ -f "$usermodmap" ]; then
   xmodmap "$usermodmap"
 fi
 
-[[ -f ~/.Xresources ]] && xrdb -merge -I ~/.Xresources
-
 if [ "$HOST" = "arch-xps" ]; then
   xrdb -merge <<<"Xft.dpi: 192"
   export VDPAU_DRIVER=va_gl
