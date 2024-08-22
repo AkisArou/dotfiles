@@ -5,12 +5,10 @@ usermodmap=$HOME/.Xmodmap
 sysresources=/etc/X11/xinit/.Xresources
 sysmodmap=/etc/X11/xinit/.Xmodmap
 
-# merge in defaults and keymaps
+export XDG_SESSION_TYPE="x11"
 
 if [ -f $sysresources ]; then
-
   xrdb -merge $sysresources
-
 fi
 
 if [ -f $sysmodmap ]; then
@@ -18,18 +16,14 @@ if [ -f $sysmodmap ]; then
 fi
 
 if [ -f "$userresources" ]; then
-
   xrdb -merge "$userresources"
-
 fi
 
 if [ -f "$usermodmap" ]; then
   xmodmap "$usermodmap"
 fi
 
-export XDG_SESSION_TYPE="x11"
-
-[[ -f ~/.Xresources ]] && xrdb -merge -I"$HOME" ~/.Xresources
+[[ -f ~/.Xresources ]] && xrdb -merge -I ~/.Xresources
 
 if [ "$HOST" = "arch-xps" ]; then
   xrdb -merge <<<"Xft.dpi: 192"
