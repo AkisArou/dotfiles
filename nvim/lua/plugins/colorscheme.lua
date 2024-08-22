@@ -149,7 +149,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes.gruber
+local selectedTheme = themes.tokyonight
 
 if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true
