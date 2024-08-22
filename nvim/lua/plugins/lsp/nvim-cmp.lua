@@ -112,10 +112,8 @@ return {
       end,
     }
 
-    local preselect = cmp.PreselectMode.Item
-
     cmp.setup({
-      preselect = preselect,
+      preselect = cmp.PreselectMode.Item,
       completion = {
         completeopt = "menu,menuone,noinsert",
       },
@@ -137,16 +135,14 @@ return {
 
     -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
     cmp.setup.cmdline({ "/", "?" }, {
-      preselect = preselect,
       sources = {
         { name = "buffer" },
       },
-      mapping = cmp.mapping.preset.cmdline(mapping),
+      mapping = cmp.mapping.preset.cmdline(),
     })
 
     -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
     cmp.setup.cmdline(":", {
-      preselect = preselect,
       sources = cmp.config.sources({
         { name = "path" },
       }, {
@@ -154,7 +150,7 @@ return {
       }),
       ---@diagnostic disable-next-line: missing-fields
       matching = { disallow_symbol_nonprefix_matching = false },
-      mapping = cmp.mapping.preset.cmdline(mapping),
+      mapping = cmp.mapping.preset.cmdline(),
     })
   end,
 }
