@@ -87,7 +87,8 @@ ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 sudo usermod -aG docker $USER
 docker --version
-sudo systemctl enable docker.service
+# .socket instead of .service to start docker deamon only when needed
+sudo systemctl enable --now docker.socket
 docker context use default
 docker compose version
 
