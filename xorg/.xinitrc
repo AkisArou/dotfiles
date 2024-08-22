@@ -30,4 +30,5 @@ else
   export XCURSOR_SIZE=24
 fi
 
+~/dotfiles/xorg/xrandr.sh
 exec i3
