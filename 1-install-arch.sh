@@ -42,7 +42,6 @@ packages=(
   "base-devel"
   "posix"
   "acpi"
-  "firewalld"
   "wol"
   "libva-utils"
   "libvdpau-va-gl"
