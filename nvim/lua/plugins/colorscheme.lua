@@ -49,7 +49,6 @@ local themes = {
       -- For light theme
       -- vim.o.background = 'light'
 
-      local c = require("vscode.colors").get_colors()
       require("vscode").setup()
       require("vscode").load()
     end,

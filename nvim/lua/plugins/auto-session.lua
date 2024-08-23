@@ -13,11 +13,8 @@ end
 return {
   "rmagatti/auto-session",
   lazy = false,
-
   config = function()
     vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
-
-    -- Register the autocommand after Vim has entered
 
     require("auto-session").setup({
       auto_session_suppress_dirs = { "~/", "~/Downloads", "/" },
