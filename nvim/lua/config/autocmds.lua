@@ -1,10 +1,9 @@
--- Re-enable if yanky is removed
--- vim.cmd([[
---   augroup highlight_yank
---   autocmd!
---   au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
---   augroup END
--- ]])
+vim.cmd([[
+  augroup highlight_yank
+  autocmd!
+  au TextYankPost * silent! lua vim.highlight.on_yank({higroup="Visual", timeout=200})
+  augroup END
+]])
 
 function Close_empty_unnamed_buffers()
   local buffers = vim.api.nvim_list_bufs()
