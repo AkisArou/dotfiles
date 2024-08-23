@@ -7,7 +7,6 @@ packages=(
   "xorg-xinit"
   "xorg-xinput"
   "i3-wm"
-  "i3lock"
   "xidlehook"
   "rofi"
   "rofi-power-menu"
