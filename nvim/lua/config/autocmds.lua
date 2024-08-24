@@ -17,8 +17,4 @@ function Close_empty_unnamed_buffers()
   end
 end
 
-local function register_autocmd()
-  vim.api.nvim_command("autocmd BufReadPost * lua Close_empty_unnamed_buffers()")
-end
-
-vim.defer_fn(register_autocmd, 1000)
+vim.api.nvim_command("autocmd BufReadPost * lua Close_empty_unnamed_buffers()")
