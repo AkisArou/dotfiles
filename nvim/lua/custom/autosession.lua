@@ -107,6 +107,7 @@ function M.load_session()
   if file then
     local bufnrs = {}
     local last_focused_file = nil
+    local open_files = {}
 
     -- Debugging output
     print("Loading session from: " .. session_path)
@@ -118,14 +119,21 @@ function M.load_session()
       print("Last focused file: " .. last_focused_file)
     end
 
-    -- Read the remaining lines for open files
+    -- Read the remaining lines and check if files are readable
     for line in file:lines() do
       if vim.fn.filereadable(line) == 1 then
-        vim.cmd("edit " .. vim.fn.fnameescape(line))
-        table.insert(bufnrs, vim.api.nvim_get_current_buf())
+        table.insert(open_files, line)
+      else
+        print("File not readable or doesn't exist: " .. line)
       end
     end
     file:close()
+
+    -- Open all files at once
+    for _, filename in ipairs(open_files) do
+      vim.cmd("edit " .. vim.fn.fnameescape(filename))
+      table.insert(bufnrs, vim.api.nvim_get_current_buf())
+    end
 
     vim.defer_fn(function()
       refresh_syntax(bufnrs)
