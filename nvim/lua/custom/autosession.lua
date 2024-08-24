@@ -92,8 +92,8 @@ local function refresh_syntax(bufnrs)
       vim.api.nvim_set_current_buf(bufnr)
       if vim.treesitter then
         vim.cmd("edit") -- This reattaches Treesitter
-      else
-        vim.cmd("syntax sync fromstart")
+        -- else
+        --   vim.cmd("syntax sync fromstart")
       end
     end
   end
