@@ -115,6 +115,7 @@ packages=(
   "ghostscript"
   "pnpm-shell-completion"
   "libreoffice-still"
+  "android-studio"
 )
 
 # ------------------------------------------------------
