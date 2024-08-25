@@ -1,15 +1,15 @@
 # akisarou dotfiles
 
-This is the configuration of my Arch linux
+This is the configuration of my Arch linux and other useful programs
 
-## Common Packages
+## Packages
 
 - WM: i3
 - Bar: polybar
 - Terminal: st | kitty | alacritty
 - Editor: nvim (configured for web dev) | vim (basic config) | vscode
 - Menus: rofi
-- Browsers: brave, chromium, edge, firefox
+- Browsers: librewolf, brave, chromium, edge, firefox
 - Filemanager: yazi, pcmanfm
 - Notifications: dunst
 - Shell: zsh
@@ -17,7 +17,7 @@ This is the configuration of my Arch linux
 Also:
 
 - docker data-root at $HOME/docker
-- gtk themes
 - git config
+- fzf, fd
 
 * various helper scripts
