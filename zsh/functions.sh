@@ -63,3 +63,17 @@ ccd() {
   )" || return
   cd "$dir" || return
 }
+
+fv() {
+  local file
+  file="$(
+    find "${1:-.}" -path '*/\.*' -prune -o -type f -print 2>/dev/null |
+      fzf +m \
+        --preview='tree -C {} | head -n $FZF_PREVIEW_LINES' \
+        --preview-window='right:hidden:wrap' \
+        --bind=ctrl-v:toggle-preview \
+        --bind=ctrl-x:toggle-sort \
+        --header='(view:ctrl-v) (sort:ctrl-x)'
+  )" || return
+  nvim "$file" || return
+}
