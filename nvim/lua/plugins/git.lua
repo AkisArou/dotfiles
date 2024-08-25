@@ -28,6 +28,12 @@ return {
         -- Requires you to have `ibhagwan/fzf-lua` installed.
         fzf_lua = true,
       },
+      ignored_settings = {
+        "NeogitPushPopup--force-with-lease",
+        "NeogitPushPopup--force",
+        "NeogitPullPopup--rebase",
+        "NeogitCommitPopup--allow-empty",
+      },
     })
 
     vim.keymap.set("n", "<leader>gs", vim.cmd.Neogit)
