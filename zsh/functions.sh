@@ -49,3 +49,17 @@ paru() {
     fi
   fi
 }
+
+zd() {
+  local dir
+  dir="$(
+    find "${1:-.}" -path '*/\.*' -prune -o -type d -print 2>/dev/null |
+      fzf +m \
+        --preview='tree -C {} | head -n $FZF_PREVIEW_LINES' \
+        --preview-window='right:hidden:wrap' \
+        --bind=ctrl-v:toggle-preview \
+        --bind=ctrl-x:toggle-sort \
+        --header='(view:ctrl-v) (sort:ctrl-x)'
+  )" || return
+  cd "$dir" || return
+}
