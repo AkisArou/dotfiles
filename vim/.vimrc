@@ -85,6 +85,10 @@ set background=dark
 
 colorscheme wildcharm
 
-set rtp+=/usr/bin/fzf
-
+let fzf_path = system('which fzf')
+let fzf_path = substitute(fzf_path, '\n', '', 'g') " Remove any trailing newline
+if !empty(fzf_path)
+  execute 'set rtp+=' . fzf_path
 nnoremap <leader>ff <cmd>FZF<CR>
+endif
+
