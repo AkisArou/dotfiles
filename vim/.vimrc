@@ -85,3 +85,6 @@ set background=dark
 
 colorscheme wildcharm
 
+set rtp+=/usr/bin/fzf
+
+nnoremap <leader>ff <cmd>FZF<CR>
