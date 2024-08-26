@@ -163,6 +163,7 @@ for_window [window_role="toolbox"] floating enable
 for_window [window_role="webconsole"] floating enable
 for_window [window_type="dialog"] floating enable
 for_window [window_type="menu"] floating enable
+for_window [title="teams.microsoft.com is sharing your screen."] move scratchpad
 
 floating_minimum_size 400 x 300
 floating_maximum_size 1400 x 1400
