@@ -13,9 +13,29 @@
   "ui_font_family": "MesloLGS Nerd Font Mono",
   "buffer_font_family": "MesloLGS Nerd Font Mono",
   "buffer_line_height": "comfortable",
+  "autosave": "on_focus_change",
+  "ensure_final_newline_on_save": false,
+  "toolbar": {
+    "breadcrumbs": false,
+    "quick_actions": false
+  },
   "theme": {
     "mode": "dark",
     "light": "One Dark",
     "dark": "Tokyo Night Storm"
+  },
+  "lsp": {
+    "biome": {
+      "settings": {
+        "require_config_file": true
+      }
+    }
+  },
+  "code_actions_on_format": {
+    "source.organizeImports.biome": true
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
   }
 }
