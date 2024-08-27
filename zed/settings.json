@@ -24,6 +24,9 @@
     "light": "One Dark",
     "dark": "Tokyo Night Storm"
   },
+  "vim": {
+    "use_smartcase_find": true
+  },
   "lsp": {
     "biome": {
       "settings": {
