@@ -42,6 +42,7 @@ create_symlink "$HOME/dotfiles/.tmux.conf" "$HOME/.tmux.conf"
 create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
 create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
+create_symlink "$HOME/dotfiles/zed" "$HOME/.config/zed"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 
 # ------------------------------------------------------
