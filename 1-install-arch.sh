@@ -116,6 +116,7 @@ packages=(
   "pnpm-shell-completion"
   "libreoffice-still"
   "android-studio"
+  "zed"
 )
 
 # ------------------------------------------------------
