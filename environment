@@ -7,7 +7,6 @@
 
 EDITOR="nvim"
 VISUAL="nvim"
-BROWSER="librewolf"
 MOZ_USE_XINPUT2=1
 MOZ_WEBRENDER=1
 MOZ_X11_EGL=1
