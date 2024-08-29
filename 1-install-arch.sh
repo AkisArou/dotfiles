@@ -114,6 +114,7 @@ packages=(
   "libreoffice-still"
   "android-studio"
   "zed"
+  "watchman-bin"
 )
 
 # ------------------------------------------------------
