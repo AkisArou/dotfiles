@@ -9,7 +9,7 @@ This is the configuration of my Arch linux and other useful programs
 - Terminal: st | kitty | alacritty
 - Editor: nvim (configured for web dev) | vim (basic config) | vscode
 - Menus: rofi
-- Browsers: librewolf, brave, chromium, edge, firefox
+- Browsers: librewolf, brave, edge
 - Filemanager: yazi, pcmanfm
 - Notifications: dunst
 - Shell: zsh

@@ -1,20 +1,12 @@
 #!/bin/zsh
 
-echo ""
-echo "-------------------------------------"
-echo "-> Enabling systemctl daemons"
-echo "-------------------------------------"
-echo ""
+echo "Enabling systemctl daemons..."
 sudo systemctl enable --now iwd
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
 
-echo ""
-echo "-------------------------------------"
-echo "-> Setting up gnome settings"
-echo "-------------------------------------"
-echo ""
+echo "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
   gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
   gsettings set org.gnome.desktop.peripherals.keyboard delay 220
@@ -25,20 +17,12 @@ if command -v gsettings &>/dev/null; then
   dconf write /org/gnome/desktop/interface/color-scheme \'prefer-dark\'
 fi
 
-echo ""
-echo "-------------------------------------"
-echo "-> Setting up tmux"
-echo "-------------------------------------"
-echo ""
+echo "Setting up tmux..."
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ~/.tmux/plugins/tpm/scripts/install_plugins.sh
 tmux source ~/.tmux.conf
 
-echo ""
-echo "-------------------------------------"
-echo "-> Setting up asdf"
-echo "-------------------------------------"
-echo ""
+echo "Setting up asdf..."
 git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
 
 source ~/.zshrc
@@ -50,11 +34,7 @@ asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 cd ~
 asdf install
 
-echo ""
-echo "-------------------------------------"
-echo "-> Modified system for vite"
-echo "-------------------------------------"
-echo ""
+echo "Modifying system for vite..."
 # Check current limit
 ulimit -Sn
 # Change limit (temporary)
@@ -71,18 +51,10 @@ echo "* - nofile 65536" | sudo tee -a /etc/security/limits.conf
 echo "DefaultLimitNOFILE=65536" | sudo tee -a /etc/systemd/system.conf
 echo "DefaultLimitNOFILE=65536" | sudo tee -a /etc/systemd/user.conf
 
-echo ""
-echo "-------------------------------------"
-echo "-> Optimizing ssd"
-echo "-------------------------------------"
-echo ""
+echo "Optimizing ssd..."
 sudo systemctl enable fstrim.timer
 
-echo ""
-echo "-------------------------------------"
-echo "-> Setting up docker"
-echo "-------------------------------------"
-echo ""
+echo "Setting up docker..."
 ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 sudo usermod -aG docker $USER
@@ -92,11 +64,7 @@ sudo systemctl enable --now docker.socket
 docker context use default
 docker compose version
 
-echo ""
-echo "-------------------------------------"
-echo "-> Configuring NodeJS"
-echo "-------------------------------------"
-echo ""
+echo "Configuring NodeJS..."
 corepack enable pnpm
 corepack enable yarn
 asdf reshim nodejs
@@ -104,3 +72,6 @@ corepack use pnpm@latest
 
 echo "Installing global npm packages..."
 npm i -g npm-workspaces-language-server
+
+echo "Applying various settings..."
+xdg-settings set default-web-browser librewolf.desktop

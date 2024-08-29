@@ -46,19 +46,6 @@ create_symlink "$HOME/dotfiles/zed" "$HOME/.config/zed"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 
 # ------------------------------------------------------
-# Firefox
-# ------------------------------------------------------
-PROFILE_DIR=$(find ~/.mozilla/firefox -type d -name '*.default-release')
-
-if [ -z "$PROFILE_DIR" ]; then
-  echo "Firefox profile directory not found."
-  exit 1
-fi
-#
-create_symlink "$HOME/dotfiles/firefox/user.js" "$PROFILE_DIR"/user.js
-sudo ln -sf "$HOME/dotfiles/firefox/policies.json" /usr/lib/firefox/distribution/policies.json
-
-# ------------------------------------------------------
 # Librewolf
 # ------------------------------------------------------
 #
