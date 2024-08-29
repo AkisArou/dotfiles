@@ -36,7 +36,7 @@ bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOU
 bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
 bindsym $mod+Shift+Up exec --no-startup-id brightnessctl set 100%
-bindsym $mod+Shift+Down exec --no-startup-id brightnessctl set 2%
+bindsym $mod+Shift+Down exec --no-startup-id brightnessctl set 1%
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
