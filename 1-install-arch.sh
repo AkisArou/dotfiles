@@ -72,7 +72,6 @@ packages=(
   "alacritty"
   "kitty"
   "brave-bin"
-  "microsoft-edge-stable-bin"
   "librewolf-bin"
   "dunst"
   "pcmanfm-gtk3"
