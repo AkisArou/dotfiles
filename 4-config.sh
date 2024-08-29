@@ -37,6 +37,9 @@ asdf plugin add maven
 cd ~
 asdf install
 
+echo "Configuring java..."
+. ~/.asdf/plugins/java/set-java-home.zsh
+
 echo "Modifying system for vite..."
 # Check current limit
 ulimit -Sn
