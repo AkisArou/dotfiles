@@ -60,7 +60,6 @@ packages=(
   "pipewire-audio"
   "pipewire-pulse"
   "pipewire-jack"
-  "wireplumber"
   "xdg-user-dirs"
   "xdg-utils"
   "avahi"
