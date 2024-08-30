@@ -79,7 +79,7 @@ corepack use pnpm@latest
 echo "Installing global npm packages..."
 npm i -g npm-workspaces-language-server
 
-echo "Applying various settings..."
+echo "Setting xdg default web browser..."
 ORIGINAL_BROWSER=$BROWSER
 unset BROWSER
 xdg-settings set default-web-browser librewolf.desktop
