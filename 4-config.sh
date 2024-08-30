@@ -80,4 +80,7 @@ echo "Installing global npm packages..."
 npm i -g npm-workspaces-language-server
 
 echo "Applying various settings..."
+ORIGINAL_BROWSER=$BROWSER
+unset BROWSER
 xdg-settings set default-web-browser librewolf.desktop
+export BROWSER=$ORIGINAL_BROWSER
