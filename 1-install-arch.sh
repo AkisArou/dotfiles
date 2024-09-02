@@ -104,7 +104,6 @@ packages=(
   "gnome-terminal"
   "docker"
   "docker-compose"
-  "jetbrains-toolbox"
   "fzf"
   "jq"
   "ueberzugpp"
