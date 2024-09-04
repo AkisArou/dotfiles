@@ -7,5 +7,4 @@ xidlehook \
   --not-when-audio \
   --timer 120 \
   'xrandr --output "$PRIMARY_DISPLAY" --brightness .1' \
-  'xrandr --output "$PRIMARY_DISPLAY" --brightness 1' \
-  ''
+  'xrandr --output "$PRIMARY_DISPLAY" --brightness 1'
