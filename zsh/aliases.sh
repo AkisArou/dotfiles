@@ -9,7 +9,6 @@ alias grep='grep --color=auto'
 alias fgrep='grep -F --color=auto'
 alias egrep='grep -E --color=auto'
 alias ip='ip -color=auto'
-alias e='emacs -nw'
 
 alias copy='xclip -sel clip'
 
