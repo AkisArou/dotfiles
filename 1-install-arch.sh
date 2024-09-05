@@ -51,6 +51,7 @@ packages=(
   "wget"
   "curl"
   "htop"
+  "btop"
   "tldr"
   "bleachbit"
   "yazi"

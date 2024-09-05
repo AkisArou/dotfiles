@@ -45,6 +45,7 @@ create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
 create_symlink "$HOME/dotfiles/zed" "$HOME/.config/zed"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
+create_symlink "$HOME/dotfiles/btop" "$HOME/.config/btop"
 
 # ------------------------------------------------------
 # Librewolf
