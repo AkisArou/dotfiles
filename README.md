@@ -19,5 +19,6 @@ Also:
 - docker data-root at $HOME/docker
 - git config
 - fzf, fd
+- gtk-3.0 theme
 
 * various helper scripts
