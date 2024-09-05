@@ -75,7 +75,7 @@ packages=(
   "brave-bin"
   "librewolf-bin"
   "dunst"
-  "pcmanfm-gtk3"
+  "thunar"
   "ttf-hack-nerd"
   "ttf-font-awesome"
   "ttf-meslo-nerd"

@@ -10,7 +10,7 @@ This is the configuration of my Arch linux and other useful programs
 - Editor: nvim (configured for web dev) | vim (basic config) | vscode | zed
 - Menus: rofi
 - Browsers: librewolf, brave
-- Filemanager: yazi, pcmanfm
+- Filemanager: yazi, thunar
 - Notifications: dunst
 - Shell: zsh
 
