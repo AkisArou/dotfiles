@@ -13,3 +13,4 @@ foo.*
 nvim/data
 .netrwhist
 vim/sessions/
+~/.env
