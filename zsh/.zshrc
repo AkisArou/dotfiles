@@ -1,4 +1,4 @@
-figlet "Arch Linux" && fastfetch -l none --color blue
+figlet "Arch Linux" && fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
 
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
