@@ -95,36 +95,65 @@ char *termname = "st-256color";
 unsigned int tabspaces = 8;
 
 /* Terminal colors (16 first used in escape sequence) */
+
+/* Gruber darker */
 static const char *colorname[] = {
     /* 8 normal colors */
-    "#1d202f",
-    "#f7768e",
-    "#9ece6a",
-    "#e0af68",
-    "#7aa2f7",
-    "#bb9af7",
-    "#7dcfff",
-    "#a9b1d6",
+    "#101010", /* -black */
+    "#f43841", /* -red */
+    "#73d936", /* -green */
+    "#ffdd33", /* -yellow */
+    "#3399ff", /* -blue */
+    "#9e95c7", /* -magenta */
+    "#33ffd0", /* -cyan */
+    "#e4e4e4", /* -white */
 
     /* 8 bright colors */
-
-    "#414868",
-    "#f7768e",
-    "#9ece6a",
-    "#e0af68",
-    "#7aa2f7",
-    "#bb9af7",
-    "#7dcfff",
-    "#c0caf5",
+    "#453d41", /* bright -black:  */
+    "#ff4f58", /* bright -red:    */
+    "#73d936", /* bright -green:  */
+    "#ffdd33", /* bright -yellow: */
+    "#96a6c8", /* bright -blue:   */
+    "#9e95c7", /* bright -magenta: */
+    "#33ffd0", /* bright -cyan:    */
+    "#f4f4ff", /* bright -white:   */
 
     [255] = 0,
 
     /* more colors can be added after 255 to use with DefaultXX */
-    "#c0caf5",
-    "#364a82",
-    "#c0caf5", /* default foreground colour */
-    "#24283b", /* default background colour */
+    "#f4f4ff", /* cursor color:  */
+    "#303540", /* reverse cursor color */
+    "#e4e4e4", /* default foreground colour */
+    "#181818", /* default background colour */
 };
+
+/* TokyoNight */
+/*static const char *colorname[] = {*/
+/*    "#1d202f",*/
+/*    "#f7768e",*/
+/*    "#9ece6a",*/
+/*    "#e0af68",*/
+/*    "#7aa2f7",*/
+/*    "#bb9af7",*/
+/*    "#7dcfff",*/
+/*    "#a9b1d6",*/
+/**/
+/*    "#414868",*/
+/*    "#f7768e",*/
+/*    "#9ece6a",*/
+/*    "#e0af68",*/
+/*    "#7aa2f7",*/
+/*    "#bb9af7",*/
+/*    "#7dcfff",*/
+/*    "#c0caf5",*/
+/**/
+/*    [255] = 0,*/
+/**/
+/*    "#c0caf5",*/
+/*    "#364a82",*/
+/*    "#c0caf5", */
+/*    "#24283b",*/
+/*};*/
 
 /*
  * Default colors (colorname index)

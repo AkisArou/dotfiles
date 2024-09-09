@@ -144,11 +144,28 @@ local themes = {
     name = "gruber-darker",
     repo = "blazkowolf/gruber-darker.nvim",
     branch = "main",
-    config = function() end,
+    config = function()
+      require("gruber-darker").setup({
+        bold = false,
+        invert = {
+          signs = false,
+          tabline = false,
+          visual = false,
+        },
+        italic = {
+          strings = true,
+          comments = true,
+          operators = false,
+          folds = true,
+        },
+        undercurl = true,
+        underline = true,
+      })
+    end,
   },
 }
 
-local selectedTheme = themes.tokyonight
+local selectedTheme = themes.gruber
 
 if vim.fn.has("termguicolors") == 1 then
   vim.o.termguicolors = true
@@ -160,6 +177,7 @@ local M = {
   selectedTheme.repo,
   commit = selectedTheme.commit,
   event = "VimEnter",
+  opts = selectedTheme.opts,
   lazy = false, -- make sure we load this during startup if it is your main colorscheme
   priority = 1000, -- make sure to load this before all the other start plugins
 }
@@ -167,12 +185,14 @@ local M = {
 M.name = selectedTheme.name
 
 function M.config()
+  if selectedTheme.config ~= nil then
+    selectedTheme.config()
+  end
+
   local status_ok, _ = pcall(vim.cmd.colorscheme, M.name)
   if not status_ok then
     return
   end
-
-  selectedTheme.config()
 end
 
 return M
