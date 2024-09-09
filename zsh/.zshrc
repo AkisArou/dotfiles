@@ -1,4 +1,4 @@
-fastfetch
+figlet "Arch Linux" && fastfetch -l none --color blue
 
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
