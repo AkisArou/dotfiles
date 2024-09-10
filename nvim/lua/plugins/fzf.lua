@@ -3,9 +3,27 @@ return {
   -- optional for icon support
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
+    local actions = require("fzf-lua.actions")
     local fzf_lua = require("fzf-lua")
     fzf_lua.setup({
       fzf_opts = { ["--cycle"] = true },
+      files = {
+        formatter = "path.filename_first",
+        find_opts = [[-type f -not -path '*/\.git/*' -printf '%P\n']],
+        rg_opts = [[--color=never --files --hidden --follow -g "!.git"]],
+        fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
+        actions = {
+          -- inherits from 'actions.files', here we can override
+          -- or set bind to 'false' to disable a default action
+          -- action to toggle `--no-ignore`, requires fd or rg installed
+          ["ctrl-g"] = { actions.toggle_ignore },
+          ["ctrl-h"] = { actions.toggle_hidden },
+          -- uncomment to override `actions.file_edit_or_qf`
+          --   ["enter"]     = actions.file_edit,
+          -- custom actions are available too
+          --   ["ctrl-y"]    = function(selected) print(selected[1]) end,
+        },
+      },
     })
 
     vim.keymap.set("n", "<leader>ff", function()
