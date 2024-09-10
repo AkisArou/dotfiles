@@ -115,6 +115,7 @@ packages=(
   "android-studio"
   "zed"
   "watchman-bin"
+  "figlet"
 )
 
 # ------------------------------------------------------
