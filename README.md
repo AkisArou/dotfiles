@@ -19,5 +19,6 @@ Also:
 - docker data-root at $HOME/docker
 - git config
 - fzf, fd
+- vscode dark & tokyonight themes for everything
 
 * various helper scripts
