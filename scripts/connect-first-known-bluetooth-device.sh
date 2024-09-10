@@ -24,4 +24,4 @@ else
 fi
 
 echo "$text"
-notify-send "$text"
+notify-send -t 1500 "$text"
