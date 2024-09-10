@@ -132,13 +132,3 @@ button selected normal {
 scrollbar {
     enabled: true;
 } 
-
-
-
-
-
-
-
-
-
-

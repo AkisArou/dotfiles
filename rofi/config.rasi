@@ -5,4 +5,4 @@ configuration {
     disable-history: false;
 }
 
-@theme "~/dotfiles/rofi/tokyonight.rasi"
+@theme "~/dotfiles/rofi/vscode.rasi"
