@@ -8,6 +8,7 @@ return {
     fzf_lua.setup({
       fzf_opts = { ["--cycle"] = true },
       files = {
+        -- VSCode like file search
         -- formatter = "path.filename_first",
         find_opts = [[-type f -not -path '*/\.git/*' -printf '%P\n']],
         rg_opts = [[--color=never --files --hidden --follow -g "!.git"]],
