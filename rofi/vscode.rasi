@@ -7,7 +7,6 @@ configuration {
 * {
     font: "MesloLGS Nerd Font Mono 11";
     foreground: #d4d4d4;
-    foreground-dark: #000000;
     background-color: #1f1f1f;
     active-background: #007ACC;
     urgent-background: #f44747;
@@ -74,7 +73,7 @@ configuration {
 
 #element.selected.normal {
     background-color: @selected-background;
-    text-color:       @foreground-dark;
+    text-color:       @foreground;
 }
 
 #element.selected.urgent {

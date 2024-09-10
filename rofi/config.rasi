@@ -3,6 +3,7 @@ configuration {
     show-icons:      true;
     display-drun:    "";
     disable-history: false;
+    kb-cancel: "Escape,Control+c";
 }
 
 @theme "~/dotfiles/rofi/vscode.rasi"
