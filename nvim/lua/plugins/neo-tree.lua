@@ -300,6 +300,8 @@ return {
     })
 
     vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>")
+    -- VSCode
+    vim.cmd("highlight! NeoTreeIndentMarker guifg=#444444")
   end,
   keys = {
     { "<leader>e", "<leader>fE", desc = "Explorer NeoTree (root dir)", remap = true },
