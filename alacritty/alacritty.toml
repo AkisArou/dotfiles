@@ -1,5 +1,5 @@
 import = [
-  "~/dotfiles/alacritty/tokyonight_storm.toml"
+  "~/dotfiles/alacritty/vscode.toml"
 ]
 
 [font]

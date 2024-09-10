@@ -96,35 +96,35 @@ unsigned int tabspaces = 8;
 
 /* Terminal colors (16 first used in escape sequence) */
 
-/* Gruber darker */
+/* VSCode dark */
 static const char *colorname[] = {
     /* 8 normal colors */
-    "#101010", /* -black */
-    "#f43841", /* -red */
-    "#73d936", /* -green */
-    "#ffdd33", /* -yellow */
-    "#3399ff", /* -blue */
-    "#9e95c7", /* -magenta */
-    "#33ffd0", /* -cyan */
-    "#e4e4e4", /* -white */
+    "#1f1f1f", /* -black */
+    "#f44747", /* -red */
+    "#6a9955", /* -green */
+    "#dcdcaa", /* -yellow */
+    "#569cd6", /* -blue */
+    "#c586c0", /* -magenta */
+    "#56b6c2", /* -cyan */
+    "#d4d4d4", /* -white */
 
     /* 8 bright colors */
-    "#453d41", /* bright -black:  */
-    "#ff4f58", /* bright -red:    */
+    "#808080", /* bright -black:  */
+    "#f44747", /* bright -red:    */
     "#73d936", /* bright -green:  */
-    "#ffdd33", /* bright -yellow: */
-    "#96a6c8", /* bright -blue:   */
-    "#9e95c7", /* bright -magenta: */
-    "#33ffd0", /* bright -cyan:    */
-    "#f4f4ff", /* bright -white:   */
+    "#ffd602", /* bright -yellow: */
+    "#569cd6", /* bright -blue:   */
+    "#c586c0", /* bright -magenta: */
+    "#4ec9b0", /* bright -cyan:    */
+    "#d4d4d4", /* bright -white:   */
 
     [255] = 0,
 
     /* more colors can be added after 255 to use with DefaultXX */
-    "#f4f4ff", /* cursor color:  */
-    "#303540", /* reverse cursor color */
-    "#e4e4e4", /* default foreground colour */
-    "#181818", /* default background colour */
+    "#d4d4d4", /* cursor color:  */
+    "#51504F", /* reverse cursor color */
+    "#d4d4d4", /* default foreground colour */
+    "#1f1f1f", /* default background colour */
 };
 
 /* TokyoNight */
