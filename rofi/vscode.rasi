@@ -9,7 +9,7 @@ configuration {
     foreground: #d4d4d4;
     foreground-dark: #000000;
     background-color: #1f1f1f;
-    active-background: #c586c0;
+    active-background: #007ACC;
     urgent-background: #f44747;
     urgent-foreground: #282a36;
     selected-background: @active-background;
