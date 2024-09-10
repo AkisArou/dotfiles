@@ -8,7 +8,7 @@ return {
     fzf_lua.setup({
       fzf_opts = { ["--cycle"] = true },
       files = {
-        formatter = "path.filename_first",
+        -- formatter = "path.filename_first",
         find_opts = [[-type f -not -path '*/\.git/*' -printf '%P\n']],
         rg_opts = [[--color=never --files --hidden --follow -g "!.git"]],
         fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
