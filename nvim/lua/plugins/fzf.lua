@@ -6,13 +6,15 @@ return {
     local actions = require("fzf-lua.actions")
     local fzf_lua = require("fzf-lua")
     fzf_lua.setup({
+      "fzf-native",
       fzf_opts = { ["--cycle"] = true },
+      previewers = {
+        bat = { cmd = "bat --theme 'Visual Studio Dark+'" },
+      },
       files = {
         -- VSCode like file search
         -- formatter = "path.filename_first",
-        find_opts = [[-type f -not -path '*/\.git/*' -printf '%P\n']],
-        rg_opts = [[--color=never --files --hidden --follow -g "!.git"]],
-        fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
+        fd_opts = [[--color=never --type f --hidden --follow --exclude .git --exclude node_modules]],
         actions = {
           -- inherits from 'actions.files', here we can override
           -- or set bind to 'false' to disable a default action
@@ -29,7 +31,6 @@ return {
 
     vim.keymap.set("n", "<leader>ff", function()
       fzf_lua.files({
-        cmd = "fd --type f --exclude node_modules",
         winopts = {
           preview = {
             layout = "vertical",
