@@ -2,7 +2,7 @@
 # By: Akis ARou
 
 # Main bg
-theme[main_bg]="##1F1F1F"
+theme[main_bg]="#1F1F1F"
 
 # Main text color
 theme[main_fg]="#D4D4D4"
