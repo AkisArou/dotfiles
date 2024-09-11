@@ -34,6 +34,8 @@ set cursorline
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[0 q"
 
+let g:netrw_dirhistmax = 0
+
 set nobackup
 set clipboard=unnamedplus
 set cmdheight=1
@@ -42,9 +44,12 @@ set conceallevel=0
 set fileencoding=utf-8
 set hlsearch
 set ignorecase
-set mouse=a
+set mouse=""
 set pumheight=10
-set noshowmode
+set showmode        
+set showcmd         
+set cmdheight=2     
+set laststatus=2    
 set showtabline=0
 set smartcase
 set smartindent
