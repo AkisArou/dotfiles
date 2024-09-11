@@ -1,14 +1,9 @@
-# Put this in your ~/.gitconfig or ~/.config/git/config
-# Windows users: "~" is your profile's home directory, e.g. C:\Users\<YourName>
 [user]
   name = AkisArou
   email = akisarou90@gmail.com
 
 [includeIf "gitdir:~/nable/nable-solutions/.git"]
   path = ./config-nable
-
-# [color]
-#   ui = auto
 
 [alias]
   # List available aliases
@@ -112,21 +107,6 @@
   default = upstream
   # When pushing, also push tags whose commit-ishs are now reachable upstream
   followTags = true
-
-# [rebase]
-  # Rebase advanced usage.
-  # Automagically reorder and prefix your commands while doing an interactive
-  # rebase. This has to be used with `--fixup` and/or `--squash` options for
-  # `git commit`.
-  # autoSquash = true
-  # Automatically stash current WD and stage when running rebase
-  # then you won't have to manually `git stash push` and `git stash pop`
-  # after and before your rebase.
-  # autoStash = true
-# [rerere]
-  # If, like me, you like rerere, uncomment these
-  # autoupdate = true
-  # enabled = true
 
 [status]
   # Display submodule rev change summaries in status
