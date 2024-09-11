@@ -7,45 +7,8 @@
 [includeIf "gitdir:~/nable/nable-solutions/.git"]
   path = ./config-nable
 
-[color]
-  ui = auto
-[color "branch"]
-  current = cyan bold reverse
-  local = white
-  plain =
-  remote = cyan
-[color "diff"]
-  commit =
-  func = cyan
-  plain =
-  whitespace = magenta reverse
-  meta = white
-  frag = cyan bold reverse
-  old = red
-  new = green
-[color "grep"]
-  context =
-  filename =
-  function =
-  linenumber = white
-  match =
-  selected =
-  separator =
-[color "interactive"]
-  error =
-  header =
-  help =
-  prompt =
-[color "status"]
-  added = green
-  changed = yellow
-  header =
-  localBranch =
-  nobranch =
-  remoteBranch = cyan bold
-  unmerged = magenta bold reverse
-  untracked = red
-  updated = green bold
+# [color]
+#   ui = auto
 
 [alias]
   # List available aliases
@@ -84,25 +47,16 @@
   whitespace = -trailing-space
 
 [delta]
-    navigate = true    # use n and N to move between diff sections
-    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
-# Tokyonight night theme
-    minus-style                   = syntax "#3f2d3d"
-    minus-non-emph-style          = syntax "#3f2d3d"
-    minus-emph-style              = syntax "#763842"
-    minus-empty-line-marker-style = syntax "#3f2d3d"
-    line-numbers-minus-style      = "#914c54"
-    plus-style                    = syntax "#283b4d"
-    plus-non-emph-style           = syntax "#283b4d"
-    plus-emph-style               = syntax "#316172"
-    plus-empty-line-marker-style  = syntax "#283b4d"
-    line-numbers-plus-style       = "#449dab"
-    line-numbers-zero-style       = "#3b4261"
+  navigate = true    # use n and N to move between diff sections
+  light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+  features = syntax-highlighting
+  syntax-theme = Visual Studio Dark+
 
 [interactive]
-    diffFilter = delta --color-only
+  diffFilter = delta --color-only --features=interactive
 
 [merge]
+  conflictstyle = diff3
   tool = diffview
 
 [mergetool]
@@ -116,7 +70,8 @@
     prompt = true
 
 [diff]
-    tool = nvimdiff
+  tool = nvimdiff
+  colorMoved = default
 
 [difftool "nvimdiff"]
     cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
