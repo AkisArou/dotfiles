@@ -30,7 +30,7 @@ return {
         json = { "biome", "prettier", stop_after_first = true },
         jsonc = { "biome", "prettier", stop_after_first = true },
         html = { "prettier" },
-        css = { "prettier" },
+        css = { "biome", "prettier", stop_after_first = true },
         yaml = { "prettier" },
         markdown = { "prettier" },
         ["markdown.mdx"] = { "prettier" },
