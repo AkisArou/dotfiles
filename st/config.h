@@ -6,7 +6,8 @@
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
 static char *font = "MesloLGS Nerd Font Mono:pixelsize=25:antialias=true:autohint=true";
-static int borderpx = 0;
+static int borderpx_x = 20;
+static int borderpx_y = 0;
 
 /*
  * What program is execed by st depends of these precedence rules:
