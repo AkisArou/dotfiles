@@ -164,6 +164,7 @@ return {
               ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
               ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
               ["packages/shared/react/mantine/tailwind.config.ts"] = "packages/shared/react/mantine/**",
+              ["packages/shared/react/justd/tailwind.config.ts"] = "packages/shared/react/justd/**",
             },
             classRegex = {
               "tw`([^`]*)",
