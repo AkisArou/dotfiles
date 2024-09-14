@@ -23,33 +23,6 @@ sus_desktop() {
   ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
 
-paru() {
-  if [ "$#" -eq 0 ]; then
-    # No arguments provided, just run paru
-    command paru && ~/dotfiles/polybar/scripts/refresh-updates.sh
-    return $?
-  else
-    local command="$1"
-    shift
-
-    if [[ "$command" == "-Syu" ]]; then
-      command paru -Syu && ~/dotfiles/polybar/scripts/refresh-updates.sh
-      return $?
-    else
-      # Run paru with the provided command and remaining arguments
-      if command paru "$command" "$@"; then
-        # Run refresh-updates.sh only if the command is related to installing, removing, or updating
-        if [[ "$command" == "-S" || "$command" == "-R" ]]; then
-          ~/dotfiles/polybar/scripts/refresh-updates.sh
-        fi
-      else
-        # Return the exit status of paru if it fails
-        return $?
-      fi
-    fi
-  fi
-}
-
 ccd() {
   local dir
   dir="$(
