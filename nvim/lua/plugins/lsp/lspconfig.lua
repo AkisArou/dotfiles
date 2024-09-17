@@ -159,14 +159,21 @@ return {
           validate = true,
           classAttributes = { "class", "className", "style" },
           experimental = {
-            configFile = {
-              ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = "packages/assistant-prm-airport/**",
-              ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
-              ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
-              ["packages/shared/react/mantine/tailwind.config.ts"] = "packages/shared/react/mantine/**",
-              ["packages/shared/react/justd/tailwind.config.ts"] = "packages/shared/react/justd/**",
-              ["packages/shared/react/spectrum/tailwind.config.ts"] = "packages/shared/react/spectrum/**",
-            },
+            configFile = (function()
+              local cwd = vim.fn.getcwd()
+              if cwd:match("nable%-solutions") then
+                return {
+                  ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = "packages/assistant-prm-airport/**",
+                  ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
+                  ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
+                  ["packages/shared/react/mantine/tailwind.config.ts"] = "packages/shared/react/mantine/**",
+                  ["packages/shared/react/justd/tailwind.config.ts"] = "packages/shared/react/justd/**",
+                  ["packages/shared/react/spectrum/tailwind.config.ts"] = "packages/shared/react/spectrum/**",
+                }
+              end
+
+              return nil
+            end)(),
             classRegex = {
               "tw`([^`]*)",
               { "tw.style\\(([^)]*)\\)", "'([^']*)'" },
