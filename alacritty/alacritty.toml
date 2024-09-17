@@ -2,6 +2,13 @@ import = [
   "~/dotfiles/alacritty/vscode.toml"
 ]
 
+[window]
+opacity = 1
+
+[window.padding]
+x = 9  
+y = 0 
+
 [font]
 size = 9
 
@@ -21,6 +28,4 @@ style = "Bold Italic"
 family = "MesloLGS Nerd Font Mono"
 style = "Italic"
 
-[window]
-opacity = 1
 
