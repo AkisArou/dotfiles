@@ -67,7 +67,7 @@ packages=(
   "wpa_supplicant"
   "iwd"
   "openssh"
-  "vlc"
+  "mpv"
   "zsh"
   "alacritty"
   "kitty"
