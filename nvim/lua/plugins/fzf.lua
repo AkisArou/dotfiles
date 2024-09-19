@@ -6,7 +6,7 @@ return {
     local actions = require("fzf-lua.actions")
     local fzf_lua = require("fzf-lua")
     fzf_lua.setup({
-      "fzf-native",
+      -- "fzf-native",
       fzf_opts = { ["--cycle"] = true },
       previewers = {
         bat = { cmd = "bat --theme 'Visual Studio Dark+'" },
