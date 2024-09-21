@@ -52,6 +52,7 @@ bindsym $mod+Return exec $term
 
 # browsers
 bindsym $mod+b exec $browser
+bindsym $mod+Shift+p exec librewolf --private-window
 bindsym $mod+Shift+t exec brave --incognito --tor
 
 # kill focused window
