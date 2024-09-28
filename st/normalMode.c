@@ -116,11 +116,11 @@ ExitState executeMotion(char const cs, KeySym const *const ks) {
 	else if (cs == 'j') historyMove(0,  (int)state.m.c, 0);
 	else if (cs == 'h') historyMove(-(int)state.m.c, 0, 0);
 	else if (cs == 'l') historyMove( (int)state.m.c, 0, 0);
-	else if (cs == 'H') term.c.y = 0;
+	else if (cs == 'g') term.c.y = 0;
 	else if (cs == 'M') term.c.y = term.bot / 2;
 	else if (cs == 'L') term.c.y = term.bot;
 	else if (cs == 's' || cs == 'S') altToggle = cs == 's' ? !altToggle : 1;
-	else if (cs == 'G' || cs == 'g') {
+	else if (cs == 'G') {
 		if (cs == 'G') term.c = c[0] = c[IS_SET(MODE_ALTSCREEN)+1];
 		if (!IS_SET(MODE_ALTSCREEN)) term.line = &buf[histOff=insertOff];
 	} else if (cs == '0') term.c.x = 0;
