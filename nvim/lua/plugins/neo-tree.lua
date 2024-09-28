@@ -97,7 +97,7 @@ return {
           required_width = 64, -- min width of window required to show this column
         },
         type = {
-          enabled = true,
+          enabled = false,
           required_width = 122, -- min width of window required to show this column
         },
         last_modified = {
