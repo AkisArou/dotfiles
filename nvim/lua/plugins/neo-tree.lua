@@ -117,7 +117,7 @@ return {
       -- see `:h neo-tree-custom-commands-global`
       commands = {},
       window = {
-        position = "float",
+        position = "left",
         -- width = 40,
         mapping_options = {
           noremap = true,
@@ -298,7 +298,7 @@ return {
       },
     })
 
-    vim.keymap.set("n", "<leader>e", "<cmd>Neotree reveal<CR>")
+    vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle<CR>")
     vim.cmd([[
       highlight! link NeoTreeDirectoryIcon NvimTreeFolderIcon
       highlight! link NeoTreeDirectoryName NvimTreeFolderName
