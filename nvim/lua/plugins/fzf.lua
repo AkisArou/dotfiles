@@ -29,6 +29,8 @@ return {
       },
     })
 
+    vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#3f3f3f" })
+
     vim.keymap.set("n", "<leader>ff", function()
       fzf_lua.files({
         winopts = {
