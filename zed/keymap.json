@@ -27,7 +27,10 @@
       "space b l": "pane::CloseItemsToTheRight",
       "space b h": "pane::CloseItemsToTheLeft",
       "space b a": "pane::CloseAllItems",
-      "space b o": ["pane::CloseItemsToTheRight", "pane::CloseItemsToTheLeft"]
+      "space b o": ["pane::CloseItemsToTheRight", "pane::CloseItemsToTheLeft"],
+      "]d": "editor::GoToNextDiagnostic",
+      "[d": "editor::GoToPrevDiagnostic",
+      "'": "vim::Quotes"
     }
   },
   {
@@ -42,7 +45,8 @@
     "bindings": {
       "space f f": "file_finder::Toggle",
       "ctrl-l": "project_panel::ToggleFocus",
-      "l": "project_panel::OpenPermanent"
+      "l": "project_panel::OpenPermanent",
+      "shift-w": "project_panel::CollapseAllEntries"
     }
   }
 ]
