@@ -22,7 +22,7 @@
   "theme": {
     "mode": "dark",
     "light": "One Dark",
-    "dark": "Tokyo Night Storm"
+    "dark": "Ayu Dark"
   },
   "vim": {
     "use_smartcase_find": true
