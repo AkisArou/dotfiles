@@ -21,7 +21,7 @@ local selectedTheme = themes.vscode
 
 local M = {
   selectedTheme.repo,
-  name = selectedTheme.name,
+  branch = selectedTheme.branch,
   event = "VimEnter",
   opts = selectedTheme.opts,
   lazy = false,
@@ -33,7 +33,7 @@ function M.config()
     selectedTheme.config()
   end
 
-  local status_ok, _ = pcall(vim.cmd.colorscheme, M.name)
+  local status_ok, _ = pcall(vim.cmd.colorscheme, selectedTheme.name)
   if not status_ok then
     return
   end
