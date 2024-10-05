@@ -162,7 +162,6 @@ return {
         end
         return msg
       end,
-      icon = " LSP:",
       color = { fg = "#ffffff", gui = "bold" },
     })
 
