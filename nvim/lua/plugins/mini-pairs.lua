@@ -3,8 +3,8 @@ return {
   event = "VeryLazy",
   opts = {
     mappings = {
-      ["<"] = { action = "open", pair = "<>", neigh_pattern = "[a-zA-Z]." },
-      [">"] = { action = "close", pair = "<>", neigh_pattern = "[^\\]." },
+      ['"'] = { action = "closeopen", pair = '""', neigh_pattern = "[^%a\\].", register = { cr = false } },
+      ["<"] = { action = "open", pair = "<>", neigh_pattern = ".[%(]", register = { cr = false } },
     },
   },
 }
