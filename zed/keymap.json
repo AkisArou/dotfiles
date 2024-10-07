@@ -24,19 +24,25 @@
       "g r": "editor::FindAllReferences",
       "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
       "space b d": "pane::CloseActiveItem",
-      "space b l": "pane::CloseItemsToTheRight",
-      "space b h": "pane::CloseItemsToTheLeft",
+      "space b r": "pane::CloseItemsToTheRight",
+      "space b l": "pane::CloseItemsToTheLeft",
       "space b a": "pane::CloseAllItems",
-      "space b o": ["pane::CloseItemsToTheRight", "pane::CloseItemsToTheLeft"],
-      "]d": "editor::GoToNextDiagnostic",
-      "[d": "editor::GoToPrevDiagnostic",
-      "'": "vim::Quotes"
+      "space b o": "pane::CloseInactiveItems",
+      "space c a": "editor::ToggleCodeActions",
+      "space c r": "editor::Rename",
+      "ctrl-c": "editor::Cancel"
     }
   },
   {
     "context": "vim_mode == insert",
     "bindings": {
       "ctrl-h": "editor::Backspace"
+    }
+  },
+  {
+    "context": "vim_operator == a || vim_operator == i || vim_operator == cs",
+    "bindings": {
+      "q": "vim::DoubleQuotes"
     }
   },
   {
@@ -47,6 +53,28 @@
       "ctrl-l": "project_panel::ToggleFocus",
       "l": "project_panel::OpenPermanent",
       "shift-w": "project_panel::CollapseAllEntries"
+    }
+  },
+  {
+    "context": "FileFinder",
+    "bindings": { "ctrl-c": "file_finder::Toggle" }
+  },
+  {
+    "context": "BufferSearchBar",
+    "bindings": {
+      "ctrl-c": "buffer_search::Dismiss"
+    }
+  },
+  {
+    "context": "BufferSearchBar && in_replace",
+    "bindings": {
+      "ctrl-c": "buffer_search::Dismiss"
+    }
+  },
+  {
+    "context": "BufferSearchBar && !in_replace > Editor",
+    "bindings": {
+      "ctrl-c": "buffer_search::Dismiss"
     }
   }
 ]
