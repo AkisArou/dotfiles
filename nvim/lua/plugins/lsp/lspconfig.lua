@@ -111,6 +111,12 @@ return {
       settings = {
         vtsls = {
           autoUseWorkspaceTsdk = true,
+          experimental = {
+            completion = {
+              enableServerSideFuzzyMatch = true,
+              entriesLimit = 5000,
+            },
+          },
         },
         typescript = {
           tsserver = {
