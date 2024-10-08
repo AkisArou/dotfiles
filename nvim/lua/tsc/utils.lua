@@ -1,5 +1,4 @@
-local has_trouble, pcall_trouble = pcall(require, "trouble")
-local trouble = has_trouble and pcall_trouble or nil
+local trouble = require("trouble")
 
 local M = {}
 
@@ -46,52 +45,32 @@ M.parse_tsc_output = function(output)
 end
 
 M.set_qflist = function(errors, opts)
-  local DEFAULT_OPTS = { use_trouble = false }
-  local final_opts = vim.tbl_extend("force", DEFAULT_OPTS, opts or {})
-
   vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
 
-  if #errors > 0 then
-    M.open_qflist(final_opts.use_trouble)
+  if #errors > 0 and opts.auto_open then
+    trouble.refresh()
+    M.open_qflist()
   end
 
   if #errors == 0 then
-    -- trouble needs to be refreshed when list is empty.
-    if final_opts.use_trouble and trouble ~= nil then
-      trouble.refresh()
-    end
-
-    M.close_qflist(final_opts.use_trouble)
+    trouble.refresh()
+    M.close_qflist()
   end
 end
 
---- open the qflist
---- @param use_trouble boolean: if trouble should be used as qflist provider
---- @return nil
-M.open_qflist = function(use_trouble)
-  if use_trouble and trouble ~= nil then
-    require("trouble").open({
-      mode = "quickfix",
-      win = {
-        position = "right",
-      },
-      focus = false,
-    })
-    -- vim.cmd("lua Trouble quickfix toggle focus=false win.position=right<cr>")
-  else
-    vim.cmd("copen")
-  end
+M.open_qflist = function()
+  require("trouble").open({
+    mode = "quickfix",
+    win = {
+      type = "split",
+      size = 30,
+    },
+    focus = true,
+  })
 end
 
---- close the qflist
---- @param use_trouble boolean: if trouble should be used as qflist provider
---- @return nil
-M.close_qflist = function(use_trouble)
-  if use_trouble and trouble ~= nil then
-    trouble.close()
-  else
-    vim.cmd("cclose")
-  end
+M.close_qflist = function()
+  trouble.close()
 end
 
 return M

@@ -10,12 +10,11 @@ if success then
 end
 
 local DEFAULT_CONFIG = {
-  auto_open_qflist = true,
-  use_trouble_qflist = true,
+  auto_open = false,
   bin_path = utils.find_tsc_bin(),
   enable_progress_notifications = true,
+  use_diagnostics = true,
   args = nil,
-  hide_progress_notifications_from_history = true,
   spinner = { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" },
 }
 
@@ -88,35 +87,54 @@ M.run = function()
     files_with_errors = result.files
 
     utils.set_qflist(errors, {
-      auto_open = config.auto_open_qflist,
-      use_trouble = config.use_trouble_qflist,
+      auto_open = config.auto_open,
     })
 
-    if not config.enable_progress_notifications then
-      return
+    if config.use_diagnostics then
+      local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
+      vim.diagnostic.reset(namespace_id)
+
+      for _, error in ipairs(errors) do
+        local bufnr = vim.fn.bufnr(error.filename)
+        if bufnr == -1 then
+          vim.notify("Buffer not found for " .. error.filename, vim.log.levels.ERROR, get_notify_options())
+          return
+        end
+        local diagnostic = {
+          bufnr = bufnr,
+          lnum = error.lnum - 1,
+          col = error.col - 1,
+          severity = vim.diagnostic.severity.ERROR,
+          message = error.text,
+          source = "tsc",
+        }
+        vim.diagnostic.set(namespace_id, bufnr, { diagnostic }, {})
+      end
     end
 
-    if #errors == 0 then
+    if config.enable_progress_notifications then
+      if #errors == 0 then
+        vim.notify(
+          format_notification_msg("Type-checking complete. No errors found 🎉"),
+          nil,
+          get_notify_options((notify_record and { replace = notify_record.id }))
+        )
+        return
+      end
+
+      -- Clear any previous notifications if the user has nvim-notify installed
+      if nvim_notify ~= nil then
+        nvim_notify.dismiss()
+      end
+
       vim.notify(
-        format_notification_msg("Type-checking complete. No errors found 🎉"),
-        nil,
-        get_notify_options((notify_record and { replace = notify_record.id }))
+        format_notification_msg(
+          string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors)
+        ),
+        vim.log.levels.ERROR,
+        get_notify_options()
       )
-      return
     end
-
-    -- Clear any previous notifications if the user has nvim-notify installed
-    if nvim_notify ~= nil then
-      nvim_notify.dismiss()
-    end
-
-    vim.notify(
-      format_notification_msg(
-        string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors)
-      ),
-      vim.log.levels.ERROR,
-      get_notify_options()
-    )
   end
 
   local total_output = {}
@@ -169,11 +187,11 @@ function M.setup(opts)
   end, { desc = "Stop `tsc` compilation", force = true })
 
   vim.api.nvim_create_user_command("TSCOpen", function()
-    utils.open_qflist(config.use_trouble_qflist)
+    utils.open_qflist()
   end, { desc = "Open the results in a qflist", force = true })
 
   vim.api.nvim_create_user_command("TSCClose", function()
-    utils.close_qflist(config.use_trouble_qflist)
+    utils.close_qflist()
   end, { desc = "Close the results qflist", force = true })
 
   vim.api.nvim_create_autocmd("BufWritePre", {
