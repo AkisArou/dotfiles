@@ -1,7 +1,6 @@
 return {
   "folke/trouble.nvim",
   lazy = true,
-  enabled = true,
   keys = {
     {
       "<leader>xx",
