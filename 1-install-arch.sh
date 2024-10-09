@@ -42,6 +42,7 @@ packages=(
   "posix"
   "acpi"
   "wol"
+  "libinput"
   "libva-utils"
   "libvdpau-va-gl"
   "vdpauinfo"
