@@ -1,5 +1,8 @@
 local trouble = require("trouble")
 
+-- global variable
+TSC_ERRORS_COUNT = 0
+
 local M = {}
 
 M.is_executable = function(cmd)
@@ -46,6 +49,8 @@ end
 
 M.set_qflist = function(errors, opts)
   vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
+
+  TSC_ERRORS_COUNT = #errors
 
   if #errors > 0 and opts.auto_open then
     trouble.refresh()

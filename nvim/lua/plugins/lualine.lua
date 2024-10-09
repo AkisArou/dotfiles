@@ -146,6 +146,16 @@ return {
     })
 
     ins_right({
+      function()
+        if TSC_ERRORS_COUNT == 0 then
+          return ""
+        end
+        return "Project errors: " .. tostring(TSC_ERRORS_COUNT)
+      end,
+      color = { fg = colors.red, gui = "bold" },
+    })
+
+    ins_right({
       -- Lsp server name .
       function()
         local msg = "No Active Lsp"
