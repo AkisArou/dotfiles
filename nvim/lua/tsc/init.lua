@@ -13,7 +13,7 @@ local DEFAULT_CONFIG = {
   auto_open = false,
   bin_path = utils.find_tsc_bin(),
   enable_progress_notifications = true,
-  use_diagnostics = true,
+  use_diagnostics = false,
   args = nil,
   spinner = { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" },
 }
