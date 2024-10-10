@@ -7,6 +7,11 @@ return {
     local fzf_lua = require("fzf-lua")
     fzf_lua.setup({
       -- "fzf-native",
+      winopts = {
+        preview = {
+          layout = "vertical",
+        },
+      },
       fzf_opts = { ["--cycle"] = true },
       previewers = {
         bat = { cmd = "bat --theme 'Visual Studio Dark+'" },
@@ -31,40 +36,10 @@ return {
 
     vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#3f3f3f" })
 
-    vim.keymap.set("n", "<leader>ff", function()
-      fzf_lua.files({
-        winopts = {
-          preview = {
-            layout = "vertical",
-          },
-        },
-      })
-    end, { desc = "Fuzzy find files in cwd" })
-
+    vim.keymap.set("n", "<leader>ff", fzf_lua.files, { desc = "Fuzzy find files in cwd" })
     vim.keymap.set("n", "<leader>fr", fzf_lua.oldfiles, { desc = "Fuzzy find recent files" })
-
-    vim.keymap.set("n", "<leader>fs", function()
-      fzf_lua.live_grep_native({
-
-        winopts = {
-          preview = {
-            layout = "vertical",
-          },
-        },
-      })
-    end, { desc = "Grep in cwd" })
-
-    vim.keymap.set("n", "<leader>fl", function()
-      fzf_lua.live_grep_resume({
-
-        winopts = {
-          preview = {
-            layout = "vertical",
-          },
-        },
-      })
-    end, { desc = "Resume grep" })
-
+    vim.keymap.set("n", "<leader>fs", fzf_lua.live_grep_native, { desc = "Grep in cwd" })
+    vim.keymap.set("n", "<leader>fl", fzf_lua.live_grep_resume, { desc = "Resume grep" })
     vim.keymap.set("n", "<leader>fw", fzf_lua.grep_cword, { desc = "Find word under cursor in cwd" })
     vim.keymap.set("n", "<leader>fW", fzf_lua.grep_cWORD, { desc = "Find WORD under cursor in cwd" })
     vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
