@@ -8,6 +8,8 @@ source ~/dotfiles/vim/.vimrc
 set surround
 set NERDTree
 
+map <Space-e> :NERDTreeToggle<CR>
+
 " Highlight copied text
 Plug 'machakann/vim-highlightedyank'
 " Commentary plugin
