@@ -1,291 +1,298 @@
 {
-	"search.followSymlinks": false,
-	"window.menuBarVisibility": "hidden",
-	"window.customMenuBarAltFocus": false,
-	"window.customTitleBarVisibility": "auto",
-	"window.titleBarStyle": "native",
-	"window.enableMenuBarMnemonics": false,
-	"apc.electron": {
-		"titleBarStyle": "hidden"
-	},
-	"window.zoomLevel": -0.3,
-	"window.commandCenter": false,
-	"workbench.layoutControl.enabled": false,
-	"workbench.tree.renderIndentGuides": "none",
-	"workbench.tree.indent": 12,
-	"workbench.startupEditor": "none",
-	"workbench.editor.sharedViewState": true,
-	"workbench.editor.enablePreview": false,
-	"workbench.activityBar.location": "hidden",
-	"workbench.colorTheme": "Default Dark+",
-	"workbench.colorCustomizations": {
-		"errorLens.errorBackground": "#85524594",
-		"errorLens.errorForeground": "#855245e1",
-		"errorLens.warningBackground": "#63421d80",
-		"errorLens.warningForeground": "#63421d",
-		"errorLens.infoBackground": "#1d634280",
-		"errorLens.infoForeground": "#1d6342",
-		"errorLens.hintBackground": "#1d634280",
-		"statusBar.background": "#1F1F1F",
-		"statusBar.foreground": "#ffffff",
-		"statusBar.noFolderBackground": "#1F1F1F",
-		"statusBar.debuggingBackground": "#1F1F1F",
-		"statusBar.debuggingForeground": "#ffffff",
-		"statusBarItem.remoteBackground": "#1F1F1F"
-	},
-	"breadcrumbs.enabled": false,
-	"explorer.compactFolders": false,
-	"explorer.confirmDragAndDrop": false,
-	"explorer.decorations.badges": false,
-	"explorer.autoReveal": false,
-	"editor.suggest.insertMode": "replace",
-	"editor.scrollbar.horizontal": "hidden",
-	"editor.lineNumbers": "off",
-	"editor.fontWeight": "normal",
-	"editor.minimap.enabled": false,
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"editor.formatOnSave": true,
-	"editor.detectIndentation": true,
-	"editor.wordBasedSuggestions": "off",
-	"editor.suggest.localityBonus": true,
-	"editor.inlineSuggest.enabled": true,
-	"editor.suggestSelection": "first",
-	"editor.hover.enabled": true,
-	"editor.inlayHints.enabled": "off",
-	"editor.linkedEditing": true,
-	"editor.smoothScrolling": true,
-	"editor.fontFamily": "MesloLGS Nerd Font",
-	"editor.fontSize": 12.5,
-	"editor.suggest.showSnippets": false,
-	"editor.quickSuggestions": {
-		"strings": "on"
-	},
-	"files.autoSave": "onFocusChange",
-	"files.exclude": {
-		"USE_GITIGNORE": true
-	},
-	"files.watcherExclude": {
-		"**/.bloop": true,
-		"**/.metals": true,
-		"**/.ammonite": true
-	},
-	"search.exclude": {
-		"**/node_modules": true,
-		"**/bower_components": true,
-		"**/coverage": true,
-		"**/dist": true,
-		"**/build": true,
-		"**/.build": true,
-		"**/.gh-pages": true
-	},
-	"files.associations": {
-		"*.css": "tailwindcss"
-	},
-	"tailwindCSS.experimental.configFile": {
-		"packages/shared/react/react-ui-data-centric/tailwind.config.ts": "packages/**"
-	},
-	"stylelint.packageManager": "pnpm",
-	"css.validate": true,
-	"css.lint.unknownAtRules": "ignore",
-	"scss.lint.unknownAtRules": "ignore",
-	"scss.validate": true,
-	"less.validate": true,
-	"less.lint.unknownAtRules": "ignore",
-	"telemetry.telemetryLevel": "crash",
-	"[json]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[typescript]": {
-		"editor.defaultFormatter": "biomejs.biome",
-		"editor.suggestSelection": "recentlyUsed",
-		"editor.suggest.showKeywords": true,
-		"editor.formatOnSave": true
-	},
-	"typescript.updateImportsOnFileMove.enabled": "always",
-	"typescript.inlayHints.enumMemberValues.enabled": true,
-	"typescript.inlayHints.functionLikeReturnTypes.enabled": true,
-	"typescript.implementationsCodeLens.enabled": true,
-	"typescript.tsserver.experimental.enableProjectDiagnostics": false,
-	"typescript.tsserver.log": "off",
-	"typescript.tsserver.maxTsServerMemory": 10000,
-	"typescript.tsserver.enableTracing": false,
-	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"typescript.preferences.importModuleSpecifierEnding": "minimal",
-	"typescript.preferences.includePackageJsonAutoImports": "on",
-	"typescript.referencesCodeLens.enabled": false,
-	"javascript.inlayHints.variableTypes.enabled": true,
-	"javascript.updateImportsOnFileMove.enabled": "always",
-	"javascript.preferences.importModuleSpecifier": "non-relative",
-	"npm.packageManager": "npm",
-	"eslint.debug": false,
-	"emmet.includeLanguages": {
-		"javascript": "javascriptreact",
-		"typescript": "javascriptreact"
-	},
-	"emmet.excludeLanguages": ["markdown", "typescript"],
-	"shellcheck.ignorePatterns": {
-		"**/*.env.*": true
-	},
-	"git.enableSmartCommit": true,
-	"git.confirmSync": false,
-	"cSpell.userWords": ["stylelint", "TSES", "tsserverlibrary"],
-	"debug.javascript.defaultRuntimeExecutable": {
-		"pwa-node": "~/.asdf/shims/node"
-	},
-	"terminal.integrated.fontSize": 12,
-	"terminal.integrated.shellIntegration.enabled": true,
-	"terminal.integrated.cursorBlinking": true,
-	"terminal.integrated.env.linux": {},
-	"terminal.integrated.env.osx": {},
-	"terminal.integrated.env.windows": {},
-	"terminal.integrated.defaultProfile.linux": "zsh",
-	"terminal.integrated.profiles.linux": {
-		"bash": {
-			"path": "bash",
-			"args": ["-l"],
-			"icon": "terminal-bash"
-		},
-		"zsh": {
-			"path": "/usr/bin/zsh",
-			"args": ["-l"]
-		},
-		"fish": {
-			"path": "fish"
-		},
-		"tmux": {
-			"path": "tmux",
-			"icon": "terminal-tmux"
-		},
-		"pwsh": {
-			"path": "pwsh",
-			"icon": "terminal-powershell"
-		}
-	},
-	"vim.shell": "/usr/bin/zsh",
-	"vim.statusBarColorControl": false,
-	"vim.surround": false,
-	"vim.hlsearch": true,
-	"vim.highlightedyank.enable": true,
-	"vim.useSystemClipboard": true,
-	"vim.leader": "<space>",
-	"vim.normalModeKeyBindingsNonRecursive": [
-		{
-			"before": ["<leader>", "b", "d"],
-			"commands": ["workbench.action.closeActiveEditor"]
-		},
-		{
-			"before": ["<leader>", "b", "a"],
-			"commands": ["openEditors.closeAll"]
-		},
-		{
-			"before": ["<leader>", "b", "l"],
-			"commands": ["workbench.action.closeEditorsToTheRight"]
-		},
-		{
-			"before": ["<leader>", "b", "h"],
-			"commands": ["workbench.action.closeEditorsToTheLeft"]
-		},
-		{
-			"before": ["<leader>", "b", "o"],
-			"commands": ["workbench.action.closeOtherEditors"]
-		},
-		{
-			"before": ["<leader>", "w"],
-			"commands": ["workbench.action.files.save"]
-		},
-		{
-			"before": ["<leader>", "c", "a"],
-			"commands": ["editor.action.rename"],
-			"when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
-		},
-		{
-			"before": ["<leader>", "f", "f"],
-			"commands": ["workbench.action.quickOpen"]
-		},
-		{
-			"before": ["g", "d"],
-			"commands": ["editor.action.revealDefinition"]
-		},
-		{
-			"before": ["g", "d"],
-			"commands": ["editor.action.revealDefinition"]
-		},
-		{
-			"before": ["g", "r"],
-			"commands": ["editor.action.goToReferences"]
-		},
-		{
-			"before": ["Shift+K"],
-			"commands": ["editor.action.showHover"]
-		},
-		{
-			"before": ["Shift+H"],
-			"commands": ["workbench.action.previousEditor"]
-		},
-		{
-			"before": ["Shift+L"],
-			"commands": ["workbench.action.nextEditor"]
-		},
-		{
-			"before": ["<leader>", "h"],
-			"commands": [":nohl"]
-		},
-		{
-			"before": ["<leader>", "c", "a"],
-			"commands": ["editor.action.quickFix"],
-			"when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
-		},
-		{
-			"before": ["<leader>", "c", "r"],
-			"commands": ["editor.action.rename"],
-			"when": "editorTextFocus"
-		},
-		{
-			"before": ["<leader>", "e"],
-			"commands": ["workbench.action.toggleSidebarVisibility"]
-		},
-		{
-			"before": ["<leader>", "g", "s"],
-			"commands": ["workbench.view.scm"]
-		},
-		{
-			"before": ["]", "d"],
-			"commands": ["editor.action.marker.next"],
-			"when": "editorTextFocus"
-		},
-		{
-			"before": ["[", "d"],
-			"commands": ["editor.action.marker.prev"],
-			"when": "editorTextFocus"
-		},
-		{
-			"before": ["<leader>", "f", "s"],
-			"commands": ["workbench.action.findInFiles"],
-			"when": "editorTextFocus"
-		},
-		{
-			"before": ["<leader>", "f", "w"],
-			"commands": ["extension.searchUnderCursor"],
-			"when": "editorTextFocus"
-		},
-		{
-			"before": ["<leader>", "g", "s"],
-			"commands": ["workbench.view.scm"],
-			"when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
-		}
-	],
-	"[prisma]": {
-		"editor.defaultFormatter": "Prisma.prisma"
-	},
-	"redhat.telemetry.enabled": false,
-	"vim.handleKeys": {
-		"<C-p>": false,
-		"<C-d>": true,
-		"<C-s>": false,
-		"<C-z>": false
-	},
-	"[c]": {
-		"editor.defaultFormatter": "ms-vscode.cpptools"
-	},
-	"react-native-tools.showUserTips": false
+  "search.followSymlinks": false,
+  "window.menuBarVisibility": "hidden",
+  "window.customMenuBarAltFocus": false,
+  "window.customTitleBarVisibility": "auto",
+  "window.titleBarStyle": "native",
+  "window.enableMenuBarMnemonics": false,
+  "apc.electron": {
+    "titleBarStyle": "hidden"
+  },
+  "window.zoomLevel": -0.3,
+  "window.commandCenter": false,
+  "workbench.layoutControl.enabled": false,
+  "workbench.tree.renderIndentGuides": "none",
+  "workbench.tree.indent": 12,
+  "workbench.startupEditor": "none",
+  "workbench.editor.sharedViewState": true,
+  "workbench.editor.enablePreview": false,
+  "workbench.activityBar.location": "hidden",
+  "workbench.colorTheme": "Default Dark+",
+  "workbench.colorCustomizations": {
+    "errorLens.errorBackground": "#85524594",
+    "errorLens.errorForeground": "#855245e1",
+    "errorLens.warningBackground": "#63421d80",
+    "errorLens.warningForeground": "#63421d",
+    "errorLens.infoBackground": "#1d634280",
+    "errorLens.infoForeground": "#1d6342",
+    "errorLens.hintBackground": "#1d634280",
+    "statusBar.background": "#1F1F1F",
+    "statusBar.foreground": "#ffffff",
+    "statusBar.noFolderBackground": "#1F1F1F",
+    "statusBar.debuggingBackground": "#1F1F1F",
+    "statusBar.debuggingForeground": "#ffffff",
+    "statusBarItem.remoteBackground": "#1F1F1F"
+  },
+  "breadcrumbs.enabled": false,
+  "explorer.compactFolders": false,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.decorations.badges": false,
+  "explorer.autoReveal": false,
+  "editor.suggest.insertMode": "replace",
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.lineNumbers": "off",
+  "editor.fontWeight": "normal",
+  "editor.minimap.enabled": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.detectIndentation": true,
+  "editor.wordBasedSuggestions": "off",
+  "editor.suggest.localityBonus": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggestSelection": "first",
+  "editor.hover.enabled": true,
+  "editor.inlayHints.enabled": "off",
+  "editor.linkedEditing": true,
+  "editor.smoothScrolling": true,
+  "editor.fontFamily": "MesloLGS Nerd Font",
+  "editor.fontSize": 12.5,
+  "editor.suggest.showSnippets": false,
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "files.autoSave": "onFocusChange",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "USE_GITIGNORE": true
+  },
+  "files.watcherExclude": {
+    "**/.bloop": true,
+    "**/.metals": true,
+    "**/.ammonite": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.build": true,
+    "**/.gh-pages": true
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.configFile": {
+    "packages/shared/react/react-ui-data-centric/tailwind.config.ts": "packages/**"
+  },
+  "stylelint.packageManager": "pnpm",
+  "css.validate": true,
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "scss.validate": true,
+  "less.validate": true,
+  "less.lint.unknownAtRules": "ignore",
+  "telemetry.telemetryLevel": "crash",
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.suggestSelection": "recentlyUsed",
+    "editor.suggest.showKeywords": true,
+    "editor.formatOnSave": true
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.inlayHints.enumMemberValues.enabled": true,
+  "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
+  "typescript.implementationsCodeLens.enabled": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "typescript.tsserver.log": "off",
+  "typescript.tsserver.maxTsServerMemory": 10000,
+  "typescript.tsserver.enableTracing": false,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.referencesCodeLens.enabled": false,
+  "javascript.inlayHints.variableTypes.enabled": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "npm.packageManager": "npm",
+  "eslint.debug": false,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "javascriptreact"
+  },
+  "emmet.excludeLanguages": ["markdown", "typescript"],
+  "shellcheck.ignorePatterns": {
+    "**/*.env.*": true
+  },
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "cSpell.userWords": ["stylelint", "TSES", "tsserverlibrary"],
+  "debug.javascript.defaultRuntimeExecutable": {
+    "pwa-node": "~/.asdf/shims/node"
+  },
+  "terminal.integrated.fontSize": 12,
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.env.linux": {},
+  "terminal.integrated.env.osx": {},
+  "terminal.integrated.env.windows": {},
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.profiles.linux": {
+    "bash": {
+      "path": "bash",
+      "args": ["-l"],
+      "icon": "terminal-bash"
+    },
+    "zsh": {
+      "path": "/usr/bin/zsh",
+      "args": ["-l"]
+    },
+    "fish": {
+      "path": "fish"
+    },
+    "tmux": {
+      "path": "tmux",
+      "icon": "terminal-tmux"
+    },
+    "pwsh": {
+      "path": "pwsh",
+      "icon": "terminal-powershell"
+    }
+  },
+  "vim.shell": "/usr/bin/zsh",
+  "vim.statusBarColorControl": false,
+  "vim.surround": false,
+  "vim.hlsearch": true,
+  "vim.highlightedyank.enable": true,
+  "vim.useSystemClipboard": true,
+  "vim.leader": "<space>",
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<leader>", "b", "d"],
+      "commands": ["workbench.action.closeActiveEditor"]
+    },
+    {
+      "before": ["<leader>", "b", "a"],
+      "commands": ["openEditors.closeAll"]
+    },
+    {
+      "before": ["<leader>", "b", "l"],
+      "commands": ["workbench.action.closeEditorsToTheRight"]
+    },
+    {
+      "before": ["<leader>", "b", "h"],
+      "commands": ["workbench.action.closeEditorsToTheLeft"]
+    },
+    {
+      "before": ["<leader>", "b", "o"],
+      "commands": ["workbench.action.closeOtherEditors"]
+    },
+    {
+      "before": ["<leader>", "w"],
+      "commands": ["workbench.action.files.save"]
+    },
+    {
+      "before": ["<leader>", "c", "a"],
+      "commands": ["editor.action.rename"],
+      "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+    },
+    {
+      "before": ["<leader>", "f", "f"],
+      "commands": ["workbench.action.quickOpen"]
+    },
+    {
+      "before": ["g", "d"],
+      "commands": ["editor.action.revealDefinition"]
+    },
+    {
+      "before": ["g", "d"],
+      "commands": ["editor.action.revealDefinition"]
+    },
+    {
+      "before": ["g", "r"],
+      "commands": ["editor.action.goToReferences"]
+    },
+    {
+      "before": ["Shift+K"],
+      "commands": ["editor.action.showHover"]
+    },
+    {
+      "before": ["Shift+H"],
+      "commands": ["workbench.action.previousEditor"]
+    },
+    {
+      "before": ["Shift+L"],
+      "commands": ["workbench.action.nextEditor"]
+    },
+    {
+      "before": ["<leader>", "h"],
+      "commands": [":nohl"]
+    },
+    {
+      "before": ["<leader>", "c", "a"],
+      "commands": ["editor.action.quickFix"],
+      "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
+    },
+    {
+      "before": ["<leader>", "c", "r"],
+      "commands": ["editor.action.rename"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "e"],
+      "commands": ["workbench.action.toggleSidebarVisibility"]
+    },
+    {
+      "before": ["<leader>", "g", "s"],
+      "commands": ["workbench.view.scm"]
+    },
+    {
+      "before": ["]", "d"],
+      "commands": ["editor.action.marker.next"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["[", "d"],
+      "commands": ["editor.action.marker.prev"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "f", "s"],
+      "commands": ["workbench.action.findInFiles"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "f", "w"],
+      "commands": ["extension.searchUnderCursor"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "g", "s"],
+      "commands": ["workbench.view.scm"],
+      "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+    }
+  ],
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "redhat.telemetry.enabled": false,
+  "vim.handleKeys": {
+    "<C-p>": false,
+    "<C-d>": true,
+    "<C-s>": false,
+    "<C-z>": false
+  },
+  "[c]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "react-native-tools.showUserTips": false,
+  "hide-files.files": []
 }
