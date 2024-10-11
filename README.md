@@ -20,5 +20,6 @@ Also:
 - git config
 - fzf, fd
 - vscode dark & tokyonight themes for everything
+- vscode settings & keybindings at .vscode
 
 * various helper scripts
