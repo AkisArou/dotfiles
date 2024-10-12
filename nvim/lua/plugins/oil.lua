@@ -1,7 +1,7 @@
 return {
   "stevearc/oil.nvim",
   opts = {},
-  dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
+  -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
   config = function()
     -- Declare a global function to retrieve the current directory
     function _G.get_oil_winbar()
@@ -18,6 +18,7 @@ return {
       win_options = {
         winbar = "%!v:lua.get_oil_winbar()",
       },
+      columns = {},
       skip_confirm_for_simple_edits = true,
       prompt_save_on_select_new_entry = false,
       lsp_file_methods = {
