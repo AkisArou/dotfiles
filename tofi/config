@@ -180,7 +180,7 @@
 	outline-color = #080800
 
 	# Width of the border in pixels.
-	border-width = 12
+	border-width = 0
 
 	# Border color
 	border-color = #F92672
@@ -256,7 +256,7 @@
 	# algorithm.
 	#
 	# Supported values: normal, prefix, fuzzy
-	matching-algorithm = normal
+	matching-algorithm = fuzzy
 
 	# If true, require a match to allow a selection to be made. If false,
 	# making a selection with no matches will print input to stdout.

@@ -14,6 +14,6 @@ case $(printf "%s\n" "Shut down" "Reboot" "Suspend" "Hibernate" "Logout" | tofi 
   systemctl hibernate
   ;;
 "Logout")
-  swaymsg exit && exit
+  pkill -KILL -u "$USER"
   ;;
 esac

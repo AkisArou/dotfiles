@@ -50,6 +50,7 @@ create_symlink "$HOME/dotfiles/gtk/gtk-3.0" "$HOME/.config/gtk-3.0"
 create_symlink "$HOME/dotfiles/yazi" "$HOME/.config/yazi"
 create_symlink "$HOME/dotfiles/sway" "$HOME/.config/sway"
 create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"
+create_symlink "$HOME/dotfiles/tofi" "$HOME/.config/tofi"
 create_symlink "$HOME/dotfiles/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 
 # ------------------------------------------------------
