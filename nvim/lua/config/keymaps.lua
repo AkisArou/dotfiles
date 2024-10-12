@@ -41,9 +41,7 @@ keymap("v", ">", ">gv", opts)
 -- Undo
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
--- Close all buffers except the current one and avoid closing neo-tree
 function CloseAllBuffersExceptCurrent()
-  -- Get the current buffer
   local current_buf = vim.api.nvim_get_current_buf()
 
   -- Get all buffers
@@ -51,9 +49,14 @@ function CloseAllBuffersExceptCurrent()
     -- Check if buffer is valid, loaded, and is not neo-tree
     local buf_name = vim.api.nvim_buf_get_name(buf)
     if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-      -- Avoid closing neo-tree buffer
+      -- Avoid closing neo-tree buffer and the current buffer
       if not buf_name:match("neo%-tree") and buf ~= current_buf then
-        vim.api.nvim_buf_delete(buf, {})
+        -- Save the buffer if it's modified
+        if vim.api.nvim_buf_get_option(buf, "modified") then
+          vim.api.nvim_command("bufdo silent! w") -- Save all modified buffers silently
+        end
+        -- Forcefully delete the buffer
+        vim.api.nvim_buf_delete(buf, { force = true })
       end
     end
   end
@@ -67,13 +70,38 @@ function CloseAllBuffers()
     if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
       -- Avoid closing neo-tree buffer
       if not buf_name:match("neo%-tree") then
-        vim.api.nvim_buf_delete(buf, {})
+        -- Save the buffer if it's modified
+        if vim.api.nvim_buf_get_option(buf, "modified") then
+          vim.api.nvim_command("bufdo silent! w") -- Save all modified buffers silently
+        end
+        -- Forcefully delete the buffer
+        vim.api.nvim_buf_delete(buf, { force = true })
       end
     end
   end
 end
 
+function CloseCurrentBuffer()
+  local current_buf = vim.api.nvim_get_current_buf()
+
+  -- Check if the buffer is valid and loaded
+  if vim.api.nvim_buf_is_valid(current_buf) and vim.api.nvim_buf_is_loaded(current_buf) then
+    -- Check if the buffer is modified
+    if vim.api.nvim_buf_get_option(current_buf, "modified") then
+      -- Save the current buffer
+      vim.api.nvim_buf_call(current_buf, function()
+        vim.cmd("w") -- or vim.cmd('silent! w') for silent save
+      end)
+    end
+
+    -- Close the current buffer
+    vim.api.nvim_buf_delete(current_buf, { force = true })
+  end
+end
+
+-- Keybinding for saving and closing the current buffer
 vim.api.nvim_set_keymap("n", "<leader>n", "<cmd>bnext<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>p", "<cmd>bprevious<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader>bd", ":lua CloseCurrentBuffer()<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<leader>bo", ":lua CloseAllBuffersExceptCurrent()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>ba", ":lua CloseAllBuffers()<CR>", opts)
