@@ -48,6 +48,8 @@ create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 create_symlink "$HOME/dotfiles/btop" "$HOME/.config/btop"
 create_symlink "$HOME/dotfiles/gtk/gtk-3.0" "$HOME/.config/gtk-3.0"
 create_symlink "$HOME/dotfiles/yazi" "$HOME/.config/yazi"
+create_symlink "$HOME/dotfiles/sway" "$HOME/.config/sway"
+create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"
 
 # ------------------------------------------------------
 # Librewolf
