@@ -1,6 +1,6 @@
 #!/bin/sh
 
-case $(printf "%s\n" "Shut down" "Reboot" "Suspend" "Hibernate" | tofi $@) in
+case $(printf "%s\n" "Shut down" "Reboot" "Suspend" "Hibernate" "Logout" | tofi $@) in
 "Shut down")
   systemctl poweroff
   ;;
@@ -12,5 +12,8 @@ case $(printf "%s\n" "Shut down" "Reboot" "Suspend" "Hibernate" | tofi $@) in
   ;;
 "Hibernate")
   systemctl hibernate
+  ;;
+"Logout")
+  swaymsg exit && exit
   ;;
 esac
