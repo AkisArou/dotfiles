@@ -18,13 +18,13 @@ set $up k
 set $right l
 
 set $term ~/dotfiles/alacritty/launch.sh
-set $menu dmenu_path | wmenu | xargs swaymsg exec --
+set $menu tofi-run | xargs swaymsg exec --
 set $browser /usr/bin/librewolf
 
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+output * bg ~/dotfiles/wallpapers/mountains-1.jpg fill
 
 output DP-2 {
     mode 5120x1440@129.999Hz
