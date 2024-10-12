@@ -84,6 +84,8 @@ input "type:touchpad" {
     # Programs
     bindsym $mod+Return exec $term
     bindsym $mod+b exec $browser
+    bindsym $mod+Shift+p exec librewolf --private-window
+    bindsym $mod+Shift+t exec brave --incognito --tor
     bindsym $mod+p exec flameshot gui
     bindsym $mod+d exec $menu
 
