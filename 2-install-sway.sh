@@ -5,10 +5,14 @@ source "$(dirname "$0")/scripts/library.sh"
 packages=(
   "sway"
   "swaybg"
+  "swayidle"
+  "swaydim"
   "polkit"
   "wl-clipboard"
   "waybar"
   "tofi"
+  "grim"
+  "grimshot"
 )
 
 # ------------------------------------------------------

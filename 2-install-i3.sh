@@ -13,6 +13,7 @@ packages=(
   "nitrogen"
   "xclip"
   "polybar"
+  "flameshot"
 )
 
 # ------------------------------------------------------

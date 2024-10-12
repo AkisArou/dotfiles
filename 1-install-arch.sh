@@ -92,7 +92,6 @@ packages=(
   "zip"
   "unzip"
   "rar"
-  "flameshot"
   "fastfetch"
   "ripgrep"
   "fd"
