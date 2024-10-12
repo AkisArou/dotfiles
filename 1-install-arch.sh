@@ -100,7 +100,6 @@ packages=(
   "vim"
   "visual-studio-code-bin"
   "tmux"
-  "genymotion"
   "git-delta"
   "gnome-terminal"
   "docker"

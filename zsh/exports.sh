@@ -21,6 +21,11 @@ export XDG_CONFIG_DIRS="/etc/xdg"
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 
+# Mozilla specific for wayland
+# export MOZ_ENABLE_WAYLAND=1
+# export MOZ_WAYLAND_USE_VAAPI=1
+# export MOZ_DBUS_REMOTE=1
+
 export TERMINAL="st"
 export TERM="xterm-256color"
 export EDITOR="nvim"
