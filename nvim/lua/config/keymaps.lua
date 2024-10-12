@@ -5,6 +5,8 @@ keymap("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
 keymap("n", "<leader>w", ":w<CR>", opts)
 keymap("n", "<leader>l", ":Lazy<CR>", opts)
 
+keymap("i", "jk", [[<C-\><C-n>]]) -- no need to escape the '\'
+
 -- Resize window using <ctrl> arrow keys
 keymap("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
 keymap("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
@@ -39,6 +41,39 @@ keymap("v", ">", ">gv", opts)
 -- Undo
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
--- Key mappings for moving tabs left and right
-vim.api.nvim_set_keymap("n", "<S-A-h>", "<cmd>BufferLineMovePrev<CR>", opts)
-vim.api.nvim_set_keymap("n", "<S-A-l>", "<cmd>BufferLineMoveNext<CR>", opts)
+-- Close all buffers except the current one and avoid closing neo-tree
+function CloseAllBuffersExceptCurrent()
+  -- Get the current buffer
+  local current_buf = vim.api.nvim_get_current_buf()
+
+  -- Get all buffers
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    -- Check if buffer is valid, loaded, and is not neo-tree
+    local buf_name = vim.api.nvim_buf_get_name(buf)
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+      -- Avoid closing neo-tree buffer
+      if not buf_name:match("neo%-tree") and buf ~= current_buf then
+        vim.api.nvim_buf_delete(buf, {})
+      end
+    end
+  end
+end
+
+function CloseAllBuffers()
+  -- Get all buffers
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    -- Check if buffer is valid, loaded, and is not neo-tree
+    local buf_name = vim.api.nvim_buf_get_name(buf)
+    if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
+      -- Avoid closing neo-tree buffer
+      if not buf_name:match("neo%-tree") then
+        vim.api.nvim_buf_delete(buf, {})
+      end
+    end
+  end
+end
+
+vim.api.nvim_set_keymap("n", "<leader>n", "<cmd>bnext<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader>p", "<cmd>bprevious<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader>bo", ":lua CloseAllBuffersExceptCurrent()<CR>", opts)
+vim.api.nvim_set_keymap("n", "<leader>ba", ":lua CloseAllBuffers()<CR>", opts)

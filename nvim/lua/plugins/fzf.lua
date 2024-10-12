@@ -26,10 +26,25 @@ return {
           -- action to toggle `--no-ignore`, requires fd or rg installed
           ["ctrl-g"] = { actions.toggle_ignore },
           ["ctrl-h"] = { actions.toggle_hidden },
-          -- uncomment to override `actions.file_edit_or_qf`
-          --   ["enter"]     = actions.file_edit,
-          -- custom actions are available too
-          --   ["ctrl-y"]    = function(selected) print(selected[1]) end,
+          -- Bind Ctrl+e to open the selected file in a normal buffer
+          ["ctrl-e"] = function(selected)
+            -- Ensure a selection was made
+            if selected and #selected > 0 then
+              -- Get the selected file
+              local file = selected[1]
+
+              -- Remove letters before the first emoji and the emoji itself
+              local cleaned_filename = file:gsub(".*[\194-\244][\128-\191]*", "") -- Remove everything up to and including the first emoji
+
+              -- Trim any leading or trailing spaces
+              cleaned_filename = cleaned_filename:match("^%s*(.-)%s*$") -- Trim spaces
+
+              -- Open the selected file in a normal buffer if the cleaned filename is valid
+              if cleaned_filename and #cleaned_filename > 0 then
+                vim.cmd("edit " .. vim.fn.fnameescape(cleaned_filename))
+              end
+            end
+          end,
         },
       },
     })
@@ -42,7 +57,8 @@ return {
     vim.keymap.set("n", "<leader>fl", fzf_lua.live_grep_resume, { desc = "Resume grep" })
     vim.keymap.set("n", "<leader>fw", fzf_lua.grep_cword, { desc = "Find word under cursor in cwd" })
     vim.keymap.set("n", "<leader>fW", fzf_lua.grep_cWORD, { desc = "Find WORD under cursor in cwd" })
-    vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
+    -- vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
+    vim.keymap.set("n", "<leader>fe", fzf_lua.buffers, { desc = "Buffers" })
     vim.keymap.set("n", "<leader>fc", fzf_lua.git_commits, { desc = "Git commits" })
     vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
     vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })

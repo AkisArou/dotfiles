@@ -34,7 +34,7 @@ export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-  --bind ctrl-d:page-down,ctrl-u:page-up
+  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
   --highlight-line \
   --info=inline-right \
   --ansi \
