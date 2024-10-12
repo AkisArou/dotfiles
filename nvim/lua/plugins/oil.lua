@@ -36,7 +36,7 @@ return {
         ["<C-p>"] = "actions.preview",
         ["<C-l>"] = "actions.refresh",
         ["h"] = "actions.parent",
-        ["w"] = "actions.open_cwd",
+        ["#"] = "actions.open_cwd",
         ["`"] = "actions.cd",
         -- ["~"] = { "actions.cd", opts = { scope = "tab" }, desc = ":tcd to the current oil directory", mode = "n" },
         ["gs"] = "actions.change_sort",
