@@ -4,11 +4,23 @@ This is the configuration of my Arch linux and other useful programs
 
 ## Packages
 
+X11
+
 - WM: i3
 - Bar: polybar
-- Terminal: st | kitty | alacritty
+- Terminal: st | alacritty | kitty
+- Menu: rofi
+
+Wayland
+
+- WM: sway
+- Bar: waybar
+- Terminal: alacritty | kitty
+- Menu: tofi
+
+Common
+
 - Editor: nvim (configured for web dev) | vim (basic config) | vscode | zed
-- Menus: rofi
 - Browsers: librewolf, brave
 - Filemanager: yazi, thunar
 - Notifications: dunst

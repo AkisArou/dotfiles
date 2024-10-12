@@ -4,6 +4,7 @@ source "$(dirname "$0")/scripts/library.sh"
 
 packages=(
   "sway"
+  "swaybg"
   "polkit"
   "wl-clipboard"
   "waybar"

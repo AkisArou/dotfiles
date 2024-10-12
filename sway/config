@@ -24,7 +24,7 @@ set $browser /usr/bin/librewolf
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg ~/dotfiles/wallpapers/mountains-1.jpg fill
+output * bg /home/akisarou/dotfiles/wallpapers/mountains-1.jpg fill
 
 output DP-2 {
     mode 5120x1440@129.999Hz
