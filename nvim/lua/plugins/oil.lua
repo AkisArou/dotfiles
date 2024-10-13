@@ -1,6 +1,7 @@
 return {
   "stevearc/oil.nvim",
   opts = {},
+  enabled = false,
   -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
   config = function()
     -- Declare a global function to retrieve the current directory
