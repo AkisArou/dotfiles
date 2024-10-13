@@ -55,6 +55,7 @@ create_symlink "$HOME/dotfiles/brave-flags.conf" "$HOME/.config/brave-flags.conf
 create_symlink "$HOME/dotfiles/systemd" "$HOME/.config/systemd"
 create_symlink "$HOME/dotfiles/foot" "$HOME/.config/foot"
 create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
+create_symlink "$HOME/dotfiles/starship" "$HOME/.config/starship"
 
 # ------------------------------------------------------
 # Librewolf
