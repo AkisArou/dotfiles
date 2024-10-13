@@ -74,7 +74,6 @@ echo "Configuring NodeJS..."
 corepack enable pnpm
 corepack enable yarn
 asdf reshim nodejs
-corepack use pnpm@latest
 
 echo "Installing global npm packages..."
 npm i -g npm-workspaces-language-server
