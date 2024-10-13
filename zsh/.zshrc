@@ -3,6 +3,7 @@ if [[ -z "$TMUX" ]]; then
 fi
 
 #figlet "Arch Linux" &&
+echo ""
 fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
 
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
