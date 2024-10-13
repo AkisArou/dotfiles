@@ -1,6 +1,6 @@
 {
 	"height": 20, // Waybar height (to be removed for auto height)
-	"spacing": 4, // Gaps between modules (4px)
+	"spacing": 6, // Gaps between modules (4px)
 	"modules-left": [
 		"sway/workspaces",
 		"sway/scratchpad",
@@ -88,9 +88,9 @@
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
 	},
 	"bluetooth": {
-		"format": " {status}",
-		"format-connected": " {device_alias}",
-		"format-connected-battery": " {device_alias} {device_battery_percentage}%",
+		"format": "<span color='#7aa2f7'>BT</span> {status}",
+		"format-connected": "{device_alias}",
+		"format-connected-battery": "{device_alias} {device_battery_percentage}%",
 		"on-click": "blueman-manager",
 		"format-device-preference": ["device1", "device2"], // preference list deciding the displayed device
 		"tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
@@ -100,10 +100,10 @@
 	},
 	"network": {
 		// "interface": "wlp2*", // (Optional) To force the use of this interface
-		"format-wifi": "{essid}",
-		"format-ethernet": "{ipaddr}/{cidr} ",
-		"tooltip-format": "{ifname} via {gwaddr} ",
-		"format-linked": "{ifname} (No IP) ",
+		"format-wifi": "{essid}",
+		"format-ethernet": "{ipaddr}/{cidr}",
+		"tooltip-format": "{ifname} via {gwaddr}",
+		"format-linked": "{ifname} (No IP)",
 		"format-disconnected": "Disconnected",
 		"format-alt": "{ifname}: {ipaddr}/{cidr}"
 	},
