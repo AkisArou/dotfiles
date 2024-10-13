@@ -13,7 +13,8 @@
 	# characters not in the chosen font will fail to render.
 	#
 	# Otherwise, fonts are interpreted in Pango format.
-	font = "usr/share/fonts/TTF/MesloLGSNerdFontMono-Regular.ttf"
+	# font = "/usr/share/fonts/TTF/MesloLGSNerdFontMono-Regular.ttf"
+	font = "/usr/share/fonts/gnu-free/FreeMono.otf"
 
 	# Point size of text.
 	font-size = 12
@@ -177,7 +178,7 @@
 	outline-width = 4
 
 	# Border outline color
-	outline-color = #080800
+	outline-color = #111111
 
 	# Width of the border in pixels.
 	border-width = 0
