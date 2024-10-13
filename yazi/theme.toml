@@ -1,5 +1,14 @@
-# : Manager {{{
+# : Icon {{{
+[icon]
+globs = []
+dirs  = []
+files = []
+conds = []
 
+# : }}}
+
+
+# : Manager {{{
 [manager]
 cwd = { fg = "#878580" }
 
@@ -34,8 +43,8 @@ syntect_theme = "~/.config/yazi/Catppuccin-macchiato.tmTheme"
 # : Status {{{
 
 [status]
-separator_open  = ""
-separator_close = ""
+separator_open  = ""
+separator_close = ""
 separator_style = { fg = "#403E3C", bg = "#403E3C" }
 
 # Mode
@@ -95,7 +104,7 @@ hovered = { underline = true }
 mask            = { bg = "#1C1B1A" }
 cand            = { fg = "#24837B" }
 rest            = { fg = "#5E409D" }
-desc            = { fg = "#A02F6F" }
+desc            = { fg = "#CECDC3" }
 separator       = "  "
 separator_style = { fg = "#575653" }
 
@@ -137,7 +146,7 @@ rules = [
 
 	# Fallback
 	{ name = "*", fg = "#878580" },
-	{ name = "*/", fg = "#24837B" }
+	{ name = "*/", fg = "#6a9955" }
 ]
 
 # : }}}
