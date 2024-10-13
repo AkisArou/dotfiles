@@ -2,7 +2,7 @@
   name = AkisArou
   email = akisarou90@gmail.com
 
-[includeIf "gitdir:~/nable/nable-solutions/.git"]
+[includeIf "gitdir:~/nable-solutions/.git"]
   path = ./config-nable
 
 [alias]
