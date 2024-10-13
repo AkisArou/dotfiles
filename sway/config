@@ -21,7 +21,7 @@ set $right l
 
 # set $term ~/dotfiles/alacritty/launch.sh
 set $term foot
-set $menu tofi-run | xargs swaymsg exec --
+set $menu tofi-drun | xargs swaymsg exec --
 set $browser /usr/bin/librewolf
 
 ### Output configuration
