@@ -52,6 +52,7 @@ create_symlink "$HOME/dotfiles/sway" "$HOME/.config/sway"
 create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"
 create_symlink "$HOME/dotfiles/tofi" "$HOME/.config/tofi"
 create_symlink "$HOME/dotfiles/brave-flags.conf" "$HOME/.config/brave-flags.conf"
+create_symlink "$HOME/dotfiles/systemd" "$HOME/.config/systemd"
 
 # ------------------------------------------------------
 # Librewolf

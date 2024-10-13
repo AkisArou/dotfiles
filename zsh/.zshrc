@@ -1,3 +1,7 @@
+if [[ -z "$TMUX" ]]; then
+  tmux attach-session -t default
+fi
+
 figlet "Arch Linux" && fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
 
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
