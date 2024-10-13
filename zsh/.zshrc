@@ -4,13 +4,14 @@ fi
 
 figlet "Arch Linux" && fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
 
+eval "$(starship init zsh)"
+
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
 # plugins
 plug "zsh-users/zsh-autosuggestions"
 plug "zap-zsh/supercharge"
 plug "zap-zsh/vim"
-plug "zap-zsh/zap-prompt"
 plug "zap-zsh/fzf"
 plug "zap-zsh/exa"
 plug "zsh-users/zsh-syntax-highlighting"
