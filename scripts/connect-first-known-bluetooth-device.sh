@@ -24,4 +24,7 @@ else
 fi
 
 echo "$text"
-notify-send -t 1500 "$text"
+
+if [ -n "$mac_address" ]; then
+  notify-send -t 1500 "$text"
+fi
