@@ -1,6 +1,6 @@
 alias sudo="sudo -E"
 alias ta="tmux a"
-alias v="nvim --listen /tmp/nvim.pipe"
+alias v="nvim"
 alias r="yazi"
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
