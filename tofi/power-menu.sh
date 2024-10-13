@@ -1,19 +1,25 @@
 #!/bin/sh
 
-case $(printf "%s\n" "Shut down" "Reboot" "Suspend" "Hibernate" "Logout" | tofi $@) in
-"Shut down")
+shutdown="Shutdown"
+reboot="Reboot"
+suspend="Suspend"
+hibernate="Hibernate"
+logout="Logout"
+
+case $(printf "%s\n" $shutdown $reboot $suspend $hibernate $logout | tofi $@) in
+$shutdown)
   systemctl poweroff
   ;;
-"Reboot")
+$reboot)
   systemctl reboot
   ;;
-"Suspend")
+$suspend)
   systemctl suspend
   ;;
-"Hibernate")
+$hibernate)
   systemctl hibernate
   ;;
-"Logout")
+$logout)
   pkill -KILL -u "$USER"
   ;;
 esac
