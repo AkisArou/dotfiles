@@ -8,7 +8,7 @@ X11
 
 - WM: i3
 - Bar: polybar
-- Terminal: st | alacritty | kitty
+- Terminal: st
 - Menu: rofi
 - Screenshot: flameshot
 
@@ -16,7 +16,7 @@ Wayland
 
 - WM: sway
 - Bar: waybar
-- Terminal: alacritty | kitty
+- Terminal: foot
 - Menu: tofi
 - Screenshot: grim & grimshot
 
@@ -24,6 +24,7 @@ Common
 
 - Editor: nvim (configured for web dev) | vim (basic config) | vscode (configuration at .vscode) | zed
 - Browsers: librewolf, brave
+- Terminal: alacritty | kitty
 - Filemanager: yazi, thunar
 - Notifications: dunst
 - Shell: zsh
