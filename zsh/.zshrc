@@ -2,7 +2,8 @@ if [[ -z "$TMUX" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
 
-figlet "Arch Linux" && fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
+#figlet "Arch Linux" &&
+fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
 
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
