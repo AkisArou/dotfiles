@@ -1,5 +1,5 @@
 if [[ -z "$TMUX" ]]; then
-  tmux attach-session -t default
+  tmux attach-session -t default || tmux new-session -s default
 fi
 
 figlet "Arch Linux" && fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"

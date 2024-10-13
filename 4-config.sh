@@ -1,12 +1,11 @@
 #!/bin/zsh
 
 echo "Enabling systemctl daemons..."
+loginctl enable-linger
 sudo systemctl enable --now iwd
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
-systemctl --user enable tmux.service
-systemctl --user start tmux.service
 
 echo "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then

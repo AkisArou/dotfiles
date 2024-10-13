@@ -9,6 +9,9 @@ xwayland disable
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+exec --no-startup-id systemctl --user enable tmux.service
+exec --no-startup-id systemctl --user start tmux.service
+
 
 set $mod Mod4
 set $left h
@@ -16,7 +19,8 @@ set $down j
 set $up k
 set $right l
 
-set $term ~/dotfiles/alacritty/launch.sh
+# set $term ~/dotfiles/alacritty/launch.sh
+set $term foot
 set $menu tofi-run | xargs swaymsg exec --
 set $browser /usr/bin/librewolf
 
