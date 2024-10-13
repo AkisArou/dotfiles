@@ -10,6 +10,7 @@ X11
 - Bar: polybar
 - Terminal: st | alacritty | kitty
 - Menu: rofi
+- Screenshot: flameshot
 
 Wayland
 
@@ -17,10 +18,11 @@ Wayland
 - Bar: waybar
 - Terminal: alacritty | kitty
 - Menu: tofi
+- Screenshot: grim & grimshot
 
 Common
 
-- Editor: nvim (configured for web dev) | vim (basic config) | vscode | zed
+- Editor: nvim (configured for web dev) | vim (basic config) | vscode (configuration at .vscode) | zed
 - Browsers: librewolf, brave
 - Filemanager: yazi, thunar
 - Notifications: dunst
