@@ -113,11 +113,6 @@ packages=(
   "zed"
   "watchman-bin"
   "figlet"
-  "android-sdk-cmdline-tools-latest"
-  "android-sdk-build-tools"
-  "android-sdk-platform-tools"
-  "android-platform"
-  "android-emulator"
 )
 
 # ------------------------------------------------------

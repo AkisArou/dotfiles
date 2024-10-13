@@ -7,14 +7,10 @@ export PATH="/usr/bin/go/bin:$PATH"
 export PATH="$HOME/.local/share/neovim/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 
-# export ANDROID_HOME="$HOME/Android/Sdk"
-# export PATH=$PATH:$ANDROID_HOME/emulator
-# export PATH=$PATH:$ANDROID_HOME/platform-tools
-
-export ANDROID_HOME="/opt/android-sdk"
+export ANDROID_HOME="$HOME/Android/Sdk"
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
-export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+export PATH=$ANDROID_HOME/cmdline-tools/latest/bin/:$PATH
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
