@@ -79,7 +79,7 @@
 	},
 	"backlight": {
 		// "device": "acpi_video1",
-		"format": "<span color='#7aa2f7'>LGT</span> {percent}%",
+		"format": "<span color='#7aa2f7'>BRT</span> {percent}%",
 		"format-icons": ["", "", "", "", "", "", "", "", ""]
 	},
 	"clock": {
