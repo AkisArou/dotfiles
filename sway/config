@@ -54,6 +54,10 @@ input "type:touchpad" {
     # disable_while_typing true
 }
 
+input "2:7:SynPS/2_Synaptics_TouchPad" {
+    events disabled
+  }
+
 
 ### Key bindings
 #
