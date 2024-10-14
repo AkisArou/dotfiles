@@ -41,7 +41,6 @@ return {
       fzf_lua.files({
         winopts = {
           preview = {
-
             hidden = "hidden",
           },
         },
