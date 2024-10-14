@@ -37,6 +37,7 @@ packages=(
   "fwupd"
   "udisks2" # Needed for fwupd
   "linux-headers"
+  "update-grub"
   "base"
   "base-devel"
   "posix"
