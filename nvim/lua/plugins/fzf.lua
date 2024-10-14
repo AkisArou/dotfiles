@@ -37,13 +37,29 @@ return {
 
     vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#3f3f3f" })
 
-    vim.keymap.set("n", "<leader>ff", fzf_lua.files, { desc = "Fuzzy find files in cwd" })
+    vim.keymap.set("n", "<leader>ff", function()
+      fzf_lua.files({
+        winopts = {
+          preview = {
+
+            hidden = "hidden",
+          },
+        },
+      })
+    end, { desc = "Fuzzy find files in cwd" })
+
     vim.keymap.set("n", "<leader>fr", fzf_lua.oldfiles, { desc = "Fuzzy find recent files" })
+
     vim.keymap.set("n", "<leader>fs", fzf_lua.live_grep_native, { desc = "Grep in cwd" })
+
     vim.keymap.set("n", "<leader>fl", fzf_lua.live_grep_resume, { desc = "Resume grep" })
+
     vim.keymap.set("n", "<leader>fw", fzf_lua.grep_cword, { desc = "Find word under cursor in cwd" })
+
     vim.keymap.set("n", "<leader>fW", fzf_lua.grep_cWORD, { desc = "Find WORD under cursor in cwd" })
+
     vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
+
     vim.keymap.set("n", "<leader>fe", function()
       fzf_lua.buffers({
         fzf_opts = {
@@ -58,8 +74,11 @@ return {
         },
       })
     end, { desc = "Buffers" })
+
     vim.keymap.set("n", "<leader>fc", fzf_lua.git_commits, { desc = "Git commits" })
+
     vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
+
     vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
   end,
 }
