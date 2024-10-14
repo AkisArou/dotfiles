@@ -24,8 +24,8 @@ filekinds:
   mount_point: { foreground: "#dcdcaa" }
 
 perms:
-  user_read: { foreground: "#d4d4d4" }
-  user_write: { foreground: "#dcdcaa" }
+  user_read: { foreground: "#d4d4d4", is_bold: false }
+  user_write: { foreground: "#dcdcaa", is_bold: false }
   user_execute_file: { foreground: "#6a9955" }
   user_execute_other: { foreground: "#6a9955" }
   group_read: { foreground: "#d4d4d4" }
@@ -99,7 +99,7 @@ file_type:
   build: { foreground: "#6272A4" }
   source: { foreground: "#8BE9FD" }
 
-punctuation: { foreground: "#6272A4" }
+punctuation: { foreground: "#44475A" }
 date: { foreground: "#dcdcaa" }
 inode: { foreground: "#d4d4d4" }
 blocks: { foreground: "#d4d4d4" }

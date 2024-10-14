@@ -16,7 +16,6 @@ plug "zsh-users/zsh-autosuggestions"
 plug "zap-zsh/supercharge"
 plug "zap-zsh/vim"
 plug "zap-zsh/fzf"
-plug "zap-zsh/exa"
 plug "zsh-users/zsh-syntax-highlighting"
 
 # keybinds
