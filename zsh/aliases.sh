@@ -1,5 +1,5 @@
 alias sudo="sudo -E"
-alias ta="tmux a"
+alias ta="tmux attach-session -t default"
 alias v="nvim"
 alias r="yazi"
 alias dir="dir --color=auto"
