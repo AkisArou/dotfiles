@@ -13,7 +13,7 @@ packages=(
   "tofi"
   "grim"
   "grimshot"
-  "xdg-desktop-porta-wlr"
+  "xdg-desktop-portal-wlr"
 )
 
 # ------------------------------------------------------

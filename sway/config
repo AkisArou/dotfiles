@@ -29,7 +29,7 @@ set $browser /usr/bin/librewolf
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 output * bg /home/akisarou/dotfiles/wallpapers/mountains-1.jpg fill
 
-output DP-2 {
+output 'Samsung Electric Company LC49G95T H4ZR303132' {
     mode 5120x1440@129.999Hz
 }
 
