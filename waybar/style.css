@@ -39,23 +39,16 @@ label.module {
 	margin-right: 10px;
 }
 
-@keyframes blink {
-	to {
-		background-color: #ffffff;
-		color: black;
-	}
-}
-
 #network {
 	color: #dcdcaa;
 }
 
-#battery.warning:not(.charging) {
+#battery.critical:not(.charging) {
 	background: #f53c3c;
-	color: white;
-	animation-name: blink;
-	animation-duration: 0.5s;
-	animation-timing-function: steps(12);
-	animation-iteration-count: infinite;
-	animation-direction: alternate;
+	color: black;
+}
+
+#battery.warning:not(.charging) {
+	background: orange;
+	color: black;
 }
