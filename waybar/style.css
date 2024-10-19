@@ -43,10 +43,25 @@ label.module {
 	color: #dcdcaa;
 }
 
+#network {
+	color: #dcdcaa;
+}
+
+@keyframes blink {
+	to {
+		background-color: rgba(0, 0, 0, 0.1);
+	}
+}
+
 #battery.critical:not(.charging) {
 	color: #f53c3c;
 	background-color: rgba(255, 0, 0, 0.1);
 	padding: 0 5px;
+	animation-name: blink;
+	animation-duration: 0.5s;
+	animation-timing-function: steps(12);
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
 }
 
 #battery.warning:not(.charging) {
