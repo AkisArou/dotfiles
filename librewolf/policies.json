@@ -1,0 +1,12 @@
+{
+	"policies": {
+		"Extensions": {
+			"Install": [
+				"https://addons.mozilla.org/firefox/downloads/latest/react-devtools/",
+				"https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/",
+				"https://addons.mozilla.org/firefox/downloads/latest/chameleon",
+				"https://addons.mozilla.org/firefox/downloads/latest/darkreader"
+			]
+		}
+	}
+}

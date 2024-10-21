@@ -83,6 +83,8 @@ fi
 
 create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CONFIG"
 
+sudo -E python3 ~/dotfiles/librewolf/merge-policies.py
+
 # ------------------------------------------------------
 # Docker
 # ------------------------------------------------------
