@@ -23,10 +23,13 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 
+# wayland specific
 export MOZ_ENABLE_WAYLAND=1
 export MOZ_WAYLAND_USE_VAAPI=1
+export GDK_BACKEND=wayland
+export QT_QPA_PLATFORM=wayland
 
-export TERMINAL="st"
+export TERMINAL="foot"
 export TERM="xterm-256color"
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -34,8 +37,6 @@ export LAUNCH_EDITOR="/home/$(echo "$USER")/dotfiles/scripts/launch-editor.sh"
 export BROWSER="librewolf"
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
-export GDK_BACKEND=wayland
-export QT_QPA_PLATFORM=wayland
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
