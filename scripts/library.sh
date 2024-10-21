@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Define colors
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+NC="\033[0m" # No Color
+
 is_package_installed() {
   package="$1"
   check="$(paru -Qs --color always "${package}" | grep "local" | grep "${package} ")"
@@ -16,7 +21,7 @@ install_packages() {
 
   for pkg; do
     if [[ $(is_package_installed "${pkg}") == 0 ]]; then
-      echo "${pkg} is already installed."
+      echo "${GREEN}${pkg} is already installed."
       continue
     fi
 
@@ -27,7 +32,7 @@ install_packages() {
     return
   fi
 
-  printf "Packages to install:\n%s\n" "${toInstall[@]}"
+  printf "${NC}Packages to install:\n%s\n" "${toInstall[@]}"
   paru --noconfirm -S "${toInstall[@]}"
 }
 
@@ -35,10 +40,16 @@ create_symlink() {
   local target=$1
   local link_name=$2
 
-  # Check if the target exists
-  if [[ ! -e $target ]]; then
-    echo "Error: Target '$target' does not exist."
-    return 1
+  # Extract directory from the link_name
+  local link_dir=$(dirname "$link_name")
+  echo "LINKDIR: $link_dir"
+
+  # Create the target directory if it does not exist
+  if [[ ! -d $link_dir ]]; then
+      # Create the parent directory for the target if it does not exist
+      sudo mkdir -p "$link_dir"
+      echo -e "${GREEN}Created target directory '$link_dir'.${NC}"
+    fi
   fi
 
   # Check if the link name already exists
@@ -47,13 +58,13 @@ create_symlink() {
       # It's a symlink, check if it points to the same target
       existing_target=$(readlink "$link_name")
       if [[ $existing_target == $target ]]; then
-        echo "Symlink '$link_name' already exists and points to '$target'."
+        echo -e "${GREEN}Symlink '$link_name' already exists and points to '$target'.${NC}"
         return 0
       else
-        echo "Warning: Symlink '$link_name' points to a different target '$existing_target'."
+        echo -e "${RED}Warning: Symlink '$link_name' points to a different target '$existing_target'.${NC}"
         read -p "Do you want to replace it? (y/n) " choice
         if [[ $choice != "y" ]]; then
-          echo "Skipping '$link_name'."
+          echo -e "${RED}Skipping '$link_name'.${NC}"
           return 1
         fi
         # Remove the old symlink
@@ -61,20 +72,31 @@ create_symlink() {
       fi
     else
       # It's not a symlink, back it up or remove it
-      echo "Warning: '$link_name' already exists and is not a symlink."
+      echo -e "${RED}Warning: '$link_name' already exists and is not a symlink.${NC}"
       read -p "Do you want to back it up and replace it? (y/n) " choice
       if [[ $choice != "y" ]]; then
-        echo "Skipping '$link_name'."
+        echo -e "${RED}Skipping '$link_name'.${NC}"
         return 1
       fi
       mv "$link_name" "${link_name}.bak"
-      echo "Backed up '$link_name' to '${link_name}.bak'."
+      echo -e "${GREEN}Backed up '$link_name' to '${link_name}.bak'.${NC}"
     fi
   fi
 
   # Create the symlink
   ln -s "$target" "$link_name"
-  echo "Created symlink: '$link_name' -> '$target'."
+
+  # Check if the symlink creation was successful
+  if [[ $? -eq 0 ]]; then
+    echo -e "${GREEN}Created symlink: '$link_name' -> '$target'.${NC}"
+  else
+    # If failed, check if the link is in a privileged directory
+    if [[ $link_name == /usr/* ]]; then
+      echo -e "${RED}Failed to create symlink: '$link_name' -> '$target'. You might need to run this command with sudo.${NC}"
+    else
+      echo -e "${RED}Failed to create symlink: '$link_name' -> '$target'.${NC}"
+    fi
+  fi
 }
 
 find_extra_packages() {
@@ -104,9 +126,9 @@ find_extra_packages() {
 
   # Output the extra packages
   if [ ${#extra_packages[@]} -eq 0 ]; then
-    echo "No extra explicitly installed packages found."
+    echo "${GREEN}No extra explicitly installed packages found."
   else
-    echo "Explicitly installed packages not in the provided list:"
+    echo "${RED}Explicitly installed packages not in the provided list:"
     for package in "${extra_packages[@]}"; do
       echo "$package"
     done
@@ -140,9 +162,9 @@ find_removed_packages() {
 
   # Output the missing packages
   if [ ${#missing_packages[@]} -eq 0 ]; then
-    echo "All explicitly installed packages are in the provided list."
+    echo "${GREEN}All explicitly installed packages are in the provided list."
   else
-    echo "Packages in the provided list but not installed explicitly:"
+    echo "${RED}Packages in the provided list but not installed explicitly:"
     for package in "${missing_packages[@]}"; do
       echo "$package"
     done
