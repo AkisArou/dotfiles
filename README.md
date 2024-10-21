@@ -4,21 +4,23 @@ This is the configuration of my Arch linux and other useful programs
 
 ## Packages
 
-X11
-
-- WM: i3
-- Bar: polybar
-- Terminal: st
-- Menu: rofi
-- Screenshot: flameshot
-
 Wayland
+(native without X11 compat)
 
 - WM: sway
 - Bar: waybar
 - Terminal: foot
 - Menu: tofi
 - Screenshot: grim & grimshot
+
+X11
+(some Wayland specific env vars and brave flags should be removed)
+
+- WM: i3
+- Bar: polybar
+- Terminal: st
+- Menu: rofi
+- Screenshot: flameshot
 
 Common
 
