@@ -18,6 +18,7 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_DATA_DIRS="/usr/local/share:/usr/share"
 export XDG_CONFIG_DIRS="/etc/xdg"
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
 
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
@@ -33,6 +34,7 @@ export LAUNCH_EDITOR="/home/$(echo "$USER")/dotfiles/scripts/launch-editor.sh"
 export BROWSER="librewolf"
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
+export GDK_BACKEND=wayland
 export QT_QPA_PLATFORM=wayland
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
