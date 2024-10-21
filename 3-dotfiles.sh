@@ -63,6 +63,7 @@ create_symlink "$HOME/dotfiles/starship" "$HOME/.config/starship"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/brave/applications/teams.desktop" "$HOME/.local/share/applications/teams.desktop"
 create_symlink "$HOME/dotfiles/brave/applications/spotify.desktop" "$HOME/.local/share/applications/spotify.desktop"
+create_symlink "$HOME/dotfiles/brave/applications/outlook.desktop" "$HOME/.local/share/applications/outlook.desktop"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
 
