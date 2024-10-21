@@ -32,7 +32,7 @@ install_packages() {
     return
   fi
 
-  printf "${NC}Packages to install:\n%s\n" "${toInstall[@]}"
+  printf "Packages to install:\n%s\n" "${toInstall[@]}"
   paru --noconfirm -S "${toInstall[@]}"
 }
 
@@ -40,16 +40,10 @@ create_symlink() {
   local target=$1
   local link_name=$2
 
-  # Extract directory from the link_name
-  local link_dir=$(dirname "$link_name")
-  echo "LINKDIR: $link_dir"
-
-  # Create the target directory if it does not exist
-  if [[ ! -d $link_dir ]]; then
-      # Create the parent directory for the target if it does not exist
-      sudo mkdir -p "$link_dir"
-      echo -e "${GREEN}Created target directory '$link_dir'.${NC}"
-    fi
+  # Check if the target exists
+  if [[ ! -e $target ]]; then
+    echo "${RED}Error: Target '$target' does not exist."
+    return 1
   fi
 
   # Check if the link name already exists
@@ -64,7 +58,7 @@ create_symlink() {
         echo -e "${RED}Warning: Symlink '$link_name' points to a different target '$existing_target'.${NC}"
         read -p "Do you want to replace it? (y/n) " choice
         if [[ $choice != "y" ]]; then
-          echo -e "${RED}Skipping '$link_name'.${NC}"
+          echo -e "${NC}Skipping '$link_name'."
           return 1
         fi
         # Remove the old symlink
@@ -75,11 +69,11 @@ create_symlink() {
       echo -e "${RED}Warning: '$link_name' already exists and is not a symlink.${NC}"
       read -p "Do you want to back it up and replace it? (y/n) " choice
       if [[ $choice != "y" ]]; then
-        echo -e "${RED}Skipping '$link_name'.${NC}"
+        echo "${NC}Skipping '$link_name'."
         return 1
       fi
       mv "$link_name" "${link_name}.bak"
-      echo -e "${GREEN}Backed up '$link_name' to '${link_name}.bak'.${NC}"
+      echo "${NC}Backed up '$link_name' to '${link_name}.bak'."
     fi
   fi
 
@@ -126,9 +120,9 @@ find_extra_packages() {
 
   # Output the extra packages
   if [ ${#extra_packages[@]} -eq 0 ]; then
-    echo "${GREEN}No extra explicitly installed packages found."
+    echo "No extra explicitly installed packages found."
   else
-    echo "${RED}Explicitly installed packages not in the provided list:"
+    echo "Explicitly installed packages not in the provided list:"
     for package in "${extra_packages[@]}"; do
       echo "$package"
     done

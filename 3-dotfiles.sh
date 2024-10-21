@@ -22,6 +22,12 @@ fi
 # ------------------------------------------------------
 # Create symbolic links
 # ------------------------------------------------------
+
+# create dirs
+mkdir -p "$HOME/.ssh"
+sudo mkdir -p "/usr/share/chromium/extensions"
+
+# linking
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 
 create_symlink "$HOME/dotfiles/alacritty" "$HOME/.config/alacritty"
@@ -59,6 +65,9 @@ create_symlink "$HOME/dotfiles/brave/applications/teams.desktop" "$HOME/.local/s
 create_symlink "$HOME/dotfiles/brave/applications/spotify.desktop" "$HOME/.local/share/applications/spotify.desktop"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
+
+sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
+sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
 
 # ------------------------------------------------------
 # Librewolf
