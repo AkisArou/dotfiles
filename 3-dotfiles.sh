@@ -56,6 +56,8 @@ create_symlink "$HOME/dotfiles/systemd" "$HOME/.config/systemd"
 create_symlink "$HOME/dotfiles/foot" "$HOME/.config/foot"
 create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
 create_symlink "$HOME/dotfiles/starship" "$HOME/.config/starship"
+create_symlink "$HOME/dotfiles/brave-applications/teams.desktop" "$HOME/.local/share/applications/teams.desktop"
+create_symlink "$HOME/dotfiles/brave-applications/spotify.desktop" "$HOME/.local/share/applications/spotify.desktop"
 
 # ------------------------------------------------------
 # Librewolf
