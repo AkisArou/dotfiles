@@ -56,7 +56,6 @@ packages=(
   "tldr"
   "bleachbit"
   "yazi"
-  "openbsd-netcat"
   "pipewire"
   "pipewire-alsa"
   "pipewire-audio"
