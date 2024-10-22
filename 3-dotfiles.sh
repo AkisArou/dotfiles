@@ -26,6 +26,7 @@ fi
 # create dirs
 mkdir -p "$HOME/.ssh"
 mkdir -p "$HOME/.local/share/applications"
+mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
 sudo mkdir -p "/usr/share/chromium/extensions"
 
 # linking
@@ -67,6 +68,9 @@ create_symlink "$HOME/dotfiles/brave/applications/spotify.desktop" "$HOME/.local
 create_symlink "$HOME/dotfiles/brave/applications/outlook.desktop" "$HOME/.local/share/applications/outlook.desktop"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
+sudo ln -sf "$HOME/dotfiles/brave/resources/cifhbcnohmdccbgoicgdjpfamggdegmo" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/cifhbcnohmdccbgoicgdjpfamggdegmo"
+sudo ln -sf "$HOME/dotfiles/brave/resources/pjibgclleladliembfgfagdaldikeohf" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/pjibgclleladliembfgfagdaldikeohf"
+sudo ln -sf "$HOME/dotfiles/brave/resources/pkooggnaalmfkidjmlhoelhdllpphaga" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/pkooggnaalmfkidjmlhoelhdllpphaga"
 
 sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
