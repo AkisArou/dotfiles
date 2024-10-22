@@ -112,6 +112,7 @@ packages=(
   "watchman-bin"
   "figlet"
   "starship"
+  "unzip" # Needed by asdf
 )
 
 # ------------------------------------------------------

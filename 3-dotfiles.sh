@@ -25,6 +25,7 @@ fi
 
 # create dirs
 mkdir -p "$HOME/.ssh"
+mkdir -p "$HOME/.local/share/applications"
 sudo mkdir -p "/usr/share/chromium/extensions"
 
 # linking
