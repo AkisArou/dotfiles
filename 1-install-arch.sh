@@ -140,14 +140,14 @@ echo "Login prompt installed."
 # ------------------------------------------------------
 # Add user to wheel
 # ------------------------------------------------------
-sudoers_line='%wheel ALL=(ALL:ALL) ALL'
+sudoers_line='%wheel ALL=(ALL:ALL) NOPASSWD: ALL'
 
 if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
   echo "The %wheel group is already uncommented in sudoers."
 else
   echo "Uncommenting %wheel group in sudoers..."
 
-  sudo sed -i.bak 's/^#\s*\(%wheel\s\+ALL=(ALL:ALL)\s\+ALL\)/\1/' /etc/sudoers
+  sudo sed -i.bak 's/^#\s*\(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers
 
   if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
     echo "Success: %wheel group has been uncommented in sudoers."
