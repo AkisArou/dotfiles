@@ -1,3 +1,4 @@
+#!/usr/bin/zsh
 CMDLINE_TOOLS_VERSION=commandlinetools-linux-11076708_latest
 ANDROID_VERSION="34"
 NDK_VERSION="26.1.10909125"
@@ -13,8 +14,8 @@ mkdir -p "$ANDROID_HOME"/cmdline-tools
 unzip commandlinetools.zip -d "$ANDROID_HOME"/cmdline-tools
 mv "$ANDROID_HOME"/cmdline-tools/cmdline-tools "$ANDROID_HOME"/cmdline-tools/latest
 
-yes | sudo "$sdkmanager" "build-tools;$ANDROID_VERSION.0.0" "platform-tools" "platforms;android-$ANDROID_VERSION" "emulator" "ndk;$NDK_VERSION"
-sudo "$sdkmanager" --install "system-images;android-$ANDROID_VERSION;google_apis_playstore;x86_64"
+yes | sudo -E "$sdkmanager" "build-tools;$ANDROID_VERSION.0.0" "platform-tools" "platforms;android-$ANDROID_VERSION" "emulator" "ndk;$NDK_VERSION"
+sudo -E "$sdkmanager" --install "system-images;android-$ANDROID_VERSION;google_apis_playstore;x86_64"
 
 yes | $sdkmanager --licenses
 

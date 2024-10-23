@@ -113,6 +113,8 @@ packages=(
   "figlet"
   "starship"
   "unzip" # Needed by asdf
+  "android-studio"
+  "genymotion"
 )
 
 # ------------------------------------------------------

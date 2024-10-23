@@ -10,9 +10,10 @@ export PATH="$HOME/.local/share/neovim/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 
 export ANDROID_HOME="$HOME/Android/Sdk"
+# export ANDROID_AVD_HOME="$HOME/.config/.android/avd"
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
-export PATH=$ANDROID_HOME/cmdline-tools/latest/bin/:$PATH
+# export PATH=$ANDROID_HOME/cmdline-tools/latest/bin/:$PATH
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
@@ -29,6 +30,7 @@ export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 export MOZ_ENABLE_WAYLAND=1
 export MOZ_WAYLAND_USE_VAAPI=1
 export GDK_BACKEND=wayland
+#export QT_QPA_PLATFORM="wayland;xcb"
 export QT_QPA_PLATFORM=wayland
 
 export TERMINAL="foot"
