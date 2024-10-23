@@ -13,7 +13,7 @@ conds = []
 cwd = { fg = "#878580" }
 
 # Hovered
-hovered         = { fg = "#CECDC3", bg = "#1C1B1A" }
+hovered         = { fg = "#CECDC3", bg = "#343331" }
 preview_hovered = { underline = true }
 
 # Find
@@ -146,7 +146,7 @@ rules = [
 
 	# Fallback
 	{ name = "*", fg = "#878580" },
-	{ name = "*/", fg = "#6a9955" }
+	{ name = "*/", fg = "#4ade80" }
 ]
 
 # : }}}
