@@ -14,6 +14,7 @@ packages=(
   "grim"
   "grimshot"
   "xdg-desktop-portal-wlr"
+  "xorg-xwayland"
 )
 
 # ------------------------------------------------------
