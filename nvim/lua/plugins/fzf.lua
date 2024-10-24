@@ -31,7 +31,7 @@ return {
       },
       buffers = {
         file_icons = false,
-        actions = false,
+        -- actions = false,
       },
     })
 
