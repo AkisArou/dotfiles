@@ -54,9 +54,9 @@ sudo sysctl fs.inotify.max_queued_events=16384
 sudo sysctl fs.inotify.max_user_instances=8192
 sudo sysctl fs.inotify.max_user_watches=524288
 
-echo "* - nofile 65536" | sudo tee -a /etc/security/limits.conf
-echo "DefaultLimitNOFILE=65536" | sudo tee -a /etc/systemd/system.conf
-echo "DefaultLimitNOFILE=65536" | sudo tee -a /etc/systemd/user.conf
+grep -qxF '* - nofile 65536' /etc/security/limits.conf || echo '* - nofile 65536' | sudo tee -a /etc/security/limits.conf
+grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/system.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/system.conf
+grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/user.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/user.conf
 
 echo "Optimizing ssd..."
 sudo systemctl enable fstrim.timer
