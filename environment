@@ -8,9 +8,6 @@
 EDITOR="nvim"
 VISUAL="nvim"
 
-# Wayland
-MOZ_WEBRENDER=1
-
 # X11
 #MOZ_USE_XINPUT2=1
 #MOZ_X11_EGL=1
