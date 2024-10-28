@@ -42,8 +42,7 @@ function CloseAllBuffersExceptCurrent()
     -- Check if buffer is valid, loaded, and is not neo-tree
     local buf_name = vim.api.nvim_buf_get_name(buf)
     if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-      -- Avoid closing neo-tree buffer and the current buffer
-      if not buf_name:match("neo%-tree") and buf ~= current_buf then
+      if not buf_name:match("NeogitStatus") and buf ~= current_buf then
         -- Save the buffer if it's modified
         if vim.api.nvim_buf_get_option(buf, "modified") then
           vim.api.nvim_command("bufdo silent! w") -- Save all modified buffers silently
@@ -61,8 +60,7 @@ function CloseAllBuffers()
     -- Check if buffer is valid, loaded, and is not neo-tree
     local buf_name = vim.api.nvim_buf_get_name(buf)
     if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
-      -- Avoid closing neo-tree buffer
-      if not buf_name:match("neo%-tree") then
+      if not buf_name:match("NeogitStatus") then
         -- Save the buffer if it's modified
         if vim.api.nvim_buf_get_option(buf, "modified") then
           vim.api.nvim_command("bufdo silent! w") -- Save all modified buffers silently
