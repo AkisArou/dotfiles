@@ -1,4 +1,4 @@
-nodejs 20.18.0
+nodejs 22.10.0
 java corretto-21.0.5.11.1
 maven 3.9.4
 kotlin 2.0.21
