@@ -3,7 +3,7 @@ return {
   event = "VeryLazy",
   init = function()
     vim.o.timeout = true
-    vim.o.timeoutlen = 1000
+    vim.o.timeoutlen = 500
   end,
   keys = {
     {
@@ -15,6 +15,7 @@ return {
     },
   },
   opts = {
+    delay = 1000,
     triggers = {
       { "<auto>", mode = { "n", "v" } },
     },
