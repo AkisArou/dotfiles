@@ -14,7 +14,7 @@
 	#
 	# Otherwise, fonts are interpreted in Pango format.
 	# font = "/usr/share/fonts/TTF/MesloLGSNerdFontMono-Regular.ttf"
-	font = "/usr/share/fonts/gnu-free/FreeMono.otf"
+	font = "/usr/share/fonts/TTF/HackNerdFontMono-Regular.ttf"
 
 	# Point size of text.
 	font-size = 12
