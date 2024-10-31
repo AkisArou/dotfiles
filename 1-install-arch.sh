@@ -79,6 +79,7 @@ packages=(
   "ttf-hack-nerd"
   "ttf-font-awesome"
   "ttf-meslo-nerd"
+  "ttf-dm-mono-git"
   "noto-fonts-emoji"
   "terminus-font"
   "eza"
