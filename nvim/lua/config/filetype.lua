@@ -5,6 +5,7 @@ vim.filetype.add({
     tiltfile = "tiltfile",
     Tiltfile = "tiltfile",
     ["mdx"] = "markdown.mdx",
+    tmTheme = "xml",
   },
   filename = {
     [".env"] = "dotenv",

@@ -35,7 +35,7 @@ border_symbol = "│"
 border_style  = { fg = "#403E3C" }
 
 # Highlighting
-syntect_theme = "~/.config/yazi/Catppuccin-macchiato.tmTheme"
+syntect_theme = "~/dotfiles/yazi/vscode.tmTheme"
 
 # : }}}
 

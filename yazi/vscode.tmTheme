@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>name</key>
+    <string>Dark Plus</string>
+    <key>settings</key>
+    <array>
+      <!-- Global colors for editor -->
+      <dict>
+        <key>settings</key>
+        <dict>
+          <key>background</key>
+          <string>#1E1E1E</string>
+          <key>foreground</key>
+          <string>#D4D4D4</string>
+          <key>caret</key>
+          <string>#D4D4D4</string>
+          <key>invisibles</key>
+          <string>#404040</string>
+          <key>lineHighlight</key>
+          <string>#3A3D41</string>
+          <key>selection</key>
+          <string>#ADD6FF26</string>
+          <key>selectionBorder</key>
+          <string>#6B6B6B</string>
+        </dict>
+      </dict>
+
+      <!-- Token colors and styles -->
+      <dict>
+        <key>name</key>
+        <string>Punctuation Grouping in Regexp</string>
+        <key>scope</key>
+        <string>punctuation.definition.group.regexp, punctuation.definition.group.assertion.regexp, punctuation.definition.character-class.regexp, punctuation.character.set.begin.regexp, punctuation.character.set.end.regexp, keyword.operator.negation.regexp, support.other.parenthesis.regexp</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#CE9178</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Embedded Code</string>
+        <key>scope</key>
+        <string>meta.embedded, source.groovy.embedded, string meta.image.inline.markdown, variable.legacy.builtin.python</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#D4D4D4</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Emphasis</string>
+        <key>scope</key>
+        <string>emphasis</string>
+        <key>settings</key>
+        <dict>
+          <key>fontStyle</key>
+          <string>italic</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Strong</string>
+        <key>scope</key>
+        <string>strong</string>
+        <key>settings</key>
+        <dict>
+          <key>fontStyle</key>
+          <string>bold</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Header</string>
+        <key>scope</key>
+        <string>header</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#000080</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Comment</string>
+        <key>scope</key>
+        <string>comment</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#6A9955</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Constant Language</string>
+        <key>scope</key>
+        <string>constant.language</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#569cd6</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Number and Operator</string>
+        <key>scope</key>
+        <string>constant.numeric, variable.other.enummember, keyword.operator.plus.exponent, keyword.operator.minus.exponent</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#b5cea8</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Entity Name Tag</string>
+        <key>scope</key>
+        <string>entity.name.tag</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#569cd6</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Invalid</string>
+        <key>scope</key>
+        <string>invalid</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#f44747</string>
+        </dict>
+      </dict>
+
+      <!-- Additional color settings -->
+      <dict>
+        <key>name</key>
+        <string>Keyword Control</string>
+        <key>scope</key>
+        <string>keyword.control</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#569cd6</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Storage</string>
+        <key>scope</key>
+        <string>storage, storage.type</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#569cd6</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>String</string>
+        <key>scope</key>
+        <string>string</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#ce9178</string>
+        </dict>
+      </dict>
+
+      <dict>
+        <key>name</key>
+        <string>Variable</string>
+        <key>scope</key>
+        <string>variable</string>
+        <key>settings</key>
+        <dict>
+          <key>foreground</key>
+          <string>#9CDCFE</string>
+        </dict>
+      </dict>
+    </array>
+  </dict>
+</plist>
