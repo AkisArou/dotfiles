@@ -9,6 +9,7 @@ sudo systemctl enable --now avahi-daemon
 
 echo "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
+  gsettings set org.gnome.desktop.interface font-name "DMMono Regular 11"
   gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
   gsettings set org.gnome.desktop.peripherals.keyboard delay 220
   gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
