@@ -17,7 +17,7 @@
 	font = "/usr/share/fonts/TTF/HackNerdFontMono-Regular.ttf"
 
 	# Point size of text.
-	font-size = 12
+	font-size = 10
 
 	# Comma separated list of OpenType font feature settings to apply,
 	# if supported by the chosen font. The format is similar to the CSS
