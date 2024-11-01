@@ -12,6 +12,7 @@ if command -v gsettings &>/dev/null; then
   gsettings set org.gnome.desktop.interface gtk-theme Default-dark
   gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
   gsettings set org.gnome.desktop.interface font-name "DMMono Regular 9"
+  gsettings set org.gnome.desktop.interface icon-theme Adwaita
   gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
   gsettings set org.gnome.desktop.peripherals.keyboard delay 220
   gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
