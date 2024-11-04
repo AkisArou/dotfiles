@@ -1,5 +1,5 @@
 # asdf
-. "$HOME/.asdf/asdf.sh"
+. /opt/asdf-vm/asdf.sh
 
 # append completions to fpath
 fpath=(${ASDF_DIR}/completions $fpath)

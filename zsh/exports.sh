@@ -1,9 +1,9 @@
 . ~/.asdf/plugins/java/set-java-home.zsh
 
-export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
+export PATH="/opt/asdf-vm/bin:$PATH"
 export PATH="$HOME/.local/share/neovim/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 

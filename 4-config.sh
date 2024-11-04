@@ -23,11 +23,6 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ~/.tmux/plugins/tpm/scripts/install_plugins.sh
 tmux source ~/.tmux.conf
 
-echo "Setting up asdf..."
-git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
-
-source ~/.zshrc
-
 ## Add asdf plugins
 asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 asdf plugin add java https://github.com/halcyon/asdf-java.git

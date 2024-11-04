@@ -109,13 +109,13 @@ packages=(
   "ghostscript"
   "pnpm-shell-completion"
   "libreoffice-still"
-  "zed"
   "watchman-bin"
   "figlet"
   "starship"
-  "unzip" # Needed by asdf
   "android-studio"
   "genymotion"
+  "asdf-vm"
+  "unzip" # Needed by asdf
 )
 
 # ------------------------------------------------------
