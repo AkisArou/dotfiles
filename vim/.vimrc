@@ -44,7 +44,7 @@ set conceallevel=0
 set fileencoding=utf-8
 set hlsearch
 set ignorecase
-set mouse=""
+set mouse=
 set pumheight=10
 set showmode        
 set showcmd         
