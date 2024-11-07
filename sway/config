@@ -85,15 +85,14 @@ input "1739:30385:CUST0001:00_06CB:76B1_Mouse" {
 
     # Programs
     bindsym $mod+Return exec $term
+    bindsym $mod+d exec $menu
     bindsym $mod+b exec $browser
     bindsym $mod+Shift+p exec librewolf --private-window
     bindsym $mod+Shift+t exec brave --incognito --tor
-    bindsym $mod+p       exec grimshot copy area
+    bindsym $mod+p exec grimshot copy area
     bindsym $mod+Ctrl+p exec grimshot copy active
     bindsym $mod+Mod1+p  exec grimshot save output
     bindsym $mod+Ctrl+Mod1+p  exec grimshot save window
-    bindsym $mod+d exec $menu
-
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
