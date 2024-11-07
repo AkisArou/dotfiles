@@ -57,16 +57,6 @@
 
 
 ;;
-;; treemacs
-;;
-
-(after! treemacs
-  (evil-define-key 'treemacs treemacs-mode-map (kbd "C-l") #'evil-window-right)
-  (evil-define-key 'treemacs treemacs-mode-map (kbd "SPC e") #'+treemacs/toggle)
-  (evil-define-key 'treemacs treemacs-mode-map (kbd "W") #'treemacs-collapse-project)
-  (evil-define-key 'treemacs treemacs-mode-map (kbd "H") #'treemacs-toggle-show-dotfiles))
-
-;;
 ;; orderless
 ;;
 
