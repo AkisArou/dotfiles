@@ -61,7 +61,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 "
 
 export NODE_OPTIONS="--max-old-space-size=8192"
-export NODE_COMPILE_CACHE="$HOME/.local/state/node-compile-cache"
+export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
 
 export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
