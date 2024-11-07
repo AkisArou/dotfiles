@@ -32,6 +32,3 @@ source "$HOME/dotfiles/zsh/npm-completion.sh"
 source "$HOME/dotfiles/zsh/pnpm-completion.sh"
 source "$HOME/dotfiles/zsh/docker-completion.sh"
 source "$HOME/dotfiles/zsh/asdf.sh"
-
-# bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
