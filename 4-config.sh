@@ -80,3 +80,6 @@ ORIGINAL_BROWSER=$BROWSER
 unset BROWSER
 xdg-settings set default-web-browser librewolf.desktop
 export BROWSER=$ORIGINAL_BROWSER
+
+echo "Install yazi plugins..."
+ya pack -a yazi-rs/plugins:git

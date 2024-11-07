@@ -27,9 +27,19 @@ local function match(line)
 end
 
 local function root(cwd)
+	local is_worktree = function(url)
+		local file, head = io.open(tostring(url)), nil
+		if file then
+			head = file:read(8)
+			file:close()
+		end
+		return head == "gitdir: "
+	end
+
 	repeat
-		local cha = fs.cha(cwd:join(".git"))
-		if cha and cha.is_dir then
+		local next = cwd:join(".git")
+		local cha = fs.cha(next)
+		if cha and (cha.is_dir or is_worktree(next)) then
 			return tostring(cwd)
 		end
 		cwd = cwd:parent()
@@ -137,9 +147,9 @@ local function setup(st, opts)
 		if not change or signs[change] == "" then
 			return ui.Line("")
 		elseif self._file:is_hovered() then
-			return ui.Line({ ui.Span(" "), ui.Span(signs[change]) })
+			return ui.Line { ui.Span(" "), ui.Span(signs[change]) }
 		else
-			return ui.Line({ ui.Span(" "), ui.Span(signs[change]):style(styles[change]) })
+			return ui.Line { ui.Span(" "), ui.Span(signs[change]):style(styles[change]) }
 		end
 	end, opts.order)
 end
