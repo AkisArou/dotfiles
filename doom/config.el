@@ -76,8 +76,7 @@
   (setq corfu-preselect 'directory) ;; Select the first candidate, except for directories
 
   (map! :map corfu-map
-        :i "TAB" #'corfu-insert
-        :i "tab" #'corfu-insert
+        :i "C-e" #'corfu-insert
         )
   )
 
