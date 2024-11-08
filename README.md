@@ -5,7 +5,6 @@ This is the configuration of my Arch linux and other useful programs
 ## Packages
 
 Wayland
-(native without X11 compat)
 
 - WM: sway
 - Bar: waybar
@@ -14,7 +13,6 @@ Wayland
 - Screenshot: grim & grimshot
 
 X11
-(some Wayland specific env vars and brave flags should be removed)
 
 - WM: i3
 - Bar: polybar

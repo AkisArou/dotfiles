@@ -4,6 +4,6 @@ Version=1.0
 Terminal=false
 Type=Application
 Name=Microsoft Teams
-Exec=/opt/brave-bin/brave --profile-directory=Default --app-id=cifhbcnohmdccbgoicgdjpfamggdegmo --ozone-platform=wayland --use-gl=desktop
+Exec=/opt/brave-bin/brave --profile-directory=Default --app-id=cifhbcnohmdccbgoicgdjpfamggdegmo
 Icon=brave-cifhbcnohmdccbgoicgdjpfamggdegmo-Default
 StartupWMClass=crx_cifhbcnohmdccbgoicgdjpfamggdegmo
