@@ -5,7 +5,8 @@
 				"https://addons.mozilla.org/firefox/downloads/latest/bitwarden-password-manager/latest.xpi",
 				"https://addons.mozilla.org/firefox/downloads/latest/react-devtools/latest.xpi",
 				"https://addons.mozilla.org/firefox/downloads/latest/darkreader/latest.xpi",
-				"https://addons.mozilla.org/firefox/downloads/latest/chameleon-ext/latest.xpi"
+				"https://addons.mozilla.org/firefox/downloads/latest/chameleon-ext/latest.xpi",
+				"https://addons.mozilla.org/firefox/downloads/latest/istilldontcareaboutcookies/latest.xpi"
 			]
 		}
 	}
