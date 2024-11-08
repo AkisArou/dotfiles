@@ -38,3 +38,4 @@ Also:
 - vscode settings & keybindings at .vscode
 
 * various helper scripts
+* change .zprofile to use X11 if wished
