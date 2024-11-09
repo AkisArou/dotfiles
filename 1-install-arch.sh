@@ -153,6 +153,14 @@ fi
 
 sudo usermod -aG wheel "$USER"
 
+# Check if the current shell is zsh
+if [[ "$SHELL" != */zsh ]]; then
+  print_info "Current shell is not zsh. Changing default shell to zsh..."
+  chsh -s $(which zsh)
+else
+  print_success "Current shell is already zsh."
+fi
+
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
