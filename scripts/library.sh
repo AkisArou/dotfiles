@@ -21,7 +21,7 @@ install_packages() {
 
   for pkg; do
     if [[ $(is_package_installed "${pkg}") == 0 ]]; then
-      echo "${GREEN}${pkg} is already installed."
+      echo -e "${GREEN}${pkg} is already installed.${NC}"
       continue
     fi
 
@@ -42,7 +42,7 @@ create_symlink() {
 
   # Check if the target exists
   if [[ ! -e $target ]]; then
-    echo "${RED}Error: Target '$target' does not exist."
+    echo "${RED}Error: Target '$target' does not exist.${NC}"
     return 1
   fi
 
