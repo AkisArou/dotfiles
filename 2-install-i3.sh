@@ -26,4 +26,4 @@ packages=(
 # ------------------------------------------------------
 install_packages "${packages[@]}"
 
-echo "DONE! Please reboot your system!"
+print_success "DONE!"

@@ -11,15 +11,15 @@ echo ""
 # Paru
 # ------------------------------------------------------
 if sudo pacman -Qs paru >/dev/null; then
-  echo "paru is installed..."
+  print_success "paru is installed..."
 else
-  echo "paru is not installed. Will be installed now!"
+  print_info "paru is not installed. Will be installed now!"
   git clone https://aur.archlinux.org/paru.git ~/paru
   cd ~/paru || exit
   makepkg -si
   cd ~/dotfiles/ || return
   rm -rf ~/paru
-  echo "paru has been installed successfully."
+  print_success "paru has been installed successfully."
 fi
 
 # ------------------------------------------------------
@@ -122,16 +122,15 @@ zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) 
 # ------------------------------------------------------
 # ST
 # ------------------------------------------------------
-echo "Making st..."
+print_info "Making st..."
 sudo make -C ~/dotfiles/st clean install
 
 # ------------------------------------------------------
 # Install custom issue (login prompt)
 # ------------------------------------------------------
 echo ""
-echo "Installing login screen..."
+print_info "Installing login screen..."
 sudo cp ~/dotfiles/login/issue /etc/issue
-echo "Login prompt installed."
 
 # ------------------------------------------------------
 # Add user to wheel
@@ -139,16 +138,16 @@ echo "Login prompt installed."
 sudoers_line='%wheel ALL=(ALL:ALL) NOPASSWD: ALL'
 
 if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
-  echo "The %wheel group is already uncommented in sudoers."
+  print_info "The %wheel group is already uncommented in sudoers."
 else
-  echo "Uncommenting %wheel group in sudoers..."
+  print_info "Uncommenting %wheel group in sudoers..."
 
   sudo sed -i.bak 's/^#\s*\(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers
 
   if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
-    echo "Success: %wheel group has been uncommented in sudoers."
+    print_success "%wheel group has been uncommented in sudoers."
   else
-    echo "Error: Failed to uncomment %wheel group in sudoers."
+    print_error "Failed to uncomment %wheel group in sudoers."
   fi
 fi
 
@@ -157,4 +156,4 @@ sudo usermod -aG wheel "$USER"
 # ------------------------------------------------------
 # DONE
 # ------------------------------------------------------
-echo "DONE! set zsh as your default shell if not yet"
+print_success "DONE! set zsh as your default shell if not yet"

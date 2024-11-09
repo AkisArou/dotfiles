@@ -8,10 +8,10 @@ echo "-------------------------------"
 echo ""
 
 if [ -d ~/.config ]; then
-  echo ".config folder already exists."
+  print_info ".config folder already exists."
 else
   mkdir ~/.config
-  echo ".config folder created."
+  print_success ".config folder created."
 fi
 
 # ------------------------------------------------------
@@ -93,4 +93,4 @@ sudo -E python3 ~/dotfiles/librewolf/merge-policies.py
 # ------------------------------------------------------
 ./docker/generate-deamon-json.sh
 
-echo "DONE! Please reboot your system and run 4-config.sh!"
+print_success "DONE!"

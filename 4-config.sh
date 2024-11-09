@@ -89,3 +89,5 @@ export BROWSER=$ORIGINAL_BROWSER
 
 print_info "Installing yazi plugins..."
 ya pack -a yazi-rs/plugins:git
+
+print_success "DONE!"
