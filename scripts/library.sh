@@ -2,8 +2,21 @@
 
 # Define colors
 GREEN="\033[0;32m"
+BLUE="\033[0;34m"
 RED="\033[0;31m"
 NC="\033[0m" # No Color
+
+print_success() {
+  echo -e "${GREEN}$1${NC}"
+}
+
+print_error() {
+  echo -e "${RED}$1${NC}"
+}
+
+print_info() {
+  echo -e "${BLUE}$1${NC}"
+}
 
 is_package_installed() {
   package="$1"

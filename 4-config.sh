@@ -1,18 +1,19 @@
 #!/bin/zsh
 
-clear
-echo "Applying system config..."
-echo "-------------------------"
-echo ""
+source "$(dirname "$0")/scripts/library.sh"
 
-echo "Enabling systemctl daemons..."
+clear
+print_info "Applying system config..."
+echo "-------------------------"
+
+print_info "Enabling systemctl daemons..."
 loginctl enable-linger
 sudo systemctl enable --now iwd
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
 
-echo "Setting up gnome settings..."
+print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
   gsettings set org.gnome.desktop.interface gtk-theme Default-dark
   gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
@@ -23,7 +24,7 @@ if command -v gsettings &>/dev/null; then
   gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
 fi
 
-echo "Setting up tmux..."
+print_info "Setting up tmux..."
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ~/.tmux/plugins/tpm/scripts/install_plugins.sh
 tmux source ~/.tmux.conf
@@ -39,10 +40,10 @@ asdf plugin add helm
 cd ~
 asdf install
 
-echo "Configuring java..."
+print_info "Configuring java..."
 . ~/.asdf/plugins/java/set-java-home.zsh
 
-echo "Modifying system for vite..."
+print_info "Modifying system for vite..."
 # Check current limit
 ulimit -Sn
 # Change limit (temporary)
@@ -59,10 +60,10 @@ grep -qxF '* - nofile 65536' /etc/security/limits.conf || echo '* - nofile 65536
 grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/system.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/system.conf
 grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/user.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/user.conf
 
-echo "Optimizing ssd..."
+print_info "Optimizing ssd..."
 sudo systemctl enable fstrim.timer
 
-echo "Setting up docker..."
+print_info "Setting up docker..."
 ls -al /dev/kvm
 sudo usermod -aG kvm $USER
 sudo usermod -aG docker $USER
@@ -72,19 +73,19 @@ sudo systemctl enable --now docker.socket
 docker context use default
 docker compose version
 
-echo "Configuring NodeJS..."
+print_info "Configuring NodeJS..."
 corepack enable pnpm
 corepack enable yarn
 asdf reshim nodejs
 
-echo "Installing global npm packages..."
+print_info "Installing global npm packages..."
 npm i -g npm-workspaces-language-server
 
-echo "Setting xdg default web browser..."
+print_info "Setting xdg default web browser..."
 ORIGINAL_BROWSER=$BROWSER
 unset BROWSER
 xdg-settings set default-web-browser librewolf.desktop
 export BROWSER=$ORIGINAL_BROWSER
 
-echo "Installing yazi plugins..."
+print_info "Installing yazi plugins..."
 ya pack -a yazi-rs/plugins:git
