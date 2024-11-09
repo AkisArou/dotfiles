@@ -3,7 +3,7 @@
 source "$(dirname "$0")/scripts/library.sh"
 
 clear
-print_info "Applying system config..."
+echo "Applying system config..."
 echo "-------------------------"
 
 print_info "Enabling systemctl daemons..."
