@@ -138,7 +138,7 @@ sudo cp ~/dotfiles/login/issue /etc/issue
 sudoers_line='%wheel ALL=(ALL:ALL) NOPASSWD: ALL'
 
 if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
-  print_info "The %wheel group is already uncommented in sudoers."
+  print_success "The %wheel group is already uncommented in sudoers."
 else
   print_info "Uncommenting %wheel group in sudoers..."
 
