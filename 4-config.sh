@@ -1,5 +1,10 @@
 #!/bin/zsh
 
+clear
+echo "Applying system config..."
+echo "-------------------------"
+echo ""
+
 echo "Enabling systemctl daemons..."
 loginctl enable-linger
 sudo systemctl enable --now iwd

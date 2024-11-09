@@ -2,6 +2,11 @@
 
 source "$(dirname "$0")/scripts/library.sh"
 
+clear
+echo "Installing wayland with sway wm..."
+echo "----------------------------------"
+echo ""
+
 packages=(
   "sway"
   "swaybg"

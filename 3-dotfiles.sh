@@ -3,13 +3,8 @@
 source "$(dirname "$0")/scripts/library.sh"
 
 clear
-echo "     _       _    __ _ _            "
-echo "  __| | ___ | |_ / _(_) | ___  ___  "
-echo " / _' |/ _ \| __| |_| | |/ _ \/ __| "
-echo "| (_| | (_) | |_|  _| | |  __/\__ \ "
-echo " \__,_|\___/ \__|_| |_|_|\___||___/ "
-echo "                                    "
-echo "-------------------------------------"
+echo "Applying application configs..."
+echo "-------------------------------"
 echo ""
 
 if [ -d ~/.config ]; then

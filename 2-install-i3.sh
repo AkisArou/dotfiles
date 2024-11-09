@@ -2,6 +2,11 @@
 
 source "$(dirname "$0")/scripts/library.sh"
 
+clear
+echo "Installing xorg with i3wm..."
+echo "----------------------------"
+echo ""
+
 packages=(
   "xorg"
   "xorg-xinit"
