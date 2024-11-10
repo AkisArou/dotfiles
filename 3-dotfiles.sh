@@ -71,7 +71,6 @@ sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.j
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
 
 # Librewolf
-### Policies for extensions should be handled manually for now
 LIBREWOLF_CONFIG="$HOME/.librewolf/librewolf.overrides.cfg"
 
 if [ ! -f "$LIBREWOLF_CONFIG" ]; then
