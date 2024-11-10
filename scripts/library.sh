@@ -10,7 +10,7 @@ print_success() {
   echo -e "${GREEN}$1${NC}"
 }
 
-print_failure() {
+nrint_failure() {
   echo -e "${RED}$1${NC}"
 }
 
@@ -45,7 +45,7 @@ install_packages() {
     return
   fi
 
-  print_info "Packages to install:\n%s\n" "${toInstall[@]}"
+  printf "Packages to install:\n%s\n" "${toInstall[@]}"
   paru --noconfirm -S "${toInstall[@]}"
 }
 
