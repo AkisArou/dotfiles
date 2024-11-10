@@ -2,20 +2,20 @@ configuration {
     show-icons:      true;
     display-drun:    "";
     disable-history: false;
-    font: "MesloLGS Nerd Font Mono 11";
+    font: "DMMono Regular 10";
 }
 
 * {
     foreground: #d4d4d4;
     background-color: #1f1f1f;
-    active-background: #007ACC;
+    active-background: #007ACC40;
     urgent-background: #f44747;
     urgent-foreground: #282a36;
     selected-background: @active-background;
     selected-urgent-background: @urgent-background;
     selected-active-background: @active-background;
     separatorcolor: @active-background;
-    bordercolor: @active-background;
+    bordercolor: #0f0f0f;
 }
 
 #window {
@@ -156,9 +156,9 @@ element-text, element-icon {
 }
 
 element-text {
-    margin: 0px 0px 0px 20px ;
+    margin: 0px 0px 0px 16px ;
 }
 
 element-icon {
-    size: 28px;
+    size: 12px;
 }
