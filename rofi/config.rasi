@@ -1,5 +1,5 @@
 configuration {
-    modes: "window,run,drun";
+    modi: "window,run,drun";
     show-icons: true;
     display-drun: "";
     disable-history: false;
