@@ -5,6 +5,10 @@ configuration {
     disable-history: false;
     kb-secondary-copy: "Control+y";
     kb-cancel: "Escape,Control+c";
+    kb-remove-to-sol: "";
+    kb-remove-char-forward: "Delete";
+    kb-page-next: "Page_Down,Control+d";
+    kb-page-prev: "Page_Up,Control+u";
 }
 
 @theme "~/dotfiles/rofi/vscode.rasi"
