@@ -5,8 +5,6 @@ keymap("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
 keymap("n", "<leader>w", ":w<CR>", opts)
 keymap("n", "<leader>l", ":Lazy<CR>", opts)
 
-keymap("i", "jk", [[<C-\><C-n>]]) -- no need to escape the '\'
-
 -- Resize window using <ctrl> arrow keys
 keymap("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
 keymap("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
