@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-FONT_FAMILY="MesloLGS Nerd Font Mono"
+FONT_FAMILY="DM Mono"
 
 if [[ "$HOST" == "akisarou-desktop" ]]; then
   POLY_FONT="$FONT_FAMILY":size=10

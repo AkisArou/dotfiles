@@ -22,7 +22,7 @@
     gap_size = 0
     separator_color = frame
     sort = yes
-    font = "MesloLGS Nerd Font Mono" 10
+    font = "DM Mono" 10
     line_height = 3
     markup = full
     format = "<b>%s</b>\n%b"

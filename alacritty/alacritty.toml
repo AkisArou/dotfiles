@@ -10,19 +10,19 @@ y = 0
 size = 9
 
 [font.normal]
-family = "MesloLGS Nerd Font Mono"
+family = "DM Mono"
 style = "Regular"
 
 [font.bold]
-family = "MesloLGS Nerd Font Mono"
+family = "DM Mono"
 style = "Bold"
 
 [font.bold_italic]
-family = "MesloLGS Nerd Font Mono"
+family = "DM Mono"
 style = "Bold Italic"
 
 [font.italic]
-family = "MesloLGS Nerd Font Mono"
+family = "DM Mono"
 style = "Italic"
 
 [general]
