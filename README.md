@@ -9,7 +9,7 @@ Wayland
 - WM: sway
 - Bar: waybar
 - Terminal: foot
-- Menu: tofi
+- Menu: rofi-wayland
 - Screenshot: grim & grimshot
 
 X11

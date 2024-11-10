@@ -20,7 +20,9 @@ set $right l
 
 # set $term ~/dotfiles/alacritty/launch.sh
 set $term foot
-set $menu tofi-drun | xargs swaymsg exec --
+set $menu rofi -show drun
+#
+# set $menu tofi-drun | xargs swaymsg exec --
 set $browser /usr/bin/librewolf
 
 ### Output configuration
@@ -106,7 +108,8 @@ input "1739:30385:CUST0001:00_06CB:76B1_Mouse" {
 
     # toggle bluetooth device
     bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
-    bindsym $mod+Shift+q exec ~/dotfiles/tofi/power-menu.sh
+    bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
+    # bindsym $mod+Shift+q exec ~/dotfiles/tofi/power-menu.sh
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 #
 # Moving around:

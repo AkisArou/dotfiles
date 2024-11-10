@@ -2,10 +2,10 @@ configuration {
     show-icons:      true;
     display-drun:    "";
     disable-history: false;
+    font: "MesloLGS Nerd Font Mono 11";
 }
 
 * {
-    font: "MesloLGS Nerd Font Mono 11";
     foreground: #d4d4d4;
     background-color: #1f1f1f;
     active-background: #007ACC;

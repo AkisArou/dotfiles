@@ -1,8 +1,9 @@
 configuration {
-    modi: "window,run,drun";
-    show-icons:      true;
-    display-drun:    "";
+    modes: "window,run,drun";
+    show-icons: true;
+    display-drun: "";
     disable-history: false;
+    kb-secondary-copy: "Control+y";
     kb-cancel: "Escape,Control+c";
 }
 
