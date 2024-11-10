@@ -14,9 +14,7 @@ else
   print_success ".config folder created."
 fi
 
-# ------------------------------------------------------
 # Create symbolic links
-# ------------------------------------------------------
 
 # create dirs
 mkdir -p "$HOME/.ssh"
@@ -72,10 +70,7 @@ sudo ln -sf "$HOME/dotfiles/brave/resources/pkooggnaalmfkidjmlhoelhdllpphaga" "$
 sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
 
-# ------------------------------------------------------
 # Librewolf
-# ------------------------------------------------------
-#
 ### Policies for extensions should be handled manually for now
 LIBREWOLF_CONFIG="$HOME/.librewolf/librewolf.overrides.cfg"
 
@@ -88,9 +83,7 @@ create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CO
 
 sudo -E python3 ~/dotfiles/librewolf/merge-policies.py
 
-# ------------------------------------------------------
 # Docker
-# ------------------------------------------------------
 ./docker/generate-deamon-json.sh
 
 print_success "DONE!"

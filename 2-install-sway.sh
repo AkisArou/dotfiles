@@ -22,9 +22,6 @@ packages=(
   "xorg-xwayland"
 )
 
-# ------------------------------------------------------
-# Install required packages
-# ------------------------------------------------------
 install_packages "${packages[@]}"
 
 print_success "DONE!"

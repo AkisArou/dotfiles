@@ -7,9 +7,7 @@ echo "Installing base packages and applying base config..."
 echo "----------------------------------------------------"
 echo ""
 
-# ------------------------------------------------------
 # Paru
-# ------------------------------------------------------
 if sudo pacman -Qs paru >/dev/null; then
   print_success "paru is installed..."
 else
@@ -22,9 +20,7 @@ else
   print_success "paru has been installed successfully."
 fi
 
-# ------------------------------------------------------
 # Install Packages
-# ------------------------------------------------------
 packages=(
   "mesa"
   "audit"
@@ -113,28 +109,20 @@ packages=(
   "unzip" # Needed by asdf
 )
 
-# ------------------------------------------------------
 # Install required packages
-# ------------------------------------------------------
 install_packages "${packages[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
-# ------------------------------------------------------
 # ST
-# ------------------------------------------------------
 print_info "Making st..."
 sudo make -C ~/dotfiles/st clean install
 
-# ------------------------------------------------------
 # Install custom issue (login prompt)
-# ------------------------------------------------------
 echo ""
 print_info "Installing login screen..."
 sudo cp ~/dotfiles/login/issue /etc/issue
 
-# ------------------------------------------------------
 # Add user to wheel
-# ------------------------------------------------------
 sudoers_line='%wheel ALL=(ALL:ALL) NOPASSWD: ALL'
 
 if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
@@ -147,7 +135,7 @@ else
   if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
     print_success "%wheel group has been uncommented in sudoers."
   else
-    print_error "Failed to uncomment %wheel group in sudoers."
+    print_failure "Failed to uncomment %wheel group in sudoers."
   fi
 fi
 
@@ -161,7 +149,4 @@ else
   print_success "Current shell is already zsh."
 fi
 
-# ------------------------------------------------------
-# DONE
-# ------------------------------------------------------
-print_success "DONE! set zsh as your default shell if not yet"
+print_success "DONE!"

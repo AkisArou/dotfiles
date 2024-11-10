@@ -21,9 +21,6 @@ packages=(
   "flameshot"
 )
 
-# ------------------------------------------------------
-# Install required packages
-# ------------------------------------------------------
 install_packages "${packages[@]}"
 
 print_success "DONE!"
