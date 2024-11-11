@@ -67,6 +67,7 @@ return {
         },
         winopts = {
           height = 0.35,
+          width = 0.35,
           preview = {
             hidden = "hidden",
           },
