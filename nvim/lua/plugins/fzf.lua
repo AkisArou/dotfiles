@@ -31,6 +31,7 @@ return {
       },
       buffers = {
         file_icons = false,
+        path_shorten = 1,
         -- actions = false,
       },
     })
@@ -59,12 +60,51 @@ return {
 
     vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
 
-    vim.keymap.set("n", "<leader>fe", function()
-      fzf_lua.buffers({
-        fzf_opts = {
-          ["--delimiter"] = "/",
-          ["--with-nth"] = "-1",
-        },
+    vim.keymap.set("n", "<leader>fc", fzf_lua.git_commits, { desc = "Git commits" })
+
+    vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
+
+    vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
+
+    -- vim.keymap.set("n", "<leader>fe", function()
+    --   fzf_lua.buffers({
+    --     fzf_opts = {
+    --       ["--delimiter"] = " ",
+    --       ["--with-nth"] = "-1",
+    --     },
+    --     winopts = {
+    --       height = 0.35,
+    --       width = 0.35,
+    --       preview = {
+    --         hidden = "hidden",
+    --       },
+    --     },
+    --   })
+    -- end, { desc = "Buffers" })
+
+    function Buffer_picker()
+      fzf_lua.fzf_exec(function(fzf_cb)
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, "buflisted") then
+            local buf_name = vim.api.nvim_buf_get_name(buf)
+            local filename = vim.fn.fnamemodify(buf_name, ":t") -- Get filename without path
+            local full_path = vim.fn.fnamemodify(buf_name, ":p") -- Get full path
+
+            local display_line = string.format(
+              "%s %s %d",
+              filename,
+              require("fzf-lua").utils.ansi_codes.grey("(" .. full_path .. ")"),
+              buf
+            )
+
+            -- Send formatted line to fzf
+            fzf_cb(display_line)
+          end
+        end
+        -- Close fzf pipe to signal end of data
+        fzf_cb()
+      end, {
+        prompt = "Buffers> ",
         winopts = {
           height = 0.35,
           width = 0.35,
@@ -72,13 +112,35 @@ return {
             hidden = "hidden",
           },
         },
+        actions = {
+          -- Default action: switch to the selected buffer
+          ["default"] = function(selected)
+            local buf_id = tonumber(selected[1]:match("(%d+)%s*$"))
+
+            if buf_id then
+              -- Switch to the selected buffer
+              vim.cmd("buffer " .. buf_id)
+            end
+          end,
+
+          -- Ctrl+x: Delete selected buffer and reload the list
+          ["ctrl-x"] = {
+            function(selected)
+              local buf_id = tonumber(selected[1]:match("(%d+)%s*$"))
+
+              if buf_id then
+                -- Delete the selected buffer
+                pcall(vim.api.nvim_buf_delete, buf_id, { force = true })
+                vim.api.nvim_out_write("Deleted buffer ID: " .. buf_id .. "\n")
+              end
+            end,
+
+            require("fzf-lua").actions.resume,
+          },
+        },
       })
-    end, { desc = "Buffers" })
+    end
 
-    vim.keymap.set("n", "<leader>fc", fzf_lua.git_commits, { desc = "Git commits" })
-
-    vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
-
-    vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
+    vim.keymap.set("n", "<leader>fe", ":lua Buffer_picker()<CR>", { noremap = true, silent = true, desc = "Buffers" })
   end,
 }
