@@ -112,7 +112,7 @@ return {
       end, {
         prompt = "Buffers> ",
         winopts = {
-          height = 0.35,
+          height = 0.25,
           width = 0.35,
           preview = {
             hidden = "hidden",
