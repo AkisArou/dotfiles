@@ -124,7 +124,6 @@ return {
             local buf_id = tonumber(selected[1]:match("(%d+)%s*$"))
 
             if buf_id then
-              -- Switch to the selected buffer
               vim.cmd("buffer " .. buf_id)
             end
           end,
@@ -135,9 +134,7 @@ return {
               local buf_id = tonumber(selected[1]:match("(%d+)%s*$"))
 
               if buf_id then
-                -- Delete the selected buffer
                 pcall(vim.api.nvim_buf_delete, buf_id, { force = true })
-                vim.api.nvim_out_write("Deleted buffer ID: " .. buf_id .. "\n")
               end
             end,
 
