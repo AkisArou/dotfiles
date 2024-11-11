@@ -31,8 +31,10 @@ export LAUNCH_EDITOR="/home/$(echo "$USER")/dotfiles/scripts/launch-editor.sh"
 export BROWSER="librewolf"
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
+
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
+
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
@@ -41,14 +43,14 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --ansi \
   --layout=reverse \
   --border=none \
-  --color=bg+:#1a1a1a \
   --color=bg:#1f1f1f \
+  --color=bg+:#222222 \
   --color=border:#1f1f1f \
   --color=fg:#d4d4d4 \
   --color=gutter:#2D2D2D \
   --color=header:#646695 \
-  --color=hl+:#4fc1ff \
-  --color=hl:#4fc1ff \
+  --color=hl:#C586C0 \
+  --color=hl+:#608b4e \
   --color=info:#8db9e2 \
   --color=marker:#4EC9B0 \
   --color=pointer:#4EC9B0 \
