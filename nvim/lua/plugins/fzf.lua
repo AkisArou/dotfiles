@@ -84,12 +84,18 @@ return {
 
     function Buffer_picker()
       fzf_lua.fzf_exec(function(fzf_cb)
+        local cwd = vim.loop.cwd()
+
         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
           if vim.api.nvim_buf_is_loaded(buf) and vim.api.nvim_buf_get_option(buf, "buflisted") then
             local buf_name = vim.api.nvim_buf_get_name(buf)
             local filename = vim.fn.fnamemodify(buf_name, ":t") -- Get filename without path
             local full_path = vim.fn.fnamemodify(buf_name, ":p") -- Get full path
 
+            -- Make the full path relative to the cwd
+            if full_path:sub(1, #cwd) == cwd then
+              full_path = full_path:sub(#cwd + 2)
+            end
             local display_line = string.format(
               "%s %s %d",
               filename,
