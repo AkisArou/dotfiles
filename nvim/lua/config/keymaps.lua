@@ -89,8 +89,6 @@ function CloseCurrentBuffer()
 end
 
 -- Keybinding for saving and closing the current buffer
-vim.api.nvim_set_keymap("n", "<leader>n", "<cmd>bnext<CR>", opts)
-vim.api.nvim_set_keymap("n", "<leader>p", "<cmd>bprevious<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>bd", ":lua CloseCurrentBuffer()<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("n", "<leader>bo", ":lua CloseAllBuffersExceptCurrent()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>ba", ":lua CloseAllBuffers()<CR>", opts)
