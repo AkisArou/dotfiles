@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 source "$(dirname "$0")/scripts/library.sh"
 
