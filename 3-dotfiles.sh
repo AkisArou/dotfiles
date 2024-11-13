@@ -50,7 +50,6 @@ create_symlink "$HOME/dotfiles/btop" "$HOME/.config/btop"
 create_symlink "$HOME/dotfiles/yazi" "$HOME/.config/yazi"
 create_symlink "$HOME/dotfiles/sway" "$HOME/.config/sway"
 create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"
-create_symlink "$HOME/dotfiles/tofi" "$HOME/.config/tofi"
 create_symlink "$HOME/dotfiles/systemd" "$HOME/.config/systemd"
 create_symlink "$HOME/dotfiles/foot" "$HOME/.config/foot"
 create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
@@ -61,11 +60,13 @@ create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flag
 create_symlink "$HOME/dotfiles/brave/applications/teams.desktop" "$HOME/.local/share/applications/teams.desktop"
 create_symlink "$HOME/dotfiles/brave/applications/spotify.desktop" "$HOME/.local/share/applications/spotify.desktop"
 create_symlink "$HOME/dotfiles/brave/applications/outlook.desktop" "$HOME/.local/share/applications/outlook.desktop"
+create_symlink "$HOME/dotfiles/brave/applications/messenger.desktop" "$HOME/.local/share/applications/messenger.desktop"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
 sudo ln -sf "$HOME/dotfiles/brave/resources/cifhbcnohmdccbgoicgdjpfamggdegmo" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/cifhbcnohmdccbgoicgdjpfamggdegmo"
 sudo ln -sf "$HOME/dotfiles/brave/resources/pjibgclleladliembfgfagdaldikeohf" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/pjibgclleladliembfgfagdaldikeohf"
 sudo ln -sf "$HOME/dotfiles/brave/resources/pkooggnaalmfkidjmlhoelhdllpphaga" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/pkooggnaalmfkidjmlhoelhdllpphaga"
+sudo ln -sf "$HOME/dotfiles/brave/resources/bbdeiblfgdokhlblpgeaokenkfknecgl" "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/bbdeiblfgdokhlblpgeaokenkfknecgl"
 
 sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json

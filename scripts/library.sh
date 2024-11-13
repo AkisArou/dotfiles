@@ -10,7 +10,7 @@ print_success() {
   echo -e "${GREEN}$1${NC}"
 }
 
-nrint_failure() {
+print_failure() {
   echo -e "${RED}$1${NC}"
 }
 
