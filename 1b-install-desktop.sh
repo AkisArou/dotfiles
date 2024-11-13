@@ -12,6 +12,7 @@ packages=(
   "radeontop"
   "mesa-vdpau"
   "libva-mesa-driver"
+  "vulkan-radeon"
 )
 
 install_packages "${packages[@]}"
