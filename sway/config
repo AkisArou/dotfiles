@@ -243,5 +243,3 @@ for_window [window_type="menu"] floating enable
 for_window [title="teams.microsoft.com is sharing your screen."] move scratchpad
 
 include /etc/sway/config.d/*
-
-
