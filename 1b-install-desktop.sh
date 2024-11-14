@@ -11,7 +11,7 @@ packages=(
   "intel-ucode"
   "radeontop"
   "mesa-vdpau"
-  "libva-mesa-driver"
+  "mesa"
   "vulkan-radeon"
 )
 
