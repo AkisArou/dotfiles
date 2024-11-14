@@ -56,14 +56,9 @@ create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
 create_symlink "$HOME/dotfiles/starship" "$HOME/.config/starship"
 create_symlink "$HOME/dotfiles/code/code-flags.conf" "$HOME/.config/code-flags.conf"
 create_symlink "$HOME/dotfiles/fontconfig" "$HOME/.config/fontconfig"
+create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
-
-if [[ "$HOST" == "arch-desktop" ]]; then
-  create_symlink "$HOME/dotfiles/brave/brave-flags-desktop.conf" "$HOME/.config/brave-flags.conf"
-else
-  create_symlink "$HOME/dotfiles/brave/brave-flags-laptop.conf" "$HOME/.config/brave-flags.conf"
-fi
 
 sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
