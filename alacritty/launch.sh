@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-if [[ "$HOST" == "akisarou-desktop" ]]; then
+if [[ "$HOST" == "arch-desktop" ]]; then
   font_size=8
 else
   font_size=9

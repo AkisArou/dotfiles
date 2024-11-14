@@ -2,7 +2,7 @@
 
 FONT_FAMILY="DM Mono"
 
-if [[ "$HOST" == "akisarou-desktop" ]]; then
+if [[ "$HOST" == "arch-desktop" ]]; then
   POLY_FONT="$FONT_FAMILY":size=10
   POLY_BAR_HEIGHT="20pt"
 else
