@@ -4,7 +4,7 @@
 #
 # Read `man 5 sway` for a complete reference.
 
-xwayland disable
+# xwayland disable
 
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
