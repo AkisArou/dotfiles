@@ -7,6 +7,7 @@ return {
     "hrsh7th/cmp-cmdline",
     "saadparwaiz1/cmp_luasnip",
   },
+  event = { "InsertEnter", "CmdlineEnter" },
   config = function()
     vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
 
