@@ -5,7 +5,6 @@ $git_state\
 $git_status\
 $cmd_duration\
 $line_break\
-$nodejs\
 $character"""
 
 [directory]
@@ -38,7 +37,3 @@ style = "bright-black"
 [cmd_duration]
 format = "[$duration]($style) "
 style = "yellow"
-
-[nodejs]
-format = '[ $version]($style) '
-
