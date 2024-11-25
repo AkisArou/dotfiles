@@ -107,7 +107,7 @@ input "1739:30385:CUST0001:00_06CB:76B1_Mouse" {
     bindsym $mod+Shift+c reload
 
     # toggle bluetooth device
-    bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
+    bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth.sh
     bindsym $mod+Shift+q exec rofi -show power-menu -modi power-menu:rofi-power-menu
     # bindsym $mod+Shift+q exec ~/dotfiles/tofi/power-menu.sh
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'

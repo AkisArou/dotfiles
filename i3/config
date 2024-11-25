@@ -62,7 +62,8 @@ bindsym $mod+q kill
 bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu.sh
 
 # toggle bluetooth device
-bindsym $mod+Shift+b exec ~/dotfiles/scripts/connect-first-known-bluetooth-device.sh
+bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth.sh
+
 
 # start a program launcher
 bindsym $mod+d exec $menu
