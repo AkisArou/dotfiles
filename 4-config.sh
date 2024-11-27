@@ -60,9 +60,6 @@ grep -qxF '* - nofile 65536' /etc/security/limits.conf || echo '* - nofile 65536
 grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/system.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/system.conf
 grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/user.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/user.conf
 
-print_info "Optimizing ssd..."
-sudo systemctl enable fstrim.timer
-
 print_info "Setting up docker..."
 ls -al /dev/kvm
 sudo usermod -aG kvm $USER
