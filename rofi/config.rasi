@@ -11,4 +11,5 @@ configuration {
     kb-page-prev: "Page_Up,Control+u";
 }
 
-@theme "~/dotfiles/rofi/vscode.rasi"
+// @theme "~/dotfiles/rofi/vscode.rasi"
+@theme "~/dotfiles/rofi/tokyonight.rasi"

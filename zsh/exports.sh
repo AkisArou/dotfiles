@@ -34,13 +34,27 @@ export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
 
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
-  --highlight-line \
-  --info=inline-right \
-  --ansi \
-  --layout=reverse \
-  --border=none \
+
+FZF_TOKYONIGHT_NIGHT="\
+  --color=bg+:#283457 \
+  --color=bg:#16161e \
+  --color=border:#27a1b9 \
+  --color=fg:#c0caf5 \
+  --color=gutter:#16161e \
+  --color=header:#ff9e64 \
+  --color=hl+:#2ac3de \
+  --color=hl:#2ac3de \
+  --color=info:#545c7e \
+  --color=marker:#ff007c \
+  --color=pointer:#ff007c \
+  --color=prompt:#2ac3de \
+  --color=query:#c0caf5:regular \
+  --color=scrollbar:#27a1b9 \
+  --color=separator:#ff9e64 \
+  --color=spinner:#ff007c \
+"
+
+FZF_VSCODE="\
   --color=bg:#1f1f1f \
   --color=bg+:#222222 \
   --color=border:#1f1f1f \
@@ -57,6 +71,16 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --color=scrollbar:#2d2d2d \
   --color=separator:#223e55 \
   --color=spinner:#4ec9b0 \
+"
+
+export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
+  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
+  --highlight-line \
+  --info=inline-right \
+  --ansi \
+  --layout=reverse \
+  --border=none \
+  $FZF_TOKYONIGHT_NIGHT
 "
 
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning --experimental-transform-types"

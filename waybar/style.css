@@ -5,8 +5,13 @@
 }
 
 window#waybar {
-	background-color: #1f1f1f;
-	color: #ffffff;
+	/* VSCode */
+	/* background-color: #1f1f1f; */
+	/* color: #ffffff; */
+
+	/* Tokyonight */
+	color: rgba(217, 216, 216, 1);
+	background: #1a1b26;
 }
 
 window#waybar.hidden {
