@@ -1,3 +1,5 @@
+@import "./tokyonight.css";
+
 * {
 	font-family: DMMono;
 	font-size: 11px;
@@ -5,13 +7,8 @@
 }
 
 window#waybar {
-	/* VSCode */
-	/* background-color: #1f1f1f; */
-	/* color: #ffffff; */
-
-	/* Tokyonight */
-	color: #a9b1d6;
-	background: #24283b;
+	color: @bar-foreground;
+	background-color: @bar-background;
 }
 
 window#waybar.hidden {
