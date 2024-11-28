@@ -19,3 +19,9 @@ sed -i "s|include=~/dotfiles/foot/.*\.ini|include=~/dotfiles/foot/$SELECTED_THEM
 sed -i "s|@import \"./.*\.css\"|@import \"./$SELECTED_THEME.css\"|" ~/dotfiles/waybar/style.css
 killall waybar
 waybar &
+
+# Yazi
+sed -i "s/use = \"[^\"]*\"/use = \"$SELECTED_THEME\"/" ~/dotfiles/yazi/theme.toml
+
+# Eza
+sed -i "s|export EZA_CONFIG_DIR=\"[^\"]*\"|export EZA_CONFIG_DIR=\"~/dotfiles/eza/$SELECTED_THEME\"|" ~/dotfiles/zsh/exports.sh
