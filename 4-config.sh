@@ -49,8 +49,6 @@ ulimit -Sn
 # Change limit (temporary)
 ulimit -Sn 10000 # You might need to change the hard limit too
 
-# Check current limits
-sysctl fs.inotify
 # Change limits (temporary)
 sudo sysctl fs.inotify.max_queued_events=16384
 sudo sysctl fs.inotify.max_user_instances=8192
