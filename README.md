@@ -34,7 +34,7 @@ Also:
 - docker data-root at $HOME/docker
 - git config
 - fzf, fd
-- vscode dark for everything
+- vscode dark & tokyonight themes
 - vscode settings & keybindings at .vscode
 
 * various helper scripts
