@@ -36,11 +36,11 @@ export QT_FONT_DPI=243
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
 FZF_TOKYONIGHT_NIGHT="\
-  --color=bg+:#283457 \
-  --color=bg:#16161e \
-  --color=border:#27a1b9 \
+  --color=bg+:#2e3c64 \
+  --color=bg:#1f2335 \
+  --color=border:#29a4bd \
   --color=fg:#c0caf5 \
-  --color=gutter:#16161e \
+  --color=gutter:#1f2335 \
   --color=header:#ff9e64 \
   --color=hl+:#2ac3de \
   --color=hl:#2ac3de \
@@ -49,7 +49,7 @@ FZF_TOKYONIGHT_NIGHT="\
   --color=pointer:#ff007c \
   --color=prompt:#2ac3de \
   --color=query:#c0caf5:regular \
-  --color=scrollbar:#27a1b9 \
+  --color=scrollbar:#29a4bd \
   --color=separator:#ff9e64 \
   --color=spinner:#ff007c \
 "
