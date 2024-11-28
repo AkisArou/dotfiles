@@ -33,7 +33,8 @@ window#waybar.hidden {
 }
 
 #workspaces button.focused {
-	background-color: #51504f;
+	/* background-color: #51504f; */
+	background-color: #1a1b26;
 }
 
 #workspaces button.urgent {
