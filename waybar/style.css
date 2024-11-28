@@ -10,8 +10,8 @@ window#waybar {
 	/* color: #ffffff; */
 
 	/* Tokyonight */
-	color: rgba(217, 216, 216, 1);
-	background: #1a1b26;
+	color: #a9b1d6;
+	background: #24283b;
 }
 
 window#waybar.hidden {
@@ -37,7 +37,7 @@ window#waybar.hidden {
 }
 
 #workspaces button.urgent {
-	background-color: #f44747;
+	background-color: #f7768e;
 }
 
 label.module {
@@ -59,7 +59,7 @@ label.module {
 }
 
 #battery.critical:not(.charging) {
-	color: #f53c3c;
+	color: #f7768e;
 	background-color: rgba(255, 0, 0, 0.1);
 	padding: 0 5px;
 	animation-name: blink;
@@ -70,7 +70,7 @@ label.module {
 }
 
 #battery.warning:not(.charging) {
-	color: orange;
+	color: #ff9e64;
 	background-color: rgba(255, 165, 0, 0.1);
 	padding: 0 5px;
 }
