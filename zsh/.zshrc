@@ -1,5 +1,5 @@
 if [[ -z "$TMUX" ]]; then
-  tmux attach || ~/dotfiles/scripts/start-tmux.sh
+  tmux a || ~/dotfiles/scripts/start-tmux.sh
 fi
 
 #figlet "Arch Linux" &&
