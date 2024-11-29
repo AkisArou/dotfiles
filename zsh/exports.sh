@@ -1,4 +1,3 @@
-export EZA_CONFIG_DIR="~/dotfiles/eza/vscode"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
@@ -33,6 +32,8 @@ export MANWIDTH=999
 
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
+
+export EZA_CONFIG_DIR="~/dotfiles/eza/vscode"
 
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
