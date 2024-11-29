@@ -39,7 +39,7 @@ CAPITALIZED_THEME=$(echo "$SELECTED_THEME" | awk '{print toupper($0)}')
 sed -i "s/FZF_SELECTED_THEME=\$FZF_[A-Z]*/FZF_SELECTED_THEME=\$FZF_${CAPITALIZED_THEME}/" ~/dotfiles/zsh/exports.sh
 
 # tmux
-sed -i "s|source-file ~/dotfiles/tmux/[a-zA-Z]*.tmux|source-file ~/dotfiles/tmux/${SELECTED_THEME}.tmux|" ~/dotfiles/.tmux.conf
+sed -i "s|source-file ~/dotfiles/tmux/[a-zA-Z]*.tmux|source-file ~/dotfiles/tmux/${SELECTED_THEME}.tmux|" ~/dotfiles/tmux/.tmux.conf
 tmux source ~/.tmux.conf
 
 #btop
