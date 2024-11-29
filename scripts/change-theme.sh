@@ -36,3 +36,5 @@ done
 # Fzf
 CAPITALIZED_THEME=$(echo "$SELECTED_THEME" | awk '{print toupper($0)}')
 sed -i "s/FZF_SELECTED_THEME=\$FZF_[A-Z]*/FZF_SELECTED_THEME=\$FZF_${CAPITALIZED_THEME}/" ~/dotfiles/zsh/exports.sh
+
+source ~/dotfiles/zsh/exports.sh
