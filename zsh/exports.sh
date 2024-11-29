@@ -33,8 +33,6 @@ export MANWIDTH=999
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
 
-export EZA_CONFIG_DIR="~/dotfiles/eza/vscode"
-
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
 FZF_TOKYONIGHT="\
