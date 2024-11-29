@@ -17,7 +17,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes.vscode
+local selectedTheme = themes.tokyonight
 
 local M = {
   selectedTheme.repo,

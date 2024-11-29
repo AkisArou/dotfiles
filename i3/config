@@ -64,6 +64,7 @@ bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu.sh
 
 # toggle bluetooth device
 bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth.sh
+bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme.sh
 
 
 # start a program launcher

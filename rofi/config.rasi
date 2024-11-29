@@ -1,4 +1,4 @@
-@import "./vscode.rasi"
+@import "./tokyonight.rasi"
 
 configuration {
     font: "DMMono Regular 10";

@@ -44,4 +44,4 @@ tmux source ~/.tmux.conf
 #btop
 sed -i "s|color_theme = \".*\"|color_theme = \"${SELECTED_THEME}\"|" ~/dotfiles/btop/btop.conf
 
-source ~/dotfiles/zsh/exports.sh
+source ~/dotfiles/zsh/.zshrc
