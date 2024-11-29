@@ -9,32 +9,39 @@ if [ -z "$SELECTED_THEME" ] || ([ "$SELECTED_THEME" != "$VSCODE_THEME" ] && [ "$
   exit 1
 fi
 
-# Rofi
+# rofi
 sed -i "s|@import \"./.*\.rasi\"|@import \"./$SELECTED_THEME.rasi\"|" ~/dotfiles/rofi/config.rasi
 
-# Foot
+# foot
 sed -i "s|include=~/dotfiles/foot/.*\.ini|include=~/dotfiles/foot/$SELECTED_THEME.ini|" ~/dotfiles/foot/foot.ini
 
-# Waybar
+# waybar
 sed -i "s|@import \"./.*\.css\"|@import \"./$SELECTED_THEME.css\"|" ~/dotfiles/waybar/style.css
 killall waybar
 waybar &
 
-# Yazi
+# yazi
 sed -i "s/use = \"[^\"]*\"/use = \"$SELECTED_THEME\"/" ~/dotfiles/yazi/theme.toml
 
-# Eza
+# eza
 sed -i "s|export EZA_CONFIG_DIR=\"[^\"]*\"|export EZA_CONFIG_DIR=\"~/dotfiles/eza/$SELECTED_THEME\"|" ~/dotfiles/zsh/exports.sh
 
-# Nvim
+# nvim
 sed -i "s|local selectedTheme = themes\.[a-zA-Z0-9_]*|local selectedTheme = themes.$SELECTED_THEME|" ~/dotfiles/nvim/lua/plugins/colorscheme.lua
 
 for addr in $XDG_RUNTIME_DIR/nvim.*; do
   nvim --server $addr --remote-send ":colorscheme $SELECTED_THEME<CR>"
 done
 
-# Fzf
+# fzf
 CAPITALIZED_THEME=$(echo "$SELECTED_THEME" | awk '{print toupper($0)}')
 sed -i "s/FZF_SELECTED_THEME=\$FZF_[A-Z]*/FZF_SELECTED_THEME=\$FZF_${CAPITALIZED_THEME}/" ~/dotfiles/zsh/exports.sh
+
+# tmux
+sed -i "s|source-file ~/dotfiles/tmux/[a-zA-Z]*.tmux|source-file ~/dotfiles/tmux/${SELECTED_THEME}.tmux|" ~/dotfiles/.tmux.conf
+tmux source ~/.tmux.conf
+
+#btop
+sed -i "s|color_theme = \".*\"|color_theme = \"${SELECTED_THEME}\"|" ~/dotfiles/btop/btop.conf
 
 source ~/dotfiles/zsh/exports.sh
