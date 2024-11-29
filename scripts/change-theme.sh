@@ -25,3 +25,10 @@ sed -i "s/use = \"[^\"]*\"/use = \"$SELECTED_THEME\"/" ~/dotfiles/yazi/theme.tom
 
 # Eza
 sed -i "s|export EZA_CONFIG_DIR=\"[^\"]*\"|export EZA_CONFIG_DIR=\"~/dotfiles/eza/$SELECTED_THEME\"|" ~/dotfiles/zsh/exports.sh
+
+# Nvim
+sed -i "s|local selectedTheme = themes\.[a-zA-Z0-9_]*|local selectedTheme = themes.$SELECTED_THEME|" ~/dotfiles/nvim/lua/plugins/colorscheme.lua
+
+for addr in $XDG_RUNTIME_DIR/nvim.*; do
+  nvim --server $addr --remote-send ":colorscheme $SELECTED_THEME<CR>"
+done
