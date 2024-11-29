@@ -65,12 +65,12 @@ configuration {
 
 #element.normal.active {
     background-color: var(active-background);
-    text-color:       black;
+    text-color:       var(foreground);
 }
 
 #element.selected.normal {
     background-color: var(selected-background);
-    text-color:       black;
+    text-color:       var(foreground);
 }
 
 #element.selected.urgent {
