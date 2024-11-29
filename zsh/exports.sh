@@ -1,4 +1,4 @@
-export EZA_CONFIG_DIR="~/dotfiles/eza/tokyonight"
+export EZA_CONFIG_DIR="~/dotfiles/eza/vscode"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
@@ -36,7 +36,7 @@ export QT_FONT_DPI=243
 
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
-FZF_TOKYONIGHT_NIGHT="\
+FZF_TOKYONIGHT="\
   --color=bg+:#2e3c64 \
   --color=bg:#1f2335 \
   --color=border:#29a4bd \
@@ -74,6 +74,8 @@ FZF_VSCODE="\
   --color=spinner:#4ec9b0 \
 "
 
+FZF_SELECTED_THEME=$FZF_VSCODE
+
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
   --highlight-line \
@@ -81,7 +83,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --ansi \
   --layout=reverse \
   --border=none \
-  $FZF_TOKYONIGHT_NIGHT
+  $FZF_SELECTED_THEME
 "
 
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning --experimental-transform-types"

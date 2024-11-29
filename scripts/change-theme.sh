@@ -32,3 +32,7 @@ sed -i "s|local selectedTheme = themes\.[a-zA-Z0-9_]*|local selectedTheme = them
 for addr in $XDG_RUNTIME_DIR/nvim.*; do
   nvim --server $addr --remote-send ":colorscheme $SELECTED_THEME<CR>"
 done
+
+# Fzf
+CAPITALIZED_THEME=$(echo "$SELECTED_THEME" | awk '{print toupper($0)}')
+sed -i "s/FZF_SELECTED_THEME=\$FZF_[A-Z]*/FZF_SELECTED_THEME=\$FZF_${CAPITALIZED_THEME}/" ~/dotfiles/zsh/exports.sh
