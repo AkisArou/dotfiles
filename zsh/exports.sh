@@ -1,4 +1,4 @@
-export EZA_CONFIG_DIR="~/dotfiles/eza/tokyonight"
+export EZA_CONFIG_DIR="~/dotfiles/eza/vscode"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
@@ -74,7 +74,7 @@ FZF_VSCODE="\
   --color=spinner:#4ec9b0 \
 "
 
-FZF_SELECTED_THEME=$FZF_TOKYONIGHT
+FZF_SELECTED_THEME=$FZF_VSCODE
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
