@@ -1,5 +1,5 @@
 if [[ -z "$TMUX" ]]; then
-  tmux a || ~/dotfiles/scripts/start-tmux.sh
+  tmux attach-session -t default || tmux new-session -s default
 fi
 
 #figlet "Arch Linux" &&
