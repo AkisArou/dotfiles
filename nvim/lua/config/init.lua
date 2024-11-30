@@ -3,6 +3,7 @@ require("config.lazy")
 require("config.autocmds")
 require("config.keymaps")
 require("config.filetype")
+require("config.netrw")
 
 local cwd = vim.fn.getcwd()
 
