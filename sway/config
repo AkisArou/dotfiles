@@ -28,7 +28,7 @@ set $browser /usr/bin/librewolf
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /home/akisarou/dotfiles/wallpapers/arch-tokyonight.png fill
+output * bg /home/akisarou/dotfiles/wallpapers/leaves.jpg fill
 
 output 'Samsung Electric Company LC49G95T H4ZR303132' {
     mode 5120x1440@129.999Hz
