@@ -15,12 +15,18 @@ local themes = {
       require("vscode").setup()
     end,
   },
+  darcula = {
+    name = "darcula-solid",
+    repo = "briones-gabriel/darcula-solid.nvim",
+    dependencies = { "rktjmp/lush.nvim" },
+  },
 }
 
 local selectedTheme = themes.vscode
 
 local M = {
   selectedTheme.repo,
+  dependencies = selectedTheme.dependencies,
   branch = selectedTheme.branch,
   event = "VimEnter",
   opts = selectedTheme.opts,
