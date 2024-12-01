@@ -7,7 +7,7 @@ function r() {
   rm -f -- "$tmp"
 }
 
-kill_by_port() {
+function kill_by_port() {
   if [[ -n "$1" ]]; then
     local port="$1"
     local process_id
@@ -24,15 +24,15 @@ kill_by_port() {
   fi
 }
 
-wake_desktop() {
+function wake_desktop() {
   wol "$DESKTOP_MAC"
 }
 
-sus_desktop() {
+function sus_desktop() {
   ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
 
-fv() {
+function fv() {
   local file
   file="$(
     find "${1:-.}" -path '*/\.*' -prune -o -type f -print 2>/dev/null |
