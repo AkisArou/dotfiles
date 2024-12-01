@@ -1,3 +1,12 @@
+function r() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd" || exit
+  fi
+  rm -f -- "$tmp"
+}
+
 kill_by_port() {
   if [[ -n "$1" ]]; then
     local port="$1"

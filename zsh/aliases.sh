@@ -1,7 +1,6 @@
 alias sudo="sudo -E"
 alias ta="tmux attach"
 alias v="nvim"
-alias r="yazi"
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
 alias ip="ip -color=auto"

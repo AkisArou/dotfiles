@@ -1,3 +1,7 @@
+if [ -f ~/.env ]; then
+  export $(cat ~/.env | xargs)
+fi
+
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
@@ -73,7 +77,7 @@ FZF_VSCODE="\
   --color=spinner:#4ec9b0 \
 "
 
-FZF_SELECTED_THEME=$FZF_VSCODE
+FZF_THEME="FZF_$(echo "${THEME:-vscode}" | tr '[:lower:]' '[:upper:]')"
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
@@ -82,7 +86,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --ansi \
   --layout=reverse \
   --border=none \
-  $FZF_SELECTED_THEME
+  $(eval echo \$"$FZF_THEME")
 "
 
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning --experimental-transform-types"
@@ -104,7 +108,3 @@ asdf_update_java_home() {
 }
 
 asdf_update_java_home
-
-if [ -f ~/.env ]; then
-  export $(cat ~/.env | xargs)
-fi
