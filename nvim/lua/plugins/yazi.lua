@@ -5,7 +5,7 @@ return {
     {
       "<leader>e",
       "<cmd>Yazi<cr>",
-      desc = "Resume the last yazi session",
+      desc = "Open yazi at the current file",
     },
     -- {
     --   "<leader>cw",
