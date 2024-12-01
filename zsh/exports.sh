@@ -2,6 +2,9 @@ if [ -f ~/.env ]; then
   export $(cat ~/.env | xargs)
 fi
 
+# Set the THEME variable to the value from ~/.env or default to "vscode"
+export THEME="${THEME:-vscode}"
+
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
@@ -77,7 +80,7 @@ FZF_VSCODE="\
   --color=spinner:#4ec9b0 \
 "
 
-FZF_THEME="FZF_$(echo "${THEME:-vscode}" | tr '[:lower:]' '[:upper:]')"
+FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept

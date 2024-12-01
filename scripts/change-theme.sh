@@ -9,40 +9,32 @@ if [ -z "$SELECTED_THEME" ] || ([ "$SELECTED_THEME" != "$VSCODE_THEME" ] && [ "$
   exit 1
 fi
 
-# rofi
-sed -i "s|@import \"./.*\.rasi\"|@import \"./$SELECTED_THEME.rasi\"|" ~/dotfiles/rofi/config.rasi
+# Check if ~/.env file exists
+if [ ! -f "$HOME/.env" ]; then
+  # Create ~/.env file if it doesn't exist
+  touch "$HOME/.env"
+  echo "Created ~/.env file."
+fi
 
-# foot
-sed -i "s|include=~/dotfiles/foot/.*\.ini|include=~/dotfiles/foot/$SELECTED_THEME.ini|" ~/dotfiles/foot/foot.ini
+# Use sed for in-place editing to replace or add THEME=$SELECTED_THEME
+sed -i "s/^THEME=.*/THEME=$SELECTED_THEME/" "$HOME/.env" 2>/dev/null
+
+# If THEME was not replaced, add it
+if ! grep -q "^THEME=" "$HOME/.env"; then
+  echo "THEME=$SELECTED_THEME" >>"$HOME/.env"
+fi
+
+echo "THEME set to $SELECTED_THEME in ~/.env"
 
 # waybar
-sed -i "s|@import \"./.*\.css\"|@import \"./$SELECTED_THEME.css\"|" ~/dotfiles/waybar/style.css
 killall waybar
-waybar &
-
-# yazi
-sed -i "s/use = \"[^\"]*\"/use = \"$SELECTED_THEME\"/" ~/dotfiles/yazi/theme.toml
-
-# eza
-rm -rf ~/.config/eza
-ln -s "~/dotfiles/eza/$SELECTED_THEME" ~/.config/eza
+~/dotfiles/waybar/launch-waybar.sh &
 
 # nvim
-sed -i "s|local selectedTheme = themes\.[a-zA-Z0-9_]*|local selectedTheme = themes.$SELECTED_THEME|" ~/dotfiles/nvim/lua/plugins/colorscheme.lua
-
 for addr in $XDG_RUNTIME_DIR/nvim.*; do
   nvim --server $addr --remote-send ":colorscheme $SELECTED_THEME<CR>"
 done
 
-# fzf
-CAPITALIZED_THEME=$(echo "$SELECTED_THEME" | awk '{print toupper($0)}')
-sed -i "s/FZF_SELECTED_THEME=\$FZF_[A-Z]*/FZF_SELECTED_THEME=\$FZF_${CAPITALIZED_THEME}/" ~/dotfiles/zsh/exports.sh
-
 # tmux
-sed -i "s|source-file ~/dotfiles/tmux/[a-zA-Z]*.tmux|source-file ~/dotfiles/tmux/${SELECTED_THEME}.tmux|" ~/dotfiles/tmux/.tmux.conf
+source ~/.env
 tmux source ~/.tmux.conf
-
-#btop
-sed -i "s|color_theme = \".*\"|color_theme = \"${SELECTED_THEME}\"|" ~/dotfiles/btop/btop.conf
-
-source ~/dotfiles/zsh/.zshrc

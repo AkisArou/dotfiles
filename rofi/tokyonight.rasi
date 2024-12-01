@@ -10,3 +10,5 @@
     separatorcolor: var(active-background);
     bordercolor: #1a1f2d;
 }
+
+@import "./config.rasi"

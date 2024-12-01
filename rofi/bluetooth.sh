@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+source ~/.env
+
 #             __ _       _     _            _              _   _
 #  _ __ ___  / _(_)     | |__ | |_   _  ___| |_ ___   ___ | |_| |__
 # | '__/ _ \| |_| |_____| '_ \| | | | |/ _ \ __/ _ \ / _ \| __| '_ \
@@ -305,7 +307,7 @@ show_menu() {
 }
 
 # Rofi command to pipe into, can add any options here
-rofi_command="rofi -dmenu $* -p"
+rofi_command="rofi -config ""$HOME""/dotfiles/rofi/"${THEME:-vscode}".rasi -dmenu $* -p"
 
 case "$1" in
 --status)

@@ -1,3 +1,5 @@
+source "$HOME/dotfiles/zsh/exports.sh"
+
 if [[ -z "$TMUX" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
@@ -23,7 +25,6 @@ bindkey '^ ' autosuggest-accept
 
 # source
 source "$HOME/dotfiles/zsh/aliases.sh"
-source "$HOME/dotfiles/zsh/exports.sh"
 source "$HOME/dotfiles/zsh/functions.sh"
 source "$HOME/dotfiles/zsh/history.sh"
 
