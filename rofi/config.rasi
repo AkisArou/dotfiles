@@ -1,5 +1,5 @@
 configuration {
-    font: "DMMono Regular 10";
+    font: "MesloLGMDZNerdFont Regular 10";
     modi: "window,run,drun";
     show-icons: true;
     display-drun: "";
