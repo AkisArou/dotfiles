@@ -36,5 +36,8 @@ for addr in $XDG_RUNTIME_DIR/nvim.*; do
 done
 
 # tmux
-source ~/.env
-tmux source ~/.tmux.conf
+tmux source ~/dotfiles/tmux/.tmux.conf
+tmux source ~/dotfiles/tmux/"$SELECTED_THEME".tmux
+
+export THEME=$SELECTED_THEME
+source ~/.zshrc
