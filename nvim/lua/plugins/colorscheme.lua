@@ -16,8 +16,9 @@ local themes = {
     end,
   },
   darcula = {
-    name = "darcula-dark",
-    repo = "xiantang/darcula-dark.nvim",
+    name = "darcula-solid",
+    repo = "briones-gabriel/darcula-solid.nvim",
+    dependencies = { "rktjmp/lush.nvim" },
   },
 }
 
