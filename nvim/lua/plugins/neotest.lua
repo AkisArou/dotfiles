@@ -7,6 +7,18 @@ return {
     "antoinemadec/FixCursorHold.nvim",
     "nvim-treesitter/nvim-treesitter",
     "marilari88/neotest-vitest",
+    {
+      "mfussenegger/nvim-dap",
+      keys = {
+        {
+          "<leader>td",
+          function()
+            require("neotest").run.run({ strategy = "dap" })
+          end,
+          desc = "Debug Nearest",
+        },
+      },
+    },
   },
     -- stylua: ignore
   keys = {
@@ -73,6 +85,7 @@ return {
           filter_dir = function(name)
             return name ~= "node_modules"
           end,
+          vitestCommand = "npx vitest",
         }),
       },
     })
