@@ -19,7 +19,7 @@
 -- end
 --
 -- local bind = function(lhs, rhs)
---   vim.keymap.set("n", lhs, rhs, { remap = true })
+--   vim.keymap.set("n", lhs, rhs, { remap = true, buffer = true })
 -- end
 --
 -- -- Navigation
