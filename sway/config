@@ -229,7 +229,7 @@ bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 # Windows:
 #
 
-gaps inner 4
+gaps inner 3
 smart_gaps off
 
 # for_window [shell="xwayland"] title_format "[XWayland] %title"
