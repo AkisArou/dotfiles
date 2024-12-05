@@ -1,5 +1,7 @@
 #!/usr/bin/zsh
 
-source ~/.env
+if [ -f ~/.env ]; then
+  source ~/.env
+fi
 
 waybar --style ~/dotfiles/waybar/"${THEME:-vscode}".css

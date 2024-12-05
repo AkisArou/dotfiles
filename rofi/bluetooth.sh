@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-source ~/.env
+
+if [ -f ~/.env ]; then
+  source ~/.env
+fi
 
 #             __ _       _     _            _              _   _
 #  _ __ ___  / _(_)     | |__ | |_   _  ___| |_ ___   ___ | |_| |__
