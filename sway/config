@@ -224,6 +224,9 @@ bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
     # }
 # }
 
+gaps inner 5
+smart_gaps off
+
 #
 # Windows:
 #
