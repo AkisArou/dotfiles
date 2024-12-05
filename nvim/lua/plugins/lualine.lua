@@ -145,8 +145,6 @@ return {
       },
     })
 
-    ins_right({ "buffers" })
-
     ins_right({
       function()
         if TSC_ERRORS_COUNT == 0 or TSC_ERRORS_COUNT == nil then
