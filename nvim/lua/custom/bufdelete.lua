@@ -1,9 +1,8 @@
 local M = {}
 
-function CloseBuffers(filter)
+function CloseBuffers(get_should_close)
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-    local shouldClose = filter(buf)
-    if shouldClose then
+    if get_should_close(buf) then
       local buf_name = vim.api.nvim_buf_get_name(buf)
 
       if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_is_loaded(buf) then
