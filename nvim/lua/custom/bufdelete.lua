@@ -20,10 +20,8 @@ function CloseBuffers(filter)
 end
 
 function M.CloseOtherBuffers()
-  local current_buf = vim.api.nvim_get_current_buf()
-
   CloseBuffers(function(buf)
-    return buf ~= current_buf
+    return buf ~= vim.api.nvim_get_current_buf()
   end)
 end
 
@@ -34,10 +32,8 @@ function M.CloseAllBuffers()
 end
 
 function M.CloseCurrentBuffer()
-  local current_buf = vim.api.nvim_get_current_buf()
-
   CloseBuffers(function(buf)
-    return buf == current_buf
+    return buf == vim.api.nvim_get_current_buf()
   end)
 end
 
