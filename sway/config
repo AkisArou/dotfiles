@@ -11,7 +11,7 @@ exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME
 exec --no-startup-id ~/dotfiles/scripts/start-tmux.sh
-exec --no-startup-id ~/dotfiles/waybar/launch-waybar.sh
+exec_always ~/dotfiles/waybar/launch-waybar.sh
 
 set $mod Mod4
 set $left h
@@ -210,18 +210,18 @@ bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 #
 # Read `man 5 sway-bar` for more information about this section.
 # bar {
-  # swaybar_command ~/dotfiles/waybar/launch-waybar.sh
-    # position top
-    #
-    # # When the status_command prints a new line to stdout, swaybar updates.
-    # # The default just shows the current date and time.
-    # status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-    #
-    # colors {
-    #     statusline #ffffff
-    #     background #323232
-    #     inactive_workspace #32323200 #32323200 #5c5c5c
-    # }
+#   swaybar_command ~/dotfiles/waybar/launch-waybar.sh
+#   position top
+#
+#     # When the status_command prints a new line to stdout, swaybar updates.
+#     # The default just shows the current date and time.
+#     status_command while date +'%Y-%m-%d %X'; do sleep 1; done
+#
+#     colors {
+#         statusline #ffffff
+#         background #323232
+#         inactive_workspace #32323200 #32323200 #5c5c5c
+#     }
 # }
 
 

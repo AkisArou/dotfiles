@@ -4,4 +4,5 @@ if [ -f ~/.env ]; then
   source ~/.env
 fi
 
+killall waybar
 waybar --style ~/dotfiles/waybar/"${THEME:-vscode}".css
