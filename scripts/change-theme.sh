@@ -13,6 +13,8 @@ fi
 if [ ! -f "$HOME/.env" ]; then
   # Create ~/.env file if it doesn't exist
   touch "$HOME/.env"
+  echo 'DESKTOP_MAC=""' >>"$HOME/.env"
+  echo "THEME=vscode" >>"$HOME/.env"
   echo "Created ~/.env file."
 fi
 
