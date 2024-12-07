@@ -3,18 +3,26 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   lazy = true,
   dependencies = {
-    "folke/neodev.nvim",
     "hrsh7th/cmp-nvim-lsp",
     "b0o/SchemaStore.nvim",
-    { "antosha417/nvim-lsp-file-operations", config = true },
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
+    { "Bilal2453/luvit-meta", lazy = true },
+    { "antosha417/nvim-lsp-file-operations", config = true },
+    {
+      "folke/lazydev.nvim",
+      ft = "lua", -- only load on lua files
+      opts = {
+        library = {
+          -- See the configuration section for more details
+          -- Load luvit types when the `vim.uv` word is found
+          { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+        },
+      },
+    },
   },
   config = function()
     vim.diagnostic.config({ update_in_insert = true })
-
-    -- IMPORTANT: make sure to setup neodev BEFORE lspconfig
-    require("neodev").setup({})
 
     local lspconfig = require("lspconfig")
 

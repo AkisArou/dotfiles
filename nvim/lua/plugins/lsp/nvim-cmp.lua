@@ -3,7 +3,7 @@ return {
   name = "nvim-cmp",
   dependencies = {
     { "iguanacucumber/mag-nvim-lsp", name = "cmp-nvim-lsp", opts = {} },
-    { "iguanacucumber/mag-nvim-lua", name = "cmp-nvim-lua" },
+    -- { "iguanacucumber/mag-nvim-lua", name = "cmp-nvim-lua" },
     { "iguanacucumber/mag-buffer", name = "cmp-buffer" },
     { "iguanacucumber/mag-cmdline", name = "cmp-cmdline" },
     { "https://codeberg.org/FelipeLema/cmp-async-path" },
@@ -61,8 +61,12 @@ return {
         end,
       },
       sources = {
+        {
+          name = "lazydev",
+          group_index = 0, -- set group index to 0 to skip loading LuaLS completions
+        },
         { name = "nvim_lsp", group_index = 1 },
-        { name = "nvim_lua", group_index = 1 },
+        -- { name = "nvim_lua", group_index = 1 },
         {
           name = "async_path",
           option = {
