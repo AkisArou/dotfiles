@@ -1,9 +1,10 @@
-vim.cmd([[
-  augroup highlight_yank
-  autocmd!
-  au TextYankPost * silent! lua vim.hl.on_yank({higroup="Visual", timeout=200})
-  augroup END
-]])
+vim.api.nvim_create_autocmd("TextYankPost", {
+  desc = "Highlight when yanking (copying) text",
+  group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank({ higroup = "Visual", timeout = 200 })
+  end,
+})
 
 function Close_empty_unnamed_buffers()
   local buffers = vim.api.nvim_list_bufs()
