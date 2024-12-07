@@ -97,17 +97,3 @@ export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
 
 export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
-
-# . ~/.asdf/plugins/java/set-java-home.zsh
-# Instead of the above script that evaluates before each cmd, run this once.
-asdf_update_java_home() {
-  local java_path
-  java_path="$(asdf which java)"
-  if [[ -n "${java_path}" ]]; then
-    export JAVA_HOME
-    JAVA_HOME="$(dirname "$(dirname "${java_path:A}")")"
-    export JDK_HOME=${JAVA_HOME}
-  fi
-}
-
-asdf_update_java_home
