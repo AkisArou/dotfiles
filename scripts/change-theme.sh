@@ -9,14 +9,7 @@ if [ -z "$SELECTED_THEME" ] || ([ "$SELECTED_THEME" != "$VSCODE_THEME" ] && [ "$
   exit 1
 fi
 
-# Check if ~/.env file exists
-if [ ! -f "$HOME/.env" ]; then
-  # Create ~/.env file if it doesn't exist
-  touch "$HOME/.env"
-  echo 'DESKTOP_MAC=""' >>"$HOME/.env"
-  echo "THEME=vscode" >>"$HOME/.env"
-  echo "Created ~/.env file."
-fi
+~/dotfiles/scripts/create-template-env.sh
 
 # Use sed for in-place editing to replace or add THEME=$SELECTED_THEME
 sed -i "s/^THEME=.*/THEME=$SELECTED_THEME/" "$HOME/.env" 2>/dev/null

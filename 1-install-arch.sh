@@ -109,6 +109,8 @@ packages=(
   "unzip" # Needed by asdf
 )
 
+~/dotfiles/scripts/create-template-env.sh
+
 # Install required packages
 install_packages "${packages[@]}"
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
