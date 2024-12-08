@@ -93,6 +93,7 @@ return {
       documentation = {
         -- Controls whether the documentation window will automatically show when selecting a completion item
         auto_show = true,
+        auto_show_delay_ms = 200,
       },
     },
 

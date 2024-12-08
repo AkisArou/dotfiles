@@ -4,6 +4,7 @@ return {
   lazy = true,
   dependencies = {
     -- "hrsh7th/cmp-nvim-lsp",
+    "saghen/blink.cmp",
     "b0o/SchemaStore.nvim",
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
@@ -105,8 +106,10 @@ return {
       keymap.set("n", "<leader>cqi", "<cmd>VtsExec remove_unused_imports<CR>", opts)
     end
 
-    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    -- local capabilities = vim.lsp.protocol.make_client_capabilities()
     -- capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+
+    local capabilities = require("blink.cmp").get_lsp_capabilities()
 
     local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
