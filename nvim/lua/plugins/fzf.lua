@@ -8,7 +8,7 @@ return {
     fzf_lua.setup({
       -- "fzf-native",
       winopts = {
-        split = "belowright new", -- open in a split instead?
+        -- split = "belowright new", -- open in a split instead?
         preview = {
           layout = "vertical",
         },
@@ -37,7 +37,7 @@ return {
       },
     })
 
-    vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#3f3f3f" })
+    vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#1f1f1f" })
 
     vim.keymap.set("n", "<leader>ff", function()
       fzf_lua.files({
