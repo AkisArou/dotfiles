@@ -3,7 +3,7 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   lazy = true,
   dependencies = {
-    "hrsh7th/cmp-nvim-lsp",
+    -- "hrsh7th/cmp-nvim-lsp",
     "b0o/SchemaStore.nvim",
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
@@ -36,8 +36,6 @@ return {
         require("lsp-file-operations").default_capabilities()
       ),
     })
-
-    local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
     local keymap = vim.keymap
 
@@ -107,7 +105,8 @@ return {
       keymap.set("n", "<leader>cqi", "<cmd>VtsExec remove_unused_imports<CR>", opts)
     end
 
-    local capabilities = cmp_nvim_lsp.default_capabilities()
+    local capabilities = vim.lsp.protocol.make_client_capabilities()
+    -- capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
     local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
