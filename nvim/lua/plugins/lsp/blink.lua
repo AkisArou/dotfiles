@@ -89,7 +89,7 @@ return {
 
     -- experimental auto-brackets support
     completion = {
-      accept = { auto_brackets = { enabled = true } },
+      -- accept = { auto_brackets = { enabled = true } },
       documentation = {
         -- Controls whether the documentation window will automatically show when selecting a completion item
         auto_show = true,
