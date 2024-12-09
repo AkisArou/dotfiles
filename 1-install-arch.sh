@@ -85,7 +85,7 @@ packages=(
   "fastfetch"
   "ripgrep"
   "fd"
-  "neovim"
+  "neovim-git"
   "vim"
   "visual-studio-code-bin"
   "tmux"
