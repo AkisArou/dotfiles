@@ -46,6 +46,8 @@ return {
       "shellcheck",
       -- "clang-format",
       "prettier",
+      "js-debug-adapter",
+      "chrome-debug-adapter",
     }
 
     local mr = require("mason-registry")
