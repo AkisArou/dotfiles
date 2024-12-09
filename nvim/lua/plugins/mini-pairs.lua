@@ -5,6 +5,12 @@ return {
   opts = {
     mappings = {
       ["<"] = { action = "open", pair = "<>", neigh_pattern = ".[%(]", register = { cr = false } },
+      ['"'] = {
+        action = "closeopen",
+        pair = '""',
+        neigh_pattern = "[%s=:]%s",
+        register = { cr = false },
+      },
     },
   },
 }
