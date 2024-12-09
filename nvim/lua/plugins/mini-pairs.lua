@@ -1,7 +1,6 @@
 return {
   "echasnovski/mini.pairs",
   version = false,
-  enabled = false,
   event = "VeryLazy",
   opts = {
     mappings = {
