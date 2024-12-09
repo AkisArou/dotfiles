@@ -1,3 +1,5 @@
+-- local quotes_pattern = "%[%]" matches [""]
+
 local quotes_pattern = "[%s=:]%s"
 
 return {
