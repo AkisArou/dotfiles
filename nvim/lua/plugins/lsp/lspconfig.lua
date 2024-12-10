@@ -23,7 +23,14 @@ return {
     },
   },
   config = function()
-    vim.diagnostic.config({ update_in_insert = true })
+    vim.diagnostic.config({
+      update_in_insert = true,
+      virtual_text = false, -- Disable builtin virtual text diagnostic.
+      signs = false,
+      virtual_improved = {
+        current_line = "only",
+      },
+    })
 
     local lspconfig = require("lspconfig")
 
