@@ -20,7 +20,7 @@ function Run_pnpm_install()
     local package_name = json.name
     if package_name then
       -- Form the command
-      local command = "pnpm install --offline --filter " .. package_name
+      local command = "pnpm install --frozen-lockfile --offline --filter " .. package_name
 
       local fidget = require("fidget")
       -- Create a new task for fidget
