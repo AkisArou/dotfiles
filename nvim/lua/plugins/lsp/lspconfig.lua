@@ -24,8 +24,8 @@ return {
   },
   config = function()
     vim.diagnostic.config({
-      update_in_insert = false,
-      virtual_text = true,
+      update_in_insert = true,
+      virtual_text = false,
       signs = {
         text = {
           [vim.diagnostic.severity.ERROR] = "◉", -- Medium dot for errors
