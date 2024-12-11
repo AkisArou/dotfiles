@@ -1,6 +1,5 @@
 -- local quotes_pattern = "%[%]" matches [""]
-
-local quotes_pattern = "[%s=:]%s"
+-- local quotes_pattern = "[%s=:(;]%s"
 
 return {
   "echasnovski/mini.pairs",
@@ -9,9 +8,6 @@ return {
   opts = {
     mappings = {
       ["<"] = { action = "open", pair = "<>", neigh_pattern = ".[%(]", register = { cr = false } },
-      ['"'] = { action = "closeopen", pair = '""', neigh_pattern = quotes_pattern, register = { cr = false } },
-      ["'"] = { action = "closeopen", pair = "''", neigh_pattern = quotes_pattern, register = { cr = false } },
-      ["`"] = { action = "closeopen", pair = "``", neigh_pattern = quotes_pattern, register = { cr = false } },
     },
   },
 }
