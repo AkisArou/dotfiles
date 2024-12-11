@@ -26,11 +26,25 @@ return {
     vim.diagnostic.config({
       update_in_insert = true,
       virtual_text = false, -- Disable builtin virtual text diagnostic.
-      signs = false,
+      signs = {
+        text = {
+          [vim.diagnostic.severity.ERROR] = "◉", -- Medium dot for errors
+          [vim.diagnostic.severity.WARN] = "◎", -- Medium ring for warnings
+          [vim.diagnostic.severity.INFO] = "●", -- Filled circle for info
+          [vim.diagnostic.severity.HINT] = "○", -- Empty circle for hints
+        },
+      },
       virtual_improved = {
         current_line = "only",
       },
     })
+
+    vim.cmd([[
+      highlight DiagnosticSignError guifg=#5C0000 ctermfg=red
+      highlight DiagnosticSignWarn guifg=#8B4500 ctermfg=yellow
+      highlight DiagnosticSignInfo guifg=#0A1D42 ctermfg=blue
+      highlight DiagnosticSignHint guifg=#004d00 ctermfg=green
+    ]])
 
     local lspconfig = require("lspconfig")
 
