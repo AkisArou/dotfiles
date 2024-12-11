@@ -1,7 +1,4 @@
 {
-    "diagnostics.disable": [
-        "incomplete-signature-doc",
-        "trailing-space",
-        "param-type-mismatch"
-    ]
+	"diagnostics.disable": ["incomplete-signature-doc", "trailing-space"]
 }
+

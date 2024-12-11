@@ -50,7 +50,6 @@ return {
       }, {
         { name = "cmdline" },
       }),
-      ---@diagnostic disable-next-line: missing-fields
       matching = { disallow_symbol_nonprefix_matching = false },
       mapping = cmp.mapping.preset.cmdline(cmdlineMapping),
     })
