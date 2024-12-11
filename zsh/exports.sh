@@ -29,7 +29,6 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 
-export TERM="xterm-256color"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export LAUNCH_EDITOR="/home/$(echo "$USER")/dotfiles/scripts/launch-editor.sh"
