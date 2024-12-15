@@ -11,6 +11,7 @@ packages=(
   "intel-ucode"
   "intel-media-driver"
   "intel-gpu-tools"
+  "vulkan-intel"
 )
 
 install_packages "${packages[@]}"
