@@ -6,9 +6,14 @@ fi
 
 # Wayland
 if [ -z "$WAYLAND_DISPLAY" ] && [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ]; then
-  XDG_CURRENT_DESKTOP=sway:wlroots WLR_RENDERER=vulkan dbus-run-session sway
+  export XDG_CURRENT_DESKTOP=sway:wlroots
+  export WLR_RENDERER=vulkan
+  dbus-run-session sway
 fi
 
 # X11
 # if [ -z "$DISPLAY" ] && [ "$XDG_VTNR" = 1 ]; then
+#   export MOZ_USE_XINPUT2=1
+#   export MOZ_X11_EGL=1
 #   exec startx
+# fi
