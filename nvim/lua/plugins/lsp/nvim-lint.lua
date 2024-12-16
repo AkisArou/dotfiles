@@ -1,5 +1,6 @@
 return {
   "mfussenegger/nvim-lint",
+  enabled = false,
   event = { "BufReadPre", "BufNewFile" },
   opts = {
     events = { "BufWritePost", "BufReadPost", "InsertLeave" },
