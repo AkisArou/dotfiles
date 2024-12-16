@@ -28,8 +28,22 @@ return {
     })
 
     -- Setup keymaps
-    vim.keymap.set("n", "K", require("hover").hover, { desc = "hover.nvim" })
-    vim.keymap.set("n", "gK", require("hover").hover_select, { desc = "hover.nvim (select)" })
+    vim.keymap.set("n", "K", function()
+      require("hover").hover({
+        opts = {
+          providers = { "lsp", "dap", "man" },
+        },
+      })
+    end, { desc = "hover" })
+
+    vim.keymap.set("n", "cd", function()
+      require("hover").hover({
+        opts = {
+          providers = { "diagnostic" },
+        },
+      })
+    end, { desc = "hover diagnostic" })
+
     -- vim.keymap.set("n", "<C-p>", function()
     --   require("hover").hover_switch("previous")
     -- end, { desc = "hover.nvim (previous source)" })
