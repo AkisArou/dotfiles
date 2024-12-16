@@ -121,8 +121,8 @@ return {
         vim.diagnostic.jump({ count = 1, float = true })
       end, opts)
 
-      -- opts.desc = "Show documentation for what is under cursor"
-      -- keymap.set("n", "K", vim.lsp.buf.hover, opts)
+      opts.desc = "Show documentation for what is under cursor"
+      keymap.set("n", "K", vim.lsp.buf.hover, opts)
 
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>cl", "<cmd>LspRestart<CR>", opts)
