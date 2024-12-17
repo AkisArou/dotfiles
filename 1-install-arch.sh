@@ -23,6 +23,7 @@ fi
 # Install Packages
 packages=(
   "mesa"
+  "vulkan-tools"
   "audit"
   "git"
   "fwupd"
