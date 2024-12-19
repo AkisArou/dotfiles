@@ -40,7 +40,6 @@ return {
     })
 
     local extra = {
-      "eslint_d",
       "shfmt",
       "rustywind",
       "stylua",
