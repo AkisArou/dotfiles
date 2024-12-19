@@ -1,6 +1,6 @@
 source "$HOME/dotfiles/zsh/exports.sh"
 
-if [[ -z "$TMUX" ]]; then
+if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
 
