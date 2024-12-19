@@ -1,15 +1,15 @@
 [[manager.prepend_keymap]]
 on   = "l"
-run  = "plugin --sync smart-enter"
+run  = "plugin smart-enter"
 desc = "Enter the child directory, or open the file"
 
 [[manager.prepend_keymap]]
 on   = "p"
-run  = "plugin --sync smart-paste"
+run  = "plugin smart-paste"
 desc = "Paste into the hovered directory or CWD"
 
 [[manager.prepend_keymap]]
 on = [ "g", "r" ]
 run = '''
-	shell 'ya pub dds-cd --str "$(git rev-parse --show-toplevel)"' --confirm
+	shell 'ya emit cd "$(git rev-parse --show-toplevel)"'
 '''
