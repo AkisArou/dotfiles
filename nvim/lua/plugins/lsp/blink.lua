@@ -25,7 +25,13 @@ return {
     },
 
     sources = {
-      default = { "lsp", "path", "lazydev", "buffer", "ripgrep" },
+      default = {
+        "lsp",
+        "path",
+        "lazydev",
+        "buffer",
+        -- "ripgrep"
+      },
 
       providers = {
         lazydev = {
