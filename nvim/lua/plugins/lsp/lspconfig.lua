@@ -3,7 +3,6 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   lazy = true,
   dependencies = {
-    -- "hrsh7th/cmp-nvim-lsp",
     "saghen/blink.cmp",
     "b0o/SchemaStore.nvim",
     "yioneko/nvim-vtsls",
