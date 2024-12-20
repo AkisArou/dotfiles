@@ -1,6 +1,6 @@
 return {
   "saghen/blink.cmp",
-  version = "*",
+  build = "cargo build --release",
   lazy = false, -- lazy loading handled internally
   dependencies = {
     { "mikavilpas/blink-ripgrep.nvim" },
@@ -28,12 +28,11 @@ return {
       default = { "lsp", "path", "lazydev", "buffer", "ripgrep" },
 
       providers = {
-        lsp = { fallback_for = { "lazydev" } },
-
         lazydev = {
           name = "LazyDev",
           module = "lazydev.integrations.blink",
           score_offset = 100, -- show at a higher priority than lsp
+          fallbacks = { "lsp" },
         },
 
         ripgrep = {

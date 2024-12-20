@@ -108,6 +108,7 @@ packages=(
   "genymotion"
   "asdf-vm"
   "unzip" # Needed by asdf
+  "rustup"
 )
 
 ~/dotfiles/scripts/create-template-env.sh
