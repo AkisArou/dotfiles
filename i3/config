@@ -160,6 +160,7 @@ bindsym $mod+Control+$down resize grow height 5 px or 5 ppt
 bindsym $mod+Control+$up resize shrink height 5 px or 5 ppt
 bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 
+gaps inner 3
 for_window [class="^.*"] border pixel 4
 
 for_window [window_role="About"] floating enable
