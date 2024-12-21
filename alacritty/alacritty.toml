@@ -1,12 +1,12 @@
 [env]
-TERM="xterm-256color"
+TERM = "xterm-256color"
 
 [window]
 opacity = 1
 
 [window.padding]
-x = 9  
-y = 0 
+x = 9
+y = 0
 
 [font]
 size = 9
@@ -28,8 +28,4 @@ family = "DM Mono"
 style = "Italic"
 
 [general]
-import = [
-  "~/dotfiles/alacritty/vscode.toml"
-]
-
-
+import = ["~/dotfiles/alacritty/vscode.toml"]

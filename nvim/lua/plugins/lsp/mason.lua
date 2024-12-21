@@ -35,6 +35,7 @@ return {
         "biome",
         -- "clangd",
         "mdx_analyzer",
+        "taplo",
       },
       automatic_installation = true,
     })

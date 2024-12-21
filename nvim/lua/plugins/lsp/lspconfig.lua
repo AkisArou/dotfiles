@@ -294,6 +294,7 @@ return {
         },
       },
     })
+    lspconfig.taplo.setup({})
 
     lspconfig["dockerls"].setup({})
 
