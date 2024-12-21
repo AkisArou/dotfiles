@@ -1,7 +1,8 @@
 return {
   "saghen/blink.cmp",
-  build = "cargo build --release",
-  lazy = false, -- lazy loading handled internally
+  -- build = "cargo build --release",
+  version = "*",
+  -- lazy = false, -- lazy loading handled internally
   dependencies = {
     { "mikavilpas/blink-ripgrep.nvim" },
     {
@@ -62,7 +63,7 @@ return {
           treesitter = { "lsp" },
         },
       },
-      -- accept = { auto_brackets = { enabled = true } },
+      accept = { auto_brackets = { enabled = false } },
       documentation = {
         auto_show = true,
         auto_show_delay_ms = 200,
