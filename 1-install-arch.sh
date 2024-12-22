@@ -86,7 +86,6 @@ packages=(
   "fastfetch"
   "ripgrep"
   "fd"
-  "neovim-git"
   "vim"
   "visual-studio-code-bin"
   "tmux"
@@ -115,6 +114,9 @@ packages=(
 
 # Install required packages
 install_packages "${packages[@]}"
+
+~/dotfiles/scripts/build-nvim.sh
+
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
 # ST
