@@ -82,7 +82,7 @@ packages=(
   "bluez"
   "bluez-utils"
   "brightnessctl"
-  "p7zip"
+  "7zip"
   "fastfetch"
   "ripgrep"
   "fd"
