@@ -108,6 +108,7 @@ packages=(
   "asdf-vm"
   "unzip" # Needed by asdf
   "rustup"
+  "ccache" # For faster nvim builds
 )
 
 ~/dotfiles/scripts/create-template-env.sh
