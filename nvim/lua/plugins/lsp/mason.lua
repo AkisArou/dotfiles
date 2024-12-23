@@ -42,11 +42,10 @@ return {
 
     local extra = {
       "shfmt",
-      "rustywind",
       "stylua",
       "shellcheck",
       -- "clang-format",
-      "prettier",
+      "prettierd",
       "js-debug-adapter",
       "chrome-debug-adapter",
     }

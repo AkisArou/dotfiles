@@ -5,14 +5,6 @@ return {
     local root_file = util.root_file({ ".git" })
     local conform = require("conform")
 
-    local format_react = function(bufnr)
-      if conform.get_formatter_info("biome", bufnr).available then
-        return { "biome", "rustywind" }
-      else
-        return { "prettier", "rustywind" }
-      end
-    end
-
     local prisma = {
       command = util.from_node_modules("prisma"),
       stdin = false,
@@ -23,17 +15,17 @@ return {
       notify_on_error = false,
       formatters_by_ft = {
         lua = { "stylua" },
-        javascript = { "biome", "prettier", stop_after_first = true },
-        typescript = { "biome", "prettier", stop_after_first = true },
-        javascriptreact = format_react,
-        typescriptreact = format_react,
-        json = { "biome", "prettier", stop_after_first = true },
-        jsonc = { "biome", "prettier", stop_after_first = true },
-        html = { "prettier" },
-        css = { "biome", "prettier", stop_after_first = true },
-        yaml = { "prettier" },
-        markdown = { "prettier" },
-        ["markdown.mdx"] = { "prettier" },
+        javascript = { "prettierd" },
+        typescript = { "prettierd" },
+        javascriptreact = { "prettierd" },
+        typescriptreact = { "prettierd" },
+        json = { "prettierd" },
+        jsonc = { "prettierd" },
+        html = { "prettierd" },
+        css = { "prettierd" },
+        yaml = { "prettierd" },
+        markdown = { "prettierd" },
+        ["markdown.mdx"] = { "prettierd" },
         prisma = { "prisma" },
         zsh = { "shfmt", "shellcheck" },
         sh = { "shfmt", "shellcheck" },
@@ -63,7 +55,7 @@ return {
         rustywind = {
           cwd = root_file,
         },
-        prettier = {
+        prettierd = {
           cwd = root_file,
         },
       },
