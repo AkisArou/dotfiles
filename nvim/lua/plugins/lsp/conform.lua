@@ -36,19 +36,6 @@ return {
       },
       formatters = {
         prisma = prisma,
-        biome = {
-          cwd = root_file,
-          args = {
-            "check",
-            "--apply",
-            "--linter-enabled=false",
-            "--formatter-enabled=true",
-            "--organize-imports-enabled=true",
-            "--skip-errors",
-            "--stdin-file-path",
-            "$FILENAME",
-          },
-        },
         typescript = {
           cwd = root_file,
         },

@@ -27,16 +27,6 @@
   "vim": {
     "use_smartcase_find": true
   },
-  "lsp": {
-    "biome": {
-      "settings": {
-        "require_config_file": true
-      }
-    }
-  },
-  "code_actions_on_format": {
-    "source.organizeImports.biome": true
-  },
   "telemetry": {
     "diagnostics": false,
     "metrics": false

@@ -2,6 +2,6 @@ NVIM optimized for web dev
 
 - typescript
 - tailwind
-- biome
+- eslint_d
 - prettier
 - prisma
