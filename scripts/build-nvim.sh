@@ -8,23 +8,37 @@ REPO_URL="https://github.com/neovim/neovim"
 
 # Function to build Neovim
 build_neovim() {
-    echo "Building Neovim..."
-    cd "$INSTALL_DIR" || exit
-    make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
-    make install
+  echo "Building Neovim..."
+  cd "$INSTALL_DIR" || exit
+  make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
+  make install
 }
 
 # Check if the directory exists
 if [ -d "$INSTALL_DIR" ]; then
-    echo "Neovim installation found. Updating..."
-    cd "$INSTALL_DIR" || exit
+  echo "Neovim installation found"
+  cd "$INSTALL_DIR" || exit
+  # Fetch changes from the remote
+  git fetch
+  LOCAL_HASH=$(git rev-parse @)
+  REMOTE_HASH=$(git rev-parse @{u})
+  BASE_HASH=$(git merge-base @ @{u})
+
+  if [ "$LOCAL_HASH" = "$REMOTE_HASH" ]; then
+    echo "Already up to date. Skipping build."
+  elif [ "$LOCAL_HASH" = "$BASE_HASH" ]; then
+    echo "Changes detected. Pulling and rebuilding Neovim..."
     git pull --rebase
     build_neovim
+  else
+    echo "Local changes diverged from the remote. Manual intervention required."
+    exit 1
+  fi
 else
-    echo "Neovim not found. Cloning and building..."
-    git clone "$REPO_URL" "$INSTALL_DIR"
-    cd "$INSTALL_DIR" || exit
-    build_neovim
+  echo "Neovim not found. Cloning and building..."
+  git clone "$REPO_URL" "$INSTALL_DIR"
+  cd "$INSTALL_DIR" || exit
+  build_neovim
 fi
 
 # Add Neovim to PATH (temporary for current session)
