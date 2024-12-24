@@ -13,6 +13,22 @@ local themes = {
     config = function()
       vim.o.background = "dark"
       require("vscode").setup()
+      -- local c = require("vscode.colors")
+      --
+      -- local hl = vim.api.nvim_set_hl
+      -- hl(0, "BlinkCmpKindVariable", { fg = c.vscLightBlue, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindnterface", { fg = c.vscLightBlue, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindText", { fg = c.vscLightBlue, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindFunction", { fg = c.vscPink, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindMethod", { fg = c.vscPink, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindKeyword", { fg = c.vscFront, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindProperty", { fg = c.vscFront, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindUnit", { fg = c.vscFront, bg = "NONE" })
+      -- hl(0, "BlinkCmpKindConstructor", { fg = c.vscUiOrange, bg = "NONE" })
+      -- hl(0, "BlinkCmpMenu", { fg = c.vscPopupFront, bg = "NONE" })
+      -- hl(0, "BlinkCmpLabelDeprecated", { fg = c.vscCursorDark, bg = c.vscPopupBack, strikethrough = true })
+      -- hl(0, "BlinkCmpLabelMatch", { fg = c.vscMediumBlue, bg = "NONE", bold = true })
+      -- more...
     end,
   },
   darcula = {
