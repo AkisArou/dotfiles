@@ -229,4 +229,4 @@ augroup textobj_quote
   autocmd FileType text call textobj#quote#init({'educate': 0})
 augroup END
 
-nnoremap <leader>gs :Git<CR>
+nnoremap <leader>gs :tab Git<CR>
