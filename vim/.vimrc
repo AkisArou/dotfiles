@@ -108,8 +108,12 @@ call plug#begin()
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
   Plug 'tpope/vim-fugitive'
   Plug 'schickling/vim-bufonly'
+  Plug 'liuchengxu/vim-which-key'
   " Plug 'tpope/vim-vinegar'
 call plug#end()
+
+nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
+set timeoutlen=500
 
 autocmd FileType gitcommit startinsert
 autocmd FileType gitcommit nnoremap <buffer> <C-c> :x<CR>
