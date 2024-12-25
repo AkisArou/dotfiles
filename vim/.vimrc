@@ -96,13 +96,52 @@ endif
 call plug#begin()
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'chriszarate/yazi.vim'
+  " Plug 'chriszarate/yazi.vim'
   Plug 'tomasiser/vim-code-dark'
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'jiangmiao/auto-pairs'
+  Plug 'kana/vim-textobj-user'
+  Plug 'preservim/vim-textobj-quote'
+  Plug 'tpope/vim-commentary'
+  Plug 'tpope/vim-vinegar'
+  Plug 'tpope/vim-fugitive'
 call plug#end()
+
+nnoremap <leader>e :Explore<CR>
+
+function! NetrwMapping()
+  nmap <buffer> <C-c> :bw<CR>
+  nmap <buffer> H u
+  nmap <buffer> h -^
+  nmap <buffer> l <CR>
+  nmap <buffer> . gh
+  nmap <buffer> P <C-w>z
+  nmap <buffer> L <CR>:Lexplore<CR>
+  nmap <buffer> <Leader>dd :Lexplore<CR>
+endfunction
+
+augroup netrw_mapping
+  autocmd!
+  autocmd filetype netrw call NetrwMapping()
+augroup END
+
+" " Automatically focus the current file in netrw when opening netrw
+" autocmd FileType netrw call FocusCurrentFile()
+
+" function! FocusCurrentFile()
+"   " Get the full path of the current file
+"   let file = expand('%:p')
+"   if filereadable(file)
+"     " Run the :NetrwRefresh command to highlight the file in netrw
+"     execute 'normal! m`'    " Store the current cursor position
+"     execute 'normal! /'.file   " Search for the file in netrw
+"     execute 'normal! n'      " Move to the file
+"     execute 'normal! m'`'    " Restore the cursor position
+"   endif
+" endfunction
+
 
 colorscheme codedark
 
@@ -114,8 +153,8 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#fugitive#enabled = 1
 let g:airline_powerline_fonts = 1
 
-nnoremap <silent> - :Yazi<cr>
-nnoremap <silent> _ :YaziWorkingDirectory<cr>
+" nnoremap <silent> - :Yazi<cr>
+" nnoremap <silent> _ :YaziWorkingDirectory<cr>
 
 function! CloseEmptyUnnamedBuffers()
        let buffers = filter(range(1, bufnr('$')), 'bufexists(v:val)')
@@ -181,3 +220,11 @@ nnoremap <leader>bo :call CloseOtherBuffers()<CR>
 " Keybinding for closing all buffers
 nnoremap <leader>ba :call CloseAllBuffers()<CR>
 
+set nocompatible
+filetype plugin on       " may already be in your .vimrc
+
+augroup textobj_quote
+  autocmd!
+  autocmd FileType vim,markdown,textile call textobj#quote#init()
+  autocmd FileType text call textobj#quote#init({'educate': 0})
+augroup END
