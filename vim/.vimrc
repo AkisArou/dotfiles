@@ -97,7 +97,7 @@ endif
 call plug#begin()
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  " Plug 'chriszarate/yazi.vim'
+  Plug 'chriszarate/yazi.vim'
   Plug 'tomasiser/vim-code-dark'
   Plug 'christoomey/vim-tmux-navigator'
   Plug 'vim-airline/vim-airline'
@@ -106,7 +106,7 @@ call plug#begin()
   Plug 'kana/vim-textobj-user'
   Plug 'preservim/vim-textobj-quote'
   Plug 'tpope/vim-commentary'
-  Plug 'tpope/vim-vinegar'
+  " Plug 'tpope/vim-vinegar'
   Plug 'tpope/vim-fugitive'
   Plug 'schickling/vim-bufonly'
 call plug#end()
@@ -118,7 +118,8 @@ autocmd FileType fugitive nnoremap <buffer> Pp :Git push<CR>
 autocmd FileType fugitive nnoremap <buffer> pp :Git pull<CR>
 autocmd FileType fugitive nnoremap <buffer> q :bdelete!<CR>
 
-nnoremap <leader>e :Explore<CR>
+" nnoremap <leader>e :Explore<CR>
+nnoremap <leader>e :Yazi<CR>
 
 let g:netrw_keepdir = 0
 let g:netrw_localmkdir = "mkdir -p"
