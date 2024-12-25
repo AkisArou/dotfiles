@@ -36,6 +36,7 @@ let &t_EI = "\e[0 q"
 
 let g:netrw_dirhistmax = 0
 
+set ttyscroll=1
 set nobackup
 set clipboard=unnamedplus
 set cmdheight=1
@@ -45,7 +46,6 @@ set fileencoding=utf-8
 set hlsearch
 set ignorecase
 set mouse=
-set pumheight=10
 set showmode        
 set showcmd         
 set cmdheight=2     
