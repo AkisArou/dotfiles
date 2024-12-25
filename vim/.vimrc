@@ -185,7 +185,7 @@ nnoremap <S-h> :w<CR> :bnext<CR>
 nnoremap <S-l> :w<CR> :bprevious<CR>
 
 " close the current buffer
-nnoremap <silent> <leader>bd :w!<CR> :bdelete!<CR>
+nnoremap <silent> <leader>bd :bdelete<CR>
 " close all buffers except the current one
 nnoremap <silent> <leader>bo  :wa!<CR> :BufOnly<CR> :AirlineRefresh<CR>
 " close all buffers
