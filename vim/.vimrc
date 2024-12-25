@@ -111,6 +111,7 @@ call plug#begin()
   Plug 'liuchengxu/vim-which-key'
   Plug '907th/vim-auto-save'
   Plug 'gelguy/wilder.nvim'
+  Plug 'RRethy/vim-illuminate'
 call plug#end()
 
 let g:auto_save = 1

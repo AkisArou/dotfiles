@@ -1,5 +1,5 @@
 let g:coc_config_home = "~/dotfiles/vim"
-let g:coc_global_extensions = ['coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html']
+let g:coc_global_extensions = ['coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-docker', 'coc-html']
 
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']
 

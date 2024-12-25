@@ -1,6 +1,5 @@
 {
   "coc.preferences.formatOnSave": true,
-  "colors.enable": false,
   "tsserver.tsdk": "./node_modules/typescript/lib",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.preferences.importModuleSpecifier": "non-relative",
