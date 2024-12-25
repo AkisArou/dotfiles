@@ -170,13 +170,13 @@ let g:airline_powerline_fonts = 1
 " nnoremap <silent> _ :YaziWorkingDirectory<cr>
 
 function! CloseEmptyUnnamedBuffers()
-       let buffers = filter(range(1, bufnr('$')), 'bufexists(v:val)')
+   let buffers = filter(range(1, bufnr('$')), 'bufexists(v:val)')
     
-       for buf in buffers
-         if buflisted(buf) && bufname(buf) == ''
-           exe buf.'bd!'
-         endif
-     endfor
+   for buf in buffers
+     if buflisted(buf) && bufname(buf) == ''
+       exe buf.'bd!'
+     endif
+   endfor
 endfunction
 
 autocmd BufReadPost * call CloseEmptyUnnamedBuffers()
