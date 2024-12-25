@@ -87,6 +87,28 @@ set updatetime=300
 set signcolumn=yes
 set background=dark
 
+" Define options for mappings
+let opts = {'noremap': v:true, 'silent': v:true}
+
+" Move blocks
+xnoremap J :m '>+1<CR>gv=gv
+xnoremap K :m '<-2<CR>gv=gv
+
+" Cursor stays in place when moving screen
+nnoremap <C-d> m`<C-d>zz
+nnoremap <C-u> m`<C-u>zz
+
+" Better paste
+xnoremap p P
+
+" Delete char without copying
+nnoremap x "_x
+
+" Stay in indent mode
+xnoremap < <gv
+xnoremap > >gv
+
+
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
   silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
