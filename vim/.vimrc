@@ -186,7 +186,15 @@ autocmd FileType fugitive nnoremap <buffer> pp :Git pull<CR>
 autocmd FileType fugitive nnoremap <buffer> q :bdelete!<CR>
 
 " nnoremap <leader>e :Explore<CR>
-nnoremap <leader>e :w!<CR> :Yazi<CR>
+function! SaveAndYazi()
+  if &modified
+    write!
+  endif
+  Yazi
+endfunction
+
+nnoremap <leader>e :call SaveAndYazi()<CR>
+
 
 let g:netrw_keepdir = 0
 let g:netrw_localmkdir = "mkdir -p"
