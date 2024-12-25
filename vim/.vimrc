@@ -49,7 +49,6 @@ set mouse=
 set pumheight=10
 set showmode        
 set showcmd         
-set cmdheight=2     
 set laststatus=2    
 set showtabline=0
 set smartcase
