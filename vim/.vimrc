@@ -109,10 +109,15 @@ call plug#begin()
   Plug 'tpope/vim-fugitive'
   Plug 'schickling/vim-bufonly'
   Plug 'liuchengxu/vim-which-key'
-  " Plug 'girishji/autosuggest.vim'
+  Plug '907th/vim-auto-save'
   Plug 'gelguy/wilder.nvim'
+  " Plug 'girishji/autosuggest.vim'
   " Plug 'tpope/vim-vinegar'
 call plug#end()
+
+let g:auto_save = 1
+let g:auto_save_write_all_buffers = 1
+let g:auto_save_events = ["BufLeave", "FocusLost", "VimSuspend", "VimLeavePre"]
 
 autocmd CmdlineEnter * ++once call s:wilder_init() | call wilder#main#start()
 
@@ -161,7 +166,7 @@ autocmd FileType fugitive nnoremap <buffer> pp :Git pull<CR>
 autocmd FileType fugitive nnoremap <buffer> q :bdelete!<CR>
 
 " nnoremap <leader>e :Explore<CR>
-nnoremap <leader>e :Yazi<CR>
+nnoremap <leader>e :w!<CR> :Yazi<CR>
 
 let g:netrw_keepdir = 0
 let g:netrw_localmkdir = "mkdir -p"
