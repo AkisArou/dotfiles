@@ -107,6 +107,7 @@ call plug#begin()
   Plug 'tpope/vim-commentary'
   Plug 'tpope/vim-vinegar'
   Plug 'tpope/vim-fugitive'
+  Plug 'schickling/vim-bufonly'
 call plug#end()
 
 nnoremap <leader>e :Explore<CR>
@@ -171,54 +172,15 @@ autocmd BufReadPost * call CloseEmptyUnnamedBuffers()
 " Define options for key mappings (same as `opts` in Lua)
 let opts = {'noremap': v:true, 'silent': v:true}
 
-" Keybinding for moving to the next buffer
 nnoremap <S-h> :bnext<CR>
-
-" Keybinding for moving to the previous buffer
 nnoremap <S-l> :bprevious<CR>
 
-" Function to close the current buffer
-function! CloseCurrentBuffer()
-  bdelete
-endfunction
-
-" Function to close all buffers except the current one
-function! CloseOtherBuffers()
-  " Get the current buffer number
-  let l:current_buffer = bufnr('%')
-  
-  " Loop through all buffers and delete them, except the current one
-  for l:buf in range(1, bufnr('$'))
-    if l:buf != l:current_buffer && bufexists(l:buf)
-      execute 'bdelete' l:buf
-    endif
-  endfor
-  execute 'AirlineRefresh'
-endfunction
-
-" Function to close all buffers
-function! CloseAllBuffers()
-  " Get the current buffer number
-  let l:current_buffer = bufnr('%')
-  
-  " Loop through all buffers and delete them
-  for l:buf in range(1, bufnr('$'))
-    " Skip the current buffer
-    if l:buf != l:current_buffer && bufexists(l:buf)
-      execute 'bdelete ' . l:buf
-    endif
-  endfor
-  execute 'AirlineRefresh'
-endfunction
-
-" Keybinding for closing the current buffer
-nnoremap <leader>bd :call CloseCurrentBuffer()<CR>
-
-" Keybinding for closing all buffers except the current one
-nnoremap <leader>bo :call CloseOtherBuffers()<CR>
-
-" Keybinding for closing all buffers
-nnoremap <leader>ba :call CloseAllBuffers()<CR>
+" close the current buffer
+nnoremap <leader>bd :bdelete<CR>
+" close all buffers except the current one
+nnoremap <leader>bo :BufOnly<CR> :AirlineRefresh<CR>
+" close all buffers
+nnoremap <leader>ba :bufdo bdelete<CR>
 
 set nocompatible
 filetype plugin on       " may already be in your .vimrc
