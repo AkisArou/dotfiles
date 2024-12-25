@@ -176,7 +176,6 @@ function! s:wilder_init() abort
 endfunction
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
-set timeoutlen=500
 
 autocmd FileType gitcommit startinsert
 autocmd FileType gitcommit nnoremap <buffer> <C-c> :x<CR>
