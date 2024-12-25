@@ -37,7 +37,7 @@ let &t_EI = "\e[0 q"
 let g:netrw_dirhistmax = 0
 
 set nobackup
-set clipboard=unnamedplus
+set clipboard+=unnamedplus
 set cmdheight=1
 set completeopt=menuone,noselect
 set conceallevel=0

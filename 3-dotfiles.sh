@@ -28,7 +28,7 @@ sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 create_symlink "$HOME/dotfiles/alacritty" "$HOME/.config/alacritty"
 create_symlink "$HOME/dotfiles/kitty" "$HOME/.config/kitty"
 create_symlink "$HOME/dotfiles/nvim" "$HOME/.config/nvim"
-create_symlink "$HOME/dotfiles/vim/.vimrc" "$HOME/.vimrc"
+create_symlink "$HOME/dotfiles/vim" "$HOME/.config/vim"
 create_symlink "$HOME/dotfiles/rofi" "$HOME/.config/rofi"
 create_symlink "$HOME/dotfiles/dunst" "$HOME/.config/dunst"
 create_symlink "$HOME/dotfiles/ssh/config" "$HOME/.ssh/config"
