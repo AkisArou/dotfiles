@@ -105,9 +105,10 @@ call plug#begin()
   Plug 'kana/vim-textobj-user'
   Plug 'preservim/vim-textobj-quote'
   Plug 'tpope/vim-commentary'
-  " Plug 'tpope/vim-vinegar'
+  Plug 'mg979/vim-visual-multi', {'branch': 'master'}
   Plug 'tpope/vim-fugitive'
   Plug 'schickling/vim-bufonly'
+  " Plug 'tpope/vim-vinegar'
 call plug#end()
 
 autocmd FileType gitcommit startinsert
