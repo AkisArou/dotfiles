@@ -111,7 +111,8 @@ call plug#begin()
 call plug#end()
 
 autocmd FileType gitcommit startinsert
-autocmd FileType gitcommit nnoremap <buffer> <C-c><C-c> :x<CR>
+autocmd FileType gitcommit nnoremap <buffer> <C-c> :x<CR>
+autocmd FileType fugitive nnoremap <buffer> <C-s> :Git stage .<CR>
 
 nnoremap <leader>e :Explore<CR>
 
