@@ -72,7 +72,7 @@ set noruler
 set numberwidth=4
 set signcolumn=yes
 set nowrap
-set scrolloff=8
+set scrolloff=25
 set sidescrolloff=8
 set guifont=monospace:h17
 set shortmess+=c
@@ -228,3 +228,5 @@ augroup textobj_quote
   autocmd FileType vim,markdown,textile call textobj#quote#init()
   autocmd FileType text call textobj#quote#init({'educate': 0})
 augroup END
+
+nnoremap <leader>gs :Git<CR>
