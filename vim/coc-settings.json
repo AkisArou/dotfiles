@@ -1,0 +1,15 @@
+{
+  "coc.preferences.formatOnSave": true,
+  "tsserver.tsdk": "./node_modules/typescript/lib",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "tailwindCSS.experimental.configFile": {
+    "apps/client/assistant-prm-airport/back-office/tailwind.config.ts": "packages/assistant-prm-airport/**",
+    "apps/client/volunteer/back-office/tailwind.config.ts": "packages/assistant-volunteer/**",
+    "apps/website/nable/tailwind.config.ts": "apps/website/nable/**",
+    "packages/shared/react/spectrum/tailwind.config.ts": "packages/shared/react/spectrum/**"
+  }
+}

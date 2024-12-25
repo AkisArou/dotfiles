@@ -67,7 +67,6 @@ set tabstop=2
 set cursorline
 set number
 set norelativenumber
-set laststatus=3
 set noshowcmd
 set noruler
 set numberwidth=4
@@ -88,12 +87,97 @@ set updatetime=300
 set signcolumn=yes
 set background=dark
 
-colorscheme wildcharm
-
-let fzf_path = system('which fzf')
-let fzf_path = substitute(fzf_path, '\n', '', 'g') " Remove any trailing newline
-if !empty(fzf_path)
-  execute 'set rtp+=' . fzf_path
-nnoremap <leader>ff <cmd>FZF<CR>
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
+
+call plug#begin()
+  Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
+  Plug 'chriszarate/yazi.vim'
+  Plug 'tomasiser/vim-code-dark'
+  Plug 'christoomey/vim-tmux-navigator'
+  Plug 'vim-airline/vim-airline'
+  Plug 'vim-airline/vim-airline-themes'
+  Plug 'jiangmiao/auto-pairs'
+call plug#end()
+
+colorscheme codedark
+
+source ~/dotfiles/vim/config/coc.vim
+source ~/dotfiles/vim/config/fzf.vim
+
+let g:airline_theme='lucius'
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#fugitive#enabled = 1
+let g:airline_powerline_fonts = 1
+
+nnoremap <silent> - :Yazi<cr>
+nnoremap <silent> _ :YaziWorkingDirectory<cr>
+
+function! CloseEmptyUnnamedBuffers()
+       let buffers = filter(range(1, bufnr('$')), 'bufexists(v:val)')
+    
+       for buf in buffers
+         if buflisted(buf) && bufname(buf) == ''
+           exe buf.'bd!'
+         endif
+     endfor
+endfunction
+
+autocmd BufReadPost * call CloseEmptyUnnamedBuffers()
+
+" Define options for key mappings (same as `opts` in Lua)
+let opts = {'noremap': v:true, 'silent': v:true}
+
+" Keybinding for moving to the next buffer
+nnoremap <S-h> :bnext<CR>
+
+" Keybinding for moving to the previous buffer
+nnoremap <S-l> :bprevious<CR>
+
+" Function to close the current buffer
+function! CloseCurrentBuffer()
+  bdelete
+endfunction
+
+" Function to close all buffers except the current one
+function! CloseOtherBuffers()
+  " Get the current buffer number
+  let l:current_buffer = bufnr('%')
+  
+  " Loop through all buffers and delete them, except the current one
+  for l:buf in range(1, bufnr('$'))
+    if l:buf != l:current_buffer && bufexists(l:buf)
+      execute 'bdelete' l:buf
+    endif
+  endfor
+  execute 'AirlineRefresh'
+endfunction
+
+" Function to close all buffers
+function! CloseAllBuffers()
+  " Get the current buffer number
+  let l:current_buffer = bufnr('%')
+  
+  " Loop through all buffers and delete them
+  for l:buf in range(1, bufnr('$'))
+    " Skip the current buffer
+    if l:buf != l:current_buffer && bufexists(l:buf)
+      execute 'bdelete ' . l:buf
+    endif
+  endfor
+  execute 'AirlineRefresh'
+endfunction
+
+" Keybinding for closing the current buffer
+nnoremap <leader>bd :call CloseCurrentBuffer()<CR>
+
+" Keybinding for closing all buffers except the current one
+nnoremap <leader>bo :call CloseOtherBuffers()<CR>
+
+" Keybinding for closing all buffers
+nnoremap <leader>ba :call CloseAllBuffers()<CR>
 
