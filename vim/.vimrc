@@ -110,6 +110,9 @@ call plug#begin()
   Plug 'schickling/vim-bufonly'
 call plug#end()
 
+autocmd FileType gitcommit startinsert
+autocmd FileType gitcommit nnoremap <buffer> <C-c><C-c> :x<CR>
+
 nnoremap <leader>e :Explore<CR>
 
 let g:netrw_keepdir = 0
@@ -177,15 +180,15 @@ autocmd BufReadPost * call CloseEmptyUnnamedBuffers()
 " Define options for key mappings (same as `opts` in Lua)
 let opts = {'noremap': v:true, 'silent': v:true}
 
-nnoremap <S-h> :bnext<CR>
-nnoremap <S-l> :bprevious<CR>
+nnoremap <S-h> :w<CR> :bnext<CR>
+nnoremap <S-l> :w<CR> :bprevious<CR>
 
 " close the current buffer
-nnoremap <leader>bd :bdelete<CR>
+nnoremap <silent> <leader>bd :w!<CR> :bdelete<CR>
 " close all buffers except the current one
-nnoremap <leader>bo :BufOnly<CR> :AirlineRefresh<CR>
+nnoremap <silent> <leader>bo  :wa!<CR> :BufOnly<CR> :AirlineRefresh<CR>
 " close all buffers
-nnoremap <leader>ba :bufdo bdelete<CR>
+nnoremap <silent> <leader>ba :wa!<CR> :bufdo bdelete<CR>
 
 set nocompatible
 filetype plugin on       " may already be in your .vimrc
