@@ -79,7 +79,7 @@ npm i -g npm-workspaces-language-server
 print_info "Setting xdg default web browser..."
 ORIGINAL_BROWSER=$BROWSER
 unset BROWSER
-xdg-settings set default-web-browser librewolf.desktop
+xdg-settings set default-web-browser brave-browser.desktop
 export BROWSER=$ORIGINAL_BROWSER
 
 print_info "Installing yazi plugins..."
