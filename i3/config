@@ -24,7 +24,7 @@ set $right l
 
 set $term ~/dotfiles/st/launch.sh
 set $menu ~/dotfiles/rofi/init.sh
-set $browser /usr/bin/librewolf
+set $browser /usr/bin/brave
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -53,7 +53,7 @@ bindsym $mod+Return exec $term
 
 # browsers
 bindsym $mod+b exec $browser
-bindsym $mod+Shift+p exec librewolf --private-window
+bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
 
 # kill focused window
