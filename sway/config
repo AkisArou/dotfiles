@@ -24,7 +24,7 @@ set $term ~/dotfiles/foot/launch-foot.sh
 set $menu ~/dotfiles/rofi/launch-rofi.sh -show drun
 #
 # set $menu tofi-drun | xargs swaymsg exec --
-set $browser /usr/bin/librewolf
+set $browser /usr/bin/brave
 
 ### Output configuration
 #
@@ -90,7 +90,7 @@ input "1739:30385:CUST0001:00_06CB:76B1_Mouse" {
     bindsym $mod+Return exec $term
     bindsym $mod+d exec $menu
     bindsym $mod+b exec $browser
-    bindsym $mod+Shift+p exec librewolf --private-window
+    bindsym $mod+Shift+p exec brave --incognito
     bindsym $mod+Shift+t exec brave --incognito --tor
     bindsym $mod+p exec grimshot copy area
     bindsym $mod+Ctrl+p exec grimshot copy active

@@ -32,7 +32,7 @@ export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export LAUNCH_EDITOR="/home/$(echo "$USER")/dotfiles/scripts/launch-editor.sh"
-export BROWSER="librewolf"
+export BROWSER="brave"
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
 
