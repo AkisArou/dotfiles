@@ -11,5 +11,6 @@
     "apps/client/volunteer/back-office/tailwind.config.ts": "packages/assistant-volunteer/**",
     "apps/website/nable/tailwind.config.ts": "apps/website/nable/**",
     "packages/shared/react/spectrum/tailwind.config.ts": "packages/shared/react/spectrum/**"
-  }
+  },
+  "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/18.1.3/clangd_18.1.3/bin/clangd"
 }
