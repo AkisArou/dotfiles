@@ -2,7 +2,6 @@ if [ -f ~/.env ]; then
   export $(cat ~/.env | xargs)
 fi
 
-# Set the THEME variable to the value from ~/.env or default to "vscode"
 export THEME="${THEME:-vscode}"
 
 export PATH="$HOME/.local/bin:$PATH"

@@ -147,6 +147,10 @@ return {
     })
 
     require("lspconfig.configs").vtsls = require("vtsls").lspconfig -- set default server config, optional but recommended
+
+    local autoImportSpecifierExcludeRegex =
+      "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$"
+
     lspconfig["vtsls"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
@@ -165,13 +169,22 @@ return {
         },
         typescript = {
           tsserver = {
-            maxTsServerMemory = 16000,
+            maxTsServerMemory = 4 * 1024,
+            nodePath = "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path.sh",
+            -- nodePath = "ELECTRON_RUN_AS_NODE=1 NODE_OPTIONS='' /opt/visual-studio-code/code",
           },
           preferences = {
             includePackageJsonAutoImports = "on",
             importModuleSpecifier = "non-relative",
             autoImportSpecifierExcludeRegexes = {
-              "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$",
+              autoImportSpecifierExcludeRegex,
+            },
+          },
+        },
+        javascript = {
+          preferences = {
+            autoImportSpecifierExcludeRegexes = {
+              autoImportSpecifierExcludeRegex,
             },
           },
         },
