@@ -127,7 +127,9 @@ return {
       keymap.set("n", "<leader>cl", "<cmd>LspRestart<CR>", opts)
 
       opts.desc = "Remove unused imports"
-      keymap.set("n", "<leader>cqi", "<cmd>VtsExec remove_unused_imports<CR>", opts)
+      keymap.set("n", "<leader>cqi", function()
+        require("vtsls").commands.remove_unused_imports(bufnr)
+      end, opts)
     end
 
     -- local capabilities = vim.lsp.protocol.make_client_capabilities()
