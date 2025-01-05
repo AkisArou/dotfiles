@@ -168,6 +168,9 @@ return {
           },
         },
         typescript = {
+          format = {
+            enable = false,
+          },
           tsserver = {
             maxTsServerMemory = 4 * 1024,
             nodePath = "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path.sh",
@@ -182,6 +185,9 @@ return {
           },
         },
         javascript = {
+          format = {
+            enable = false,
+          },
           preferences = {
             autoImportSpecifierExcludeRegexes = {
               autoImportSpecifierExcludeRegex,
