@@ -242,6 +242,7 @@ return {
                   ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
                   ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
                   ["packages/shared/react/spectrum/tailwind.config.ts"] = "packages/shared/react/spectrum/**",
+                  ["packages/shared/react/rsuite/tailwind.config.ts"] = "packages/shared/react/rsuite/**",
                 }
               end
 
