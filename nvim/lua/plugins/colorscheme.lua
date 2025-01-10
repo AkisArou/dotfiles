@@ -36,9 +36,17 @@ local themes = {
     repo = "briones-gabriel/darcula-solid.nvim",
     dependencies = { "rktjmp/lush.nvim" },
   },
+  gruvbox = {
+    name = "gruvbox-material",
+    repo = "sainnhe/gruvbox-material",
+    config = function()
+      vim.g.gruvbox_material_background = "hard"
+    end,
+  },
 }
 
-local selectedTheme = themes[os.getenv("THEME") or "vscode"]
+-- local selectedTheme = themes[os.getenv("THEME") or "vscode"]
+local selectedTheme = themes.gruvbox
 
 local M = {
   selectedTheme.repo,
