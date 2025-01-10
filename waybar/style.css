@@ -1,72 +1,72 @@
 * {
-	font-family: MesloLGMDZNerdFont;
-	font-size: 11px;
-	border: none;
+  font-family: HackNerdFontMono;
+  font-size: 11px;
+  border: none;
 }
 
 window#waybar {
-	color: @bar-foreground;
-	background-color: @bar-background;
+  color: @bar-foreground;
+  background-color: @bar-background;
 }
 
 window#waybar.hidden {
-	opacity: 0.2;
+  opacity: 0.2;
 }
 
 #workspaces {
-	margin-right: 10px;
+  margin-right: 10px;
 }
 
 #workspaces button {
-	padding: 0 5px;
-	color: #ffffff;
-	border-radius: 0;
+  padding: 0 5px;
+  color: #ffffff;
+  border-radius: 0;
 }
 
 #workspaces button:hover {
-	background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 #workspaces button.focused {
-	/* background-color: #51504f; */
-	background-color: @focused-button-background
+  /* background-color: #51504f; */
+  background-color: @focused-button-background;
 }
 
 #workspaces button.urgent {
-	background-color: #f7768e;
+  background-color: #f7768e;
 }
 
 label.module {
-	margin-right: 10px;
+  margin-right: 10px;
 }
 
 #network {
-	color: #dcdcaa;
+  color: #dcdcaa;
 }
 
 #network {
-	color: #dcdcaa;
+  color: #dcdcaa;
 }
 
 @keyframes blink {
-	to {
-		background-color: rgba(0, 0, 0, 0.1);
-	}
+  to {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }
 
 #battery.critical:not(.charging) {
-	color: #f7768e;
-	background-color: rgba(255, 0, 0, 0.1);
-	padding: 0 5px;
-	animation-name: blink;
-	animation-duration: 0.5s;
-	animation-timing-function: steps(12);
-	animation-iteration-count: infinite;
-	animation-direction: alternate;
+  color: #f7768e;
+  background-color: rgba(255, 0, 0, 0.1);
+  padding: 0 5px;
+  animation-name: blink;
+  animation-duration: 0.5s;
+  animation-timing-function: steps(12);
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
 }
 
 #battery.warning:not(.charging) {
-	color: #ff9e64;
-	background-color: rgba(255, 165, 0, 0.1);
-	padding: 0 5px;
+  color: #ff9e64;
+  background-color: rgba(255, 165, 0, 0.1);
+  padding: 0 5px;
 }
