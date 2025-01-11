@@ -24,4 +24,4 @@ alias ll='ls -lh --git'
 alias la='ll -a'
 alias tree='ll --tree --level=2'
 
-alias update_all="paru -Syu && ~/dotfiles/scripts/build-nvim.sh"
+alias update_all="paru -Syu && echo && ~/dotfiles/scripts/build-nvim.sh"
