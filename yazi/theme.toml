@@ -2,4 +2,5 @@
 
 [flavor]
 light = "catppuccin-mocha"
-dark = "catppuccin-mocha"
+# dark = "catppuccin-mocha"
+dark = "gruvbox-dark"

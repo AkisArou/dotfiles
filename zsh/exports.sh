@@ -2,6 +2,8 @@ if [ -f ~/.env ]; then
   export $(cat ~/.env | xargs)
 fi
 
+. ~/dotfiles/zsh/fzf.sh
+
 export THEME="${THEME:-vscode}"
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -13,6 +15,7 @@ export PATH="$HOME/neovim/bin:$PATH"
 
 export ANDROID_HOME="$HOME/Android/Sdk"
 # export ANDROID_AVD_HOME="$HOME/.config/.android/avd"
+
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
 # export PATH=$ANDROID_HOME/cmdline-tools/latest/bin/:$PATH
@@ -37,58 +40,6 @@ export MANWIDTH=999
 
 export QT_SCALE_FACTOR=2
 export QT_FONT_DPI=243
-
-export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
-
-FZF_TOKYONIGHT="\
-  --color=bg+:#2e3c64 \
-  --color=bg:#1f2335 \
-  --color=border:#29a4bd \
-  --color=fg:#c0caf5 \
-  --color=gutter:#1f2335 \
-  --color=header:#ff9e64 \
-  --color=hl+:#2ac3de \
-  --color=hl:#2ac3de \
-  --color=info:#545c7e \
-  --color=marker:#ff007c \
-  --color=pointer:#ff007c \
-  --color=prompt:#2ac3de \
-  --color=query:#c0caf5:regular \
-  --color=scrollbar:#29a4bd \
-  --color=separator:#ff9e64 \
-  --color=spinner:#ff007c \
-"
-
-FZF_VSCODE="\
-  --color=bg:#1f1f1f \
-  --color=bg+:#222222 \
-  --color=border:#1f1f1f \
-  --color=fg:#d4d4d4 \
-  --color=gutter:#2D2D2D \
-  --color=header:#646695 \
-  --color=hl:#C586C0 \
-  --color=hl+:#608b4e \
-  --color=info:#8db9e2 \
-  --color=marker:#4EC9B0 \
-  --color=pointer:#4EC9B0 \
-  --color=prompt:#C586C0 \
-  --color=query:#d4d4d4:regular \
-  --color=scrollbar:#2d2d2d \
-  --color=separator:#223e55 \
-  --color=spinner:#4ec9b0 \
-"
-
-FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
-
-export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
-  --highlight-line \
-  --info=inline-right \
-  --ansi \
-  --layout=reverse \
-  --border=none \
-  $(eval echo \$"$FZF_THEME")
-"
 
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning --experimental-transform-types"
 export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"

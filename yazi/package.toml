@@ -1,5 +1,5 @@
 [flavor]
-deps = [{ use = "yazi-rs/flavors:catppuccin-mocha", rev = "c686812" }]
+deps = [{ use = "yazi-rs/flavors:catppuccin-mocha", rev = "c686812" }, { use = "bennyyip/gruvbox-dark", rev = "b4cc9f2" }]
 
 [plugin]
 deps = [{ use = "yazi-rs/plugins:git", rev = "7afba3a" }]
