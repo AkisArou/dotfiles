@@ -48,7 +48,6 @@
   (setq lsp-biome-organize-imports-on-save t))
 
 (use-package! lsp-tailwindcss)
-(add-hook 'before-save-hook 'lsp-tailwindcss-rustywind-before-save)
 
 (after! lsp-mode
   (when (modulep! :completion corfu)

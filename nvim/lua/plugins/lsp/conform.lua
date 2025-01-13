@@ -39,9 +39,6 @@ return {
         typescript = {
           cwd = root_file,
         },
-        rustywind = {
-          cwd = root_file,
-        },
         prettierd = {
           cwd = root_file,
         },
