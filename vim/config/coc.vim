@@ -1,5 +1,5 @@
 let g:coc_config_home = "~/dotfiles/vim"
-let g:coc_global_extensions = ['coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-clangd']
+let g:coc_global_extensions = ['coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-clangd']
 
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']
 
@@ -67,10 +67,17 @@ nmap <silent> [d <Plug>(coc-diagnostic-prev)
 nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
+" nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gd :CocCommand fzf-preview.CocDefinition<CR>
+
+" nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gy :CocCommand fzf-preview.CocDefinition<CR>
+
+" nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gi :CocCommand fzf-preview.CocImplementations<CR>
+
+" nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gr :CocCommand fzf-preview.CocReferences<CR>
 
 " Use K to show documentation in preview window
 nnoremap <silent> K :call ShowDocumentation()<CR>
@@ -107,7 +114,7 @@ xmap <leader>a  <Plug>(coc-codeaction-selected)
 nmap <leader>a  <Plug>(coc-codeaction-selected)
 
 " Remap keys for applying code actions at the cursor position
-nmap <leader>ac  <Plug>(coc-codeaction-cursor)
+nmap <leader>ca  <Plug>(coc-codeaction-cursor)
 " Remap keys for apply code actions affect whole buffer
 nmap <leader>as  <Plug>(coc-codeaction-source)
 " Apply the most preferred quickfix action to fix diagnostic on the current line
@@ -163,11 +170,13 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 " Mappings for CoCList
 " Show all diagnostics
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+nnoremap <silent><nowait> <space>a  :CocCommand fzf-preview.CocDiagnostics<CR>
+
 " Manage extensions
 " nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
 " Show commands
-nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
 " Find symbol of current document
 nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
 " Search workspace symbols
