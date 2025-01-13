@@ -133,6 +133,8 @@ call plug#begin()
   Plug 'liuchengxu/vim-which-key'
   Plug '907th/vim-auto-save'
   Plug 'gelguy/wilder.nvim'
+  Plug 'kana/vim-textobj-user'
+  Plug 'beloglazov/vim-textobj-quotes'
 call plug#end()
 
 let g:auto_save = 1
