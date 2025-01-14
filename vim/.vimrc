@@ -135,6 +135,7 @@ call plug#begin()
   Plug 'gelguy/wilder.nvim'
   Plug 'kana/vim-textobj-user'
   Plug 'beloglazov/vim-textobj-quotes'
+  Plug 'jasonccox/vim-wayland-clipboard'
 call plug#end()
 
 let g:auto_save = 1

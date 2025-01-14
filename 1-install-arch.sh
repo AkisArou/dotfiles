@@ -41,6 +41,7 @@ packages=(
   "vdpauinfo"
   "rsync"
   "preload"
+  "wl-clipboard"
   "wget"
   "curl"
   "htop"
