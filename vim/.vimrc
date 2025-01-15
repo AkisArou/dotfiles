@@ -238,6 +238,7 @@ augroup END
 colorscheme codedark
 
 source ~/dotfiles/vim/config/coc.vim
+source ~/dotfiles/vim/config/tsc.vim
 source ~/dotfiles/vim/config/fzf.vim
 
 let g:airline_theme='lucius'
