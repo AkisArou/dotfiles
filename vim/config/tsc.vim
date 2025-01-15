@@ -35,6 +35,4 @@ autocmd VimEnter *
   \ if match(getcwd(), '/nable-solutions') >= 0 |
   \   echom "nable-solutions directory found, starting tsc watch..." | 
   \   call StartTSCWatch() | 
-  \ else | 
-  \   echom "nable-solutions directory not found." | 
   \ endif

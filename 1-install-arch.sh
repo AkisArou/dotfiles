@@ -87,7 +87,7 @@ packages=(
   "fastfetch"
   "ripgrep"
   "fd"
-  "vim"
+  "gvim"
   "visual-studio-code-bin"
   "tmux"
   "git-delta"
