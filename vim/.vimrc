@@ -56,7 +56,6 @@ set noswapfile
 set termguicolors
 set timeout timeoutlen=300
 set undofile
-set updatetime=300
 set nowritebackup
 set expandtab
 set shiftwidth=2
