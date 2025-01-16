@@ -99,7 +99,8 @@ endfunction
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " Symbol renaming
-nmap <leader>cr <Plug>(coc-rename)
+nmap <leader>cr <Plug>(coc-rename)<Cmd>wa<CR>
+
 
 " Formatting selected code
 xmap <leader>f  <Plug>(coc-format-selected)
@@ -193,4 +194,15 @@ nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
 " Resume latest coc list
 nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
-nnoremap <silent> <space>cqi  :CO<CR>
+
+function! OrganizeAndFormatCallback(err, result)
+  if !empty(a:err)
+    echomsg "Error during organize imports: " . a:err
+  else
+    " Run CocActionAsync('format') if the first action succeeds
+    call CocActionAsync('format')
+  endif
+endfunction
+
+" Create a mapping to execute the sequence
+nnoremap <silent> <space>cqi :call CocActionAsync('runCommand', 'editor.action.organizeImport', function('OrganizeAndFormatCallback'))<CR>
