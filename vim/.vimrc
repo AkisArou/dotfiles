@@ -129,7 +129,6 @@ call plug#begin()
   Plug 'tpope/vim-fugitive'
   Plug 'schickling/vim-bufonly'
   Plug 'liuchengxu/vim-which-key'
-  Plug '907th/vim-auto-save'
   Plug 'gelguy/wilder.nvim'
   Plug 'kana/vim-textobj-user'
   Plug 'beloglazov/vim-textobj-quotes'
@@ -150,3 +149,5 @@ source ~/dotfiles/vim/config/netrw.vim
 source ~/dotfiles/vim/config/airline.vim
 source ~/dotfiles/vim/config/fugitive.vim
 source ~/dotfiles/vim/config/yazi.vim
+
+autocmd BufLeave,FocusLost * silent! wall
