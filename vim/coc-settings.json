@@ -15,12 +15,6 @@
   "typescript.preferences.importModuleSpecifierEnding": "minimal",
   "typescript.preferences.includePackageJsonAutoImports": "on",
   "javascript.preferences.importModuleSpecifier": "non-relative",
-  "tailwindCSS.experimental.configFile": {
-    "apps/client/assistant-prm-airport/back-office/tailwind.config.ts": "packages/assistant-prm-airport/**",
-    "apps/client/volunteer/back-office/tailwind.config.ts": "packages/assistant-volunteer/**",
-    "apps/website/nable/tailwind.config.ts": "apps/website/nable/**",
-    "packages/shared/react/rsuite/tailwind.config.ts": "packages/shared/react/rsuite/**"
-  },
   "emmet.excludeLanguages": ["markdown", "typescript"],
   "css.validate": true,
   "css.lint.unknownAtRules": "ignore",
@@ -28,5 +22,16 @@
   "scss.validate": true,
   "less.validate": true,
   "less.lint.unknownAtRules": "ignore",
+  "tailwindCSS.classAttributes": ["class", "className", "style"],
+  "tailwindCSS.experimental.classRegex": [
+    "tw`([^`]*)",
+    ["tw.style\\(([^)]*)\\)", "'([^']*)'"]
+  ],
+  "tailwindCSS.experimental.configFile": {
+    "apps/client/assistant-prm-airport/back-office/tailwind.config.ts": "packages/assistant-prm-airport/**",
+    "apps/client/volunteer/back-office/tailwind.config.ts": "packages/assistant-volunteer/**",
+    "apps/website/nable/tailwind.config.ts": "apps/website/nable/**",
+    "packages/shared/react/rsuite/tailwind.config.ts": "packages/shared/react/rsuite/**"
+  },
   "clangd.path": "~/.config/coc/extensions/coc-clangd-data/install/18.1.3/clangd_18.1.3/bin/clangd"
 }
