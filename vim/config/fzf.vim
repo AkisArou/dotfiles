@@ -13,3 +13,4 @@ let g:fzf_layout = { 'window': { 'width': 0.85, 'height': 0.9  }  }
  nnoremap <silent> <leader>fd :CocCommand fzf-preview.NvimLspCurrentDiagnostics<CR>
  nnoremap <silent> <leader>fq :CocCommand fzf-preview.QuickFix<CR>
  nnoremap <silent> <leader>fe :Buffers<CR>
+

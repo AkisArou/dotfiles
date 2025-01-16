@@ -114,6 +114,7 @@ call plug#begin()
   Plug 'kana/vim-textobj-user'
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'jasonccox/vim-wayland-clipboard'
+  Plug 'thaerkh/vim-workspace'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
@@ -131,4 +132,7 @@ source ~/dotfiles/vim/config/airline.vim
 source ~/dotfiles/vim/config/fugitive.vim
 source ~/dotfiles/vim/config/yazi.vim
 
-autocmd BufLeave,FocusLost * silent! wall
+" autocmd BufLeave,FocusLost * silent! wall
+" :au BufWrite * :call timer_start(20000, { -> execute('w')  })
+let g:workspace_autosave_always = 1
+
