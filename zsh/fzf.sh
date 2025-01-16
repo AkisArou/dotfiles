@@ -60,7 +60,7 @@ FZF_GRUVBOX="\
 FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept
+  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept \
   --highlight-line \
   --info=inline-right \
   --ansi \

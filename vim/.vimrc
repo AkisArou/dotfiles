@@ -115,6 +115,7 @@ endif
 
 call plug#begin()
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+  Plug 'junegunn/fzf.vim'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'chriszarate/yazi.vim'
   Plug 'tomasiser/vim-code-dark'
