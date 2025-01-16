@@ -69,11 +69,11 @@ nmap <silent> [d <Plug>(coc-diagnostic-prev)
 nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation
-" nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gd :CocCommand fzf-preview.CocDefinition<CR>
+nmap <silent> gd <Plug>(coc-definition)
+" nmap <silent> gd :CocCommand fzf-preview.CocDefinition<CR>
 
-" nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gy :CocCommand fzf-preview.CocDefinition<CR>
+nmap <silent> gy <Plug>(coc-type-definition)
+" nmap <silent> gy :CocCommand fzf-preview.CocDefinition<CR>
 
 " nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gi :CocCommand fzf-preview.CocImplementations<CR>
