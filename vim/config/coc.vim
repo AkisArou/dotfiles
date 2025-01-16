@@ -1,5 +1,5 @@
 let g:coc_config_home = "~/dotfiles/vim"
-let g:coc_global_extensions = ['coc-git', 'coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
+let g:coc_global_extensions = ['coc-git', 'coc-sh', 'coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
 
 highlight CocHighlightText guibg=#3d3d3d
 highlight CocGitAddedSign guibg=#2d2d2d

@@ -117,6 +117,7 @@ call plug#begin()
   Plug 'jasonccox/vim-wayland-clipboard'
   Plug 'thaerkh/vim-workspace'
   Plug 'markonm/traces.vim'
+  Plug 'machakann/vim-sandwich'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
