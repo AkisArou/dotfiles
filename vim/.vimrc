@@ -17,6 +17,7 @@ let &t_EI = "\e[0 q"
 
 set ttyscroll=1
 set nobackup
+set incsearch
 set clipboard+=unnamedplus
 set cmdheight=1
 set completeopt=menuone,noselect
@@ -115,6 +116,7 @@ call plug#begin()
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'jasonccox/vim-wayland-clipboard'
   Plug 'thaerkh/vim-workspace'
+  Plug 'markonm/traces.vim'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>

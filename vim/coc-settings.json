@@ -1,6 +1,7 @@
 {
   "coc.preferences.formatOnSave": true,
   "tsserver.tsdk": "./node_modules/typescript/lib",
+  "highlight.colors.enable": true,
   "prettier.enableDebugLogs": true,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.preferences.importModuleSpecifier": "non-relative",

@@ -1,6 +1,8 @@
 let g:coc_config_home = "~/dotfiles/vim"
 let g:coc_global_extensions = ['coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
 
+highlight CocHighlightText guibg=#3d3d3d
+
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']
 
 " https://raw.githubusercontent.com/neoclide/coc.nvim/master/doc/coc-example-config.vim
