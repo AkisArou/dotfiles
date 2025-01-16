@@ -124,7 +124,6 @@ colorscheme codedark
 source ~/dotfiles/vim/config/coc.vim
 source ~/dotfiles/vim/config/fzf.vim
 source ~/dotfiles/vim/config/tsc.vim
-source ~/dotfiles/vim/config/autosave.vim
 source ~/dotfiles/vim/config/wilder.vim
 source ~/dotfiles/vim/config/buffers.vim
 source ~/dotfiles/vim/config/netrw.vim
@@ -132,7 +131,12 @@ source ~/dotfiles/vim/config/airline.vim
 source ~/dotfiles/vim/config/fugitive.vim
 source ~/dotfiles/vim/config/yazi.vim
 
+let g:workspace_session_directory = $HOME . '/.cache/vim-sessions/'
+let g:workspace_autocreate = 1
+let g:workspace_persist_undo_history = 0  " enabled = 1 (default), disabled = 0
+" let g:workspace_undodir='.undodir'
+"
+
 " autocmd BufLeave,FocusLost * silent! wall
 " :au BufWrite * :call timer_start(20000, { -> execute('w')  })
 let g:workspace_autosave_always = 1
-
