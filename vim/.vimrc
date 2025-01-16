@@ -4,34 +4,16 @@ let mapleader=" "
 " Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
 
-" Enable type file detection. Vim will be able to try to detect the type of file in use.
-filetype on
-
-" Enable plugins and load plugin for the detected file type.
-filetype plugin on
-
-" Load an indent file for the detected file type.
-filetype indent on
-
 syntax on
 
-" Highlight cursor line underneath the cursor horizontally.
+filetype on
+filetype plugin on
+filetype indent on
+
 set cursorline
 
-" Use a line cursor within insert mode and a block cursor everywhere else.
-"
-" Reference chart of values:
-"   Ps = 0  -> blinking block.
-"   Ps = 1  -> blinking block (default).
-"   Ps = 2  -> steady block.
-"   Ps = 3  -> blinking underline.
-"   Ps = 4  -> steady underline.
-"   Ps = 5  -> blinking bar (xterm).
-"   Ps = 6  -> steady bar (xterm).
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[0 q"
-
-let g:netrw_dirhistmax = 0
 
 set ttyscroll=1
 set nobackup
@@ -74,7 +56,6 @@ set guifont=monospace:h17
 set shortmess+=c
 set whichwrap+=<,>,[,],h,l
 set iskeyword+=-
-set formatoptions-=cro
 set linebreak
 set encoding=utf-8
 set nobackup
@@ -82,8 +63,8 @@ set nowritebackup
 set updatetime=300
 set signcolumn=yes
 set background=dark
+set formatoptions-=cro
 
-" Define options for mappings
 let opts = {'noremap': v:true, 'silent': v:true}
 
 " Move blocks

@@ -1,3 +1,4 @@
+let g:netrw_dirhistmax = 0
 let g:netrw_keepdir = 0
 let g:netrw_localmkdir = "mkdir -p"
 let g:netrw_localcopycmd = "cp -r"
