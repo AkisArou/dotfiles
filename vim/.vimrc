@@ -143,3 +143,5 @@ autocmd BufLeave,FocusLost * silent! wall
 " :au BufWrite * :call timer_start(20000, { -> execute('w')  })
 let g:workspace_autosave_always = 0
 let g:workspace_autosave = 0
+
+let &t_Cs="\<Esc>[4:3m"

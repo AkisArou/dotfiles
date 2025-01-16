@@ -1,7 +1,10 @@
 let g:coc_config_home = "~/dotfiles/vim"
-let g:coc_global_extensions = ['coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
+let g:coc_global_extensions = ['coc-git', 'coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
 
 highlight CocHighlightText guibg=#3d3d3d
+highlight CocGitAddedSign guibg=#2d2d2d
+highlight CocGitRemovedSign guibg=#2d2d2d
+highlight CocGitChangedSign guibg=#2d2d2d
 
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']
 
@@ -79,7 +82,7 @@ nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi :CocCommand fzf-preview.CocImplementations<CR>
 
 " nmap <silent> gr <Plug>(coc-references)
-nmap <silent> gr :CocCommand fzf-preview.CocReferences<CR>
+nmap <silent> gr :w<CR>:CocCommand fzf-preview.CocReferences<CR>
 
 " Use K to show documentation in preview window
 nnoremap <silent> K :call ShowDocumentation()<CR>
@@ -96,7 +99,7 @@ endfunction
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
 " Symbol renaming
-nmap <leader>rn <Plug>(coc-rename)
+nmap <leader>cr <Plug>(coc-rename)
 
 " Formatting selected code
 xmap <leader>f  <Plug>(coc-format-selected)
