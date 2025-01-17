@@ -1,5 +1,6 @@
 {
   "coc.preferences.formatOnSave": true,
+  "npm-workspaces.enable": true,
   "tsserver.tsdk": "./node_modules/typescript/lib",
   "tsserver.experimental.enableProjectDiagnostics": false,
   "tsserver.maxTsServerMemory": 4200,

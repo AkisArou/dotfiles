@@ -118,6 +118,7 @@ call plug#begin()
   Plug 'thaerkh/vim-workspace'
   Plug 'markonm/traces.vim'
   Plug 'machakann/vim-sandwich'
+  Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install --frozen-lockfile && pnpm run build-coc'}
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
