@@ -115,7 +115,6 @@ call plug#begin()
   Plug 'kana/vim-textobj-user'
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'jasonccox/vim-wayland-clipboard'
-  " Plug 'thaerkh/vim-workspace'
   Plug 'markonm/traces.vim'
   Plug 'machakann/vim-sandwich'
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
@@ -135,15 +134,4 @@ source ~/dotfiles/vim/config/airline.vim
 source ~/dotfiles/vim/config/fugitive.vim
 source ~/dotfiles/vim/config/yazi.vim
 
-" let g:workspace_session_directory = $HOME . '/.cache/vim-sessions/'
-" let g:workspace_autocreate = 1
-" let g:workspace_persist_undo_history = 0  " enabled = 1 (default), disabled = 0
-" let g:workspace_undodir='.undodir'
-"
-
 autocmd BufLeave,FocusLost * silent! wall
-" :au BufWrite * :call timer_start(20000, { -> execute('w')  })
-" let g:workspace_autosave_always = 0
-" let g:workspace_autosave = 0
-
-let &t_Cs="\<Esc>[4:3m"
