@@ -11,9 +11,7 @@ function! UpdateAirlineTabHighlight() abort
 
   let info = get(b:, 'coc_diagnostic_info', {})
 
-  if empty(info) | return '' | endif
-
-  let msgs = []
+  if empty(info) | return | endif
 
   if get(info, 'error', 0)
     execute 'highlight airline_tabsel guifg=#ff0000'

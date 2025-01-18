@@ -4,9 +4,6 @@ let g:coc_global_extensions = ['coc-sh', 'coc-json', 'coc-tsserver', 'coc-eslint
 set runtimepath^=~/.vim/plugged/npm-workspaces-lsp/packages/coc
 
 highlight CocHighlightText guibg=#3d3d3d
-highlight CocGitAddedSign guibg=NONE guifg=#808080
-highlight CocGitRemovedSign guibg=NONE guifg=#808080
-highlight CocGitChangedSign guibg=NONE guifg=#808080
 
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']
 
