@@ -66,6 +66,7 @@ set signcolumn=yes
 set background=dark
 set formatoptions-=cro
 
+
 let opts = {'noremap': v:true, 'silent': v:true}
 
 " Move blocks
@@ -118,11 +119,14 @@ call plug#begin()
   Plug 'markonm/traces.vim'
   Plug 'machakann/vim-sandwich'
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
+  Plug 'sonph/onehalf', {'rtp': 'vim/'}
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
-colorscheme codedark
+" colorscheme codedark
+colorscheme onehalfdark
+let g:airline_theme='onehalfdark'
 
 source ~/dotfiles/vim/config/coc.vim
 source ~/dotfiles/vim/config/fzf.vim

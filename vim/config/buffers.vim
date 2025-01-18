@@ -13,8 +13,8 @@ autocmd BufReadPost * call CloseEmptyUnnamedBuffers()
 " Define options for key mappings (same as `opts` in Lua)
 let opts = {'noremap': v:true, 'silent': v:true}
 
-nnoremap <S-h> :w<CR> :bnext<CR>
-nnoremap <S-l> :w<CR> :bprevious<CR>
+nnoremap <S-h> :w<CR> :bprevious<CR>
+nnoremap <S-l> :w<CR> :bnext<CR>
 
 " close the current buffer
 nnoremap <silent> <leader>bd :bdelete<CR>
