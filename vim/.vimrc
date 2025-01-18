@@ -118,15 +118,14 @@ call plug#begin()
   Plug 'markonm/traces.vim'
   Plug 'machakann/vim-sandwich'
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
-  Plug 'sonph/onehalf', {'rtp': 'vim/'}
   Plug 'airblade/vim-gitgutter'
+  Plug 'joshdick/onedark.vim'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
-" colorscheme codedark
-colorscheme onehalfdark
-let g:airline_theme='onehalfdark'
+colorscheme onedark
+let g:airline_theme='onedark'
 
 source ~/dotfiles/vim/config/coc.vim
 source ~/dotfiles/vim/config/fzf.vim
