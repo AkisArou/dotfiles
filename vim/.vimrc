@@ -120,12 +120,26 @@ call plug#begin()
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
   Plug 'airblade/vim-gitgutter'
   Plug 'joshdick/onedark.vim'
+  Plug 'yuezk/vim-js'
+  Plug 'maxmellon/vim-jsx-pretty'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
 
 colorscheme onedark
 let g:airline_theme='onedark'
+highlight Identifier guifg=#c678dd
+highlight GitGutterAdd guibg=NONE guifg=NONE
+highlight GitGutterChange guibg=NONE guifg=NONE
+highlight GitGutterDelete guibg=NONE guifg=NONE
+highlight Type guifg=#56b6c2
+highlight typescriptBlock guifg=#56b6c2
+highlight typescriptFuncCallArg guifg=#56b6c2
+highlight typescriptCall guifg=#abb2bf
+highlight typescriptDestructureVariable guifg=#abb2bf
+highlight typescriptMember guifg=#abb2bf
+highlight typescriptAliasDeclaration guifg=#abb2bf
+highlight typescriptObjectLabel guifg=#abb2bf
 
 source ~/dotfiles/vim/config/coc.vim
 source ~/dotfiles/vim/config/fzf.vim
@@ -139,54 +153,3 @@ source ~/dotfiles/vim/config/yazi.vim
 autocmd BufLeave,FocusLost * silent! wall
 
 nnoremap <leader>gs :silent !lazygit<CR>\|:silent redraw!<CR>
-
-
-let s:black       = { "gui": "#282c34", "cterm": "236" }
-let s:red         = { "gui": "#e06c75", "cterm": "168" }
-let s:green       = { "gui": "#98c379", "cterm": "114" }
-let s:yellow      = { "gui": "#e5c07b", "cterm": "180" }
-let s:blue        = { "gui": "#61afef", "cterm": "75"  }
-let s:purple      = { "gui": "#c678dd", "cterm": "176" }
-let s:cyan        = { "gui": "#56b6c2", "cterm": "73"  }
-let s:white       = { "gui": "#dcdfe4", "cterm": "188" }
-
-let s:fg          = s:white
-let s:bg          = s:black
-
-let s:comment_fg  = { "gui": "#5c6370", "cterm": "241" }
-let s:gutter_bg   = { "gui": "#282c34", "cterm": "236" }
-let s:gutter_fg   = { "gui": "#919baa", "cterm": "247" }
-let s:non_text    = { "gui": "#373C45", "cterm": "239" }
-
-let s:cursor_line = { "gui": "#313640", "cterm": "237" }
-let s:color_col   = { "gui": "#313640", "cterm": "237" }
-
-let s:selection   = { "gui": "#474e5d", "cterm": "239" }
-let s:vertsplit   = { "gui": "#313640", "cterm": "237" }
-
-
-" |  Color Name  |         RGB        |   Hex   |
-" |--------------+--------------------+---------|
-" | Black        | rgb(40, 44, 52)    | #282c34 |
-" |--------------+--------------------+---------|
-" | White        | rgb(171, 178, 191) | #abb2bf |
-" |--------------+--------------------+---------|
-" | Light Red    | rgb(224, 108, 117) | #e06c75 |
-" |--------------+--------------------+---------|
-" | Dark Red     | rgb(190, 80, 70)   | #be5046 |
-" |--------------+--------------------+---------|
-" | Green        | rgb(152, 195, 121) | #98c379 |
-" |--------------+--------------------+---------|
-" | Light Yellow | rgb(229, 192, 123) | #e5c07b |
-" |--------------+--------------------+---------|
-" | Dark Yellow  | rgb(209, 154, 102) | #d19a66 |
-" |--------------+--------------------+---------|
-" | Blue         | rgb(97, 175, 239)  | #61afef |
-" |--------------+--------------------+---------|
-" | Magenta      | rgb(198, 120, 221) | #c678dd |
-" |--------------+--------------------+---------|
-" | Cyan         | rgb(86, 182, 194)  | #56b6c2 |
-" |--------------+--------------------+---------|
-" | Gutter Grey  | rgb(76, 82, 99)    | #4b5263 |
-" |--------------+--------------------+---------|
-" | Comment Grey | rgb(92, 99, 112)   | #5c6370 |

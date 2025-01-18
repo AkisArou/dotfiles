@@ -110,6 +110,7 @@ packages=(
   "unzip" # Needed by asdf
   "rustup"
   "ccache" # For faster nvim builds
+  "lazygit"
 )
 
 ~/dotfiles/scripts/create-template-env.sh
