@@ -119,8 +119,7 @@ call plug#begin()
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
   Plug 'airblade/vim-gitgutter'
   Plug 'joshdick/onedark.vim'
-  Plug 'yuezk/vim-js'
-  Plug 'maxmellon/vim-jsx-pretty'
+  Plug 'sheerun/vim-polyglot'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
