@@ -26,7 +26,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes[os.getenv("THEME") or "vscode"]
+local selectedTheme = themes[os.getenv("THEME") or "vscode"] or themes.vscode
 
 local M = {
   selectedTheme.repo,

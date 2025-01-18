@@ -57,6 +57,25 @@ FZF_GRUVBOX="\
   --color=spinner:#89b482 \
 "
 
+FZF_ONEHALF="\
+  --color=bg:#1a1d21 \
+  --color=bg+:#222222 \
+  --color=border:#1f1f1f \
+  --color=fg:#dcdfe4 \
+  --color=gutter:#2D2D2D \
+  --color=header:#919baa \
+  --color=hl:#c678dd \
+  --color=hl+:#98c379 \
+  --color=info:#8db9e2 \
+  --color=marker:#56b6c2 \
+  --color=pointer:#56b6c2 \
+  --color=prompt:#c678dd \
+  --color=query:#d4d4d4:regular \
+  --color=scrollbar:#313640 \
+  --color=separator:#223e55 \
+  --color=spinner:#56b6c2 \
+"
+
 FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
