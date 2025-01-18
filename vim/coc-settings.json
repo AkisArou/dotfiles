@@ -1,6 +1,7 @@
 {
   "coc.preferences.formatOnSave": true,
   "dialog.confirmKey": "<C-e>",
+  "colors.enable": true,
   "npm-workspaces.enable": true,
   "tsserver.tsdk": "./node_modules/typescript/lib",
   "tsserver.experimental.enableProjectDiagnostics": false,
