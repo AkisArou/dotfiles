@@ -109,7 +109,6 @@ call plug#begin()
   Plug 'kana/vim-textobj-user'
   Plug 'tpope/vim-commentary'
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
-  Plug 'tpope/vim-fugitive'
   Plug 'schickling/vim-bufonly'
   Plug 'liuchengxu/vim-which-key'
   Plug 'gelguy/wilder.nvim'
@@ -136,7 +135,8 @@ source ~/dotfiles/vim/config/wilder.vim
 source ~/dotfiles/vim/config/buffers.vim
 source ~/dotfiles/vim/config/netrw.vim
 source ~/dotfiles/vim/config/airline.vim
-source ~/dotfiles/vim/config/fugitive.vim
 source ~/dotfiles/vim/config/yazi.vim
 
 autocmd BufLeave,FocusLost * silent! wall
+
+nnoremap <leader>gs :silent !lazygit<CR>\|:silent redraw!<CR>

@@ -27,4 +27,5 @@ function! UpdateAirlineTabHighlight() abort
   execute 'highlight airline_tabsel guifg=#ffffff'
 endfunction
 
+
 :autocmd User CocDiagnosticChange call UpdateAirlineTabHighlight()
