@@ -120,6 +120,7 @@ call plug#begin()
   Plug 'machakann/vim-sandwich'
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
   Plug 'sonph/onehalf', {'rtp': 'vim/'}
+  Plug 'airblade/vim-gitgutter'
 call plug#end()
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
