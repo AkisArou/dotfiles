@@ -57,7 +57,7 @@ FZF_GRUVBOX="\
   --color=spinner:#89b482 \
 "
 
-FZF_ONEHALF="\
+FZF_ONEDARK="\
   --color=bg:#1a1d21 \
   --color=bg+:#222222 \
   --color=border:#1f1f1f \
