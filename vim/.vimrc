@@ -1,7 +1,6 @@
 nnoremap <SPACE> <Nop>
 let mapleader=" "
 
-" Disable compatibility with vi which can cause unexpected issues.
 set nocompatible
 
 syntax on
