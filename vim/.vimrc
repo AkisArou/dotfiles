@@ -9,6 +9,18 @@ filetype on
 filetype plugin on
 filetype indent on
 
+source ~/dotfiles/vim/config/plug.vim
+source ~/dotfiles/vim/config/colorscheme.vim
+source ~/dotfiles/vim/config/coc.vim
+source ~/dotfiles/vim/config/fzf.vim
+source ~/dotfiles/vim/config/tsc.vim
+source ~/dotfiles/vim/config/wilder.vim
+source ~/dotfiles/vim/config/buffers.vim
+source ~/dotfiles/vim/config/netrw.vim
+source ~/dotfiles/vim/config/airline.vim
+source ~/dotfiles/vim/config/yazi.vim
+
+
 set cursorline
 
 let &t_SI = "\e[6 q"
@@ -65,16 +77,24 @@ set signcolumn=yes
 set background=dark
 set formatoptions-=cro
 
-
-let opts = {'noremap': v:true, 'silent': v:true}
-
 " Move blocks
 xnoremap J :m '>+1<CR>gv=gv
 xnoremap K :m '<-2<CR>gv=gv
 
 " Cursor stays in place when moving screen
-nnoremap <C-d> m`<C-d>gzz
-nnoremap <C-u> m`<C-u>gzz
+function! Scroll(direction)
+  set lazyredraw
+  if a:direction == 'down'
+    execute "normal! m`\<C-d>"
+  elseif a:direction == 'up'
+    execute "normal! m`\<C-u>"
+  endif
+  set nolazyredraw
+  normal! zz
+endfunction
+
+nnoremap <silent> <C-d> :call Scroll('down')<CR>
+nnoremap <silent> <C-u> :call Scroll('up')<CR>
 
 " Better paste
 xnoremap p P
@@ -89,51 +109,7 @@ xnoremap > >gv
 nnoremap <leader>w :w<CR>
 nnoremap <leader>h :nohl<CR>
 
-let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
-if empty(glob(data_dir . '/autoload/plug.vim'))
-  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-endif
-
-call plug#begin()
-  Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-  Plug 'junegunn/fzf.vim'
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'chriszarate/yazi.vim'
-  Plug 'tomasiser/vim-code-dark'
-  Plug 'christoomey/vim-tmux-navigator'
-  Plug 'vim-airline/vim-airline'
-  Plug 'vim-airline/vim-airline-themes'
-  Plug 'jiangmiao/auto-pairs'
-  Plug 'kana/vim-textobj-user'
-  Plug 'tpope/vim-commentary'
-  Plug 'mg979/vim-visual-multi', {'branch': 'master'}
-  Plug 'schickling/vim-bufonly'
-  Plug 'liuchengxu/vim-which-key'
-  Plug 'gelguy/wilder.nvim'
-  Plug 'kana/vim-textobj-user'
-  Plug 'beloglazov/vim-textobj-quotes'
-  Plug 'jasonccox/vim-wayland-clipboard'
-  Plug 'markonm/traces.vim'
-  Plug 'machakann/vim-sandwich'
-  Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
-  Plug 'airblade/vim-gitgutter'
-  Plug 'joshdick/onedark.vim'
-  Plug 'sheerun/vim-polyglot'
-call plug#end()
-
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
-
-source ~/dotfiles/vim/config/colorscheme.vim
-source ~/dotfiles/vim/config/coc.vim
-source ~/dotfiles/vim/config/fzf.vim
-source ~/dotfiles/vim/config/tsc.vim
-source ~/dotfiles/vim/config/wilder.vim
-source ~/dotfiles/vim/config/buffers.vim
-source ~/dotfiles/vim/config/netrw.vim
-source ~/dotfiles/vim/config/airline.vim
-source ~/dotfiles/vim/config/yazi.vim
+nnoremap <leader>gs :silent !lazygit<CR>\|:silent redraw!<CR>
 
 autocmd BufLeave,FocusLost * silent! wall
-
-nnoremap <leader>gs :silent !lazygit<CR>\|:silent redraw!<CR>
