@@ -73,8 +73,8 @@ xnoremap J :m '>+1<CR>gv=gv
 xnoremap K :m '<-2<CR>gv=gv
 
 " Cursor stays in place when moving screen
-nnoremap <C-d> m`<C-d>zz
-nnoremap <C-u> m`<C-u>zz
+nnoremap <C-d> m`<C-d>gzz
+nnoremap <C-u> m`<C-u>gzz
 
 " Better paste
 xnoremap p P
