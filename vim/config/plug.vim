@@ -21,11 +21,11 @@ call plug#begin()
   Plug 'schickling/vim-bufonly'
   Plug 'liuchengxu/vim-which-key'
   Plug 'gelguy/wilder.nvim'
-  Plug 'kana/vim-textobj-user'
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'jasonccox/vim-wayland-clipboard'
   Plug 'markonm/traces.vim'
   Plug 'machakann/vim-sandwich'
+  Plug 'tpope/vim-surround'
   Plug 'AkisArou/npm-workspaces-lsp', {'do': 'pnpm install && pnpm run build-coc'}
   Plug 'airblade/vim-gitgutter'
   Plug 'joshdick/onedark.vim'

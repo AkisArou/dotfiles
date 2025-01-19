@@ -19,7 +19,7 @@ source ~/dotfiles/vim/config/buffers.vim
 source ~/dotfiles/vim/config/netrw.vim
 source ~/dotfiles/vim/config/airline.vim
 source ~/dotfiles/vim/config/yazi.vim
-
+source ~/dotfiles/vim/config/sandwich.vim
 
 set cursorline
 
