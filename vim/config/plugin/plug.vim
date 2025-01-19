@@ -30,6 +30,8 @@ call plug#begin()
   Plug 'airblade/vim-gitgutter'
   Plug 'joshdick/onedark.vim'
   Plug 'sheerun/vim-polyglot'
+  Plug 'puremourning/vimspector'
+  Plug 'vim-test/vim-test'
 call plug#end()
 
 delc PlugUpgrade

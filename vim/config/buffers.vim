@@ -1,5 +1,5 @@
-nnoremap <silent> <S-h> :w<CR> :bprevious<CR>
-nnoremap <silent> <S-l> :w<CR> :bnext<CR>
+nnoremap <silent> <S-h> :bprevious<CR>
+nnoremap <silent> <S-l> :bnext<CR>
 
 " close the current buffer
 nnoremap <silent> <leader>bd :bdelete<CR>
