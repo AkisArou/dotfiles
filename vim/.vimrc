@@ -21,11 +21,10 @@ source ~/dotfiles/vim/config/plugin/airline.vim
 source ~/dotfiles/vim/config/plugin/yazi.vim
 source ~/dotfiles/vim/config/plugin/sandwich.vim
 
-set cursorline
-
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[0 q"
 
+set cursorline
 set ttyscroll=1
 set nobackup
 set incsearch
