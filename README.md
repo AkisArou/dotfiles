@@ -22,7 +22,7 @@ X11
 
 Common
 
-- Editor: nvim (configured for web dev) | vim (basic config) | vscode (configuration at .vscode) | zed
+- Editor: nvim (configured for web dev) | vim (configured for web dev like nvim) | vscode (configuration at .vscode) | zed
 - Browsers: librewolf, brave
 - Terminal: alacritty | kitty
 - Filemanager: yazi, thunar
