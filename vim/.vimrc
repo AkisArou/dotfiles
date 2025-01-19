@@ -15,7 +15,6 @@ source ~/dotfiles/vim/config/plugin/coc.vim
 source ~/dotfiles/vim/config/plugin/fzf.vim
 source ~/dotfiles/vim/config/plugin/tsc.vim
 source ~/dotfiles/vim/config/plugin/wilder.vim
-source ~/dotfiles/vim/config/plugin/buffers.vim
 source ~/dotfiles/vim/config/plugin/netrw.vim
 source ~/dotfiles/vim/config/plugin/airline.vim
 source ~/dotfiles/vim/config/plugin/yazi.vim
@@ -78,3 +77,4 @@ set formatoptions-=cro
 
 source ~/dotfiles/vim/config/keymap.vim
 source ~/dotfiles/vim/config/autocmd.vim
+source ~/dotfiles/vim/config/buffers.vim
