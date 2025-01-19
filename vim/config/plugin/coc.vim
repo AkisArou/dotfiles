@@ -71,7 +71,7 @@ nmap <silent> [d <Plug>(coc-diagnostic-prev)
 nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation
-nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gd :w<CR><Plug>(coc-definition)
 " nmap <silent> gd :CocCommand fzf-preview.CocDefinition<CR>
 
 nmap <silent> gy <Plug>(coc-type-definition)
