@@ -15,10 +15,6 @@ keymap("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase windo
 keymap("v", "J", ":m '>+1<CR>gv=gv")
 keymap("v", "K", ":m '<-2<CR>gv=gv")
 
--- Cursor stays in place when moving screen
-keymap("n", "<C-d>", "m`<C-d>zz")
-keymap("n", "<C-u>", "m`<C-u>zz")
-
 -- Better paste
 keymap("v", "p", "P", opts)
 
@@ -38,3 +34,17 @@ vim.api.nvim_set_keymap("n", "<S-l>", "<cmd>bnext<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>bd", ":lua require('custom.bufdelete').CloseCurrentBuffer()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>bo", ":lua require('custom.bufdelete').CloseOtherBuffers()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>ba", ":lua require('custom.bufdelete').CloseAllBuffers()<CR>", opts)
+
+local function lazykeys(keys)
+  keys = vim.api.nvim_replace_termcodes(keys, true, false, true)
+  return function()
+    local old = vim.o.lazyredraw
+    vim.o.lazyredraw = true
+    vim.api.nvim_feedkeys(keys, "nx", false)
+    vim.o.lazyredraw = old
+  end
+end
+
+-- Cursor stays in place when moving screen
+vim.keymap.set("n", "<c-d>", lazykeys("<c-d>zz"), { desc = "Scroll down half screen" })
+vim.keymap.set("n", "<c-u>", lazykeys("<c-u>zz"), { desc = "Scroll down half screen" })
