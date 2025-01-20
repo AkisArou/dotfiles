@@ -33,8 +33,8 @@ keymap("v", ">", ">gv", opts)
 keymap("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
 -- Keybinding for saving and closing the current buffer
-vim.api.nvim_set_keymap("n", "<S-h>", "<cmd>bnext<CR>", opts)
-vim.api.nvim_set_keymap("n", "<S-l>", "<cmd>bprevious<CR>", opts)
+vim.api.nvim_set_keymap("n", "<S-h>", "<cmd>bprevious<CR>", opts)
+vim.api.nvim_set_keymap("n", "<S-l>", "<cmd>bnext<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>bd", ":lua require('custom.bufdelete').CloseCurrentBuffer()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>bo", ":lua require('custom.bufdelete').CloseOtherBuffers()<CR>", opts)
 vim.api.nvim_set_keymap("n", "<leader>ba", ":lua require('custom.bufdelete').CloseAllBuffers()<CR>", opts)
