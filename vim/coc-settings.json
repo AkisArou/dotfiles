@@ -1,6 +1,6 @@
 {
   "coc.preferences.formatOnSave": true,
-  "coc.preferences.enableLinkedEditing": true,
+  "coc.preferences.enableLinkedEditing": false,
   "dialog.confirmKey": "<C-e>",
   "colors.enable": true,
   "npm-workspaces.enable": true,
