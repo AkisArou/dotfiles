@@ -24,6 +24,10 @@ local themes = {
     name = "gruvbox-material",
     repo = "sainnhe/gruvbox-material",
   },
+  onedark = {
+    name = "onedark",
+    repo = "navarasu/onedark.nvim",
+  },
 }
 
 local selectedTheme = themes[os.getenv("THEME") or "vscode"] or themes.vscode
