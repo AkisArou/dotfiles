@@ -34,4 +34,4 @@ let g:airline_powerline_fonts = 1
 
 " :autocmd User CocDiagnosticChange call UpdateAirlineTabHighlight()
 
-let g:airline#extensions#tabline#formatter = 'foo'
+let g:airline#extensions#tabline#formatter = 'coc_format'
