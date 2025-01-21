@@ -32,6 +32,8 @@ call plug#begin()
   Plug 'sheerun/vim-polyglot'
   Plug 'puremourning/vimspector'
   Plug 'vim-test/vim-test'
+  Plug 'svban/YankAssassin.vim'
+  Plug 'machakann/vim-highlightedyank'
 call plug#end()
 
 delc PlugUpgrade
@@ -40,3 +42,5 @@ autocmd VimEnter *
   \  if len(filter(values(g:plugs), '!isdirectory(v:val.dir)'))
   \|   PlugInstall --sync | q
   \| endif
+
+let g:highlightedyank_highlight_duration = 300

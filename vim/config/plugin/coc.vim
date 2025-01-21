@@ -1,9 +1,7 @@
 let g:coc_config_home = "~/dotfiles/vim"
-let g:coc_global_extensions = ['coc-sh', 'coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-highlight', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
+let g:coc_global_extensions = ['coc-sh', 'coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
 
 set runtimepath^=~/.vim/plugged/npm-workspaces-lsp/packages/coc
-
-highlight CocHighlightText guibg=#3d3d3d
 
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']
 
