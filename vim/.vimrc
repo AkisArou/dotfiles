@@ -9,6 +9,7 @@ filetype on
 filetype plugin on
 filetype indent on
 
+source ~/dotfiles/vim/autoload/airline/extensions/tabline/formatters/foo.vim
 source ~/dotfiles/vim/config/plugin/plug.vim
 source ~/dotfiles/vim/config/plugin/colorscheme.vim
 source ~/dotfiles/vim/config/plugin/coc.vim
