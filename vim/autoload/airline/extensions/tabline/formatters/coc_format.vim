@@ -32,7 +32,7 @@ function! airline#extensions#tabline#formatters#coc_format#format(bufnr, buffers
 
 
   if l:error == 0 && l:warning == 0
-    execute 'highlight airline_tabsel guifg=#abb2bf'
+    execute 'highlight airline_tabsel guifg=#abb2bf guibg=#1a1d21'
   endif
 
   return l:output
