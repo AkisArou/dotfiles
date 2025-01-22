@@ -16,7 +16,6 @@ call plug#begin()
   Plug 'vim-airline/vim-airline-themes'
   Plug 'jiangmiao/auto-pairs'
   Plug 'kana/vim-textobj-user'
-  Plug 'tpope/vim-commentary'
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
   Plug 'schickling/vim-bufonly'
   Plug 'liuchengxu/vim-which-key'
@@ -34,6 +33,7 @@ call plug#begin()
   Plug 'vim-test/vim-test'
   Plug 'svban/YankAssassin.vim'
   Plug 'machakann/vim-highlightedyank'
+  Plug 'tomtom/tcomment_vim'
 call plug#end()
 
 delc PlugUpgrade
