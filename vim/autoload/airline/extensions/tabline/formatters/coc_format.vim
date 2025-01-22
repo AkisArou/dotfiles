@@ -18,17 +18,18 @@ function! airline#extensions#tabline#formatters#coc_format#format(bufnr, buffers
   " Build the tabline output
   let l:output = fnamemodify(l:bufname, ':t')
 
+  " Append warnings if present
+  if l:warning > 0
+    execute 'highlight airline_tabsel guifg=#e5c07b'
+    let l:output .= printf(' %s %d', l:warning_circle, l:warning)
+  endif
+
   " Append errors if present
   if l:error > 0
     execute 'highlight airline_tabsel guifg=#e86671'
     let l:output .= printf(' %s %d', l:error_circle, l:error)
   endif
 
-  " Append warnings if present
-  if l:warning > 0
-    execute 'highlight airline_tabsel guifg=#e5c07b'
-    let l:output .= printf(' %s %d', l:warning_circle, l:warning)
-  endif
 
   if l:error == 0 && l:warning == 0
     execute 'highlight airline_tabsel guifg=#abb2bf'
