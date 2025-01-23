@@ -18,8 +18,8 @@ let g:lightline = {
       \             [ 'readonly', 'filename', 'modified'  ], [ 'cocstatus', 'currentfunction' ] ],
       \   'right': [ [ 'lineinfo' ],
       \              [ 'percent' ],
-      \              [ 'fileformat', 'fileencoding', 'filetype' ],
-      \              [ 'gitbranch' ] ]
+      \              [ 'filetype' ],
+      \              [ 'git' ] ]
       \ },
       \ 'tabline': {
       \   'left': [ ['buffers'] ],
@@ -34,7 +34,7 @@ let g:lightline = {
       \ 'component_function': {
       \   'cocstatus': 'coc#status',
       \   'currentfunction': 'CocCurrentFunction',
-      \   'gitbranch': 'gitbranch#name'
+      \   'git': 'ShowGitBranch'
       \ },
       \ }
 
@@ -44,6 +44,9 @@ let g:lightline.enable = {
         \ 'tabline': 1
         \ }
 
+function! ShowGitBranch()
+  return ' ' . gitbranch#name()
+endfunction
 
 function! UpdateTabsel(color1, color2)
   let g:lightline#colorscheme#{g:lightline.colorscheme}#palette.tabline.tabsel = [[a:color1, a:color2, 235, 176]]
