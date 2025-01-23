@@ -19,7 +19,7 @@ let g:lightline = {
       \ },
       \ 'tabline': {
       \   'left': [ ['buffers'] ],
-      \   'right': [ ['close'] ]
+      \   'right': [ [] ]
       \ },
       \ 'component_expand': {
       \   'buffers': 'lightline#bufferline#buffers'
@@ -68,10 +68,10 @@ endfunction
 autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
 autocmd User CocStatusChange,CocDiagnosticChange call Show_coc_status()
 
-function! OverrideColors()
+function! OverrideColors() abort
   let g:lightline#colorscheme#{g:lightline.colorscheme}#palette.tabline.tabsel = [['#abb2bf', '#282a36', 235, 176]]
   call g:lightline#colorscheme()
 endfunction
 
 " Set up a timer to call the function after 1 second (1000 ms)
-autocmd VimEnter * call timer_start(0, {-> OverrideColors()})
+autocmd VimEnter * call OverrideColors()
