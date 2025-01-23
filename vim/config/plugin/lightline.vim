@@ -15,7 +15,11 @@ let g:lightline = {
       \ 'colorscheme': 'one',
       \ 'active': {
       \   'left': [ [ 'mode', 'paste' ],
-      \             [ 'readonly', 'filename', 'modified', 'gitbranch', 'cocstatus', 'currentfunction' ] ]
+      \             [ 'readonly', 'filename', 'modified'  ], [ 'cocstatus', 'currentfunction' ] ],
+      \   'right': [ [ 'lineinfo' ],
+      \              [ 'percent' ],
+      \              [ 'fileformat', 'fileencoding', 'filetype' ],
+      \              [ 'gitbranch' ] ]
       \ },
       \ 'tabline': {
       \   'left': [ ['buffers'] ],
@@ -40,27 +44,57 @@ let g:lightline.enable = {
         \ 'tabline': 1
         \ }
 
+
+function! UpdateTabsel(color1, color2)
+  let g:lightline#colorscheme#{g:lightline.colorscheme}#palette.tabline.tabsel = [[a:color1, a:color2, 235, 176]]
+  call g:lightline#colorscheme()
+endfunction
+
+function! ShowStatusWarning() 
+  let warning_bg = '#4e3a22'
+  let warning_fg = '#abb2bf'
+  
+  call UpdateTabsel(warning_fg, warning_bg)
+
+  execute 'highlight LightlineLeft_active_2 guibg=' . warning_bg . ' guifg=' . warning_fg
+endfunction
+
+function! ShowStatusError() 
+  let error_bg = '#52272b'
+  let error_fg = '#abb2bf'
+  
+  call UpdateTabsel(error_fg, error_bg)
+  
+  execute 'highlight LightlineLeft_active_2 guibg=' . error_bg . ' guifg=' . error_fg
+endfunction
+
+" Function to show the normal status
+function! ShowStatusNormal() 
+  let normal_bg = '#282a36'
+  let normal_fg = '#abb2bf'
+  
+  call UpdateTabsel(normal_fg, normal_bg)
+  
+  execute 'highlight LightlineLeft_active_2 ctermfg=145 ctermbg=240 guifg=' . normal_fg . ' guibg=' . normal_bg
+endfunction
+
 function! Show_coc_status() 
   let l:diagnostic_info = getbufvar(bufnr('%'), 'coc_diagnostic_info', {'error': 0, 'warning': 0})
 
-
-  " Extract error and warning counts
   let l:error = l:diagnostic_info['error']
   let l:warning = l:diagnostic_info['warning']
 
-  " Append warnings if present
   if l:warning > 0
-    execute 'highlight LightlineLeft_active_1 guibg=#e5c07b guifg=#282a36'
+    call ShowStatusWarning()
   endif
 
-  " Append errors if present
   if l:error > 0
-    execute 'highlight LightlineLeft_active_1 guibg=#e86671 guifg=#282a36'
+    call ShowStatusError()
   endif
 
 
   if l:error == 0 && l:warning == 0
-    execute 'highlight LightlineLeft_active_1 ctermfg=145 ctermbg=240 guifg=#abb2bf guibg=#3e4452'
+    call ShowStatusNormal()
   endif
 
 endfunction
@@ -68,10 +102,7 @@ endfunction
 autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
 autocmd User CocStatusChange,CocDiagnosticChange call Show_coc_status()
 
-function! OverrideColors() abort
-  let g:lightline#colorscheme#{g:lightline.colorscheme}#palette.tabline.tabsel = [['#abb2bf', '#282a36', 235, 176]]
-  call g:lightline#colorscheme()
-endfunction
+autocmd VimEnter * call ShowStatusNormal()
 
-" Set up a timer to call the function after 1 second (1000 ms)
-autocmd VimEnter * call OverrideColors()
+
+
