@@ -9,7 +9,7 @@ filetype on
 filetype plugin on
 filetype indent on
 
-source ~/dotfiles/vim/autoload/airline/extensions/tabline/formatters/coc_format.vim
+" source ~/dotfiles/vim/autoload/airline/extensions/tabline/formatters/coc_format.vim
 source ~/dotfiles/vim/config/plugin/plug.vim
 source ~/dotfiles/vim/config/plugin/colorscheme.vim
 source ~/dotfiles/vim/config/plugin/coc.vim
@@ -17,7 +17,8 @@ source ~/dotfiles/vim/config/plugin/fzf.vim
 source ~/dotfiles/vim/config/plugin/tsc.vim
 source ~/dotfiles/vim/config/plugin/wilder.vim
 source ~/dotfiles/vim/config/plugin/netrw.vim
-source ~/dotfiles/vim/config/plugin/airline.vim
+" source ~/dotfiles/vim/config/plugin/airline.vim
+source ~/dotfiles/vim/config/plugin/lightline.vim
 source ~/dotfiles/vim/config/plugin/yazi.vim
 source ~/dotfiles/vim/config/plugin/sandwich.vim
 source ~/dotfiles/vim/config/plugin/vimspector.vim
@@ -44,7 +45,7 @@ set pumheight=10
 set showmode        
 set showcmd         
 set laststatus=2    
-set showtabline=0
+set showtabline=2
 set smartcase
 set smartindent
 set splitbelow
@@ -78,7 +79,9 @@ set nowritebackup
 set updatetime=300
 set signcolumn=yes
 set background=dark
+set noshowmode
 set formatoptions-=cro
+set guioptions-=e
 
 source ~/dotfiles/vim/config/keymap.vim
 source ~/dotfiles/vim/config/autocmd.vim
