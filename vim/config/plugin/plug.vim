@@ -15,8 +15,6 @@ call plug#begin()
   Plug 'itchyny/lightline.vim'
   Plug 'mengelbrecht/lightline-bufferline'
   Plug 'itchyny/vim-gitbranch'
-  " Plug 'vim-airline/vim-airline'
-  " Plug 'vim-airline/vim-airline-themes'
   Plug 'jiangmiao/auto-pairs'
   Plug 'kana/vim-textobj-user'
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
