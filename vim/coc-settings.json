@@ -28,6 +28,7 @@
   "scss.validate": true,
   "less.validate": true,
   "less.lint.unknownAtRules": "ignore",
+  "tailwindCSS.custom.serverPath": "/home/akisarou/.local/share/nvim/mason/packages/tailwindcss-language-server/node_modules/@tailwindcss/language-server/bin/tailwindcss-language-server",
   "tailwindCSS.classAttributes": ["class", "className", "style"],
   "tailwindCSS.experimental.classRegex": [
     "tw`([^`]*)",
