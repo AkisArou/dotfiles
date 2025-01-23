@@ -68,7 +68,6 @@ function! ShowStatusError()
   execute 'highlight LightlineLeft_active_2 guibg=' . error_bg . ' guifg=' . error_fg
 endfunction
 
-" Function to show the normal status
 function! ShowStatusNormal() 
   let normal_bg = '#282a36'
   let normal_fg = '#abb2bf'
