@@ -34,7 +34,7 @@ export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 export EDITOR="vim"
 export VISUAL="vim"
 export BROWSER="brave"
-export MANPAGER="vim +Man!"
+export MANPAGER="vim +MANPAGER --not-a-term -"
 export MANWIDTH=999
 
 export QT_SCALE_FACTOR=2

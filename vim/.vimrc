@@ -9,6 +9,8 @@ filetype on
 filetype plugin on
 filetype indent on
 
+runtime ftplugin/man.vim
+
 source ~/dotfiles/vim/config/plugin/plug.vim
 source ~/dotfiles/vim/config/plugin/colorscheme.vim
 source ~/dotfiles/vim/config/plugin/coc.vim
