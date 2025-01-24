@@ -6,7 +6,9 @@ let s:vim_suggest.cmd = {
     \ 'exclude': [],
     \ 'onspace': ['b\%[uffer]','colo\%[rscheme]'],
     \ 'alwayson': v:true,
-    \ 'popupattrs': {},
+    \ 'popupattrs': {
+    \   'maxheight': 12
+    \ },
     \ 'wildignore': v:true,
     \ 'addons': v:true,
     \ 'trigger': 'n',

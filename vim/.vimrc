@@ -83,6 +83,7 @@ set nowritebackup
 set updatetime=300
 set signcolumn=yes
 set background=dark
+set wop+=fuzzy
 set noshowmode
 set formatoptions-=cro
 set guioptions-=e
