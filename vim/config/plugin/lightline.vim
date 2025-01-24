@@ -105,6 +105,3 @@ autocmd User CocStatusChange,CocDiagnosticChange call lightline#update()
 autocmd User CocStatusChange,CocDiagnosticChange call Show_coc_status()
 
 autocmd VimEnter * call ShowStatusNormal()
-
-
-
