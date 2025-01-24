@@ -1,5 +1,7 @@
 let g:coc_config_home = "~/dotfiles/vim"
 
+let g:coc_node_path = '~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path.sh'
+
 let g:coc_global_extensions = [
     \ 'coc-sh', 'coc-json',
     \ 'coc-tsserver', 'coc-eslint',
