@@ -3,6 +3,10 @@ let g:coc_global_extensions = ['coc-sh', 'coc-json', 'coc-tsserver', 'coc-eslint
 let g:coc_status_error_sign = ' '
 let g:coc_status_warning_sign = ' '
 
+hi CocUnderline gui=undercurl term=undercurl cterm=undercurl
+hi CocWarningHighlight gui=undercurl term=undercurl cterm=undercurl guisp=#e5c07b
+hi CocErrorHighlight gui=undercurl term=undercurl cterm=undercurl guisp=#e06c75
+
 set runtimepath^=~/.vim/plugged/npm-workspaces-lsp/packages/coc
 
 autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:coc_root_patterns = ['.git', 'package.json']

@@ -26,6 +26,8 @@ source ~/dotfiles/vim/config/plugin/vimtest.vim
 
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[0 q"
+let &t_Cs = "\e[4:3m"
+let &t_Ce = "\e[0m"
 
 set autowrite
 set autowriteall
