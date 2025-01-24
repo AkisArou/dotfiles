@@ -1,6 +1,6 @@
 alias sudo="sudo -E"
 alias ta="tmux attach"
-alias vim="TERM=xterm-256color vim"
+# alias vim="TERM=xterm-256color vim"
 alias v="nvim"
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
