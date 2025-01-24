@@ -1,6 +1,9 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.opt.autowrite = true
+vim.opt.autowriteall = true
+vim.opt.cursorline = true -- highlight the current line
 vim.opt.backup = false -- creates a backup file
 vim.opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 vim.opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
@@ -28,7 +31,6 @@ vim.opt.expandtab = true -- convert tabs to spaces
 vim.opt.shiftwidth = 2 -- the number of spaces inserted for each indentation
 vim.opt.tabstop = 2 -- insert 2 spaces for a tab
 vim.opt.softtabstop = 2
-vim.opt.cursorline = true -- highlight the current line
 vim.opt.number = true -- set numbered lines
 vim.opt.relativenumber = false
 vim.opt.laststatus = 3 -- only the last window will always have a status line
@@ -39,6 +41,7 @@ vim.opt.signcolumn = "yes" -- always show the sign column, otherwise it would sh
 vim.opt.wrap = false -- display lines as one long line
 vim.opt.scrolloff = 25 -- minimal number of screen lines to keep above and below the cursor
 vim.opt.sidescrolloff = 8 -- minimal number of screen columns to keep to the left and right of the cursor if wrap is `false`
+vim.opt.termsync = true -- terminal synchronized output
 vim.opt.guifont = "monospace:h17" -- the font used in graphical neovim applications
 vim.opt.fillchars.eob = " " -- show empty lines at the end of a buffer as ` ` {default `~`}
 vim.opt.shortmess:append("c") -- hide all the completion messages, e.g. "-- XXX completion (YYY)", "match 1 of 2", "The only match", "Pattern not found"

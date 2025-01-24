@@ -20,7 +20,7 @@ call plug#begin()
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
   Plug 'schickling/vim-bufonly'
   Plug 'liuchengxu/vim-which-key'
-  Plug 'gelguy/wilder.nvim'
+  Plug 'girishji/vimsuggest'
   Plug 'beloglazov/vim-textobj-quotes'
   Plug 'jasonccox/vim-wayland-clipboard'
   Plug 'markonm/traces.vim'

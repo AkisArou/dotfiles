@@ -16,7 +16,7 @@ source ~/dotfiles/vim/config/plugin/colorscheme.vim
 source ~/dotfiles/vim/config/plugin/coc.vim
 source ~/dotfiles/vim/config/plugin/fzf.vim
 source ~/dotfiles/vim/config/plugin/tsc.vim
-source ~/dotfiles/vim/config/plugin/wilder.vim
+source ~/dotfiles/vim/config/plugin/vimsuggest.vim
 source ~/dotfiles/vim/config/plugin/netrw.vim
 source ~/dotfiles/vim/config/plugin/lightline.vim
 source ~/dotfiles/vim/config/plugin/yazi.vim
