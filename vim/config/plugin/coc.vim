@@ -1,5 +1,17 @@
 let g:coc_config_home = "~/dotfiles/vim"
-let g:coc_global_extensions = ['coc-sh', 'coc-json', 'coc-tsserver', 'coc-eslint', 'coc-prettier-dev', 'coc-css', '@yaegassy/coc-tailwindcss3', 'coc-fzf-preview', 'coc-vimlsp', 'coc-cssmodules', 'coc-yank', 'coc-yaml', 'coc-toml', 'coc-docker', 'coc-html', 'coc-emmet', 'coc-clangd']
+
+let g:coc_global_extensions = [
+    \ 'coc-sh', 'coc-json',
+    \ 'coc-tsserver', 'coc-eslint',
+    \ 'coc-prettier-dev', 'coc-fzf-preview',
+    \ '@yaegassy/coc-tailwindcss3', 'coc-css',
+    \ 'coc-vimlsp', 'coc-cssmodules',
+    \ 'coc-yank', 'coc-yaml',
+    \ 'coc-toml', 'coc-docker',
+    \ 'coc-html', 'coc-emmet',
+    \ 'coc-clangd'
+    \ ]
+
 let g:coc_status_error_sign = ' '
 let g:coc_status_warning_sign = ' '
 
