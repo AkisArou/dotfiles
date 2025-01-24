@@ -35,3 +35,9 @@ let s:vim_suggest.search = {
 \ }
 
 autocmd VimEnter * call g:VimSuggestSetOptions(s:vim_suggest)
+
+augroup vimsuggest-qf-show
+    autocmd!
+    autocmd QuickFixCmdPost clist cwindow
+augroup END
+
