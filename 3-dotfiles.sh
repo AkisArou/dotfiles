@@ -41,7 +41,6 @@ create_symlink "$HOME/dotfiles/git" "$HOME/.config/git"
 create_symlink "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"
 create_symlink "$HOME/dotfiles/.ideavimrc" "$HOME/.ideavimrc"
 create_symlink "$HOME/dotfiles/tmux/.tmux.conf" "$HOME/.tmux.conf"
-create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
 create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
 create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
@@ -59,6 +58,9 @@ create_symlink "$HOME/dotfiles/code/code-flags.conf" "$HOME/.config/code-flags.c
 create_symlink "$HOME/dotfiles/fontconfig" "$HOME/.config/fontconfig"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/.watchman.json" "$HOME/.watchman.json"
+
+./eza/appy-eza-theme.sh
+
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
 

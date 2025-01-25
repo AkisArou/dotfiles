@@ -44,5 +44,5 @@ Also:
 
 ![vim and fzf](./.screenshots/2025-01-25T05:25:11,894196173+02:00.png)
 ![vim and sway config](./.screenshots/2025-01-25T05:26:52,485881280+02:00.png)
-![split windows](./.screenshots/2025-01-25T05:30:17,390373374+02:00.png)
+![split windows](./.screenshots/2025-01-25T06:05:50,206021303+02:00.png)
 ![rofi](./.screenshots/2025-01-25T05:37:21,359043147+02:00.png)

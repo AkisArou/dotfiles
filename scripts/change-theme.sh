@@ -25,6 +25,12 @@ echo "THEME set to $SELECTED_THEME in ~/.env"
 killall waybar
 ~/dotfiles/waybar/launch-waybar.sh &
 
+if [ -f "~/dotfiles/eza/${SELECTED_THEME}.yml" ]; then
+    ln -sf "~/dotfiles/eza/${SELECTED_THEME}.yml" ~/.config/eza/theme.yml
+else
+    ln -sf "~/dotfiles/eza/onedark.yml" ~/.config/eza/theme.yml
+fi
+
 # nvim
 for addr in $XDG_RUNTIME_DIR/nvim.*; do
   nvim --server $addr --remote-send ":colorscheme $SELECTED_THEME<CR>"
