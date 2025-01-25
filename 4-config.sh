@@ -85,4 +85,7 @@ export BROWSER=$ORIGINAL_BROWSER
 print_info "Installing yazi plugins..."
 ya pack -a yazi-rs/plugins:git
 
+print_info "Building bat cache..."
+bat cache --build
+
 print_success "DONE!"

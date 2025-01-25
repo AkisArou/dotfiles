@@ -1,6 +1,5 @@
 alias sudo="sudo -E"
 alias ta="tmux attach"
-# alias vim="TERM=xterm-256color vim"
 alias v="nvim"
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
@@ -15,7 +14,6 @@ alias rm="rm -i"
 alias df="df -h"
 alias free="free -m"
 
-alias bat="bat -pp"
 alias cat="bat"
 
 alias ls='eza --group-directories-first --icons=never'
