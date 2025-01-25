@@ -5,6 +5,7 @@ fi
 . ~/dotfiles/zsh/fzf.sh
 
 export THEME="${THEME:-vscode}"
+export BAT_THEME=OneHalfDark
 
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"

@@ -15,9 +15,8 @@ alias rm="rm -i"
 alias df="df -h"
 alias free="free -m"
 
-alias bat="bat -pp --theme \"Visual Studio Dark+\""
-alias cat="bat -pp --theme \"Visual Studio Dark+\""
-alias catt="bat --theme \"Visual Studio Dark+\""
+alias bat="bat -pp"
+alias cat="bat"
 
 alias ls='eza --group-directories-first --icons=never'
 alias ll='ls -lh --git'
