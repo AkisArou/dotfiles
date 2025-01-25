@@ -238,10 +238,12 @@ return {
               local cwd = vim.fn.getcwd()
               if cwd:match("nable%-solutions") then
                 return {
-                  ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = "packages/assistant-prm-airport/**",
+                  ["apps/client/assistant-prm-airport/back-office/src/styles.css"] = {
+                    "apps/client/assistant-prm-airport/back-office/src/**",
+                    "packages/assistant-prm-airport/**"
+                  },
                   ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
                   ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
-                  ["packages/shared/react/spectrum/tailwind.config.ts"] = "packages/shared/react/spectrum/**",
                   ["packages/shared/react/rsuite/tailwind.config.ts"] = "packages/shared/react/rsuite/**",
                 }
               end
