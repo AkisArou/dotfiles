@@ -1,6 +1,6 @@
 # : Manager {{{
 [manager]
-cwd = { fg = "#61AFEF" } # Blue
+cwd = { fg = "#98C379" } # Blue
 
 # Hovered
 hovered = { reversed = true, fg = "#3a3f4a", bg = "#cdd6f4" }
@@ -31,17 +31,23 @@ border_symbol = "│"
 border_style = { fg = "#282C34" } # Darkened background
 
 # : }}}
+[mode]
+normal_main = { fg = "#282C34", bg = "#61AFEF", bold = true }
+normal_alt = { fg = "#61AFEF", bg = "#282C34" }
+
+# Select mode
+select_main = { fg = "#282C34", bg = "#98C379", bold = true }
+select_alt = { fg = "#98C379", bg = "#282C34" }
+
+# Unset mode
+unset_main = { fg = "#282C34", bg = "#61AFEF", bold = true }
+unset_alt = { fg = "#61AFEF", bg = "#282C34" }
 
 # : Status {{{
 [status]
-separator_open = ""
-separator_close = ""
+separator_open = ""
+separator_close = ""
 separator_style = { fg = "#61AFEF", bg = "#282C34" } # Blue on Darkened background
-
-# Mode
-mode_normal = { fg = "#282C34", bg = "#61AFEF", bold = true } # Dark gray on Blue
-mode_select = { fg = "#282C34", bg = "#61AFEF", bold = true } # Dark gray on Blue
-mode_unset = { fg = "#282C34", bg = "#61AFEF", bold = true }  # Dark gray on Blue
 
 # Progress
 progress_label = { fg = "#ABB2BF", bold = true }     # Light gray
@@ -49,11 +55,11 @@ progress_normal = { fg = "#98C379", bg = "#282C34" } # Green on Darkened backgro
 progress_error = { fg = "#E06C75", bg = "#282C34" }  # Red on Darkened background
 
 # Permissions
-permissions_t = { fg = "#98C379" } # Green
-permissions_r = { fg = "#E06C75" } # Red
-permissions_w = { fg = "#E5C07B" } # Orange
-permissions_x = { fg = "#98C379" } # Green
-permissions_s = { fg = "#ABB2BF" } # Light gray
+perm_sep = { fg = "#7f849c" }
+perm_type = { fg = "#89b4fa" }
+perm_read = { fg = "#f9e2af" }
+perm_write = { fg = "#f38ba8" }
+perm_exec = { fg = "#a6e3a1" }
 
 # : }}}
 
