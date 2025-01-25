@@ -4,7 +4,6 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
 
-#figlet "Arch Linux" &&
 echo ""
 fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
 
