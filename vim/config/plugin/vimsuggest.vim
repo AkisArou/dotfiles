@@ -14,6 +14,7 @@ let s:vim_suggest.cmd = {
     \ 'trigger': 'n',
     \ 'reverse': v:false,
     \ 'prefixlen': 1,
+    \ 'auto_first': v:true
 \ }
 
 let s:vim_suggest.search = {
