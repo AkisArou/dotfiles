@@ -3,6 +3,9 @@ xmap <Leader>f [fzf-p]
 
 let g:fzf_layout = { 'window': { 'width': 0.85, 'height': 0.9  }  }
 
+let g:fzf_vim = {}
+let g:fzf_vim.preview_window = ['down,50%', 'ctrl-/']
+
  nnoremap <silent> <leader>ff :Files<CR>
  nnoremap <silent> <leader>fr :CocCommand fzf-preview.ProjectOldFiles<CR>
  nnoremap <silent> <leader>fs :Rg<CR>
