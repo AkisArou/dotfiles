@@ -41,7 +41,7 @@ vim.opt.signcolumn = "yes" -- always show the sign column, otherwise it would sh
 vim.opt.wrap = false -- display lines as one long line
 vim.opt.scrolloff = 25 -- minimal number of screen lines to keep above and below the cursor
 vim.opt.sidescrolloff = 8 -- minimal number of screen columns to keep to the left and right of the cursor if wrap is `false`
-vim.opt.termsync = true -- terminal synchronized output
+-- vim.opt.termsync = true -- terminal synchronized output
 vim.opt.guifont = "monospace:h17" -- the font used in graphical neovim applications
 vim.opt.fillchars.eob = " " -- show empty lines at the end of a buffer as ` ` {default `~`}
 vim.opt.shortmess:append("c") -- hide all the completion messages, e.g. "-- XXX completion (YYY)", "match 1 of 2", "The only match", "Pattern not found"
