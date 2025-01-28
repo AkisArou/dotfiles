@@ -1,13 +1,13 @@
 {
   "coc.preferences.formatOnSave": true,
   "coc.preferences.enableLinkedEditing": false,
+  "coc.preferences.promptInput": false,
   "dialog.confirmKey": "<C-e>",
   "colors.enable": true,
   "npm-workspaces.enable": true,
   "tsserver.tsdk": "./node_modules/typescript/lib",
   "tsserver.experimental.enableProjectDiagnostics": false,
   "tsserver.maxTsServerMemory": 4200,
-  "highlight.colors.enable": true,
   "prettier.enableDebugLogs": true,
   "diagnostic.refreshOnInsertMode": true,
   "typescript.preferences.autoImportFileExcludePatterns": [
