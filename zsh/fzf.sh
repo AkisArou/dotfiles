@@ -79,7 +79,7 @@ FZF_ONEDARK="\
 FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
 
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
-  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept,ctrl-o:next-history,ctrl-i:prev-history \
+  --bind ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept,ctrl-alt-n:next-history,ctrl-alt-p:prev-history \
   --highlight-line \
   --info=inline-right \
   --ansi \
