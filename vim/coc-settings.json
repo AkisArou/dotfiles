@@ -35,7 +35,7 @@
     ["tw.style\\(([^)]*)\\)", "'([^']*)'"]
   ],
   "tailwindCSS.experimental.configFile": {
-    "apps/client/assistant-prm-airport/back-office/src/tailwind.config.ts": [
+    "apps/client/assistant-prm-airport/back-office/tailwind.config.ts": [
       "apps/client/assistant-prm-airport/back-office/src/**",
       "packages/assistant-prm-airport/**"
     ],
