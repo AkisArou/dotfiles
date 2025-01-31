@@ -41,6 +41,7 @@ set clipboard+=unnamedplus
 set cmdheight=1
 set completeopt=menuone,noselect
 set conceallevel=0
+set encoding=utf-8
 set fileencoding=utf-8
 set hlsearch
 set ignorecase
@@ -74,10 +75,10 @@ set scrolloff=25
 set sidescrolloff=8
 set guifont=monospace:h17
 set shortmess+=c
+set backspace=eol,start,indent
 set whichwrap+=<,>,[,],h,l
 set iskeyword+=-
 set linebreak
-set encoding=utf-8
 set nobackup
 set nowritebackup
 set updatetime=300
@@ -87,6 +88,11 @@ set wop+=fuzzy
 set noshowmode
 set formatoptions-=cro
 set guioptions-=e
+
+let g:tcomment#filetype#guess_typescriptreact = 1
+
+set autoread
+au FocusGained,BufEnter * checktime
 
 source ~/dotfiles/vim/config/keymap.vim
 source ~/dotfiles/vim/config/autocmd.vim
