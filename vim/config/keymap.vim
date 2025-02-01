@@ -31,7 +31,9 @@ nnoremap <leader>w :w<CR>
 nnoremap <leader>h :nohl<CR>
 
 nnoremap <silent> <leader> :WhichKey '<Space>'<CR>
+
 nnoremap <leader>gs :silent !lazygit<CR>\|:silent redraw!<CR>
+nnoremap <leader>gf :silent !lazygit --filter %<CR>\|:silent redraw!<CR>
 
 nmap <leader>y <Plug>YADefault
 xmap <leader>y <Plug>YADefault
