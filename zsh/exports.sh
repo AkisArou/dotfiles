@@ -32,8 +32,8 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 
-export EDITOR="vim"
-export VISUAL="vim"
+export EDITOR="v"
+export VISUAL="v"
 export BROWSER="brave"
 export MANPAGER="vim +MANPAGER --not-a-term -"
 export MANWIDTH=999

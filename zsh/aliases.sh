@@ -1,7 +1,7 @@
 alias sudo="sudo -E"
 alias ta="tmux attach"
 alias vim="TERM=xterm-256color vim"
-alias v="nvim"
+alias v='nvim --listen /tmp/nvim-server.pipe'
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
 alias ip="ip -color=auto"

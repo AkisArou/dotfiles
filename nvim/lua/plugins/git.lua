@@ -12,6 +12,7 @@ return {
   },
   keys = {
     { "<leader>gs", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+    { "<leader>gf", "<cmd>LazyGitFilterCurrentFile<cr>", desc = "LazyGit current file" },
   },
   config = function()
     vim.g.lazygit_floating_window_scaling_factor = 1

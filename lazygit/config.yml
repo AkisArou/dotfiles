@@ -3,12 +3,9 @@ gui:
   nerdFontsVersion: "3"
   filterMode: "fuzzy"
 
-quitOnTopLevelReturn: true
-promptToReturnFromSubprocess: false
 os:
-  editInTerminal: true
-  edit: "vim {{filename}}"
-  editAtLine: "vim +{{line}} {{filename}} -c 'normal zt'"
+  editCommand: "nvim"
+  editCommandTemplate: "{{editor}} --server /tmp/nvim-server.pipe --remote-tab {{filename}}"
   copyToClipboardCmd: >
     if [[ "$TERM" =~ ^(screen|tmux) ]]; then
       printf "\033Ptmux;\033\033]52;c;$(printf {{text}} | base64 -w 0)\a\033\\" > /dev/tty
