@@ -6,7 +6,7 @@ gui:
   # OneDark
   theme:
     activeBorderColor:
-      - "#8a3fa0"
+      - "#56b6c2"
       - bold
 
     inactiveBorderColor:
