@@ -3,6 +3,46 @@ gui:
   nerdFontsVersion: "3"
   filterMode: "fuzzy"
 
+  # OneDark
+  theme:
+    activeBorderColor:
+      - "#8a3fa0"
+      - bold
+
+    inactiveBorderColor:
+      - "#848b98"
+
+    searchingActiveBorderColor:
+      - "#73b8f1"
+      - bold
+
+    optionsTextColor:
+      - "#266269"
+
+    selectedLineBgColor:
+      - "#266269"
+
+    inactiveViewSelectedLineBgColor:
+      - bold
+
+    cherryPickedCommitFgColor:
+      - "#266269"
+
+    cherryPickedCommitBgColor:
+      - "#73b8f1"
+
+    markedBaseCommitFgColor:
+      - "#73b8f1"
+
+    markedBaseCommitBgColor:
+      - "#e5c07b"
+
+    unstagedChangesColor:
+      - "#f65866"
+
+    defaultFgColor:
+      - "#a0a8b7"
+
 promptToReturnFromSubprocess: false
 os:
   # editCommand: "nvim"
