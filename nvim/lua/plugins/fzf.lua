@@ -15,9 +15,6 @@ return {
       },
       fzf_opts = { ["--cycle"] = true },
       keymap = { fzf = { ["ctrl-e"] = "accept" } },
-      previewers = {
-        bat = { cmd = "bat --theme 'Visual Studio Dark+'" },
-      },
       files = {
         -- VSCode like file search
         -- formatter = "path.filename_first",
@@ -41,11 +38,11 @@ return {
 
     vim.keymap.set("n", "<leader>ff", function()
       fzf_lua.files({
-        winopts = {
-          preview = {
-            hidden = "hidden",
-          },
-        },
+        -- winopts = {
+        --   preview = {
+        --     hidden = "hidden",
+        --   },
+        -- },
       })
     end, { desc = "Fuzzy find files in cwd" })
 
