@@ -6,8 +6,10 @@ return {
     require("bufferline").setup({
       options = {
         diagnostics = "nvim_lsp",
-        always_show_bufferline = false,
+        always_show_bufferline = true,
       },
     })
+
+    vim.cmd("highlight! link BufferLineFill Normal")
   end,
 }
