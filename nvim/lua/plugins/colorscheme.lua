@@ -72,6 +72,7 @@ local themes = {
           ["@lsp.type.property"] = { fg = colors.fg },
           ["@lsp.type.enumMember"] = { fg = colors.cyan },
           ["@type.builtin.typescript"] = { fg = colors.cyan },
+          ["@tag.attribute"] = { fg = colors.fg },
         },
       })
     end,
