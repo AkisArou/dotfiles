@@ -8,6 +8,12 @@ alias ip="ip -color=auto"
 alias copy="xclip -sel clip"
 alias grep="grep --color=auto"
 
+function lazygit() {
+  ~/dotfiles/lazygit/launch-lazygit.sh "$@"
+}
+
+alias lg='lazygit'
+
 alias cp="cp -i"
 alias mv="mv -i"
 alias rm="rm -i"
