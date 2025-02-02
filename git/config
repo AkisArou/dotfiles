@@ -37,7 +37,7 @@
   pager = delta
   # Global ignore file (not shared)
   excludesfile = ~/.gitignore_global
-  editor = nvim -f
+  editor = vim
   # Don't consider trailing space change as a cause for merge conflicts
   whitespace = -trailing-space
 
