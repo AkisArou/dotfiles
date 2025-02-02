@@ -30,7 +30,9 @@ return {
         })
       end
 
-      local lazygit = Make_lazygit_term("lazygit")
+      local base_lazygit_cmd = vim.env.HOME .. "/dotfiles/lazygit/launch-lazygit.sh"
+
+      local lazygit = Make_lazygit_term(base_lazygit_cmd)
       local lazygitFile = nil
 
       function Lazygit_toggle()
@@ -44,7 +46,6 @@ return {
           lazygitFile = nil
         else
           lazygitFile:close()
-          lazygitFile = nil
         end
       end
 
@@ -58,6 +59,7 @@ return {
 
           if lazygitFile then
             lazygitFile:close()
+            lazygitFile = nil
           end
         end,
       })
