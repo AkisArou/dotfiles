@@ -36,10 +36,6 @@ map("o", "N", "'nN'[v:searchforward]", { expr = true, desc = "Prev Search Result
 -- Undo
 map("n", "<leader>uu", vim.cmd.UndotreeToggle)
 
--- Cursor stays in place when moving screen
-map("n", "<C-d>", "<C-d>zz")
-map("n", "<C-u>", "<C-u>zz")
-
 -- Add undo break-points
 map("i", ",", ",<c-g>u")
 map("i", ".", ".<c-g>u")
@@ -51,3 +47,17 @@ map("n", "<S-l>", "<cmd>bnext<CR>", opts)
 map("n", "<leader>bd", ":lua require('custom.bufdelete').CloseCurrentBuffer()<CR>", opts)
 map("n", "<leader>bo", ":lua require('custom.bufdelete').CloseOtherBuffers()<CR>", opts)
 map("n", "<leader>ba", ":lua require('custom.bufdelete').CloseAllBuffers()<CR>", opts)
+
+local function lazykeys(keys)
+  keys = vim.api.nvim_replace_termcodes(keys, true, false, true)
+  return function()
+    local old = vim.o.lazyredraw
+    vim.o.lazyredraw = true
+    vim.api.nvim_feedkeys(keys, "nx", false)
+    vim.o.lazyredraw = old
+  end
+end
+
+-- Cursor stays in place when moving screen
+vim.keymap.set("n", "<c-d>", lazykeys("<c-d>zz"), { desc = "Scroll down half screen" })
+vim.keymap.set("n", "<c-u>", lazykeys("<c-u>zz"), { desc = "Scroll down half screen" })

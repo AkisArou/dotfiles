@@ -8,7 +8,8 @@ opt.autowrite = true
 opt.autowriteall = true
 opt.cursorline = true -- highlight the current line
 opt.backup = false -- creates a backup file
-opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
+-- opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
+opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
 opt.completeopt = { "menuone", "noselect" } -- mostly just for cmp
 opt.conceallevel = 0 -- so that `` is visible in markdown files
@@ -60,4 +61,3 @@ opt.whichwrap:append("<,>,[,],h,l") -- keys allowed to move to the previous/next
 opt.iskeyword:append("-") -- treats words with `-` as single words
 opt.formatoptions:remove({ "c", "r", "o" }) -- This is a sequence of letters which describes how automatic formatting is to be done
 opt.linebreak = true
-vim.cmd("set guicursor+=a:blinkon500")
