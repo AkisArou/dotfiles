@@ -13,6 +13,7 @@ export PATH="/usr/bin/go/bin:$PATH"
 export PATH="/opt/asdf-vm/bin:$PATH"
 export PATH="$HOME/.config/emacs/bin:$PATH"
 export PATH="$HOME/neovim/bin:$PATH"
+export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 export ANDROID_HOME="$HOME/Android/Sdk"
 # export ANDROID_AVD_HOME="$HOME/.config/.android/avd"

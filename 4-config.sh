@@ -29,6 +29,15 @@ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ~/.tmux/plugins/tpm/scripts/install_plugins.sh
 tmux source ~/.tmux.conf
 
+print_info "Setting up asdf..."
+# Generate asdf completions
+COMPLETIONS_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}/completions"
+
+if [ ! -d "$COMPLETIONS_DIR" ]; then
+  mkdir -p "$COMPLETIONS_DIR"
+  asdf completion zsh >"$COMPLETIONS_DIR/_asdf"
+fi
+
 ## Add asdf plugins
 asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
 asdf plugin add java https://github.com/halcyon/asdf-java.git
