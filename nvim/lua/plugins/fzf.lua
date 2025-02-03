@@ -8,6 +8,7 @@ return {
     fzf_lua.setup({
       -- "fzf-native",
       winopts = {
+        border = "none",
         -- split = "belowright new", -- open in a split instead?
         preview = {
           layout = "vertical",
