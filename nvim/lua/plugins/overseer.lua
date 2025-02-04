@@ -35,7 +35,7 @@ return {
     overseer.setup({
       strategy = {
         "toggleterm",
-        open_on_start = true,
+        open_on_start = false,
       },
     })
 
@@ -68,7 +68,27 @@ return {
     })
 
     if is_nable then
-      overseer.run_template({ name = template_name, autostart = true })
+      vim.api.nvim_create_autocmd({ "TermEnter" }, {
+        callback = function()
+          for _, buffers in ipairs(vim.fn.getbufinfo()) do
+            vim.api.nvim_create_autocmd({ "BufWriteCmd", "FileWriteCmd", "FileAppendCmd" }, {
+              buffer = buffers.bufnr,
+              callback = function()
+                vim.cmd("silent q!")
+              end,
+            })
+          end
+        end,
+      })
+
+      overseer.run_template({ name = template_name, autostart = true }, function(task)
+        if task == nil then
+          print("NIL TASK")
+          return
+        end
+
+        print("OK TASK")
+      end)
     end
   end,
 }
