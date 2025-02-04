@@ -35,6 +35,19 @@ let s:vim_suggest.search = {
     \ 'prefixlen': 1,
 \ }
 
+let s:vim_suggest.keymap = {
+    \ 'page_up': ["\<C-u>"],
+    \ 'page_down': ["\<C-d>"],
+    \ 'hide': "\<C-c>",
+    \ 'dismiss': "\<C-s>",
+    \ 'send_to_qflist': "\<C-q>",
+    \ 'send_to_arglist': "\<C-l>",
+    \ 'send_to_clipboard': "\<C-g>",
+    \ 'split_open': "\<C-j>",
+    \ 'vsplit_open': "\<C-v>",
+    \ 'tab_open': "\<C-t>",
+\ }
+
 autocmd VimEnter * call g:VimSuggestSetOptions(s:vim_suggest)
 
 augroup vimsuggest-qf-show
