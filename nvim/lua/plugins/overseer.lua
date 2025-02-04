@@ -74,21 +74,14 @@ return {
             vim.api.nvim_create_autocmd({ "BufWriteCmd", "FileWriteCmd", "FileAppendCmd" }, {
               buffer = buffers.bufnr,
               callback = function()
-                vim.cmd("silent q!")
+                vim.cmd("kilent q!")
               end,
             })
           end
         end,
       })
 
-      overseer.run_template({ name = template_name, autostart = true }, function(task)
-        if task == nil then
-          print("NIL TASK")
-          return
-        end
-
-        print("OK TASK")
-      end)
+      overseer.run_template({ name = template_name, autostart = true })
     end
   end,
 }
