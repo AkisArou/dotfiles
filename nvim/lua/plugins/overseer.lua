@@ -68,19 +68,6 @@ return {
     })
 
     if is_nable then
-      vim.api.nvim_create_autocmd({ "TermEnter" }, {
-        callback = function()
-          for _, buffers in ipairs(vim.fn.getbufinfo()) do
-            vim.api.nvim_create_autocmd({ "BufWriteCmd", "FileWriteCmd", "FileAppendCmd" }, {
-              buffer = buffers.bufnr,
-              callback = function()
-                vim.cmd("kilent q!")
-              end,
-            })
-          end
-        end,
-      })
-
       overseer.run_template({ name = template_name, autostart = true })
     end
   end,
