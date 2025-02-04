@@ -32,7 +32,12 @@ return {
 
     local overseer = require("overseer")
 
-    overseer.setup()
+    overseer.setup({
+      strategy = {
+        "toggleterm",
+        open_on_start = true,
+      },
+    })
 
     local cwd = vim.fn.getcwd()
     local template_name = "nable-tsc"
