@@ -34,7 +34,7 @@ return {
 
     overseer.setup({
       strategy = {
-        "toggleterm",
+        "jobstart",
         open_on_start = false,
       },
     })
