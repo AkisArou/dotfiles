@@ -51,7 +51,6 @@ opt.wrap = false -- display lines as one long line
 opt.scrolloff = 25 -- minimal number of screen lines to keep above and below the cursor
 opt.sidescrolloff = 8 -- minimal number of screen columns to keep to the left and right of the cursor if wrap is `false`
 opt.grepprg = "rg --vimgrep"
-opt.list = true -- Show some invisible characters (tabs...
 opt.winminwidth = 5 -- Minimum window width
 -- vim.opt.termsync = true -- terminal synchronized output
 opt.guifont = "monospace:h17" -- the font used in graphical neovim applications
