@@ -131,17 +131,17 @@ vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "TermOpen" }, {
-  callback = function()
-    for _, buffers in ipairs(vim.fn.getbufinfo()) do
-      if vim.bo.buftype == "terminal" then
-        vim.api.nvim_create_autocmd({ "BufWriteCmd", "FileWriteCmd", "FileAppendCmd" }, {
-          buffer = buffers.bufnr,
-          callback = function()
-            vim.cmd("silent q!")
-          end,
-        })
-      end
-    end
-  end,
-})
+-- vim.api.nvim_create_autocmd({ "TermOpen" }, {
+--   callback = function()
+--     for _, buffers in ipairs(vim.fn.getbufinfo()) do
+--       if vim.bo.buftype == "terminal" then
+--         vim.api.nvim_create_autocmd({ "BufWriteCmd", "FileWriteCmd", "FileAppendCmd" }, {
+--           buffer = buffers.bufnr,
+--           callback = function()
+--             vim.cmd("silent q!")
+--           end,
+--         })
+--       end
+--     end
+--   end,
+-- })
