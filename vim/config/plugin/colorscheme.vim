@@ -1,5 +1,6 @@
 silent! colorscheme onedark
 let g:airline_theme='onedark'
+highlight Normal guibg=#1f2329
 highlight Identifier guifg=#c678dd
 highlight GitGutterAdd guibg=NONE guifg=NONE
 highlight GitGutterChange guibg=NONE guifg=NONE
