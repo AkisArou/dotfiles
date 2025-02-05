@@ -4,8 +4,7 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
 
-echo ""
-fastfetch -l none --color blue -s "Title:OS:Kernel:Host:Terminal:Uptime:Battery"
+fastfetch
 
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
