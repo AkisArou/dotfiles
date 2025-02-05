@@ -49,6 +49,11 @@ local themes = {
           ["@tag.attribute"] = { fg = colors.fg },
         },
       })
+
+      vim.defer_fn(function()
+        vim.cmd(string.format("hi LazySpecial guifg=%s", colors.cyan))
+        vim.cmd(string.format("hi LazyReasonPlugin guifg=%s", colors.blue))
+      end, 0)
     end,
   },
 }
