@@ -57,6 +57,7 @@ create_symlink "$HOME/dotfiles/bat" "$HOME/.config/bat"
 create_symlink "$HOME/dotfiles/fastfetch" "$HOME/.config/fastfetch"
 create_symlink "$HOME/dotfiles/code/code-flags.conf" "$HOME/.config/code-flags.conf"
 create_symlink "$HOME/dotfiles/fontconfig" "$HOME/.config/fontconfig"
+create_symlink "$HOME/dotfiles/paru" "$HOME/.config/paru"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/.watchman.json" "$HOME/.watchman.json"
 
