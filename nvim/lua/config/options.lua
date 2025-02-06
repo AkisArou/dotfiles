@@ -25,7 +25,7 @@ opt.smartcase = true -- smart case
 opt.smartindent = true -- make indenting smarter again
 opt.splitbelow = true -- force all horizontal splits to go below current window
 opt.splitright = true -- force all vertical splits to go to the right of current window
-opt.shortmess:append({ W = true, I = true, c = true, C = true })
+opt.shortmess:append({ c = true, C = true })
 opt.swapfile = false -- creates a swapfile
 opt.termguicolors = true -- set term gui colors (most terminals support this)
 opt.timeout = true
