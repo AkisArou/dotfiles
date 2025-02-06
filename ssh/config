@@ -8,10 +8,3 @@ Host *
 Host 192.168.*.*
 	Protocol 2
   Compression no
-
-	# Use a shared channel for all sessions to the same host,
-	# instead of always opening a new one. This leads to much
-	# quicker connection times.
-	ControlMaster auto
-	ControlPath ~/.ssh/control/%r@%h:%p
-	ControlPersist 1800
