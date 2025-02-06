@@ -54,5 +54,26 @@ return {
       end,
       desc = "Lazygit file",
     },
+    {
+      "<leader>bd",
+      function()
+        Snacks.bufdelete()
+      end,
+      desc = "Buffer delete current",
+    },
+    {
+      "<leader>bo",
+      function()
+        Snacks.bufdelete.other()
+      end,
+      desc = "Buffer delete others",
+    },
+    {
+      "<leader>ba",
+      function()
+        Snacks.bufdelete.all()
+      end,
+      desc = "Buffer delete others",
+    },
   },
 }

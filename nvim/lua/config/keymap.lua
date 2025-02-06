@@ -44,9 +44,9 @@ map("i", ";", ";<c-g>u")
 -- Keybinding for saving and closing the current buffer
 map("n", "<S-h>", "<cmd>bprevious<CR>", opts)
 map("n", "<S-l>", "<cmd>bnext<CR>", opts)
-map("n", "<leader>bd", ":lua require('custom.bufdelete').CloseCurrentBuffer()<CR>", opts)
-map("n", "<leader>bo", ":lua require('custom.bufdelete').CloseOtherBuffers()<CR>", opts)
-map("n", "<leader>ba", ":lua require('custom.bufdelete').CloseAllBuffers()<CR>", opts)
+-- map("n", "<leader>bd", ":lua require('custom.bufdelete').CloseCurrentBuffer()<CR>", opts)
+-- map("n", "<leader>bo", ":lua require('custom.bufdelete').CloseOtherBuffers()<CR>", opts)
+-- map("n", "<leader>ba", ":lua require('custom.bufdelete').CloseAllBuffers()<CR>", opts)
 
 local function lazykeys(keys)
   keys = vim.api.nvim_replace_termcodes(keys, true, false, true)
