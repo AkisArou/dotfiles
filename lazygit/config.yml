@@ -5,8 +5,10 @@ gui:
 
 promptToReturnFromSubprocess: false
 os:
-  # editCommand: "nvim"
-  # editCommandTemplate: "{{editor}} --server /tmp/nvim.pipe --remote-tab {{filename}}"
+  edit: '[ -z "$NVIM" ] && (nvim -- {{filename}}) || (nvim --server "$NVIM" --remote-send "q" && nvim --server "$NVIM" --remote {{filename}})'
+  editAtLine: '[ -z "$NVIM" ] && (nvim +{{line}} -- {{filename}}) || (nvim --server "$NVIM" --remote-send "q" &&  nvim --server "$NVIM" --remote {{filename}} && nvim --server "$NVIM" --remote-send ":{{line}}<CR>")'
+  editAtLineAndWait: "nvim +{{line}} {{filename}}"
+  openDirInEditor: '[ -z "$NVIM" ] && (nvim -- {{dir}}) || (nvim --server "$NVIM" --remote-send "q" && nvim --server "$NVIM" --remote {{dir}})'
   copyToClipboardCmd: >
     if [[ "$TERM" =~ ^(screen|tmux) ]]; then
       printf "\033Ptmux;\033\033]52;c;$(printf {{text}} | base64 -w 0)\a\033\\" > /dev/tty
