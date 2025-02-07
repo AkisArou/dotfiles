@@ -1,11 +1,11 @@
 #!/usr/bin/zsh
 
-SELECTED_THEME=$1
-VSCODE_THEME="vscode"
-TOKYONIGHT_THEME="tokyonight"
+VALID_THEMES=("vscode" "tokyonight" "onedark" "gruvbox")
 
-if [ -z "$SELECTED_THEME" ] || ([ "$SELECTED_THEME" != "$VSCODE_THEME" ] && [ "$SELECTED_THEME" != "$TOKYONIGHT_THEME" ]); then
-  echo "Invalid theme! \nOptions: $VSCODE_THEME, $TOKYONIGHT_THEME"
+SELECTED_THEME=$1
+
+if [[ ! " ${VALID_THEMES[@]} " =~ " ${SELECTED_THEME} " ]]; then
+  echo "Invalid theme! \nOptions: ${VALID_THEMES[*]}"
   exit 1
 fi
 
@@ -26,9 +26,9 @@ killall waybar
 ~/dotfiles/waybar/launch-waybar.sh &
 
 if [ -f "~/dotfiles/eza/${SELECTED_THEME}.yml" ]; then
-    ln -sf "~/dotfiles/eza/${SELECTED_THEME}.yml" ~/.config/eza/theme.yml
+  ln -sf "~/dotfiles/eza/${SELECTED_THEME}.yml" ~/.config/eza/theme.yml
 else
-    ln -sf "~/dotfiles/eza/onedark.yml" ~/.config/eza/theme.yml
+  ln -sf "~/dotfiles/eza/onedark.yml" ~/.config/eza/theme.yml
 fi
 
 # nvim

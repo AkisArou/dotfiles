@@ -2,4 +2,4 @@
 
 source ~/.env
 
-rofi -config ~/dotfiles/rofi/"${THEME:-vscode}".rasi "$@"
+rofi -config ~/dotfiles/rofi/"${THEME:-onedark}".rasi "$@"
