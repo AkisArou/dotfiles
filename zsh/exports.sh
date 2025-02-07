@@ -4,7 +4,7 @@ fi
 
 . ~/dotfiles/zsh/fzf.sh
 
-export THEME="${THEME:onedark}"
+export THEME="${THEME:-onedark}"
 export BAT_THEME=onedark
 
 export PATH="$HOME/.local/bin:$PATH"

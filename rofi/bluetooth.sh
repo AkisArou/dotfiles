@@ -310,7 +310,7 @@ show_menu() {
 }
 
 # Rofi command to pipe into, can add any options here
-rofi_command="rofi -config ""$HOME""/dotfiles/rofi/"${THEME:-vscode}".rasi -dmenu $* -p"
+rofi_command="rofi -config ""$HOME""/dotfiles/rofi/"${THEME:-onedark}".rasi -dmenu $* -p"
 
 case "$1" in
 --status)

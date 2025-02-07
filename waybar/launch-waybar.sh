@@ -5,4 +5,4 @@ if [ -f ~/.env ]; then
 fi
 
 killall waybar
-waybar --style ~/dotfiles/waybar/"${THEME:onedark}".css
+waybar --style ~/dotfiles/waybar/"${THEME:-onedark}".css
