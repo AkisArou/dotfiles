@@ -45,3 +45,7 @@ function fv() {
   )" || return
   nvim "$file" || return
 }
+
+set_java_home() {
+  source ~/.asdf/plugins/java/set-java-home.zsh
+}
