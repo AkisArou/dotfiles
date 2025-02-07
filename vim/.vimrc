@@ -9,21 +9,6 @@ filetype on
 filetype plugin on
 filetype indent on
 
-runtime ftplugin/man.vim
-
-source ~/dotfiles/vim/config/plugin/plug.vim
-source ~/dotfiles/vim/config/plugin/colorscheme.vim
-source ~/dotfiles/vim/config/plugin/coc.vim
-source ~/dotfiles/vim/config/plugin/fzf.vim
-source ~/dotfiles/vim/config/plugin/tsc.vim
-source ~/dotfiles/vim/config/plugin/vimsuggest.vim
-source ~/dotfiles/vim/config/plugin/netrw.vim
-source ~/dotfiles/vim/config/plugin/lightline.vim
-source ~/dotfiles/vim/config/plugin/yazi.vim
-source ~/dotfiles/vim/config/plugin/sandwich.vim
-source ~/dotfiles/vim/config/plugin/vimspector.vim
-source ~/dotfiles/vim/config/plugin/vimtest.vim
-
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[0 q"
 
@@ -89,11 +74,76 @@ set noshowmode
 set formatoptions-=cro
 set guioptions-=e
 
-let g:tcomment#filetype#guess_typescriptreact = 1
+colorscheme sorbet
 
 set autoread
 au FocusGained,BufEnter * checktime
 
-source ~/dotfiles/vim/config/keymap.vim
-source ~/dotfiles/vim/config/autocmd.vim
-source ~/dotfiles/vim/config/buffers.vim
+let g:netrw_dirhistmax = 0
+let g:netrw_keepdir = 1
+let g:netrw_localmkdir = "mkdir -p"
+let g:netrw_localcopycmd = "cp -r"
+let g:netrw_localrmdir = "rm -r"
+
+" Automatically focus the current file in netrw when opening netrw
+" nmap <silent> <Leader>x :Ex <bar> :sil! call search(expand("#:t"))<CR>
+"
+function! NetrwMapping()
+  nmap <buffer> <C-c> :bw<CR>
+  nmap <buffer> H u
+  nmap <buffer> h -^
+  nmap <buffer> l <CR>
+  nmap <buffer> . gh
+  nmap <buffer> P <C-w>z
+  nmap <buffer> L <CR>:Lexplore<CR>
+  nmap <buffer> <Leader>dd :Lexplore<CR>
+endfunction
+
+augroup netrw_mapping
+  autocmd!
+  autocmd filetype netrw call NetrwMapping()
+augroup END
+
+autocmd BufLeave,FocusLost * silent! wall
+
+nnoremap <silent> <S-h> :bprevious<CR>
+nnoremap <silent> <S-l> :bnext<CR>
+
+" close the current buffer
+nnoremap <silent> <leader>bd :bdelete<CR>
+" close all buffers except the current one
+" nnoremap <silent> <leader>bo :wa!<CR> :BufOnly<CR> :e<CR>
+" close all buffers
+nnoremap <silent> <leader>ba :wa!<CR> :bufdo bdelete<CR>
+
+" Move blocks
+xnoremap J :m '>+1<CR>gv=gv
+xnoremap K :m '<-2<CR>gv=gv
+
+" Cursor stays in place when moving screen
+function! Scroll(direction)
+  set lazyredraw
+  if a:direction == 'down'
+    execute "normal! m`\<C-d>"
+  elseif a:direction == 'up'
+    execute "normal! m`\<C-u>"
+  endif
+  set nolazyredraw
+  normal! zz
+endfunction
+
+nnoremap <silent> <C-d> :call Scroll('down')<CR>
+nnoremap <silent> <C-u> :call Scroll('up')<CR>
+
+" Better paste
+xnoremap p P
+
+" Delete char without copying
+nnoremap x "_x
+
+" Stay in indent mode
+xnoremap < <gv
+xnoremap > >gv
+
+nnoremap <leader>w :w<CR>
+nnoremap <leader>h :nohl<CR>
