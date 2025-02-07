@@ -18,8 +18,8 @@ return {
       open_for_directories = true,
       yazi_floating_window_border = "shadow",
       floating_window_scaling_factor = 1,
-      keymaps = {
-        show_help = "<f1>",
+      future_features = {
+        process_events_live = false,
       },
     })
   end,
