@@ -101,7 +101,6 @@ packages=(
   "ghostscript"
   "pnpm-shell-completion"
   "libreoffice-still"
-  "watchman-bin"
   "figlet"
   "starship"
   "android-studio"
