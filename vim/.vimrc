@@ -73,6 +73,7 @@ set wop+=fuzzy
 set noshowmode
 set formatoptions-=cro
 set guioptions-=e
+set wildoptions+=pum
 
 colorscheme sorbet
 
