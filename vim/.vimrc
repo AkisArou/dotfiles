@@ -109,11 +109,20 @@ autocmd BufLeave,FocusLost * silent! wall
 nnoremap <silent> <S-h> :bprevious<CR>
 nnoremap <silent> <S-l> :bnext<CR>
 
-" close the current buffer
+function! CloseOtherBuffers()                                                                                        
+  " Get the current buffer number                                                                                    
+  let l:current_buffer = bufnr('%')                                                                                  
+                                                                                                                      
+  " Loop through all buffers and delete them, except the current one                                                 
+  for l:buf in range(1, bufnr('$'))                                                                                  
+    if l:buf != l:current_buffer && bufexists(l:buf)                                                                 
+      execute 'bdelete' l:buf                                                                                        
+    endif                                                                                                            
+  endfor                                                                                                             
+endfunction                                                                                                          
+
 nnoremap <silent> <leader>bd :bdelete<CR>
-" close all buffers except the current one
-" nnoremap <silent> <leader>bo :wa!<CR> :BufOnly<CR> :e<CR>
-" close all buffers
+nnoremap <silent> <leader>bo :wa!<CR> :call CloseOtherBuffers()<CR>
 nnoremap <silent> <leader>ba :wa!<CR> :bufdo bdelete<CR>
 
 " Move blocks
@@ -147,3 +156,12 @@ xnoremap > >gv
 
 nnoremap <leader>w :w<CR>
 nnoremap <leader>h :nohl<CR>
+
+
+let fzf_path = system('which fzf')                                                                                   
+let fzf_path = substitute(fzf_path, '\n', '', 'g') " Remove any trailing newline                                     
+if !empty(fzf_path)                                                                                                  
+  execute 'set rtp+=' . fzf_path                                                                                     
+endif
+
+nnoremap <leader>ff <cmd>FZF<CR>                                                                                     
