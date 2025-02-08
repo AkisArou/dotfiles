@@ -5,6 +5,10 @@ else
   export VDPAU_DRIVER=va_gl
 fi
 
+if command -v powerprofilesctl &>/dev/null; then
+  powerprofilesctl set performance
+fi
+
 # Wayland
 if [ -z "$WAYLAND_DISPLAY" ] && [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ]; then
   export XDG_CURRENT_DESKTOP=sway:wlroots
