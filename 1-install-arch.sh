@@ -41,6 +41,7 @@ packages=(
   "vdpauinfo"
   "rsync"
   "preload"
+  "power-profiles-daemon"
   "wl-clipboard"
   "wget"
   "curl"
