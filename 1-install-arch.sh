@@ -41,6 +41,7 @@ packages=(
   "vdpauinfo"
   "rsync"
   "preload"
+  "ananicy-cpp"
   "wl-clipboard"
   "wget"
   "curl"
