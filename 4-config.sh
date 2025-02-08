@@ -12,7 +12,6 @@ sudo systemctl enable --now iwd
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
-sudo systemctl enable --now ananicy-cpp.service
 
 print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
