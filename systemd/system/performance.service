@@ -1,0 +1,11 @@
+[Unit]
+Description=Set Performance Mode if powerprofilesctl exists
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'command -v powerprofilesctl &> /dev/null && powerprofilesctl set performance'
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

@@ -25,6 +25,7 @@ sudo mkdir -p "/usr/share/chromium/extensions"
 # linking
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
+sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
 
 create_symlink "$HOME/dotfiles/alacritty" "$HOME/.config/alacritty"
 create_symlink "$HOME/dotfiles/kitty" "$HOME/.config/kitty"
