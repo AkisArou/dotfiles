@@ -1,0 +1,1 @@
+/root/dotfiles/systemd/coredump.conf.d

@@ -132,23 +132,7 @@ print_info "Installing login screen..."
 sudo cp ~/dotfiles/login/issue /etc/issue
 
 # Add user to wheel
-sudoers_line='%wheel ALL=(ALL:ALL) NOPASSWD: ALL'
-
-if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
-  print_success "The %wheel group is already uncommented in sudoers."
-else
-  print_info "Uncommenting %wheel group in sudoers..."
-
-  sudo sed -i.bak 's/^#\s*\(%wheel ALL=(ALL:ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers
-
-  if sudo grep -q "^${sudoers_line}$" /etc/sudoers; then
-    print_success "%wheel group has been uncommented in sudoers."
-  else
-    print_failure "Failed to uncomment %wheel group in sudoers."
-  fi
-fi
-
-sudo usermod -aG wheel "$USER"
+sudo cp "/home/akisarou/dotfiles/sudoers.d/sudoers" /etc/sudoers.d/sudoers
 
 # Check if the current shell is zsh
 if [[ "$SHELL" != */zsh ]]; then

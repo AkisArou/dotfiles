@@ -6,6 +6,8 @@ clear
 echo "Applying system config..."
 echo "-------------------------"
 
+sudo usermod -aG wheel,audio,video "$USER"
+
 print_info "Enabling systemctl daemons..."
 loginctl enable-linger
 sudo systemctl enable --now iwd

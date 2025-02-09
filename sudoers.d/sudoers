@@ -1,0 +1,9 @@
+%wheel      ALL=(ALL:ALL) ALL
+
+# Set default EDITOR to restricted version of vim, and do not allow visudo to use EDITOR/VISUAL.
+Defaults      editor=/usr/bin/vim, !env_editor
+Defaults:akisarou      !authenticate
+Defaults passwd_timeout=0
+Defaults passprompt="^G[sudo] password for %p: "
+Defaults insults
+Defaults pwfeedback

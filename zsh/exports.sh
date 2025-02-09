@@ -47,3 +47,5 @@ export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
 
 export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
+
+export SUDO_PROMPT="$(tput setaf 1 bold)Password:$(tput sgr0) "
