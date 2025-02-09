@@ -3,6 +3,7 @@ AddKeysToAgent yes
 Host *
 	# Always use SSH2.
 	Protocol 2
+  ConnectTimeout 10
 
 
 Host 192.168.*.*
