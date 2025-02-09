@@ -1,7 +1,7 @@
 alias sudo="sudo -E"
 alias ta="tmux attach"
 alias vim="TERM=xterm-256color vim"
-alias v='sudo nice -n -15 sudo -E -u akisarou zsh -l -c "PATH=$PATH /home/akisarou/neovim/bin/nvim"'
+alias v='sudo nice -n -10 sudo -E -u akisarou zsh -l -c "PATH=$PATH /home/akisarou/neovim/bin/nvim"'
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
 alias ip="ip -color=auto"
