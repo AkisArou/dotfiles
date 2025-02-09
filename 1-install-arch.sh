@@ -131,9 +131,6 @@ echo ""
 print_info "Installing login screen..."
 sudo cp ~/dotfiles/login/issue /etc/issue
 
-# Add user to wheel
-sudo cp "/home/akisarou/dotfiles/sudoers.d/sudoers" /etc/sudoers.d/sudoers
-
 # Check if the current shell is zsh
 if [[ "$SHELL" != */zsh ]]; then
   print_info "Current shell is not zsh. Changing default shell to zsh..."
