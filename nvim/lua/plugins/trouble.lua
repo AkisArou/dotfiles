@@ -28,7 +28,7 @@ return {
       desc = "Location List (Trouble)",
     },
     {
-      "<leader>xQ",
+      "<leader>xq",
       "<cmd>Trouble qflist toggle<cr>",
       desc = "Quickfix List (Trouble)",
     },
@@ -36,6 +36,13 @@ return {
   config = function()
     require("trouble").setup({
       auto_close = true,
+      focus = true,
+      win = {
+        type = "split",
+        relative = "editor",
+        size = 30,
+        position = "bottom",
+      },
     })
   end,
 }

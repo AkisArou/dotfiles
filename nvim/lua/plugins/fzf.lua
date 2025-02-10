@@ -15,7 +15,7 @@ return {
         },
       },
       fzf_opts = { ["--cycle"] = true },
-      keymap = { fzf = { ["ctrl-e"] = "accept" } },
+      keymap = { fzf = { ["ctrl-e"] = "accept", ["ctrl-q"] = "select-all+accept" } },
       files = {
         -- VSCode like file search
         -- formatter = "path.filename_first",
