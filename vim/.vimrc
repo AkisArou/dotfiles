@@ -78,7 +78,6 @@ set wildoptions+=pum
 colorscheme sorbet
 
 set autoread
-au FocusGained,BufEnter * checktime
 
 let g:netrw_dirhistmax = 0
 let g:netrw_keepdir = 1
@@ -110,16 +109,16 @@ autocmd BufLeave,FocusLost * silent! wall
 nnoremap <silent> <S-h> :bprevious<CR>
 nnoremap <silent> <S-l> :bnext<CR>
 
-function! CloseOtherBuffers()                                                                                        
-  " Get the current buffer number                                                                                    
-  let l:current_buffer = bufnr('%')                                                                                  
-                                                                                                                      
+function! CloseOtherBuffers()
+  " Get the current buffer number
+  let l:current_buffer = bufnr('%')
+
   " Loop through all buffers and delete them, except the current one                                                 
-  for l:buf in range(1, bufnr('$'))                                                                                  
-    if l:buf != l:current_buffer && bufexists(l:buf)                                                                 
-      execute 'bdelete' l:buf                                                                                        
-    endif                                                                                                            
-  endfor                                                                                                             
+  for l:buf in range(1, bufnr('$'))
+    if l:buf != l:current_buffer && bufexists(l:buf)
+      execute 'bwipeout' l:buf
+    endif
+  endfor
 endfunction                                                                                                          
 
 nnoremap <silent> <leader>bd :bdelete<CR>
@@ -166,3 +165,4 @@ if !empty(fzf_path)
 endif
 
 nnoremap <leader>ff <cmd>FZF<CR>                                                                                     
+nnoremap <leader>e <cmd>Ex<CR>                                                                                     
