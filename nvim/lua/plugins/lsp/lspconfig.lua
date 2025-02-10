@@ -3,7 +3,8 @@ return {
   event = { "BufReadPre", "BufNewFile" },
   lazy = true,
   dependencies = {
-    "saghen/blink.cmp",
+    -- "saghen/blink.cmp",
+    "iguanacucumber/magazine.nvim",
     "b0o/SchemaStore.nvim",
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
@@ -132,10 +133,9 @@ return {
       end, opts)
     end
 
-    -- local capabilities = vim.lsp.protocol.make_client_capabilities()
-    -- capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
+    local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-    local capabilities = require("blink.cmp").get_lsp_capabilities()
+    -- local capabilities = require("blink.cmp").get_lsp_capabilities()
 
     local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
