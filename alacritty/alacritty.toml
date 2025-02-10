@@ -28,4 +28,4 @@ family = "DM Mono"
 style = "Italic"
 
 [general]
-import = ["~/dotfiles/alacritty/vscode.toml"]
+import = ["~/dotfiles/alacritty/onedark.toml"]
