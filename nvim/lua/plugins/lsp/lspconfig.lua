@@ -242,6 +242,9 @@ return {
                     "apps/client/assistant-prm-airport/back-office/src/**",
                     "packages/assistant-prm-airport/**",
                   },
+                  ["apps/client/assistant-prm-airport/agent/tailwind.config.ts"] = {
+                    "apps/client/assistant-prm-airport/agent/**",
+                  },
                   ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
                   ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
                   ["packages/shared/react/rsuite/tailwind.config.ts"] = "packages/shared/react/rsuite/**",
