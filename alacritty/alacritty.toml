@@ -12,19 +12,19 @@ y = 0
 size = 9
 
 [font.normal]
-family = "DM Mono"
+family = "HackNerdFont"
 style = "Regular"
 
 [font.bold]
-family = "DM Mono"
+family = "HackNerdFont"
 style = "Bold"
 
 [font.bold_italic]
-family = "DM Mono"
+family = "HackNerdFont"
 style = "Bold Italic"
 
 [font.italic]
-family = "DM Mono"
+family = "HackNerdFont"
 style = "Italic"
 
 [general]
