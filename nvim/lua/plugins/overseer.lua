@@ -1,6 +1,5 @@
 return {
   "stevearc/overseer.nvim",
-  dependencies = { "folke/trouble.nvim" },
   config = function()
     local problem_matcher = {
       fileLocation = { "relative", "${cwd}" },
