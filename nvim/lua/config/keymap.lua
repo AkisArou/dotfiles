@@ -47,6 +47,8 @@ map("n", "<S-l>", "<cmd>bnext<CR>", opts)
 
 -- qflist
 map("n", "<leader>xq", "<cmd>copen<CR>", opts)
+map("n", "]q", "<cmd>cnext<CR>", opts)
+map("n", "[q", "<cmd>cprev<CR>", opts)
 
 local function lazykeys(keys)
   keys = vim.api.nvim_replace_termcodes(keys, true, false, true)
