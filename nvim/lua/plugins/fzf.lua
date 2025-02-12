@@ -27,7 +27,6 @@ return {
       buffers = {
         file_icons = false,
         path_shorten = 1,
-        -- actions = false,
       },
     })
 
