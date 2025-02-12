@@ -52,6 +52,8 @@ return {
 
     vim.keymap.set("n", "<leader>fm", fzf_lua.manpages, { desc = "Manpages" })
 
+    vim.keymap.set("n", "<leader>gb", fzf_lua.git_branches, { desc = "Git branches" })
+
     vim.keymap.set("n", "<leader>gc", function()
       fzf_lua.git_commits({
         winopts = {
