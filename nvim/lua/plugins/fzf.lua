@@ -5,6 +5,7 @@ return {
     local actions = require("fzf-lua.actions")
     local fzf_lua = require("fzf-lua")
     fzf_lua.setup({
+      "hide",
       -- "fzf-native",
       winopts = {
         border = "none",
@@ -13,7 +14,12 @@ return {
         },
       },
       fzf_opts = { ["--cycle"] = true },
-      keymap = { fzf = { ["ctrl-e"] = "accept", ["ctrl-q"] = "select-all+accept" } },
+      keymap = {
+        fzf = { ["ctrl-q"] = "select-all+accept" },
+        builtin = {
+          ["<C-c>"] = "hide", -- hide fzf-lua, `:FzfLua resume` to continue
+        },
+      },
       files = {
         fd_opts = [[--color=never --type f --hidden --follow --exclude .git --exclude node_modules]],
         actions = {
