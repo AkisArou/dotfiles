@@ -46,7 +46,13 @@ return {
 
     vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
 
-    vim.keymap.set("n", "<leader>fc", function()
+    vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
+
+    vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
+
+    vim.keymap.set("n", "<leader>fm", fzf_lua.manpages, { desc = "Manpages" })
+
+    vim.keymap.set("n", "<leader>gc", function()
       fzf_lua.git_commits({
         winopts = {
           preview = {
@@ -56,12 +62,6 @@ return {
       })
     end, { desc = "Git commits" })
 
-    vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
-
-    vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
-
-    vim.keymap.set("n", "<leader>fm", fzf_lua.manpages, { desc = "Manpages" })
-
     vim.keymap.set("n", "<leader>gf", function()
       fzf_lua.git_bcommits({
         winopts = {
@@ -69,6 +69,7 @@ return {
             layout = "flex",
           },
         },
+        actions = { ["ctrl-o"] = actions.git_checkout },
       })
     end, { desc = "Buffer commit history" })
 
