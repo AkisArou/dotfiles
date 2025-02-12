@@ -52,6 +52,16 @@ return {
 
     vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
 
+    vim.keymap.set("n", "<leader>gf", function()
+      fzf_lua.git_bcommits({
+        winopts = {
+          preview = {
+            layout = "flex",
+          },
+        },
+      })
+    end, { desc = "Buffer commit history" })
+
     vim.keymap.set("n", "<leader>fe", function()
       fzf_lua.buffers({
         fzf_opts = {

@@ -14,9 +14,6 @@
   st = status
   # Display tree-like log, because default log is a pain…
   lg = log --graph --date=relative --pretty=tformat:'%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%an %ad)%Creset'
-  # Useful when you have to update your last commit
-  # with staged files without editing the commit message.
-  oops = commit --amend --no-edit
   # Ensure that force-pushing won't lose someone else's work (only mine).
   push-with-lease = push --force-with-lease
   # Rebase won’t trigger hooks on each "replayed" commit.
@@ -33,7 +30,6 @@
   untrack = rm --cache --
 
 [core]
-  # Don't paginate output by default
   pager = delta
   # Global ignore file (not shared)
   excludesfile = ~/.gitignore_global
@@ -45,7 +41,8 @@
   navigate = true    # use n and N to move between diff sections
   light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
   features = syntax-highlighting
-  syntax-theme = Visual Studio Dark+
+  syntax-theme = onedark
+  line-numbers = true
 
 [interactive]
   diffFilter = delta --color-only --features=interactive
