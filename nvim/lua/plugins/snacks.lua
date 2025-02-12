@@ -1,7 +1,8 @@
 -- lazy.nvim
 return {
   "folke/snacks.nvim",
-  enabled = false,
+  priority = 1000,
+  lazy = false,
   ---@type snacks.Config
   opts = {
     dashboard = { enabled = false },
@@ -15,6 +16,7 @@ return {
     scroll = { enabled = false },
     statuscolumn = { enabled = false },
     words = { enabled = false },
+
     bigfile = {
       -- your bigfile configuration comes here
       -- or leave it empty to use the default settings

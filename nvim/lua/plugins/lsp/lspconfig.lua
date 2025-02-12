@@ -52,7 +52,6 @@ return {
       opts.buffer = bufnr
 
       opts.desc = "Show LSP references"
-
       keymap.set("n", "gr", function()
         require("fzf-lua").lsp_references({
           ignore_current_line = true,
@@ -86,7 +85,17 @@ return {
       keymap.set("n", "gt", ":FzfLua typedefs<CR>", opts)
 
       opts.desc = "See available code actions"
-      keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
+      keymap.set({ "n", "v" }, "<leader>ca", function()
+        vim.lsp.buf.code_action({
+          filter = function(action)
+            if string.find(action.title, "Move to") or string.find(action.title, "Show documentation") then
+              return false
+            end
+
+            return true
+          end,
+        })
+      end, opts)
 
       opts.desc = "Smart rename"
       keymap.set("n", "<leader>cr", vim.lsp.buf.rename, opts)
