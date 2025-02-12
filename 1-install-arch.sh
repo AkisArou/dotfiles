@@ -39,6 +39,7 @@ packages=(
   "libva-utils"
   "libvdpau-va-gl"
   "vdpauinfo"
+  "ffmpeg"
   "rsync"
   "preload"
   "power-profiles-daemon"
