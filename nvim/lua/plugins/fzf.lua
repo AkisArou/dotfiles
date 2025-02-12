@@ -1,6 +1,5 @@
 return {
   "ibhagwan/fzf-lua",
-  -- optional for icon support
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local actions = require("fzf-lua.actions")
@@ -9,7 +8,6 @@ return {
       -- "fzf-native",
       winopts = {
         border = "none",
-        -- split = "belowright new", -- open in a split instead?
         preview = {
           layout = "vertical",
         },
@@ -17,8 +15,6 @@ return {
       fzf_opts = { ["--cycle"] = true },
       keymap = { fzf = { ["ctrl-e"] = "accept", ["ctrl-q"] = "select-all+accept" } },
       files = {
-        -- VSCode like file search
-        -- formatter = "path.filename_first",
         fd_opts = [[--color=never --type f --hidden --follow --exclude .git --exclude node_modules]],
         actions = {
           -- inherits from 'actions.files', here we can override
@@ -37,15 +33,7 @@ return {
 
     vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#1f1f1f" })
 
-    vim.keymap.set("n", "<leader>ff", function()
-      fzf_lua.files({
-        -- winopts = {
-        --   preview = {
-        --     hidden = "hidden",
-        --   },
-        -- },
-      })
-    end, { desc = "Fuzzy find files in cwd" })
+    vim.keymap.set("n", "<leader>ff", fzf_lua.files, { desc = "Fuzzy find files in cwd" })
 
     vim.keymap.set("n", "<leader>fr", fzf_lua.oldfiles, { desc = "Fuzzy find recent files" })
 

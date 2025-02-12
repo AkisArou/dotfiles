@@ -9,14 +9,11 @@ return {
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
     { "Bilal2453/luvit-meta", lazy = true },
-    { "antosha417/nvim-lsp-file-operations", config = true },
     {
       "folke/lazydev.nvim",
-      ft = "lua", -- only load on lua files
+      ft = "lua",
       opts = {
         library = {
-          -- See the configuration section for more details
-          -- Load luvit types when the `vim.uv` word is found
           { path = "${3rd}/luv/library", words = { "vim%.uv" } },
         },
       },
@@ -28,10 +25,10 @@ return {
       virtual_text = false,
       signs = {
         text = {
-          [vim.diagnostic.severity.ERROR] = "◉", -- Medium dot for errors
-          [vim.diagnostic.severity.WARN] = "◎", -- Medium ring for warnings
-          [vim.diagnostic.severity.INFO] = "●", -- Filled circle for info
-          [vim.diagnostic.severity.HINT] = "○", -- Empty circle for hints
+          [vim.diagnostic.severity.ERROR] = "◉",
+          [vim.diagnostic.severity.WARN] = "◎",
+          [vim.diagnostic.severity.INFO] = "●",
+          [vim.diagnostic.severity.HINT] = "○",
         },
       },
       jump = { float = true },
@@ -47,17 +44,6 @@ return {
     ]])
 
     local lspconfig = require("lspconfig")
-
-    -- Set global defaults for all servers
-    lspconfig.util.default_config = vim.tbl_extend("force", lspconfig.util.default_config, {
-      capabilities = vim.tbl_deep_extend(
-        "force",
-        vim.lsp.protocol.make_client_capabilities(),
-        -- returns configured operations if setup() was already called
-        -- or default operations if not
-        require("lsp-file-operations").default_capabilities()
-      ),
-    })
 
     local keymap = vim.keymap
 
@@ -176,7 +162,6 @@ return {
           tsserver = {
             maxTsServerMemory = 4 * 1024,
             nodePath = "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path.sh",
-            -- nodePath = "ELECTRON_RUN_AS_NODE=1 NODE_OPTIONS='' /opt/visual-studio-code/code",
           },
           preferences = {
             includePackageJsonAutoImports = "on",
@@ -350,25 +335,6 @@ return {
       on_attach = on_attach,
       filetypes = { "json", "packagejson" },
     })
-
-    -- lspconfig["clangd"].setup({
-    --   on_attach = function(client, bufnr)
-    --     client.server_capabilities.signatureHelpProvider = false
-    --     on_attach(client, bufnr)
-    --   end,
-    --   root_dir = function(...)
-    --     return require("lspconfig.util").root_pattern(
-    --       ".clangd",
-    --       ".clang-tidy",
-    --       ".clang-format",
-    --       "compile_commands.json",
-    --       "compile_flags.txt",
-    --       "configure.ac",
-    --       ".git"
-    --     )(...)
-    --   end,
-    --   capabilities = capabilities,
-    -- })
 
     lspconfig["mdx_analyzer"].setup({
       capabilities = capabilities,
