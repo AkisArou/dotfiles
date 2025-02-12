@@ -83,6 +83,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --highlight-line \
   --info=inline-right \
   --ansi \
+  --cycle \
   --layout=reverse \
   --border=none \
   --history=$HOME/.fzf_history
