@@ -5,18 +5,6 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
-    dashboard = { enabled = false },
-    explorer = { enabled = false },
-    indent = { enabled = false },
-    input = { enabled = false },
-    picker = { enabled = false },
-    notifier = { enabled = false },
-    quickfile = { enabled = false },
-    scope = { enabled = false },
-    scroll = { enabled = false },
-    statuscolumn = { enabled = false },
-    words = { enabled = false },
-
     bigfile = {
       -- your bigfile configuration comes here
       -- or leave it empty to use the default settings
