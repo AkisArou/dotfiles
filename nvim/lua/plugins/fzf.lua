@@ -38,7 +38,7 @@ return {
 
     vim.keymap.set("n", "<leader>fs", fzf_lua.live_grep_native, { desc = "Grep in cwd" })
 
-    vim.keymap.set("n", "<leader>fl", fzf_lua.live_grep_resume, { desc = "Resume grep" })
+    vim.keymap.set("n", "<leader>fl", fzf_lua.resume, { desc = "Fzf resume" })
 
     vim.keymap.set("n", "<leader>fw", fzf_lua.grep_cword, { desc = "Find word under cursor in cwd" })
 
@@ -46,11 +46,21 @@ return {
 
     vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
 
-    vim.keymap.set("n", "<leader>fc", fzf_lua.git_commits, { desc = "Git commits" })
+    vim.keymap.set("n", "<leader>fc", function()
+      fzf_lua.git_commits({
+        winopts = {
+          preview = {
+            layout = "flex",
+          },
+        },
+      })
+    end, { desc = "Git commits" })
 
     vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
 
     vim.keymap.set("n", "<leader>fq", fzf_lua.quickfix, { desc = "Quickfix" })
+
+    vim.keymap.set("n", "<leader>fm", fzf_lua.manpages, { desc = "Manpages" })
 
     vim.keymap.set("n", "<leader>gf", function()
       fzf_lua.git_bcommits({
