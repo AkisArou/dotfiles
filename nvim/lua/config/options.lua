@@ -11,6 +11,7 @@ opt.backup = false -- creates a backup file
 -- opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
+opt.cmdwinheight = 20
 opt.completeopt = { "menuone", "noselect" } -- mostly just for cmp
 opt.conceallevel = 0 -- so that `` is visible in markdown files
 opt.fileencoding = "utf-8" -- the encoding written to a file
