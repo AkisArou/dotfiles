@@ -15,7 +15,6 @@ sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
-sudo systemctl enable --now performance
 
 print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
@@ -97,5 +96,9 @@ ya pack -a yazi-rs/plugins:git
 
 print_info "Building bat cache..."
 bat cache --build
+
+print_info "Generating zsh completions..."
+~/dotfiles/scripts/setup-completions.sh
+source "$HOME/dotfiles/scripts/try-source-completions.sh"
 
 print_success "DONE!"

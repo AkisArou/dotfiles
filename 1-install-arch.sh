@@ -112,6 +112,7 @@ packages=(
   "rustup"
   "ccache" # For faster nvim builds
   "lazygit"
+  "github-cli"
 )
 
 ~/dotfiles/scripts/create-template-env.sh

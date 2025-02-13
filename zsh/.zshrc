@@ -20,6 +20,8 @@ plug "zsh-users/zsh-syntax-highlighting"
 
 # keybinds
 bindkey '^ ' autosuggest-accept
+bindkey -M menuselect '^N' down-line-or-history
+bindkey -M menuselect '^P' up-line-or-history
 
 # source
 source "$HOME/dotfiles/zsh/aliases.sh"
@@ -27,7 +29,13 @@ source "$HOME/dotfiles/zsh/functions.sh"
 source "$HOME/dotfiles/zsh/history.sh"
 
 # completions
-source "$HOME/dotfiles/zsh/npm-completion.sh"
-source "$HOME/dotfiles/zsh/pnpm-completion.sh"
-source "$HOME/dotfiles/zsh/docker-completion.sh"
-source "$HOME/dotfiles/zsh/asdf.sh"
+source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
+source "$HOME/dotfiles/scripts/try-source-completions.sh"
+fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+autoload -Uz compinit && compinit
+
+_fzf_complete_pnpm() {
+  _fzf_complete --multi --reverse --prompt="pnpm run> " -- "$@" < <(
+    cat package.json | jq -r '.scripts | keys[]'
+  )
+}
