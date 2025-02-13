@@ -50,7 +50,7 @@ asdf plugin add java https://github.com/halcyon/asdf-java.git
 cd ~
 asdf install
 
-print_info "Configuring java..."
+print_info "Configuring java... (for the current session only)"
 . ~/.asdf/plugins/java/set-java-home.zsh
 
 print_info "Modifying system for vite..."
