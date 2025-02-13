@@ -53,6 +53,7 @@ local themes = {
       vim.defer_fn(function()
         vim.cmd(string.format("hi LazySpecial guifg=%s", colors.cyan))
         vim.cmd(string.format("hi LazyReasonPlugin guifg=%s", colors.blue))
+        vim.cmd(string.format("hi FzfLuaHeaderText guifg=%s", colors.fg))
       end, 0)
     end,
   },
