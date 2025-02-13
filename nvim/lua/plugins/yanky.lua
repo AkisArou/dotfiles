@@ -4,7 +4,11 @@ return {
   desc = "Better Yank/Paste",
   lazy = true,
   opts = {
-    highlight = { timer = 150 },
+    highlight = {
+      on_put = false,
+      on_yank = true,
+      timer = 150,
+    },
   },
   keys = {
     {

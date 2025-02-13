@@ -1,19 +1,16 @@
 vim.filetype.add({
-  extension = {
-    conf = "conf",
-    env = "dotenv",
-    tiltfile = "tiltfile",
-    Tiltfile = "tiltfile",
-    ["mdx"] = "markdown.mdx",
-    tmTheme = "xml",
-  },
+  extension = { rasi = "rasi", rofi = "rasi", wofi = "rasi", ["mdx"] = "markdown.mdx", tmTheme = "xml" },
   filename = {
-    [".env"] = "dotenv",
+    ["vifmrc"] = "vim",
     ["tsconfig.json"] = "jsonc",
     [".yamlfmt"] = "yaml",
     ["librewolf.overrides.cfg"] = "javascript",
   },
   pattern = {
-    ["%.env%.[%w_.-]+"] = "dotenv",
+    [".*/waybar/config"] = "jsonc",
+    [".*/mako/config"] = "dosini",
+    [".*/kitty/.+%.conf"] = "kitty",
+    [".*/hypr/.+%.conf"] = "hyprlang",
+    ["%.env%.[%w_.-]+"] = "sh",
   },
 })
