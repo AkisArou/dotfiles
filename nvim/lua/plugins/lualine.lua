@@ -45,7 +45,7 @@ return {
           },
         },
         lualine_c = { "filename" },
-        lualine_x = { "overseer", "nvim-dap-ui", "encoding", "fileformat", "filetype" },
+        lualine_x = { "nvim-dap-ui", "encoding", "fileformat", "filetype" },
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
@@ -60,7 +60,7 @@ return {
       tabline = {},
       winbar = {},
       inactive_winbar = {},
-      extensions = { "overseer", "nvim-dap-ui" },
+      extensions = { "nvim-dap-ui" },
     })
   end,
 }
