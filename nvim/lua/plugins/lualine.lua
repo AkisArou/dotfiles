@@ -2,16 +2,13 @@ return {
   "nvim-lualine/lualine.nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
-    -- ins_right({
-    --   function()
-    --     if TSC_ERRORS_COUNT == 0 or TSC_ERRORS_COUNT == nil then
-    --       return ""
-    --     end
-    --
-    --     return "Project errors: " .. tostring(TSC_ERRORS_COUNT)
-    --   end,
-    --   color = { fg = colors.red, gui = "bold" },
-    -- })
+    local tsc = function()
+      if TSC_ERRORS_COUNT == 0 or TSC_ERRORS_COUNT == nil then
+        return ""
+      end
+
+      return "Project errors: " .. tostring(TSC_ERRORS_COUNT)
+    end
 
     require("lualine").setup({
       options = {
@@ -45,7 +42,13 @@ return {
           },
         },
         lualine_c = { "filename" },
-        lualine_x = { "nvim-dap-ui", "encoding", "fileformat", "filetype" },
+        lualine_x = {
+          { tsc, icon = "", color = "DiagnosticError" },
+          "nvim-dap-ui",
+          "encoding",
+          "fileformat",
+          "filetype",
+        },
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
