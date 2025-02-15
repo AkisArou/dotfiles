@@ -5,13 +5,13 @@
 # Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 exec --no-startup-id dex --autostart --environment i3
-exec_always --no-startup-id ~/dotfiles/polybar/init.sh
+exec_always --no-startup-id ~/dotfiles/polybar/init
 exec --no-startup-id nitrogen --set-auto ~/dotfiles/wallpapers/mountains-1.jpg
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec --no-startup-id ~/dotfiles/scripts/inactivity.sh
-exec --no-startup-id ~/dotfiles/scripts/start-tmux.sh
+exec --no-startup-id ~/dotfiles/scripts/inactivity
+exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec --no-startup-id flameshot
 exec --no-startup-id xset s off
 exec --no-startup-id xset s 0 0
@@ -22,8 +22,8 @@ set $down j
 set $up k
 set $right l
 
-set $term ~/dotfiles/st/launch.sh
-set $menu ~/dotfiles/rofi/init.sh
+set $term ~/dotfiles/st/launch
+set $menu ~/dotfiles/rofi/init
 set $browser /usr/bin/brave
 
 # Font for window titles. Will also be used by the bar unless a different font
@@ -60,11 +60,11 @@ bindsym $mod+Shift+t exec brave --incognito --tor
 bindsym $mod+q kill
 
 # Power menu
-bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu.sh
+bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
 
 # toggle bluetooth device
-bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth.sh
-bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme.sh
+bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
+bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
 
 # start a program launcher

@@ -170,7 +170,7 @@ return {
           },
           tsserver = {
             maxTsServerMemory = 4 * 1024,
-            nodePath = "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path.sh",
+            nodePath = "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path",
           },
           preferences = {
             includePackageJsonAutoImports = "on",

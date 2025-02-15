@@ -9,7 +9,7 @@ if [[ ! " ${VALID_THEMES[@]} " =~ " ${SELECTED_THEME} " ]]; then
   exit 1
 fi
 
-~/dotfiles/scripts/create-template-env.sh
+~/dotfiles/scripts/create-template-env
 
 # Use sed for in-place editing to replace or add THEME=$SELECTED_THEME
 sed -i "s/^THEME=.*/THEME=$SELECTED_THEME/" "$HOME/.env" 2>/dev/null
@@ -23,7 +23,7 @@ echo "THEME set to $SELECTED_THEME in ~/.env"
 
 # waybar
 killall waybar
-~/dotfiles/waybar/launch-waybar.sh &
+~/dotfiles/waybar/launch-waybar &
 
 if [ -f "~/dotfiles/eza/${SELECTED_THEME}.yml" ]; then
   ln -sf "~/dotfiles/eza/${SELECTED_THEME}.yml" ~/.config/eza/theme.yml

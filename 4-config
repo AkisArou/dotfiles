@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-source "$(dirname "$0")/scripts/library.sh"
+source "$(dirname "$0")/scripts/library"
 
 clear
 echo "Applying system config..."
@@ -29,7 +29,7 @@ fi
 
 print_info "Setting up tmux..."
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-~/.tmux/plugins/tpm/scripts/install_plugins.sh
+~/.tmux/plugins/tpm/scripts/install_plugins
 tmux source ~/.tmux.conf
 
 print_info "Setting up asdf..."
@@ -98,10 +98,10 @@ print_info "Building bat cache..."
 bat cache --build
 
 print_info "Generating zsh completions..."
-~/dotfiles/scripts/setup-completions.sh
-source "$HOME/dotfiles/scripts/try-source-completions.sh"
+~/dotfiles/scripts/setup-completions
+source "$HOME/dotfiles/scripts/try-source-completions"
 
 print_info "Install GTK adwaita one dark theme..."
-~/dotfiles/scripts/install-adwaita-onedark.sh
+~/dotfiles/scripts/install-adwaita-onedark
 
 print_success "DONE!"

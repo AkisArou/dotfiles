@@ -1,4 +1,4 @@
-source "$HOME/dotfiles/zsh/exports.sh"
+source "$HOME/dotfiles/zsh/exports"
 
 if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
@@ -24,13 +24,13 @@ bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
 
 # source
-source "$HOME/dotfiles/zsh/aliases.sh"
-source "$HOME/dotfiles/zsh/functions.sh"
-source "$HOME/dotfiles/zsh/history.sh"
+source "$HOME/dotfiles/zsh/aliases"
+source "$HOME/dotfiles/zsh/functions"
+source "$HOME/dotfiles/zsh/history"
 
 # completions
 source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
-source "$HOME/dotfiles/scripts/try-source-completions.sh"
+source "$HOME/dotfiles/scripts/try-source-completions"
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 autoload -Uz compinit && compinit
 

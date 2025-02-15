@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 alias sudo="sudo -E"
 alias ta="tmux attach"
 alias vim="TERM=xterm-256color vim"
@@ -10,7 +12,7 @@ alias copy="xclip -sel clip"
 alias grep="grep --color=auto"
 
 function lazygit() {
-  ~/dotfiles/lazygit/launch-lazygit.sh "$@"
+  ~/dotfiles/lazygit/launch-lazygit "$@"
 }
 
 alias lg='lazygit'
@@ -30,4 +32,4 @@ alias ll='ls -lh --git'
 alias la='ll -a'
 alias tree='ll --tree --level=2'
 
-alias update_all="paru -Syu && echo && ~/dotfiles/scripts/build-nvim.sh"
+alias update_all="paru -Syu && echo && ~/dotfiles/scripts/build-nvim"

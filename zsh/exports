@@ -1,8 +1,10 @@
+#!/bin/zsh
+
 if [ -f ~/.env ]; then
   export $(cat ~/.env | xargs)
 fi
 
-. ~/dotfiles/zsh/fzf.sh
+. ~/dotfiles/zsh/fzf
 
 export THEME="${THEME:-onedark}"
 export BAT_THEME=onedark

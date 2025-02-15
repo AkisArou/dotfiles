@@ -10,8 +10,8 @@ exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME
-exec --no-startup-id ~/dotfiles/scripts/start-tmux.sh
-exec_always ~/dotfiles/waybar/launch-waybar.sh
+exec --no-startup-id ~/dotfiles/scripts/start-tmux
+exec_always ~/dotfiles/waybar/launch-waybar
 
 set $mod Mod4
 set $left h
@@ -19,9 +19,9 @@ set $down j
 set $up k
 set $right l
 
-# set $term ~/dotfiles/alacritty/launch.sh
-set $term ~/dotfiles/foot/launch-foot.sh
-set $menu ~/dotfiles/rofi/launch-rofi.sh -show drun
+# set $term ~/dotfiles/alacritty/launch
+set $term ~/dotfiles/foot/launch-foot
+set $menu ~/dotfiles/rofi/launch-rofi -show drun
 #
 # set $menu tofi-drun | xargs swaymsg exec --
 set $browser /usr/bin/brave
@@ -108,11 +108,11 @@ input "1739:30385:CUST0001:00_06CB:76B1_Mouse" {
     bindsym $mod+Shift+c reload
 
     # toggle bluetooth device
-    bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth.sh
-    bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch-rofi.sh -show power-menu -modi power-menu:rofi-power-menu
-    # bindsym $mod+Shift+q exec ~/dotfiles/tofi/power-menu.sh
+    bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
+    bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch-rofi -show power-menu -modi power-menu:rofi-power-menu
+    # bindsym $mod+Shift+q exec ~/dotfiles/tofi/power-menu
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-    bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme.sh
+    bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 #
 # Moving around:
 #
@@ -210,7 +210,7 @@ bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 #
 # Read `man 5 sway-bar` for more information about this section.
 # bar {
-#   swaybar_command ~/dotfiles/waybar/launch-waybar.sh
+#   swaybar_command ~/dotfiles/waybar/launch-waybar
 #   position top
 #
 #     # When the status_command prints a new line to stdout, swaybar updates.

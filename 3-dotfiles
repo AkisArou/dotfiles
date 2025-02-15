@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-source "$(dirname "$0")/scripts/library.sh"
+source "$(dirname "$0")/scripts/library"
 
 clear
 echo "Applying application configs..."
@@ -62,7 +62,7 @@ create_symlink "$HOME/dotfiles/fontconfig" "$HOME/.config/fontconfig"
 create_symlink "$HOME/dotfiles/paru" "$HOME/.config/paru"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 
-./eza/apply-eza-theme.sh
+./eza/apply-eza-theme
 
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
@@ -83,6 +83,6 @@ create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CO
 sudo -E python3 ~/dotfiles/librewolf/merge-policies.py
 
 # Docker
-./docker/generate-deamon-json.sh
+./docker/generate-deamon-json
 
 print_success "DONE!"
