@@ -1,0 +1,52 @@
+#!/bin/zsh
+
+# Set variables
+GITHUB_REPO="lonr/adwaita-one-dark"
+THEME_DIR="$HOME/.local/share/themes/Adwaita-One-Dark"
+GTK_CONFIG_DIR="$HOME/.config"
+THEME_DOWNLOAD_DIR="/tmp/adwaita-one-dark"
+
+# Ensure dependencies are installed
+echo "Checking for required packages..."
+REQUIRED_PKGS=("wget" "tar" "jq")
+for pkg in "${REQUIRED_PKGS[@]}"; do
+  if ! command -v $pkg &>/dev/null; then
+    echo "Error: $pkg is not installed. Install it and rerun the script."
+    exit 1
+  fi
+done
+
+# Get latest release download URL
+echo "Fetching latest release..."
+LATEST_URL=$(wget -qO- "https://api.github.com/repos/$GITHUB_REPO/releases/latest" | jq -r '.tarball_url')
+
+if [[ "$LATEST_URL" == "null" ]]; then
+  echo "Error: Unable to fetch the latest release."
+  exit 1
+fi
+
+# Download and extract theme
+echo "Downloading Adwaita-One-Dark theme..."
+mkdir -p "$THEME_DOWNLOAD_DIR"
+wget -qO "$THEME_DOWNLOAD_DIR/theme.tar.gz" "$LATEST_URL"
+tar -xzf "$THEME_DOWNLOAD_DIR/theme.tar.gz" -C "$THEME_DOWNLOAD_DIR" --strip-components=1
+
+# Move theme to proper location
+rm -rf "$THEME_DIR"
+mkdir -p "$THEME_DIR"
+mv -f "$THEME_DOWNLOAD_DIR"/* "$THEME_DIR"
+
+# Ensure necessary directories exist
+mkdir -p "$GTK_CONFIG_DIR/gtk-4.0" "$GTK_CONFIG_DIR/gtk-3.0"
+mkdir -p "$HOME/.themes/adw-gtk3-dark"
+
+# Create symbolic links (overwriting existing ones)
+ln -sf "$THEME_DIR/adwaita/templates/colors/gtk-dark.css" "$GTK_CONFIG_DIR/gtk-4.0/gtk.css"
+ln -sf "$THEME_DIR/adwaita/templates/colors/gtk-dark.css" "$GTK_CONFIG_DIR/gtk-3.0/gtk.css"
+ln -sf "$THEME_DIR/gtk-2.0" "$HOME/.themes/adw-gtk3-dark/gtk-2.0"
+
+# Gtk3
+# https://github.com/lassekongo83/adw-gtk3
+gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' && gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+
+echo "Adwaita-One-Dark theme installed successfully!"

@@ -101,4 +101,7 @@ print_info "Generating zsh completions..."
 ~/dotfiles/scripts/setup-completions.sh
 source "$HOME/dotfiles/scripts/try-source-completions.sh"
 
+print_info "Install GTK adwaita one dark theme..."
+~/dotfiles/scripts/install-adwaita-onedark.sh
+
 print_success "DONE!"
