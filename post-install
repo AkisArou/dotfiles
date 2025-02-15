@@ -11,6 +11,8 @@ https://wiki.archlinux.org/title/Ext4#Enabling_fast_commit
 * laptop
 w /sys/devices/system/cpu/cpufreq/policy*/energy_performance_preference - - - - performance
 
+Quirks
+------
 * possible laptop touchpad fix
 echo 'ACTION=="add|change", SUBSYSTEM=="i2c", KERNELS=="i2c-CUST0001:00", ATTR{power/control}="on"' | sudo tee /etc/udev/rules.d/99-touchpad-power.rules
 
