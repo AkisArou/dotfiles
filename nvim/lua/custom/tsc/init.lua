@@ -12,7 +12,7 @@ end
 local DEFAULT_CONFIG = {
   auto_open = false,
   bin_path = utils.find_tsc_bin(),
-  enable_progress_notifications = true,
+  enable_progress_notifications = false,
   use_diagnostics = false,
   args = nil,
   spinner = { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" },
@@ -184,13 +184,15 @@ function M.setup(opts)
     M.stop()
   end, { desc = "Stop `tsc` compilation", force = true })
 
-  vim.api.nvim_create_autocmd("BufWritePre", {
-    pattern = "*.{ts,tsx}",
-    desc = "Run tsc.nvim in watch mode automatically when saving a TypeScript file",
-    callback = function()
-      vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil, get_notify_options())
-    end,
-  })
+  if config.enable_progress_notifications then
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = "*.{ts,tsx}",
+      desc = "Run tsc.nvim in watch mode automatically when saving a TypeScript file",
+      callback = function()
+        vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil, get_notify_options())
+      end,
+    })
+  end
 
   vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = "*.{ts,tsx}",
