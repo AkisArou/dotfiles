@@ -71,6 +71,7 @@ packages=(
   "librewolf-bin"
   "dunst"
   "thunar"
+  "adw-gtk-theme"
   "ttf-hack-nerd"
   "ttf-font-awesome"
   "ttf-meslo-nerd"
