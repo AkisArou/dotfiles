@@ -39,7 +39,7 @@ return {
       highlight DiagnosticSignWarn guifg=#8B4500 ctermfg=yellow
       highlight DiagnosticSignInfo guifg=#0A1D42 ctermfg=blue
       highlight DiagnosticSignHint guifg=#004d00 ctermfg=green
-      highlight DiagnosticUnderlineError guisp=#C62828 gui=undercurl
+      highlight DiagnosticUnderlineError guisp=#70222a gui=undercurl
       highlight DiagnosticVirtualTextError guifg=#808080
     ]])
 
