@@ -64,11 +64,6 @@ input "2:7:SynPS/2_Synaptics_TouchPad" {
     events disabled
   }
 
-input "1739:30385:CUST0001:00_06CB:76B1_Mouse" {
-    events disabled
-  }
-
-
 ### Key bindings
 #
 
