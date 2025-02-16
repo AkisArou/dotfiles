@@ -16,7 +16,7 @@ build_neovim() {
 
 # Check if the directory exists
 if [ -d "$INSTALL_DIR" ]; then
-  echo "Neovim installation found"
+  echo "Neovim already installed... checking for updates..."
   cd "$INSTALL_DIR" || exit
   # Fetch changes from the remote
   git fetch
