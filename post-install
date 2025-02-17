@@ -4,9 +4,5 @@ Performance
 * kernel param: mitigations=off
 https://wiki.archlinux.org/title/Improving_performance#Turn_off_CPU_exploit_mitigations
 
-
-* tune2fs -O fast_commit /dev/<nvme0n1p2>
-https://wiki.archlinux.org/title/Ext4#Enabling_fast_commit
-
 * laptop
 w /sys/devices/system/cpu/cpufreq/policy*/energy_performance_preference - - - - performance
