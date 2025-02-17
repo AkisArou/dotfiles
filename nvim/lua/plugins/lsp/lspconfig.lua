@@ -69,7 +69,7 @@ return {
       opts.desc = "Show LSP definitions"
       keymap.set("n", "gd", function()
         require("fzf-lua").lsp_definitions({
-          jump_to_single_result = true,
+          jump1 = true,
           winopts = {
             preview = {
               layout = "vertical",
