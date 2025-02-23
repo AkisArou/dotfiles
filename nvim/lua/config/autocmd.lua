@@ -118,6 +118,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         and vim.api.nvim_buf_get_name(bufnr) == ""
         and vim.bo.buftype ~= "quickfix"
         and vim.bo.buftype ~= "gitcommit"
+        and vim.bo.buftype:find("^Neogit") == nil
       then
         vim.api.nvim_buf_delete(bufnr, {
           force = true,
