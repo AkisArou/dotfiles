@@ -42,8 +42,8 @@ map("i", ".", ".<c-g>u")
 map("i", ";", ";<c-g>u")
 
 -- Keybinding for saving and closing the current buffer
-map("n", "<S-h>", "<cmd>bprevious<CR>", opts)
-map("n", "<S-l>", "<cmd>bnext<CR>", opts)
+map("n", "<S-h>", "<cmd>lua require('conform').format()<CR><cmd>bprevious<CR>", opts)
+map("n", "<S-l>", "<cmd>lua require('conform').format()<CR><cmd>bnext<CR>", opts)
 
 -- qflist
 map("n", "<leader>xq", "<cmd>copen<CR>", opts)

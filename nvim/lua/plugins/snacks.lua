@@ -31,6 +31,8 @@ return {
     {
       "<leader>bd",
       function()
+        require("conform").format()
+        vim.cmd("silent wall")
         Snacks.bufdelete()
       end,
       desc = "Buffer delete current",
@@ -45,9 +47,11 @@ return {
     {
       "<leader>ba",
       function()
+        require("conform").format()
+        vim.cmd("silent wall")
         Snacks.bufdelete.all()
       end,
-      desc = "Buffer delete others",
+      desc = "Buffer delete all",
     },
   },
 }
