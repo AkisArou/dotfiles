@@ -1,5 +1,6 @@
 return {
   "iguanacucumber/magazine.nvim",
+  enabled = false,
   name = "nvim-cmp",
   dependencies = {
     { "iguanacucumber/mag-nvim-lsp", name = "cmp-nvim-lsp", opts = {} },
