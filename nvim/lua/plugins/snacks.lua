@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-doc-name, undefined-doc-class, duplicate-doc-field, undefined-global
 return {
   "folke/snacks.nvim",
   priority = 1000,
