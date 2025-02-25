@@ -71,6 +71,15 @@ return {
       },
     },
 
+    cmdline = {
+      keymap = { preset = "default", ["<C-e>"] = { "select_and_accept" } },
+      completion = {
+        menu = {
+          auto_show = true,
+        },
+      },
+    },
+
     signature = { enabled = true },
   },
   opts_extend = {
