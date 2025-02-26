@@ -1,8 +1,8 @@
 return {
   "saghen/blink.cmp",
   -- enabled = false,
-  build = "cargo build --release",
-  -- version = "*",
+  -- build = "cargo build --release",
+  version = "*",
   -- lazy = false, -- lazy loading handled internally
   dependencies = {
     { "mikavilpas/blink-ripgrep.nvim" },
