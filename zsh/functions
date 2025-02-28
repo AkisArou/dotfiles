@@ -2,17 +2,19 @@
 
 function update_all() {
   paru -Syu
-  echo 
+  echo
 
   ~/dotfiles/scripts/build-nvim
-  echo 
+  echo
 
   zap update all
-  echo 
+  echo
 
   ~/.tmux/plugins/tpm/bin/update_plugins all
-}
+  echo
 
+  ya pack -u
+}
 
 function e() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
