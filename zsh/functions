@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-function update_all() {
+function update-all() {
   paru -Syu
   echo
 
@@ -25,7 +25,7 @@ function e() {
   rm -f -- "$tmp"
 }
 
-function kill_by_port() {
+function kill-by-port() {
   if [[ -n "$1" ]]; then
     local port="$1"
     local process_id
@@ -42,11 +42,11 @@ function kill_by_port() {
   fi
 }
 
-function wake_desktop() {
+function wake-desktop() {
   wol "$DESKTOP_MAC"
 }
 
-function sus_desktop() {
+function sus-desktop() {
   ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
 
@@ -64,6 +64,6 @@ function fv() {
   nvim "$file" || return
 }
 
-function set_java_home() {
+function set-java-home() {
   source ~/.asdf/plugins/java/set-java-home.zsh
 }
