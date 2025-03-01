@@ -6,3 +6,7 @@ https://wiki.archlinux.org/title/Improving_performance#Turn_off_CPU_exploit_miti
 
 * laptop
 w /sys/devices/system/cpu/cpufreq/policy*/energy_performance_preference - - - - performance
+
+* fwupd-efi
+Remove 10" delay
+sudo efibootmgr --delete-bootnum --bootnum 0001
