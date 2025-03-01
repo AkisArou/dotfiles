@@ -40,7 +40,7 @@ local themes = {
           ["@variable.parameter"] = { fg = colors.fg },
           ["@lsp.type.parameter"] = { fg = colors.fg },
           ["@lsp.type.type"] = { fg = colors.fg },
-          ["@lsp.type.interface"] = { fg = colors.blue },
+          ["@lsp.type.interface"] = { fg = colors.cyan },
           ["@lsp.type.enum"] = { fg = colors.fg },
           ["@lsp.type.namespace"] = { fg = colors.fg },
           ["@lsp.type.property"] = { fg = colors.fg },
