@@ -15,9 +15,6 @@ map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window w
 map("v", "J", ":m '>+1<CR>gv=gv")
 map("v", "K", ":m '<-2<CR>gv=gv")
 
--- Better paste
-map("v", "p", "P", opts)
-
 -- delete char without copying
 map("n", "x", '"_x')
 
