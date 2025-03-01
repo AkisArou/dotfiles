@@ -17,7 +17,7 @@ return {
         "json",
       },
       settings = {
-        experimental = { useFlatConfig = true },
+        useFlatConfig = true,
         workspaceFolder = function(bufnr)
           local root_dir = nvim_eslint.resolve_git_dir(bufnr) or vim.fn.getcwd()
           return {
