@@ -11,10 +11,16 @@ Performance
   Remove 10" delay
   sudo efibootmgr --delete-bootnum --bootnum 0001
 
-* watchdog intel
-# Disable intel mei (including mei_watchdog).
+* watchdog
+  => Add kernel parameter in/etc/default/grub:
+
+  GRUB_CMDLINE_LINUX_DEFAULT=nowatchdog
+
+  => Then blacklist the modules in /etc/modeprobe.d/blacklist.conf:
+
+  # Disable intel mei (including mei_watchdog).
   blacklist intel_pmc_bxt
   blacklist iTCO_vendor_support
 
-# Do not load the 'iTCO_wdt' watchdog module on boot.
+  # Do not load the 'iTCO_wdt' watchdog module on boot.
   blacklist iTCO_wdt
