@@ -16,7 +16,7 @@ Performance
 
   GRUB_CMDLINE_LINUX_DEFAULT=nowatchdog
 
-  => Then blacklist the modules in /etc/modeprobe.d/blacklist.conf:
+  => Then blacklist the modules in /etc/modprobe.d/blacklist.conf:
 
   # Disable intel mei (including mei_watchdog).
   blacklist intel_pmc_bxt
