@@ -8,7 +8,7 @@ Performance
   w /sys/devices/system/cpu/cpufreq/policy*/energy_performance_preference - - - - performance
 
 * fwupd-efi
-  Remove 10" delay
+  # Remove 10" delay
   sudo efibootmgr --delete-bootnum --bootnum 0001
 
 * watchdog
