@@ -1,8 +1,8 @@
 return {
   "saghen/blink.cmp",
   -- enabled = false,
-  -- build = "cargo build --release",
-  version = "*",
+  build = "cargo build --release",
+  -- version = "*",
   -- lazy = false, -- lazy loading handled internally
   dependencies = {
     { "mikavilpas/blink-ripgrep.nvim" },
@@ -77,6 +77,20 @@ return {
         menu = {
           auto_show = true,
         },
+      },
+    },
+
+    fuzzy = {
+      sorts = {
+        function(a, b)
+          if (a.client_name == nil or b.client_name == nil) or (a.client_name == b.client_name) then
+            return
+          end
+
+          return b.client_name == "emmet_language_server"
+        end,
+        "score",
+        "sort_text",
       },
     },
 
