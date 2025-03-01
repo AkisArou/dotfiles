@@ -18,6 +18,9 @@ return {
       },
       settings = {
         useFlatConfig = true,
+        nodePath = function()
+          return "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path"
+        end,
         workspaceFolder = function(bufnr)
           local root_dir = nvim_eslint.resolve_git_dir(bufnr) or vim.fn.getcwd()
           return {
