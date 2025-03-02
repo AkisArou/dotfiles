@@ -110,6 +110,8 @@ packages=(
   "genymotion"
   "asdf-vm"
   "clang"
+  "cmake"
+  "ninja"
   "unzip" # Needed by asdf
   "rustup"
   "ccache" # For faster nvim builds
