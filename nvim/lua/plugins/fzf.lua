@@ -60,6 +60,8 @@ return {
 
     vim.keymap.set("n", "<leader>gb", fzf_lua.git_branches, { desc = "Git branches" })
 
+    vim.keymap.set("n", "<leader>ft", fzf_lua.treesitter, { desc = "Treesitter" })
+
     vim.keymap.set("n", "<leader>gc", function()
       fzf_lua.git_commits({
         winopts = {
