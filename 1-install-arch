@@ -109,6 +109,7 @@ packages=(
   "android-studio"
   "genymotion"
   "asdf-vm"
+  "clang"
   "unzip" # Needed by asdf
   "rustup"
   "ccache" # For faster nvim builds
