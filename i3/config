@@ -168,13 +168,13 @@ for_window [window_role="Organizer"] floating enable
 for_window [window_role="Preferences"] floating enable
 for_window [window_role="bubble"] floating enable
 for_window [window_role="page-info"] floating enable
-# for_window [window_role="pop-up"] floating enable
 for_window [window_role="task_dialog"] floating enable
 for_window [window_role="toolbox"] floating enable
 for_window [window_role="webconsole"] floating enable
 for_window [window_type="dialog"] floating enable
 for_window [window_type="menu"] floating enable
-for_window [title="teams.microsoft.com is sharing your screen."] move scratchpad
+for_window [title="^teams.microsoft.com is sharing"] move scratchpad
+for_window [title="^Android Emulator*"] floating enable
 
 floating_minimum_size 400 x 300
 floating_maximum_size 1400 x 1400
