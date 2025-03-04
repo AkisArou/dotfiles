@@ -28,7 +28,7 @@ return {
 
     sources = {
       default = (function()
-        local basic = {
+        local default_sources = {
           "lsp",
           "path",
           "lazydev",
@@ -37,8 +37,10 @@ return {
         }
 
         if vim.g.is_work then
-          table.insert(basic, "commit")
+          table.insert(default_sources, "commit")
         end
+
+        return default_sources
       end)(),
 
       providers = {
