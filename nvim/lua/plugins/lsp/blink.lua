@@ -28,6 +28,7 @@ return {
 
     sources = {
       default = {
+        -- "commit",
         "lsp",
         "path",
         "lazydev",
@@ -54,6 +55,17 @@ return {
             context_size = 5,
             max_filesize = "1M",
           },
+        },
+
+        commit = {
+          name = "Commit",
+          module = "custom.commit",
+          enabled = function()
+            return vim.bo.filetype == "gitcommit"
+          end,
+          ---@module 'blink-cmp-conventional-commits'
+          ---@type blink-cmp-conventional-commits.Options
+          opts = {}, -- none so far
         },
       },
     },
