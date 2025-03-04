@@ -5,9 +5,8 @@ require("config.keymap")
 require("config.filetype")
 require("config.netrw")
 
-local cwd = vim.fn.getcwd()
-
-if cwd:match("nable%-solutions") then
+if vim.g.is_work then
+  local cwd = vim.fn.getcwd()
   local project = cwd .. "/tsconfig.json"
 
   require("custom.tsc.init").setup({

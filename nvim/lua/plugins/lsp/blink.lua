@@ -27,14 +27,19 @@ return {
     },
 
     sources = {
-      default = {
-        -- "commit",
-        "lsp",
-        "path",
-        "lazydev",
-        "buffer",
-        -- "ripgrep"
-      },
+      default = (function()
+        local basic = {
+          "lsp",
+          "path",
+          "lazydev",
+          "buffer",
+          -- "ripgrep"
+        }
+
+        if vim.g.is_work then
+          table.insert(basic, "commit")
+        end
+      end)(),
 
       providers = {
         lazydev = {
@@ -57,16 +62,14 @@ return {
           },
         },
 
-        commit = {
+        commit = vim.g.is_work and {
           name = "Commit",
-          module = "custom.commit",
+          module = "custom.blink-commit",
           enabled = function()
             return vim.bo.filetype == "gitcommit"
           end,
-          ---@module 'blink-cmp-conventional-commits'
-          ---@type blink-cmp-conventional-commits.Options
-          opts = {}, -- none so far
-        },
+          opts = {},
+        } or nil,
       },
     },
 
