@@ -85,17 +85,18 @@ return {
       keymap.set("n", "gt", ":FzfLua typedefs<CR>", opts)
 
       opts.desc = "See available code actions"
-      keymap.set({ "n", "v" }, "<leader>ca", function()
-        vim.lsp.buf.code_action({
-          filter = function(action)
-            if string.find(action.title, "Move to") or string.find(action.title, "Show documentation") then
-              return false
-            end
-
-            return true
-          end,
-        })
-      end, opts)
+      keymap.set({ "n", "v" }, "<leader>ca", "<cmd>FzfLua lsp_code_actions<CR>", opts)
+      -- keymap.set({ "n", "v" }, "<leader>ca", function()
+      --   vim.lsp.buf.code_action({
+      --     filter = function(action)
+      --       if string.find(action.title, "Move to") or string.find(action.title, "Show documentation") then
+      --         return false
+      --       end
+      --
+      --       return true
+      --     end,
+      --   })
+      -- end, opts)
 
       opts.desc = "Smart rename"
       keymap.set("n", "<leader>cr", vim.lsp.buf.rename, opts)
