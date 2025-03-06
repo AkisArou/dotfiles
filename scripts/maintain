@@ -21,3 +21,7 @@ echo "Spaced saved: $home_cache_used"
 echo
 print_info "Clearing system logs"
 sudo journalctl --vacuum-time=7d
+
+echo
+print_info "Building bat cache..."
+bat cache --build
