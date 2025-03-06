@@ -65,9 +65,11 @@ create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flag
 ./eza/apply-eza-theme
 
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
+sudo ln -sf "$HOME/dotfiles/brave/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json" "/usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
 
 sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
+sudo chmod 644 /usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
 
 # Librewolf

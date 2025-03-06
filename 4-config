@@ -104,4 +104,10 @@ source "$HOME/dotfiles/scripts/try-source-completions"
 print_info "Install GTK adwaita one dark theme..."
 ~/dotfiles/scripts/install-adwaita-onedark
 
+print_info "Installing tmp plugins..."
+~/.tmux/plugins/tpm/bin/update_plugins all
+
+print_info "Installing yazi plugins..."
+ya pack -u
+
 print_success "DONE!"

@@ -65,6 +65,7 @@ packages=(
   "openssh"
   "mpv"
   "zsh"
+  "foot"
   "alacritty"
   "kitty"
   "brave-bin"
@@ -136,13 +137,5 @@ sudo make -C ~/dotfiles/st clean install
 echo ""
 print_info "Installing login screen..."
 sudo cp ~/dotfiles/login/issue /etc/issue
-
-# Check if the current shell is zsh
-if [[ "$SHELL" != */zsh ]]; then
-  print_info "Current shell is not zsh. Changing default shell to zsh..."
-  chsh -s $(which zsh)
-else
-  print_success "Current shell is already zsh."
-fi
 
 print_success "DONE!"
