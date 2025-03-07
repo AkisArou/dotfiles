@@ -8,7 +8,8 @@ echo "----------------------------------------------------"
 echo ""
 
 # Ensure rustup is installed for paru, because rust conflicts with rustup which I have a dep
-pacman -S rustup
+sudo pacman -S rustup
+rustup default stable
 
 # Paru
 if sudo pacman -Qs paru >/dev/null; then

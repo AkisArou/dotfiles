@@ -35,6 +35,7 @@ tmux source ~/.tmux.conf
 print_info "Setting up asdf..."
 # Generate asdf completions
 COMPLETIONS_DIR="${ASDF_DATA_DIR:-$HOME/.asdf}/completions"
+PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 if [ ! -d "$COMPLETIONS_DIR" ]; then
   mkdir -p "$COMPLETIONS_DIR"
