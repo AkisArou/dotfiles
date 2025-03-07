@@ -7,6 +7,9 @@ echo "Installing base packages and applying base config..."
 echo "----------------------------------------------------"
 echo ""
 
+# Ensure rustup is installed for paru, because rust conflicts with rustup which I have a dep
+pacman -S rustup
+
 # Paru
 if sudo pacman -Qs paru >/dev/null; then
   print_success "paru is installed..."
