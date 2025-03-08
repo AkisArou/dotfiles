@@ -18,6 +18,8 @@ function update-all() {
   echo
 
   ya pack -u
+
+  fwupdmgr get-updates
 }
 
 function e() {
