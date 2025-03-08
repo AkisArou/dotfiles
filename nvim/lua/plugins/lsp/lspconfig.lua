@@ -85,11 +85,22 @@ return {
       keymap.set("n", "gt", ":FzfLua typedefs<CR>", opts)
 
       opts.desc = "See available code actions"
+      local ommited_actions = {
+        "Move to",
+        "Extract to",
+        "Change to parameter",
+        "Add missing function declaration",
+        "Add all missing function declarations",
+        "Generate 'get'",
+        "Add braces",
+      }
       keymap.set({ "n", "v" }, "<leader>ca", function()
         require("fzf-lua").lsp_code_actions({
           filter = function(action)
-            if string.find(action.title, "Move to") or string.find(action.title, "Change to parameter") then
-              return false
+            for _, value in ipairs(ommited_actions) do
+              if string.find(action.title, value) then
+                return false
+              end
             end
 
             return true
