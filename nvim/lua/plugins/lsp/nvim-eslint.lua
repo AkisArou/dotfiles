@@ -1,5 +1,6 @@
 return {
   "esmuellert/nvim-eslint",
+  enabled = false,
   config = function()
     local nvim_eslint = require("nvim-eslint")
 
