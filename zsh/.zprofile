@@ -10,9 +10,9 @@ if [ -z "$WAYLAND_DISPLAY" ] && [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ]; the
   export XDG_CURRENT_DESKTOP=sway:wlroots
   dbus-run-session sway
 
-  if [[ "$HOST" == "arch-desktop" ]]; then
-    swaymsg "gaps inner 0; gaps horizontal 1700; smart_gaps inverse_outer"
-  fi
+  # if [[ "$HOST" == "arch-desktop" ]]; then
+  #   swaymsg "gaps inner 0; gaps horizontal 1700; smart_gaps inverse_outer"
+  # fi
 fi
 
 # X11
