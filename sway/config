@@ -12,6 +12,7 @@ exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME
 exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec_always ~/dotfiles/waybar/launch-waybar
+exec_always ~/dotfiles/sway/gaps
 
 set $mod Mod4
 set $left h
@@ -225,7 +226,6 @@ bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 #
 
 gaps inner 3
-smart_gaps off
 
 # for_window [shell="xwayland"] title_format "[XWayland] %title"
 for_window [class="^.*"] border pixel 4
