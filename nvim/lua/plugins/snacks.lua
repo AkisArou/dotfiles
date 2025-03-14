@@ -5,6 +5,16 @@ return {
   lazy = false,
   ---@type snacks.Config
   opts = {
+    styles = {
+      input = {
+        backdrop = true,
+        relative = "cursor",
+        b = {
+          completion = true, -- blink completions in input
+        },
+      },
+    },
+    input = {},
     bigfile = {
       -- your bigfile configuration comes here
       -- or leave it empty to use the default settings
