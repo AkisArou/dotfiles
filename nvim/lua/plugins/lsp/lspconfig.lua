@@ -276,7 +276,6 @@ return {
     lspconfig["emmet_language_server"].setup({
       capabilities = capabilities,
       on_attach = on_attach,
-      filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "svelte" },
     })
 
     lspconfig["lua_ls"].setup({
@@ -328,6 +327,7 @@ return {
         },
       },
     })
+
     lspconfig.taplo.setup({})
 
     lspconfig["dockerls"].setup({})
