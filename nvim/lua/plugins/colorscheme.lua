@@ -1,10 +1,11 @@
 local themes = {
   tokyonight = {
     name = "tokyonight",
-    colorscheme_name = "tokyonight-night",
     repo = "folke/tokyonight.nvim",
     config = function()
-      vim.opt.background = "dark"
+      require("tokyonight").setup({
+        style = "night",
+      })
     end,
   },
   vscode = {
@@ -78,7 +79,7 @@ function M.config()
     selectedTheme.config()
   end
 
-  local status_ok, _ = pcall(vim.cmd.colorscheme, selectedTheme.colorscheme_name or selectedTheme.name)
+  local status_ok, _ = pcall(vim.cmd.colorscheme, selectedTheme.name)
   if not status_ok then
     return
   end
