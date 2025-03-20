@@ -6,6 +6,11 @@ local themes = {
       require("tokyonight").setup({
         style = "night",
       })
+
+      vim.defer_fn(function()
+        vim.cmd(string.format("hi @tag.tsx guifg=%s", "#bb9af7"))
+        vim.cmd(string.format("hi @variable.parameter guifg=%s", "#a9b1d6"))
+      end, 0)
     end,
   },
   vscode = {
