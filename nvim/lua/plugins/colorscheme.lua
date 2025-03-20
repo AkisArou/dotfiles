@@ -10,6 +10,15 @@ local themes = {
       vim.defer_fn(function()
         vim.cmd(string.format("hi @tag.tsx guifg=%s", "#bb9af7"))
         vim.cmd(string.format("hi @variable.parameter guifg=%s", "#a9b1d6"))
+
+        vim.cmd([[
+          highlight DiagnosticSignError guifg=#6e2a33 ctermfg=red
+          highlight DiagnosticSignWarn guifg=#7a3f22 ctermfg=yellow
+          highlight DiagnosticSignInfo guifg=#2a4373 ctermfg=blue
+          highlight DiagnosticSignHint guifg=#364a23 ctermfg=green
+          highlight DiagnosticUnderlineError guisp=#6e2a33 gui=undercurl
+          highlight DiagnosticVirtualTextError guifg=#3b4050
+        ]])
       end, 0)
     end,
   },
@@ -62,6 +71,15 @@ local themes = {
         vim.cmd(string.format("hi LazySpecial guifg=%s", colors.cyan))
         vim.cmd(string.format("hi LazyReasonPlugin guifg=%s", colors.blue))
         vim.cmd(string.format("hi FzfLuaHeaderText guifg=%s", colors.fg))
+
+        vim.cmd([[
+          highlight DiagnosticSignError guifg=#5C0000 ctermfg=red
+          highlight DiagnosticSignWarn guifg=#8B4500 ctermfg=yellow
+          highlight DiagnosticSignInfo guifg=#0A1D42 ctermfg=blue
+          highlight DiagnosticSignHint guifg=#004d00 ctermfg=green
+          highlight DiagnosticUnderlineError guisp=#70222a gui=undercurl
+          highlight DiagnosticVirtualTextError guifg=#808080
+        ]])
       end, 0)
     end,
   },
