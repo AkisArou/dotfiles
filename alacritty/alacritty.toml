@@ -28,4 +28,4 @@ family = "HackNerdFont"
 style = "Italic"
 
 [general]
-import = ["~/dotfiles/alacritty/onedark.toml"]
+import = ["~/dotfiles/alacritty/tokyonight_night.toml"]
