@@ -1,8 +1,8 @@
 * {
     foreground: #d4d4d4;
     background-color: #24283b;
-    active-background: #9274ca;
-    urgent-background: #f44747;
+    active-background: #1a1b26;
+    urgent-background: #f7768e;
     urgent-foreground: #282a36;
     selected-background: var(active-background);
     selected-urgent-background: var(urgent-background);

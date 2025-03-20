@@ -1,6 +1,7 @@
 local themes = {
   tokyonight = {
     name = "tokyonight",
+    colorscheme_name = "tokyonight-night",
     repo = "folke/tokyonight.nvim",
     config = function()
       vim.opt.background = "dark"
@@ -60,7 +61,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes[os.getenv("THEME") or "onedark"] or themes.vscode
+local selectedTheme = themes[vim.g.os_theme] or themes.onedark
 
 local M = {
   selectedTheme.repo,
@@ -77,7 +78,7 @@ function M.config()
     selectedTheme.config()
   end
 
-  local status_ok, _ = pcall(vim.cmd.colorscheme, selectedTheme.name)
+  local status_ok, _ = pcall(vim.cmd.colorscheme, selectedTheme.colorscheme_name or selectedTheme.name)
   if not status_ok then
     return
   end
