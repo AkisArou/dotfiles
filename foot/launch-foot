@@ -1,7 +1,15 @@
-#!/usr/bin/sh
+#!/usr/bin/zsh
 
 if [ -f ~/.env ]; then
   source ~/.env
 fi
 
-foot --override include=~/dotfiles/foot/"${THEME:-onedark}".ini
+FONT=HackNerdFont-Regular:size=
+
+if [[ "$HOST" == "arch-desktop" ]]; then
+  FONT="$FONT"10
+else
+  FONT="$FONT"9
+fi
+
+foot --override include=~/dotfiles/foot/"${THEME:-onedark}".ini --font="$FONT"
