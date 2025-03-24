@@ -58,9 +58,9 @@ local function lazykeys(keys)
 end
 
 -- Cursor stays in place when moving screen
-vim.keymap.set("n", "<c-d>", lazykeys("<c-d>zz"), { desc = "Scroll down half screen" })
-vim.keymap.set("n", "<c-u>", lazykeys("<c-u>zz"), { desc = "Scroll up half screen" })
-vim.keymap.set("n", ")", lazykeys(")zz"), { desc = "Scroll down one sentence" })
-vim.keymap.set("n", "(", lazykeys("(zz"), { desc = "Scroll up one sentence" })
-vim.keymap.set("n", "}", lazykeys("}zz"), { desc = "Scroll down one paragraph" })
-vim.keymap.set("n", "{", lazykeys("{zz"), { desc = "Scroll up one paragraph" })
+-- vim.keymap.set("n", "<c-d>", lazykeys("<c-d>zz"), { desc = "Scroll down half screen" })
+-- vim.keymap.set("n", "<c-u>", lazykeys("<c-u>zz"), { desc = "Scroll up half screen" })
+-- vim.keymap.set("n", ")", lazykeys(")zz"), { desc = "Scroll down one sentence" })
+-- vim.keymap.set("n", "(", lazykeys("(zz"), { desc = "Scroll up one sentence" })
+-- vim.keymap.set("n", "}", lazykeys("}zz"), { desc = "Scroll down one paragraph" })
+-- vim.keymap.set("n", "{", lazykeys("{zz"), { desc = "Scroll up one paragraph" })
