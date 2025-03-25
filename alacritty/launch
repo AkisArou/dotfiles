@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
 if [[ "$HOST" == "arch-desktop" ]]; then
-  font_size=8
+  font_size=10
 else
   font_size=9
 fi

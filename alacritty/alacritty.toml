@@ -9,7 +9,7 @@ x = 20
 y = 0
 
 [font]
-size = 9
+size = 10
 
 [font.normal]
 family = "HackNerdFont"
