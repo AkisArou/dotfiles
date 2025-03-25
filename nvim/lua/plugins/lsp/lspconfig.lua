@@ -84,6 +84,7 @@ return {
         "Add all missing function declarations",
         "Generate 'get'",
         "Add braces",
+        "Remove unused",
       }
       keymap.set({ "n", "v" }, "<leader>ca", function()
         require("fzf-lua").lsp_code_actions({
