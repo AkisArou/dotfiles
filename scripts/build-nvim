@@ -10,7 +10,7 @@ REPO_URL="https://github.com/neovim/neovim"
 build_neovim() {
   echo "Building Neovim..."
   cd "$INSTALL_DIR" || exit
-  make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
+  CC=clang make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
   make install
 }
 
