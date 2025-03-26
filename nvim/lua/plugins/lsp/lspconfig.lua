@@ -85,6 +85,8 @@ return {
         "Generate 'get'",
         "Add braces",
         "Remove unused",
+        "Fix all detected spelling",
+        "Change spelling to",
       }
       keymap.set({ "n", "v" }, "<leader>ca", function()
         require("fzf-lua").lsp_code_actions({
