@@ -12,13 +12,14 @@ local themes = {
         vim.cmd(string.format("hi @variable.parameter guifg=%s", "#a9b1d6"))
 
         vim.cmd([[
-          highlight DiagnosticSignError guifg=#6e2a33 ctermfg=red
-          highlight DiagnosticSignWarn guifg=#7a3f22 ctermfg=yellow
-          highlight DiagnosticSignInfo guifg=#2a4373 ctermfg=blue
-          highlight DiagnosticSignHint guifg=#364a23 ctermfg=green
-          highlight DiagnosticUnderlineError guisp=#6e2a33 gui=undercurl
-          highlight DiagnosticVirtualTextError guifg=#3b4050
-          highlight CursorLineNr guifg=#737aa2
+          hi DiagnosticSignError guifg=#6e2a33 ctermfg=red
+          hi DiagnosticSignWarn guifg=#7a3f22 ctermfg=yellow
+          hi DiagnosticSignInfo guifg=#2a4373 ctermfg=blue
+          hi DiagnosticSignHint guifg=#364a23 ctermfg=green
+          hi DiagnosticUnderlineError guisp=#6e2a33 gui=undercurl
+          hi DiagnosticVirtualTextError guifg=#3b4050
+          hi CursorLineNr guifg=#737aa2
+          hi DiagnosticUnnecessary guifg=#737aa2
         ]])
       end, 0)
     end,
@@ -74,12 +75,13 @@ local themes = {
         vim.cmd(string.format("hi FzfLuaHeaderText guifg=%s", colors.fg))
 
         vim.cmd([[
-          highlight DiagnosticSignError guifg=#5C0000 ctermfg=red
-          highlight DiagnosticSignWarn guifg=#8B4500 ctermfg=yellow
-          highlight DiagnosticSignInfo guifg=#0A1D42 ctermfg=blue
-          highlight DiagnosticSignHint guifg=#004d00 ctermfg=green
-          highlight DiagnosticUnderlineError guisp=#70222a gui=undercurl
-          highlight DiagnosticVirtualTextError guifg=#808080
+          hi DiagnosticSignError guifg=#5C0000 ctermfg=red
+          hi DiagnosticSignWarn guifg=#8B4500 ctermfg=yellow
+          hi DiagnosticSignInfo guifg=#0A1D42 ctermfg=blue
+          hi DiagnosticSignHint guifg=#004d00 ctermfg=green
+          hi DiagnosticUnderlineError guisp=#70222a gui=undercurl
+          hi DiagnosticVirtualTextError guifg=#808080
+          hi! MiniCursorword guibg=#343b41 gui=NONE
         ]])
       end, 0)
     end,
