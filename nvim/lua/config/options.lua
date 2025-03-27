@@ -12,7 +12,7 @@ opt.backup = false -- creates a backup file
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
 opt.cmdwinheight = 20
-opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" } -- mostly just for cmp
+opt.completeopt = { "menuone", "noinsert", "popup", "fuzzy" } -- mostly just for cmp
 opt.conceallevel = 0 -- so that `` is visible in markdown files
 opt.fileencoding = "utf-8" -- the encoding written to a file
 opt.hlsearch = true -- highlight all matches on previous search pattern

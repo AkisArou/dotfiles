@@ -44,21 +44,3 @@ map("n", "<S-l>", "<cmd>lua require('conform').format()<CR><cmd>bnext<CR>", opts
 
 -- qflist
 map("n", "<leader>xq", "<cmd>copen<CR>", opts)
-
-local function lazykeys(keys)
-  keys = vim.api.nvim_replace_termcodes(keys, true, false, true)
-  return function()
-    local old = vim.o.lazyredraw
-    vim.o.lazyredraw = true
-    vim.api.nvim_feedkeys(keys, "nx", false)
-    vim.o.lazyredraw = old
-  end
-end
-
--- Cursor stays in place when moving screen
--- vim.keymap.set("n", "<c-d>", lazykeys("<c-d>zz"), { desc = "Scroll down half screen" })
--- vim.keymap.set("n", "<c-u>", lazykeys("<c-u>zz"), { desc = "Scroll up half screen" })
--- vim.keymap.set("n", ")", lazykeys(")zz"), { desc = "Scroll down one sentence" })
--- vim.keymap.set("n", "(", lazykeys("(zz"), { desc = "Scroll up one sentence" })
--- vim.keymap.set("n", "}", lazykeys("}zz"), { desc = "Scroll down one paragraph" })
--- vim.keymap.set("n", "{", lazykeys("{zz"), { desc = "Scroll up one paragraph" })
