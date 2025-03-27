@@ -105,7 +105,10 @@ return {
 
       opts.desc = "Remove unused imports"
       keymap.set("n", "<leader>cqi", function()
-        require("vtsls").commands.remove_unused_imports(bufnr)
+        require("vtsls").commands.remove_unused_imports(bufnr, function()
+          require("conform").format({ bufnr = bufnr, async = false })
+          vim.cmd("silent! w")
+        end)
       end, opts)
     end
 
