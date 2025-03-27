@@ -43,7 +43,7 @@ return {
       opts.buffer = bufnr
 
       opts.desc = "Show LSP references"
-      keymap.set("n", "gr", function()
+      keymap.set("n", "grr", function()
         require("fzf-lua").lsp_references({
           ignore_current_line = true,
           winopts = {
@@ -69,13 +69,8 @@ return {
         })
       end, opts)
 
-      opts.desc = "Show LSP implementations"
-      keymap.set("n", "gi", ":FzfLua lsp_implementations<CR>", opts)
-
-      opts.desc = "Show LSP type definitions"
-      keymap.set("n", "gt", ":FzfLua typedefs<CR>", opts)
-
       opts.desc = "See available code actions"
+
       local ommited_actions = {
         "Move to",
         "Extract to",
@@ -88,7 +83,8 @@ return {
         "Fix all detected spelling",
         "Change spelling to",
       }
-      keymap.set({ "n", "v" }, "<leader>ca", function()
+
+      keymap.set({ "n", "v" }, "gra", function()
         require("fzf-lua").lsp_code_actions({
           filter = function(action)
             for _, value in ipairs(ommited_actions) do
@@ -102,27 +98,8 @@ return {
         })
       end, opts)
 
-      opts.desc = "Smart rename"
-      keymap.set("n", "<leader>cr", vim.lsp.buf.rename, opts)
-
       opts.desc = "Show buffer diagnostics"
       keymap.set("n", "<leader>cb", ":FzfLua lsp_document_diagnostics<CR>", opts)
-
-      opts.desc = "Show line diagnostics"
-      keymap.set("n", "<leader>cd", vim.diagnostic.open_float, opts)
-
-      opts.desc = "Go to previous diagnostic"
-      keymap.set("n", "[d", function()
-        vim.diagnostic.jump({ count = -1, float = true })
-      end, opts)
-
-      opts.desc = "Go to next diagnostic"
-      keymap.set("n", "]d", function()
-        vim.diagnostic.jump({ count = 1, float = true })
-      end, opts)
-
-      opts.desc = "Show documentation for what is under cursor"
-      keymap.set("n", "K", vim.lsp.buf.hover, opts)
 
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>cl", "<cmd>LspRestart<CR>", opts)
