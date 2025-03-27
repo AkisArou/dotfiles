@@ -18,6 +18,7 @@ local themes = {
           highlight DiagnosticSignHint guifg=#364a23 ctermfg=green
           highlight DiagnosticUnderlineError guisp=#6e2a33 gui=undercurl
           highlight DiagnosticVirtualTextError guifg=#3b4050
+          highlight CursorLineNr guifg=#737aa2
         ]])
       end, 0)
     end,
