@@ -98,7 +98,7 @@ return {
       end, opts)
 
       opts.desc = "Show buffer diagnostics"
-      keymap.set("n", "<leader>cb", ":FzfLua lsp_document_diagnostics<CR>", opts)
+      keymap.set("n", "<C-w><C-f>", ":FzfLua lsp_document_diagnostics<CR>", opts)
 
       opts.desc = "Restart LSP"
       keymap.set("n", "<leader>cl", "<cmd>LspRestart<CR>", opts)
