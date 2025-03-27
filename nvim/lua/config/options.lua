@@ -12,7 +12,7 @@ opt.backup = false -- creates a backup file
 opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
 opt.cmdwinheight = 20
-opt.completeopt = { "menuone", "noselect" } -- mostly just for cmp
+opt.completeopt = { "menuone", "noselect", "popup", "fuzzy" } -- mostly just for cmp
 opt.conceallevel = 0 -- so that `` is visible in markdown files
 opt.fileencoding = "utf-8" -- the encoding written to a file
 opt.hlsearch = true -- highlight all matches on previous search pattern
@@ -53,7 +53,6 @@ opt.wrap = false -- display lines as one long line
 opt.sidescrolloff = 8 -- minimal number of screen columns to keep to the left and right of the cursor if wrap is `false`
 opt.winminwidth = 5 -- Minimum window width
 -- vim.opt.termsync = true -- terminal synchronized output
-opt.paste = true -- disable auto comment in new line
 opt.guifont = "monospace:h17" -- the font used in graphical neovim applications
 opt.fillchars.eob = " " -- show empty lines at the end of a buffer as ` ` {default `~`}
 opt.shortmess:append("c") -- hide all the completion messages, e.g. "-- XXX completion (YYY)", "match 1 of 2", "The only match", "Pattern not found"
@@ -64,3 +63,5 @@ opt.linebreak = true
 
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"
+
+vim.cmd([[autocmd FileType * set formatoptions-=ro]]) -- disable new line auto comment
