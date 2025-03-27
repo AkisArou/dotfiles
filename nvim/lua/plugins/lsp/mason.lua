@@ -41,6 +41,7 @@ return {
 
     local extra = {
       "eslint_d",
+      "eslint-lsp",
       "shfmt",
       "stylua",
       "shellcheck",

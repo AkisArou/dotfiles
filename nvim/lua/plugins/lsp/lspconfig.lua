@@ -357,5 +357,17 @@ return {
         return require("lspconfig.util").root_pattern(".git")(...)
       end,
     })
+
+    lspconfig.eslint.setup({
+      capabilities = capabilities,
+      on_attach = on_attach,
+      root_dir = function(...)
+        return require("lspconfig.util").root_pattern(".git", "eslint.config.js")(...)
+      end,
+      settings = {
+        format = false,
+        nodePath = "~/dotfiles/nvim/lua/plugins/lsp/vscode-as-node-path",
+      },
+    })
   end,
 }
