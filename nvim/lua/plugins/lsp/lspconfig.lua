@@ -4,7 +4,6 @@ return {
   lazy = true,
   dependencies = {
     "saghen/blink.cmp",
-    -- "iguanacucumber/magazine.nvim",
     "b0o/SchemaStore.nvim",
     "yioneko/nvim-vtsls",
     "ibhagwan/fzf-lua",
@@ -109,8 +108,6 @@ return {
         require("vtsls").commands.remove_unused_imports(bufnr)
       end, opts)
     end
-
-    -- local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
     local capabilities = require("blink.cmp").get_lsp_capabilities()
 
