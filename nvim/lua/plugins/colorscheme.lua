@@ -19,7 +19,7 @@ local themes = {
           hi DiagnosticUnderlineError guisp=#6e2a33 gui=undercurl
           hi DiagnosticVirtualTextError guifg=#3b4050
           hi CursorLineNr guifg=#737aa2
-          hi DiagnosticUnnecessary guifg=#737aa2
+          hi DiagnosticUnnecessary guifg=#6F7E99
         ]])
       end, 0)
     end,
