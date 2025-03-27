@@ -38,6 +38,7 @@ export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export BROWSER="brave"
+export EDGE_PATH=$(which brave)
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
 

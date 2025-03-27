@@ -2,6 +2,7 @@ vim.filetype.add({
   extension = { rasi = "rasi", rofi = "rasi", wofi = "rasi", ["mdx"] = "markdown.mdx", tmTheme = "xml" },
   filename = {
     ["vifmrc"] = "vim",
+    ["exports"] = "zsh",
     ["tsconfig.json"] = "jsonc",
     [".yamlfmt"] = "yaml",
     ["librewolf.overrides.cfg"] = "javascript",
