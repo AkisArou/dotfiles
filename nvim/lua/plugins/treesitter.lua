@@ -58,7 +58,9 @@ return {
         "editorconfig",
         "tmux",
         "git_config",
+        "gitignore",
         "ssh_config",
+        "dockerfile",
       },
       incremental_selection = {
         enable = true,
