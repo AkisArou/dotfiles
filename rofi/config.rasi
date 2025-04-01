@@ -13,10 +13,12 @@ configuration {
 }
 
 #window {
-    background-color: #1f1f1f99;
     width: 500px;
     height: 600px;
     border: 0;
+    padding: 0;
+    border-radius:    6;
+    background-color: var(bordercolor);
 }
 
 #mainbox {
@@ -38,7 +40,7 @@ configuration {
 
 #listview {
     fixed-height: 0;
-    border:       0px;
+    border:       0;
     border-color: var(bordercolor);
     spacing:      2px ;
     scrollbar:    false;

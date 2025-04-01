@@ -106,8 +106,8 @@ augroup END
 
 autocmd BufLeave,FocusLost * silent! wall
 
-nnoremap <silent> <S-h> :bprevious<CR>
-nnoremap <silent> <S-l> :bnext<CR>
+nnoremap <silent> [b :bprevious<CR>
+nnoremap <silent> ]b :bnext<CR>
 
 function! CloseOtherBuffers()
   " Get the current buffer number
