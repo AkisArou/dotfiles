@@ -38,9 +38,22 @@ map("i", ",", ",<c-g>u")
 map("i", ".", ".<c-g>u")
 map("i", ";", ";<c-g>u")
 
--- Keybinding for saving and closing the current buffer
-map("n", "[b", "<cmd>lua require('conform').format()<CR><cmd>bprevious<CR>", opts)
-map("n", "]b", "<cmd>lua require('conform').format()<CR><cmd>bnext<CR>", opts)
-
 -- qflist
 map("n", "<leader>xq", "<cmd>copen<CR>", opts)
+
+-- Keybinding for saving and closing the current buffer
+local function format_and_switch_buffer(cmd)
+  if vim.bo.modifiable then
+    vim.cmd("lua require('conform').format()")
+  end
+
+  vim.cmd(cmd)
+end
+
+map("n", "[b", function()
+  format_and_switch_buffer("bprevious")
+end, opts)
+
+map("n", "]b", function()
+  format_and_switch_buffer("bnext")
+end, opts)

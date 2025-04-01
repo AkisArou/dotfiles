@@ -1,3 +1,5 @@
+local util = require("custom.util")
+
 ---@diagnostic disable: undefined-doc-name, undefined-doc-class, duplicate-doc-field, undefined-global
 return {
   "folke/snacks.nvim",
@@ -42,8 +44,7 @@ return {
     {
       "<leader>bd",
       function()
-        require("conform").format()
-        vim.cmd("silent wall")
+        util.write_format()
         Snacks.bufdelete()
       end,
       desc = "Buffer delete current",
@@ -58,8 +59,7 @@ return {
     {
       "<leader>ba",
       function()
-        require("conform").format()
-        vim.cmd("silent wall")
+        util.write_format()
         Snacks.bufdelete.all()
       end,
       desc = "Buffer delete all",
