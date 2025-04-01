@@ -57,6 +57,8 @@ return {
         "vimdoc",
         "editorconfig",
         "tmux",
+        "git_config",
+        "ssh_config",
       },
       incremental_selection = {
         enable = true,

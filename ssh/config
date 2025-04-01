@@ -5,7 +5,6 @@ Host *
 	Protocol 2
   ConnectTimeout 10
 
-
 Host 192.168.*.*
 	Protocol 2
   Compression no

@@ -12,6 +12,8 @@ vim.filetype.add({
     [".*/mako/config"] = "dosini",
     [".*/kitty/.+%.conf"] = "kitty",
     [".*/hypr/.+%.conf"] = "hyprlang",
+    [".*/git/config.*"] = "gitconfig",
+    [".*/ssh/config"] = "sshconfig",
     [".*/.+%.tmux"] = "tmux",
     ["%.env%.[%w_.-]+"] = "sh",
   },
