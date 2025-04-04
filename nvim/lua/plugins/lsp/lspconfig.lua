@@ -112,8 +112,6 @@ return {
       end, opts)
     end
 
-    local capabilities = require("blink.cmp").get_lsp_capabilities()
-
     local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
     for type, icon in pairs(signs) do
       local hl = "DiagnosticSign" .. type
@@ -121,7 +119,6 @@ return {
     end
 
     lspconfig["html"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
     })
 
@@ -131,7 +128,6 @@ return {
       "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$"
 
     lspconfig["vtsls"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       root_dir = function(...)
         return require("lspconfig.util").root_pattern(".git", "package.json", "tsconfig.json")(...)
@@ -176,7 +172,6 @@ return {
     })
 
     lspconfig["cssls"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       settings = {
         css = {
@@ -195,7 +190,6 @@ return {
     })
 
     lspconfig["tailwindcss"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       root_dir = function(...)
         return require("lspconfig.util").root_pattern(
@@ -240,17 +234,14 @@ return {
     })
 
     lspconfig["prismals"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
     })
 
-    lspconfig["emmet_language_server"].setup({
-      capabilities = capabilities,
-      on_attach = on_attach,
-    })
+    -- lspconfig["emmet_language_server"].setup({
+    --   on_attach = on_attach,
+    -- })
 
     lspconfig["lua_ls"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       settings = {
         Lua = {
@@ -268,7 +259,6 @@ return {
     })
 
     lspconfig["jsonls"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       filetypes = { "json", "jsonc" },
       settings = {
@@ -283,7 +273,6 @@ return {
     })
 
     lspconfig["yamlls"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       settings = {
         yaml = {
@@ -322,13 +311,11 @@ return {
     end
 
     lspconfig["npm_workspaces_language_server"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       filetypes = { "json", "packagejson" },
     })
 
     lspconfig["mdx_analyzer"].setup({
-      capabilities = capabilities,
       on_attach = on_attach,
       root_dir = function(...)
         return require("lspconfig.util").root_pattern(".git")(...)
