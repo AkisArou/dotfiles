@@ -106,9 +106,6 @@ augroup END
 
 autocmd BufLeave,FocusLost * silent! wall
 
-nnoremap <silent> [b :bprevious<CR>
-nnoremap <silent> ]b :bnext<CR>
-
 function! CloseOtherBuffers()
   " Get the current buffer number
   let l:current_buffer = bufnr('%')
@@ -166,3 +163,9 @@ endif
 
 nnoremap <leader>ff <cmd>FZF<CR>                                                                                     
 nnoremap <leader>e <cmd>Ex<CR>                                                                                     
+
+nnoremap <silent> [b :bprevious<CR>
+nnoremap <silent> ]b :bnext<CR>
+
+nnoremap <silent> [q :cprevious<CR>
+nnoremap <silent> ]q :cnext<CR>
