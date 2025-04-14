@@ -1,3 +1,12 @@
+-- Set default root marker for all clients
+vim.lsp.config("*", {
+  root_markers = { ".git" },
+})
+
+vim.lsp.config.vtsls = {
+  root_markers = { ".git", "tsconfig.json", "jsonconfig.json", "package.json" },
+}
+
 vim.lsp.enable({
   "html",
   "vtsls",
