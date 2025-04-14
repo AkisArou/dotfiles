@@ -1,14 +1,16 @@
-vim.lsp.enable("html")
-vim.lsp.enable("vtsls")
-vim.lsp.enable("cssls")
-vim.lsp.enable("tailwindcss")
-vim.lsp.enable("lua_ls")
-vim.lsp.enable("jsonls")
-vim.lsp.enable("yamlls")
-vim.lsp.enable("taplo")
-vim.lsp.enable("dockerls")
-vim.lsp.enable("docker_compose_language_service")
-vim.lsp.enable("npmls")
+vim.lsp.enable({
+  "html",
+  "vtsls",
+  "cssls",
+  "tailwindcss",
+  "lua_ls",
+  "jsonls",
+  "yamlls",
+  "taplo",
+  "dockerls",
+  "docker_compose_language_service",
+  "npmls",
+})
 
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("akisarou.lsp", {}),
