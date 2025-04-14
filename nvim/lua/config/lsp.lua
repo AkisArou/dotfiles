@@ -1,14 +1,27 @@
+vim.lsp.enable("html")
+vim.lsp.enable("vtsls")
+vim.lsp.enable("cssls")
+vim.lsp.enable("tailwindcss")
+vim.lsp.enable("lua_ls")
+vim.lsp.enable("jsonls")
+vim.lsp.enable("yamlls")
+vim.lsp.enable("taplo")
+vim.lsp.enable("dockerls")
+vim.lsp.enable("docker_compose_language_service")
+vim.lsp.enable("npmls")
+
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("akisarou.lsp", {}),
   callback = function(args)
     local bufnr = args.buf
     local keymap = vim.keymap
+    local fzf = require("fzf-lua")
 
     local opts = { noremap = true, silent = true }
 
     opts.desc = "Show LSP references"
     keymap.set("n", "grr", function()
-      require("fzf-lua").lsp_references({
+      fzf.lsp_references({
         ignore_current_line = true,
         winopts = {
           preview = {
@@ -23,7 +36,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     opts.desc = "Show LSP definitions"
     keymap.set("n", "gd", function()
-      require("fzf-lua").lsp_definitions({
+      fzf.lsp_definitions({
         jump1 = true,
         winopts = {
           preview = {
@@ -34,22 +47,21 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end, opts)
 
     opts.desc = "See available code actions"
-
-    local ommited_actions = {
-      "Move to",
-      "Extract to",
-      "Change to parameter",
-      "Add missing function declaration",
-      "Add all missing function declarations",
-      "Generate 'get'",
-      "Add braces",
-      "Remove unused",
-      "Fix all detected spelling",
-      "Change spelling to",
-    }
-
     keymap.set({ "n", "v" }, "gra", function()
-      require("fzf-lua").lsp_code_actions({
+      local ommited_actions = {
+        "Move to",
+        "Extract to",
+        "Change to parameter",
+        "Add missing function declaration",
+        "Add all missing function declarations",
+        "Generate 'get'",
+        "Add braces",
+        "Remove unused",
+        "Fix all detected spelling",
+        "Change spelling to",
+      }
+
+      fzf.lsp_code_actions({
         filter = function(action)
           for _, value in ipairs(ommited_actions) do
             if string.find(action.title, value) then
@@ -77,15 +89,3 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end, opts)
   end,
 })
-
-vim.lsp.enable("html")
-vim.lsp.enable("vtsls")
-vim.lsp.enable("cssls")
-vim.lsp.enable("tailwindcss")
-vim.lsp.enable("lua_ls")
-vim.lsp.enable("jsonls")
-vim.lsp.enable("yamlls")
-vim.lsp.enable("taplo")
-vim.lsp.enable("dockerls")
-vim.lsp.enable("docker_compose_language_service")
-vim.lsp.enable("npmls")
