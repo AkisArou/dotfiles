@@ -3,22 +3,20 @@ vim.lsp.config("*", {
   root_markers = { ".git" },
 })
 
-vim.lsp.config.vtsls = {
-  root_markers = { ".git", "tsconfig.json", "jsonconfig.json", "package.json" },
-}
-
 vim.lsp.enable({
-  "html",
-  "vtsls",
   "cssls",
-  "tailwindcss",
-  "lua_ls",
-  "jsonls",
-  "yamlls",
-  "taplo",
-  "dockerls",
+  "cssmodules_ls",
   "docker_compose_language_service",
+  "dockerls",
+  "html",
+  "jsonls",
+  "lua_ls",
+  "mdx_analyzer",
   "npmls",
+  "tailwindcss",
+  "taplo",
+  "vtsls",
+  "yamlls",
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {

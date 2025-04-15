@@ -1,5 +1,10 @@
+-- @type vim.lsp.Config
 return {
+  cmd = { "yaml-language-server", "--stdio" },
+  filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
+  root_markers = { ".git" },
   settings = {
+    redhat = { telemetry = { enabled = false } },
     yaml = {
       schemaStore = {
         -- You must disable built-in schemaStore support if you want to use
