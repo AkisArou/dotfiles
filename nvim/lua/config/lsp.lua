@@ -22,14 +22,13 @@ vim.lsp.enable({
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("akisarou.lsp", {}),
   callback = function(args)
-    local map = function(keys, func, desc, mode)
-      mode = mode or "n"
+    local map = function(mode, keys, func, desc)
       vim.keymap.set(mode, keys, func, { buffer = args.buf, desc = "LSP: " .. desc })
     end
 
     local fzf = require("fzf-lua")
 
-    map("grr", function()
+    map("n", "grr", function()
       fzf.lsp_references({
         ignore_current_line = true,
         winopts = {
@@ -40,9 +39,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
       })
     end, "Show references")
 
-    map("gD", vim.lsp.buf.declaration, "Go to declaration")
+    map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
 
-    map("gd", function()
+    map("n", "gd", function()
       fzf.lsp_definitions({
         jump1 = true,
         winopts = {
@@ -53,7 +52,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
       })
     end, "Show definitions")
 
-    map("gra", function()
+    map({ "n", "v" }, "gra", function()
       local ommited_actions = {
         "Move to",
         "Extract to",
@@ -78,13 +77,13 @@ vim.api.nvim_create_autocmd("LspAttach", {
           return true
         end,
       })
-    end, "Code actions", { "n", "v" })
+    end, "Code actions")
 
-    map("<C-w><C-f>", ":FzfLua lsp_document_diagnostics<CR>", "Show buffer diagnostics")
+    map("n", "<C-w><C-f>", ":FzfLua lsp_document_diagnostics<CR>", "Show buffer diagnostics")
 
-    map("<leader>cl", "<cmd>LspRestart<CR>", "Restart LSP")
+    map("n", "<leader>cl", "<cmd>LspRestart<CR>", "Restart LSP")
 
-    map("<leader>cqi", function()
+    map("n", "<leader>cqi", function()
       require("vtsls").commands.remove_unused_imports(args.buf, function()
         require("conform").format({ bufnr = args.buf, async = false })
         vim.cmd("silent! w")
