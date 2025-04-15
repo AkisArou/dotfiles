@@ -1,4 +1,4 @@
--- @type vim.lsp.Config
+--- @type vim.lsp.Config
 return {
   root_markers = { ".git", "package.json" },
 }
