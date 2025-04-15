@@ -22,14 +22,14 @@ vim.lsp.enable({
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("akisarou.lsp", {}),
   callback = function(args)
-    local bufnr = args.buf
-    local keymap = vim.keymap
+    local map = function(keys, func, desc, mode)
+      mode = mode or "n"
+      vim.keymap.set(mode, keys, func, { buffer = args.buf, desc = "LSP: " .. desc })
+    end
+
     local fzf = require("fzf-lua")
 
-    local opts = { noremap = true, silent = true }
-
-    opts.desc = "Show LSP references"
-    keymap.set("n", "grr", function()
+    map("grr", function()
       fzf.lsp_references({
         ignore_current_line = true,
         winopts = {
@@ -38,13 +38,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
           },
         },
       })
-    end, opts)
+    end, "Show references")
 
-    opts.desc = "Go to declaration"
-    keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+    map("gD", vim.lsp.buf.declaration, "Go to declaration")
 
-    opts.desc = "Show LSP definitions"
-    keymap.set("n", "gd", function()
+    map("gd", function()
       fzf.lsp_definitions({
         jump1 = true,
         winopts = {
@@ -53,10 +51,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
           },
         },
       })
-    end, opts)
+    end, "Show definitions")
 
-    opts.desc = "See available code actions"
-    keymap.set({ "n", "v" }, "gra", function()
+    map("gra", function()
       local ommited_actions = {
         "Move to",
         "Extract to",
@@ -81,20 +78,17 @@ vim.api.nvim_create_autocmd("LspAttach", {
           return true
         end,
       })
-    end, opts)
+    end, "Code actions", { "n", "v" })
 
-    opts.desc = "Show buffer diagnostics"
-    keymap.set("n", "<C-w><C-f>", ":FzfLua lsp_document_diagnostics<CR>", opts)
+    map("<C-w><C-f>", ":FzfLua lsp_document_diagnostics<CR>", "Show buffer diagnostics")
 
-    opts.desc = "Restart LSP"
-    keymap.set("n", "<leader>cl", "<cmd>LspRestart<CR>", opts)
+    map("<leader>cl", "<cmd>LspRestart<CR>", "Restart LSP")
 
-    opts.desc = "Remove unused imports"
-    keymap.set("n", "<leader>cqi", function()
-      require("vtsls").commands.remove_unused_imports(bufnr, function()
-        require("conform").format({ bufnr = bufnr, async = false })
+    map("<leader>cqi", function()
+      require("vtsls").commands.remove_unused_imports(args.buf, function()
+        require("conform").format({ bufnr = args.buf, async = false })
         vim.cmd("silent! w")
       end)
-    end, opts)
+    end, "Remove unused imports")
   end,
 })
