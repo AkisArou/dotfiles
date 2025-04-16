@@ -97,6 +97,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
+-- Clear unnamed buffers
 vim.api.nvim_create_autocmd("BufReadPost", {
   group = augroup("clear_unnamed_bufs"),
   pattern = "*",
@@ -120,10 +121,28 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
+-- Autosave
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
   group = augroup("autowrite"),
   pattern = "*",
   callback = function()
     vim.cmd("silent! wall")
+  end,
+})
+
+-- Restore cursor position on file open
+vim.api.nvim_create_autocmd("BufReadPost", {
+  group = augroup("restore_cursor"),
+  pattern = "*",
+  callback = function()
+    local line = vim.fn.line("'\"")
+    if
+      line > 1
+      and line <= vim.fn.line("$")
+      and vim.bo.filetype ~= "commit"
+      and vim.fn.index({ "xxd", "gitrebase" }, vim.bo.filetype) == -1
+    then
+      vim.cmd('normal! g`"')
+    end
   end,
 })
