@@ -147,6 +147,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
+-- Refresh buffer when neogit status changed
 vim.api.nvim_create_autocmd("User", {
   pattern = "NeogitStatusRefreshed",
   callback = function()
