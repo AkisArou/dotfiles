@@ -146,3 +146,10 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end
   end,
 })
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "NeogitStatusRefreshed",
+  callback = function()
+    vim.cmd("set autoread | checktime")
+  end,
+})
