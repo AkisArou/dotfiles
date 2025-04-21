@@ -87,26 +87,21 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
-  "tailwindCSS.experimental.configFile": {
-    "packages/shared/react/react-ui-data-centric/tailwind.config.ts": "packages/**"
-  },
-  "stylelint.packageManager": "pnpm",
-  "css.validate": true,
-  "css.lint.unknownAtRules": "ignore",
-  "scss.lint.unknownAtRules": "ignore",
-  "scss.validate": true,
-  "less.validate": true,
-  "less.lint.unknownAtRules": "ignore",
-  "telemetry.telemetryLevel": "crash",
   "[json]": {
-    "editor.defaultFormatter": "biomejs.biome"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "biomejs.biome",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.suggestSelection": "recentlyUsed",
     "editor.suggest.showKeywords": true,
     "editor.formatOnSave": true
   },
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "typescript.tsc.autoDetect": "off",
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$"
+  ],
+  "typescript.format.enable": false,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.inlayHints.enumMemberValues.enabled": true,
   "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
@@ -122,26 +117,54 @@
   "javascript.inlayHints.variableTypes.enabled": true,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.preferences.importModuleSpecifier": "non-relative",
-  "npm.packageManager": "npm",
   "eslint.debug": false,
   "emmet.includeLanguages": {
     "javascript": "javascriptreact",
     "typescript": "javascriptreact"
   },
   "emmet.excludeLanguages": ["markdown", "typescript"],
+  "stylelint.packageManager": "pnpm",
+  "css.validate": true,
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "scss.validate": true,
+  "less.validate": true,
+  "less.lint.unknownAtRules": "ignore",
+  "telemetry.telemetryLevel": "crash",
   "shellcheck.ignorePatterns": {
     "**/*.env.*": true
   },
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
   "cSpell.userWords": ["stylelint", "TSES", "tsserverlibrary"],
+  "cSpell.ignorePaths": [
+    "package.json",
+    "**/node_modules/**",
+    "package-lock.json",
+    "node_modules",
+    "tsconfig.json",
+    "pnpm-workspace.yaml",
+    "mvnw",
+    "mvnw.cmd",
+    "pom.xml",
+    ".gitignore",
+    ".dockerignore",
+    ".tool-versions",
+    "vscode-extension",
+    ".git/{info,lfs,logs,refs,objects}/**",
+    ".git/{index,*refs,*HEAD}",
+    ".vscode",
+    ".vscode-insiders"
+  ],
   "debug.javascript.defaultRuntimeExecutable": {
     "pwa-node": "~/.asdf/shims/node"
   },
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.shellIntegration.enabled": true,
   "terminal.integrated.cursorBlinking": true,
-  "terminal.integrated.env.linux": {},
+  "terminal.integrated.env.linux": {
+    "PATH": "${env:HOME}/.asdf/shims"
+  },
   "terminal.integrated.env.osx": {},
   "terminal.integrated.env.windows": {},
   "terminal.integrated.defaultProfile.linux": "zsh",
