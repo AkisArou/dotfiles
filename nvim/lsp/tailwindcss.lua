@@ -41,7 +41,7 @@ return {
     tailwindCSS = {
       validate = true,
       lint = {
-        cssConflict = "warning",
+        cssConflict = "error",
         invalidApply = "error",
         invalidScreen = "error",
         invalidVariant = "error",
