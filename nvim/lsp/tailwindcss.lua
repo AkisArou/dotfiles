@@ -31,6 +31,10 @@ return {
     "tailwind.config.js",
     "tailwind.config.cjs",
     "tailwind.config.mjs",
+    "postcss.config.js",
+    "postcss.config.cjs",
+    "postcss.config.mjs",
+    "postcss.config.ts",
   },
   workspace_required = true,
   settings = {
