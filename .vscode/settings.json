@@ -130,6 +130,8 @@
   "scss.validate": true,
   "less.validate": true,
   "less.lint.unknownAtRules": "ignore",
+  "tailwindCSS.classAttributes": ["class", "className", "style", "classList"],
+  "tailwindCSS.classFunctions": ["cn", "clsx", "tw", "tw.color", "tw.style"],
   "telemetry.telemetryLevel": "crash",
   "shellcheck.ignorePatterns": {
     "**/*.env.*": true

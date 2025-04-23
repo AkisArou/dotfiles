@@ -32,6 +32,7 @@ return {
     "tailwind.config.cjs",
     "tailwind.config.mjs",
   },
+  workspace_required = true,
   settings = {
     tailwindCSS = {
       validate = true,
@@ -49,7 +50,8 @@ return {
         htmlangular = "html",
       },
 
-      classAttributes = { "class", "className", "style", "class:list", "classList", "ngClass" },
+      classAttributes = { "class", "className", "style", "classList" },
+      classFunctions = { "cn", "clsx", "tw", "tw.color", "tw.style" },
       experimental = {
         configFile = (function()
           local cwd = vim.fn.getcwd()
@@ -64,17 +66,12 @@ return {
               },
               ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
               ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
-              ["packages/shared/react/rsuite/tailwind.config.ts"] = "packages/shared/react/rsuite/**",
               ["packages/shared/react/heroui/tailwind.config.ts"] = "packages/shared/react/heroui/**",
             }
           end
 
           return nil
         end)(),
-        classRegex = {
-          "tw`([^`]*)",
-          { "tw.style\\(([^)]*)\\)", "'([^']*)'" },
-        },
       },
     },
   },
