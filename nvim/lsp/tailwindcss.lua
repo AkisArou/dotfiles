@@ -25,17 +25,7 @@ return {
     "vue",
     "svelte",
   },
-  root_markers = {
-    ".git",
-    "tailwind.config.ts",
-    "tailwind.config.js",
-    "tailwind.config.cjs",
-    "tailwind.config.mjs",
-    "postcss.config.js",
-    "postcss.config.cjs",
-    "postcss.config.mjs",
-    "postcss.config.ts",
-  },
+  root_dir = vim.fn.getcwd(),
   workspace_required = true,
   before_init = function(_, config)
     if not config.settings then
