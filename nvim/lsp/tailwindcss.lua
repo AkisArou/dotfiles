@@ -35,6 +35,7 @@ return {
       config.settings.editor = {}
     end
     if not config.settings.editor.tabSize then
+      ---@diagnostic disable-next-line: inject-field
       config.settings.editor.tabSize = vim.lsp.util.get_effective_tabstop()
     end
   end,
