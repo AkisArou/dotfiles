@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-if [[ "$HOST" == "arch-desktop" ]]; then
+if [ "$ULTRAWIDE" ]; then
   font_size=10
 else
   font_size=9

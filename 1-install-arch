@@ -31,7 +31,7 @@ packages=(
   "audit"
   "git"
   "fwupd"
-  "udisks2" # Needed for fwupd
+  "udisks2" # Needed by fwupd
   "linux-headers"
   "update-grub"
   "base"

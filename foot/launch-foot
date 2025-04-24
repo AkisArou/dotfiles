@@ -6,7 +6,7 @@ fi
 
 FONT=HackNerdFont-Regular:size=
 
-if [[ "$HOST" == "arch-desktop" ]]; then
+if [ "$ULTRAWIDE" ]; then
   FONT="$FONT"10
 else
   FONT="$FONT"9

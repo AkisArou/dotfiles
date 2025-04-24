@@ -1,4 +1,6 @@
-if [[ "$HOST" == "arch-desktop" ]]; then
+[ "$HOST" = "arch-desktop" ] && export ULTRAWIDE=1
+
+if [ "$ULTRAWIDE" ]; then
   export VDPAU_DRIVER=radeonsi
 else
   export WLR_RENDERER=vulkan

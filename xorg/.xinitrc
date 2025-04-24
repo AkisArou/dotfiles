@@ -23,11 +23,11 @@ if [ -f "$usermodmap" ]; then
   xmodmap "$usermodmap"
 fi
 
-if [ "$HOST" = "arch-xps" ]; then
+if [ "$ULTRAWIDE" ]; then
+  export XCURSOR_SIZE=24
+else
   xrdb -merge <<<"Xft.dpi: 192"
   export VDPAU_DRIVER=va_gl
-else
-  export XCURSOR_SIZE=24
 fi
 
 ~/dotfiles/xorg/xrandr.sh

@@ -2,7 +2,7 @@
 
 FONT_FAMILY="DM Mono"
 
-if [[ "$HOST" == "arch-desktop" ]]; then
+if [ "$ULTRAWIDE" ]; then
   POLY_FONT="$FONT_FAMILY":size=10
   POLY_BAR_HEIGHT="20pt"
 else
