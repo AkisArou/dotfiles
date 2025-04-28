@@ -1,6 +1,6 @@
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons" },
+  dependencies = { "nvim-tree/nvim-web-devicons", "arkav/lualine-lsp-progress" },
   config = function()
     local tsc = function()
       if TSC_ERRORS_COUNT == 0 or TSC_ERRORS_COUNT == nil then
@@ -41,7 +41,7 @@ return {
             update_in_insert = true,
           },
         },
-        lualine_c = { "filename" },
+        lualine_c = { "filename", "lsp_progress" },
         lualine_x = {
           { tsc, icon = "", color = "DiagnosticError" },
           "nvim-dap-ui",

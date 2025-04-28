@@ -1,3 +1,53 @@
+local use_fidget = false
+
+local fidget_notifier = {}
+
+fidget_notifier.on_start = function(package_name)
+  local fidget = require("fidget")
+  fidget.notify("Installing " .. package_name, nil, { key = package_name })
+end
+
+fidget_notifier.on_output = function(package_name, line)
+  local fidget = require("fidget")
+  fidget.notify(line .. package_name, nil, { key = package_name })
+end
+
+fidget_notifier.on_error = function(package_name)
+  local fidget = require("fidget")
+  fidget.notify("Installation error: " .. package_name, nil, { key = package_name })
+end
+
+fidget_notifier.on_success = function(package_name)
+  local fidget = require("fidget")
+  fidget.notify("Installation success: " .. package_name, nil, { key = package_name })
+end
+
+local nvim_notifier = {}
+
+nvim_notifier.on_start = function(package_name)
+  vim.notify("Installing " .. package_name)
+end
+
+nvim_notifier.on_output = function(package_name, line)
+  vim.notify(line .. package_name)
+end
+
+nvim_notifier.on_error = function(package_name)
+  vim.notify("Installation error: " .. package_name)
+end
+
+nvim_notifier.on_success = function(package_name)
+  vim.notify("Installation success: " .. package_name)
+end
+
+local function get_notifier()
+  if use_fidget then
+    return fidget_notifier
+  end
+
+  return nvim_notifier
+end
+
 -- Function to execute the pnpm command
 function Run_pnpm_install()
   -- Get the current buffer's file path
@@ -18,46 +68,48 @@ function Run_pnpm_install()
 
     -- Get the package name
     local package_name = json.name
-    if package_name then
-      -- Form the command
-      local command = "pnpm install --offline --filter " .. package_name
 
-      local fidget = require("fidget")
-      -- Create a new task for fidget
+    if package_name == nil then
+      print("Not a package.json file")
+      return
+    end
 
-      fidget.notify("Installing " .. package_name, nil, { key = package_name })
+    -- Form the command
+    local command = "pnpm install --offline --filter " .. package_name
 
-      -- Function to handle command output
-      local function on_output(_, data, _)
-        if data then
-          for _, line in ipairs(data) do
-            if line ~= "" then
-              fidget.notify(line .. package_name, nil, { key = package_name })
-            end
+    local notifier = get_notifier()
+    -- Create a new task for fidget
+
+    notifier.on_start(package_name)
+
+    -- Function to handle command output
+    local function on_output(_, data, _)
+      if data then
+        for _, line in ipairs(data) do
+          if line ~= "" then
+            notifier.on_output(package_name, line)
           end
         end
       end
-
-      -- Run the command and capture the output
-      vim.fn.jobstart(command, {
-        stdout_buffered = false,
-        on_stdout = on_output,
-        on_stderr = on_output,
-        on_exit = function(_, exit_code, _)
-          if exit_code == 0 then
-            print("Installation successful")
-          else
-            print("Installation error")
-          end
-        end,
-      })
-
-      print("Running: " .. command)
-    else
-      print("Package name not found in package.json")
     end
+
+    -- Run the command and capture the output
+    vim.fn.jobstart(command, {
+      stdout_buffered = false,
+      on_stdout = on_output,
+      on_stderr = on_output,
+      on_exit = function(_, exit_code, _)
+        if exit_code == 0 then
+          notifier.on_success(package_name)
+        else
+          notifier.on_error(package_name)
+        end
+      end,
+    })
+
+    print("Running: " .. command)
   else
-    print("Not a package.json file")
+    print("Package name not found in package.json")
   end
 end
 
