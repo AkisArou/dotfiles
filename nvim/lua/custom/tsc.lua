@@ -17,22 +17,11 @@ local config = {
   enable_progress_notifications = false,
   use_diagnostics = false,
   args = nil,
-}
-
-local function get_notify_options(...)
-  local overrides = {}
-
-  for _, opts in ipairs({ ... }) do
-    for key, value in pairs(opts) do
-      overrides[key] = value
-    end
-  end
-
-  return vim.tbl_deep_extend("force", {}, {
+  notify_opts = {
     title = "TSC",
     hide_from_history = false,
-  }, overrides)
-end
+  },
+}
 
 M.parse_tsc_output = function(output)
   local errors = {}
@@ -72,79 +61,29 @@ M.run = function()
   end
 
   local tsc = config.bin_path
-  local errors = {}
-  local files_with_errors = {}
-  local notify_record
 
-  local is_tsc_executable = vim.fn.executable(tsc) == 1 or false
-
-  if not is_tsc_executable then
+  if not vim.fn.executable(tsc) == 1 or false then
     vim.notify(
       "tsc was not available or found in your node_modules or $PATH. Please run install and try again.",
       vim.log.levels.ERROR,
-      get_notify_options()
+      M.config.notify_opts
     )
-
     return
   end
 
   M.is_running = true
-
-  if config.enable_progress_notifications then
-    vim.notify(
-      "  " .. require("nvim-web-devicons").get_icon_by_filetype("typescript") .. "  Compiling...",
-      nil,
-      get_notify_options()
-    )
-  end
+  M.notify_start()
 
   local function on_stdout(_, output)
     local result = M.parse_tsc_output(output)
 
-    errors = result.errors
-    files_with_errors = result.files
+    local errors = result.errors
+    local files_with_errors = result.files
 
-    M.set_qflist(errors)
     M.total_errors = #errors
-
-    if config.use_diagnostics then
-      local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
-      vim.diagnostic.reset(namespace_id)
-
-      for _, error in ipairs(errors) do
-        local bufnr = vim.fn.bufnr(error.filename)
-        if bufnr == -1 then
-          vim.notify("Buffer not found for " .. error.filename, vim.log.levels.ERROR, get_notify_options())
-          return
-        end
-        local diagnostic = {
-          bufnr = bufnr,
-          lnum = error.lnum - 1,
-          col = error.col - 1,
-          severity = vim.diagnostic.severity.ERROR,
-          message = error.text,
-          source = "tsc",
-        }
-        vim.diagnostic.set(namespace_id, bufnr, { diagnostic }, {})
-      end
-    end
-
-    if config.enable_progress_notifications then
-      if #errors == 0 then
-        vim.notify(
-          "Type-checking complete. No errors found 🎉",
-          nil,
-          get_notify_options((notify_record and { replace = notify_record.id }))
-        )
-        return
-      end
-
-      vim.notify(
-        string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors),
-        vim.log.levels.ERROR,
-        get_notify_options()
-      )
-    end
+    M.set_qflist(errors)
+    M.show_diagnostics(errors)
+    M.notify_progress(errors, files_with_errors)
   end
 
   local total_output = {}
@@ -173,6 +112,58 @@ M.run = function()
   })
 end
 
+function M.show_diagnostics(errors)
+  if not config.use_diagnostics then
+    return
+  end
+  local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
+  vim.diagnostic.reset(namespace_id)
+
+  for _, error in ipairs(errors) do
+    local bufnr = vim.fn.bufnr(error.filename)
+    if bufnr == -1 then
+      vim.notify("Buffer not found for " .. error.filename, vim.log.levels.ERROR, M.config.notify_opts)
+
+      return
+    end
+    local diagnostic = {
+      bufnr = bufnr,
+      lnum = error.lnum - 1,
+      col = error.col - 1,
+      severity = vim.diagnostic.severity.ERROR,
+      message = error.text,
+      source = "tsc",
+    }
+    vim.diagnostic.set(namespace_id, bufnr, { diagnostic }, {})
+  end
+end
+
+function M.notify_progress(errors, files_with_errors)
+  if config.enable_progress_notifications then
+    if #errors == 0 then
+      vim.notify("Type-checking complete. No errors found 🎉", nil, M.config.notify_opts)
+      return
+    end
+
+    vim.notify(
+      string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors),
+      vim.log.levels.ERROR,
+      M.config.notify_opts
+    )
+  end
+end
+
+function M.notify_start()
+  if not config.enable_progress_notifications then
+    return
+  end
+  vim.notify(
+    "  " .. require("nvim-web-devicons").get_icon_by_filetype("typescript") .. "  Compiling...",
+    nil,
+    M.config.notify_opts
+  )
+end
+
 function M.stop()
   if M.pid then
     vim.fn.jobstop(M.pid)
@@ -195,7 +186,7 @@ function M.setup(opts)
       pattern = "*.{ts,tsx}",
       desc = "Run tsc.nvim in watch mode automatically when saving a TypeScript file",
       callback = function()
-        vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil, get_notify_options())
+        vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil, M.config.notify_opts)
       end,
     })
   end
