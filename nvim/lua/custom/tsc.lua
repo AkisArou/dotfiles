@@ -112,7 +112,9 @@ function M.show_diagnostics(errors)
   if not config.use_diagnostics then
     return
   end
+
   local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
+
   vim.diagnostic.reset(namespace_id)
 
   for _, error in ipairs(errors) do
