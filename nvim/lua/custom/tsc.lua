@@ -4,23 +4,21 @@ local M = {
   total_errors = 0,
 }
 
+local bin_path = (function()
+  local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
+
+  if node_modules_tsc_binary ~= "" then
+    return node_modules_tsc_binary
+  end
+
+  return "tsc"
+end)()
+
 local config = {
-  bin_path = (function()
-    local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
-
-    if node_modules_tsc_binary ~= "" then
-      return node_modules_tsc_binary
-    end
-
-    return "tsc"
-  end)(),
+  bin_path = bin_path,
   enable_progress_notifications = false,
   use_diagnostics = false,
   args = nil,
-  notify_opts = {
-    title = "TSC",
-    hide_from_history = false,
-  },
 }
 
 M.parse_tsc_output = function(output)
@@ -65,8 +63,7 @@ M.run = function()
   if not vim.fn.executable(tsc) == 1 or false then
     vim.notify(
       "tsc was not available or found in your node_modules or $PATH. Please run install and try again.",
-      vim.log.levels.ERROR,
-      M.config.notify_opts
+      vim.log.levels.ERROR
     )
     return
   end
@@ -74,28 +71,27 @@ M.run = function()
   M.is_running = true
   M.notify_start()
 
-  local function on_stdout(_, output)
-    local result = M.parse_tsc_output(output)
-
-    local errors = result.errors
-    local files_with_errors = result.files
-
-    M.total_errors = #errors
-    M.set_qflist(errors)
-    M.show_diagnostics(errors)
-    M.notify_progress(errors, files_with_errors)
-  end
+  local errors = {}
+  local files_with_errors = {}
 
   local total_output = {}
 
-  local function watch_on_stdout(_, output)
+  local function on_stdout(_, output)
     for _, v in ipairs(output) do
       table.insert(total_output, v)
     end
 
     for _, value in pairs(output) do
       if string.find(value, "Watching for file changes") then
-        on_stdout(_, total_output)
+        local result = M.parse_tsc_output(total_output)
+
+        errors = result.errors
+        files_with_errors = result.files
+
+        M.set_qflist(errors)
+        M.total_errors = #errors
+        M.show_diagnostics(errors)
+        M.notify_progress(errors, files_with_errors)
         total_output = {}
       end
     end
@@ -106,7 +102,7 @@ M.run = function()
   end
 
   M.pid = vim.fn.jobstart(tsc .. " " .. config.args, {
-    on_stdout = watch_on_stdout,
+    on_stdout = on_stdout,
     on_exit = on_exit,
     stdout_buffered = false,
   })
@@ -121,11 +117,12 @@ function M.show_diagnostics(errors)
 
   for _, error in ipairs(errors) do
     local bufnr = vim.fn.bufnr(error.filename)
-    if bufnr == -1 then
-      vim.notify("Buffer not found for " .. error.filename, vim.log.levels.ERROR, M.config.notify_opts)
 
+    if bufnr == -1 then
+      vim.notify("Buffer not found for " .. error.filename, vim.log.levels.ERROR)
       return
     end
+
     local diagnostic = {
       bufnr = bufnr,
       lnum = error.lnum - 1,
@@ -134,6 +131,7 @@ function M.show_diagnostics(errors)
       message = error.text,
       source = "tsc",
     }
+
     vim.diagnostic.set(namespace_id, bufnr, { diagnostic }, {})
   end
 end
@@ -141,14 +139,13 @@ end
 function M.notify_progress(errors, files_with_errors)
   if config.enable_progress_notifications then
     if #errors == 0 then
-      vim.notify("Type-checking complete. No errors found 🎉", nil, M.config.notify_opts)
+      vim.notify("Type-checking complete. No errors found 🎉", nil)
       return
     end
 
     vim.notify(
       string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors),
-      vim.log.levels.ERROR,
-      M.config.notify_opts
+      vim.log.levels.ERROR
     )
   end
 end
@@ -157,17 +154,16 @@ function M.notify_start()
   if not config.enable_progress_notifications then
     return
   end
-  vim.notify(
-    "  " .. require("nvim-web-devicons").get_icon_by_filetype("typescript") .. "  Compiling...",
-    nil,
-    M.config.notify_opts
-  )
+
+  vim.notify("  " .. require("nvim-web-devicons").get_icon_by_filetype("typescript") .. "  Compiling...", nil)
 end
 
 function M.stop()
-  if M.pid then
-    vim.fn.jobstop(M.pid)
+  if not M.pid then
+    return
   end
+
+  vim.fn.jobstop(M.pid)
 end
 
 function M.setup(opts)
@@ -186,7 +182,7 @@ function M.setup(opts)
       pattern = "*.{ts,tsx}",
       desc = "Run tsc.nvim in watch mode automatically when saving a TypeScript file",
       callback = function()
-        vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil, M.config.notify_opts)
+        vim.notify("Type-checking your project via watch mode, hang tight 🚀", nil)
       end,
     })
   end
