@@ -4,7 +4,7 @@ function maintain() {
   ~/dotfiles/scripts/maintain
 }
 
-function update-all() {
+function update() {
   paru -Syu
   echo
 
