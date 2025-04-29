@@ -1,16 +1,37 @@
--- global variable
-TSC_ERRORS_COUNT = 0
+local M = {
+  pid = nil,
+  is_running = false,
+  total_errors = 0,
+}
 
-local M = {}
+local config = {
+  bin_path = (function()
+    local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
 
-M.find_tsc_bin = function()
-  local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
+    if node_modules_tsc_binary ~= "" then
+      return node_modules_tsc_binary
+    end
 
-  if node_modules_tsc_binary ~= "" then
-    return node_modules_tsc_binary
+    return "tsc"
+  end)(),
+  enable_progress_notifications = false,
+  use_diagnostics = false,
+  args = nil,
+}
+
+local function get_notify_options(...)
+  local overrides = {}
+
+  for _, opts in ipairs({ ... }) do
+    for key, value in pairs(opts) do
+      overrides[key] = value
+    end
   end
 
-  return "tsc"
+  return vim.tbl_deep_extend("force", {}, {
+    title = "TSC",
+    hide_from_history = false,
+  }, overrides)
 end
 
 M.parse_tsc_output = function(output)
@@ -43,50 +64,10 @@ end
 
 M.set_qflist = function(errors)
   vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
-
-  TSC_ERRORS_COUNT = #errors
-end
-
-local DEFAULT_CONFIG = {
-  auto_open = false,
-  bin_path = M.find_tsc_bin(),
-  enable_progress_notifications = false,
-  use_diagnostics = false,
-  args = nil,
-  spinner = { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" },
-}
-
-local DEFAULT_NOTIFY_OPTIONS = {
-  title = "TSC",
-  hide_from_history = false,
-}
-
-local config = {}
-local is_running = false
-local pid
-
-local function get_notify_options(...)
-  local overrides = {}
-
-  for _, opts in ipairs({ ... }) do
-    for key, value in pairs(opts) do
-      overrides[key] = value
-    end
-  end
-
-  return vim.tbl_deep_extend("force", {}, DEFAULT_NOTIFY_OPTIONS, overrides)
-end
-
-local function format_notification_msg(msg, spinner_idx)
-  if spinner_idx == 0 or spinner_idx == nil then
-    return string.format(" %s ", msg)
-  end
-
-  return string.format(" %s %s ", config.spinner[spinner_idx], msg)
 end
 
 M.run = function()
-  if is_running then
+  if M.is_running then
     return
   end
 
@@ -99,9 +80,7 @@ M.run = function()
 
   if not is_tsc_executable then
     vim.notify(
-      format_notification_msg(
-        "tsc was not available or found in your node_modules or $PATH. Please run install and try again."
-      ),
+      "tsc was not available or found in your node_modules or $PATH. Please run install and try again.",
       vim.log.levels.ERROR,
       get_notify_options()
     )
@@ -109,12 +88,14 @@ M.run = function()
     return
   end
 
-  is_running = true
-
-  local icons = require("nvim-web-devicons")
+  M.is_running = true
 
   if config.enable_progress_notifications then
-    vim.notify("  " .. icons.get_icon_by_filetype("typescript") .. "  Compiling...", nil, get_notify_options())
+    vim.notify(
+      "  " .. require("nvim-web-devicons").get_icon_by_filetype("typescript") .. "  Compiling...",
+      nil,
+      get_notify_options()
+    )
   end
 
   local function on_stdout(_, output)
@@ -124,6 +105,7 @@ M.run = function()
     files_with_errors = result.files
 
     M.set_qflist(errors)
+    M.total_errors = #errors
 
     if config.use_diagnostics then
       local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
@@ -150,7 +132,7 @@ M.run = function()
     if config.enable_progress_notifications then
       if #errors == 0 then
         vim.notify(
-          format_notification_msg("Type-checking complete. No errors found 🎉"),
+          "Type-checking complete. No errors found 🎉",
           nil,
           get_notify_options((notify_record and { replace = notify_record.id }))
         )
@@ -158,9 +140,7 @@ M.run = function()
       end
 
       vim.notify(
-        format_notification_msg(
-          string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors)
-        ),
+        string.format("Type-checking complete. Found %s errors across %s files 💥", #errors, #files_with_errors),
         vim.log.levels.ERROR,
         get_notify_options()
       )
@@ -183,30 +163,24 @@ M.run = function()
   end
 
   local on_exit = function()
-    is_running = false
+    M.is_running = false
   end
 
-  local opts = {
+  M.pid = vim.fn.jobstart(tsc .. " " .. config.args, {
     on_stdout = watch_on_stdout,
     on_exit = on_exit,
     stdout_buffered = false,
-  }
-
-  pid = vim.fn.jobstart(tsc .. " " .. config.args, opts)
+  })
 end
 
 function M.stop()
-  if pid then
-    vim.fn.jobstop(pid)
+  if M.pid then
+    vim.fn.jobstop(M.pid)
   end
 end
 
-function M.is_running()
-  return is_running
-end
-
 function M.setup(opts)
-  config = vim.tbl_deep_extend("force", config, DEFAULT_CONFIG, opts or {})
+  config = vim.tbl_deep_extend("force", config, opts or {})
 
   vim.api.nvim_create_user_command("TSC", function()
     M.run()

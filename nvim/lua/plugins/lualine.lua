@@ -3,11 +3,13 @@ return {
   dependencies = { "nvim-tree/nvim-web-devicons", "arkav/lualine-lsp-progress" },
   config = function()
     local tsc = function()
-      if TSC_ERRORS_COUNT == 0 or TSC_ERRORS_COUNT == nil then
+      local total_errors = require("custom.tsc").total_errors
+
+      if total_errors == 0 or total_errors == nil then
         return ""
       end
 
-      return "Project errors: " .. tostring(TSC_ERRORS_COUNT)
+      return "Project errors: " .. tostring(total_errors)
     end
 
     require("lualine").setup({
