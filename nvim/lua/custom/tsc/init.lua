@@ -1,17 +1,55 @@
-local success, pcall_result = pcall(require, "notify")
-local utils = require("custom.tsc.utils")
+-- global variable
+TSC_ERRORS_COUNT = 0
 
 local M = {}
 
-local nvim_notify
+M.find_tsc_bin = function()
+  local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
 
-if success then
-  nvim_notify = pcall_result
+  if node_modules_tsc_binary ~= "" then
+    return node_modules_tsc_binary
+  end
+
+  return "tsc"
+end
+
+M.parse_tsc_output = function(output)
+  local errors = {}
+  local files = {}
+
+  if output == nil then
+    return { errors = errors, files = files }
+  end
+
+  for _, line in ipairs(output) do
+    local filename, lineno, colno, message = line:match("^(.+)%((%d+),(%d+)%)%s*:%s*(.+)$")
+    if filename ~= nil then
+      table.insert(errors, {
+        filename = filename,
+        lnum = tonumber(lineno),
+        col = tonumber(colno),
+        text = message,
+        type = "E",
+      })
+
+      if vim.tbl_contains(files, filename) == false then
+        table.insert(files, filename)
+      end
+    end
+  end
+
+  return { errors = errors, files = files }
+end
+
+M.set_qflist = function(errors)
+  vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
+
+  TSC_ERRORS_COUNT = #errors
 end
 
 local DEFAULT_CONFIG = {
   auto_open = false,
-  bin_path = utils.find_tsc_bin(),
+  bin_path = M.find_tsc_bin(),
   enable_progress_notifications = false,
   use_diagnostics = false,
   args = nil,
@@ -49,17 +87,17 @@ end
 
 M.run = function()
   if is_running then
-    -- vim.notify(format_notification_msg("Type-checking already in progress"), vim.log.levels.WARN, get_notify_options())
     return
   end
 
-  -- Closed over state
   local tsc = config.bin_path
   local errors = {}
   local files_with_errors = {}
   local notify_record
 
-  if not utils.is_executable(tsc) then
+  local is_tsc_executable = vim.fn.executable(tsc) == 1 or false
+
+  if not is_tsc_executable then
     vim.notify(
       format_notification_msg(
         "tsc was not available or found in your node_modules or $PATH. Please run install and try again."
@@ -77,16 +115,15 @@ M.run = function()
 
   if config.enable_progress_notifications then
     vim.notify("  " .. icons.get_icon_by_filetype("typescript") .. "  Compiling...", nil, get_notify_options())
-    -- vim.notify("👀 Building & Watching  🇹🇸, kick back and relax 🚀", nil, get_notify_options())
   end
 
   local function on_stdout(_, output)
-    local result = utils.parse_tsc_output(output)
+    local result = M.parse_tsc_output(output)
 
     errors = result.errors
     files_with_errors = result.files
 
-    utils.set_qflist(errors)
+    M.set_qflist(errors)
 
     if config.use_diagnostics then
       local namespace_id = vim.api.nvim_create_namespace("tsc_diagnostics")
@@ -118,11 +155,6 @@ M.run = function()
           get_notify_options((notify_record and { replace = notify_record.id }))
         )
         return
-      end
-
-      -- Clear any previous notifications if the user has nvim-notify installed
-      if nvim_notify ~= nil then
-        nvim_notify.dismiss()
       end
 
       vim.notify(
