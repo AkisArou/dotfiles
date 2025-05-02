@@ -124,6 +124,29 @@ packages=(
   "github-cli"
 )
 
+cpu_vendor=$(grep -m 1 'vendor_id' /proc/cpuinfo)
+
+if [[ $cpu_vendor == *"GenuineIntel"* ]]; then
+  packages+=("intel-ucode")
+fi
+
+gpu_info=$(lspci | grep -i 'vga\|3d\|display')
+
+if echo "$gpu_info" | grep -qi 'amd'; then
+  packages+=(
+    "radeontop"
+    "mesa-vdpau"
+    "mesa"
+    "vulkan-radeon"
+  )
+elif echo "$gpu_info" | grep -qi 'intel'; then
+  packages+=(
+    "intel-media-driver"
+    "intel-gpu-tools"
+    "vulkan-intel"
+  )
+fi
+
 ~/dotfiles/scripts/create-template-env
 
 # Install required packages
