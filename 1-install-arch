@@ -123,22 +123,20 @@ packages=(
   "github-cli"
 )
 
-cpu_vendor=$(grep -m 1 'vendor_id' /proc/cpuinfo)
-
-if [[ $cpu_vendor == *"GenuineIntel"* ]]; then
+if cpu_is_intel; then
   packages+=("intel-ucode")
 fi
 
-gpu_info=$(lspci | grep -i 'vga\|3d\|display')
-
-if echo "$gpu_info" | grep -qi 'amd'; then
+# Prefer AMD GPU packages, instead of integrated ones.
+# Do not 'install' both, because of potential downsides
+if gpu_has_amd; then
   packages+=(
     "radeontop"
     "mesa-vdpau"
     "mesa"
     "vulkan-radeon"
   )
-elif echo "$gpu_info" | grep -qi 'intel'; then
+elif gpu_has_intel; then
   packages+=(
     "intel-media-driver"
     "intel-gpu-tools"
