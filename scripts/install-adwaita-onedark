@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 # Set variables
 GITHUB_REPO="lonr/adwaita-one-dark"

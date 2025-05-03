@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 # Load all completions from ~/.completions
 if [[ -d "$HOME/.completions" ]]; then

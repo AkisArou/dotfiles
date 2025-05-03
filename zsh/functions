@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 function maintain() {
   ~/dotfiles/scripts/maintain

@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 COMPLETIONS_DIR="$HOME/.completions"
 mkdir -p "$COMPLETIONS_DIR"

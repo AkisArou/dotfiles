@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/usr/bin/zsh
 
 if [ ! -f "$HOME/.env" ]; then
   touch "$HOME/.env"

@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 # Get the name of the connected output (assuming only one output is connected)
 output=$(xrandr | grep " connected" | awk '{ print $1 }')

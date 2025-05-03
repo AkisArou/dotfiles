@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/zsh
 
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
