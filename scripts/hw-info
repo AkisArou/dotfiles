@@ -1,6 +1,5 @@
 #!/usr/bin/zsh
 
-
 function cpu_is_intel() {
   local vendor
   vendor=$(grep -m 1 'vendor_id' /proc/cpuinfo)
