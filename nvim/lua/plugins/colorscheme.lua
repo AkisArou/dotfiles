@@ -7,9 +7,15 @@ local themes = {
         style = "night",
       })
 
+      local colors = require("tokyonight.colors.storm")
+
       vim.defer_fn(function()
-        vim.cmd(string.format("hi @tag.tsx guifg=%s", "#bb9af7"))
-        vim.cmd(string.format("hi @variable.parameter guifg=%s", "#a9b1d6"))
+        vim.cmd(string.format("hi @tag.tsx guifg=%s", colors.magenta))
+        vim.cmd(string.format("hi @variable.parameter guifg=%s", colors.fg_dark))
+        vim.cmd(string.format("hi @variable.parameter guifg=%s", colors.fg_dark))
+        vim.cmd(string.format("hi @variable.builtin.javascript guifg=%s", colors.teal))
+        vim.cmd(string.format("hi @variable.builtin.typescript guifg=%s", colors.teal))
+        vim.cmd(string.format("hi @variable.builtin.tsx guifg=%s", colors.teal))
 
         vim.cmd([[
           hi DiagnosticSignError guifg=#6e2a33 ctermfg=red
