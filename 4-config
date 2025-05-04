@@ -53,7 +53,7 @@ asdf install
 print_info "Configuring java... (for the current session only)"
 . ~/.asdf/plugins/java/set-java-home.zsh
 
-print_info "Modifying system for vite..."
+print_info "Increasing file descriptor and inotify limits..."
 # Check current limit
 ulimit -Sn
 # Change limit (temporary)
