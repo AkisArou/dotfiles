@@ -20,12 +20,8 @@ set $down j
 set $up k
 set $right l
 
-# set $term ~/dotfiles/alacritty/launch
-set $term ~/dotfiles/foot/launch-foot
-set $menu ~/dotfiles/rofi/launch-rofi -show drun
-#
-# set $menu tofi-drun | xargs swaymsg exec --
-set $browser /usr/bin/brave
+set $term ~/dotfiles/foot/launch
+set $menu ~/dotfiles/rofi/launch -show drun
 
 ### Output configuration
 #
@@ -85,7 +81,7 @@ input "2:7:SynPS/2_Synaptics_TouchPad" {
     # Programs
     bindsym $mod+Return exec $term
     bindsym $mod+d exec $menu
-    bindsym $mod+b exec $browser
+    bindsym $mod+b exec /usr/bin/brave --remote-debugging-port=9222
     bindsym $mod+Shift+p exec brave --incognito
     bindsym $mod+Shift+t exec brave --incognito --tor
     bindsym $mod+p exec grimshot copy area
@@ -105,7 +101,7 @@ input "2:7:SynPS/2_Synaptics_TouchPad" {
 
     # toggle bluetooth device
     bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
-    bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch-rofi -show power-menu -modi power-menu:rofi-power-menu
+    bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
     # bindsym $mod+Shift+q exec ~/dotfiles/tofi/power-menu
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
     bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme

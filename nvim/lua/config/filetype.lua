@@ -4,6 +4,8 @@ vim.filetype.add({
     ["vifmrc"] = "vim",
     ["exports"] = "zsh",
     ["tsconfig.json"] = "jsonc",
+    ["launch.json"] = "jsonc",
+    ["tasks.json"] = "jsonc",
     [".yamlfmt"] = "yaml",
     ["librewolf.overrides.cfg"] = "javascript",
   },
