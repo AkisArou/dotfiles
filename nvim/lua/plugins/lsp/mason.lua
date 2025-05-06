@@ -46,7 +46,6 @@ return {
       -- "clang-format",
       "prettierd",
       "js-debug-adapter",
-      "chrome-debug-adapter",
     }
 
     local mr = require("mason-registry")
