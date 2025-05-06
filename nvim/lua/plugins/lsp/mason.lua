@@ -3,7 +3,6 @@ return {
   dependencies = {
     "williamboman/mason-lspconfig.nvim",
   },
-  lazy = true,
   config = function()
     local mason = require("mason")
     local mason_lspconfig = require("mason-lspconfig")

@@ -16,13 +16,89 @@ return {
     "mfussenegger/nvim-dap",
     event = "VeryLazy",
     dependencies = {
-      { "rcarriga/nvim-dap-ui" },
-      { "nvim-neotest/nvim-nio" },
-      {
-        "theHamsta/nvim-dap-virtual-text",
-        opts = {},
-      },
+      "rcarriga/nvim-dap-ui",
+      "nvim-neotest/nvim-nio",
+      "theHamsta/nvim-dap-virtual-text",
     },
+    config = function()
+      local dap = require("dap")
+      local dapui = require("dapui")
+
+      dapui.setup()
+      -- stylua: ignore
+      dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open({}) end
+      -- stylua: ignore
+      dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close({}) end
+      -- stylua: ignore
+      dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
+
+      local vscode = require("dap.ext.vscode")
+
+      vscode.json_decode = function(str)
+        return vim.json.decode(require("plenary.json").json_strip_comments(str))
+      end
+
+      dap.adapters["node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = {
+            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+            "${port}",
+          },
+        },
+      }
+
+      dap.adapters["chrome"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = {
+            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+            "${port}",
+          },
+        },
+      }
+
+      if not vim.g.is_work then
+        dap.configurations.typescriptreact = {
+          -- Default react
+          {
+            type = "chrome",
+            name = "Default react",
+            request = "attach",
+            program = "${file}",
+            cwd = vim.fn.getcwd(),
+            sourceMaps = true,
+            protocol = "inspector",
+            port = 9222,
+            webRoot = "${workspaceFolder}",
+          },
+        }
+
+        dap.configurations.typescript = {
+          -- Default node
+          {
+            type = "node",
+            request = "Default node",
+            name = "Launch file",
+            runtimeExecutable = "deno",
+            runtimeArgs = {
+              "run",
+              "--inspect-wait",
+              "--allow-all",
+            },
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+            attachSimplePort = 9229,
+          },
+        }
+      end
+    end,
     keys = {
       -- dap
       {
@@ -162,49 +238,5 @@ return {
         mode = { "n", "v" },
       },
     },
-    config = function()
-      local dap = require("dap")
-      local dapui = require("dapui")
-
-      local vscode = require("dap.ext.vscode")
-      local json = require("plenary.json")
-      vscode.json_decode = function(str)
-        return vim.json.decode(json.json_strip_comments(str))
-      end
-
-      dapui.setup()
-
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open({})
-      end
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        dapui.close({})
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        dapui.close({})
-      end
-
-      dap.adapters["pwa-node"] = {
-        type = "server",
-        host = "localhost",
-        port = "${port}",
-        executable = {
-          command = "node",
-          args = {
-            require("mason-registry").get_package("js-debug-adapter"):get_install_path()
-              .. "/js-debug/src/dapDebugServer.js",
-            "${port}",
-          },
-        },
-      }
-
-      dap.adapters.chrome = {
-        type = "executable",
-        command = "node",
-        args = {
-          require("mason-registry").get_package("chrome-debug-adapter"):get_install_path() .. "/out/src/chromeDebug.js",
-        },
-      }
-    end,
   },
 }

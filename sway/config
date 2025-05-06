@@ -81,7 +81,7 @@ input "2:7:SynPS/2_Synaptics_TouchPad" {
     # Programs
     bindsym $mod+Return exec $term
     bindsym $mod+d exec $menu
-    bindsym $mod+b exec /usr/bin/brave --remote-debugging-port=9222
+    bindsym $mod+b exec ~/dotfiles/brave/launch
     bindsym $mod+Shift+p exec brave --incognito
     bindsym $mod+Shift+t exec brave --incognito --tor
     bindsym $mod+p exec grimshot copy area
