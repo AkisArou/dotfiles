@@ -28,9 +28,7 @@ return {
       -- stylua: ignore
       dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
 
-      local vscode = require("dap.ext.vscode")
-
-      vscode.json_decode = function(str)
+      require("dap.ext.vscode").json_decode = function(str)
         return vim.json.decode(require("plenary.json").json_strip_comments(str))
       end
 
