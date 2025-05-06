@@ -64,6 +64,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         "Remove unused",
         "Fix all detected spelling",
         "Change spelling to",
+        "Convert named export",
       }
 
       fzf.lsp_code_actions({
