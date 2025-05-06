@@ -16,6 +16,7 @@ local themes = {
         vim.cmd(string.format("hi @variable.builtin.javascript guifg=%s", colors.teal))
         vim.cmd(string.format("hi @variable.builtin.typescript guifg=%s", colors.teal))
         vim.cmd(string.format("hi @variable.builtin.tsx guifg=%s", colors.teal))
+        vim.cmd(string.format("hi @lsp.typemod.variable.defaultLibrary.typescriptreact guifg=%s", colors.teal))
 
         vim.cmd([[
           hi DiagnosticSignError guifg=#6e2a33 ctermfg=red
