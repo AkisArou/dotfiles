@@ -38,7 +38,7 @@ return {
         return vim.json.decode(require("plenary.json").json_strip_comments(str))
       end
 
-      dap.adapters["node"] = {
+      local js_debug_adapter_opts = {
         type = "server",
         host = "localhost",
         port = "${port}",
@@ -51,18 +51,8 @@ return {
         },
       }
 
-      dap.adapters["chrome"] = {
-        type = "server",
-        host = "localhost",
-        port = "${port}",
-        executable = {
-          command = "node",
-          args = {
-            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
-            "${port}",
-          },
-        },
-      }
+      dap.adapters["node"] = js_debug_adapter_opts
+      dap.adapters["chrome"] = js_debug_adapter_opts
 
       if not vim.g.is_work then
         dap.configurations.typescriptreact = {
