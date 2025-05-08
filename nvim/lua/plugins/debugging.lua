@@ -26,8 +26,19 @@ return {
 
       vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
 
+      local chrome_type = "pwa-chrome"
+      local node_type = "node"
+
       require("dap.ext.vscode").json_decode = function(str)
-        return vim.json.decode(require("plenary.json").json_strip_comments(str))
+        local config = vim.json.decode(require("plenary.json").json_strip_comments(str))
+
+        for _, item in ipairs(config.configurations) do
+          if item.type == "chrome" then
+            item.type = chrome_type
+          end
+        end
+
+        return config
       end
 
       local js_debug_adapter_opts = {
@@ -43,14 +54,14 @@ return {
         },
       }
 
-      dap.adapters["node"] = js_debug_adapter_opts
-      dap.adapters["chrome"] = js_debug_adapter_opts
+      dap.adapters[node_type] = js_debug_adapter_opts
+      dap.adapters[chrome_type] = js_debug_adapter_opts
 
       if not vim.g.is_work then
         dap.configurations.typescriptreact = {
           -- Default react
           {
-            type = "chrome",
+            type = chrome_type,
             name = "Default react",
             request = "attach",
             program = "${file}",
@@ -65,7 +76,7 @@ return {
         dap.configurations.typescript = {
           -- Default node
           {
-            type = "node",
+            type = node_type,
             request = "Default node",
             name = "Launch file",
             runtimeExecutable = "node",
