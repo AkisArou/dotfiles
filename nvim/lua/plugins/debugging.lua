@@ -24,7 +24,23 @@ return {
       -- stylua: ignore
       dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
 
-      vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
+      vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
+      local icons = {
+        Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
+        Breakpoint = " ",
+        BreakpointCondition = " ",
+        BreakpointRejected = { " ", "DiagnosticError" },
+        LogPoint = ".>",
+      }
+
+      for name, sign in pairs(icons) do
+        sign = type(sign) == "table" and sign or { sign }
+        vim.fn.sign_define(
+          "Dap" .. name,
+          ---@diagnostic disable-next-line: assign-type-mismatch
+          { text = sign[1], texthl = sign[2] or "DiagnosticInfo", linehl = sign[3], numhl = sign[3] }
+        )
+      end
 
       local chrome_type = "pwa-chrome"
       local node_type = "pwa-node"
@@ -69,7 +85,7 @@ return {
             dap.configurations[language] = {
               {
                 type = chrome_type,
-                name = "Default react",
+                name = "React: Attach",
                 request = "attach",
                 program = "${file}",
                 cwd = "${workspaceFolder}",
@@ -81,14 +97,21 @@ return {
               {
                 type = "pwa-node",
                 request = "launch",
-                name = "Launch file",
+                name = "NodeJS: Launch file",
                 program = "${file}",
                 cwd = "${workspaceFolder}",
               },
               {
                 type = "pwa-node",
                 request = "attach",
-                name = "Attach",
+                name = "NodeJS: Attach to 9228",
+                cwd = "${workspaceFolder}",
+                port = 9228,
+              },
+              {
+                type = "pwa-node",
+                request = "attach",
+                name = "NodeJS: Pick process",
                 processId = require("dap.utils").pick_process,
                 cwd = "${workspaceFolder}",
               },
