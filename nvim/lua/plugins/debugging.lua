@@ -6,6 +6,7 @@ return {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",
       "theHamsta/nvim-dap-virtual-text",
+      "nvim-lua/plenary.nvim",
       {
         "microsoft/vscode-js-debug",
         build = "npm install --legacy-peer-deps && npx gulp dapDebugServer",
