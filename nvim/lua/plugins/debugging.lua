@@ -8,8 +8,13 @@ return {
       "theHamsta/nvim-dap-virtual-text",
       "nvim-lua/plenary.nvim",
       {
-        "microsoft/vscode-js-debug",
-        build = "npm install --legacy-peer-deps && npx gulp dapDebugServer",
+        lazy = true,
+        "jay-babu/mason-nvim-dap.nvim",
+        dependencies = "mason.nvim",
+        opts = {
+          automatic_installation = true,
+          ensure_installed = { "js" },
+        },
       },
     },
     config = function()
@@ -65,7 +70,7 @@ return {
           command = "node",
           -- stylua: ignore
           args = {
-            vim.fn.stdpath("data") .. "/lazy/vscode-js-debug/dist/src/dapDebugServer.js", "${port}" , "localhost",
+            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js", "${port}" , "localhost",
           },
         },
       }
