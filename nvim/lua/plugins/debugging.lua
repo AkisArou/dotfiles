@@ -68,12 +68,12 @@ return {
             type = "node",
             request = "Default node",
             name = "Launch file",
-            runtimeExecutable = "deno",
-            runtimeArgs = {
-              "run",
-              "--inspect-wait",
-              "--allow-all",
-            },
+            runtimeExecutable = "node",
+            -- runtimeArgs = {
+            --   "run",
+            --   "--inspect-wait",
+            --   "--allow-all",
+            -- },
             program = "${file}",
             cwd = "${workspaceFolder}",
             attachSimplePort = 9229,
