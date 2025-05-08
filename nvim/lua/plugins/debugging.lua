@@ -27,7 +27,7 @@ return {
       vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
 
       local chrome_type = "pwa-chrome"
-      local node_type = "node"
+      local node_type = "pwa-node"
 
       require("dap.ext.vscode").json_decode = function(str)
         local config = vim.json.decode(require("plenary.json").json_strip_comments(str))
@@ -49,7 +49,7 @@ return {
           command = "node",
           -- stylua: ignore
           args = {
-            vim.fn.stdpath("data") .. "/lazy/vscode-js-debug/dist/src/dapDebugServer.js", "${port}",
+            vim.fn.stdpath("data") .. "/lazy/vscode-js-debug/dist/src/dapDebugServer.js", "${port}" , "localhost",
           },
         },
       }
@@ -58,38 +58,43 @@ return {
       dap.adapters[chrome_type] = js_debug_adapter_opts
 
       if not vim.g.is_work then
-        dap.configurations.typescriptreact = {
-          -- Default react
-          {
-            type = chrome_type,
-            name = "Default react",
-            request = "attach",
-            program = "${file}",
-            cwd = vim.fn.getcwd(),
-            sourceMaps = true,
-            protocol = "inspector",
-            port = 9222,
-            webRoot = "${workspaceFolder}",
-          },
-        }
+        local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
 
-        dap.configurations.typescript = {
-          -- Default node
-          {
-            type = node_type,
-            request = "Default node",
-            name = "Launch file",
-            runtimeExecutable = "node",
-            -- runtimeArgs = {
-            --   "run",
-            --   "--inspect-wait",
-            --   "--allow-all",
-            -- },
-            program = "${file}",
-            cwd = "${workspaceFolder}",
-            attachSimplePort = 9229,
-          },
-        }
+        local vscode = require("dap.ext.vscode")
+        vscode.type_to_filetypes["node"] = js_filetypes
+        vscode.type_to_filetypes["pwa-node"] = js_filetypes
+
+        for _, language in ipairs(js_filetypes) do
+          if not dap.configurations[language] then
+            dap.configurations[language] = {
+              {
+                type = chrome_type,
+                name = "Default react",
+                request = "attach",
+                program = "${file}",
+                cwd = "${workspaceFolder}",
+                sourceMaps = true,
+                protocol = "inspector",
+                port = 9222,
+                webRoot = "${workspaceFolder}",
+              },
+              {
+                type = "pwa-node",
+                request = "launch",
+                name = "Launch file",
+                program = "${file}",
+                cwd = "${workspaceFolder}",
+              },
+              {
+                type = "pwa-node",
+                request = "attach",
+                name = "Attach",
+                processId = require("dap.utils").pick_process,
+                cwd = "${workspaceFolder}",
+              },
+            }
+          end
+        end
       end
     end,
     -- stylua: ignore
