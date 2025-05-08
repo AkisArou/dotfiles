@@ -1,20 +1,15 @@
 return {
   {
-    lazy = true,
-    "jay-babu/mason-nvim-dap.nvim",
-    dependencies = "mason.nvim",
-    opts = {
-      automatic_installation = true,
-      ensure_installed = { "js" },
-    },
-  },
-  {
     "mfussenegger/nvim-dap",
     event = "VeryLazy",
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",
       "theHamsta/nvim-dap-virtual-text",
+      {
+        "microsoft/vscode-js-debug",
+        build = "npm install --legacy-peer-deps && npx gulp dapDebugServer",
+      },
     },
     config = function()
       local dap = require("dap")
@@ -28,6 +23,8 @@ return {
       -- stylua: ignore
       dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
 
+      vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
+
       require("dap.ext.vscode").json_decode = function(str)
         return vim.json.decode(require("plenary.json").json_strip_comments(str))
       end
@@ -38,9 +35,9 @@ return {
         port = "${port}",
         executable = {
           command = "node",
+          -- stylua: ignore
           args = {
-            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
-            "${port}",
+            vim.fn.stdpath("data") .. "/lazy/vscode-js-debug/dist/src/dapDebugServer.js", "${port}",
           },
         },
       }
