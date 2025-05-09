@@ -1,18 +1,20 @@
 return {
   "saghen/blink.cmp",
-  -- enabled = false,
   build = "cargo build --release",
-  -- version = "*",
-  -- lazy = false, -- lazy loading handled internally
   dependencies = {
-    { "mikavilpas/blink-ripgrep.nvim" },
+    "mikavilpas/blink-ripgrep.nvim",
+    "rcarriga/cmp-dap",
+    {
+      "saghen/blink.compat",
+      version = "*",
+      lazy = true,
+      opts = {},
+    },
     {
       "folke/lazydev.nvim",
-      ft = "lua", -- only load on lua files
+      ft = "lua",
       opts = {
         library = {
-          -- See the configuration section for more details
-          -- Load luvit types when the `vim.uv` word is found
           { path = "${3rd}/luv/library", words = { "vim%.uv" } },
         },
       },
@@ -32,6 +34,7 @@ return {
           "path",
           "lazydev",
           "buffer",
+          "dap",
           -- "ripgrep"
         }
 
@@ -71,6 +74,8 @@ return {
           end,
           opts = {},
         } or nil,
+
+        dap = { name = "dap", module = "blink.compat.source" },
       },
     },
 

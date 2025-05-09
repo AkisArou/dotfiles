@@ -5,7 +5,6 @@ return {
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",
-      "theHamsta/nvim-dap-virtual-text",
       "nvim-lua/plenary.nvim",
       {
         lazy = true,
@@ -29,7 +28,15 @@ return {
       -- stylua: ignore
       dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
 
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "dap-float",
+        callback = function()
+          vim.api.nvim_buf_set_keymap(0, "n", "q", "<cmd>close!<CR>", { noremap = true, silent = true })
+        end,
+      })
+
       vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
+
       local icons = {
         Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
         Breakpoint = " ",
@@ -143,7 +150,9 @@ return {
       { "<leader>dr", function() require("dap").repl.toggle() end, desc = "Toggle REPL" },
       { "<leader>ds", function() require("dap").session() end, desc = "Session" },
       { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
+      { "<leader>dd", function() require("dap").disconnect() end, desc = "Disconnect" },
       { "<leader>dw", function() require("dap.ui.widgets").hover() end, desc = "Widgets" },
+      { "<leader>dp", function() require("dap.ui.widgets").centered_float(require("dap.ui.widgets").frames) end, desc = "Scopes" },
     },
   },
 }
