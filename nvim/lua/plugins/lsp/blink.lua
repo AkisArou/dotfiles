@@ -3,13 +3,6 @@ return {
   build = "cargo build --release",
   dependencies = {
     "mikavilpas/blink-ripgrep.nvim",
-    "rcarriga/cmp-dap",
-    {
-      "saghen/blink.compat",
-      version = "*",
-      lazy = true,
-      opts = {},
-    },
     {
       "folke/lazydev.nvim",
       ft = "lua",
@@ -34,7 +27,6 @@ return {
           "path",
           "lazydev",
           "buffer",
-          "dap",
           -- "ripgrep"
         }
 
@@ -74,9 +66,6 @@ return {
           end,
           opts = {},
         } or nil,
-
-        dap = { name = "dap", module = "blink.compat.source" },
-      },
     },
 
     completion = {
