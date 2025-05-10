@@ -66,6 +66,7 @@ return {
           end,
           opts = {},
         } or nil,
+      },
     },
 
     completion = {
