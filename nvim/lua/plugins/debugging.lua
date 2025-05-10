@@ -63,6 +63,8 @@ return {
         for _, item in ipairs(config.configurations) do
           if item.type == "chrome" then
             item.type = chrome_type
+          elseif item.type == "node" then
+            item.type = node_type
           end
         end
 
