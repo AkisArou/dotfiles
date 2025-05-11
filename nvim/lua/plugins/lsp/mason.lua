@@ -24,7 +24,6 @@ return {
         "jsonls",
         "html",
         "cssls",
-        "emmet_language_server",
         "tailwindcss",
         "cssmodules_ls",
         "prismals",
