@@ -175,3 +175,12 @@ if !empty($WAYLAND_DISPLAY)
   autocmd TextYankPost * if (v:event.operator == 'y' || v:event.operator == 'd') | silent! execute 'call system("wl-copy", @")' | endif
   nnoremap p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
 endif
+
+
+function! CentreCursor()
+    let pos = getpos(".")
+    normal! zz
+    call setpos(".", pos)
+endfunction
+
+:autocmd CursorMoved,CursorMovedI * call CentreCursor()
