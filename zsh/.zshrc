@@ -1,5 +1,3 @@
-source "$HOME/dotfiles/zsh/exports"
-
 if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
@@ -24,7 +22,6 @@ bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
 
 # source
-source "$HOME/dotfiles/zsh/aliases"
 source "$HOME/dotfiles/zsh/functions"
 source "$HOME/dotfiles/zsh/history"
 
