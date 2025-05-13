@@ -192,10 +192,10 @@ input "2:7:SynPS/2_Synaptics_TouchPad" {
 #
 # Resizing containers:
 #
-bindsym $mod+Control+$left resize shrink width 5 px or 5 ppt
-bindsym $mod+Control+$down resize grow height 5 px or 5 ppt
-bindsym $mod+Control+$up resize shrink height 5 px or 5 ppt
-bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
+bindsym $mod+Control+$left resize shrink width 1 px or 1 ppt
+bindsym $mod+Control+$down resize grow height 1 px or 1 ppt
+bindsym $mod+Control+$up resize shrink height 1 px or 1 ppt
+bindsym $mod+Control+$right resize grow width 1 px or 1 ppt
 
 #
 # Status Bar:
