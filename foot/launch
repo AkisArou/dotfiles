@@ -12,4 +12,4 @@ else
   FONT="$FONT"9
 fi
 
-foot --override include=~/dotfiles/foot/"${THEME:-onedark}".ini --font="$FONT"
+foot --override include=~/dotfiles/foot/"${THEME:-tokyonight}".ini --font="$FONT"

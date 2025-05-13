@@ -6,7 +6,7 @@ fi
 
 . ~/dotfiles/zsh/fzf
 
-export THEME="${THEME:-onedark}"
+export THEME="${THEME:-tokyonight}"
 export BAT_THEME=tokyonight
 
 export PATH="$HOME/.local/bin:$PATH"

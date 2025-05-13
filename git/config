@@ -41,10 +41,10 @@
   navigate = true    # use n and N to move between diff sections
   light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
   features = syntax-highlighting
-  syntax-theme = onedark
+  syntax-theme = tokyonight
   line-numbers = true
 
-  #TokyoNight night
+  # tokyonight night
   minus-style                   = syntax "#37222c"
   minus-non-emph-style          = syntax "#37222c"
   minus-emph-style              = syntax "#713137"

@@ -95,7 +95,7 @@ local themes = {
   },
 }
 
-local selectedTheme = themes[vim.g.os_theme] or themes.onedark
+local selectedTheme = themes[vim.g.os_theme] or themes.tokyonight
 
 local M = {
   selectedTheme.repo,
