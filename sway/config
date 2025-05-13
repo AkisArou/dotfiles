@@ -211,8 +211,8 @@ for_window [window_type="dialog"] floating enable
 for_window [window_type="menu"] floating enable
 for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
-for_window [title="Android Emulator - *"] border normal
-for_window [class="Emulator"] resize set width 629px
+# Resize again after a while, to redraw
+for_window [class="Emulator"] border normal, resize set width 629px, exec "swaymsg '[class=\"Emulator\"] resize set width 630px'; sleep 3; swaymsg '[class=\"Emulator\"] resize set width 629px'"
 
 
 include /etc/sway/config.d/*
