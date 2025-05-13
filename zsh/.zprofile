@@ -1,8 +1,10 @@
+source ~/dotfiles/scripts/hw-info
+
 [ "$HOST" = "arch-desktop" ] && export ULTRAWIDE=1
 
-if [ "$ULTRAWIDE" ]; then
+if gpu_has_amd; then
   export VDPAU_DRIVER=radeonsi
-else
+elif gpu_has_intel; then
   export WLR_RENDERER=vulkan
   export VDPAU_DRIVER=va_gl
 fi

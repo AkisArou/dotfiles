@@ -32,6 +32,10 @@ function e() {
   rm -f -- "$tmp"
 }
 
+function lazygit() {
+  ~/dotfiles/lazygit/launch-lazygit "$@"
+}
+
 function kill-by-port() {
   if [[ -n "$1" ]]; then
     local port="$1"
