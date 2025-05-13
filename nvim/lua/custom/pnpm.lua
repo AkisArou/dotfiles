@@ -113,21 +113,25 @@ function Run_pnpm_install()
   end
 end
 
--- Create an augroup
-local augroup = vim.api.nvim_create_augroup("PnpmInstall", { clear = true })
+return {
+  setup = function()
+    -- Create an augroup
+    local augroup = vim.api.nvim_create_augroup("PnpmInstall", { clear = true })
 
--- Create an autocmd for the FileType event
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup,
-  pattern = { "json", "packagejson" },
-  callback = function()
-    -- Set the keybinding in normal mode
-    vim.api.nvim_buf_set_keymap(
-      0,
-      "n",
-      "<leader>ci",
-      ":lua Run_pnpm_install()<CR>",
-      { noremap = true, silent = true, desc = "pnpm install for workspace" }
-    )
+    -- Create an autocmd for the FileType event
+    vim.api.nvim_create_autocmd("FileType", {
+      group = augroup,
+      pattern = { "json", "packagejson" },
+      callback = function()
+        -- Set the keybinding in normal mode
+        vim.api.nvim_buf_set_keymap(
+          0,
+          "n",
+          "<leader>ci",
+          ":lua Run_pnpm_install()<CR>",
+          { noremap = true, silent = true, desc = "pnpm install for workspace" }
+        )
+      end,
+    })
   end,
-})
+}
