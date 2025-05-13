@@ -237,6 +237,8 @@ for_window [window_role="webconsole"] floating enable
 for_window [window_type="dialog"] floating enable
 for_window [window_type="menu"] floating enable
 for_window [title="^teams.microsoft.com is sharing"] move scratchpad
-for_window [title="^Emulator$" floating] move scratchpad
+for_window [title="Emulator" window_type="utility"] move scratchpad
+for_window [title="Android Emulator - *"] border normal
+
 
 include /etc/sway/config.d/*
