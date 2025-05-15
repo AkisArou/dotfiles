@@ -1,10 +1,10 @@
 #!/usr/bin/zsh
 
-function maintain() {
+maintain() {
   ~/dotfiles/scripts/maintain
 }
 
-function update() {
+update() {
   paru -Syu
   echo
 
@@ -27,7 +27,7 @@ function update() {
   fwupdmgr get-updates
 }
 
-function e() {
+e() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
   yazi "$@" --cwd-file="$tmp"
   if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
@@ -36,11 +36,11 @@ function e() {
   rm -f -- "$tmp"
 }
 
-function lazygit() {
+lazygit() {
   ~/dotfiles/lazygit/launch-lazygit "$@"
 }
 
-function kill-by-port() {
+kill-by-port() {
   if [[ -n "$1" ]]; then
     local port="$1"
     local process_id
@@ -57,15 +57,15 @@ function kill-by-port() {
   fi
 }
 
-function wake-desktop() {
+wake-desktop() {
   wol "$DESKTOP_MAC"
 }
 
-function sus-desktop() {
+sus-desktop() {
   ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
 
-function fv() {
+fv() {
   local file
   file="$(
     find "${1:-.}" -path '*/\.*' -prune -o -type f -print 2>/dev/null |
@@ -79,6 +79,6 @@ function fv() {
   nvim "$file" || return
 }
 
-function set-java-home() {
+set-java-home() {
   source ~/.asdf/plugins/java/set-java-home.zsh
 }

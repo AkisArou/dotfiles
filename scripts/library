@@ -6,19 +6,19 @@ BLUE="\033[0;34m"
 RED="\033[0;31m"
 NC="\033[0m" # No Color
 
-function print_success() {
+print_success() {
   echo -e "${GREEN}$1${NC}"
 }
 
-function print_failure() {
+print_failure() {
   echo -e "${RED}$1${NC}"
 }
 
-function print_info() {
+print_info() {
   echo -e "${BLUE}$1${NC}"
 }
 
-function is_package_installed() {
+is_package_installed() {
   package="$1"
   check="$(paru -Qs --color always "${package}" | grep "local" | grep "${package} ")"
   if [ -n "${check}" ]; then
@@ -29,7 +29,7 @@ function is_package_installed() {
   return
 }
 
-function install_packages() {
+install_packages() {
   toInstall=()
 
   for pkg; do
@@ -49,7 +49,7 @@ function install_packages() {
   paru --noconfirm -S "${toInstall[@]}"
 }
 
-function create_symlink() {
+create_symlink() {
   local target=$1
   local link_name=$2
 

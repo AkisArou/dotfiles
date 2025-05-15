@@ -1,15 +1,15 @@
 #!/usr/bin/zsh
 
-function cpu_is_intel() {
+cpu_is_intel() {
   local vendor
   vendor=$(grep -m 1 'vendor_id' /proc/cpuinfo)
   [[ $vendor == *"GenuineIntel"* ]]
 }
 
-function gpu_has_amd() {
+gpu_has_amd() {
   lspci | grep -i 'vga' | grep -qi 'amd'
 }
 
-function gpu_has_intel() {
+gpu_has_intel() {
   lspci | grep -i 'vga\|3d\|display' | grep -qi 'intel'
 }
