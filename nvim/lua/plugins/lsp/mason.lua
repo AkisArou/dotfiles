@@ -2,10 +2,12 @@ return {
   "williamboman/mason.nvim",
   dependencies = {
     "williamboman/mason-lspconfig.nvim",
+    "RubixDev/mason-update-all",
   },
   config = function()
     local mason = require("mason")
     local mason_lspconfig = require("mason-lspconfig")
+    require("mason-update-all").setup()
 
     mason.setup({
       ui = {

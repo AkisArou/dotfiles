@@ -11,6 +11,10 @@ function update() {
   ~/dotfiles/scripts/build-nvim
   echo
 
+  nvim --headless "+Lazy! sync" +qa
+  nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
+  echo
+
   zap update all
   echo
 
