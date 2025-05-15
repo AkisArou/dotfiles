@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+swaymsg -r "[title=\"Android Emulator - *\"] resize set width ${EMULATOR_WIDTH}px"
