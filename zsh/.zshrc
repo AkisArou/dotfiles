@@ -15,6 +15,7 @@ plug "zap-zsh/supercharge"
 plug "zap-zsh/vim"
 plug "zap-zsh/fzf"
 plug "zsh-users/zsh-syntax-highlighting"
+plug "Aloxaf/fzf-tab"
 
 # keybinds
 bindkey '^ ' autosuggest-accept
@@ -30,9 +31,3 @@ source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
 source "$HOME/dotfiles/scripts/try-source-completions"
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 autoload -Uz compinit && compinit
-
-_fzf_complete_pnpm() {
-  _fzf_complete --multi --reverse --prompt="pnpm run> " -- "$@" < <(
-    cat package.json | jq -r '.scripts | keys[]'
-  )
-}

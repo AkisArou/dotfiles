@@ -96,3 +96,5 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --history=$HOME/.fzf_history
   $(eval echo \$"$FZF_THEME")
 "
+
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
