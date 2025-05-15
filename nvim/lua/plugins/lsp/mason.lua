@@ -7,7 +7,7 @@ return {
   config = function()
     local mason = require("mason")
     local mason_lspconfig = require("mason-lspconfig")
-    require("mason-update-all").setup()
+    require("mason-update-all").setup({})
 
     mason.setup({
       ui = {
