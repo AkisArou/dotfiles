@@ -1,6 +1,7 @@
 # : Manager {{{
 [manager]
-cwd = { fg = "#98C379" } # Blue
+cwd = { fg = "#98C379" }                                       # Blue
+highlight = "~/dotfiles/yazi/flavors/onedark.yazi/tmtheme.xml"
 
 # Hovered
 hovered = { reversed = true, fg = "#3a3f4a", bg = "#cdd6f4" }
