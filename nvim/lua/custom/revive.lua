@@ -54,17 +54,29 @@ function M.load_session()
   for _, file in ipairs(files) do
     if vim.fn.filereadable(file) == 1 then
       vim.cmd("edit " .. vim.fn.fnameescape(file))
+      vim.cmd("normal! zz")
     end
   end
 end
 
+local default_opts = {
+  auto = false,
+  keymap = "<leader>sl",
+}
+
 -- Setup keymap and autocmd
-function M.setup()
+function M.setup(opts)
+  opts = vim.tbl_deep_extend("force", default_opts, opts or {})
+
+  if opts.auto then
+    M.load_session()
+  end
+
   vim.api.nvim_create_autocmd("VimLeavePre", {
     callback = M.save_session,
   })
 
-  vim.keymap.set("n", "<leader>sl", M.load_session, { desc = "Load last session buffers" })
+  vim.keymap.set("n", opts.keymap, M.load_session, { desc = "Load last session buffers" })
 end
 
 return M
