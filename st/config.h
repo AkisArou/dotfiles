@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "DM Mono:pixelsize=25:antialias=true:autohint=true";
+static char *font = "HackNerdFont-Regular:pixelsize=25:antialias=true:autohint=true";
 static int borderpx_x = 20;
 static int borderpx_y = 0;
 

@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
 if [ "$ULTRAWIDE" ]; then
-  ~/dotfiles/st/st -s 0.9 -f "DM Mono:pixelsize=12:antialias=true:autohint=true"
+  ~/dotfiles/st/st -s 0.9 -f "HackNerdFont-Regular:pixelsize=14:antialias=true:autohint=true"
 else
-  ~/dotfiles/st/st -s 0.9 -f "DM Mono:pixelsize=25:antialias=true:autohint=true"
+  ~/dotfiles/st/st -s 0.9 -f "HackNerdFont-Regular:pixelsize=25:antialias=true:autohint=true"
 fi
