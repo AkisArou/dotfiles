@@ -1,4 +1,4 @@
-$!/bin/zsh
+#!/bin/zsh
 
 rm -rf ./config.h
 sudo make clean install
