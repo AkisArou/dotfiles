@@ -1,0 +1,3 @@
+#!/usr/bin/zsh
+
+i3-msg -r "[title=\"Android Emulator - *\"] resize set width ${EMULATOR_WIDTH}px"

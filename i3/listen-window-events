@@ -1,0 +1,17 @@
+#!/usr/bin/zsh
+
+while true; do
+  i3-msg -t subscribe '[ "window" ]' | while read -r line; do
+    echo "$line"
+    change=$(echo "$line" | jq -r '.change')
+
+    if [[ "$change" == "new" || "$change" == "close" ]]; then
+      ~/dotfiles/i3/resize-emulator
+    fi
+  done
+done
+
+# If we get here, i3-msg exited
+exit_code=${PIPESTATUS[0]}
+echo "i3-msg exited with code $exit_code. Restarting..."
+exit $exit_code
