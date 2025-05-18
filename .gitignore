@@ -13,3 +13,6 @@ nvim/data
 .netrwhist
 vim/sessions/
 ~/.env
+*.o
+st
+*.orig
