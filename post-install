@@ -24,3 +24,8 @@ Performance
 
   # Do not load the 'iTCO_wdt' watchdog module on boot.
   blacklist iTCO_wdt
+
+Applications
+------------
+* modify Android studio desktop file:
+  Exec=sh -c 'exec android-studio "$@" $( [ "$XDG_SESSION_TYPE" = wayland ] && echo -Dawt.toolkit.name=WLToolkit )' sh %f
