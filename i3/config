@@ -25,7 +25,7 @@ set $down j
 set $up k
 set $right l
 
-set $term st
+set $term ~/dotfiles/alacritty/launch
 set $menu ~/dotfiles/rofi/launch -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font
