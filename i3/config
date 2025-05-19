@@ -18,6 +18,7 @@ exec --no-startup-id ~/dotfiles/i3/listen-events
 exec --no-startup-id flameshot
 exec --no-startup-id xset s off
 exec --no-startup-id xset s 0 0
+# exec_always ~/dotfiles/i3/gaps
 
 set $mod Mod4
 set $left h
@@ -164,6 +165,7 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 
 
 gaps inner 3
+smart_gaps inverse_outer
 
 for_window [class="^.*"] border pixel 4
 
