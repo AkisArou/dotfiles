@@ -16,7 +16,7 @@ X11
 
 - WM: i3
 - Bar: polybar
-- Terminal: st
+- Terminal: alacritty
 - Menu: rofi
 - Screenshot: flameshot
 
