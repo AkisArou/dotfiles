@@ -26,7 +26,7 @@ set $up k
 set $right l
 
 set $term st
-set $menu ~/dotfiles/rofi/init
+set $menu ~/dotfiles/rofi/launch -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -62,7 +62,8 @@ bindsym $mod+Shift+t exec brave --incognito --tor
 bindsym $mod+q kill
 
 # Power menu
-bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
+# bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
+bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
 
 # toggle bluetooth device
 bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth

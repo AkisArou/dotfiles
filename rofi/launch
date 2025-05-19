@@ -2,4 +2,4 @@
 
 source ~/.env
 
-rofi -config ~/dotfiles/rofi/"${THEME:-onedark}".rasi "$@"
+rofi -config ~/dotfiles/rofi/"${THEME:-tokyonight}".rasi "$@"
