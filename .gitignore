@@ -15,4 +15,5 @@ vim/sessions/
 ~/.env
 *.o
 st/st
+st/config.h
 *.orig
