@@ -154,10 +154,6 @@ install_packages "${packages[@]}"
 
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
 
-# ST
-print_info "Making st..."
-~/dotfiles/st/build
-
 # Install custom issue (login prompt)
 echo ""
 print_info "Installing login screen..."
