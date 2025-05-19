@@ -5,6 +5,8 @@ Xft.autohint: true
 Xft.hintstyle: hintfull
 Xft.lcdfilter: lcdfilter
 
+st.font: HackNerdFont:size=10
+
 ! vscode dark .Xresources
 
 /**.foreground: #d4d4d4*/

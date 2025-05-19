@@ -14,5 +14,5 @@ nvim/data
 vim/sessions/
 ~/.env
 *.o
-./st/st
+st/st
 *.orig
