@@ -5,6 +5,9 @@ local themes = {
     config = function()
       require("tokyonight").setup({
         style = "night",
+        on_colors = function(colors)
+          colors.bg = "#000000"
+        end,
       })
 
       local colors = require("tokyonight.colors.storm")
