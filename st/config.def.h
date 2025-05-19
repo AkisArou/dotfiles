@@ -95,34 +95,96 @@ char *termname = "xterm-256color";
 unsigned int tabspaces = 8;
 
 /* Terminal colors (16 first used in escape sequence) */
+// static const char *colorname[] = {
+// 	/* 8 normal colors */
+// 	"black",
+// 	"red3",
+// 	"green3",
+// 	"yellow3",
+// 	"blue2",
+// 	"magenta3",
+// 	"cyan3",
+// 	"gray90",
+//
+// 	/* 8 bright colors */
+// 	"gray50",
+// 	"red",
+// 	"green",
+// 	"yellow",
+// 	"#5c5cff",
+// 	"magenta",
+// 	"cyan",
+// 	"white",
+//
+// 	[255] = 0,
+//
+// 	/* more colors can be added after 255 to use with DefaultXX */
+// 	"#cccccc",
+// 	"#555555",
+// 	"gray90", /* default foreground colour */
+// 	"black", /* default background colour */
+// };
+
+/* VSCode dark */
+// static const char *colorname[] = {
+//     /* 8 normal colors */
+//     "#1f1f1f", /* -black */
+//     "#f44747", /* -red */
+//     "#6a9955", /* -green */
+//     "#dcdcaa", /* -yellow */
+//     "#569cd6", /* -blue */
+//     "#c586c0", /* -magenta */
+//     "#56b6c2", /* -cyan */
+//     "#d4d4d4", /* -white */
+// 
+//     /* 8 bright colors */
+//     "#808080", /* bright -black:  */
+//     "#f44747", /* bright -red:    */
+//     "#6a9955", /* bright -green:  */
+//     "#dcdcaa", /* bright -yellow: */
+//     "#569cd6", /* bright -blue:   */
+//     "#c586c0", /* bright -magenta: */
+//     "#56b6c2", /* bright -cyan:    */
+//     "#d4d4d4", /* bright -white:   */
+// 
+//     [255] = 0,
+// 
+//     /* more colors can be added after 255 to use with DefaultXX */
+//     "#d4d4d4", /* cursor color:  */
+//     "#51504F", /* reverse cursor color */
+//     "#d4d4d4", /* default foreground colour */
+//     "#1f1f1f", /* default background colour */
+//};
+
+/* TokyoNight */
 static const char *colorname[] = {
-	/* 8 normal colors */
-	"black",
-	"red3",
-	"green3",
-	"yellow3",
-	"blue2",
-	"magenta3",
-	"cyan3",
-	"gray90",
+    /* 8 normal colors */
+    "#15161e",
+    "#f7768e",
+    "#9ece6a",
+    "#e0af68",
+    "#7aa2f7",
+    "#bb9af7",
+    "#7dcfff",
+    "#a9b1d6",
 
-	/* 8 bright colors */
-	"gray50",
-	"red",
-	"green",
-	"yellow",
-	"#5c5cff",
-	"magenta",
-	"cyan",
-	"white",
+    /* 8 bright colors */
+    "#414868",
+    "#f7768e",
+    "#9ece6a",
+    "#e0af68",
+    "#7aa2f7",
+    "#bb9af7",
+    "#7dcfff",
+    "#c0caf5",
 
-	[255] = 0,
+    [255] = 0,
 
-	/* more colors can be added after 255 to use with DefaultXX */
-	"#cccccc",
-	"#555555",
-	"gray90", /* default foreground colour */
-	"black", /* default background colour */
+    /* more colors can be added after 255 to use with DefaultXX */
+    "#c0caf5",     
+    "#33467c",
+    "#c0caf5", /* default foreground colour */
+    "#1a1b26", /* default background colour */
 };
 
 
