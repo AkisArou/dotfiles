@@ -4,10 +4,10 @@
     active-background: #007ACC40;
     urgent-background: #f44747;
     urgent-foreground: #282a36;
-    selected-background: var(active-background);
-    selected-urgent-background: var(urgent-background);
-    selected-active-background: var(active-background);
-    separatorcolor: var(active-background);
+    selected-background: @active-background;
+    selected-urgent-background: @urgent-background;
+    selected-active-background: @active-background;
+    separatorcolor: @active-background;
     bordercolor: #0f0f0f;
 }
 

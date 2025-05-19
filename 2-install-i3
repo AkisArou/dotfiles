@@ -15,7 +15,7 @@ packages=(
   "i3-wm"
   "xidlehook"
   "picom"
-  # "rofi"
+  "rofi-wayland"
   "rofi-power-menu"
   "nitrogen"
   "polybar"
