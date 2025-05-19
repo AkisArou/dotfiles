@@ -13,7 +13,7 @@ exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id ~/dotfiles/scripts/inactivity
 exec --no-startup-id ~/dotfiles/scripts/start-tmux
-exec --no-startup-id ~/dotfiles/i3/listen-window-events
+exec --no-startup-id ~/dotfiles/i3/listen-events
 exec --no-startup-id flameshot
 exec --no-startup-id xset s off
 exec --no-startup-id xset s 0 0
@@ -26,7 +26,6 @@ set $right l
 
 set $term st
 set $menu ~/dotfiles/rofi/init
-set $browser /usr/bin/brave
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -54,7 +53,7 @@ floating_modifier $mod
 bindsym $mod+Return exec $term
 
 # browsers
-bindsym $mod+b exec $browser
+bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
 
