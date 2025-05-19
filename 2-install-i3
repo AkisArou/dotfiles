@@ -13,6 +13,7 @@ packages=(
   "xorg-xinput"
   "i3-wm"
   "xidlehook"
+  "picom"
   # "rofi"
   "rofi-power-menu"
   "nitrogen"
