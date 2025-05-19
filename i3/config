@@ -7,11 +7,11 @@
 exec --no-startup-id dex --autostart --environment i3
 exec --no-startup-id ~/dotfiles/xorg/xrandr
 exec_always --no-startup-id ~/dotfiles/polybar/init
-exec --no-startup-id nitrogen --set-zoom-fill ~/dotfiles/wallpapers/forest.jpg
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id "pactl load-module module-switch-on-connect"
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec --no-startup-id picom --config ~/.config/picom/picom.conf
+exec --no-startup-id  picom --config ~/.config/picom/picom.conf; 
+exec --no-startup-id sleep 0.2; nitrogen --set-zoom-fill ~/dotfiles/wallpapers/forest.jpg;
 exec --no-startup-id ~/dotfiles/scripts/inactivity
 exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec --no-startup-id ~/dotfiles/i3/listen-events
