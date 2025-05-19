@@ -1,21 +1,12 @@
 #!/usr/bin/zsh
 
 while true; do
-  i3-msg -t subscribe '[ "window", "binding" ]' | while read -r line; do
+  i3-msg -t subscribe '[ "window" ]' | while read -r line; do
     echo "$line"
     change=$(echo "$line" | jq -r '.change')
 
-    # Run resize-emulator on new or close window
     if [[ "$change" == "new" || "$change" == "close" ]]; then
       ~/dotfiles/i3/resize-emulator
-    fi
-
-    # Run resize-emulator on binding command with "resize" in it
-    if [[ "$change" == "run" ]]; then
-      command=$(echo "$line" | jq -r '.binding.command')
-      if [[ "$command" == *resize* ]]; then
-        ~/dotfiles/i3/resize-emulator
-      fi
     fi
   done
 done

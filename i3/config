@@ -32,7 +32,9 @@ set $menu ~/dotfiles/rofi/launch -show drun
 # is used in the bar {} block below.
 font pango:monospace 8
 
-# Use pactl to adjust volume in PulseAudio.
+#
+### Key bindings
+#
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
@@ -43,58 +45,49 @@ bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
 bindsym $mod+Shift+Up exec --no-startup-id brightnessctl set 100%
 bindsym $mod+Shift+Down exec --no-startup-id brightnessctl set 1%
 
-# Use Mouse+$mod to drag floating windows to their wanted position
-floating_modifier $mod
+bindsym $mod+q kill
 
-# move tiling windows via drag & drop by left-clicking into the title bar,
-# or left-clicking anywhere into the window while holding the floating modifier.
-# tiling_drag modifier titlebar
-
-# start a terminal
+# Programs
 bindsym $mod+Return exec $term
-
-# browsers
+bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
-
-# kill focused window
-bindsym $mod+q kill
-
-# Power menu
-# bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
-bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
-
-# toggle bluetooth device
-bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
-bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
-
-
-# start a program launcher
-bindsym $mod+d exec $menu
-
 bindsym $mod+p exec flameshot gui
 
-# change focus
+floating_modifier $mod
+
+# reload the configuration file
+bindsym $mod+Shift+c reload
+# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
+bindsym $mod+Shift+r restart
+
+bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
+bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
+
+# Move your focus around
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
 bindsym $mod+$up focus up
 bindsym $mod+$right focus right
 
-# move focused window
+# Move focused window
 bindsym $mod+Shift+$left move left
 bindsym $mod+Shift+$down move down
 bindsym $mod+Shift+$up move up
 bindsym $mod+Shift+$right move right
 
+# Layout stuff
+# You can "split" the current object of your focus with
+# $mod+b or $mod+v, for horizontal and vertical splits
+# respectively.
 # split in horizontal orientation
 bindsym $mod+x split h
 
 # split in vertical orientation
 bindsym $mod+v split v
-
-# enter fullscreen mode for the focused container
-bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
@@ -110,22 +103,27 @@ bindsym $mod+space focus mode_toggle
 # focus the parent container
 bindsym $mod+a focus parent
 
+# enter fullscreen mode for the focused container
+bindsym $mod+f fullscreen toggle
+
 #
 # Scratchpad:
 #
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
+bindsym $mod+Shift+minus move scratchpad
 
-    # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
+# Show the next scratchpad window or hide the focused scratchpad window.
+# If there are multiple scratchpad windows, this command cycles through them.
+bindsym $mod+minus scratchpad show
 
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
+bindsym $mod+Control+$left resize shrink width 1 px or 1 ppt, exec "~/dotfiles/i3/resize-emulator"
+bindsym $mod+Control+$down resize grow height 1 px or 1 ppt, exec "~/dotfiles/i3/resize-emulator"
+bindsym $mod+Control+$up resize shrink height 1 px or 1 ppt, exec "~/dotfiles/i3/resize-emulator"
+bindsym $mod+Control+$right resize grow width 1 px or 1 ppt, exec "~/dotfiles/i3/resize-emulator"
 
-# focus the child container
-#bindsym $mod+d focus child
 
+#
+# Workspaces:
+#
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
 set $ws1 "1"
@@ -163,18 +161,7 @@ bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
-# reload the configuration file
-bindsym $mod+Shift+c reload
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
-
-bindsym $mod+Control+$left resize shrink width 5 px or 5 ppt
-bindsym $mod+Control+$down resize grow height 5 px or 5 ppt
-bindsym $mod+Control+$up resize shrink height 5 px or 5 ppt
-bindsym $mod+Control+$right resize grow width 5 px or 5 ppt
 
 gaps inner 3
 
