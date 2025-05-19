@@ -156,7 +156,7 @@ zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) 
 
 # ST
 print_info "Making st..."
-sudo make -C ~/dotfiles/st clean install
+~/dotfiles/st/build
 
 # Install custom issue (login prompt)
 echo ""
