@@ -1,5 +1,6 @@
 return {
   "saghen/blink.cmp",
+  event = "VimEnter",
   build = "cargo build --release",
   dependencies = {
     "mikavilpas/blink-ripgrep.nvim",

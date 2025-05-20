@@ -21,12 +21,10 @@ return {
       local dapui = require("dapui")
 
       dapui.setup()
-      -- stylua: ignore
-      dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open({}) end
-      -- stylua: ignore
-      dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close({}) end
-      -- stylua: ignore
-      dap.listeners.before.event_exited["dapui_config"] = function() dapui.close({}) end
+
+      dap.listeners.after.event_initialized["dapui_config"] = dapui.open
+      dap.listeners.before.event_terminated["dapui_config"] = dapui.close
+      dap.listeners.before.event_exited["dapui_config"] = dapui.close
 
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "dap-float",
