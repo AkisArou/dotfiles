@@ -1,3 +1,4 @@
 #!/usr/bin/zsh
 
 i3-msg -r "[title=\"Android Emulator - *\"] resize set width ${EMULATOR_WIDTH}px"
+i3-msg -r "[title=\"Google Pixel *\"] resize set width 687px"

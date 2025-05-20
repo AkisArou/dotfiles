@@ -208,6 +208,7 @@ for_window [window_type="menu"] floating enable
 for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
 for_window [class="Emulator"] border normal, exec "swaymsg '[title=\"Android Emulator - *\"] resize set width 630px';"
+for_window [class="Genymotion Player"] border normal, exec "swaymsg '[title=\"Google Pixel *\"] resize set width 687px';"
 
 
 include /etc/sway/config.d/*

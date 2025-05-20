@@ -1,3 +1,4 @@
 #!/usr/bin/zsh
 
 swaymsg -r "[title=\"Android Emulator - *\"] resize set width ${EMULATOR_WIDTH}px"
+swaymsg -r "[title=\"Google Pixel *\"] resize set width 687px"
