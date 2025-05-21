@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-FONT_FAMILY="DM Mono"
+FONT_FAMILY="Hack Nerd Font Mono"
 
 if [ "$ULTRAWIDE" ]; then
   POLY_FONT="$FONT_FAMILY":size=9
