@@ -52,6 +52,8 @@ return {
 
     vim.keymap.set("n", "<leader>fW", fzf_lua.grep_cWORD, { desc = "Find WORD under cursor in cwd" })
 
+    vim.keymap.set("n", "<leader>fv", fzf_lua.grep_visual, { desc = "Find visual selection in cwd" })
+
     vim.keymap.set("n", "<leader>fb", fzf_lua.lgrep_curbuf, { desc = "Grep in currunt buffer" })
 
     vim.keymap.set("n", "<leader>fd", fzf_lua.diagnostics_document, { desc = "Document diagnostics" })
