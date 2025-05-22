@@ -5,10 +5,41 @@ Xft.autohint: true
 Xft.hintstyle: hintfull
 Xft.lcdfilter: lcdfilter
 
-st.font: HackNerdFont:size=10
+XTerm.termName: xterm-256color
+XTerm*utf8: 2
+XTerm*locale: true
+XTerm*renderFont: true
+XTerm.*.faceName: HackNerdFont Mono:size=10:antialias=true
+XTerm.*.metaSendsEscape: true
+XTerm.*.backarrowKey: false
+XTerm.ttyModes: erase ^?
+XTerm*savelines: 16384
+
+st.font: HackNerdFont Mono:size=10
+
+! TokyoNight colors for Xresources
+*background: #1a1b26
+*foreground: #c0caf5
+
+*color0: #15161e
+*color1: #f7768e
+*color2: #9ece6a
+*color3: #e0af68
+*color4: #7aa2f7
+*color5: #bb9af7
+*color6: #7dcfff
+*color7: #a9b1d6
+
+*color8: #414868
+*color9: #f7768e
+*color10: #9ece6a
+*color11: #e0af68
+*color12: #7aa2f7
+*color13: #bb9af7
+*color14: #7dcfff
+*color15: #c0caf5
 
 ! vscode dark .Xresources
-
 /**.foreground: #d4d4d4*/
 /**.background: #1f1f1f*/
 /**.cursorColor: #d4d4d4*/
@@ -33,25 +64,3 @@ st.font: HackNerdFont:size=10
 /*Nsxiv.window.foreground: #608b4e*/
 /*Nsxiv.mark.foreground: #f44747*/
 
-! TokyoNight colors for Xresources
-
-*background: #1a1b26
-*foreground: #c0caf5
-
-*color0: #15161e
-*color1: #f7768e
-*color2: #9ece6a
-*color3: #e0af68
-*color4: #7aa2f7
-*color5: #bb9af7
-*color6: #7dcfff
-*color7: #a9b1d6
-
-*color8: #414868
-*color9: #f7768e
-*color10: #9ece6a
-*color11: #e0af68
-*color12: #7aa2f7
-*color13: #bb9af7
-*color14: #7dcfff
-*color15: #c0caf5
