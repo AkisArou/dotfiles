@@ -107,7 +107,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     for _, bufnr in ipairs(buffers) do
       if
         vim.api.nvim_buf_is_loaded(bufnr)
-        and vim.api.nvim_buf_get_name(bufnr) == ""
+        and not vim.api.nvim_get_option_value("modified", { buf = bufnr })
         and vim.api.nvim_buf_get_name(bufnr) == ""
         and vim.bo.buftype ~= "quickfix"
         and vim.bo.buftype ~= "gitcommit"
