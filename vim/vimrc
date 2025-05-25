@@ -85,6 +85,8 @@ let g:netrw_localmkdir = "mkdir -p"
 let g:netrw_localcopycmd = "cp -r"
 let g:netrw_localrmdir = "rm -r"
 
+nmap <silent> <leader>e :Ex <bar> :sil! call search(expand("#:t"))<CR>
+
 " Automatically focus the current file in netrw when opening netrw
 " nmap <silent> <Leader>x :Ex <bar> :sil! call search(expand("#:t"))<CR>
 "
@@ -162,7 +164,6 @@ if !empty(fzf_path)
 endif
 
 nnoremap <leader>ff <cmd>FZF<CR>                                                                                     
-nnoremap <leader>e <cmd>Ex<CR>                                                                                     
 
 nnoremap <silent> [b :bprevious<CR>
 nnoremap <silent> ]b :bnext<CR>
