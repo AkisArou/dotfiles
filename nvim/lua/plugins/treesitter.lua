@@ -5,7 +5,7 @@ return {
     branch = "main",
     build = ":TSUpdate",
     setup = function()
-      local ensure_installed = {
+      require("nvim-treesitter").install({
         "bash",
         "c",
         "css",
@@ -37,16 +37,6 @@ return {
         "vim",
         "vimdoc",
         "yaml",
-      }
-
-      require("nvim-treesitter").install(ensure_installed)
-
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = ensure_installed,
-        callback = function()
-          vim.treesitter.start()
-          vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-        end,
       })
     end,
   },
