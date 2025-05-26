@@ -63,6 +63,3 @@ opt.linebreak = true
 
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"
-
-vim.cmd([[autocmd FileType * set formatoptions-=ro]]) -- disable new line auto comment
-vim.cmd([[set mouse=]])

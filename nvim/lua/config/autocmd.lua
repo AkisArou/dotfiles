@@ -155,3 +155,12 @@ vim.api.nvim_create_autocmd("User", {
     vim.cmd("set autoread | checktime")
   end,
 })
+
+-- Disable new line auto-comment
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    vim.cmd("set formatoptions-=cro")
+    vim.cmd("setlocal formatoptions-=cro")
+  end,
+})
