@@ -122,6 +122,7 @@ packages=(
   "ccache" # For faster nvim builds
   "lazygit"
   "github-cli"
+  "tree-sitter-cli-git"
 )
 
 if cpu_is_intel; then
