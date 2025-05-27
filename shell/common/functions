@@ -1,5 +1,3 @@
-#!/usr/bin/zsh
-
 maintain() {
   ~/dotfiles/scripts/maintain
 }
@@ -77,8 +75,4 @@ fv() {
         --header='(view:ctrl-v) (sort:ctrl-x)'
   )" || return
   nvim "$file" || return
-}
-
-set-java-home() {
-  source ~/.asdf/plugins/java/set-java-home.zsh
 }

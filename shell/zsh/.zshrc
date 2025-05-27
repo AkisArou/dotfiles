@@ -18,13 +18,13 @@ plug "zsh-users/zsh-syntax-highlighting"
 plug "Aloxaf/fzf-tab"
 
 # keybinds
-bindkey '^ ' autosuggest-accept
+bindkey '^E' autosuggest-accept
 bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
 
 # source
-source "$HOME/dotfiles/zsh/functions"
-source "$HOME/dotfiles/zsh/history"
+source "$HOME/dotfiles/shell/common/functions"
+source "$HOME/dotfiles/shell/zsh/history"
 
 # completions
 source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh

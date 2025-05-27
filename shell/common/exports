@@ -1,10 +1,8 @@
-#!/usr/bin/zsh
-
 if [ -f ~/.env ]; then
   export $(cat ~/.env | xargs)
 fi
 
-. ~/dotfiles/zsh/fzf
+. ~/dotfiles/shell/common/fzf
 
 export THEME="${THEME:-tokyonight}"
 export BAT_THEME=tokyonight

@@ -27,9 +27,11 @@ sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
 sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
 
-create_symlink "$HOME/dotfiles/zsh/.zshenv" "$HOME/.zshenv"
-create_symlink "$HOME/dotfiles/zsh/.zprofile" "$HOME/.zprofile"
-create_symlink "$HOME/dotfiles/zsh/.zshrc" "$HOME/.zshrc"
+create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"
+create_symlink "$HOME/dotfiles/shell/zsh/.zprofile" "$HOME/.zprofile"
+create_symlink "$HOME/dotfiles/shell/zsh/.zshrc" "$HOME/.zshrc"
+create_symlink "$HOME/dotfiles/shell/bash/.bashrc" "$HOME/.bashrc"
+create_symlink "$HOME/dotfiles/shell/bash/.bash_profile" "$HOME/.bash_profile"
 create_symlink "$HOME/dotfiles/alacritty" "$HOME/.config/alacritty"
 create_symlink "$HOME/dotfiles/kitty" "$HOME/.config/kitty"
 create_symlink "$HOME/dotfiles/nvim" "$HOME/.config/nvim"

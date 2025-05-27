@@ -3,6 +3,7 @@ vim.filetype.add({
   filename = {
     ["vifmrc"] = "vim",
     ["exports"] = "zsh",
+    ["blerc"] = "bash",
     ["tsconfig.json"] = "jsonc",
     ["launch.json"] = "jsonc",
     ["tasks.json"] = "jsonc",
@@ -10,6 +11,7 @@ vim.filetype.add({
     ["librewolf.overrides.cfg"] = "javascript",
   },
   pattern = {
+    [".*/shell/common/.*"] = "bash",
     [".*/waybar/config"] = "jsonc",
     [".*/mako/config"] = "dosini",
     [".*/kitty/.+%.conf"] = "kitty",

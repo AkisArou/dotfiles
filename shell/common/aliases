@@ -1,5 +1,3 @@
-#!/usr/bin/zsh
-
 alias sudo="sudo -E"
 alias ta="tmux attach"
 alias vim="TERM=xterm-256color vim"

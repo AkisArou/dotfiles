@@ -27,7 +27,7 @@ Common
 - Terminal: alacritty | kitty
 - Filemanager: yazi, thunar
 - Notifications: dunst
-- Shell: zsh
+- Shell: zsh & bash
 
 Also:
 
