@@ -1,3 +1,5 @@
+#!/usr/bin/zsh
+
 maintain() {
   ~/dotfiles/scripts/maintain
 }
