@@ -21,7 +21,7 @@ update() {
   ~/.tmux/plugins/tpm/bin/update_plugins all
   echo
 
-  ya pack -u
+  ya pkg upgrade
   echo
 
   fwupdmgr get-updates
