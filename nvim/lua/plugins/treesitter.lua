@@ -41,15 +41,17 @@ return {
     end,
   },
   {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+  },
+  {
     "nvim-treesitter/nvim-treesitter-context",
     event = "VeryLazy",
     opts = { mode = "cursor", max_lines = 3 },
-    keys = {},
   },
   {
     "windwp/nvim-ts-autotag",
     ft = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
     event = "VeryLazy",
-    opts = {},
   },
 }
