@@ -83,6 +83,12 @@ FZF_ONEDARK="\
 
 FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
 
+if [ -n "$ZSH_VERSION" ]; then
+  history_file="$HOME/.fzf_history"
+else
+  history_file="$HOME/.bash_history"
+fi
+
 export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --bind ctrl-n:down,ctrl-p:up,ctrl-d:page-down,ctrl-u:page-up,ctrl-e:accept,ctrl-k:next-history,ctrl-j:prev-history \
   --highlight-line \
@@ -91,7 +97,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --cycle \
   --layout=reverse \
   --border=none \
-  --history=$HIST_FILE
+  --history=$history_file \
   $(eval echo \$"$FZF_THEME")
 "
 
