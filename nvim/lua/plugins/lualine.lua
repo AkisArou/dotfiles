@@ -36,14 +36,17 @@ return {
         lualine_b = {
           "branch",
           "diff",
+        },
+        lualine_c = {
+          "filename",
           {
             "diagnostics",
             symbols = { error = " ", warn = " ", info = " " },
             update_in_insert = true,
           },
         },
-        lualine_c = { "filename", "lsp_progress" },
         lualine_x = {
+          "lsp_progress",
           { tsc, icon = "", color = "DiagnosticError" },
           "nvim-dap-ui",
           "encoding",
