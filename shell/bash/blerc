@@ -1155,6 +1155,7 @@ function blerc/vim-load-hook {
   ## With this setting, M-RET can be used to insert a newline in the
   ## commandline.
 
+  ble-bind -m vi_imap -f S-TAB vi_imap/normal-mode
   #ble-decode/keymap:vi_imap/define-meta-bindings
 
   ## In this case, C-RET can be optionally configured so that it forcibly
@@ -1203,7 +1204,7 @@ function blerc/vim-load-hook {
   ## current line and go to the next line, you can bind C-c to 'discard-line':
 
   ble-bind -m vi_imap -f 'C-c' discard-line
-  ble-bind -m vi_nmap -f 'C-c' discard-line
+  ble-bind -m vi_nmap -f 'C-c' 'discard-line vi_imap/normal-mode'
 
 
   ## The default mapping of 'g g' and G moves the current position in the
