@@ -89,13 +89,13 @@ return {
 
     vim.keymap.set("n", "<leader>fe", function()
       fzf_lua.buffers({
-        fzf_opts = {
-          ["--delimiter"] = " ",
-          ["--with-nth"] = "-1",
-        },
+        -- fzf_opts = {
+        --   ["--delimiter"] = " ",
+        --   ["--with-nth"] = "-1",
+        -- },
         winopts = {
-          height = 0.35,
-          width = 0.35,
+          -- height = 0.35,
+          -- width = 0.35,
           preview = {
             hidden = "hidden",
           },
