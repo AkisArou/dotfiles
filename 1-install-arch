@@ -94,6 +94,7 @@ packages=(
   "power-profiles-daemon"
   "preload"
   "python-pip"
+  "ripdrag-git"
   "ripgrep"
   "rsync"
   "rustup"
