@@ -14,7 +14,13 @@ return {
 
     local filename = function()
       local get_fg = function(hl)
-        return { fg = string.format("#%06x", vim.api.nvim_get_hl(0, { name = hl }).fg), gui = "bold" }
+        local fg_hl = vim.api.nvim_get_hl(0, { name = hl }).fg
+
+        if fg_hl == nil then
+          return { fg = "none" }
+        end
+
+        return { fg = string.format("#%06x", fg_hl), gui = "bold" }
       end
 
       return {
@@ -43,7 +49,7 @@ return {
       options = {
         theme = vim.g.os_theme,
         disabled_filetypes = { "man" },
-        component_separators = { left = "", right = "" },
+        component_separators = "",
       },
       sections = {
         lualine_a = { "mode" },
@@ -61,14 +67,6 @@ return {
           "progress",
           "location",
         },
-        lualine_y = {},
-        lualine_z = {},
-      },
-      inactive_sections = {
-        lualine_a = {},
-        lualine_b = {},
-        lualine_c = { "filename" },
-        lualine_x = { "location" },
         lualine_y = {},
         lualine_z = {},
       },
