@@ -659,7 +659,7 @@ bleopt editor=vim
 #ble-face auto_complete='fg=238,bg=254'           # default
 #ble-face auto_complete='fg=231,bg=69'            # blue background
 #ble-face auto_complete='fg=240,underline,italic' # darker background
-
+ble-face -s auto_complete fg=#414868
 
 ## The setting "complete_auto_wordbreaks" is used as the delimiters for
 ## identifying words for M-right (auto-complete/insert-word).  The default
@@ -986,7 +986,7 @@ bleopt editor=vim
 #ble-face -s syntax_quotation          fg=green,bold
 #ble-face -s syntax_escape             fg=magenta
 #ble-face -s syntax_expr               fg=63
-#ble-face -s syntax_error              bg=203,fg=231
+ble-face -s syntax_error               fg=red
 #ble-face -s syntax_varname            fg=202
 #ble-face -s syntax_delimiter          bold
 #ble-face -s syntax_param_expansion    fg=133
@@ -999,7 +999,7 @@ bleopt editor=vim
 #ble-face -s syntax_document           fg=100
 #ble-face -s syntax_document_begin     fg=100,bold
 #ble-face -s command_builtin_dot       fg=red,bold
-#ble-face -s command_builtin           fg=red
+ble-face -s command_builtin            fg=green
 #ble-face -s command_alias             fg=teal
 #ble-face -s command_function          fg=99 # fg=133
 #ble-face -s command_file              fg=green
