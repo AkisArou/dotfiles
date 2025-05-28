@@ -1,3 +1,6 @@
+source "$HOME/dotfiles/shell/common/exports"
+source "$HOME/dotfiles/shell/common/aliases"
+
 [[ $- == *i* ]] && source /usr/share/blesh/ble.sh --noattach --rcfile ~/dotfiles/shell/bash/blerc
 
 if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
