@@ -16,8 +16,6 @@ return {
       options = {
         icons_enabled = true,
         theme = vim.g.os_theme,
-        component_separators = { left = "", right = "" },
-        section_separators = { left = "", right = "" },
         disabled_filetypes = {
           "man",
         },
