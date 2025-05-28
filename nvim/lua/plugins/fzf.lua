@@ -30,10 +30,6 @@ return {
           ["ctrl-h"] = { actions.toggle_hidden },
         },
       },
-      buffers = {
-        file_icons = false,
-        path_shorten = 1,
-      },
     })
 
     vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#1f1f1f" })
@@ -89,10 +85,13 @@ return {
 
     vim.keymap.set("n", "<leader>fe", function()
       fzf_lua.buffers({
-        -- fzf_opts = {
-        --   ["--delimiter"] = " ",
-        --   ["--with-nth"] = "-1",
-        -- },
+        file_icons = false,
+        path_shorten = 1,
+        color_icons = false,
+        fzf_opts = {
+          ["--delimiter"] = " ",
+          ["--with-nth"] = "-1",
+        },
         winopts = {
           -- height = 0.35,
           -- width = 0.35,
