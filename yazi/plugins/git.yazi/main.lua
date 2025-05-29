@@ -1,4 +1,4 @@
---- @since 25.4.4
+--- @since 25.5.28
 
 local WINDOWS = ya.target_family() == "windows"
 
@@ -167,9 +167,9 @@ local function setup(st, opts)
 		if not code or signs[code] == "" then
 			return ""
 		elseif self._file.is_hovered then
-			return ui.Line({ " ", signs[code] })
+			return ui.Line { " ", signs[code] }
 		else
-			return ui.Line({ " ", ui.Span(signs[code]):style(styles[code]) })
+			return ui.Line { " ", ui.Span(signs[code]):style(styles[code]) }
 		end
 	end, opts.order)
 end
