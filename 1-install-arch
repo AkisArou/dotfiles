@@ -123,7 +123,7 @@ packages=(
   "xdg-desktop-portal-gtk"
   "xdg-user-dirs"
   "xdg-utils"
-  "yazi-nightly-bin"
+  "yazi-git"
   "zsh"
 )
 

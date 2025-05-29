@@ -9,7 +9,7 @@ conds = []
 
 
 # : Manager {{{
-[manager]
+[mgr]
 cwd = { fg = "#878580" }
 
 # Hovered

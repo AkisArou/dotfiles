@@ -24,6 +24,8 @@ update() {
   ya pkg upgrade
   echo
 
+  rustup update
+
   fwupdmgr get-updates
 }
 

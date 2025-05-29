@@ -1,4 +1,4 @@
-[manager]
+[mgr]
 cwd = { fg = "#a9b1d6", italic = true }
 
 # Hovered

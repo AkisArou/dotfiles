@@ -1,5 +1,5 @@
 # : Manager {{{
-[manager]
+[mgr]
 cwd = { fg = "#98C379" }                                       # Blue
 highlight = "~/dotfiles/yazi/flavors/onedark.yazi/tmtheme.xml"
 
