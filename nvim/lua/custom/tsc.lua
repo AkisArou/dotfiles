@@ -7,7 +7,7 @@ local M = {
 local bin_path = (function()
   local node_modules_tsc_binary = vim.fn.findfile("node_modules/.bin/tsc", ".;")
 
-  if node_modules_tsc_binary ~= "" then
+  if type(node_modules_tsc_binary) == "string" and node_modules_tsc_binary ~= "" then
     return node_modules_tsc_binary
   end
 

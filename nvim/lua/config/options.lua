@@ -17,7 +17,6 @@ opt.conceallevel = 0 -- so that `` is visible in markdown files
 opt.fileencoding = "utf-8" -- the encoding written to a file
 opt.hlsearch = true -- highlight all matches on previous search pattern
 opt.ignorecase = true -- ignore case in search patterns
-opt.mouse = "a" -- allow the mouse to be used in neovim
 opt.pumheight = 10 -- pop up menu height
 opt.pumblend = 10 -- Popup blend
 opt.showmode = false -- we don't need to see things like -- INSERT -- anymore
@@ -63,3 +62,5 @@ opt.linebreak = true
 
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"
+
+vim.cmd([[set mouse=]])
