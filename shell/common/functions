@@ -25,6 +25,7 @@ update() {
   echo
 
   rustup update
+  echo
 
   fwupdmgr get-updates
 }
