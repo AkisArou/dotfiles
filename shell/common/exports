@@ -9,6 +9,9 @@ fi
 export THEME="${THEME:-tokyonight}"
 export BAT_THEME=tokyonight
 
+# tokyonight
+export JQ_COLORS="0;90:33:33:37:32:37:37:36"
+
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
