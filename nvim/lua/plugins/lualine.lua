@@ -1,6 +1,6 @@
 return {
   "nvim-lualine/lualine.nvim",
-  dependencies = { "nvim-tree/nvim-web-devicons", "arkav/lualine-lsp-progress" },
+  dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local tsc = function()
       local total_errors = require("custom.tsc").total_errors
@@ -59,7 +59,7 @@ return {
           { "diagnostics", symbols = { error = " ", warn = " ", info = " " }, update_in_insert = true },
         },
         lualine_x = {
-          "lsp_progress",
+          "lsp_status",
           { tsc, icon = "", color = "DiagnosticError" },
           "nvim-dap-ui",
           "branch",
