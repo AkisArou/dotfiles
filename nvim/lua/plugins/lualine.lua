@@ -59,7 +59,10 @@ return {
           { "diagnostics", symbols = { error = " ", warn = " ", info = " " }, update_in_insert = true },
         },
         lualine_x = {
-          "lsp_status",
+          {
+            "lsp_status",
+            ignore_lsp = { "cssmodules_ls", "tailwindcss" },
+          },
           { tsc, icon = "", color = "DiagnosticError" },
           "nvim-dap-ui",
           "branch",
