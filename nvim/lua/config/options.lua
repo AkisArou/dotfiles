@@ -64,3 +64,12 @@ opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"
 
 vim.cmd([[set mouse=]])
+
+-- Workaround for issue: https://github.com/neovim/neovim/issues/14061
+-- Fixes issue with term buffers when :wqa
+vim.api.nvim_create_user_command("Z", function()
+  vim.cmd("write")
+  vim.cmd("qa")
+end, {})
+
+vim.cmd([[cabbrev wqa Z]])
