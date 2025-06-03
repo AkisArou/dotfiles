@@ -1,4 +1,3 @@
 {
-	"diagnostics.disable": ["incomplete-signature-doc", "trailing-space"]
+  "diagnostics.disable": ["incomplete-signature-doc", "trailing-space"]
 }
-
