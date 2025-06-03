@@ -35,6 +35,7 @@ return {
         -- "clangd",
         "mdx_analyzer",
         "taplo",
+        "eslint",
       },
       automatic_installation = true,
     })
