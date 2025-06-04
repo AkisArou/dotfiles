@@ -50,7 +50,7 @@ set shiftwidth=2
 set tabstop=2
 set cursorline
 set number
-set norelativenumber
+set relativenumber
 set noshowcmd
 set noruler
 set numberwidth=4
@@ -107,6 +107,7 @@ augroup netrw_mapping
 augroup END
 
 autocmd BufLeave,FocusLost * silent! wall
+
 
 function! CloseOtherBuffers()
   " Get the current buffer number
@@ -185,3 +186,8 @@ function! CentreCursor()
 endfunction
 
 :autocmd CursorMoved,CursorMovedI * call CentreCursor()
+
+let s:plugin_file = expand('~/.local/share/nvim/lazy/vim-tmux-navigator/plugin/tmux_navigator.vim')
+if filereadable(s:plugin_file)
+  execute 'source' fnameescape(s:plugin_file)
+endif
