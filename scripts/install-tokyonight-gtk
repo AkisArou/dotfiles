@@ -1,0 +1,22 @@
+#!/usr/bin/zsh
+
+REPO_DIR="$HOME/src/Tokyonight-GTK-Theme"
+
+if [ ! -d "$REPO_DIR" ]; then
+  echo "Cloning Tokyonight-GTK-Theme into $REPO_DIR..."
+  git clone https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme "$REPO_DIR"
+else
+  echo "Directory exists. Pulling latest changes..."
+  cd "$REPO_DIR" || {
+    echo "Failed to enter directory"
+    exit 1
+  }
+  git pull
+fi
+
+cd "$REPO_DIR" || {
+  echo "Failed to enter directory"
+  exit 1
+}
+echo "Running install.sh..."
+./themes/install.sh

@@ -7,6 +7,7 @@ fi
 . ~/dotfiles/shell/common/fzf
 
 export THEME="${THEME:-tokyonight}"
+export GTK_THEME="Tokyonight-Dark"
 export BAT_THEME=tokyonight
 
 # tokyonight
