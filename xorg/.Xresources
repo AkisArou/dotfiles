@@ -17,26 +17,27 @@ XTerm*savelines: 16384
 
 st.font: HackNerdFont Mono:size=10
 
-! TokyoNight colors for Xresources
+! TokyoNight colors for Xresources (matched to Alacritty)
 *background: #1a1b26
 *foreground: #c0caf5
 
-*color0: #15161e
-*color1: #f7768e
-*color2: #9ece6a
-*color3: #e0af68
-*color4: #7aa2f7
-*color5: #bb9af7
-*color6: #7dcfff
-*color7: #a9b1d6
-
-*color8: #414868
-*color9: #f7768e
-*color10: #9ece6a
-*color11: #e0af68
-*color12: #7aa2f7
-*color13: #bb9af7
-*color14: #7dcfff
+!normal
+*color0:  #15161e
+*color1:  #f7768e
+*color2:  #9ece6a
+*color3:  #e0af68
+*color4:  #7aa2f7
+*color5:  #bb9af7
+*color6:  #7dcfff
+*color7:  #a9b1d6
+!bright
+*color8:  #6E7FAE
+*color9:  #ff899d
+*color10: #9fe044
+*color11: #faba4a
+*color12: #8db0ff
+*color13: #c7a9ff
+*color14: #a4daff
 *color15: #c0caf5
 
 ! vscode dark .Xresources
