@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+rm -rf ./config.h
+sudo make -C ~/dotfiles/st clean install

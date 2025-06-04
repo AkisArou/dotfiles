@@ -153,6 +153,7 @@ fi
 # Install required packages
 install_packages "${packages[@]}"
 
+~/dotfiles/st/build
 ~/dotfiles/scripts/build-nvim
 
 zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
