@@ -27,6 +27,9 @@ update() {
   rustup update
   echo
 
+  asdf plugin update --all
+  echo
+
   fwupdmgr get-updates
 }
 
