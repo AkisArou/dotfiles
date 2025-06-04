@@ -29,3 +29,10 @@ Applications
 ------------
 * modify Android studio desktop file:
   Exec=sh -c 'exec android-studio "$@" $( [ "$XDG_SESSION_TYPE" = wayland ] && echo -Dawt.toolkit.name=WLToolkit )' sh %f
+
+Various
+-------
+* set vconsole font:
+  sudo vim /etc/vconsole.conf
+  For ultrawide monitor add: 
+  FONT=ter-120n
