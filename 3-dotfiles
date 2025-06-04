@@ -27,6 +27,7 @@ sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
 sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
 
+create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"
 create_symlink "$HOME/dotfiles/shell/zsh/.zprofile" "$HOME/.zprofile"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshrc" "$HOME/.zshrc"

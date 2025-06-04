@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-source "$(dirname "$0")/library"
+source "$HOME/dotfiles/scripts/library"
 
 print_info "Checking orphan packages..."
 orphans=$(paru -Qdtq)

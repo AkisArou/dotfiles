@@ -1,38 +1,5 @@
 #!/usr/bin/zsh
 
-maintain() {
-  ~/dotfiles/scripts/maintain
-}
-
-update() {
-  paru -Syu
-  echo
-
-  ~/dotfiles/scripts/build-nvim
-  echo
-
-  nvim --headless "+Lazy! sync" +qa
-  nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
-  echo
-
-  zap update all
-  echo
-
-  ~/.tmux/plugins/tpm/bin/update_plugins all
-  echo
-
-  ya pkg upgrade
-  echo
-
-  rustup update
-  echo
-
-  asdf plugin update --all
-  echo
-
-  fwupdmgr get-updates
-}
-
 e() {
   local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
   yazi "$@" --cwd-file="$tmp"
