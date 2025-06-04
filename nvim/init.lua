@@ -6,10 +6,7 @@ require("custom.revive").setup({ auto = false })
 require("custom.pnpm").setup()
 
 if vim.g.is_work then
-  local cwd = vim.fn.getcwd()
-  local project = cwd .. "/tsconfig.json"
-
   require("custom.tsc").setup({
-    args = "--build " .. project .. " --watch",
+    npm_script = "ts:watch",
   })
 end

@@ -19,6 +19,7 @@ local config = {
   enable_progress_notifications = false,
   use_diagnostics = false,
   args = nil,
+  npm_script = nil,
 }
 
 M.parse_tsc_output = function(output)
@@ -53,18 +54,28 @@ M.set_qflist = function(errors)
   vim.fn.setqflist({}, "r", { title = "TSC", items = errors })
 end
 
+M.get_cmd = function()
+  -- NPM
+  if config.npm_script then
+    return "npm" .. " run " .. config.npm_script
+  -- TSC
+  else
+    local tsc = config.bin_path
+
+    if vim.fn.executable(tsc) == 0 then
+      vim.notify(
+        "tsc was not available or found in your node_modules or $PATH. Please run install and try again.",
+        vim.log.levels.ERROR
+      )
+      return
+    end
+
+    return tsc .. " " .. config.args
+  end
+end
+
 M.run = function()
   if M.is_running then
-    return
-  end
-
-  local tsc = config.bin_path
-
-  if not vim.fn.executable(tsc) == 1 or false then
-    vim.notify(
-      "tsc was not available or found in your node_modules or $PATH. Please run install and try again.",
-      vim.log.levels.ERROR
-    )
     return
   end
 
@@ -101,11 +112,15 @@ M.run = function()
     M.is_running = false
   end
 
-  M.pid = vim.fn.jobstart(tsc .. " " .. config.args, {
-    on_stdout = on_stdout,
-    on_exit = on_exit,
-    stdout_buffered = false,
-  })
+  local cmd = M.get_cmd()
+
+  if cmd then
+    M.pid = vim.fn.jobstart(cmd, {
+      on_stdout = on_stdout,
+      on_exit = on_exit,
+      stdout_buffered = false,
+    })
+  end
 end
 
 function M.show_diagnostics(errors)
