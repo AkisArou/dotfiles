@@ -2,6 +2,14 @@ local function augroup(name)
   return vim.api.nvim_create_augroup("akisarou_" .. name, { clear = true })
 end
 
+-- Enable treesitter
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    pcall(vim.treesitter.start)
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
+
 -- Check if we need to reload the file when it changed
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("checktime"),
@@ -162,13 +170,5 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.cmd("set formatoptions-=cro")
     vim.cmd("setlocal formatoptions-=cro")
-  end,
-})
-
--- Enable treesitter
-vim.api.nvim_create_autocmd("FileType", {
-  callback = function()
-    pcall(vim.treesitter.start)
-    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end,
 })
