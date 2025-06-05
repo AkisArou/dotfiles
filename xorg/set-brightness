@@ -1,0 +1,41 @@
+#!/usr/bin/env zsh
+
+# Config
+BRIGHTNESS_FILE="/tmp/.xrandr_brightness"
+STEP=0.1
+DEFAULT=1.0
+MIN=0.1
+MAX=1.0
+
+# Get connected display
+output=$(xrandr | grep " connected" | awk '{ print $1 }')
+
+# Read current brightness
+if [[ -f "$BRIGHTNESS_FILE" ]]; then
+  current=$(<"$BRIGHTNESS_FILE")
+else
+  current=$DEFAULT
+fi
+
+# Parse argument
+case "$1" in
+inc)
+  new=$(echo "$current + $STEP" | bc)
+  ;;
+dec)
+  new=$(echo "$current - $STEP" | bc)
+  ;;
+*)
+  echo "Usage: $0 [inc|dec]"
+  exit 1
+  ;;
+esac
+
+# Clamp brightness to min/max
+new=$(echo "$new" | awk -v min=$MIN -v max=$MAX '{ if ($1 < min) print min; else if ($1 > max) print max; else print $1 }')
+
+# Apply brightness
+xrandr --output "$output" --brightness "$new"
+
+# Save new brightness
+echo "$new" >"$BRIGHTNESS_FILE"
