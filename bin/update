@@ -1,10 +1,13 @@
 #!/usr/bin/zsh
 
+source "$HOME/dotfiles/scripts/library"
 [ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
+print_info "System:"
 paru -Syu
 echo
 
+print_info "Nvim:"
 ~/dotfiles/scripts/build-nvim
 echo
 
@@ -12,19 +15,25 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
 echo
 
+print_info "Zap:"
 zap update all
 echo
 
+print_info "Tmux:"
 ~/.tmux/plugins/tpm/bin/update_plugins all
 echo
 
+print_info "Yazi:"
 ya pkg upgrade
 echo
 
+print_info "Rust:"
 rustup update
 echo
 
+print_info "asdf:"
 asdf plugin update --all
 echo
 
+print_info "Firmware:"
 fwupdmgr get-updates
