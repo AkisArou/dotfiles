@@ -3,9 +3,9 @@ return {
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
     local tsc = function()
-      local total_errors = require("custom.tsc").total_errors
+      local total_errors = #require("overseer").list_tasks({ recent_first = true })[1].result.diagnostics
 
-      if total_errors == 0 or total_errors == nil then
+      if total_errors == 0 then
         return ""
       end
 
@@ -59,11 +59,11 @@ return {
           { "diagnostics", symbols = { error = " ", warn = " ", info = " " }, update_in_insert = true },
         },
         lualine_x = {
+          { tsc, icon = "", color = "DiagnosticError" },
           {
             "lsp_status",
             ignore_lsp = { "cssmodules_ls", "tailwindcss" },
           },
-          { tsc, icon = "", color = "DiagnosticError" },
           "nvim-dap-ui",
           "branch",
           "diff",
