@@ -15,7 +15,12 @@ return {
     },
   },
   opts = {
-    keymap = { preset = "default", ["<C-e>"] = { "select_and_accept" } },
+    keymap = {
+      preset = "default",
+      ["<C-e>"] = { "select_and_accept" },
+      ["<C-b>"] = { "scroll_documentation_up", "fallback" },
+      ["<C-f>"] = { "scroll_documentation_down", "fallback" },
+    },
 
     appearance = {
       nerd_font_variant = "mono",

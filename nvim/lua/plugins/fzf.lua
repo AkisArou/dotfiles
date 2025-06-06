@@ -4,6 +4,7 @@ return {
   config = function()
     local actions = require("fzf-lua.actions")
     local fzf_lua = require("fzf-lua")
+
     fzf_lua.setup({
       "hide",
       -- "fzf-native",
@@ -31,6 +32,8 @@ return {
         },
       },
     })
+
+    fzf_lua.register_ui_select()
 
     vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#1f1f1f" })
 
