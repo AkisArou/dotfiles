@@ -62,6 +62,7 @@ opt.linebreak = true
 
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"
+opt.exrc = true
 
 vim.cmd([[set mouse=]])
 
