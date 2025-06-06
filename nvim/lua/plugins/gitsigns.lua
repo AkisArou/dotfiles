@@ -1,14 +1,25 @@
+local dashed_bar = "┊"
+local vertical_bar = "│"
+
 return {
   "lewis6991/gitsigns.nvim",
   event = "VeryLazy",
   opts = {
     signs = {
-      add = { text = "▎" },
-      change = { text = "▎" },
-      delete = { text = "" },
-      topdelete = { text = "" },
-      changedelete = { text = "▎" },
-      untracked = { text = "▎" },
+      add = { text = vertical_bar },
+      untracked = { text = vertical_bar },
+      change = { text = vertical_bar },
+      delete = { text = vertical_bar },
+      topdelete = { text = vertical_bar },
+      changedelete = { text = vertical_bar },
+    },
+    signs_staged = {
+      add = { text = dashed_bar },
+      untracked = { text = dashed_bar },
+      change = { text = dashed_bar },
+      delete = { text = dashed_bar },
+      topdelete = { text = dashed_bar },
+      changedelete = { text = dashed_bar },
     },
     on_attach = function(buffer)
       local gs = package.loaded.gitsigns
