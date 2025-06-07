@@ -7,15 +7,17 @@ fastfetch
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 eval "$(starship init zsh)"
 
-[ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
+if [ -f "$HOME/.local/share/zap/zap.zsh" ]; then
+  source "$HOME/.local/share/zap/zap.zsh"
 
-# plugins
-plug "zsh-users/zsh-autosuggestions"
-plug "zap-zsh/supercharge"
-plug "zap-zsh/vim"
-plug "zap-zsh/fzf"
-plug "zsh-users/zsh-syntax-highlighting"
-plug "Aloxaf/fzf-tab"
+  # plugins
+  plug "zsh-users/zsh-autosuggestions"
+  plug "zap-zsh/supercharge"
+  plug "zap-zsh/vim"
+  plug "zap-zsh/fzf"
+  plug "zsh-users/zsh-syntax-highlighting"
+  plug "Aloxaf/fzf-tab"
+fi
 
 # keybinds
 bindkey '^E' autosuggest-accept
