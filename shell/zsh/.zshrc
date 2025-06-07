@@ -25,6 +25,7 @@ bindkey -M menuselect '^P' up-line-or-history
 # source
 source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/history"
+[ -f ~/.asdf/plugins/java/set-java-home.zsh ] && . ~/.asdf/plugins/java/set-java-home.zsh
 
 # completions
 source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
