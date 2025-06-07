@@ -3,7 +3,6 @@ return {
   event = "VimEnter",
   build = "cargo build --release",
   dependencies = {
-    "mikavilpas/blink-ripgrep.nvim",
     {
       "folke/lazydev.nvim",
       ft = "lua",
@@ -49,19 +48,6 @@ return {
           module = "lazydev.integrations.blink",
           score_offset = 100, -- show at a higher priority than lsp
           fallbacks = { "lsp" },
-        },
-
-        ripgrep = {
-          module = "blink-ripgrep",
-          name = "Ripgrep",
-          -- the options below are optional, some default values are shown
-          ---@module "blink-ripgrep"
-          ---@type blink-ripgrep.Options
-          opts = {
-            prefix_min_len = 3,
-            context_size = 5,
-            max_filesize = "1M",
-          },
         },
 
         commit = vim.g.is_work and {
