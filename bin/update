@@ -37,3 +37,6 @@ echo
 
 print_info "Firmware:"
 fwupdmgr get-updates
+
+print_info "Corepack:"
+npm install --global corepack@latest
