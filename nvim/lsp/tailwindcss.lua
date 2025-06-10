@@ -56,27 +56,6 @@ return {
       },
       classAttributes = { "class", "className", "style", "classList" },
       classFunctions = { "cn", "clsx", "tw", "tw.color", "tw.style" },
-      experimental = {
-        configFile = (function()
-          local cwd = vim.fn.getcwd()
-          if cwd:match("nable%-solutions") then
-            return {
-              ["apps/client/assistant-prm-airport/back-office/tailwind.config.ts"] = {
-                "apps/client/assistant-prm-airport/back-office/src/**",
-                "packages/assistant-prm-airport/**",
-              },
-              ["apps/client/assistant-prm-airport/agent/tailwind.config.ts"] = {
-                "apps/client/assistant-prm-airport/agent/**",
-              },
-              ["apps/client/volunteer/back-office/tailwind.config.ts"] = "packages/assistant-volunteer/**",
-              ["apps/website/nable/tailwind.config.ts"] = "apps/website/nable/**",
-              ["packages/shared/react/heroui/tailwind.config.ts"] = "packages/shared/react/heroui/**",
-            }
-          end
-
-          return nil
-        end)(),
-      },
     },
   },
 }
