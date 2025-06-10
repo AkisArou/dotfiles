@@ -79,6 +79,7 @@ vim.api.nvim_create_autocmd("FileType", {
   group = augroup("wrap_spell"),
   pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
   callback = function()
+    -- Skip lsp doc window
     if vim.bo.buftype == "nofile" then
       return
     end
