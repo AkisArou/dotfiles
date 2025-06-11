@@ -16,6 +16,12 @@ return {
             name = "eas.json",
             url = "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json",
           },
+          {
+            description = "VSCode launch.json",
+            fileMatch = "launch.json",
+            name = "launch.json",
+            url = "https://codeberg.org/mfussenegger/dapconfig-schema/raw/branch/master/dapconfig-schema.json",
+          },
         },
       }),
       format = {
