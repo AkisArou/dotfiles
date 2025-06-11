@@ -8,7 +8,16 @@ return {
   },
   settings = {
     json = {
-      schemas = require("schemastore").json.schemas(),
+      schemas = require("schemastore").json.schemas({
+        extra = {
+          {
+            description = "EAS expo",
+            fileMatch = "eas.json",
+            name = "eas.json",
+            url = "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json",
+          },
+        },
+      }),
       format = {
         enable = true,
       },
