@@ -8,7 +8,6 @@
   "apc.electron": {
     "titleBarStyle": "hidden"
   },
-  "window.zoomLevel": -0.3,
   "window.commandCenter": false,
   "workbench.layoutControl.enabled": false,
   "workbench.tree.renderIndentGuides": "none",
@@ -17,7 +16,7 @@
   "workbench.editor.sharedViewState": true,
   "workbench.editor.enablePreview": false,
   "workbench.activityBar.location": "hidden",
-  "workbench.colorTheme": "Default Dark+",
+  "workbench.colorTheme": "Tokyo Night",
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#85524594",
     "errorLens.errorForeground": "#855245e1",
@@ -37,7 +36,7 @@
   "explorer.compactFolders": false,
   "explorer.confirmDragAndDrop": false,
   "explorer.decorations.badges": false,
-  "explorer.autoReveal": false,
+  "explorer.autoReveal": true,
   "editor.suggest.insertMode": "replace",
   "editor.scrollbar.horizontal": "hidden",
   "editor.lineNumbers": "off",
@@ -54,21 +53,16 @@
   "editor.inlayHints.enabled": "off",
   "editor.linkedEditing": true,
   "editor.smoothScrolling": true,
-  "editor.fontFamily": "MesloLGS Nerd Font",
-  "editor.fontSize": 12.5,
+  "editor.fontFamily": "Hack Nerd Font",
+  "editor.fontSize": 13.5,
   "editor.suggest.showSnippets": false,
   "editor.quickSuggestions": {
     "strings": "on"
   },
+  "editor.experimental.preferTreeSitter.typescript": true,
   "files.autoSave": "onFocusChange",
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
-    "USE_GITIGNORE": true,
-    "**/CVS": true
+    "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
     "**/.bloop": true,
@@ -87,6 +81,14 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
+  "stylelint.packageManager": "pnpm",
+  "css.validate": true,
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "scss.validate": true,
+  "less.validate": true,
+  "less.lint.unknownAtRules": "ignore",
+  "telemetry.telemetryLevel": "crash",
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -96,12 +98,6 @@
     "editor.suggest.showKeywords": true,
     "editor.formatOnSave": true
   },
-  "typescript.tsdk": "./node_modules/typescript/lib",
-  "typescript.tsc.autoDetect": "off",
-  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
-    "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$"
-  ],
-  "typescript.format.enable": false,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.inlayHints.enumMemberValues.enabled": true,
   "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
@@ -117,81 +113,24 @@
   "javascript.inlayHints.variableTypes.enabled": true,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.preferences.importModuleSpecifier": "non-relative",
+  "npm.packageManager": "npm",
   "eslint.debug": false,
   "emmet.includeLanguages": {
     "javascript": "javascriptreact",
     "typescript": "javascriptreact"
   },
   "emmet.excludeLanguages": ["markdown", "typescript"],
-  "stylelint.packageManager": "pnpm",
-  "css.validate": true,
-  "css.lint.unknownAtRules": "ignore",
-  "scss.lint.unknownAtRules": "ignore",
-  "scss.validate": true,
-  "less.validate": true,
-  "less.lint.unknownAtRules": "ignore",
-  "tailwindCSS.classAttributes": ["class", "className", "style", "classList"],
-  "tailwindCSS.classFunctions": ["cn", "clsx", "tw", "tw.color", "tw.style"],
-  "telemetry.telemetryLevel": "crash",
   "shellcheck.ignorePatterns": {
     "**/*.env.*": true
   },
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
   "cSpell.userWords": ["stylelint", "TSES", "tsserverlibrary"],
-  "cSpell.ignorePaths": [
-    "package.json",
-    "**/node_modules/**",
-    "package-lock.json",
-    "node_modules",
-    "tsconfig.json",
-    "pnpm-workspace.yaml",
-    "mvnw",
-    "mvnw.cmd",
-    "pom.xml",
-    ".gitignore",
-    ".dockerignore",
-    ".tool-versions",
-    "vscode-extension",
-    ".git/{info,lfs,logs,refs,objects}/**",
-    ".git/{index,*refs,*HEAD}",
-    ".vscode",
-    ".vscode-insiders"
-  ],
   "debug.javascript.defaultRuntimeExecutable": {
     "pwa-node": "~/.asdf/shims/node"
   },
   "terminal.integrated.fontSize": 12,
-  "terminal.integrated.shellIntegration.enabled": true,
   "terminal.integrated.cursorBlinking": true,
-  "terminal.integrated.env.linux": {
-    "PATH": "${env:HOME}/.asdf/shims"
-  },
-  "terminal.integrated.env.osx": {},
-  "terminal.integrated.env.windows": {},
-  "terminal.integrated.defaultProfile.linux": "zsh",
-  "terminal.integrated.profiles.linux": {
-    "bash": {
-      "path": "bash",
-      "args": ["-l"],
-      "icon": "terminal-bash"
-    },
-    "zsh": {
-      "path": "/usr/bin/zsh",
-      "args": ["-l"]
-    },
-    "fish": {
-      "path": "fish"
-    },
-    "tmux": {
-      "path": "tmux",
-      "icon": "terminal-tmux"
-    },
-    "pwsh": {
-      "path": "pwsh",
-      "icon": "terminal-powershell"
-    }
-  },
   "vim.shell": "/usr/bin/zsh",
   "vim.statusBarColorControl": false,
   "vim.surround": false,
@@ -319,5 +258,8 @@
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },
   "react-native-tools.showUserTips": false,
-  "hide-files.files": []
+  "settingsSync.ignoredExtensions": [
+    "undefined_publisher.vscode-npm-workspaces"
+  ],
+  "conventionalCommits.showNewVersionNotes": false
 }
