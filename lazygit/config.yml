@@ -28,8 +28,8 @@ keybinding:
     gotoBottom: G
     prevBlock: <left>
     nextBlock: <right>
-    # prevBlock-alt: h
-    # nextBlock-alt: l
+    prevBlock-alt: h
+    nextBlock-alt: l
     nextBlock-alt2: <tab>
     prevBlock-alt2: <backtab>
     jumpToBlock:
@@ -44,7 +44,7 @@ keybinding:
     optionMenu: x
     optionMenu-alt1: "?"
     select: <space>
-    goInto: l
+    goInto: <enter>
     confirm: <enter>
     remove: d
     new: "n"
