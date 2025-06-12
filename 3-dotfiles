@@ -88,7 +88,4 @@ create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CO
 
 sudo -E python3 ~/dotfiles/librewolf/merge-policies.py
 
-# Docker
-./docker/generate-deamon-json
-
 print_success "DONE!"
