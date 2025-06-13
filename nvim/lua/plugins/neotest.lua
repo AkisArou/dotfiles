@@ -5,6 +5,7 @@ return {
     "nvim-lua/plenary.nvim",
     "antoinemadec/FixCursorHold.nvim",
     "nvim-treesitter/nvim-treesitter",
+    "markandrus/neotest-node-test-runner",
     {
       "mfussenegger/nvim-dap",
       keys = {
@@ -53,7 +54,7 @@ return {
     require("neotest").setup({
       status = { virtual_text = true },
       output = { open_on_run = true },
-      adapters = {},
+      adapters = { require("neotest-node-test-runner") },
     })
   end,
 }
