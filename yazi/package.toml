@@ -13,5 +13,15 @@ use = "yazi-rs/plugins:git"
 rev = "aeca767"
 hash = "bf6f074cd41ee33c3360341d168f9733"
 
+[[plugin.deps]]
+use = "aresler/path-from-root"
+rev = "22b6fb5"
+hash = "98cdb2e889b73c4d4a8945f166486605"
+
+[[plugin.deps]]
+use = "llanosrocas/githead"
+rev = "8df5b68"
+hash = "f9d28d35e8e500a802b95a8b46117123"
+
 [flavor]
 deps = []

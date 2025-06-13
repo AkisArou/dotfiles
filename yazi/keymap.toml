@@ -20,3 +20,8 @@ on = ["R"]
 run = '''
     shell 'ripdrag "$@" -x 2>/dev/null &' --confirm
 '''
+
+[[mgr.prepend_keymap]]
+on = ["c", "r"]
+run = "plugin path-from-root"
+desc = "Copies path from git root"
