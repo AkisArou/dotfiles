@@ -60,6 +60,7 @@
     "strings": "on"
   },
   "editor.experimental.preferTreeSitter.typescript": true,
+  "editor.cursorSurroundingLines": 100,
   "files.autoSave": "onFocusChange",
   "files.exclude": {
     "USE_GITIGNORE": true
@@ -131,6 +132,24 @@
   },
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.cursorBlinking": true,
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "redhat.telemetry.enabled": false,
+  "vim.handleKeys": {
+    "<C-p>": false,
+    "<C-d>": true,
+    "<C-s>": false,
+    "<C-z>": false
+  },
+  "[c]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools"
+  },
+  "react-native-tools.showUserTips": false,
+  "settingsSync.ignoredExtensions": [
+    "undefined_publisher.vscode-npm-workspaces"
+  ],
+  "conventionalCommits.showNewVersionNotes": false,
   "vim.shell": "/usr/bin/zsh",
   "vim.statusBarColorControl": false,
   "vim.surround": false,
@@ -139,6 +158,17 @@
   "vim.useSystemClipboard": true,
   "vim.leader": "<space>",
   "vim.normalModeKeyBindingsNonRecursive": [
+    // Core
+    {
+      "before": ["<leader>", "w"],
+      "commands": ["workbench.action.files.save"]
+    },
+    {
+      "before": ["<leader>", "h"],
+      "commands": [":nohl"]
+    },
+
+    // Buffers
     {
       "before": ["<leader>", "b", "d"],
       "commands": ["workbench.action.closeActiveEditor"]
@@ -160,21 +190,19 @@
       "commands": ["workbench.action.closeOtherEditors"]
     },
     {
-      "before": ["<leader>", "w"],
-      "commands": ["workbench.action.files.save"]
+      "before": ["[", "b"],
+      "commands": ["workbench.action.previousEditor"]
     },
     {
-      "before": ["<leader>", "c", "a"],
+      "before": ["]", "b"],
+      "commands": ["workbench.action.nextEditor"]
+    },
+
+    // LSP
+    {
+      "before": ["<leader>", "g", "r", "a"],
       "commands": ["editor.action.rename"],
       "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
-    },
-    {
-      "before": ["<leader>", "f", "f"],
-      "commands": ["workbench.action.quickOpen"]
-    },
-    {
-      "before": ["g", "d"],
-      "commands": ["editor.action.revealDefinition"]
     },
     {
       "before": ["g", "d"],
@@ -189,16 +217,15 @@
       "commands": ["editor.action.showHover"]
     },
     {
-      "before": ["Shift+H"],
-      "commands": ["workbench.action.previousEditor"]
+      "before": ["ctrl+w", "ctrl+d"],
+      "commands": ["editor.action.showHover"],
+      "when": "editorTextFocus"
     },
+
+    // Files
     {
-      "before": ["Shift+L"],
-      "commands": ["workbench.action.nextEditor"]
-    },
-    {
-      "before": ["<leader>", "h"],
-      "commands": [":nohl"]
+      "before": ["<leader>", "f", "f"],
+      "commands": ["workbench.action.quickOpen"]
     },
     {
       "before": ["<leader>", "c", "a"],
@@ -206,18 +233,11 @@
       "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
     },
     {
-      "before": ["<leader>", "c", "r"],
-      "commands": ["editor.action.rename"],
-      "when": "editorTextFocus"
-    },
-    {
       "before": ["<leader>", "e"],
       "commands": ["workbench.action.toggleSidebarVisibility"]
     },
-    {
-      "before": ["<leader>", "g", "s"],
-      "commands": ["workbench.view.scm"]
-    },
+
+    // Diagnostics
     {
       "before": ["]", "d"],
       "commands": ["editor.action.marker.next"],
@@ -229,6 +249,28 @@
       "when": "editorTextFocus"
     },
     {
+      "before": ["]", "e"],
+      "commands": ["go-to-next-error.next.error"],
+      "when": "editorFocus"
+    },
+    {
+      "before": ["[", "e"],
+      "commands": ["go-to-next-error.prev.error"],
+      "when": "editorFocus"
+    },
+    {
+      "before": ["]", "w"],
+      "commands": ["go-to-next-error.next.warning"],
+      "when": "editorFocus"
+    },
+    {
+      "before": ["[", "w"],
+      "commands": ["go-to-next-error.prev.warning"],
+      "when": "editorFocus"
+    },
+
+    // Grep
+    {
       "before": ["<leader>", "f", "s"],
       "commands": ["workbench.action.findInFiles"],
       "when": "editorTextFocus"
@@ -238,28 +280,39 @@
       "commands": ["extension.searchUnderCursor"],
       "when": "editorTextFocus"
     },
+
+    // Git
     {
       "before": ["<leader>", "g", "s"],
       "commands": ["workbench.view.scm"],
       "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+    },
+
+    // Debug
+    {
+      "before": ["<leader>", "d", "b"],
+      "commands": ["editor.debug.action.toggleBreakpoint"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "d", "c"],
+      "commands": ["workbench.action.debug.continue"],
+      "when": "editorTextFocus && inDebugMode"
+    },
+    {
+      "before": ["<leader>", "d", "c"],
+      "commands": ["workbench.action.debug.selectandstart"],
+      "when": "editorTextFocus && !inDebugMode"
+    },
+    {
+      "before": ["ctrl+d", "ctrl+w"],
+      "commands": ["editor.debug.action.showDebugHover"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "d", "d"],
+      "commands": ["workbench.action.debug.disconnect"],
+      "when": "editorTextFocus"
     }
-  ],
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  },
-  "redhat.telemetry.enabled": false,
-  "vim.handleKeys": {
-    "<C-p>": false,
-    "<C-d>": true,
-    "<C-s>": false,
-    "<C-z>": false
-  },
-  "[c]": {
-    "editor.defaultFormatter": "ms-vscode.cpptools"
-  },
-  "react-native-tools.showUserTips": false,
-  "settingsSync.ignoredExtensions": [
-    "undefined_publisher.vscode-npm-workspaces"
-  ],
-  "conventionalCommits.showNewVersionNotes": false
+  ]
 }
