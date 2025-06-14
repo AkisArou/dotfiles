@@ -11,6 +11,7 @@ vim.filetype.add({
     ["librewolf.overrides.cfg"] = "javascript",
   },
   pattern = {
+    [".*/.vscode/.*.json"] = "jsonc",
     [".*/waybar/config"] = "jsonc",
     [".*/mako/config"] = "dosini",
     [".*/kitty/.+%.conf"] = "kitty",
