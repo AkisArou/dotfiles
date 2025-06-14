@@ -45,10 +45,8 @@ selected_entry = next((entry for entry in desktop_entries if entry.getName() == 
 
 if selected_entry:
     try:
-        desktop_filename = os.path.basename(selected_entry.getFileName())
-        app_id = os.path.splitext(desktop_filename)[0]
-
-        cmd = ["gtk-launch", app_id]
+        import shlex
+        cmd = shlex.split(selected_entry.getExec())
 
         # Start the process fully detached
         process = subprocess.Popen(
