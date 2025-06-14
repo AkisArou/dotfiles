@@ -189,4 +189,3 @@ for_window [class="^fzf-menu$"] floating enable, border pixel 3
 
 # floating_minimum_size 400 x 300
 # floating_maximum_size 1400 x 1400
-
