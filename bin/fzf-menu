@@ -1,20 +1,65 @@
-#!/usr/bin/zsh
+#!/usr/bin/python3
 
-SELECTED_FILE=$(grep -l "^Name=" /usr/share/applications/*.desktop ~/.local/share/applications/*.desktop 2>/dev/null |
-  xargs awk -F= '/^Name=/{print FILENAME "\t" $2}' |
-  sort -u -t$'\t' -k2 |
-  fzf --with-nth=2.. |
-  cut -f1)
+import os
+import subprocess
+from xdg import DesktopEntry, BaseDirectory
 
-[ -z "$SELECTED_FILE" ] && exit 1
+app_dirs = [ f"{dir}/applications" for dir in BaseDirectory.xdg_data_dirs ]
 
-EXEC_CMD=$(awk -F= '/^Exec=/{print substr($0, index($0,"=")+1); exit}' "$SELECTED_FILE")
+desktop_entries = []
 
-echo $EXEC_CMD
+for directory in app_dirs:
+    if not os.path.isdir(directory):
+        continue
+    for filename in os.listdir(directory):
+        if filename.endswith('.desktop'):
+            filepath = os.path.join(directory, filename)
+            try:
+                entry = DesktopEntry.DesktopEntry(filepath)
 
-EXEC_CMD=$(echo "$EXEC_CMD" | sed -E 's/ *%[a-zA-Z]//g')
+                should_skip = entry.getHidden() or entry.getNoDisplay() or len(entry.getNotShowIn()) > 0 or len(entry.getOnlyShowIn()) > 0
 
-EXEC_ARR=("${(@s: :)EXEC_CMD}")
+                if should_skip:
+                    continue
 
-nohup "${EXEC_ARR[@]}" & disown &
-clear
+                desktop_entries.append(entry)
+            except Exception as e:
+                print(f"Failed to parse {filepath}: {e}")
+
+def fzf_select(choices):
+    try:
+        result = subprocess.run(
+            ["fzf"],
+            input="\n".join(choices),
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()  # Remove trailing newline
+    except subprocess.CalledProcessError:
+        return None  # User cancelled (e.g., pressed ESC)
+
+selected = fzf_select([entry.getName() for entry in desktop_entries])
+
+selected_entry = next((entry for entry in desktop_entries if entry.getName() == selected), None)
+
+if selected_entry:
+    try:
+        desktop_filename = os.path.basename(selected_entry.getFileName())
+        app_id = os.path.splitext(desktop_filename)[0]
+
+        cmd = ["gtk-launch", app_id]
+
+        # Start the process fully detached
+        process = subprocess.Popen(
+            cmd,
+            preexec_fn=os.setpgrp,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            stdin=subprocess.DEVNULL,
+            close_fds=True
+        )
+    except Exception as e:
+        print(f"Failed to launch application: {e}")
+else:
+    print("No matching entry found.")
