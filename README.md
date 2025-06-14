@@ -29,7 +29,6 @@ Common
 
 Also:
 
-- docker data-root at $HOME/docker
 - git config
 - fzf, fd
 - vscode dark & tokyonight themes
