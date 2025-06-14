@@ -9,14 +9,12 @@ Wayland
 - WM: sway
 - Bar: waybar
 - Terminal: foot
-- Screenshot: grim & grimshot
 
 X11
 
 - WM: i3
 - Bar: polybar
 - Terminal: st
-- Screenshot: flameshot
 
 Common
 
@@ -26,11 +24,12 @@ Common
 - Filemanager: yazi, thunar
 - Notifications: dunst
 - Shell: zsh & bash
+- Screenshot: flameshot
 
 Also:
 
 - git config
-- fzf, fd
+- fzf, fd, rg
 - vscode dark & tokyonight themes
 - vscode settings & keybindings at .vscode
 - various helper scripts
