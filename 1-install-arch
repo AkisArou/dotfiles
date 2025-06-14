@@ -102,7 +102,7 @@ packages=(
   "rustup"
   "starship"
   "terminus-font"
-  "thunar"
+  "nautilus"
   "tldr"
   "tmux"
   "tree-sitter-cli-git"
