@@ -1,7 +1,0 @@
-#!/usr/bin/zsh
-
-if [ "$ULTRAWIDE" ]; then
-  rofi -show drun
-else
-  rofi -show drun -dpi 180
-fi

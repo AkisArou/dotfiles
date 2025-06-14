@@ -11,8 +11,6 @@ packages=(
   "grim"
   "grimshot"
   "polkit"
-  "rofi-power-menu"
-  "rofi-wayland"
   "sway"
   "swaybg"
   "swaydim"
