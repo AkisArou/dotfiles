@@ -34,7 +34,6 @@ Also:
 - vscode dark & tokyonight themes
 - vscode settings & keybindings at .vscode
 - various helper scripts
-- change .zprofile to use X11 if wished
 
 ## Screenshots
 
