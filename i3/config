@@ -67,7 +67,8 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
-bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+q exec --no-startup-id "st -c 'fzf-menu' -g 32x8 -e ~/dotfiles/bin/fzf-power-menu"
+# bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
@@ -189,6 +190,6 @@ for_window [class="Emulator"] border normal, exec --no-startup-id sh -c 'sleep 0
 for_window [class="Genymotion Player"] border normal, exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
 for_window [class="^fzf-menu$"] floating enable, border pixel 3
 
-floating_minimum_size 400 x 300
-floating_maximum_size 1400 x 1400
+# floating_minimum_size 400 x 300
+# floating_maximum_size 1400 x 1400
 
