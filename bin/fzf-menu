@@ -65,5 +65,3 @@ if selected_entry:
         )
     except Exception as e:
         print(f"Failed to launch application: {e}")
-else:
-    print("No matching entry found.")
