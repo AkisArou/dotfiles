@@ -121,7 +121,6 @@ packages=(
   "vulkan-tools"
   "wget"
   "wireplumber"
-  "wl-clipboard"
   "wol"
   "wpa_supplicant"
   "xdg-desktop-portal-gtk"
