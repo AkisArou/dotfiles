@@ -45,10 +45,16 @@ selected_entry = next((entry for entry in desktop_entries if entry.getName() == 
 
 if selected_entry:
     try:
-        import shlex
-        cmd = shlex.split(selected_entry.getExec())
+        exec_line = selected_entry.getExec()
+        # Replace %U (and other similar placeholders) with empty string or handle as needed
+        for placeholder in ['%U', '%u', '%F', '%f', '%i', '%c', '%k']:
+            exec_line = exec_line.replace(placeholder, '')
 
-        # Start the process fully detached
+        exec_line = exec_line.strip()  # clean trailing spaces
+
+        import shlex
+        cmd = shlex.split(exec_line)
+
         process = subprocess.Popen(
             cmd,
             preexec_fn=os.setpgrp,
