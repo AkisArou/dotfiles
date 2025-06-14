@@ -13,31 +13,6 @@ lazygit() {
   ~/dotfiles/lazygit/launch-lazygit "$@"
 }
 
-kill-by-port() {
-  if [[ -n "$1" ]]; then
-    local port="$1"
-    local process_id
-    process_id=$(lsof -ti :"$port")
-
-    if [[ -n "$process_id" ]]; then
-      kill -9 "$process_id"
-      echo "Killed process with PID $process_id using port $port."
-    else
-      echo "No process found using port $port."
-    fi
-  else
-    echo "Usage: kill_process_by_port <port>"
-  fi
-}
-
-wake-desktop() {
-  wol "$DESKTOP_MAC"
-}
-
-sus-desktop() {
-  ssh "$DESKTOP" 'sudo -S systemctl suspend'
-}
-
 fv() {
   local file
   file="$(
@@ -50,4 +25,12 @@ fv() {
         --header='(view:ctrl-v) (sort:ctrl-x)'
   )" || return
   nvim "$file" || return
+}
+
+wake-desktop() {
+  wol "$DESKTOP_MAC"
+}
+
+sus-desktop() {
+  ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
