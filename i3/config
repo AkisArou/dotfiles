@@ -27,7 +27,6 @@ set $up k
 set $right l
 
 set $term st
-# set $menu ~/dotfiles/rofi/launch -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -66,11 +65,8 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
-bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
-bindsym $mod+Shift+q exec --no-startup-id "st -c 'fzf-menu' -g 32x8 -e ~/dotfiles/bin/fzf-power-menu"
-# bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+b exec --no-startup-id "st -c 'fzf-menu' -g 85x40 -e ~/dotfiles/bin/fzf-bluetooth"
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
-bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
 # Move your focus around
 bindsym $mod+$left focus left

@@ -16,7 +16,6 @@ set $up k
 set $right l
 
 set $term ~/dotfiles/foot/launch
-# set $menu ~/dotfiles/rofi/launch -show drun
 
 #
 ### Output configuration
@@ -72,8 +71,8 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
+bindsym $mod+d exec ~/dotfiles/sway/run-foot ~/dotfiles/bin/fzf-menu
 # bindsym $mod+d exec $menu
-bindsym $mod+d exec foot --app-id fzf-menu -g 85x40 -e ~/dotfiles/bin/fzf-menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
@@ -86,10 +85,9 @@ floating_modifier $mod normal
 
 bindsym $mod+Shift+c reload
 
-bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
-bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+b exec ~/dotfiles/sway/run-foot ~/dotfiles/bin/fzf-bluetooth
+bindsym $mod+Shift+q exec ~/dotfiles/sway/run-foot ~/dotfiles/bin/fzf-power-menu
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
-bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
 # Move your focus around
 bindsym $mod+$left focus left

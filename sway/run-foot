@@ -1,0 +1,24 @@
+#!/usr/bin/zsh
+
+# Default values
+APP_ID="fzf-menu"
+THEME="${THEME:-tokyonight}"
+FONT="HackNerdFont-Regular:size=10"
+SIZE="600x600"
+
+# The script to run inside foot
+SCRIPT="$1"
+
+# Check if script is passed
+if [[ -z "$SCRIPT" ]]; then
+  echo "Usage: $0 <script-path>"
+  exit 1
+fi
+
+# Launch foot with overrides
+exec foot \
+  --app-id "$APP_ID" \
+  --override "include=$HOME/dotfiles/foot/${THEME}.ini" \
+  --font="$FONT" \
+  --override="initial-window-size-pixels=${SIZE}" \
+  -e "$SCRIPT"
