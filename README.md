@@ -15,7 +15,7 @@ X11
 
 - WM: i3
 - Bar: polybar
-- Terminal: alacritty
+- Terminal: st
 - Screenshot: flameshot
 
 Common
