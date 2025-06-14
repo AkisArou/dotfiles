@@ -8,6 +8,7 @@ exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec --no-startup-id ~/dotfiles/sway/listen-events
 exec_always ~/dotfiles/waybar/launch-waybar
 exec_always ~/dotfiles/sway/gaps
+exec --no-startup-id flameshot
 
 set $mod Mod4
 set $left h
@@ -76,14 +77,11 @@ bindsym $mod+d exec ~/dotfiles/sway/fzf-menu-sway fzf-menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
-bindsym $mod+p exec grimshot copy area
-bindsym $mod+Ctrl+p exec grimshot copy active
-bindsym $mod+Mod1+p  exec grimshot save output
-bindsym $mod+Ctrl+Mod1+p  exec grimshot save window
+bindsym $mod+p exec flameshot gui
 
 floating_modifier $mod normal
 
-bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r reload
 
 bindsym $mod+Shift+b exec ~/dotfiles/sway/fzf-menu-sway fzf-bluetooth
 bindsym $mod+Shift+q exec ~/dotfiles/sway/fzf-menu-sway fzf-power-menu

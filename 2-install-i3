@@ -8,7 +8,6 @@ echo "----------------------------"
 echo ""
 
 packages=(
-  "flameshot"
   "i3-wm"
   "nitrogen"
   "picom"
