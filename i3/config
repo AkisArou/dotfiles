@@ -52,7 +52,7 @@ bindsym $mod+q kill
 # Programs
 bindsym $mod+Return exec $term
 # bindsym $mod+d exec $menu
-bindsym $mod+d exec --no-startup-id "st -c 'fzf-menu' -g 85x40 -e ~/dotfiles/bin/fzf-menu"
+bindsym $mod+d exec ~/dotfiles/i3/fzf-menu-i3 fzf-menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
@@ -65,7 +65,8 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
-bindsym $mod+Shift+b exec --no-startup-id "st -c 'fzf-menu' -g 85x40 -e ~/dotfiles/bin/fzf-bluetooth"
+bindsym $mod+Shift+b exec ~/dotfiles/i3/fzf-menu-i3 fzf-bluetooth
+bindsym $mod+Shift+q exec ~/dotfiles/i3/fzf-menu-i3 fzf-power-menu
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # Move your focus around

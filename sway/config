@@ -71,7 +71,7 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
-bindsym $mod+d exec ~/dotfiles/sway/run-foot ~/dotfiles/bin/fzf-menu
+bindsym $mod+d exec ~/dotfiles/sway/fzf-menu-sway fzf-menu
 # bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
@@ -85,8 +85,8 @@ floating_modifier $mod normal
 
 bindsym $mod+Shift+c reload
 
-bindsym $mod+Shift+b exec ~/dotfiles/sway/run-foot ~/dotfiles/bin/fzf-bluetooth
-bindsym $mod+Shift+q exec ~/dotfiles/sway/run-foot ~/dotfiles/bin/fzf-power-menu
+bindsym $mod+Shift+b exec ~/dotfiles/sway/fzf-menu-sway fzf-bluetooth
+bindsym $mod+Shift+q exec ~/dotfiles/sway/fzf-menu-sway fzf-power-menu
 bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
 # Move your focus around
