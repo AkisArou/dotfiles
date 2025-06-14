@@ -13,7 +13,7 @@ FZF_TOKYONIGHT="\
   --color=border:#27a1b9 \
   --color=fg:#c0caf5 \
   --color=gutter:#16161e \
-  --color=header:#ff9e64 \
+  --color=header:#bb9af7 \
   --color=hl+:#2ac3de \
   --color=hl:#2ac3de \
   --color=info:#545c7e \
@@ -22,7 +22,7 @@ FZF_TOKYONIGHT="\
   --color=prompt:#2ac3de \
   --color=query:#c0caf5:regular \
   --color=scrollbar:#27a1b9 \
-  --color=separator:#ff9e64 \
+  --color=separator:#2e3c64 \
   --color=spinner:#ff007c \
 "
 

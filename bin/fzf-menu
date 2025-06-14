@@ -1,0 +1,20 @@
+#!/usr/bin/zsh
+
+SELECTED_FILE=$(grep -l "^Name=" /usr/share/applications/*.desktop ~/.local/share/applications/*.desktop 2>/dev/null |
+  xargs awk -F= '/^Name=/{print FILENAME "\t" $2}' |
+  sort -u -t$'\t' -k2 |
+  fzf --with-nth=2.. |
+  cut -f1)
+
+[ -z "$SELECTED_FILE" ] && exit 1
+
+EXEC_CMD=$(awk -F= '/^Exec=/{print substr($0, index($0,"=")+1); exit}' "$SELECTED_FILE")
+
+echo $EXEC_CMD
+
+EXEC_CMD=$(echo "$EXEC_CMD" | sed -E 's/ *%[a-zA-Z]//g')
+
+EXEC_ARR=("${(@s: :)EXEC_CMD}")
+
+nohup "${EXEC_ARR[@]}" & disown &
+clear

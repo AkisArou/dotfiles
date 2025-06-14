@@ -27,7 +27,7 @@ set $up k
 set $right l
 
 set $term st
-set $menu ~/dotfiles/rofi/launch -show drun
+# set $menu ~/dotfiles/rofi/launch -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -52,7 +52,8 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
-bindsym $mod+d exec $menu
+# bindsym $mod+d exec $menu
+bindsym $mod+d exec --no-startup-id "st -c 'fzf-menu' -g 85x40 -e ~/dotfiles/bin/fzf-menu"
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
@@ -186,6 +187,8 @@ for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
 for_window [class="Emulator"] border normal, exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
 for_window [class="Genymotion Player"] border normal, exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
+for_window [class="^fzf-menu$"] floating enable, border pixel 3
 
 floating_minimum_size 400 x 300
 floating_maximum_size 1400 x 1400
+
