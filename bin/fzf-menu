@@ -4,7 +4,7 @@ import os
 import subprocess
 from xdg import DesktopEntry, BaseDirectory
 
-app_dirs = [ f"{dir}/applications" for dir in BaseDirectory.xdg_data_dirs ]
+app_dirs = [f"{dir}/applications" for dir in BaseDirectory.xdg_data_dirs]
 
 desktop_entries = []
 
@@ -37,7 +37,7 @@ def fzf_select(choices):
         )
         return result.stdout.strip()  # Remove trailing newline
     except subprocess.CalledProcessError:
-        return None  # User cancelled (e.g., pressed ESC)
+        return None
 
 selected = fzf_select([entry.getName() for entry in desktop_entries])
 
