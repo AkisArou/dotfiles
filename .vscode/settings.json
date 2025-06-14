@@ -152,11 +152,30 @@
   "conventionalCommits.showNewVersionNotes": false,
   "vim.shell": "/usr/bin/zsh",
   "vim.statusBarColorControl": false,
-  "vim.surround": false,
+  "vim.surround": true,
   "vim.hlsearch": true,
   "vim.highlightedyank.enable": true,
   "vim.useSystemClipboard": true,
   "vim.leader": "<space>",
+  "vim.normalModeKeyBindings": [
+    // Surround
+    {
+      "before": ["s"],
+      "after": []
+    },
+    {
+      "before": ["s", "d"],
+      "after": ["d", "s"]
+    },
+    {
+      "before": ["s", "r"],
+      "after": ["c", "s"]
+    },
+    {
+      "before": ["s", "a"],
+      "after": ["y", "s"]
+    }
+  ],
   "vim.normalModeKeyBindingsNonRecursive": [
     // Core
     {
