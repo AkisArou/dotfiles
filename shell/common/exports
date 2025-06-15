@@ -8,6 +8,7 @@ fi
 
 export THEME="${THEME:-tokyonight}"
 export GTK_THEME="Tokyonight-Dark"
+export QT_QPA_PLATFORMTHEME=qt6ct
 export BAT_THEME=tokyonight
 
 # tokyonight

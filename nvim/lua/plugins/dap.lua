@@ -63,6 +63,8 @@ return {
             item.type = chrome_type
           elseif item.type == "node" then
             item.type = node_type
+          elseif item.type == "reactnativedirect" then
+            item.type = node_type
           end
         end
 
