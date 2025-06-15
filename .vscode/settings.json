@@ -328,7 +328,7 @@
       "when": "editorTextFocus && !inDebugMode"
     },
     {
-      "before": ["ctrl+d", "ctrl+w"],
+      "before": ["<leader>", "d", "w"],
       "commands": ["editor.debug.action.showDebugHover"],
       "when": "editorTextFocus"
     },
