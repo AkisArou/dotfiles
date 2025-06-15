@@ -12,11 +12,26 @@ return {
     options = options or {}
 
     local config = {
+      order = options.order or {
+        "branch",
+        "remote",
+        "behind_ahead",
+        "stashes",
+        "state",
+        "staged",
+        "unstaged",
+        "untracked",
+      },
+
       show_branch = options.show_branch == nil and true or options.show_branch,
       branch_prefix = options.branch_prefix or "on",
       branch_color = options.branch_color or "blue",
       branch_symbol = options.branch_symbol or "",
       branch_borders = options.branch_borders or "()",
+
+      show_remote = options.show_remote == nil and true or options.show_remote,
+      remote_prefix = options.remote_prefix or ":",
+      remote_color = options.remote_color or "bright magenta",
 
       commit_color = options.commit_color or "bright magenta",
       commit_symbol = options.commit_symbol or "@",
@@ -83,6 +98,18 @@ return {
         return ui.Line({
           ui.Span(branch_prefix),
           ui.Span(branch_string):fg(config.branch_color),
+        })
+      end
+    end
+
+    function Header:get_remote(status)
+      local branch = status:match("On branch (%S+)")
+      local remote_branch = status:match("'[^/]+/([^']+)'")
+
+      if (branch and remote_branch) and (branch ~= remote_branch) then
+        return ui.Line({
+          ui.Span(config.remote_prefix),
+          ui.Span(remote_branch):fg(config.remote_color),
         })
       end
     end
@@ -217,23 +244,20 @@ return {
         return ui.Line({})
       end
 
-      local branch = config.show_branch and self:get_branch(status) or ""
-      local behind_ahead = config.show_behind_ahead and self:get_behind_ahead(status) or ""
-      local stashes = config.show_stashes and self:get_stashes(status) or ""
-      local state = config.show_state and self:get_state(status) or ""
-      local staged = config.show_staged and self:get_staged(status) or ""
-      local unstaged = config.show_unstaged and self:get_unstaged(status) or ""
-      local untracked = config.show_untracked and self:get_untracked(status) or ""
+      local head = {}
 
-      return ui.Line({
-        branch,
-        behind_ahead,
-        stashes,
-        state,
-        staged,
-        unstaged,
-        untracked,
-      })
+      for _, key in ipairs(config.order) do
+        local fn_name = "get_" .. key
+        local fn = self[fn_name]
+        local is_shown = config["show_" .. key]
+
+        if fn and is_shown then
+          local value = fn(self, status)
+          if value then table.insert(head, value) end
+        end
+      end
+
+      return ui.Line(head)
     end
 
     Header:children_add(Header.githead, 2000, Header.LEFT)
