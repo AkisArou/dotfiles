@@ -232,5 +232,10 @@
     "key": "shift+w",
     "command": "list.collapseAll",
     "when": "listFocus && !inputFocus && !treestickyScrollFocused"
+  },
+  {
+    "key": "space f f",
+    "command": "workbench.action.quickOpen",
+    "when": "!editorFocus"
   }
 ]
