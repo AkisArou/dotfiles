@@ -1,21 +1,12 @@
 {
   "search.followSymlinks": false,
-  "window.menuBarVisibility": "hidden",
-  "window.customMenuBarAltFocus": false,
-  "window.customTitleBarVisibility": "auto",
-  "window.titleBarStyle": "native",
   "window.enableMenuBarMnemonics": false,
-  "apc.electron": {
-    "titleBarStyle": "hidden"
-  },
   "window.commandCenter": false,
   "workbench.layoutControl.enabled": false,
   "workbench.tree.renderIndentGuides": "none",
   "workbench.tree.indent": 12,
-  "workbench.startupEditor": "none",
   "workbench.editor.sharedViewState": true,
   "workbench.editor.enablePreview": false,
-  "workbench.activityBar.location": "hidden",
   "workbench.colorTheme": "Tokyo Night",
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#85524594",
@@ -39,7 +30,6 @@
   "explorer.autoReveal": true,
   "editor.suggest.insertMode": "replace",
   "editor.scrollbar.horizontal": "hidden",
-  "editor.lineNumbers": "off",
   "editor.fontWeight": "normal",
   "editor.minimap.enabled": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
