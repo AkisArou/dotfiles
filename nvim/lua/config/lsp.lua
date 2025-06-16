@@ -54,13 +54,16 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     map({ "n", "v" }, "gra", function()
       local ommited_actions = {
+        "Inline variable",
         "Move to",
-        "Extract to",
+        "Extract",
         "Change to parameter",
+        "Convert",
         "Add missing function declaration",
         "Add all missing function declarations",
         "Generate 'get'",
         "Add braces",
+        "Remove braces",
         "Remove unused",
         "Fix all detected spelling",
         "Change spelling to",
