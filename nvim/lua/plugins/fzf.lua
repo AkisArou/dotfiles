@@ -31,6 +31,10 @@ return {
           ["ctrl-h"] = { actions.toggle_hidden },
         },
       },
+      lsp = {
+        -- make lsp requests synchronous so they work with null-ls
+        async_or_timeout = 3000,
+      },
     })
 
     fzf_lua.register_ui_select()
