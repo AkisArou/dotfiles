@@ -20,8 +20,8 @@ alias free="free -m"
 
 alias cat="bat"
 
-alias ls='eza --group-directories-first --icons=never'
-alias ll='ls -lh --git'
-
-alias la='ll -a'
-alias tree='ll --tree --level=2'
+eza_base='eza --group-directories-first --icons=never'
+alias ls="$eza_base"
+alias ll="$eza_base -lh --git"
+alias la="$eza_base -lha --git"
+alias tree="$eza_base --tree --level=2"
