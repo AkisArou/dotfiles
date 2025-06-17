@@ -25,6 +25,7 @@ bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
 
 # source
+source "$HOME/dotfiles/shell/common/aliases"
 source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/history"
 [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && . ~/.asdf/plugins/java/set-java-home.zsh
