@@ -183,8 +183,8 @@ for_window [window_type="menu"] floating enable
 for_window [class="ripdrag"] floating enable
 for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
-for_window [class="Emulator"] border normal, exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
-for_window [class="Genymotion Player"] border normal, exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
+for_window [class="Emulator"] exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
+for_window [class="Genymotion Player"] exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
 for_window [class="^fzf-menu$"] floating enable, border pixel 3
 
 # floating_minimum_size 400 x 300
