@@ -85,7 +85,6 @@ bindsym $mod+Shift+r reload
 
 bindsym $mod+Shift+b exec ~/dotfiles/sway/fzf-menu-sway fzf-bluetooth
 bindsym $mod+Shift+q exec ~/dotfiles/sway/fzf-menu-sway fzf-power-menu
-bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 
 # Move your focus around
 bindsym $mod+$left focus left
