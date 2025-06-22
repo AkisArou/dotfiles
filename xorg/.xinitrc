@@ -30,5 +30,6 @@ else
   export VDPAU_DRIVER=va_gl
 fi
 
-~/dotfiles/xorg/xrandr.sh
-exec i3
+~/dotfiles/xorg/xrandr
+# exec i3
+exec dwm

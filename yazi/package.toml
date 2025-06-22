@@ -1,16 +1,16 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "3d1efb7"
+rev = "42f64c0"
 hash = "56fdabc96fc1f4d53c96eb884b02a5be"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-paste"
-rev = "3d1efb7"
+rev = "42f64c0"
 hash = "a8050052e59f3952abe0b3e27a5843de"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "3d1efb7"
+rev = "42f64c0"
 hash = "e01006bfb38951ea89031bd918b20dbb"
 
 [[plugin.deps]]
