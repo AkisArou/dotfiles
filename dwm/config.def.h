@@ -8,15 +8,26 @@ static const int topbar             = 1;        /* 0 means bottom bar */
 static const unsigned int gappx     = 4;       /* gap pixel between windows */
 static const char *fonts[]          = { "monospace:size=10" };
 static const char dmenufont[]       = "monospace:size=10";
-static const char col_gray1[]       = "#222222";
-static const char col_gray2[]       = "#444444";
-static const char col_gray3[]       = "#bbbbbb";
-static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#005577";
+static const char col_bg[]       = "#1a1b26";  // background
+static const char col_fg[]       = "#c0caf5";  // foreground
+static const char col_black[]    = "#15161e";
+static const char col_gray[]     = "#a9b1d6";
+static const char col_gray1[]       = "#1a1b26";
+static const char col_gray2[]       = "#1a1b26";
+static const char col_gray3[]       = "#f8f8f2";
+static const char col_gray4[]       = "#f8f8f2";
+static const char col_gray5[]       = "#aaaaaa";
+static const char col_blue[]     = "#7aa2f7";
+static const char col_cyan[]     = "#7dcfff";
+static const char col_magenta[]  = "#bb9af7";
+static const char col_red[]      = "#f7768e";
+static const char col_green[]    = "#9ece6a";
+static const char col_yellow[]   = "#e0af68";
+
 static const char *colors[][3]      = {
-	/*               fg         bg         border   */
-	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
-	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
+    /*               fg         bg         border   */
+    [SchemeNorm] = { col_fg,    col_bg,    col_bg },
+    [SchemeSel]  = { col_bg,    col_blue,  col_blue },
 };
 
 /* tagging */
