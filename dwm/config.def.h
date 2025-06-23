@@ -13,6 +13,7 @@ static const char col_fg[]       = "#c0caf5";  // foreground
 static const char col_black[]    = "#15161e";
 static const char col_gray[]     = "#a9b1d6";
 static const char col_blue[]     = "#7aa2f7";
+static const char col_blue_dark[]  = "#314062";
 static const char col_cyan[]     = "#7dcfff";
 static const char col_magenta[]  = "#bb9af7";
 static const char col_red[]      = "#f7768e";
@@ -23,7 +24,7 @@ static const char col_yellow[]   = "#e0af68";
 static const char *colors[][3]      = {
     /*                 fg         bg         border   */
     [SchemeNorm]   = { col_fg,    col_bg,    col_bg },
-    [SchemeSel]    = { col_bg,    col_blue,  col_blue },
+    [SchemeSel]    = { col_fg,    col_blue_dark,  col_blue_dark },
     [SchemeTitle]  = { col_fg,    col_bg,    col_bg  },
 };
 
