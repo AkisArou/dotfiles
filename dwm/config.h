@@ -1,22 +1,17 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const unsigned int borderpx  = 3;        /* border pixel of windows */
+static const unsigned int borderpx  = 2;        /* border pixel of windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const unsigned int gappx     = 4;       /* gap pixel between windows */
-static const char *fonts[]          = { "monospace:size=10" };
-static const char dmenufont[]       = "monospace:size=10";
+static const char *fonts[]          = { "Hack Nerd Font Mono:size=10" };
+static const char dmenufont[]       = "Hack Nerd Font Mono:size=10";
 static const char col_bg[]       = "#1a1b26";  // background
 static const char col_fg[]       = "#c0caf5";  // foreground
 static const char col_black[]    = "#15161e";
 static const char col_gray[]     = "#a9b1d6";
-static const char col_gray1[]       = "#1a1b26";
-static const char col_gray2[]       = "#1a1b26";
-static const char col_gray3[]       = "#f8f8f2";
-static const char col_gray4[]       = "#f8f8f2";
-static const char col_gray5[]       = "#aaaaaa";
 static const char col_blue[]     = "#7aa2f7";
 static const char col_cyan[]     = "#7dcfff";
 static const char col_magenta[]  = "#bb9af7";
@@ -24,10 +19,12 @@ static const char col_red[]      = "#f7768e";
 static const char col_green[]    = "#9ece6a";
 static const char col_yellow[]   = "#e0af68";
 
+
 static const char *colors[][3]      = {
-    /*               fg         bg         border   */
-    [SchemeNorm] = { col_fg,    col_bg,    col_bg },
-    [SchemeSel]  = { col_bg,    col_blue,  col_blue },
+    /*                 fg         bg         border   */
+    [SchemeNorm]   = { col_fg,    col_bg,    col_bg },
+    [SchemeSel]    = { col_bg,    col_blue,  col_blue },
+    [SchemeTitle]  = { col_fg,    col_bg,    col_bg  },
 };
 
 /* tagging */
@@ -74,7 +71,7 @@ static const Layout layouts[] = {
 #include "movestack.c"
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray, "-nf", col_gray, "-sb", col_cyan, "-sf", col_gray, NULL };
 static const char *termcmd[]  = { "st", NULL };
 static const char *browsercmd[] = { BROWSER, NULL };
 
