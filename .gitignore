@@ -15,7 +15,8 @@ nvim/data
 vim/sessions/
 ~/.env
 *.o
+*.orig
 st/st
 st/config.h
-*.orig
 dwm/dwm
+dwm/config.h
