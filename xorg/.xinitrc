@@ -32,3 +32,4 @@ fi
 
 ~/dotfiles/xorg/xrandr
 exec i3
+#exec /home/akisarou/mtwm/mtwm

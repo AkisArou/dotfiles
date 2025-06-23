@@ -115,4 +115,7 @@ print_info "Installing tmp plugins..."
 print_info "Installing yazi plugins..."
 ya pack -u
 
+print_info "Removing thunar extra desktop files..."
+sudo rm -rf /usr/share/applications/{thunar-bulk-rename.desktop,thunar-settings.desktop}
+
 print_success "DONE!"
