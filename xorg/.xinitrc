@@ -32,6 +32,3 @@ fi
 
 ~/dotfiles/xorg/xrandr
 exec i3
-
-# picom --config ~/.config/picom/picom.conf &
-# exec dwm
