@@ -12,6 +12,8 @@ packages=(
   "nitrogen"
   "picom"
   "polybar"
+  "rofi-power-menu"
+  "rofi-wayland"
   "xidlehook"
   "xorg"
   "xorg-xinit"

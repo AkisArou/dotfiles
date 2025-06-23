@@ -26,6 +26,7 @@ set $up k
 set $right l
 
 set $term st
+set $menu ~/dotfiles/rofi/launch -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -50,8 +51,7 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
-# bindsym $mod+d exec $menu
-bindsym $mod+d exec ~/dotfiles/i3/fzf-menu-i3 fzf-menu
+bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
@@ -64,8 +64,9 @@ bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
-bindsym $mod+Shift+b exec ~/dotfiles/i3/fzf-menu-i3 fzf-bluetooth
-bindsym $mod+Shift+q exec ~/dotfiles/i3/fzf-menu-i3 fzf-power-menu
+bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
+bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
 # Move your focus around
 bindsym $mod+$left focus left
@@ -183,4 +184,3 @@ for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
 for_window [class="Emulator"] exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
 for_window [class="Genymotion Player"] exec --no-startup-id sh -c 'sleep 0.5 && ~/dotfiles/i3/resize-emulator';
-for_window [class="^fzf-menu$"] floating enable, border pixel 3

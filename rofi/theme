@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+
+theme=$(echo -e "vscode\ntokyonight\nonedark\ngruvbox" | ~/dotfiles/rofi/launch -dmenu -p "Theme")
+
+~/dotfiles/scripts/change-theme $theme

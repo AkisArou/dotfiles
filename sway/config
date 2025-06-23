@@ -17,6 +17,7 @@ set $up k
 set $right l
 
 set $term ~/dotfiles/foot/launch
+set $menu ~/dotfiles/rofi/launch -show drun
 
 #
 ### Output configuration
@@ -72,7 +73,7 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
-bindsym $mod+d exec ~/dotfiles/sway/fzf-menu-sway fzf-menu
+bindsym $mod+d exec $menu
 # bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+p exec brave --incognito
@@ -83,8 +84,9 @@ floating_modifier $mod normal
 
 bindsym $mod+Shift+r reload
 
-bindsym $mod+Shift+b exec ~/dotfiles/sway/fzf-menu-sway fzf-bluetooth
-bindsym $mod+Shift+q exec ~/dotfiles/sway/fzf-menu-sway fzf-power-menu
+bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
+bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
+bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
 # Move your focus around
 bindsym $mod+$left focus left
@@ -206,6 +208,5 @@ for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
 for_window [class="Emulator"] exec "swaymsg '[title=\"Android Emulator - *\"] resize set width 630px';"
 for_window [class="Genymotion Player"] exec "swaymsg '[title=\"Google Pixel *\"] resize set width 687px';"
-for_window [app_id="fzf-menu"] floating enable, border pixel 3
 
 include /etc/sway/config.d/*
