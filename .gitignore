@@ -18,3 +18,4 @@ vim/sessions/
 st/st
 st/config.h
 *.orig
+dwm/dwm
