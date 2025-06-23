@@ -1745,11 +1745,11 @@ col(Monitor *m) {
 	if (n == 1 
     // && selmon->sel->CenterThisWindow
   )
-        resizeclient(selmon->sel,
-                (selmon->mw - selmon->mw * 0.5) / 2,
-                (selmon->mh - selmon->mh * 0.5) / 2,
-                selmon->mw * 0.5,
-                selmon->mh * 0.5);
+      resizeclient(selmon->sel,
+          (selmon->mw - selmon->mw * 0.5) / 2,
+          bh,
+          selmon->mw * 0.5,
+          selmon->mh - bh - (borderpx * 2));
 }
 
 void

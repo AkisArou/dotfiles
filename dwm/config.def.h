@@ -77,6 +77,8 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray, "-nf", col_gray, "-sb", col_cyan, "-sf", col_gray, NULL };
 static const char *termcmd[]  = { "st", NULL };
 static const char *browsercmd[] = { BROWSER, NULL };
+static const char *fzf_menu[]  = { "st", "-c", "fzf-menu", "-g", "80x24", "-e", "fzf-menu", NULL };
+static const char *fzf_menu_bluetooth[]  = { "st", "-c", "fzf-menu", "-g", "80x24" "-e", "fzf-menu", NULL };
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -87,8 +89,9 @@ static const Key keys[] = {
   { MODKEY,                       XK_h,      focusstack,     {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_l,      movestack,      {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_h,      movestack,      {.i = -1 } },
-	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
-	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
+	// { MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
+	// { MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
+	{ MODKEY,                       XK_d,      spawn,          {.v = fzf_menu } },
 	{ MODKEY|ControlMask,           XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY|ControlMask,           XK_l,      setmfact,       {.f = +0.05} },
 	{ MODKEY,                       XK_z,      zoom,           {0} },
