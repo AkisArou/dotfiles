@@ -98,7 +98,6 @@ packages=(
   "power-profiles-daemon"
   "preload"
   "python-pip"
-  "python-pyxdg"
   "qt6ct"
   "ripdrag-git"
   "ripgrep"
