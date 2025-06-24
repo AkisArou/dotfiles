@@ -26,7 +26,7 @@ fi
 if [ "$ULTRAWIDE" ]; then
   export XCURSOR_SIZE=24
 else
-  xrdb -merge <<<"Xft.dpi: 192"
+  xrdb -merge <<<"Xft.dpi: 152"
   export VDPAU_DRIVER=va_gl
 fi
 
