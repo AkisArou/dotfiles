@@ -18,7 +18,7 @@ window#waybar.hidden {
 }
 
 #workspaces button {
-  padding: 0 5px;
+  padding: 0;
   color: #ffffff;
   border-radius: 0;
 }
@@ -41,11 +41,7 @@ label.module {
 }
 
 #network {
-  color: #dcdcaa;
-}
-
-#network {
-  color: #dcdcaa;
+  color: #9ece6a;
 }
 
 @keyframes blink {
