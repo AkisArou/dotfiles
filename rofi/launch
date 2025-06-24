@@ -2,4 +2,8 @@
 
 source ~/.env
 
-rofi -config ~/dotfiles/rofi/"${THEME:-onedark}".rasi "$@"
+if [ "$ULTRAWIDE" ]; then
+  rofi -config ~/dotfiles/rofi/"${THEME:-onedark}".rasi "$@"
+else
+  rofi -config ~/dotfiles/rofi/"${THEME:-onedark}".rasi "$@" -dpi 152
+fi
