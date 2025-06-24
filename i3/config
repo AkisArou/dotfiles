@@ -41,7 +41,7 @@ bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ to
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
 
 bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
-bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set -5%
+bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5-%
 bindsym $mod+Shift+Up exec --no-startup-id brightnessctl set 100%
 bindsym $mod+Shift+Down exec --no-startup-id brightnessctl set 1%
 bindsym $mod+Control+Up exec --no-startup-id ~/dotfiles/xorg/set-brightness inc
