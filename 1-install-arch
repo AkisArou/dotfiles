@@ -138,7 +138,6 @@ fi
 # Do not 'install' both, because of potential downsides
 if gpu_has_amd; then
   packages+=(
-    "mesa"
     "mesa-vdpau"
     "radeontop"
     "vulkan-radeon"
