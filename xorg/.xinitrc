@@ -33,5 +33,5 @@ fi
 ~/dotfiles/xorg/xrandr
 exec i3
 
-# exec picom --config ~/.config/picom/picom.conf &
-# exec /home/akisarou/dotfiles/mtwm/mtwm
+#exec picom --config ~/.config/picom/picom.conf &
+#exec /home/akisarou/dotfiles/mtwm/mtwm

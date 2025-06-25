@@ -32,7 +32,7 @@ return {
         "dockerls",
         "docker_compose_language_service",
         "yamlls",
-        -- "clangd",
+        "clangd",
         "mdx_analyzer",
         "taplo",
       },

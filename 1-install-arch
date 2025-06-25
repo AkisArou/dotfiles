@@ -39,7 +39,6 @@ packages=(
   "base-devel"
   "bat"
   "bleachbit"
-  "blesh-git"
   "bluez"
   "bluez-utils"
   "brave-bin"

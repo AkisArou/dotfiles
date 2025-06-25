@@ -1,0 +1,6 @@
+#!/bin/zsh
+
+Xephyr :1 -screen 1280x800 &
+sleep 1
+DISPLAY=:1 exec picom --config ~/.config/picom/picom.conf &
+DISPLAY=:1 /home/akisarou/dotfiles/mtwm/mtwm
