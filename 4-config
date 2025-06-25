@@ -29,7 +29,7 @@ fi
 
 print_info "Setting up tmux..."
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-~/.tmux/plugins/tpm/scripts/install_plugins
+~/.tmux/plugins/tpm/bin/install_plugins
 tmux source ~/.tmux.conf
 
 print_info "Setting up asdf..."
@@ -110,7 +110,7 @@ print_info "Install GTK Tokyonight theme..."
 ~/dotfiles/scripts/install-tokyonight-gtk
 
 print_info "Installing tmp plugins..."
-~/.tmux/plugins/tpm/bin/update_plugins all
+~/.tmux/plugins/tpm/bin/clean_plugins all
 
 print_info "Installing yazi plugins..."
 ya pack -u
