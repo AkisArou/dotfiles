@@ -5,31 +5,23 @@
     "break",
     {
       "type": "title",
-      "key": " "
+      "key": " ",
     },
     {
       "type": "kernel",
-      "key": " "
+      "key": " ",
     },
     {
       "type": "host",
-      "key": " "
+      "key": " ",
     },
     {
       "type": "shell",
-      "key": " "
+      "key": " ",
     },
     {
       "type": "terminal",
-      "key": " "
+      "key": " ",
     },
-    {
-      "type": "uptime",
-      "key": " "
-    },
-    {
-      "type": "battery",
-      "key": " "
-    }
-  ]
+  ],
 }

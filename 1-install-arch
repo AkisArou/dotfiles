@@ -103,7 +103,6 @@ packages=(
   "ripgrep"
   "rsync"
   "rustup"
-  "starship"
   "terminus-font"
   "tldr"
   "tmux"
