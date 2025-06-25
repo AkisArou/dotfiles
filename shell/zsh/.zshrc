@@ -1,11 +1,11 @@
 fastfetch && echo
 
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+
+  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 fi
-
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
 
 if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
@@ -14,6 +14,7 @@ fi
 
 if [ -f "$HOME/.local/share/zap/zap.zsh" ]; then
   source "$HOME/.local/share/zap/zap.zsh"
+
 
   # plugins
   plug "zap-zsh/supercharge"
