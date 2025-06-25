@@ -144,7 +144,7 @@ void tile_windows() {
   xcb_flush(conn);
 }
 
-void add_window(xcb_window_t win) {
+void create_window(xcb_window_t win) {
   Workspace *workspace = screen->curr_workspace;
 
   Window *window = malloc(sizeof(Window));
@@ -167,7 +167,7 @@ void add_window(xcb_window_t win) {
                       XCB_CURRENT_TIME);
 }
 
-void remove_window(xcb_window_t win) {
+void destroy_window(xcb_window_t win) {
   Workspace *workspace = screen->curr_workspace;
 
   for (int i = 0; i < workspace->windows_count; ++i) {
@@ -176,7 +176,9 @@ void remove_window(xcb_window_t win) {
     if (window->win == win) {
       memmove(&workspace->windows[i], &workspace->windows[i + 1],
               sizeof(Window *) * (workspace->windows_count - i - 1));
+
       workspace->windows_count--;
+
       if (workspace->windows_count == 0) {
         if (screen->default_workspace != workspace) {
           destroy_workspace(screen, workspace);
@@ -186,7 +188,9 @@ void remove_window(xcb_window_t win) {
       } else if (workspace->focused >= workspace->windows_count) {
         workspace->focused = workspace->windows_count - 1;
       }
+
       tile_windows();
+
       if (workspace->focused >= 0) {
         xcb_set_input_focus(conn, XCB_INPUT_FOCUS_POINTER_ROOT,
                             workspace->windows[workspace->focused]->win,
@@ -224,11 +228,13 @@ void focus_prev() {
 
   if (workspace->windows_count == 0)
     return;
+
   workspace->focused = (workspace->focused - 1 + workspace->windows_count) %
                        workspace->windows_count;
   xcb_set_input_focus(conn, XCB_INPUT_FOCUS_POINTER_ROOT,
                       workspace->windows[workspace->focused]->win,
                       XCB_CURRENT_TIME);
+
   update_focus_borders();
 }
 
@@ -251,8 +257,8 @@ void move_focused_left() {
 void move_focused_right() {
   Workspace *workspace = screen->curr_workspace;
 
-  if (workspace->windows_count <= 1 || workspace->focused <= 0 ||
-      workspace->focused >= workspace->windows_count - 1)
+  if (workspace->windows_count <= 1 || workspace->focused < 0 ||
+      workspace->windows_count - 1 == workspace->focused)
     return;
 
   Window *tmp = workspace->windows[workspace->focused];
@@ -325,12 +331,12 @@ int main() {
     case XCB_MAP_REQUEST: {
       xcb_map_request_event_t *e = (xcb_map_request_event_t *)ev;
       xcb_map_window(conn, e->window);
-      add_window(e->window);
+      create_window(e->window);
       break;
     }
     case XCB_DESTROY_NOTIFY: {
       xcb_destroy_notify_event_t *e = (xcb_destroy_notify_event_t *)ev;
-      remove_window(e->window);
+      destroy_window(e->window);
       break;
     }
     case XCB_KEY_PRESS: {
