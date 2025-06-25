@@ -15,7 +15,6 @@ fi
 if [ -f "$HOME/.local/share/zap/zap.zsh" ]; then
   source "$HOME/.local/share/zap/zap.zsh"
 
-
   # plugins
   plug "zap-zsh/supercharge"
   ZVM_INIT_MODE=sourcing
