@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -34,6 +35,15 @@ typedef struct {
   Workspace **workspaces;
   int workspace_count;
 } Screen;
+
+typedef struct {
+  int left;
+  int right;
+  int top;
+  int bottom;
+} ScreenMargins;
+
+ScreenMargins reserved = {0, 0, 0, 0};
 
 Screen *screen;
 xcb_connection_t *conn;
@@ -116,9 +126,10 @@ void update_focus_borders() {
 void tile_windows() {
   Workspace *workspace = screen->curr_workspace;
 
-  int x = GAP; // Start with gap from left edge
-  int screen_width = scr->width_in_pixels;
-  int screen_height = scr->height_in_pixels;
+  int x = reserved.left + GAP;
+  int y = reserved.top + GAP;
+  int screen_width = scr->width_in_pixels - reserved.left - reserved.right;
+  int screen_height = scr->height_in_pixels - reserved.top - reserved.bottom;
   float total_factor = 0;
 
   for (int i = 0; i < workspace->windows_count; ++i) {
@@ -137,7 +148,7 @@ void tile_windows() {
     xcb_configure_window(conn, window->win,
                          XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y |
                              XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                         (uint32_t[]){x, GAP, w, screen_height - (GAP * 2)});
+                         (uint32_t[]){x, y, w, screen_height - (2 * GAP)});
     x += w + GAP; // Add gap after each window
   }
 
@@ -310,6 +321,70 @@ void grab_keys() {
   xcb_key_symbols_free(syms);
 }
 
+xcb_atom_t get_atom(const char *name) {
+  xcb_intern_atom_cookie_t cookie =
+      xcb_intern_atom(conn, 0, strlen(name), name);
+  xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(conn, cookie, NULL);
+  if (!reply)
+    return XCB_NONE;
+  xcb_atom_t atom = reply->atom;
+  free(reply);
+  return atom;
+}
+
+bool is_dock_window(xcb_window_t win) {
+  xcb_atom_t type_atom = get_atom("_NET_WM_WINDOW_TYPE");
+  xcb_atom_t dock_atom = get_atom("_NET_WM_WINDOW_TYPE_DOCK");
+
+  xcb_get_property_cookie_t prop_cookie =
+      xcb_get_property(conn, 0, win, type_atom, XCB_ATOM_ATOM, 0, 32);
+  xcb_get_property_reply_t *prop_reply =
+      xcb_get_property_reply(conn, prop_cookie, NULL);
+
+  if (!prop_reply || xcb_get_property_value_length(prop_reply) == 0) {
+    free(prop_reply);
+    return false;
+  }
+
+  xcb_atom_t *atoms = (xcb_atom_t *)xcb_get_property_value(prop_reply);
+  int count = xcb_get_property_value_length(prop_reply) / sizeof(xcb_atom_t);
+
+  for (int i = 0; i < count; ++i) {
+    if (atoms[i] == dock_atom) {
+      free(prop_reply);
+      return true;
+    }
+  }
+
+  free(prop_reply);
+  return false;
+}
+
+void update_reserved_area(xcb_window_t win) {
+  xcb_atom_t strut_atom = get_atom("_NET_WM_STRUT_PARTIAL");
+  if (strut_atom == XCB_NONE)
+    return;
+
+  xcb_get_property_cookie_t prop_cookie =
+      xcb_get_property(conn, 0, win, strut_atom, XCB_ATOM_CARDINAL, 0, 12);
+  xcb_get_property_reply_t *prop_reply =
+      xcb_get_property_reply(conn, prop_cookie, NULL);
+
+  if (!prop_reply ||
+      xcb_get_property_value_length(prop_reply) < 12 * sizeof(uint32_t)) {
+    free(prop_reply);
+    return;
+  }
+
+  uint32_t *struts = (uint32_t *)xcb_get_property_value(prop_reply);
+  reserved.left = struts[0];
+  reserved.right = struts[1];
+  reserved.top = struts[2];
+  reserved.bottom = struts[3];
+
+  free(prop_reply);
+}
+
 int main() {
   screen = create_screen();
 
@@ -330,7 +405,14 @@ int main() {
     switch (ev->response_type & ~0x80) {
     case XCB_MAP_REQUEST: {
       xcb_map_request_event_t *e = (xcb_map_request_event_t *)ev;
-      xcb_map_window(conn, e->window);
+
+      xcb_map_window(conn, e->window); // Just map it
+
+      if (is_dock_window(e->window)) {
+        update_reserved_area(e->window);
+        break;
+      }
+
       create_window(e->window);
       break;
     }
