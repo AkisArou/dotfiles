@@ -42,4 +42,3 @@ source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
 source "$HOME/dotfiles/scripts/try-source-completions"
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 autoload -Uz compinit && compinit
-
