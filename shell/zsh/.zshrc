@@ -1,3 +1,7 @@
+if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
+  tmux attach-session -t default || tmux new-session -s default
+fi
+
 fastfetch && echo
 
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -6,11 +10,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 
   [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 fi
-
-if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
-  tmux attach-session -t default || tmux new-session -s default
-fi
-
 
 if [ -f "$HOME/.local/share/zap/zap.zsh" ]; then
   source "$HOME/.local/share/zap/zap.zsh"
