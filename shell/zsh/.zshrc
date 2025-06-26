@@ -2,7 +2,7 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
 
-fastfetch; echo
+fastfetch; echo;
 
 # source
 source "$HOME/dotfiles/shell/zsh/zinit"
