@@ -9,17 +9,24 @@ autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
 # plugins
-zinit light zsh-users/zsh-autosuggestions
+zinit ice pick"async.zsh" src"pure.zsh" # with zsh-async library that's bundled with it.
+zinit light sindresorhus/pure
 
-zinit light zdharma-continuum/fast-syntax-highlighting
+zinit light romkatv/zsh-defer
+source "$HOME/.local/share/zinit/plugins/romkatv---zsh-defer/zsh-defer.plugin.zsh"
 
+zsh-defer zinit light zsh-users/zsh-autosuggestions
+
+zsh-defer zinit light zdharma-continuum/fast-syntax-highlighting
+
+zvm_after_init_commands=("source <(fzf --zsh)")
 function zvm_config() {
-  ZVM_INIT_MODE=sourcing
   ZVM_VI_SURROUND_BINDKEY=s-prefix
   ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
   WORDCHARS=${WORDCHARS//\/}
+
 }
 zinit ice depth=1
-zinit light jeffreytse/zsh-vi-mode
+zsh-defer zinit light jeffreytse/zsh-vi-mode
 
-zinit light Aloxaf/fzf-tab
+zsh-defer zinit light Aloxaf/fzf-tab

@@ -6,12 +6,11 @@ fastfetch; echo
 
 # source
 source "$HOME/dotfiles/shell/zsh/zinit"
-source <(fzf --zsh)
 source "$HOME/dotfiles/shell/common/aliases"
 source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/history"
 source "$HOME/dotfiles/shell/zsh/opts"
-[ -f ~/.asdf/plugins/java/set-java-home.zsh ] && . ~/.asdf/plugins/java/set-java-home.zsh
+[ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
 
 # completions
 autoload -Uz compinit 
@@ -22,5 +21,5 @@ else
 fi;
 
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
-source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
-source "$HOME/dotfiles/scripts/try-source-completions"
+zsh-defer source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
+zsh-defer source "$HOME/dotfiles/scripts/try-source-completions"
