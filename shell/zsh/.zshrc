@@ -1,5 +1,5 @@
 if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
-  tmux attach-session -t default || tmux new-session -s default
+  tmux attach-session -t default || "$HOME/dotfiles/scripts/start-tmux" && tmux attach-session -t default
 fi
 
 fastfetch
