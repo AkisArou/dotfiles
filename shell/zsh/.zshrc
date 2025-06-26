@@ -2,49 +2,25 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   tmux attach-session -t default || tmux new-session -s default
 fi
 
-fastfetch && echo
-
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-
-  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-fi
-
-
-if [ -f "$HOME/.local/share/zap/zap.zsh" ]; then
-  source "$HOME/.local/share/zap/zap.zsh"
-
-  function zvm_config() {
-    ZVM_INIT_MODE=sourcing
-    ZVM_VI_SURROUND_BINDKEY=s-prefix
-    ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
-    WORDCHARS=${WORDCHARS//\/}
-  }
-
-  # plugins
-  plug "zap-zsh/supercharge"
-  plug "jeffreytse/zsh-vi-mode"
-  plug "zsh-users/zsh-autosuggestions"
-  plug "zsh-users/zsh-syntax-highlighting"
-  plug "Aloxaf/fzf-tab"
-  plug "romkatv/powerlevel10k"
-fi
-
-# keybinds
-bindkey '^E' autosuggest-accept
-bindkey -M menuselect '^N' down-line-or-history
-bindkey -M menuselect '^P' up-line-or-history
+fastfetch; echo
 
 # source
+source "$HOME/dotfiles/shell/zsh/zinit"
 source <(fzf --zsh)
 source "$HOME/dotfiles/shell/common/aliases"
 source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/history"
+source "$HOME/dotfiles/shell/zsh/opts"
 [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && . ~/.asdf/plugins/java/set-java-home.zsh
 
 # completions
+autoload -Uz compinit 
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+	compinit;
+else
+	compinit -C;
+fi;
+
+fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
 source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
 source "$HOME/dotfiles/scripts/try-source-completions"
-fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
-autoload -Uz compinit && compinit

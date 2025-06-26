@@ -1,13 +1,12 @@
 #!/usr/bin/zsh
 
 source "$HOME/dotfiles/scripts/library"
-[ -f "$HOME/.local/share/zap/zap.zsh" ] && source "$HOME/.local/share/zap/zap.zsh"
 
-print_info "System:"
+print_info "system:"
 paru -Syu
 echo
 
-print_info "Nvim:"
+print_info "nvim:"
 ~/dotfiles/scripts/build-nvim
 echo
 
@@ -15,19 +14,20 @@ nvim --headless "+Lazy! sync" +qa
 nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
 echo
 
-print_info "Zap:"
-zap update all
+print_info "zinit:"
+zinit self-update
+zinit update --parallel
 echo
 
-print_info "Tmux:"
+print_info "tmux:"
 ~/.tmux/plugins/tpm/bin/update_plugins all
 echo
 
-print_info "Yazi:"
+print_info "yazi:"
 ya pkg upgrade
 echo
 
-print_info "Rust:"
+print_info "rust:"
 rustup update
 echo
 
@@ -35,9 +35,9 @@ print_info "asdf:"
 asdf plugin update --all
 echo
 
-print_info "Firmware:"
+print_info "firmware:"
 fwupdmgr get-updates
 echo
 
-print_info "Corepack:"
+print_info "corepack:"
 npm install --global corepack@latest

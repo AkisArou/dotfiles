@@ -157,7 +157,7 @@ install_packages "${packages[@]}"
 ~/dotfiles/st/build
 ~/dotfiles/scripts/build-nvim
 
-zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh) --branch release-v1
+bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
 
 # Install custom issue (login prompt)
 echo ""
