@@ -60,5 +60,5 @@ export EXPO_NO_TYPESCRIPT_SETUP=1
 if [ "$ULTRAWIDE" ]; then
   export EMULATOR_WIDTH=687
 else
-  export EMULATOR_WIDTH=713
+  export EMULATOR_WIDTH=711
 fi
