@@ -34,3 +34,7 @@ wake-desktop() {
 sus-desktop() {
   ssh "$DESKTOP" 'sudo -S systemctl suspend'
 }
+
+export-lan-ip() {
+  export LAN_IP=$(ip -4 -o addr show scope global | awk '{print $4}' | cut -d/ -f1 | head -n 1)
+}

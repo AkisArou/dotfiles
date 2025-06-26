@@ -13,3 +13,5 @@ source "$HOME/dotfiles/shell/zsh/history"
 source "$HOME/dotfiles/shell/zsh/opts"
 source "$HOME/dotfiles/shell/zsh/completions"
 [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
+
+zsh-defer export-lan-ip
