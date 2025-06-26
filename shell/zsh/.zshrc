@@ -11,17 +11,23 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 fi
 
+
 if [ -f "$HOME/.local/share/zap/zap.zsh" ]; then
   source "$HOME/.local/share/zap/zap.zsh"
 
+  function zvm_config() {
+    ZVM_INIT_MODE=sourcing
+    ZVM_VI_SURROUND_BINDKEY=s-prefix
+    ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
+    WORDCHARS=${WORDCHARS//\/}
+  }
+
   # plugins
   plug "zap-zsh/supercharge"
-  ZVM_INIT_MODE=sourcing
   plug "jeffreytse/zsh-vi-mode"
   plug "zsh-users/zsh-autosuggestions"
   plug "zsh-users/zsh-syntax-highlighting"
   plug "Aloxaf/fzf-tab"
-  plug "zap-zsh/fzf"
   plug "romkatv/powerlevel10k"
 fi
 
@@ -31,6 +37,7 @@ bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
 
 # source
+source <(fzf --zsh)
 source "$HOME/dotfiles/shell/common/aliases"
 source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/history"
