@@ -36,3 +36,16 @@ Various
   sudo vim /etc/vconsole.conf
   For ultrawide monitor add: 
   FONT=ter-120n
+
+* set < key to shift (laptop)
+  sudo vim /etc/udev/hwdb.d/99-custom-keyboard.hwdb
+   
+  add contents:
+  # Remap keycode 93 (<) to Left Shift
+  evdev:input:b*
+   KEYBOARD_KEY_56=leftshift
+
+  run:
+  sudo systemd-hwdb update
+  sudo udevadm trigger --verbose
+
