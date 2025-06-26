@@ -1,0 +1,13 @@
+#!/usr/bin/zsh
+
+# completions
+autoload -Uz compinit 
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+	compinit;
+else
+	compinit -C;
+fi;
+
+fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+zsh-defer source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
+zsh-defer source "$HOME/dotfiles/scripts/try-source-completions"
