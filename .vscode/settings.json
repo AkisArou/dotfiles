@@ -53,6 +53,11 @@
   "editor.cursorSurroundingLines": 100,
   "files.autoSave": "onFocusChange",
   "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
     "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
@@ -327,5 +332,6 @@
       "commands": ["workbench.action.debug.disconnect"],
       "when": "editorTextFocus"
     }
-  ]
+  ],
+  "hide-files.files": []
 }

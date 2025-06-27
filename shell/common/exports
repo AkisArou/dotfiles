@@ -57,6 +57,8 @@ export SUDO_PROMPT="$(tput setaf 1 bold)Password:$(tput sgr0) "
 
 export EXPO_NO_TYPESCRIPT_SETUP=1
 
+export ELECTRON_OZONE_PLATFORM_HINT=auto
+
 if [ "$ULTRAWIDE" ]; then
   export EMULATOR_WIDTH=687
 else
