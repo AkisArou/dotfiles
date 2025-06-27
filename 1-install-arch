@@ -65,6 +65,7 @@ packages=(
   "git-delta"
   "github-cli"
   "gnome-terminal"
+  "grim"
   "gtk-engine-murrine" # Needed by gtk tokyonight
   "gvim"
   "htop"
