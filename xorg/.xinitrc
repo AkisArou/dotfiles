@@ -32,8 +32,3 @@ fi
 
 ~/dotfiles/xorg/xrandr
 exec i3
-
-#exec picom --config ~/.config/picom/picom.conf &
-#exec polybar &
-#exec nitrogen --set-zoom-fill ~/dotfiles/wallpapers/forest.jpg &
-#exec /home/akisarou/dotfiles/mtwm/mtwm

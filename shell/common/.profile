@@ -12,24 +12,30 @@ fi
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
-  echo "1) Xorg (default)"
-  echo "2) Wayland"
+  echo "1) Wayland (default)"
+  echo "1) Xorg"
   printf "Enter choice [1-2]: "
   read session_choice
 
   session_choice=${session_choice:-1}
 
-  if [ "$session_choice" = "1" ]; then
-    export MOZ_USE_XINPUT2=1
-    export MOZ_X11_EGL=1
-    exec startx
-  elif [ "$session_choice" = "2" ]; then
+  wayland() {
     export XDG_CURRENT_DESKTOP=sway:wlroots
     exec dbus-run-session sway
-  else
-    echo "Falling back to default (Xorg)."
+  }
+
+  xorg() {
     export MOZ_USE_XINPUT2=1
     export MOZ_X11_EGL=1
     exec startx
+  }
+
+  if [ "$session_choice" = "1" ]; then
+    wayland();
+  elif [ "$session_choice" = "2" ]; then
+    xorg();
+  else
+    echo "Falling back to default (Wayland)."
+    wayland();
   fi
 fi
