@@ -34,8 +34,10 @@ Various
 -------
 * set vconsole font:
   sudo vim /etc/vconsole.conf
-  For ultrawide monitor add: 
-  FONT=ter-120n
+  - ultrawide: 
+    FONT=ter-120n
+  - asus laptop:
+    FONT=ter-128n
 
 * set < key to shift (laptop)
   sudo vim /etc/udev/hwdb.d/99-custom-keyboard.hwdb
