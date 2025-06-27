@@ -39,7 +39,14 @@ Various
   - asus laptop:
     FONT=ter-128n
 
-* set < key to shift (laptop)
+* set grub resolution:
+  sudo vim /etc/default/grub
+  - asus laptop:
+    GRUB_GFXMODE=1920x1080
+
+  ensure GRUB_GFXPAYLOAD_LINUX=keep is uncommented.
+
+* set < key to shift (asus laptop)
   sudo vim /etc/udev/hwdb.d/99-custom-keyboard.hwdb
    
   add contents:
