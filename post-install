@@ -65,3 +65,6 @@ Various
 
   sudo vim /etc/default/grub
   GRUB_CMDLINE_LINUX_DEFAULT="asus_wmi.fnlock_default=0"
+
+* (ASUS LAPTOP)
+  disable fast boot in BIOS
