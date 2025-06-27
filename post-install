@@ -12,11 +12,11 @@ Performance
   sudo efibootmgr --delete-bootnum --bootnum 0001
 
 * watchdog
-  => Add kernel parameter in/etc/default/grub:
+  Add kernel parameter in/etc/default/grub:
 
-  GRUB_CMDLINE_LINUX_DEFAULT=nowatchdog
+  GRUB_CMDLINE_LINUX_DEFAULT="nowatchdog"
 
-  => Then blacklist the modules in /etc/modprobe.d/blacklist.conf:
+  Then blacklist the modules in /etc/modprobe.d/blacklist.conf:
 
   # Disable intel mei (including mei_watchdog).
   blacklist intel_pmc_bxt
@@ -46,7 +46,9 @@ Various
 
   ensure GRUB_GFXPAYLOAD_LINUX=keep is uncommented.
 
-* set < key to shift (asus laptop)
+* (ASUS LAPTOP) 
+  set < key to shift
+
   sudo vim /etc/udev/hwdb.d/99-custom-keyboard.hwdb
    
   add contents:
@@ -58,3 +60,8 @@ Various
   sudo systemd-hwdb update
   sudo udevadm trigger --verbose
 
+* (ASUS LAPTOP)
+  make hotkeys work without fn
+
+  sudo vim /etc/default/grub
+  GRUB_CMDLINE_LINUX_DEFAULT="asus_wmi.fnlock_default=0"
