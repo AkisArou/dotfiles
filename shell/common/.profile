@@ -9,6 +9,17 @@ elif gpu_has_intel; then
   export VDPAU_DRIVER=va_gl
 fi
 
+wayland() {
+  export XDG_CURRENT_DESKTOP=sway:wlroots
+  exec dbus-run-session sway
+}
+
+xorg() {
+  export MOZ_USE_XINPUT2=1
+  export MOZ_X11_EGL=1
+  exec startx
+}
+
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
@@ -19,23 +30,12 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
 
   session_choice=${session_choice:-1}
 
-  wayland() {
-    export XDG_CURRENT_DESKTOP=sway:wlroots
-    exec dbus-run-session sway
-  }
-
-  xorg() {
-    export MOZ_USE_XINPUT2=1
-    export MOZ_X11_EGL=1
-    exec startx
-  }
-
   if [ "$session_choice" = "1" ]; then
-    wayland();
+    wayland
   elif [ "$session_choice" = "2" ]; then
-    xorg();
+    xorg
   else
     echo "Falling back to default (Wayland)."
-    wayland();
+    wayland
   fi
 fi
