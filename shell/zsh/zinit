@@ -27,6 +27,8 @@ zvm_after_init_commands=("source <(fzf --zsh)")
 function zvm_config() {
   ZVM_VI_SURROUND_BINDKEY=s-prefix
   ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
+  ZVM_VI_HIGHLIGHT_BACKGROUND=#292e42
+
 }
 zinit ice depth=1
 zinit light jeffreytse/zsh-vi-mode
