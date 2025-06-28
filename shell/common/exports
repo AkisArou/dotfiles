@@ -23,11 +23,9 @@ export PATH="$HOME/neovim/bin:$PATH"
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 
 export ANDROID_HOME="$HOME/Android/Sdk"
-# export ANDROID_AVD_HOME="$HOME/.config/.android/avd"
 
 export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/platform-tools
-# export PATH=$ANDROID_HOME/cmdline-tools/latest/bin/:$PATH
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
