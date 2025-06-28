@@ -18,6 +18,9 @@ map("v", "K", ":m '<-2<CR>gv=gv")
 -- delete char without copying
 map("n", "x", '"_x')
 
+-- keep yanked text on paste
+map("x", "p", [["_dP]])
+
 -- Stay in indent mode
 map("v", "<", "<gv", opts)
 map("v", ">", ">gv", opts)
