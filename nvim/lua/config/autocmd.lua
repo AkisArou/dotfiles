@@ -2,20 +2,20 @@ local function augroup(name)
   return vim.api.nvim_create_augroup("akisarou_" .. name, { clear = true })
 end
 
+-- Enable treesitter
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    pcall(vim.treesitter.start)
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
+
 -- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
   desc = "Highlight when yanking (copying) text",
   group = augroup("highlight_yank"),
   callback = function()
     vim.hl.on_yank()
-  end,
-})
-
--- Enable treesitter
-vim.api.nvim_create_autocmd("FileType", {
-  callback = function()
-    pcall(vim.treesitter.start)
-    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
   end,
 })
 

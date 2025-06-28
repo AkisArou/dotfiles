@@ -19,7 +19,7 @@ map("v", "K", ":m '<-2<CR>gv=gv")
 map("n", "x", '"_x')
 
 -- keep yanked text on paste
-map("x", "p", [["_dP]])
+map("x", "p", [["_dP]], opts)
 
 -- Stay in indent mode
 map("v", "<", "<gv", opts)
