@@ -54,10 +54,6 @@ input "type:touchpad" {
     accel_profile "adaptive"
 }
 
-input "2:7:SynPS/2_Synaptics_TouchPad" {
-    events disabled
-  }
-
 #
 ### Key bindings
 #
@@ -70,6 +66,8 @@ bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5-%
 bindsym $mod+Shift+Up exec --no-startup-id brightnessctl set 100%
 bindsym $mod+Shift+Down exec --no-startup-id brightnessctl set 1%
+bindsym $mod+Control+Up exec --no-startup-id ~/dotfiles/xorg/set-brightness inc
+bindsym $mod+Control+Down exec --no-startup-id ~/dotfiles/xorg/set-brightness dec
 
 bindsym $mod+q kill
 
