@@ -1,8 +1,0 @@
-#!/bin/zsh
-
-Xephyr :1 -screen 1280x800 &
-sleep 1
-DISPLAY=:1 exec picom --config ~/.config/picom/picom.conf &
-DISPLAY=:1 exec polybar &
-DISPLAY=:1 exec nitrogen --set-zoom-fill ~/dotfiles/wallpapers/forest.jpg &
-DISPLAY=:1 exec /home/akisarou/dotfiles/mtwm/mtwm
