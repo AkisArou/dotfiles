@@ -118,6 +118,7 @@ packages=(
   "vdpauinfo"
   "visual-studio-code-bin"
   "vulkan-tools"
+  "watchman-bin"
   "wget"
   "wireplumber"
   "wireshark-qt"
