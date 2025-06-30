@@ -29,7 +29,7 @@ Applications
 ------------
 * Android studio - Use WLToolkit on wayland 
   modify Android studio desktop file:
-  Exec=sh -c 'exec android-studio "$@" $( [ "$XDG_SESSION_TYPE" = wayland ] && echo -Dawt.toolkit.name=WLToolkit )' sh %f
+  Exec=sh -c 'set -- "$@"; [ "$XDG_SESSION_TYPE" = wayland ] && set -- "$@" -Dawt.toolkit.name=WLToolkit; exec android-studio "$@"' sh %f
 
 Various
 -------
