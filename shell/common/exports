@@ -60,5 +60,5 @@ export ELECTRON_OZONE_PLATFORM_HINT=auto
 if [ "$ULTRAWIDE" ]; then
   export EMULATOR_WIDTH=687
 else
-  export EMULATOR_WIDTH=711
+  export EMULATOR_WIDTH=473
 fi
