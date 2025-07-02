@@ -38,6 +38,7 @@ packages=(
   "base"
   "base-devel"
   "bat"
+  "bind" #nslookup
   "bleachbit"
   "bluez"
   "bluez-utils"
