@@ -1,17 +1,17 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "2ad42fa"
+rev = "e5f00e2"
 hash = "56fdabc96fc1f4d53c96eb884b02a5be"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-paste"
-rev = "2ad42fa"
+rev = "e5f00e2"
 hash = "a8050052e59f3952abe0b3e27a5843de"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "2ad42fa"
-hash = "e01006bfb38951ea89031bd918b20dbb"
+rev = "e5f00e2"
+hash = "37ebed215c8742eada643fc2655b65e2"
 
 [[plugin.deps]]
 use = "aresler/path-from-root"
