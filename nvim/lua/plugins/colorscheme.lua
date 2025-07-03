@@ -61,7 +61,7 @@ local themes = {
           hi DiagnosticSignWarn guifg=#7a3f22 ctermfg=yellow
           hi DiagnosticSignInfo guifg=#2a4373 ctermfg=blue
           hi DiagnosticSignHint guifg=#364a23 ctermfg=green
-          hi DiagnosticUnderlineError guisp=#6e2a33 gui=undercurl
+          hi DiagnosticUnderlineError guisp=#4a1b22 gui=undercurl
           hi DiagnosticVirtualTextError guifg=#3b4050
           hi CursorLineNr guifg=#737aa2
           hi DiagnosticUnnecessary guifg=#6F7E99
