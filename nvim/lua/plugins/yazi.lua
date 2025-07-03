@@ -1,9 +1,6 @@
 return {
   "mikavilpas/yazi.nvim",
   lazy = false,
-  dependencies = {
-    "dstein64/vim-startuptime",
-  },
   keys = {
     {
       "<leader>e",
