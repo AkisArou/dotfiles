@@ -236,6 +236,6 @@
   {
     "key": "space f f",
     "command": "workbench.action.quickOpen",
-    "when": "!editorFocus"
+    "when": "!editorFocus && !inputFocus && !inputBoxFocus && !searchInputBoxFocus"
   }
 ]
