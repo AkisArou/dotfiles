@@ -52,7 +52,7 @@ bindsym $mod+q kill
 bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
-bindsym $mod+Shift+p exec brave --incognito
+bindsym $mod+Shift+n exec brave --incognito
 bindsym $mod+Shift+t exec brave --incognito --tor
 bindsym $mod+p exec flameshot gui
 
