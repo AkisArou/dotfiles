@@ -15,10 +15,8 @@ return {
       json = { eslint },
     }
 
-    local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
-
     vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
-      group = lint_augroup,
+      group = vim.api.nvim_create_augroup("lint", { clear = true }),
       callback = function()
         lint.try_lint()
       end,
