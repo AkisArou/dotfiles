@@ -10,7 +10,7 @@ print_info "nvim:"
 ~/dotfiles/scripts/build-nvim
 echo
 
-nvim --headless "+Lazy! sync" +qa
+nvim --headless -c "lua vim.pack.update({}, { force = true })" -c "quit"
 nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
 echo
 
