@@ -51,6 +51,7 @@ input "type:keyboard" {
 input "type:touchpad" {
     natural_scroll true
     tap enabled
+    drag_lock disabled
     accel_profile "adaptive"
 }
 
