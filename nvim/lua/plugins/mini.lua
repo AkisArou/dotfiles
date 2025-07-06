@@ -1,35 +1,15 @@
-return {
-  {
-    "echasnovski/mini.cursorword",
-    version = false,
-    config = function()
-      require("mini.cursorword").setup()
-    end,
+require("mini.cursorword").setup()
+
+require("mini.surround").setup()
+
+require("mini.pairs").setup({
+  mappings = {
+    ["<"] = { action = "open", pair = "<>", neigh_pattern = ".[%(]", register = { cr = false } },
   },
-  {
-    "echasnovski/mini.surround",
-    version = false,
-    config = function()
-      require("mini.surround").setup()
-    end,
+})
+
+require("mini.ai").setup({
+  custom_textobjects = {
+    b = false,
   },
-  {
-    "echasnovski/mini.pairs",
-    version = false,
-    event = "VeryLazy",
-    opts = {
-      mappings = {
-        ["<"] = { action = "open", pair = "<>", neigh_pattern = ".[%(]", register = { cr = false } },
-      },
-    },
-  },
-  {
-    "echasnovski/mini.ai",
-    version = false,
-    opts = {
-      custom_textobjects = {
-        b = false,
-      },
-    },
-  },
-}
+})

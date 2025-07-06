@@ -1,17 +1,17 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-enter"
-rev = "cbc4450"
+rev = "b886025"
 hash = "56fdabc96fc1f4d53c96eb884b02a5be"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:smart-paste"
-rev = "cbc4450"
+rev = "b886025"
 hash = "a8050052e59f3952abe0b3e27a5843de"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "cbc4450"
-hash = "a57f09c9e61ffc850d8ea8c6fc1efb2c"
+rev = "b886025"
+hash = "63b6c222bf2103b3023389dde5e2ecfe"
 
 [[plugin.deps]]
 use = "aresler/path-from-root"
@@ -20,8 +20,8 @@ hash = "98cdb2e889b73c4d4a8945f166486605"
 
 [[plugin.deps]]
 use = "llanosrocas/githead"
-rev = "9d0a8a4"
-hash = "41122ed1619bdad7f557c0c819bf87a4"
+rev = "9e9e224"
+hash = "4a3cbda9a0cd90c2682e497dcea4910e"
 
 [flavor]
 deps = []

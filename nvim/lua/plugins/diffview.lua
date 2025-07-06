@@ -1,3 +1,1 @@
-return {
-  "sindrets/diffview.nvim",
-}
+require("diffview").setup()

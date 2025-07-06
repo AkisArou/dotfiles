@@ -1,10 +1,6 @@
-return {
-  "catgoose/nvim-colorizer.lua",
-  event = "VeryLazy",
-  opts = {
-    user_default_options = {
-      tailwind = true,
-      mode = "background",
-    },
+require("colorizer").setup({
+  user_default_options = {
+    tailwind = true,
+    mode = "background",
   },
-}
+})
