@@ -110,12 +110,12 @@ vim.pack.add({
 -- Instant loading
 require("config")
 require("plugins.colorscheme")
-require("plugins.lualine")
 
 -- Lazy loading
 vim.defer_fn(function()
   require("custom.revive").setup({ auto = false })
 
+  require("plugins.lualine")
   require("plugins.treesitter")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
