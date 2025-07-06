@@ -11,6 +11,7 @@ print_info "nvim:"
 echo
 
 nvim --headless -c "lua vim.pack.update({}, { force = true })" -c "quit"
+echo
 nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
 echo
 
