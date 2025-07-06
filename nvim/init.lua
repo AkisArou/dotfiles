@@ -5,6 +5,10 @@ vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
     local name = event.data.spec.name
 
+    if name == "nvim-treesitter" then
+      vim.cmd("TSUpdate")
+    end
+
     if name == "blink.cmp" then
       local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
 
@@ -111,12 +115,10 @@ vim.pack.add({
 require("config")
 require("plugins.colorscheme")
 
--- Lazy loading
+-- Deferred loading
 vim.defer_fn(function()
-  require("custom.revive").setup({ auto = false })
-
-  require("plugins.lualine")
   require("plugins.treesitter")
+  require("plugins.lualine")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
   require("plugins.yazi")
@@ -143,22 +145,17 @@ vim.defer_fn(function()
   require("plugins.undotree")
   require("plugins.vim-visual-multi")
   require("plugins.which-key")
+  require("plugins.template-string")
+
+  require("custom.revive").setup({ auto = false })
 end, 0)
 
 -- Autocmd loaded
 local js_files = { "*.ts", "*.tsx", "*.js", "*.jsx" }
 
-vim.api.nvim_create_autocmd("InsertEnter", {
-  once = true,
-  pattern = js_files,
-  callback = function()
-    require("plugins.template-string")
-  end,
-})
-
 vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
-  pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+  pattern = js_files,
   callback = function()
     require("plugins.neotest")
     require("custom.pnpm").setup()
