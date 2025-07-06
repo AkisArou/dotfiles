@@ -27,6 +27,9 @@ end
 vim.pack.add({
   github("folke/tokyonight.nvim"),
   github("nvim-lua/plenary.nvim"),
+  github("nvim-lualine/lualine.nvim"),
+  github("arnamak/stay-centered.nvim"),
+
   github("Bilal2453/luvit-meta"),
   github("nvim-tree/nvim-web-devicons"),
 
@@ -59,8 +62,6 @@ vim.pack.add({
 
   github("itchyny/vim-highlighturl"),
 
-  github("nvim-lualine/lualine.nvim"),
-
   github("echasnovski/mini.cursorword"),
   github("echasnovski/mini.surround"),
   github("echasnovski/mini.pairs"),
@@ -83,8 +84,6 @@ vim.pack.add({
 
   github("folke/snacks.nvim"),
 
-  github("arnamak/stay-centered.nvim"),
-
   github("axelvc/template-string.nvim"),
 
   github("folke/todo-comments.nvim"),
@@ -93,7 +92,7 @@ vim.pack.add({
 
   github("christoomey/vim-tmux-navigator"),
 
-  { src = github("mg979/vim-visual-multi"), version = "master" },
+  github("mg979/vim-visual-multi"),
 
   github("folke/which-key.nvim"),
 
@@ -108,38 +107,60 @@ vim.pack.add({
   github("yioneko/nvim-vtsls"),
 })
 
+-- Instant loading
 require("config")
-require("custom.revive").setup({ auto = false })
-require("custom.pnpm").setup()
-
-require("plugins.lsp.blink")
-require("plugins.lsp.conform")
-require("plugins.lsp.lsp")
-require("plugins.lsp.mason")
 require("plugins.colorscheme")
-require("plugins.dap")
-require("plugins.diffview")
-require("plugins.fzf")
-require("plugins.gitsigns")
-require("plugins.grug-far")
-require("plugins.highlighturl")
-require("plugins.lualine")
-require("plugins.mini")
-require("plugins.neogit")
-require("plugins.neotab")
-require("plugins.neotest")
-require("plugins.nvim-colorizer")
-require("plugins.nvim-lint")
-require("plugins.octo")
-require("plugins.overseer")
-require("plugins.schemastore")
-require("plugins.snacks")
-require("plugins.stay-centered")
-require("plugins.template-string")
-require("plugins.todo-comments")
-require("plugins.treesitter")
-require("plugins.undotree")
-require("plugins.vim-tmux-navigator")
-require("plugins.vim-visual-multi")
-require("plugins.which-key")
-require("plugins.yazi")
+
+-- Lazy loading
+vim.defer_fn(function()
+  require("custom.revive").setup({ auto = false })
+
+  require("plugins.lualine")
+  require("plugins.treesitter")
+  require("plugins.stay-centered")
+  require("plugins.vim-tmux-navigator")
+  require("plugins.yazi")
+  require("plugins.overseer")
+  require("plugins.lsp.blink")
+  require("plugins.lsp.conform")
+  require("plugins.lsp.lsp")
+  require("plugins.lsp.mason")
+  require("plugins.nvim-lint")
+  require("plugins.dap")
+  require("plugins.diffview")
+  require("plugins.fzf")
+  require("plugins.gitsigns")
+  require("plugins.grug-far")
+  require("plugins.highlighturl")
+  require("plugins.neotab")
+  require("plugins.nvim-colorizer")
+  require("plugins.neogit")
+  require("plugins.mini")
+  require("plugins.octo")
+  require("plugins.schemastore")
+  require("plugins.snacks")
+  require("plugins.todo-comments")
+  require("plugins.undotree")
+  require("plugins.vim-visual-multi")
+  require("plugins.which-key")
+end, 0)
+
+-- Autocmd loaded
+local js_files = { "*.ts", "*.tsx", "*.js", "*.jsx" }
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  once = true,
+  pattern = js_files,
+  callback = function()
+    require("plugins.template-string")
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufReadPost", {
+  once = true,
+  pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+  callback = function()
+    require("plugins.neotest")
+    require("custom.pnpm").setup()
+  end,
+})
