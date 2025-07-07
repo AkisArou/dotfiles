@@ -93,6 +93,7 @@
     // "format": "<span color='#bb9af7'>BRT</span> {percent}%",
     // "format": "<span color='#d3869b'>BRT</span> {percent}%",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
+    "tooltip": false,
   },
   "clock": {
     "timezone": "Europe/Athens",
