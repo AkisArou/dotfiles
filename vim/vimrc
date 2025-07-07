@@ -187,7 +187,7 @@ endfunction
 
 :autocmd CursorMoved,CursorMovedI * call CentreCursor()
 
-let s:plugin_file = expand('~/.local/share/nvim/lazy/vim-tmux-navigator/plugin/tmux_navigator.vim')
+let s:plugin_file = expand('~/.local/share/nvim/site/pack/core/opt/vim-tmux-navigator/plugin/tmux_navigator.vim')
 if filereadable(s:plugin_file)
   execute 'source' fnameescape(s:plugin_file)
 endif
