@@ -111,11 +111,11 @@ vim.pack.add({
   github("yioneko/nvim-vtsls"),
 })
 
--- Instant loading
+-- Instant load
 require("config")
 require("plugins.colorscheme")
 
--- Deferred loading
+-- Deferred load
 vim.defer_fn(function()
   require("plugins.treesitter")
   require("plugins.lualine")
@@ -123,7 +123,6 @@ vim.defer_fn(function()
   require("plugins.vim-tmux-navigator")
   require("plugins.yazi")
   require("plugins.overseer")
-  require("plugins.lsp.blink")
   require("plugins.lsp.conform")
   require("plugins.lsp.lsp")
   require("plugins.lsp.mason")
@@ -134,30 +133,43 @@ vim.defer_fn(function()
   require("plugins.gitsigns")
   require("plugins.grug-far")
   require("plugins.highlighturl")
-  require("plugins.neotab")
   require("plugins.nvim-colorizer")
   require("plugins.neogit")
   require("plugins.mini")
   require("plugins.octo")
-  require("plugins.schemastore")
   require("plugins.snacks")
   require("plugins.todo-comments")
   require("plugins.undotree")
-  require("plugins.vim-visual-multi")
   require("plugins.which-key")
   require("plugins.template-string")
 
   require("custom.revive").setup({ auto = false })
 end, 0)
 
--- Autocmd loaded
-local js_files = { "*.ts", "*.tsx", "*.js", "*.jsx" }
-
+-- Autocmd load
 vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
-  pattern = js_files,
+  pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
   callback = function()
     require("plugins.neotest")
     require("custom.pnpm").setup()
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufReadPost", {
+  once = true,
+  pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
+  callback = function()
+    require("plugins.schemastore")
+  end,
+})
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+  once = true,
+  pattern = "*",
+  callback = function()
+    require("plugins.lsp.blink")
+    require("plugins.neotab")
+    require("plugins.vim-visual-multi")
   end,
 })
