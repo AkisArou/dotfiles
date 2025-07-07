@@ -3,7 +3,6 @@ local opts = { noremap = true, silent = true }
 
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
 map("n", "<leader>w", ":w<CR>", opts)
-map("n", "<leader>l", ":Lazy<CR>", opts)
 
 -- Resize window using <ctrl> arrow keys
 map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
