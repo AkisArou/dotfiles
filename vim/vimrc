@@ -9,6 +9,8 @@ filetype on
 filetype plugin on
 filetype indent on
 
+set omnifunc=syntaxcomplete#Complete
+
 let &t_SI = "\e[6 q"
 let &t_EI = "\e[0 q"
 
