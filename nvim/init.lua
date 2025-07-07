@@ -153,7 +153,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
   callback = function()
     require("plugins.neotest")
-    require("custom.pnpm").setup()
   end,
 })
 
@@ -162,6 +161,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
   callback = function()
     require("plugins.schemastore")
+    require("custom.pnpm").setup()
   end,
 })
 
