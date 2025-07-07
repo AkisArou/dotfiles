@@ -114,11 +114,11 @@ vim.pack.add({
 -- Instant load
 require("config")
 require("plugins.colorscheme")
+require("plugins.lualine")
 
 -- Deferred load
 vim.defer_fn(function()
   require("plugins.treesitter")
-  require("plugins.lualine")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
   require("plugins.yazi")
