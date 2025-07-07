@@ -54,7 +54,7 @@ local themes = {
       vim.cmd("hi HighlightUrl guifg=#5f8ae9 gui=underline")
 
       vim.cmd([[
-          hi DiagnosticSignError guifg=#6e2a33 ctermfg=red
+          hi DiagnosticSignError guifg=#4a1b22 ctermfg=red
           hi DiagnosticSignWarn guifg=#7a3f22 ctermfg=yellow
           hi DiagnosticSignInfo guifg=#2a4373 ctermfg=blue
           hi DiagnosticSignHint guifg=#364a23 ctermfg=green
