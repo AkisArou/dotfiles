@@ -1,12 +1,8 @@
-local is_open = false
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "undotree",
+  callback = function()
+    vim.defer_fn(vim.cmd.UndotreeFocus, 0)
+  end,
+})
 
--- Undo
-vim.keymap.set("n", "<leader>uu", function()
-  vim.cmd.UndotreeToggle()
-
-  is_open = not is_open
-
-  if is_open then
-    vim.cmd.UndotreeFocus()
-  end
-end)
+vim.keymap.set("n", "<leader>uu", vim.cmd.UndotreeToggle)
