@@ -39,7 +39,7 @@ preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 ############
 # Keydings #
 ############
-bindkey -M viins '^R' fzf-history-widget  # replace fzf-history-widget if you have a custom one
+bindkey -M viins '^R' fzf-history-widget # fzf should be sourced first
 vi-redo() { zle redo }
 zle -N vi-redo
 bindkey -M vicmd '^R' vi-redo
