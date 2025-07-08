@@ -20,7 +20,7 @@ set $menu ~/dotfiles/rofi/launch -show drun
 #
 ### Output configuration
 #
-output * bg /home/akisarou/dotfiles/wallpapers/forest.jpg fill
+output * bg /home/akisarou/dotfiles/wallpapers/tokyonight-1.jpg fill
 
 output "Samsung Electric Company LC49G95T H4ZR303132" {
     mode 5120x1440@129.999Hz
