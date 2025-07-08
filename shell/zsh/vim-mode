@@ -39,6 +39,10 @@ preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
 ############
 # Keydings #
 ############
+bindkey -M viins '^R' fzf-history-widget  # replace fzf-history-widget if you have a custom one
+vi-redo() { zle redo }
+zle -N vi-redo
+bindkey -M vicmd '^R' vi-redo
 
 # allow vv to edit the command line (standard behaviour)
 autoload -Uz edit-command-line
@@ -97,3 +101,10 @@ for m in visual viopp; do
     bindkey -M $m $c select-quoted
   done
 done
+
+for m in visual viopp; do
+  bindkey -M $m aq select-in-word
+  bindkey -M $m iq select-in-word
+done
+
+
