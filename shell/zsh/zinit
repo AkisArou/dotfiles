@@ -8,19 +8,16 @@ source "${ZINIT_HOME}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-# theme
-zinit ice pick"async.zsh" src"pure.zsh" # with zsh-async library that's bundled with it.
+zinit ice src"pure.zsh"
 zinit light sindresorhus/pure
 
-# zsh-defer
 zinit light romkatv/zsh-defer
 source "$HOME/.local/share/zinit/plugins/romkatv---zsh-defer/zsh-defer.plugin.zsh"
 
-# zsh-autosuggestions
 zsh-defer zinit light zsh-users/zsh-autosuggestions
 
-# fast-syntax-highlighting
 zsh-defer zinit light zdharma-continuum/fast-syntax-highlighting
 
-# fzf-tab
 zsh-defer zinit light Aloxaf/fzf-tab
+
+zsh-defer zinit light kutsan/zsh-system-clipboard

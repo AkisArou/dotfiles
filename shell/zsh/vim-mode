@@ -106,5 +106,3 @@ for m in visual viopp; do
   bindkey -M $m aq select-in-word
   bindkey -M $m iq select-in-word
 done
-
-
