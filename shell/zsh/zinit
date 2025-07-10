@@ -12,13 +12,10 @@ autoload -Uz _zinit
 zinit ice src"pure.zsh"
 zinit light sindresorhus/pure
 
-zinit light romkatv/zsh-defer
-source "$HOME/.local/share/zinit/plugins/romkatv---zsh-defer/zsh-defer.plugin.zsh"
-
 zinit light zsh-users/zsh-autosuggestions
 
 zinit light zdharma-continuum/fast-syntax-highlighting
 
-zsh-defer zinit light Aloxaf/fzf-tab
+zinit light Aloxaf/fzf-tab
 
-zsh-defer zinit light kutsan/zsh-system-clipboard
+zinit light kutsan/zsh-system-clipboard

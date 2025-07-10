@@ -9,5 +9,5 @@ else
 fi;
 
 fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
-zsh-defer source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
-zsh-defer source "$HOME/dotfiles/scripts/try-source-completions"
+source /usr/share/zsh/plugins/pnpm-shell-completion/pnpm-shell-completion.zsh
+source "$HOME/dotfiles/scripts/try-source-completions"
