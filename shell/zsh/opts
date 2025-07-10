@@ -23,3 +23,6 @@ setopt APPEND_HISTORY
 bindkey '^E' autosuggest-accept
 bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
+
+# Open nvim with Alt+e like fish
+bindkey -s '\ee' 'v\n'
