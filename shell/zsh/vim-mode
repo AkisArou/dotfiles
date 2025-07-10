@@ -97,12 +97,113 @@ done
 autoload -U select-quoted
 zle -N select-quoted
 for m in visual viopp; do
-  for c in {a,i}{\',\",\`,q}; do
+  for c in {a,i}{\',\",\`}; do
     bindkey -M $m $c select-quoted
   done
 done
 
+# Function to select any quote (single, double, or backtick)
+select-any-quote() {
+  local REPLY
+  local quotes=("'" '"' '`')
+  local best_start=-1
+  local best_end=-1
+  local best_quote=""
+  local found=0
+  
+  # Find the closest quote pair around cursor
+  for quote in "${quotes[@]}"; do
+    # Save current cursor position
+    local orig_cursor=$CURSOR
+    
+    # Look for opening quote before cursor
+    local start_pos=-1
+    local temp_cursor=$CURSOR
+    
+    # Search backwards for opening quote
+    while [[ $temp_cursor -gt 0 ]]; do
+      temp_cursor=$((temp_cursor - 1))
+      if [[ "${BUFFER[$temp_cursor]}" == "$quote" ]]; then
+        # Check if this quote is escaped
+        local escaped=0
+        local check_pos=$((temp_cursor - 1))
+        while [[ $check_pos -gt 0 && "${BUFFER[$check_pos]}" == '\' ]]; do
+          escaped=$((1 - escaped))
+          check_pos=$((check_pos - 1))
+        done
+        
+        if [[ $escaped -eq 0 ]]; then
+          start_pos=$temp_cursor
+          break
+        fi
+      fi
+    done
+    
+    if [[ $start_pos -ne -1 ]]; then
+      # Look for closing quote after cursor
+      temp_cursor=$CURSOR
+      local end_pos=-1
+      
+      while [[ $temp_cursor -lt ${#BUFFER} ]]; do
+        temp_cursor=$((temp_cursor + 1))
+        if [[ "${BUFFER[$temp_cursor]}" == "$quote" ]]; then
+          # Check if this quote is escaped
+          local escaped=0
+          local check_pos=$((temp_cursor - 1))
+          while [[ $check_pos -gt 0 && "${BUFFER[$check_pos]}" == '\' ]]; do
+            escaped=$((1 - escaped))
+            check_pos=$((check_pos - 1))
+          done
+          
+          if [[ $escaped -eq 0 ]]; then
+            end_pos=$temp_cursor
+            break
+          fi
+        fi
+      done
+      
+      if [[ $end_pos -ne -1 ]]; then
+        # Check if this is the closest pair
+        local distance=$((start_pos + (${#BUFFER} - end_pos)))
+        if [[ $found -eq 0 || $distance -lt $((best_start + (${#BUFFER} - best_end))) ]]; then
+          best_start=$start_pos
+          best_end=$end_pos
+          best_quote=$quote
+          found=1
+        fi
+      fi
+    fi
+  done
+  
+  if [[ $found -eq 1 ]]; then
+    if [[ $KEYMAP == "viopp" ]]; then
+      # For operators (like c, d, y) - select inner content
+      CURSOR=$best_start
+      MARK=$((best_end - 1))
+    else
+      # For visual mode
+      if [[ $KEYS == "aq" ]]; then
+        # Select around quotes (including quotes)
+        CURSOR=$((best_start - 1))
+        MARK=$best_end
+      else
+        # Select inner quotes (excluding quotes)
+        CURSOR=$best_start
+        MARK=$((best_end - 1))
+      fi
+    fi
+  else
+    # No quotes found, do nothing
+    return 1
+  fi
+}
+
+# Register the widget
+zle -N select-any-quote
+
+# Bind to q for "quote" in both visual and operator modes
 for m in visual viopp; do
-  bindkey -M $m aq select-in-word
-  bindkey -M $m iq select-in-word
+  for c in {a,i}q; do
+    bindkey -M $m $c select-any-quote
+  done
 done
