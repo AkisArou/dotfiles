@@ -5,8 +5,6 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
   }
 fi
 
-fastfetch
-
 # source
 source <(fzf --zsh)
 source "$HOME/dotfiles/shell/zsh/zinit"
@@ -16,6 +14,6 @@ source "$HOME/dotfiles/shell/zsh/history"
 source "$HOME/dotfiles/shell/zsh/opts"
 source "$HOME/dotfiles/shell/zsh/completions"
 source "$HOME/dotfiles/shell/zsh/vim-mode"
-[ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
+zsh-defer [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
 
 zsh-defer export-lan-ip
