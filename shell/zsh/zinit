@@ -15,9 +15,9 @@ zinit light sindresorhus/pure
 zinit light romkatv/zsh-defer
 source "$HOME/.local/share/zinit/plugins/romkatv---zsh-defer/zsh-defer.plugin.zsh"
 
-zsh-defer zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-autosuggestions
 
-zsh-defer zinit light zdharma-continuum/fast-syntax-highlighting
+zinit light zdharma-continuum/fast-syntax-highlighting
 
 zsh-defer zinit light Aloxaf/fzf-tab
 
