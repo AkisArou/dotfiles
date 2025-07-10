@@ -1,0 +1,1 @@
+rofi-rbw --selector-args "rofi -config ~/dotfiles/rofi/"${THEME:-onedark}".rasi"
