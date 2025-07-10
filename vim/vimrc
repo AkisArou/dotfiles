@@ -18,6 +18,18 @@ let &t_EI = "\e[0 q"
 let &t_Cs = "\e[4:3m"
 let &t_Ce = "\e[4:0m"
 
+" Enable 24-bit colors
+set termguicolors
+let &t_8f = "\<Esc>[38:2::%lu:%lu:%lum"
+let &t_8b = "\<Esc>[48:2::%lu:%lu:%lum"
+
+" foot terminal
+" Workaround bug in vim, where it incorrectly thinks modifyOtherKeys level 2 is
+" enabled, even when it's not. The snippets below ensure modifyOtherKeys=2 is
+" enabled. https://github.com/vim/vim/issues/9014
+let &t_TI = "\<Esc>[>4;2m"
+let &t_TE = "\<Esc>[>4;m"
+
 set autowrite
 set autowriteall
 set cursorline
@@ -43,7 +55,6 @@ set smartindent
 set splitbelow
 set splitright
 set noswapfile
-set termguicolors
 set timeout timeoutlen=300
 set undofile
 set nowritebackup
