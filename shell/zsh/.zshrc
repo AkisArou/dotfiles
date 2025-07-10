@@ -13,6 +13,6 @@ source "$HOME/dotfiles/shell/zsh/opts"
 source "$HOME/dotfiles/shell/zsh/vim-mode"
 zsh-defer source "$HOME/dotfiles/shell/common/functions"
 zsh-defer source "$HOME/dotfiles/shell/zsh/completions"
-[ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
+zsh-defer [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
 
 zsh-defer export-lan-ip
