@@ -1,0 +1,14 @@
+@import "./tokyonight.rasi"
+
+#window {
+    width: 900px;
+}
+
+#textbox {
+    padding: 20px 0;
+    color: gray;
+}
+
+element-text {
+    margin: 0;
+}
