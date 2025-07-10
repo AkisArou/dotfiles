@@ -8,11 +8,11 @@ fi
 source <(fzf --zsh)
 source "$HOME/dotfiles/shell/zsh/zinit"
 source "$HOME/dotfiles/shell/common/aliases"
-source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/history"
 source "$HOME/dotfiles/shell/zsh/opts"
 source "$HOME/dotfiles/shell/zsh/vim-mode"
-source "$HOME/dotfiles/shell/zsh/completions"
+zsh-defer source "$HOME/dotfiles/shell/common/functions"
+zsh-defer source "$HOME/dotfiles/shell/zsh/completions"
 [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && zsh-defer . ~/.asdf/plugins/java/set-java-home.zsh
 
 zsh-defer export-lan-ip
