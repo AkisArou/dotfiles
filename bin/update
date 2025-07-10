@@ -14,6 +14,7 @@ nvim --headless \
   -c "lua vim.pack.update(nil, { force = true })" \
   -c "quit"
 echo
+echo
 
 nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'lua require("plugins.lsp.mason")' -c 'MasonUpdateAll'
 echo
