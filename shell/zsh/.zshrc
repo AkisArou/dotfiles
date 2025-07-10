@@ -6,7 +6,6 @@ if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
 fi
 
 fastfetch
-echo
 
 # source
 source <(fzf --zsh)
