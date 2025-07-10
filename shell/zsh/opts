@@ -9,8 +9,6 @@ zmodload zsh/complist
 
 _comp_options+=(globdots) # Include hidden files.
 
-stty stop undef # Disable ctrl-s to freeze terminal.
-
 unsetopt BEEP
 setopt AUTO_CD
 setopt GLOB_DOTS
