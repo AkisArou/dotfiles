@@ -9,8 +9,8 @@ map("n", "<leader>w", ":w<CR>", opts)
 -- Resize window using <ctrl> arrow keys
 map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
 map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
-map("n", "<C-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
-map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+map("n", "<C-Left>", require("custom.resize-windows").resize_window_left, { desc = "Grow window left" })
+map("n", "<C-Right>", require("custom.resize-windows").resize_window_right, { desc = "Grow window right" })
 
 -- Move blocks
 map("v", "J", ":m '>+1<CR>gv=gv")
