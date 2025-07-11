@@ -1,21 +1,18 @@
-local M = {}
-
-local window_cache = {
-  sorted = nil,
-  valid = false,
+local M = {
+  delta = 2,
 }
 
-vim.api.nvim_create_autocmd({ "WinNew", "WinClosed", "WinEnter" }, {
-  callback = function()
-    window_cache.valid = false
-  end,
-})
+local resize_cmds = {
+  shrink = "",
+  grow = "",
+}
+
+local function build_resize_cmds(delta)
+  resize_cmds.shrink = "vertical resize -" .. delta
+  resize_cmds.grow = "vertical resize +" .. delta
+end
 
 local function get_windows_sorted_by_left()
-  if window_cache.valid and window_cache.sorted then
-    return window_cache.sorted
-  end
-
   local windows = vim.api.nvim_list_wins()
   local win_positions = {}
 
@@ -33,10 +30,6 @@ local function get_windows_sorted_by_left()
     table.insert(sorted_windows, item.win)
   end
 
-  -- Cache it
-  window_cache.sorted = sorted_windows
-  window_cache.valid = true
-
   return sorted_windows
 end
 
@@ -48,10 +41,11 @@ local function get_left_neighbor(sorted_wins)
       return sorted_wins[i - 1]
     end
   end
+
   return nil -- No left neighbor (current is the leftmost)
 end
 
-local function resize_window(delta)
+local function resize_window(delta_middle, resize_left_cmd, resize_right_cmd)
   local wins = get_windows_sorted_by_left()
   local cur_win = vim.api.nvim_get_current_win()
 
@@ -63,23 +57,28 @@ local function resize_window(delta)
     local prev_win = get_left_neighbor(wins)
 
     if prev_win then
-      vim.api.nvim_win_set_width(prev_win, vim.api.nvim_win_get_width(prev_win) + delta)
+      vim.api.nvim_win_set_width(prev_win, vim.api.nvim_win_get_width(prev_win) + delta_middle)
     end
   else
     if cur_win ~= wins[#wins] then
-      vim.cmd(string.format("vertical resize %s%d", delta > 0 and "+" or "-", math.abs(delta)))
+      vim.cmd(resize_left_cmd)
     else
-      vim.cmd(string.format("vertical resize %s%d", delta < 0 and "+" or "-", math.abs(delta)))
+      vim.cmd(resize_right_cmd)
     end
   end
 end
 
+M.setup = function(config)
+  M.delta = config.delta
+  build_resize_cmds(config.delta)
+end
+
 M.resize_window_left = function()
-  resize_window(-2)
+  resize_window(-M.delta, resize_cmds.shrink, resize_cmds.grow)
 end
 
 M.resize_window_right = function()
-  resize_window(2)
+  resize_window(M.delta, resize_cmds.grow, resize_cmds.shrink)
 end
 
 return M
