@@ -26,6 +26,9 @@
 
 local api = vim.api
 
+vim.api.nvim_set_hl(0, "PackageActive", { fg = "#10B981", bold = true }) -- Green for active
+vim.api.nvim_set_hl(0, "PackageInactive", { fg = "#6B7280", italic = true }) -- Gray for inactive
+
 local function run_job(cmd)
   return coroutine.running(),
     function(callback)
@@ -130,6 +133,7 @@ end
 --- @param buf integer
 local function create_popup(items, buf)
   local lines = {}
+  local highlights = {} -- to collect highlight instructions
 
   local help_line = "📋 Keybindings:"
     .. "  q - Close popup"
@@ -141,27 +145,49 @@ local function create_popup(items, buf)
   table.insert(lines, help_line)
   table.insert(lines, "")
 
+  local line_idx = #lines
+
   for _, item in ipairs(items) do
-    local active_status = item.active and "✅ Active" or "❌ Inactive"
-    local name = item.spec.name or "Unknown"
-    local src = item.spec.src or ""
-    local path = item.path or ""
-    local version = item.spec.version or ""
     local result = item.result
 
-    table.insert(lines, string.format("🔹 %s [%s]", name, active_status))
-    table.insert(lines, "    Source: " .. src)
-    table.insert(lines, "    Path: " .. path)
-    table.insert(lines, "    Version: " .. version)
-    table.insert(lines, "    " .. result.message)
+    local name_line = item.spec.name
+    local source_line = "    Source: " .. item.spec.src
+    local path_line = "    Path: " .. item.path
+    local version_line = "    Version: " .. (item.spec.version or "")
+    local message_line = "    " .. result.message
+
+    local name_line_index = line_idx
+
+    local item_lines = {
+      name_line,
+      source_line,
+      path_line,
+      version_line,
+      message_line,
+    }
 
     if result.type == "behind" then
       for _, value in pairs(result.commits) do
-        table.insert(lines, "    " .. value)
+        table.insert(item_lines, "    " .. value)
       end
     end
 
-    table.insert(lines, "")
+    table.insert(item_lines, "")
+
+    for _, line in pairs(item_lines) do
+      table.insert(lines, line)
+      line_idx = line_idx + 1
+    end
+
+    local col_start = 0
+    local col_end = col_start + #name_line
+
+    table.insert(highlights, {
+      line = name_line_index,
+      col_start = col_start,
+      col_end = col_end,
+      hl_group = item.active and "PackageActive" or "PackageInactive",
+    })
   end
 
   -- Create window
@@ -182,6 +208,13 @@ local function create_popup(items, buf)
 
   api.nvim_buf_set_option(buf, "modifiable", true)
   api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+
+  -- Apply highlights after lines are set
+  local ns = api.nvim_create_namespace("package_status")
+  for _, h in ipairs(highlights) do
+    api.nvim_buf_add_highlight(buf, ns, h.hl_group, h.line, h.col_start, h.col_end)
+  end
+
   api.nvim_buf_set_option(buf, "modifiable", false)
 end
 
@@ -198,7 +231,7 @@ local function run()
   ---@type Item[]
   local pack_info = {}
 
-  for i, value in pairs({ vim.pack.get()[47] }) do
+  for i, value in pairs(vim.pack.get()) do
     pack_info[i] = to_item(value, {
       type = "pending",
       message = "🔄 Checking...",
