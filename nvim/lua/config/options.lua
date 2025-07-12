@@ -59,6 +59,8 @@ opt.whichwrap:append("<,>,[,],h,l") -- keys allowed to move to the previous/next
 opt.iskeyword:append("-") -- treats words with `-` as single words
 opt.formatoptions:remove({ "c", "r", "o" }) -- This is a sequence of letters which describes how automatic formatting is to be done
 opt.linebreak = true
+opt.linebreak = true
+opt.nrformats = "blank"
 
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"
