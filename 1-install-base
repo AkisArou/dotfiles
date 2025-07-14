@@ -39,6 +39,7 @@ packages=(
   "base-devel"
   "bat"
   "bind" #nslookup
+  "bitwarden"
   "bleachbit"
   "bluez"
   "bluez-utils"
