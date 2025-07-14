@@ -1,9 +1,6 @@
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
-map({ "i" }, "jk", "<Esc>", opts)
-map("c", "jk", "<C-c>", opts)
-
 map("n", "<leader>qq", ":qa<CR>", { desc = "Quit All" })
 map("n", "<leader>q", ":waq<CR>", opts)
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
