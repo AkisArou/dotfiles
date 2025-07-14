@@ -4,6 +4,8 @@ local opts = { noremap = true, silent = true }
 map("n", "<leader>qq", ":qa<CR>", { desc = "Quit All" })
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
+map({ "n", "v" }, "<C-j>", "6j", { noremap = true })
+map({ "n", "v" }, "<C-k>", "6k", { noremap = true })
 
 -- Resize window using <ctrl> arrow keys
 local resize_windows = require("custom.resize-windows")
