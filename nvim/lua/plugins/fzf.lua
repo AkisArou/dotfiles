@@ -3,7 +3,6 @@ local fzf_lua = require("fzf-lua")
 
 fzf_lua.setup({
   "hide",
-  -- "fzf-native",
   winopts = {
     border = "none",
     preview = {
