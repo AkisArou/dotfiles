@@ -1,5 +1,5 @@
 configuration {
-    font: "HackNerdFontMono Regular 10";
+    font: "HackNerdFont Regular 10";
     modi: "window,run,drun";
     show-icons: true;
     display-drun: "";
