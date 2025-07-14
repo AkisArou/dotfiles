@@ -32,6 +32,7 @@ vim.pack.add({
   github("folke/tokyonight.nvim"),
   github("nvim-lua/plenary.nvim"),
   github("nvim-lualine/lualine.nvim"),
+  github("max397574/better-escape.nvim"),
   github("arnamak/stay-centered.nvim"),
 
   github("Bilal2453/luvit-meta"),
@@ -115,6 +116,7 @@ vim.pack.add({
 require("config")
 require("plugins.colorscheme")
 require("plugins.lualine")
+require("plugins.better-escape")
 
 -- Deferred load
 vim.defer_fn(function()
