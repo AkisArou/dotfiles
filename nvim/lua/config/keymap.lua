@@ -2,6 +2,7 @@ local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
 map("n", "<leader>qq", ":qa<CR>", { desc = "Quit All" })
+map("i", "<C-c>", "<Esc>")
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
 map({ "n", "v" }, "<C-j>", "6j", opts)
