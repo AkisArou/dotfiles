@@ -1,1 +1,0 @@
-rofi-rbw --prompt "Filter item" --selector-args "rofi -config ~/dotfiles/rofi/rbw-config.rasi"
