@@ -110,6 +110,7 @@ vim.pack.add({
   github("stevearc/conform.nvim"),
 
   github("yioneko/nvim-vtsls"),
+  github("mluders/comfy-line-numbers.nvim"),
 })
 
 -- Instant load
@@ -145,6 +146,7 @@ vim.defer_fn(function()
   require("plugins.undotree")
   require("plugins.which-key")
   require("plugins.template-string")
+  require("plugins.comfy-line-numbers")
 
   require("custom.revive").setup({ auto = false })
 end, 0)
