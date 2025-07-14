@@ -4,7 +4,7 @@ if [ -f ~/.env ]; then
   source ~/.env
 fi
 
-FONT=HackNerdFont-Regular:size=
+FONT=HackNerdFontMono-Regular:size=
 
 if [ "$ULTRAWIDE" ]; then
   FONT="$FONT"10
