@@ -61,6 +61,8 @@ opt.formatoptions:remove({ "c", "r", "o" }) -- This is a sequence of letters whi
 opt.linebreak = true
 opt.linebreak = true
 opt.nrformats = "blank"
+opt.foldenable = false -- Disable folding by default
+opt.foldmethod = "manual"
 
 opt.grepprg = "rg --vimgrep --smart-case --hidden"
 opt.grepformat = "%f:%l:%c:%m"

@@ -2,6 +2,7 @@
 
 bindkey -v # enable vi mode
 
+zle_highlight=(region:bg="#292e42")
 
 ###########
 # Options #
