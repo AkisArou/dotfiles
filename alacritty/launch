@@ -3,7 +3,7 @@
 if [ "$ULTRAWIDE" ]; then
   font_size=9
 else
-  font_size=9
+  font_size=10.5
 fi
 
 alacritty --option="font.size=$font_size"
