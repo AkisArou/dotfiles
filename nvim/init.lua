@@ -117,7 +117,6 @@ vim.pack.add({
 require("config")
 require("plugins.colorscheme")
 require("plugins.lualine")
-require("plugins.better-escape")
 
 -- Deferred load
 vim.defer_fn(function()
