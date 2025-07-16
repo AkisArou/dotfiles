@@ -9,7 +9,17 @@ if [[ -z "$orphans" ]]; then
   echo "No orphan packages found."
 else
   echo "The following orphan packages were found:"
-  paru -Qdtq | paru -Rns -
+  # Remove orphaned packages
+  paru -Rns $(paru -Qtdq)
+
+  # Remove old cached packages (keep 3 versions)
+  sudo paccache -r
+
+  # Clean paru cache
+  paru -Sc
+
+  # Clear AUR build files
+  rm -rf ~/.cache/paru/*
 fi
 
 echo
