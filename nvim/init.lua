@@ -29,6 +29,7 @@ local github = function(path)
 end
 
 vim.pack.add({
+  github("j-hui/fidget.nvim"),
   github("folke/tokyonight.nvim"),
   github("nvim-lua/plenary.nvim"),
   github("nvim-lualine/lualine.nvim"),
@@ -146,6 +147,7 @@ vim.defer_fn(function()
   require("plugins.which-key")
   require("plugins.template-string")
   require("plugins.comfy-line-numbers")
+  require("plugins.fidget")
 
   require("custom.revive").setup({ auto = false })
 end, 0)
