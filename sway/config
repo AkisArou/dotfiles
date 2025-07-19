@@ -3,6 +3,7 @@
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME
+exec dbus-update-activation-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME
 exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec --no-startup-id ~/dotfiles/sway/listen-events
 exec_always ~/dotfiles/sway/gaps
@@ -207,6 +208,7 @@ for_window [title="^teams.microsoft.com is sharing"] move scratchpad
 for_window [title="Emulator" window_type="utility"] move scratchpad
 for_window [class="Emulator"] exec "swaymsg '[title=\"Android Emulator - *\"] resize set width 630px';"
 for_window [class="Genymotion Player"] exec "swaymsg '[title=\"Google Pixel *\"] resize set width 687px';"
+for_window [app_id="flameshot"] border pixel 0, floating enable, fullscreen disable, move absolute position 0 0
 
 bar { 
      swaybar_command "/home/akisarou/dotfiles/waybar/launch-waybar"
