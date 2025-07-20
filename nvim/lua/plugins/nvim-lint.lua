@@ -15,6 +15,9 @@ lint.linters_by_ft = {
 vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
   group = vim.api.nvim_create_augroup("lint", { clear = true }),
   callback = function()
-    lint.try_lint()
+    -- Somehow with delay it works better
+    vim.defer_fn(function()
+      lint.try_lint()
+    end, 50)
   end,
 })
