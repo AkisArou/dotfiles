@@ -51,13 +51,9 @@
   },
   "editor.experimental.preferTreeSitter.typescript": true,
   "editor.cursorSurroundingLines": 100,
+  "editor.cursorSurroundingLinesStyle": "all",
   "files.autoSave": "onFocusChange",
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
     "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
@@ -91,8 +87,7 @@
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.suggestSelection": "recentlyUsed",
-    "editor.suggest.showKeywords": true,
-    "editor.formatOnSave": true
+    "editor.suggest.showKeywords": true
   },
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.inlayHints.enumMemberValues.enabled": true,
@@ -140,6 +135,7 @@
   "[c]": {
     "editor.defaultFormatter": "ms-vscode.cpptools"
   },
+  "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, IndentWidth: 4, UseTab: Never, BreakBeforeBraces: Attach, AllowShortFunctionsOnASingleLine: None, ColumnLimit: 0 }",
   "react-native-tools.showUserTips": false,
   "settingsSync.ignoredExtensions": [
     "undefined_publisher.vscode-npm-workspaces"
@@ -218,7 +214,7 @@
 
     // LSP
     {
-      "before": ["<leader>", "g", "r", "a"],
+      "before": ["g", "r", "n"],
       "commands": ["editor.action.rename"],
       "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
     },
@@ -227,7 +223,7 @@
       "commands": ["editor.action.revealDefinition"]
     },
     {
-      "before": ["g", "r"],
+      "before": ["g", "r", "r"],
       "commands": ["editor.action.goToReferences"]
     },
     {
@@ -246,7 +242,7 @@
       "commands": ["workbench.action.quickOpen"]
     },
     {
-      "before": ["<leader>", "c", "a"],
+      "before": ["g", "r", "a"],
       "commands": ["editor.action.quickFix"],
       "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
     },
@@ -332,6 +328,6 @@
       "commands": ["workbench.action.debug.disconnect"],
       "when": "editorTextFocus"
     }
-  ],
-  "hide-files.files": []
+  ]
 }
+
