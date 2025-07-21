@@ -28,6 +28,7 @@
   "explorer.confirmDragAndDrop": false,
   "explorer.decorations.badges": false,
   "explorer.autoReveal": true,
+  "editor.lineNumbers": "relative",
   "editor.suggest.insertMode": "replace",
   "editor.scrollbar.horizontal": "hidden",
   "editor.fontWeight": "normal",
@@ -330,4 +331,3 @@
     }
   ]
 }
-
