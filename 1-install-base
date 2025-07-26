@@ -111,7 +111,6 @@ packages=(
   "ttf-dm-mono-git"
   "ttf-hack-nerd"
   "ttf-meslo-nerd"
-  "woff2-font-awesome"
   "udisks2" # Needed by fwupd
   "ueberzugpp"
   "unzip" # Needed by asdf
