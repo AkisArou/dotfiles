@@ -64,3 +64,7 @@ if [ "$ULTRAWIDE" ]; then
 else
   export EMULATOR_WIDTH=473
 fi
+
+if [[ "$XDG_SESSION_TYPE" == "tty" ]]; then
+  export ZSH_SYSTEM_CLIPBOARD_METHOD=tmux
+fi
