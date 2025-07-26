@@ -20,8 +20,8 @@ hash = "5022fdb08fcb05c10eb59b63663edb10"
 
 [[plugin.deps]]
 use = "llanosrocas/githead"
-rev = "230dc7f"
-hash = "d8c2bf67a4da2a2af89f981ce2f7ba22"
+rev = "76fe4b8"
+hash = "10c3bc6cd6f3223e18f2483320a9e24a"
 
 [flavor]
 deps = []

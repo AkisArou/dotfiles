@@ -109,9 +109,9 @@ packages=(
   "tmux"
   "tree-sitter-cli-git"
   "ttf-dm-mono-git"
-  "ttf-font-awesome"
   "ttf-hack-nerd"
   "ttf-meslo-nerd"
+  "woff2-font-awesome"
   "udisks2" # Needed by fwupd
   "ueberzugpp"
   "unzip" # Needed by asdf
