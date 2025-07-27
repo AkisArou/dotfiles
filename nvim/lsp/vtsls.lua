@@ -14,6 +14,14 @@ local preferences = {
 return {
   root_dir = vim.fn.getcwd(),
   root_markers = { ".git", "tsconfig.json", "jsonconfig.json", "package.json" },
+  filetypes = {
+    "javascript",
+    "javascriptreact",
+    "javascript.jsx",
+    "typescript",
+    "typescriptreact",
+    "typescript.tsx",
+  },
   settings = {
     vtsls = {
       autoUseWorkspaceTsdk = true,
