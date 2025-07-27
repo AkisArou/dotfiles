@@ -25,6 +25,7 @@ window#waybar.hidden {
   color: @bar-foreground;
   border-radius: 0;
   min-width: 0;
+  transition: none;
 }
 
 #workspaces button:hover {
