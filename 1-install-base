@@ -104,6 +104,7 @@ packages=(
   "ripgrep"
   "rsync"
   "rustup"
+  "scrcpy"
   "terminus-font"
   "tldr"
   "tmux"
