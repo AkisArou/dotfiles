@@ -123,7 +123,7 @@ vim.defer_fn(function()
   require("plugins.treesitter")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
-  -- require("plugins.yazi")
+  require("plugins.yazi")
   require("plugins.fzf")
   require("plugins.lsp.conform")
   require("plugins.lsp.lsp")
@@ -177,4 +177,4 @@ vim.api.nvim_create_autocmd("InsertEnter", {
   end,
 })
 
-require("config.netrw")
+-- require("config.netrw")
