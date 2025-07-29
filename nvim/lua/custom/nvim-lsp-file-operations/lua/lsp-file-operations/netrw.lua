@@ -34,19 +34,46 @@ function M.rename()
 end
 
 function M.delete()
+  local response = nil
+
   local marked_files = vim.fn["netrw#Expose"]("netrwmarkfilelist")
+  local files = marked_files ~= "n/a" and marked_files or { get_netrw_path() }
 
-  local files_to_delete = marked_files ~= "n/a" and marked_files or { get_netrw_path() }
+  local to_delete = {}
 
-  for _, fname in pairs(files_to_delete) do
+  for _, fname in ipairs(files) do
+    if response == "a" then
+      table.insert(to_delete, fname)
+    elseif response == "q" then
+      break
+    else
+      local answer =
+        vim.fn.input(string.format("Confirm deletion of file %s [{y(es)},n(o),a(ll),q(uit)]: ", fname)):lower()
+
+      if answer == "a" then
+        response = "a"
+        table.insert(to_delete, fname)
+      elseif answer == "q" then
+        response = "q"
+        break
+      elseif answer == "y" then
+        table.insert(to_delete, fname)
+      end
+    end
+  end
+
+  for _, fname in ipairs(to_delete) do
     require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.will-delete").callback({ fname = fname })
 
-    vim.cmd('silent! call delete("' .. fname .. '")')
+    vim.fn.delete(fname, "rf")
 
     require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.did-delete").callback({ fname = fname })
 
     log.debug("Netrw delete: " .. fname)
   end
+
+  -- Refresh netrw
+  vim.cmd("edit")
 end
 
 function M.create()
