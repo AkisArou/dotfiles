@@ -196,13 +196,5 @@ vim.api.nvim_create_autocmd("TermOpen", {
     vim.opt.number = false
     vim.opt.relativenumber = false
     vim.cmd.startinsert()
-    require("stay-centered").disable()
-  end,
-})
-
-vim.api.nvim_create_autocmd("TermClose", {
-  group = augroup("terminal-close"),
-  callback = function()
-    require("stay-centered").enable()
   end,
 })
