@@ -172,6 +172,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 
 -- Refresh buffer when neogit status changed
 vim.api.nvim_create_autocmd("User", {
+  group = augroup("neogit"),
   pattern = "NeogitStatusRefreshed",
   callback = function()
     vim.cmd("set autoread | checktime")
@@ -180,9 +181,29 @@ vim.api.nvim_create_autocmd("User", {
 
 -- Disable new line auto-comment
 vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("auto-comment"),
   pattern = "*",
   callback = function()
     vim.cmd("set formatoptions-=cro")
     vim.cmd("setlocal formatoptions-=cro")
+  end,
+})
+
+-- Terminal
+vim.api.nvim_create_autocmd("TermOpen", {
+  group = augroup("terminal-open"),
+  callback = function()
+    vim.opt.number = false
+    vim.opt.relativenumber = false
+    vim.cmd.startinsert()
+    require("stay-centered").disable()
+  end,
+})
+
+vim.api.nvim_create_autocmd("TermClose", {
+  group = augroup("terminal-close"),
+  callback = function()
+    vim.cmd("normal! zz")
+    require("stay-centered").enable()
   end,
 })
