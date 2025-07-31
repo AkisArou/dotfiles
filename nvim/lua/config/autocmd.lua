@@ -214,7 +214,9 @@ end
 
 vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
   callback = function()
-    config_keyboard(600, 25)
+    vim.schedule(function()
+      config_keyboard(600, 25)
+    end)
   end,
 })
 
