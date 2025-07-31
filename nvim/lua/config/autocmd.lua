@@ -213,6 +213,7 @@ local function config_keyboard(delay, rate)
 end
 
 vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
+  group = augroup("keyboard"),
   callback = function()
     vim.schedule(function()
       config_keyboard(600, 25)
@@ -221,6 +222,7 @@ vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
 })
 
 vim.api.nvim_create_autocmd({ "ExitPre", "FocusLost" }, {
+  group = augroup("keyboard"),
   callback = function()
     config_keyboard(220, 33)
   end,
