@@ -119,7 +119,7 @@ require("plugins.colorscheme")
 require("plugins.lualine")
 
 -- Deferred load
-vim.defer_fn(function()
+vim.schedule(function()
   require("plugins.treesitter")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
@@ -148,7 +148,7 @@ vim.defer_fn(function()
   require("plugins.fidget")
 
   require("custom.revive").setup({ auto = false })
-end, 0)
+end)
 
 -- Autocmd load
 vim.api.nvim_create_autocmd("BufReadPost", {
