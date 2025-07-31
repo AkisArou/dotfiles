@@ -1,4 +1,5 @@
 -- Netrw global settings
+vim.g.netrw_banner = 0
 vim.g.netrw_dirhistmax = 0
 vim.g.netrw_keepdir = 1
 vim.g.netrw_localmkdir = "mkdir -p"
@@ -25,6 +26,7 @@ vim.api.nvim_create_autocmd("FileType", {
       nmap <buffer> P <C-w>z
       nmap <buffer> L <CR>:Lexplore<CR>
       nmap <buffer> <Leader>dd :Lexplore<CR>
+      nmap <buffer> % := require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.netrw").create()<CR>
       nmap <buffer> R := require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.netrw").rename()<CR>
       nmap <buffer> D := require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.netrw").delete()<CR>
     ]])
