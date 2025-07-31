@@ -17,6 +17,7 @@ vim.lsp.enable({
   "taplo",
   "vtsls",
   "yamlls",
+  "oxlint",
 })
 
 vim.api.nvim_create_autocmd("LspAttach", {

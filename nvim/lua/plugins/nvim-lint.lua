@@ -1,18 +1,18 @@
-local lint = require("lint")
-
 local js_linter = (function()
   -- oxlint
   local oxlint_bin = vim.fn.fnamemodify("./node_modules/.bin/" .. "oxlint", ":p")
   local oxlint_stat = vim.loop.fs_stat(oxlint_bin)
 
   if oxlint_stat then
-    local oxlint = require("lint").linters.oxlint
+    return {} -- Handled by oxlint lsp
 
-    oxlint.cmd = function()
-      return oxlint_bin
-    end
-
-    return { "oxlint" }
+    -- local oxlint = require("lint").linters.oxlint
+    --
+    -- oxlint.cmd = function()
+    --   return oxlint_bin
+    -- end
+    --
+    -- return { "oxlint" }
   end
 
   -- eslint_d
@@ -27,16 +27,20 @@ local js_linter = (function()
   return {}
 end)()
 
-lint.linters_by_ft = {
-  javascript = js_linter,
-  javascriptreact = js_linter,
-  typescript = js_linter,
-  typescriptreact = js_linter,
-}
+if #js_linter > 0 then
+  local lint = require("lint")
 
-vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
-  group = vim.api.nvim_create_augroup("lint", { clear = true }),
-  callback = function()
-    lint.try_lint()
-  end,
-})
+  lint.linters_by_ft = {
+    javascript = js_linter,
+    javascriptreact = js_linter,
+    typescript = js_linter,
+    typescriptreact = js_linter,
+  }
+
+  vim.api.nvim_create_autocmd({ "BufWritePost", "BufReadPost", "InsertLeave" }, {
+    group = vim.api.nvim_create_augroup("lint", { clear = true }),
+    callback = function()
+      lint.try_lint()
+    end,
+  })
+end
