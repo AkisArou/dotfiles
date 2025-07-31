@@ -1,37 +1,5 @@
 #!/usr/bin/zsh
 
-# Keyboard repeat/delay
-last_mode=""
-
-INPUT_ID="type:keyboard"
-NORMAL_DELAY=220
-NORMAL_RATE=33
-DEFAULT_DELAY=600
-DEFAULT_RATE=25
-
-set_repeat() {
-  local delay=$1
-  local rate=$2
-  swaymsg input "$INPUT_ID" repeat_delay "$delay"
-  swaymsg input "$INPUT_ID" repeat_rate "$rate"
-}
-
-maybe_set_repeat() {
-  local app=$(echo "$1" | jq -r '.. | objects | select(.type? == "con" and .focused==true) | .app_id // .name')
-
-  if [[ "$app" == "foot" ]]; then
-    if [[ "$last_mode" != "foot" ]]; then
-      set_repeat $DEFAULT_DELAY $DEFAULT_RATE
-      last_mode="foot"
-    fi
-  else
-    if [[ "$last_mode" != "other" ]]; then
-      set_repeat $NORMAL_DELAY $NORMAL_RATE
-      last_mode="other"
-    fi
-  fi
-}
-
 # Emulator
 resize-emulator() {
   change=$(echo "$1" | jq -r '.change')
@@ -46,7 +14,6 @@ resize-emulator() {
 while true; do
   swaymsg -t subscribe '[ "window" ]' | while read -r line; do
     resize-emulator "$line"
-    maybe_set_repeat "$line"
   done
 done
 
