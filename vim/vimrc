@@ -89,7 +89,7 @@ set guioptions-=e
 set wildoptions+=pum
 set nrformats="blank"
 
-colorscheme sorbet
+colorscheme murphy
 
 set autoread
 
