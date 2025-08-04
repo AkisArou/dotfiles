@@ -1,5 +1,11 @@
+local created_groups = {}
+
 local function augroup(name)
-  return vim.api.nvim_create_augroup("akisarou_" .. name, { clear = true })
+  local full_name = "akisarou_" .. name
+  if not created_groups[full_name] then
+    created_groups[full_name] = vim.api.nvim_create_augroup(full_name, { clear = true })
+  end
+  return created_groups[full_name]
 end
 
 -- Enable treesitter
@@ -199,7 +205,7 @@ vim.api.nvim_create_autocmd("TermOpen", {
   end,
 })
 
--- Define a function to update sway keyboard repeat settings
+-- keyboard
 local has_swaymsg = vim.fn.executable("swaymsg") == 1
 local has_xset = vim.fn.executable("xset") == 1
 
