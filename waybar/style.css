@@ -16,6 +16,10 @@ window#waybar.hidden {
   opacity: 0.2;
 }
 
+window#waybar #window {
+  opacity: 0.7;
+}
+
 #workspaces {
   margin-right: 10px;
 }
