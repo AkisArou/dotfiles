@@ -64,6 +64,7 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 
 bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
+bindsym $mod+Shift+e exec ~/dotfiles/rofi/emulator
 bindsym $mod+Shift+q exec ~/dotfiles/rofi/launch -show power-menu -modi power-menu:rofi-power-menu
 bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
