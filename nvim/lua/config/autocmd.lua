@@ -206,14 +206,15 @@ vim.api.nvim_create_autocmd("TermOpen", {
 })
 
 -- keyboard
-local has_swaymsg = vim.fn.executable("swaymsg") == 1
-local has_xset = vim.fn.executable("xset") == 1
+local session_type = os.getenv("XDG_SESSION_TYPE")
+local is_wayland = session_type == "wayland"
+local is_x11 = session_type == "x11"
 
 local function config_keyboard(delay, rate)
-  if has_swaymsg then
+  if is_wayland then
     vim.fn.system({ "swaymsg", "input", "type:keyboard", "repeat_delay", tostring(delay) })
     vim.fn.system({ "swaymsg", "input", "type:keyboard", "repeat_rate", tostring(rate) })
-  elseif has_xset then
+  elseif is_x11 then
     vim.fn.system({ "xset", "r", "rate", tostring(delay), tostring(rate) })
   end
 end
@@ -222,7 +223,7 @@ vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
   group = augroup("keyboard"),
   callback = function()
     vim.schedule(function()
-      config_keyboard(600, 25)
+      config_keyboard(600, 33)
     end)
   end,
 })
