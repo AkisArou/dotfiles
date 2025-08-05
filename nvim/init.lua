@@ -101,8 +101,8 @@ vim.pack.add({
 
   github("folke/which-key.nvim"),
 
-  github("mikavilpas/yazi.nvim"),
-  github("benomahony/oil-git.nvim"),
+  -- github("mikavilpas/yazi.nvim"),
+  github("refractalize/oil-git-status.nvim"),
   github("JezerM/oil-lsp-diagnostics.nvim"),
   github("stevearc/oil.nvim"),
 
@@ -179,5 +179,3 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     require("plugins.vim-visual-multi")
   end,
 })
-
--- require("config.netrw")
