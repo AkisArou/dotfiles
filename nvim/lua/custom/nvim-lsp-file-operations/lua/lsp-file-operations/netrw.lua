@@ -98,6 +98,11 @@ function M.create()
     require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.did-create").callback({ fname = new_name })
 
     vim.cmd("edit")
+
+    -- Focus the file in netrw
+    local fname_only = vim.fn.fnamemodify(new_name, ":t")
+    vim.fn.search("^\\s*" .. vim.fn.escape(fname_only, [[\/.*~$^]]), "cw")
+
     log.debug("Netrw create (Lua): " .. new_name)
   end
 end
