@@ -5,6 +5,8 @@ vim.g.netrw_keepdir = 1
 vim.g.netrw_localmkdir = "mkdir -p"
 vim.g.netrw_localcopycmd = "cp -r"
 vim.g.netrw_localrmdir = "rm -r"
+vim.g.netrw_list_hide = [[^\./\=$,\.\./]]
+vim.g.netrw_hide = 1 -- make sure hiding is enabled
 
 -- Keymap to open netrw and highlight current file
 vim.keymap.set("n", "<leader>e", ':Ex | silent! call search(expand("#:t"))<CR>', { silent = true })
@@ -30,5 +32,12 @@ vim.api.nvim_create_autocmd("FileType", {
       nmap <buffer> R := require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.netrw").rename()<CR>
       nmap <buffer> D := require("custom.nvim-lsp-file-operations.lua.lsp-file-operations.netrw").delete()<CR>
     ]])
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "netrw",
+  callback = function()
+    vim.cmd("normal! gg") -- move to top of file
   end,
 })
