@@ -70,6 +70,8 @@ require("oil").setup({
   keymaps = {
     ["<C-e>"] = "actions.select",
     ["<C-f>"] = { "actions.parent", mode = "n" },
+    ["<Leader>yp"] = "actions.copy_entry_path",
+    ["<Leader>yf"] = "actions.copy_entry_filename",
   },
 
   view_options = {
