@@ -60,6 +60,8 @@ refresh.callback = function(...)
   orig_refresh(...)
 end
 
+local detail = false
+
 require("oil").setup({
   skip_confirm_for_simple_edits = true,
 
@@ -73,9 +75,25 @@ require("oil").setup({
     ["<C-f>"] = { "actions.parent", mode = "n" },
     ["<Leader>yp"] = "actions.copy_entry_path",
     ["<Leader>yf"] = "actions.copy_entry_filename",
+    ["gr"] = "actions.open_cwd",
+    ["gd"] = {
+      desc = "Toggle file detail view",
+      callback = function()
+        detail = not detail
+        if detail then
+          require("oil").set_columns({ "icon", "permissions", "size", "mtime" })
+        else
+          require("oil").set_columns({ "icon" })
+        end
+      end,
+    },
   },
 
   view_options = {
+    is_always_hidden = function(name)
+      return name == ".."
+    end,
+
     is_hidden_file = function(name, bufnr)
       local dir = require("oil").get_current_dir(bufnr)
       local is_dotfile = vim.startswith(name, ".") and name ~= ".."
