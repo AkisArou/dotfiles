@@ -20,10 +20,26 @@ setopt EXTENDED_GLOB
 setopt INTERACTIVE_COMMENTS
 setopt APPEND_HISTORY
 
+ZSH_AUTOSUGGEST_ENABLED=0
+
+function autosuggest-toggle() {
+  if ! typeset -f _zsh_autosuggest_start >/dev/null; then
+    zinit load zsh-users/zsh-autosuggestions
+  fi
+
+  if [[ $ZSH_AUTOSUGGEST_ENABLED -eq 1 ]]; then
+    _zsh_autosuggest_disable
+    ZSH_AUTOSUGGEST_ENABLED=0
+  else
+    _zsh_autosuggest_enable
+    ZSH_AUTOSUGGEST_ENABLED=1
+  fi
+}
+
 # autosuggestions
-_zsh_autosuggest_disable
-bindkey '^G' autosuggest-toggle
+zle -N autosuggest-toggle
 bindkey '^E' autosuggest-accept
+bindkey '^G' autosuggest-toggle
 
 bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
