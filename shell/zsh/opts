@@ -20,7 +20,11 @@ setopt EXTENDED_GLOB
 setopt INTERACTIVE_COMMENTS
 setopt APPEND_HISTORY
 
+# autosuggestions
+_zsh_autosuggest_disable
+bindkey '^G' autosuggest-toggle
 bindkey '^E' autosuggest-accept
+
 bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
 
