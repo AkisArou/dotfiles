@@ -21,6 +21,7 @@ return {
           return
         end
 
+        ---@diagnostic disable-next-line: param-type-mismatch
         client.request("workspace/executeCommand", {
           command = "oxc.fixAll",
           arguments = {
