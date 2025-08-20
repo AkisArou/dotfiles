@@ -51,6 +51,8 @@ local themes = {
       vim.cmd(string.format("hi @variable.builtin.typescript guifg=%s", colors.teal))
       vim.cmd(string.format("hi @variable.builtin.tsx guifg=%s", colors.teal))
       vim.cmd(string.format("hi @lsp.typemod.variable.defaultLibrary.typescriptreact guifg=%s", colors.teal))
+      vim.cmd(string.format("hi Search guibg=%s", "#5e428f"))
+      vim.cmd(string.format("hi IncSearch guibg=%s guifg=%s", colors.magenta, colors.bg_dark))
       vim.cmd("hi HighlightUrl guifg=#5f8ae9 gui=underline")
 
       vim.cmd([[
