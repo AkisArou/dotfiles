@@ -31,6 +31,10 @@ Applications
   modify Android studio desktop file:
   Exec=sh -c 'set -- "$@"; [ "$XDG_SESSION_TYPE" = wayland ] && set -- "$@" -Dawt.toolkit.name=WLToolkit; exec android-studio "$@"' sh %f
 
+* VSCode
+  modify desktop file:
+  Exec=/usr/bin/code --enable-features=TouchpadOverscrollHistoryNavigation,VaapiVideoDecoder,VaapiIgnoreDriverChecks,Vulkan,DefaultANGLEVulkan,VulkanFromANGLE %F
+
 Various
 -------
 * set vconsole font:
