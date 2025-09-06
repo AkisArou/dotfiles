@@ -9,8 +9,6 @@ echo ""
 
 packages=(
   "polkit"
-  "rofi-power-menu"
-  "rofi-wayland"
   "sway"
   "swaybg"
   "swaydim"
