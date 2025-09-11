@@ -1,8 +1,34 @@
 {
-    "schemeVersion": 2,
-    "enabled": true,
-    "fetchNews": true,
-    "theme": {
+  "schemeVersion": 2,
+  "enabled": true,
+  "fetchNews": true,
+  "theme": {
+    "mode": 1,
+    "brightness": 100,
+    "contrast": 100,
+    "grayscale": 0,
+    "sepia": 0,
+    "useFont": false,
+    "fontFamily": "Open Sans",
+    "textStroke": 0,
+    "engine": "dynamicTheme",
+    "stylesheet": "",
+    "darkSchemeBackgroundColor": "#181a1b",
+    "darkSchemeTextColor": "#e8e6e3",
+    "lightSchemeBackgroundColor": "#dcdad7",
+    "lightSchemeTextColor": "#181a1b",
+    "scrollbarColor": "",
+    "selectionColor": "auto",
+    "styleSystemControls": false,
+    "lightColorScheme": "Default",
+    "darkColorScheme": "Default",
+    "immediateModify": false
+  },
+  "presets": [],
+  "customThemes": [
+    {
+      "builtIn": true,
+      "theme": {
         "mode": 1,
         "brightness": 100,
         "contrast": 100,
@@ -11,7 +37,7 @@
         "useFont": false,
         "fontFamily": "Open Sans",
         "textStroke": 0,
-        "engine": "dynamicTheme",
+        "engine": "svgFilter",
         "stylesheet": "",
         "darkSchemeBackgroundColor": "#181a1b",
         "darkSchemeTextColor": "#e8e6e3",
@@ -23,157 +49,123 @@
         "lightColorScheme": "Default",
         "darkColorScheme": "Default",
         "immediateModify": false
+      },
+      "url": ["*.officeapps.live.com"]
     },
-    "presets": [],
-    "customThemes": [
-        {
-            "builtIn": true,
-            "theme": {
-                "mode": 1,
-                "brightness": 100,
-                "contrast": 100,
-                "grayscale": 0,
-                "sepia": 0,
-                "useFont": false,
-                "fontFamily": "Open Sans",
-                "textStroke": 0,
-                "engine": "svgFilter",
-                "stylesheet": "",
-                "darkSchemeBackgroundColor": "#181a1b",
-                "darkSchemeTextColor": "#e8e6e3",
-                "lightSchemeBackgroundColor": "#dcdad7",
-                "lightSchemeTextColor": "#181a1b",
-                "scrollbarColor": "",
-                "selectionColor": "auto",
-                "styleSystemControls": false,
-                "lightColorScheme": "Default",
-                "darkColorScheme": "Default",
-                "immediateModify": false
-            },
-            "url": [
-                "*.officeapps.live.com"
-            ]
-        },
-        {
-            "builtIn": true,
-            "theme": {
-                "mode": 1,
-                "brightness": 100,
-                "contrast": 100,
-                "grayscale": 0,
-                "sepia": 0,
-                "useFont": false,
-                "fontFamily": "Open Sans",
-                "textStroke": 0,
-                "engine": "svgFilter",
-                "stylesheet": "",
-                "darkSchemeBackgroundColor": "#181a1b",
-                "darkSchemeTextColor": "#e8e6e3",
-                "lightSchemeBackgroundColor": "#dcdad7",
-                "lightSchemeTextColor": "#181a1b",
-                "scrollbarColor": "",
-                "selectionColor": "auto",
-                "styleSystemControls": false,
-                "lightColorScheme": "Default",
-                "darkColorScheme": "Default",
-                "immediateModify": false
-            },
-            "url": [
-                "*.sharepoint.com"
-            ]
-        },
-        {
-            "builtIn": true,
-            "theme": {
-                "mode": 1,
-                "brightness": 100,
-                "contrast": 100,
-                "grayscale": 0,
-                "sepia": 0,
-                "useFont": false,
-                "fontFamily": "Open Sans",
-                "textStroke": 0,
-                "engine": "svgFilter",
-                "stylesheet": "",
-                "darkSchemeBackgroundColor": "#181a1b",
-                "darkSchemeTextColor": "#e8e6e3",
-                "lightSchemeBackgroundColor": "#dcdad7",
-                "lightSchemeTextColor": "#181a1b",
-                "scrollbarColor": "",
-                "selectionColor": "auto",
-                "styleSystemControls": false,
-                "lightColorScheme": "Default",
-                "darkColorScheme": "Default",
-                "immediateModify": false
-            },
-            "url": [
-                "docs.google.com"
-            ]
-        },
-        {
-            "builtIn": true,
-            "theme": {
-                "mode": 1,
-                "brightness": 100,
-                "contrast": 100,
-                "grayscale": 0,
-                "sepia": 0,
-                "useFont": false,
-                "fontFamily": "Open Sans",
-                "textStroke": 0,
-                "engine": "svgFilter",
-                "stylesheet": "",
-                "darkSchemeBackgroundColor": "#181a1b",
-                "darkSchemeTextColor": "#e8e6e3",
-                "lightSchemeBackgroundColor": "#dcdad7",
-                "lightSchemeTextColor": "#181a1b",
-                "scrollbarColor": "",
-                "selectionColor": "auto",
-                "styleSystemControls": false,
-                "lightColorScheme": "Default",
-                "darkColorScheme": "Default",
-                "immediateModify": false
-            },
-            "url": [
-                "onedrive.live.com"
-            ]
-        }
-    ],
-    "enabledByDefault": false,
-    "enabledFor": [
-        "skroutz.gr",
-        "play.google.com",
-        "www.npmjs.com"
-    ],
-    "disabledFor": [],
-    "changeBrowserTheme": false,
-    "syncSettings": true,
-    "syncSitesFixes": false,
-    "automation": {
-        "behavior": "OnOff",
-        "enabled": false,
-        "mode": ""
+    {
+      "builtIn": true,
+      "theme": {
+        "mode": 1,
+        "brightness": 100,
+        "contrast": 100,
+        "grayscale": 0,
+        "sepia": 0,
+        "useFont": false,
+        "fontFamily": "Open Sans",
+        "textStroke": 0,
+        "engine": "svgFilter",
+        "stylesheet": "",
+        "darkSchemeBackgroundColor": "#181a1b",
+        "darkSchemeTextColor": "#e8e6e3",
+        "lightSchemeBackgroundColor": "#dcdad7",
+        "lightSchemeTextColor": "#181a1b",
+        "scrollbarColor": "",
+        "selectionColor": "auto",
+        "styleSystemControls": false,
+        "lightColorScheme": "Default",
+        "darkColorScheme": "Default",
+        "immediateModify": false
+      },
+      "url": ["*.sharepoint.com"]
     },
-    "time": {
-        "activation": "18:00",
-        "deactivation": "9:00"
+    {
+      "builtIn": true,
+      "theme": {
+        "mode": 1,
+        "brightness": 100,
+        "contrast": 100,
+        "grayscale": 0,
+        "sepia": 0,
+        "useFont": false,
+        "fontFamily": "Open Sans",
+        "textStroke": 0,
+        "engine": "svgFilter",
+        "stylesheet": "",
+        "darkSchemeBackgroundColor": "#181a1b",
+        "darkSchemeTextColor": "#e8e6e3",
+        "lightSchemeBackgroundColor": "#dcdad7",
+        "lightSchemeTextColor": "#181a1b",
+        "scrollbarColor": "",
+        "selectionColor": "auto",
+        "styleSystemControls": false,
+        "lightColorScheme": "Default",
+        "darkColorScheme": "Default",
+        "immediateModify": false
+      },
+      "url": ["docs.google.com"]
     },
-    "location": {
-        "latitude": null,
-        "longitude": null
-    },
-    "previewNewDesign": false,
-    "previewNewestDesign": false,
-    "enableForPDF": true,
-    "enableForProtectedPages": false,
-    "enableContextMenus": false,
-    "detectDarkTheme": true,
-    "displayedNews": [
-        "firefox-bugs"
-    ],
-    "installation": {
-        "date": 1739231124494,
-        "reason": "install",
-        "version": "4.9.101"
+    {
+      "builtIn": true,
+      "theme": {
+        "mode": 1,
+        "brightness": 100,
+        "contrast": 100,
+        "grayscale": 0,
+        "sepia": 0,
+        "useFont": false,
+        "fontFamily": "Open Sans",
+        "textStroke": 0,
+        "engine": "svgFilter",
+        "stylesheet": "",
+        "darkSchemeBackgroundColor": "#181a1b",
+        "darkSchemeTextColor": "#e8e6e3",
+        "lightSchemeBackgroundColor": "#dcdad7",
+        "lightSchemeTextColor": "#181a1b",
+        "scrollbarColor": "",
+        "selectionColor": "auto",
+        "styleSystemControls": false,
+        "lightColorScheme": "Default",
+        "darkColorScheme": "Default",
+        "immediateModify": false
+      },
+      "url": ["onedrive.live.com"]
     }
+  ],
+  "enabledByDefault": false,
+  "enabledFor": [
+    "skroutz.gr",
+    "play.google.com",
+    "www.npmjs.com",
+    "debian.org"
+  ],
+  "disabledFor": [],
+  "changeBrowserTheme": false,
+  "syncSettings": true,
+  "syncSitesFixes": false,
+  "automation": {
+    "behavior": "OnOff",
+    "enabled": false,
+    "mode": ""
+  },
+  "time": {
+    "activation": "18:00",
+    "deactivation": "9:00"
+  },
+  "location": {
+    "latitude": null,
+    "longitude": null
+  },
+  "previewNewDesign": false,
+  "previewNewestDesign": false,
+  "enableForPDF": true,
+  "enableForProtectedPages": false,
+  "enableContextMenus": false,
+  "detectDarkTheme": true,
+  "displayedNews": ["firefox-bugs"],
+  "installation": {
+    "date": 1739231124494,
+    "reason": "install",
+    "version": "4.9.101"
+  }
 }
+
