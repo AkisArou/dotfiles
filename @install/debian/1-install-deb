@@ -1,0 +1,5 @@
+usergroupp add -aG wheel akisarou OR SMTH
+
+xorg
+xorg-dev
+-- then build st

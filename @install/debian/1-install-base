@@ -1,0 +1,158 @@
+#!/usr/bin/zsh
+
+source "$(dirname "$0")/scripts/library"
+source "$(dirname "$0")/scripts/hw-info"
+
+clear
+echo "Installing base packages and applying base config..."
+echo "----------------------------------------------------"
+echo ""
+
+
+# Install Packages
+packages=(
+  "rustup"
+  "7zip"
+  "acpi"
+  #"adw-gtk-theme"
+  "alacritty"
+  #"android-studio"
+  "asdf-vm"
+  "auditd"
+  "avahi-daemon"
+  "base"
+  "build-essential"
+  "bat"
+  "bind9-dnsutils" #nslookup
+  "bleachbit"
+  "bluetooth"
+  "bluez"
+  # "brave-bin"
+  "brightnessctl"
+  "ccache" # For faster nvim builds
+  "clang"
+  "cmake"
+  "curl"
+  #"docker"
+  #"docker-compose"
+  "dunst"
+  "eza"
+  "fd-find"
+  "ffmpeg"
+  "figlet"
+  "flameshot"
+  "foot"
+  "fwupd"
+  "fzf"
+  "genymotion"
+  "ghostscript"
+  "git"
+  "git-delta"
+  "gh"
+  "gnome-terminal"
+  "grim"
+  #"gtk-engine-murrine" # Needed by gtk tokyonight
+  "vim-gtk3"
+  "htop"
+  "imagemagick"
+  "iwd"
+  "jq"
+  "kitty"
+  #"lazydocker"
+  "lazygit"
+  "libinput-bin"
+  "libreoffice"
+  "librewolf-bin"
+  "vainfo"
+  "libvdpau-va-gl1"
+  "linux-headers-amd64"
+  "mesa-utils"
+  "mpv"
+  "nautilus"
+  "ninja-build"
+  #"noto-fonts-emoji"
+  "openssh-server"
+  "openssh-client"
+  "pavucontrol"
+  "pipewire"
+  "pipewire-alsa"
+  "pipewire-audio"
+  "pipewire-jack"
+  "pipewire-pulse"
+  #"pnpm-shell-completion"
+  "power-profiles-daemon"
+  "preload"
+  #"python-pip"
+  "qt6ct"
+  #"ripdrag-git"
+  "ripgrep"
+  "rofi"
+  #"rofi-power-menu"
+  "rsync"
+  "rustup"
+  #"scrcpy"
+  #"terminus-font"
+  "tealdeer"
+  "tmux"
+  "tree-sitter-cli"
+  #"ttf-dm-mono-git"
+  #"ttf-hack-nerd"
+  #"ttf-meslo-nerd"
+  "udisks2" # Needed by fwupd
+  #"ueberzugpp"
+  "unzip" # Needed by asdf
+  "grub2-common"
+  "vdpauinfo"
+  #"visual-studio-code-bin"
+  "vulkan-tools"
+  #"watchman-bin"
+  "wget"
+  "wireplumber"
+  "wireshark"
+  "wakeonlan"
+  "wtype"
+  "xdg-desktop-portal-gtk"
+  "xdg-user-dirs"
+  "xdg-utils"
+  #"yazi-git"
+  "zsh"
+)
+
+
+if cpu_is_intel; then
+  packages+=("intel-microcode")
+fi
+
+# Prefer AMD GPU packages, instead of integrated ones.
+# Do not 'install' both, because of potential downsides
+if gpu_has_amd; then
+  packages+=(
+    "mesa-vdpau-drivers"
+    "radeontop"
+    "mesa-vulkan-drivers"
+  )
+elif gpu_has_intel; then
+  packages+=(
+    "intel-gpu-tools"
+    "intel-media-va-driver"
+    "mesa-vulkan-drivers"
+  )
+fi
+
+rustup default stable
+
+~/dotfiles/scripts/create-template-env
+
+# Install required packages
+install_packages "${packages[@]}"
+
+~/dotfiles/scripts/build-nvim
+
+bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
+
+# Install custom issue (login prompt)
+echo ""
+print_info "Installing login screen..."
+sudo cp ~/dotfiles/login/issue /etc/issue
+
+print_success "DONE!"
