@@ -52,8 +52,8 @@ bindsym $mod+q kill
 bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
-bindsym $mod+Shift+n exec brave --incognito
-bindsym $mod+Shift+t exec brave --incognito --tor
+bindsym $mod+Shift+n exec ~/dotfiles/brave/launch --incognito
+bindsym $mod+Shift+t exec ~/dotfiles/brave/launch --incognito --tor
 bindsym $mod+p exec flameshot gui
 
 floating_modifier $mod

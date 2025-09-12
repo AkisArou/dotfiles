@@ -1,0 +1,49 @@
+#!/usr/bin/zsh
+
+set -e
+
+fonts_list=(
+  "Hack"
+  "JetBrainsMono"
+  "Meslo"
+  "NerdFontsSymbolsOnly"
+  "Terminus"
+)
+
+FONT_DIR="$HOME/.fonts"
+mkdir -p "$FONT_DIR"
+
+for font_name in "${fonts_list[@]}"; do
+  ZIP_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${font_name}.zip"
+  ZIP_FILE="${font_name}.zip"
+  INSTALL_PATH="${FONT_DIR}/${font_name}"
+
+  echo ""
+  echo "🔤 Processing: $font_name"
+
+  # Download the font zip (always fetches latest)
+  echo "⬇️  Downloading $ZIP_URL"
+  curl -L -o "$ZIP_FILE" "$ZIP_URL"
+
+  # Clean old install dir if it exists
+  if [[ -d "$INSTALL_PATH" ]]; then
+    echo "🧹 Removing old version at $INSTALL_PATH"
+    rm -rf "$INSTALL_PATH"
+  fi
+
+  # Unzip into font directory
+  echo "📂 Installing to $INSTALL_PATH"
+  mkdir -p "$INSTALL_PATH"
+  unzip -o -q "$ZIP_FILE" -d "$INSTALL_PATH"
+
+  # Remove zip to save space
+  rm "$ZIP_FILE"
+
+done
+
+# Rebuild font cache
+echo ""
+echo "🔄 Rebuilding font cache..."
+fc-cache -fv
+
+echo "✅ All fonts installed or updated!"

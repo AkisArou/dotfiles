@@ -134,6 +134,8 @@ packages=(
   "zsh"
 )
 
+sudo ln -s /usr/bin/brave /usr/bin/brave-browser
+
 if cpu_is_intel; then
   packages+=("intel-ucode")
 fi

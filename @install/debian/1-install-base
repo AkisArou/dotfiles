@@ -8,6 +8,9 @@ echo "Installing base packages and applying base config..."
 echo "----------------------------------------------------"
 echo ""
 
+sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+sudo curl -fsSLo /etc/apt/sources.list.d/brave-browser-release.sources https://brave-browser-apt-release.s3.brave.com/brave-browser.sources
+sudo apt update
 
 # Install Packages
 packages=(
@@ -27,7 +30,7 @@ packages=(
   "bleachbit"
   "bluetooth"
   "bluez"
-  # "brave-bin"
+  "brave-browser"
   "brightnessctl"
   "ccache" # For faster nvim builds
   "clang"
@@ -118,7 +121,6 @@ packages=(
   "zsh"
 )
 
-
 if cpu_is_intel; then
   packages+=("intel-microcode")
 fi
@@ -146,6 +148,7 @@ rustup default stable
 # Install required packages
 install_packages "${packages[@]}"
 
+~/dotfiles/scripts/install-nerd-fonts
 ~/dotfiles/scripts/build-nvim
 
 bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
