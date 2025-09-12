@@ -101,7 +101,6 @@ packages=(
   "ripdrag-git"
   "ripgrep"
   "rofi"
-  "rofi-power-menu"
   "rsync"
   "rustup"
   "scrcpy"
