@@ -93,7 +93,6 @@ packages=(
   "pipewire-audio"
   "pipewire-jack"
   "pipewire-pulse"
-  "pnpm-shell-completion"
   "posix"
   "power-profiles-daemon"
   "preload"

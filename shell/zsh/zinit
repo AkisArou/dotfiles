@@ -23,3 +23,6 @@ zinit light zdharma-continuum/fast-syntax-highlighting
 zinit light Aloxaf/fzf-tab
 
 zinit light kutsan/zsh-system-clipboard
+
+zinit ice atload"zpcdreplay" atclone"./zplug.zsh" atpull"%atclone"
+zinit light g-plane/pnpm-shell-completion
