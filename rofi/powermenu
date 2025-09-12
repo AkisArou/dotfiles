@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
 if [ "$ULTRAWIDE" ]; then
-  rofi -show power-menu -modi power-menu:rofi-power-menu
+  "$HOME/dotfiles/rofi/launch" -show power-menu -modi power-menu:"$HOME/dotfiles/rofi/powermenu-script"
 else
-  rofi -show power-menu -modi power-menu:rofi-power-menu -dpi 180
+  "$HOME/dotfiles/rofi/launch" -show power-menu -modi power-menu:"$HOME/dotfiles/rofi/powermenu-script" -dpi 180
 fi
