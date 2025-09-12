@@ -2,9 +2,32 @@
 
 source "$HOME/dotfiles/scripts/library"
 
-print_info "system:"
-paru -Syu
-echo
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  OS=$ID
+else
+  echo "Could not detect OS."
+  exit 1
+fi
+
+if [ "$OS" == "arch" ]; then
+  print_info "system: Arch Linux"
+  paru -Syu
+  echo
+elif [ "$OS" == "debian" ] || [ "$OS" == "ubuntu" ]; then
+  print_info "system: Debian-based (Ubuntu/Debian)"
+  sudo apt update && sudo apt upgrade -y
+  echo
+else
+  print_info "system: Unknown OS ($OS)"
+  exit 1
+fi
+
+if command -v flatpak &>/dev/null; then
+  print_info "Updating Flatpak packages..."
+  flatpak update -y
+  echo
+fi
 
 print_info "nvim:"
 ~/dotfiles/scripts/build-nvim

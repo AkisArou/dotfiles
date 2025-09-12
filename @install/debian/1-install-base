@@ -14,6 +14,7 @@ sudo apt update
 
 # Install Packages
 packages=(
+  "flatpak"
   "rustup"
   "7zip"
   "acpi"
@@ -147,8 +148,12 @@ rustup default stable
 
 # Install required packages
 install_packages "${packages[@]}"
-
 ~/dotfiles/scripts/install-nerd-fonts
+
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+
+flatpak install flathub com.google.AndroidStudio
+
 ~/dotfiles/scripts/build-nvim
 
 bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
