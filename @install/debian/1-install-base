@@ -148,6 +148,8 @@ rustup default stable
 
 # Install required packages
 install_packages "${packages[@]}"
+ln -s $(which fdfind) ~/.local/bin/fd
+
 ~/dotfiles/scripts/install-nerd-fonts
 
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo

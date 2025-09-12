@@ -31,3 +31,7 @@ alias ga="git add ."
 alias gc="git commit -m"
 alias gp="git pull"
 alias gP="git push"
+
+if command -v flatpak >/dev/null 2>&1; then
+  alias android-studio='flatpak run com.google.AndroidStudio'
+fi
