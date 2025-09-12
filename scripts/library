@@ -79,12 +79,7 @@ create_symlink() {
       fi
     else
       # It's not a symlink, back it up or remove it
-      print_failure "Warning: '$link_name' already exists and is not a symlink."
-      read -p "Do you want to back it up and replace it? (y/n) " choice
-      if [[ $choice != "y" ]]; then
-        echo "Skipping '$link_name'."
-        return 1
-      fi
+      print_info "Warning: '$link_name' already exists and is not a symlink. Replacing with a backup"
       mv "$link_name" "${link_name}.bak"
       echo "Backed up '$link_name' to '${link_name}.bak'."
     fi

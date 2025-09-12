@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-source "$(dirname "$0")/scripts/library"
+source "$HOME/dotfiles/scripts/library"
 
 clear
 echo "Applying application configs..."
@@ -26,6 +26,7 @@ sudo mkdir -p "/usr/share/chromium/extensions"
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
 sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
+sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"
@@ -40,7 +41,6 @@ create_symlink "$HOME/dotfiles/nvim" "$HOME/.config/nvim"
 create_symlink "$HOME/dotfiles/vim" "$HOME/.config/vim"
 create_symlink "$HOME/dotfiles/dunst" "$HOME/.config/dunst"
 create_symlink "$HOME/dotfiles/ssh/config" "$HOME/.ssh/config"
-create_symlink "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 create_symlink "$HOME/dotfiles/xorg/.xinitrc" "$HOME/.xinitrc"
 create_symlink "$HOME/dotfiles/xorg/.xscreensaver" "$HOME/.xscreensaver"
 create_symlink "$HOME/dotfiles/xorg/.Xresources" "$HOME/.Xresources"
