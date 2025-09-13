@@ -15,10 +15,17 @@ curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsof
 sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/keyrings/microsoft-archive-keyring.gpg
 sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/code stable main" > /etc/apt/sources.list.d/vscode.list'
 
+echo 'deb http://download.opensuse.org/repositories/home:/justkidding/Debian_13/ /' | sudo tee /etc/apt/sources.list.d/home:justkidding.list
+curl -fsSL https://download.opensuse.org/repositories/home:justkidding/Debian_13/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_justkidding.gpg >/dev/null
+
+sudo apt install extrepo -y
+sudo extrepo enable librewolf
+
 sudo apt update
 
 # Install Packages
 packages=(
+  "golang-go"
   "flatpak"
   "rustup"
   "7zip"
@@ -70,7 +77,7 @@ packages=(
   "lazygit"
   "libinput-bin"
   "libreoffice"
-  "librewolf-bin"
+  "librewolf"
   "vainfo"
   "libvdpau-va-gl1"
   "linux-headers-amd64"
@@ -101,7 +108,7 @@ packages=(
   "tmux"
   "tree-sitter-cli"
   "udisks2" # Needed by fwupd
-  #"ueberzugpp"
+  "ueberzugpp"
   "unzip" # Needed by asdf
   "grub2-common"
   "vdpauinfo"
