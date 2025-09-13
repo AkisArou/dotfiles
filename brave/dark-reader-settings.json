@@ -132,12 +132,7 @@
     }
   ],
   "enabledByDefault": false,
-  "enabledFor": [
-    "skroutz.gr",
-    "play.google.com",
-    "www.npmjs.com",
-    "debian.org"
-  ],
+  "enabledFor": ["skroutz.gr", "play.google.com", "www.npmjs.com"],
   "disabledFor": [],
   "changeBrowserTheme": false,
   "syncSettings": true,
@@ -168,4 +163,3 @@
     "version": "4.9.101"
   }
 }
-
