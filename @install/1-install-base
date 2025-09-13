@@ -1,7 +1,7 @@
 #!/usr/bin/zsh
 
-source "$(dirname "$0")/scripts/library"
-source "$(dirname "$0")/scripts/hw-info"
+source "$HOME/dotfiles/scripts/library"
+source "$HOME/dotfiles/scripts/hw-info"
 
 clear
 echo "Installing base packages and applying base config..."
