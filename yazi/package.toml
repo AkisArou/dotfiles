@@ -11,7 +11,7 @@ hash = "a8050052e59f3952abe0b3e27a5843de"
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
 rev = "d7588f6"
-hash = "63b6c222bf2103b3023389dde5e2ecfe"
+hash = "3cce60031b27cbce80b50f68ca319c0a"
 
 [[plugin.deps]]
 use = "aresler/path-from-root"
