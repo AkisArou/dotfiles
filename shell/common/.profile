@@ -28,7 +28,7 @@ xorg() {
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
   echo "1) Wayland (default)"
-  echo "1) Xorg"
+  echo "2) Xorg"
   printf "Enter choice [1-2]: "
   read session_choice
 
