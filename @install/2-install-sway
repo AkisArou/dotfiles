@@ -12,6 +12,7 @@ packages=(
   "sway"
   "swaybg"
   "swayidle"
+  "swaydim"
   "waybar"
   "wl-clipboard"
   "xdg-desktop-portal-wlr"
