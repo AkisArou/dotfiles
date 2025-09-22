@@ -12,6 +12,7 @@ local preferences = {
 
 --- @type vim.lsp.Config
 return {
+  cmd = { "vtsls", "--stdio" },
   root_dir = vim.fn.getcwd(),
   root_markers = { ".git", "tsconfig.json", "jsonconfig.json", "package.json" },
   filetypes = {
