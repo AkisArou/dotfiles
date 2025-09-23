@@ -15,11 +15,6 @@ marker_cut = { fg = "#f7768e", bg = "#f7768e" }
 marker_marked = { fg = "#bb9af7", bg = "#bb9af7" }
 marker_selected = { fg = "#7aa2f7", bg = "#7aa2f7" }
 
-# Tab
-tab_active = { fg = "#c0caf5", bg = "#292e42" }
-tab_inactive = { fg = "#3b4261", bg = "#1a1b26" }
-tab_width = 1
-
 # Count
 count_copied = { fg = "#c0caf5", bg = "#41a6b5" }
 count_cut = { fg = "#c0caf5", bg = "#db4b4b" }
@@ -28,10 +23,15 @@ count_selected = { fg = "#c0caf5", bg = "#3d59a1" }
 border_symbol = "│"
 border_style = { fg = "#27a1b9" }
 
-[status]
-separator_open = ""
-separator_close = ""
-separator_style = { fg = "#3b4261", bg = "#3b4261" }
+# Tab
+[tabs]
+active = { fg = "#c0caf5", bg = "#292e42" }
+inactive = { fg = "#3b4261", bg = "#1a1b26" }
+
+# [status]
+# sep_left = ""
+# sep_right = ""
+# sep_style = { fg = "#3b4261", bg = "#3b4261" }
 
 # Progress
 progress_label = { fg = "#a9b1d6", bold = true }
@@ -52,10 +52,10 @@ normal_alt = { fg = "#c0caf5", bg = "#3b4261", bold = true }
 select_main = { fg = "#16161e", bg = "#bb9af7", bold = true }
 unset_main = { fg = "#16161e", bg = "#9d7cd8", bold = true }
 
-[select]
-border = { fg = "#27a1b9" }
-active = { fg = "#c0caf5", bg = "#283457" }
-inactive = { fg = "#c0caf5" }
+# [select]
+# border = { fg = "#27a1b9" }
+# active = { fg = "#c0caf5", bg = "#283457" }
+# inactive = { fg = "#c0caf5" }
 
 # Input
 [input]
@@ -65,7 +65,7 @@ value = { fg = "#9d7cd8" }
 selected = { bg = "#283457" }
 
 # Completion
-[completion]
+[cmp]
 border = { fg = "#0db9d7" }
 active = { fg = "#c0caf5", bg = "#283457" }
 inactive = { fg = "#c0caf5" }
@@ -122,5 +122,5 @@ rules = [
   { name = "*", is = "exec", fg = "#9ece6a" },
 
   # Fallback
-  { name = "*/", fg = "#7aa2f7" },
+  { url = "*/", fg = "#7aa2f7" },
 ]
