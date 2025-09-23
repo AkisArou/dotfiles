@@ -1,0 +1,33 @@
+#!/usr/bin/zsh
+
+PORTS=(3000 5173)
+
+start() {
+  for port in "${PORTS[@]}"; do
+    socat TCP-LISTEN:$port,fork TCP:$DESKTOP:$port &
+    echo $! >"/tmp/socat_$port.pid"
+    echo "Started socat proxy on port $port (PID $(cat /tmp/socat_$port.pid))"
+  done
+}
+
+stop() {
+  for port in "${PORTS[@]}"; do
+    if [[ -f "/tmp/socat_$port.pid" ]]; then
+      kill "$(cat /tmp/socat_$port.pid)" 2>/dev/null
+      rm "/tmp/socat_$port.pid"
+      echo "Stopped socat proxy on port $port"
+    else
+      echo "No running socat process found for port $port"
+    fi
+  done
+}
+
+case "$1" in
+start) start ;;
+stop) stop ;;
+restart)
+  stop
+  start
+  ;;
+*) echo "Usage: $0 {start|stop|restart}" ;;
+esac
