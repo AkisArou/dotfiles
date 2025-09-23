@@ -2,24 +2,26 @@
 
 PORTS=(3000 5173)
 
+TUNNELS=""
+for port in "${PORTS[@]}"; do
+  TUNNELS="$TUNNELS -L $port:localhost:$port"
+done
+
 start() {
-  for port in "${PORTS[@]}"; do
-    socat TCP-LISTEN:$port,fork TCP:$DESKTOP:$port &
-    echo $! >"/tmp/socat_$port.pid"
-    echo "Started socat proxy on port $port (PID $(cat /tmp/socat_$port.pid))"
-  done
+  echo "Starting SSH port forwarding to $DESKTOP..."
+  ssh -N $TUNNELS "akisarou@$DESKTOP" &
+  echo $! >/tmp/ssh-proxy.pid
+  echo "SSH tunnel started (PID $(cat /tmp/ssh-proxy.pid))"
 }
 
 stop() {
-  for port in "${PORTS[@]}"; do
-    if [[ -f "/tmp/socat_$port.pid" ]]; then
-      kill "$(cat /tmp/socat_$port.pid)" 2>/dev/null
-      rm "/tmp/socat_$port.pid"
-      echo "Stopped socat proxy on port $port"
-    else
-      echo "No running socat process found for port $port"
-    fi
-  done
+  if [[ -f /tmp/ssh-proxy.pid ]]; then
+    kill "$(cat /tmp/ssh-proxy.pid)" 2>/dev/null
+    rm /tmp/ssh-proxy.pid
+    echo "SSH tunnel stopped"
+  else
+    echo "No running SSH tunnel found"
+  fi
 }
 
 case "$1" in
