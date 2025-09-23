@@ -19,19 +19,20 @@ marker_selected = { fg = "#7aa2f7", bg = "#7aa2f7" }
 count_copied = { fg = "#c0caf5", bg = "#41a6b5" }
 count_cut = { fg = "#c0caf5", bg = "#db4b4b" }
 count_selected = { fg = "#c0caf5", bg = "#3d59a1" }
+
 # Border
 border_symbol = "│"
 border_style = { fg = "#27a1b9" }
 
-# Tab
+
 [tabs]
 active = { fg = "#c0caf5", bg = "#292e42" }
 inactive = { fg = "#3b4261", bg = "#1a1b26" }
 
-# [status]
-# sep_left = ""
-# sep_right = ""
-# sep_style = { fg = "#3b4261", bg = "#3b4261" }
+
+[status]
+sep_left = { open = "", close = "" }
+overall = { fg = "#3b4261", bg = "#3b4261" }
 
 # Progress
 progress_label = { fg = "#a9b1d6", bold = true }
@@ -45,6 +46,7 @@ perm_write = { fg = "#f7768e" }
 perm_exec = { fg = "#9ece6a" }
 perm_sep = { fg = "#414868" }
 
+
 # Mode
 [mode]
 normal_main = { fg = "#16161e", bg = "#bb9af7", bold = true }
@@ -52,10 +54,6 @@ normal_alt = { fg = "#c0caf5", bg = "#3b4261", bold = true }
 select_main = { fg = "#16161e", bg = "#bb9af7", bold = true }
 unset_main = { fg = "#16161e", bg = "#9d7cd8", bold = true }
 
-# [select]
-# border = { fg = "#27a1b9" }
-# active = { fg = "#c0caf5", bg = "#283457" }
-# inactive = { fg = "#c0caf5" }
 
 # Input
 [input]
@@ -64,17 +62,20 @@ title = {}
 value = { fg = "#9d7cd8" }
 selected = { bg = "#283457" }
 
+
 # Completion
 [cmp]
 border = { fg = "#0db9d7" }
 active = { fg = "#c0caf5", bg = "#283457" }
 inactive = { fg = "#c0caf5" }
 
+
 # Tasks
 [tasks]
 border = { fg = "#27a1b9" }
 title = {}
 hovered = { fg = "#c0caf5", bg = "#283457" }
+
 
 # Which
 [which]
@@ -86,11 +87,13 @@ desc = { fg = "#bb9af7" }
 separator = "  "
 separator_style = { fg = "#565f89" }
 
+
 # Notify
 [notify]
 title_info = { fg = "#0db9d7" }
 title_warn = { fg = "#e0af68" }
 title_error = { fg = "#f7768e" }
+
 
 # Help
 [help]
@@ -98,6 +101,7 @@ on = { fg = "#9ece6a" }
 run = { fg = "#bb9af7" }
 hovered = { bg = "#283457" }
 footer = { fg = "#c0caf5", bg = "#1a1b26" }
+
 
 [filetype]
 rules = [
