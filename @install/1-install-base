@@ -104,6 +104,7 @@ packages=(
   "rsync"
   "rustup"
   "scrcpy"
+  "sshpass"
   "terminus-font"
   "tldr"
   "tmux"

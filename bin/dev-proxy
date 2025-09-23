@@ -1,15 +1,19 @@
 #!/usr/bin/zsh
 
-PORTS=(3000 5173)
+PORTS=(3000 3001 5173)
 
-TUNNELS=""
+# Build tunnels array
+TUNNELS=()
 for port in "${PORTS[@]}"; do
-  TUNNELS="$TUNNELS -L $port:localhost:$port"
+  TUNNELS+=("-L" "${port}:localhost:${port}")
 done
 
 start() {
-  echo "Starting SSH port forwarding to $DESKTOP..."
-  ssh -N $TUNNELS "akisarou@$DESKTOP" &
+  # Prompt for password (hidden input)
+  read -s "SSHPASS?Enter SSH password for $DESKTOP: "
+
+  # Run ssh with sshpass
+  sshpass -p "$SSHPASS" ssh -N "${TUNNELS[@]}" "akisarou@$DESKTOP" &
   echo $! >/tmp/ssh-proxy.pid
   echo "SSH tunnel started (PID $(cat /tmp/ssh-proxy.pid))"
 }
