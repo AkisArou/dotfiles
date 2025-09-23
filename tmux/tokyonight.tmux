@@ -22,7 +22,7 @@ set -g status-right-style NONE
 set -g status-left "#[fg=#7aa2f7,bg=#1a1b26,nobold] #S"
 set -g status-right "#[fg=#7aa2f7,bg=#1a1b26] #{prefix_highlight} #h"
 
-setw -g window-status-activity-style "underscore,fg=#a9b1d6,bg=#1a1b26"
+setw -g window-status-activity-style "underscore"
 setw -g window-status-separator ""
 setw -g window-status-style "NONE,fg=#7881aa,bg=#1a1b26"
 setw -g window-status-format "#[fg=#1a1b26,bg=#1a1b26,nobold,nounderscore,noitalics]#[default]  #I:#W #F"
