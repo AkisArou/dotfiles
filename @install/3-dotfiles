@@ -17,8 +17,13 @@ fi
 # Create symbolic links
 
 # create dirs
+ICONS_SRC_DIR="$WEB_APPS_DIR/icons"
+APPS_TARGET_DIR="$HOME/.local/share/applications"
+ICONS_TARGET_BASE="$HOME/.local/share/icons/hicolor"
+
 mkdir -p "$HOME/.ssh"
-mkdir -p "$HOME/.local/share/applications"
+mkdir -p $APPS_TARGET_DIR
+mkdir -p $ICONS_TARGET_BASE
 mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
 sudo mkdir -p "/usr/share/chromium/extensions"
 
@@ -75,6 +80,25 @@ sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.js
 sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
 sudo chmod 644 /usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
+
+# Web apps
+WEB_APPS_DIR="$HOME/dotfiles/web-apps"
+
+if [ -d "$WEB_APPS_DIR" ]; then
+  for desktop in "$WEB_APPS_DIR"/*.desktop; do
+    [ -e "$desktop" ] || continue
+    create_symlink "$desktop" "$APPS_TARGET_DIR/$(basename "$desktop")"
+  done
+
+  for size_path in "$ICONS_SRC_DIR"/*; do
+    [ -d "$size_path" ] || continue
+    size_dir="$(basename "$size_path")"
+    create_symlink "$size_path" "$ICONS_TARGET_BASE/$size_dir"
+  done
+fi
+
+command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$APPS_TARGET_DIR" >/dev/null 2>&1 || true
+command -v gtk-update-icon-cache >/dev/null 2>&1 && gtk-update-icon-cache -f "$ICONS_TARGET_BASE" >/dev/null 2>&1 || true
 
 # Librewolf
 LIBREWOLF_CONFIG="$HOME/.librewolf/librewolf.overrides.cfg"
