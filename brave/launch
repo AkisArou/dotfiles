@@ -1,2 +1,2 @@
 #!/usr/bin/zsh
-/usr/bin/brave-browser --password-store=basic --remote-debugging-port=9222 "$@"
+/usr/bin/brave --password-store=basic --remote-debugging-port=9222 "$@"
