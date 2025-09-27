@@ -1,5 +1,9 @@
 AddKeysToAgent yes
 
+Host 192.168.1.2
+	HostName 192.168.1.2
+	User akisarou
+
 Host *
 	# Always use SSH2.
 	Protocol 2
