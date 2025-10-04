@@ -1,0 +1,23 @@
+#!/usr/bin/zsh
+
+source "$HOME/dotfiles/scripts/library"
+
+clear
+echo "Installing wayland with dwl..."
+echo "----------------------------------"
+echo ""
+
+packages=(
+  "wayland"
+  "wayland-protocols"
+  "polkit"
+  "swaybg"
+  "waybar"
+  "wl-clipboard"
+  "xdg-desktop-portal-wlr"
+  "xorg-xwayland"
+)
+
+install_packages "${packages[@]}"
+
+print_success "DONE!"
