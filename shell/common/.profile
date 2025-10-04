@@ -15,7 +15,6 @@ wayland() {
   # export QT_QPA_PLATFORM=wayland # Disable for android emulator for now
   export XDG_CURRENT_DESKTOP=sway
   export XDG_SESSION_DESKTOP=sway
-  exec dbus-run-session sway
 }
 
 xorg() {
@@ -27,19 +26,26 @@ xorg() {
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
-  echo "1) Wayland (default)"
-  echo "2) Xorg"
-  printf "Enter choice [1-2]: "
+  echo "1) Sway (default)"
+  echo "2) i3"
+  echo "3) dwl"
+  printf "Enter choice [1-3]: "
   read session_choice
 
   session_choice=${session_choice:-1}
 
   if [ "$session_choice" = "1" ]; then
     wayland
+    exec dbus-run-session sway
   elif [ "$session_choice" = "2" ]; then
     xorg
-  else
-    echo "Falling back to default (Wayland)."
+    exec startx
+  elif [ "$session_choice" = "3" ]; then
     wayland
+    exec dwl
+  else
+    echo "Falling back to default (Sway)."
+    wayland
+    exec dbus-run-session sway
   fi
 fi
