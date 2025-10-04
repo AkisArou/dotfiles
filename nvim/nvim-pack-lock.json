@@ -1,0 +1,60 @@
+{
+  "plugins": {
+    "FixCursorHold.nvim": [],
+    "SchemaStore.nvim": [],
+    "blink.cmp": [],
+    "conform.nvim": [],
+    "diffview.nvim": [],
+    "fidget.nvim": [],
+    "fzf-lua": {
+      "rev": "c887688"
+    },
+    "gitsigns.nvim": [],
+    "grug-far.nvim": [],
+    "lazydev.nvim": [],
+    "lualine.nvim": [],
+    "luvit-meta": [],
+    "mason-lspconfig.nvim": [],
+    "mason-nvim-dap.nvim": [],
+    "mason-update-all": [],
+    "mason.nvim": [],
+    "mini.ai": [],
+    "mini.cursorword": [],
+    "mini.pairs": [],
+    "mini.surround": [],
+    "neogit": [],
+    "neotab.nvim": [],
+    "neotest": [],
+    "neotest-node-test-runner": [],
+    "nvim-colorizer.lua": [],
+    "nvim-dap": [],
+    "nvim-dap-ui": [],
+    "nvim-lint": [],
+    "nvim-nio": [],
+    "nvim-treesitter": {
+      "version": "'main'"
+    },
+    "nvim-treesitter-context": [],
+    "nvim-treesitter-textobjects": {
+      "version": "'main'"
+    },
+    "nvim-ts-autotag": [],
+    "nvim-vtsls": [],
+    "nvim-web-devicons": [],
+    "octo.nvim": [],
+    "overseer.nvim": [],
+    "plenary.nvim": [],
+    "snacks.nvim": [],
+    "stay-centered.nvim": [],
+    "template-string.nvim": [],
+    "todo-comments.nvim": [],
+    "tokyonight.nvim": [],
+    "ts-comments.nvim": [],
+    "undotree": [],
+    "vim-highlighturl": [],
+    "vim-tmux-navigator": [],
+    "vim-visual-multi": [],
+    "which-key.nvim": [],
+    "yazi.nvim": []
+  }
+}
