@@ -1,0 +1,4 @@
+#!/usr/bin/zsh
+
+rm -rf ~/dotfiles/dwl/config.h
+sudo make -C ~/dotfiles/dwl clean install

@@ -58,7 +58,9 @@ static const struct xkb_rule_names xkb_rules = {
 	/* example:
 	.options = "ctrl:nocaps",
 	*/
-	.options = NULL,
+  .layout = "us,gr",
+  .model = "pc105+inet",
+	.options = "grp:win_space_toggle",
 };
 
 static const int repeat_rate = 33;
@@ -69,7 +71,7 @@ static const int tap_to_click = 1;
 static const int tap_and_drag = 1;
 static const int drag_lock = 0;
 static const int natural_scrolling = 1;
-static const int disable_while_typing = 1;
+static const int disable_while_typing = 0;
 static const int left_handed = 0;
 static const int middle_button_emulation = 0;
 /* You can choose between:
@@ -117,12 +119,17 @@ static const enum libinput_config_tap_button_map button_map = LIBINPUT_CONFIG_TA
 	{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT,SKEY,toggletag, {.ui = 1 << TAG} }
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define SHCMD(cmd) { .v = (const char*[]){ "/usr/bin/zsh", "-c", cmd, NULL } }
 
 /* commands */
 static const char *termcmd[] = { "/home/akisarou/dotfiles/foot/launch", NULL };
 static const char *menucmd[] = { "/home/akisarou/dotfiles/rofi/launch", "-show", "drun", NULL };
 static const char *browsercmd[] = {"/home/akisarou/dotfiles/brave/launch", NULL};
+static const char *bluetoothmenucmd[] = {"/home/akisarou/dotfiles/rofi/bluetooth", NULL};
+static const char *powermenucmd[] = {"/home/akisarou/dotfiles/rofi/powermenu", NULL};
+
+static const char *bright_up[] = { "brightnessctl", "set", "5%+", NULL };
+static const char *bright_down[] = { "brightnessctl", "set", "5%-", NULL };
 
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
@@ -130,6 +137,8 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_d,          spawn,            {.v = menucmd} },
 	{ MODKEY,                    XKB_KEY_Return,     spawn,            {.v = termcmd} },
   { MODKEY,                    XKB_KEY_b,          spawn,            {.v = browsercmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B,          spawn,            {.v = bluetoothmenucmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          spawn,            {.v = powermenucmd}},
 	{ MODKEY,                    XKB_KEY_j,          focusstack,       {.i = +1} },
 	{ MODKEY,                    XKB_KEY_k,          focusstack,       {.i = -1} },
 	{ MODKEY,                    XKB_KEY_i,          incnmaster,       {.i = +1} },
@@ -160,7 +169,14 @@ static const Key keys[] = {
 	TAGKEYS(          XKB_KEY_7, XKB_KEY_ampersand,                    6),
 	TAGKEYS(          XKB_KEY_8, XKB_KEY_asterisk,                     7),
 	TAGKEYS(          XKB_KEY_9, XKB_KEY_parenleft,                    8),
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          quit,             {0} },
+	/*{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          quit,             {0} },*/
+
+  { 0, XKB_KEY_XF86MonBrightnessUp,   spawn, SHCMD("brightnessctl set +5%") },
+  { 0, XKB_KEY_XF86MonBrightnessDown, spawn, SHCMD("brightnessctl set 5-%") },
+  { 0, XKB_KEY_XF86AudioRaiseVolume,  spawn, SHCMD("pactl set-sink-volume @DEFAULT_SINK@ +5%") },
+  { 0, XKB_KEY_XF86AudioLowerVolume,  spawn, SHCMD("pactl set-sink-volume @DEFAULT_SINK@ -5%") },
+  { 0, XKB_KEY_XF86AudioMute,         spawn, SHCMD("pactl set-sink-mute @DEFAULT_SINK@ toggle") },
+  { 0, XKB_KEY_XF86AudioMicMute ,     spawn, SHCMD("pactl set-source-mute @DEFAULT_SOURCE@ toggle") },
 
 	/* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
 	{ WLR_MODIFIER_CTRL|WLR_MODIFIER_ALT,XKB_KEY_Terminate_Server, quit, {0} },
