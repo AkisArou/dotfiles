@@ -10,34 +10,36 @@ elif gpu_has_intel; then
 fi
 
 # Base functions
-wayland() {
+config_wayland() {
+  export XDG_SESSION_TYPE=wayland
   export SDL_VIDEODRIVER=wayland
   export _JAVA_AWT_WM_NONREPARENTING=1
   # export QT_QPA_PLATFORM=wayland # Disable for android emulator for now
 }
 
-xorg() {
+config_xorg() {
   export MOZ_USE_XINPUT2=1
   export MOZ_X11_EGL=1
-  exec startx
 }
 
 # WM functions
 run_sway() {
-  wayland
+  config_wayland
   export XDG_CURRENT_DESKTOP=sway
   export XDG_SESSION_DESKTOP=sway
   exec dbus-run-session sway
 }
 
 run_i3() {
-  xorg
+  config_xorg
   exec startx
 }
 
 run_dwl() {
-  wayland
-  exec dwl -s /home/akisarou/dotfiles/dwl/startup &
+  config_wayland
+  export XDG_CURRENT_DESKTOP=wlroots
+  export XDG_SESSION_DESKTOP=wlroots
+  exec dbus-run-session dwl -s /home/akisarou/dotfiles/dwl/startup
 }
 
 # Only run session chooser on first virtual terminal (e.g., tty1)
