@@ -1,0 +1,39 @@
+From f43a49324c2ddd21100d6308d1adde9d894746e2 Mon Sep 17 00:00:00 2001
+From: Guido Cella <guido@guidocella.xyz>
+Date: Wed, 5 Jun 2024 12:05:16 +0200
+Subject: [PATCH] center floating windows
+
+---
+ dwl.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/dwl.c b/dwl.c
+index 12f441e..c377c67 100644
+--- a/dwl.c
++++ b/dwl.c
+@@ -499,6 +499,11 @@ applyrules(Client *c)
+ 		}
+ 	}
+ 
++	if (mon) {
++		c->geom.x = (mon->w.width - c->geom.width) / 2 + mon->m.x;
++		c->geom.y = (mon->w.height - c->geom.height) / 2 + mon->m.y;
++	}
++
+ 	c->isfloating |= client_is_float_type(c);
+ 	setmon(c, mon, newtags);
+ }
+@@ -1787,6 +1792,10 @@ mapnotify(struct wl_listener *listener, void *data)
+ 	 * If there is no parent, apply rules */
+ 	if ((p = client_get_parent(c))) {
+ 		c->isfloating = 1;
++		if (p->mon) {
++			c->geom.x = (p->mon->w.width - c->geom.width) / 2 + p->mon->m.x;
++			c->geom.y = (p->mon->w.height - c->geom.height) / 2 + p->mon->m.y;
++		}
+ 		setmon(c, p->mon, p->tags);
+ 	} else {
+ 		applyrules(c);
+-- 
+2.49.0
+

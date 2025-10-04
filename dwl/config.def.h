@@ -128,9 +128,6 @@ static const char *browsercmd[] = {"/home/akisarou/dotfiles/brave/launch", NULL}
 static const char *bluetoothmenucmd[] = {"/home/akisarou/dotfiles/rofi/bluetooth", NULL};
 static const char *powermenucmd[] = {"/home/akisarou/dotfiles/rofi/powermenu", NULL};
 
-static const char *bright_up[] = { "brightnessctl", "set", "5%+", NULL };
-static const char *bright_down[] = { "brightnessctl", "set", "5%-", NULL };
-
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
 	/* modifier                  key                 function          argument */
