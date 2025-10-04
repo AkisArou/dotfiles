@@ -37,8 +37,7 @@ run_i3() {
 
 run_dwl() {
   wayland
-  exec dwl &
-  /home/akisarou/dotfiles/waybar/launch-waybar &
+  exec dwl -s /home/akisarou/dotfiles/dwl/startup &
 }
 
 # Only run session chooser on first virtual terminal (e.g., tty1)
