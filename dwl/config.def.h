@@ -37,6 +37,7 @@ static const Layout layouts[] = {
 	{ "[]=",      tile },
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
+	{ "||=",      mastercol },
 };
 
 /* monitors */
@@ -51,7 +52,7 @@ static const MonitorRule monrules[] = {
 	{ "eDP-1",    0.5f,  1,      2,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
 	*/
 	/* defaults */
-	{ "eDP-1",    0.5f,  1,      1.5f, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
+	{ "eDP-1",    0.5f,  2,      1.5f, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
 	{ NULL,       0.55f, 1,      1,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
 };
 
@@ -151,6 +152,7 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_t,          setlayout,        {.v = &layouts[0]} },
 	{ MODKEY,                    XKB_KEY_u,          setlayout,        {.v = &layouts[1]} },
 	{ MODKEY,                    XKB_KEY_m,          setlayout,        {.v = &layouts[2]} },
+  { MODKEY,                    XKB_KEY_c,          setlayout,        {.v = &layouts[3]} },
 	{ MODKEY,                    XKB_KEY_space,      setlayout,        {0} },
 	{ MODKEY,                    XKB_KEY_f,          togglefloating,   {0} },
 	{ MODKEY,                    XKB_KEY_e,          togglefullscreen, {0} },
