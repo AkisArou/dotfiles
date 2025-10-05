@@ -6,12 +6,6 @@ fi
 
 killall waybar
 
-if [ "$XDG_CURRENT_DESKTOP" = "sway" ]; then
-  CONFIG="$HOME/dotfiles/waybar/config.sway.jsonc"
-else
-  CONFIG="$HOME/dotfiles/waybar/config.dwl.jsonc"
-fi
-
 STYLE="$HOME/dotfiles/waybar/${THEME:-tokyonight}.css"
 
-waybar --config "$CONFIG" --style "$STYLE"
+waybar --style "$STYLE"
