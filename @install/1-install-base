@@ -158,7 +158,6 @@ fi
 # Install required packages
 install_packages "${packages[@]}"
 
-~/dotfiles/st/build
 ~/dotfiles/scripts/build-nvim
 
 bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"

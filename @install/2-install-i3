@@ -21,4 +21,6 @@ packages=(
 
 install_packages "${packages[@]}"
 
+~/dotfiles/st/build
+
 print_success "DONE!"
