@@ -52,7 +52,7 @@ static const MonitorRule monrules[] = {
 	{ "eDP-1",    0.5f,  1,      2,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
 	*/
 	/* defaults */
-	{ "eDP-1",    0.5f,  2,      1.5f, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
+	{ "eDP-1",    0.5f,  3,      1.5f, &layouts[3], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
 	{ NULL,       0.55f, 1,      1,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
 };
 
@@ -142,6 +142,8 @@ static const Key keys[] = {
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          spawn,            {.v = powermenucmd}},
 	{ MODKEY,                    XKB_KEY_j,          focusstack,       {.i = +1} },
 	{ MODKEY,                    XKB_KEY_k,          focusstack,       {.i = -1} },
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_J,          movestack,        {.i = +1} },
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_K,          movestack,        {.i = -1} },
 	{ MODKEY,                    XKB_KEY_i,          incnmaster,       {.i = +1} },
 	{ MODKEY,                    XKB_KEY_s,          incnmaster,       {.i = -1} },
 	{ MODKEY,                    XKB_KEY_h,          setmfact,         {.f = -0.05f} },
