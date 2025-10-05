@@ -51,6 +51,16 @@ window#waybar #window {
   background-color: #f7768e;
 }
 
+#tags button:not(.occupied):not(.focused) {
+  font-size: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: -17px;
+  padding: 0;
+  color: transparent;
+  background-color: transparent;
+}
+
 label.module {
   margin-right: 10px;
 }
