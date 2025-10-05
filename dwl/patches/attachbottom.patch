@@ -1,0 +1,28 @@
+From 0dda3ed8634154fd3887b71133b451d66a11b61d Mon Sep 17 00:00:00 2001
+From: Ben Collerson <benc@benc.cc>
+Date: Thu, 4 Jan 2024 23:31:41 +1000
+Subject: [PATCH] attachbottom
+
+---
+ dwl.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/dwl.c b/dwl.c
+index bf763dfc..12e08e2b 100644
+--- a/dwl.c
++++ b/dwl.c
+@@ -1605,7 +1605,11 @@ mapnotify(struct wl_listener *listener, void *data)
+ 	c->geom.height += 2 * c->bw;
+ 
+ 	/* Insert this client into client lists. */
+-	wl_list_insert(&clients, &c->link);
++	if (clients.prev)
++		// tile at the bottom
++		wl_list_insert(clients.prev, &c->link);
++	else
++		wl_list_insert(&clients, &c->link);
+ 	wl_list_insert(&fstack, &c->flink);
+ 
+ 	/* Set initial monitor, tags, floating status, and focus:
+-- 
+2.43.0
