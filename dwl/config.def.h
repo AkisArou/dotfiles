@@ -129,6 +129,8 @@ static const enum libinput_config_tap_button_map button_map = LIBINPUT_CONFIG_TA
 static const char *termcmd[] = { "/home/akisarou/dotfiles/foot/launch", NULL };
 static const char *menucmd[] = { "/home/akisarou/dotfiles/rofi/launch", "-show", "drun", NULL };
 static const char *browsercmd[] = {"/home/akisarou/dotfiles/brave/launch", NULL};
+static const char *browserprivatecmd[] = {"/home/akisarou/dotfiles/brave/launch", "--incognito", NULL};
+static const char *browsertorcmd[] = {"/home/akisarou/dotfiles/brave/launch", "--incognito", "--tor", NULL};
 static const char *bluetoothmenucmd[] = {"/home/akisarou/dotfiles/rofi/bluetooth", NULL};
 static const char *powermenucmd[] = {"/home/akisarou/dotfiles/rofi/powermenu", NULL};
 
@@ -138,6 +140,8 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_d,          spawn,            {.v = menucmd} },
 	{ MODKEY,                    XKB_KEY_Return,     spawn,            {.v = termcmd} },
   { MODKEY,                    XKB_KEY_b,          spawn,            {.v = browsercmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_N,          spawn,            {.v = browserprivatecmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_T,          spawn,            {.v = browsertorcmd}},
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B,          spawn,            {.v = bluetoothmenucmd}},
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          spawn,            {.v = powermenucmd}},
 	{ MODKEY,                    XKB_KEY_j,          focusstack,       {.i = +1} },
