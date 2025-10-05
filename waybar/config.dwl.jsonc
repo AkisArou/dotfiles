@@ -3,14 +3,12 @@
   "spacing": 8, // Gaps between modules (4px)
   "modules-left": ["dwl/tags", "dwl/window", "custom/media"],
   "modules-right": [
-    "sway/scratchpad",
     "pulseaudio",
     "memory",
     "cpu",
     "battery",
     "backlight",
     "bluetooth",
-    "sway/language",
     "clock",
     "network",
     "tray",
