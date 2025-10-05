@@ -133,6 +133,7 @@ static const char *browserprivatecmd[] = {"/home/akisarou/dotfiles/brave/launch"
 static const char *browsertorcmd[] = {"/home/akisarou/dotfiles/brave/launch", "--incognito", "--tor", NULL};
 static const char *bluetoothmenucmd[] = {"/home/akisarou/dotfiles/rofi/bluetooth", NULL};
 static const char *powermenucmd[] = {"/home/akisarou/dotfiles/rofi/powermenu", NULL};
+static const char *flameshotcmd[] = {"flameshot", "gui", NULL};
 
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
@@ -144,6 +145,7 @@ static const Key keys[] = {
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_T,          spawn,            {.v = browsertorcmd}},
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B,          spawn,            {.v = bluetoothmenucmd}},
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          spawn,            {.v = powermenucmd}},
+  { MODKEY,                    XKB_KEY_p,          spawn,            {.v = flameshotcmd}},
 	{ MODKEY,                    XKB_KEY_j,          focusstack,       {.i = +1} },
 	{ MODKEY,                    XKB_KEY_k,          focusstack,       {.i = -1} },
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_J,          movestack,        {.i = +1} },
