@@ -117,6 +117,41 @@ if not vim.g.is_work then
       }
     end
   end
+else
+  local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
+
+  local vscode = require("dap.ext.vscode")
+  vscode.type_to_filetypes["node"] = js_filetypes
+  vscode.type_to_filetypes["pwa-node"] = js_filetypes
+
+  for _, language in ipairs(js_filetypes) do
+    if not dap.configurations[language] then
+      dap.configurations[language] = {
+        {
+          type = "pwa-node",
+          request = "attach",
+          name = "Debug React Native App (Advanced Setup)",
+          port = 8081,
+          address = "localhost",
+          localRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
+          remoteRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
+          sourceMaps = true,
+          skipFiles = {
+            "<node_internals>/**",
+            "node_modules/**",
+            "**/node_modules/undici/**",
+            "**/node_modules/typescript/**",
+            "**/node_modules/@expo/**",
+            "**/*.bundle.js",
+            "**/*.min.js",
+          },
+          -- Connect via WebSocket protocol used by React Native
+          protocol = "inspector",
+          timeout = 30000,
+        },
+      }
+    end
+  end
 end
 -- stylua: ignore
 local keys = {
