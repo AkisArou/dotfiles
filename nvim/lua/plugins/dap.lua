@@ -72,87 +72,73 @@ local js_debug_adapter_opts = {
 dap.adapters[node_type] = js_debug_adapter_opts
 dap.adapters[chrome_type] = js_debug_adapter_opts
 
-if not vim.g.is_work then
-  local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
+local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
 
-  local vscode = require("dap.ext.vscode")
-  vscode.type_to_filetypes["node"] = js_filetypes
-  vscode.type_to_filetypes["pwa-node"] = js_filetypes
+local vscode = require("dap.ext.vscode")
+vscode.type_to_filetypes["node"] = js_filetypes
+vscode.type_to_filetypes["pwa-node"] = js_filetypes
 
-  for _, language in ipairs(js_filetypes) do
-    if not dap.configurations[language] then
-      dap.configurations[language] = {
-        {
-          type = chrome_type,
-          name = "React: Attach",
-          request = "attach",
-          program = "${file}",
-          cwd = "${workspaceFolder}",
-          sourceMaps = true,
-          protocol = "inspector",
-          port = 9222,
-          webRoot = "${workspaceFolder}",
+for _, language in ipairs(js_filetypes) do
+  if not dap.configurations[language] then
+    dap.configurations[language] = {
+      {
+        type = chrome_type,
+        name = "React: Attach",
+        request = "attach",
+        program = "${file}",
+        cwd = "${workspaceFolder}",
+        sourceMaps = true,
+        protocol = "inspector",
+        port = 9222,
+        webRoot = "${workspaceFolder}",
+      },
+      {
+        type = node_type,
+        request = "launch",
+        name = "NodeJS: Launch file",
+        program = "${file}",
+        cwd = "${workspaceFolder}",
+      },
+      {
+        type = node_type,
+        request = "attach",
+        name = "NodeJS: Attach to 9228",
+        cwd = "${workspaceFolder}",
+        port = 9228,
+      },
+      {
+        type = node_type,
+        request = "attach",
+        name = "NodeJS: Pick process",
+        processId = require("dap.utils").pick_process,
+        cwd = "${workspaceFolder}",
+      },
+      {
+        type = "pwa-node",
+        request = "attach",
+        name = "Debug React Native App (Advanced Setup)",
+        port = 8081,
+        address = "localhost",
+        localRoot = "${workspaceFolder}",
+        remoteRoot = "${workspaceFolder}",
+        sourceMaps = true,
+        skipFiles = {
+          "<node_internals>/**",
+          "node_modules/**",
+          "**/node_modules/undici/**",
+          "**/node_modules/typescript/**",
+          "**/node_modules/@expo/**",
+          "**/*.bundle.js",
+          "**/*.min.js",
         },
-        {
-          type = node_type,
-          request = "launch",
-          name = "NodeJS: Launch file",
-          program = "${file}",
-          cwd = "${workspaceFolder}",
-        },
-        {
-          type = node_type,
-          request = "attach",
-          name = "NodeJS: Attach to 9228",
-          cwd = "${workspaceFolder}",
-          port = 9228,
-        },
-        {
-          type = node_type,
-          request = "attach",
-          name = "NodeJS: Pick process",
-          processId = require("dap.utils").pick_process,
-          cwd = "${workspaceFolder}",
-        },
-      }
-    end
-  end
-else
-  local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
-
-  local vscode = require("dap.ext.vscode")
-  vscode.type_to_filetypes["node"] = js_filetypes
-  vscode.type_to_filetypes["pwa-node"] = js_filetypes
-
-  for _, language in ipairs(js_filetypes) do
-    if not dap.configurations[language] then
-      dap.configurations[language] = {
-        {
-          type = "pwa-node",
-          request = "attach",
-          name = "Debug React Native App (Advanced Setup)",
-          port = 8081,
-          address = "localhost",
-          localRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
-          remoteRoot = "${workspaceFolder}/apps/client/assistant-prm-airport/agent",
-          sourceMaps = true,
-          skipFiles = {
-            "<node_internals>/**",
-            "node_modules/**",
-            "**/node_modules/undici/**",
-            "**/node_modules/typescript/**",
-            "**/node_modules/@expo/**",
-            "**/*.bundle.js",
-            "**/*.min.js",
-          },
-          -- Connect via WebSocket protocol used by React Native
-          protocol = "inspector",
-          timeout = 30000,
-        },
-      }
-    end
+        -- Connect via WebSocket protocol used by React Native
+        protocol = "inspector",
+        timeout = 30000,
+      },
+    }
   end
 end
+
 -- stylua: ignore
 local keys = {
   { "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: ')) end, desc = "Breakpoint Condition" },
