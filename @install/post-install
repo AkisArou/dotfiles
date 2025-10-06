@@ -72,3 +72,13 @@ Various
 
 * (ASUS LAPTOP)
   set headset as default at pavu
+
+* add swapfile for limited memory systems(while keeping zram):
+  sudo fallocate -l 16G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon -p 10 /swapfile
+  swapon --show (to confirm)
+
+  Then add to /etc/fstab to make it permanent:
+  /swapfile none swap defaults,pri=10 0 0
