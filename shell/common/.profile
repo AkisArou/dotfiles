@@ -40,7 +40,7 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "Select session type:"
   echo "1) Sway (default)"
   echo "2) i3"
-  printf "Enter choice [1-3]: "
+  printf "Enter choice [1-2]: "
   read session_choice
 
   session_choice=${session_choice:-1}
