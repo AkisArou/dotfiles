@@ -49,7 +49,7 @@
       "src": "https://github.com/Bilal2453/luvit-meta"
     },
     "mason-lspconfig.nvim": {
-      "rev": "155eac5",
+      "rev": "6bdb14f",
       "src": "https://github.com/williamboman/mason-lspconfig.nvim"
     },
     "mason-nvim-dap.nvim": {
@@ -199,7 +199,7 @@
       "src": "https://github.com/folke/which-key.nvim"
     },
     "yazi.nvim": {
-      "rev": "3d6e3ee",
+      "rev": "11c93ba",
       "src": "https://github.com/mikavilpas/yazi.nvim"
     }
   }
