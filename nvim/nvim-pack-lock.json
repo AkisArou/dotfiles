@@ -9,7 +9,7 @@
       "src": "https://github.com/b0o/SchemaStore.nvim"
     },
     "blink.cmp": {
-      "rev": "a999ddc",
+      "rev": "d918ebd",
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
@@ -101,7 +101,7 @@
       "src": "https://github.com/catgoose/nvim-colorizer.lua"
     },
     "nvim-dap": {
-      "rev": "48570d8",
+      "rev": "881f7dc",
       "src": "https://github.com/mfussenegger/nvim-dap"
     },
     "nvim-dap-ui": {
@@ -117,7 +117,7 @@
       "src": "https://github.com/nvim-neotest/nvim-nio"
     },
     "nvim-treesitter": {
-      "rev": "01ced749",
+      "rev": "0594d1ba",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
@@ -199,7 +199,7 @@
       "src": "https://github.com/folke/which-key.nvim"
     },
     "yazi.nvim": {
-      "rev": "11c93ba",
+      "rev": "339035d",
       "src": "https://github.com/mikavilpas/yazi.nvim"
     }
   }
