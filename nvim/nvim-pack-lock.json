@@ -109,7 +109,7 @@
       "src": "https://github.com/rcarriga/nvim-dap-ui"
     },
     "nvim-lint": {
-      "rev": "335a604",
+      "rev": "9da1fb9",
       "src": "https://github.com/mfussenegger/nvim-lint"
     },
     "nvim-nio": {
