@@ -3,7 +3,7 @@
 " You can find a list of commands here: https://jb.gg/h38q75
 " Find more examples here: https://jb.gg/share-ideavimrc
 
-source ~/dotfiles/vim/.vimrc
+source ~/dotfiles/vim/vimrc
 
 set surround
 set NERDTree
