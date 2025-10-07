@@ -5,7 +5,7 @@
       "src": "https://github.com/antoinemadec/FixCursorHold.nvim"
     },
     "SchemaStore.nvim": {
-      "rev": "8e17e50",
+      "rev": "f3d6d9a",
       "src": "https://github.com/b0o/SchemaStore.nvim"
     },
     "blink.cmp": {
@@ -25,7 +25,7 @@
       "src": "https://github.com/j-hui/fidget.nvim"
     },
     "fzf-lua": {
-      "rev": "a13c5c5",
+      "rev": "c0c0926",
       "src": "https://github.com/ibhagwan/fzf-lua"
     },
     "gitsigns.nvim": {
@@ -77,7 +77,7 @@
       "src": "https://github.com/echasnovski/mini.pairs"
     },
     "mini.surround": {
-      "rev": "61db6ba",
+      "rev": "fc6fbc3",
       "src": "https://github.com/echasnovski/mini.surround"
     },
     "neogit": {
@@ -117,7 +117,7 @@
       "src": "https://github.com/nvim-neotest/nvim-nio"
     },
     "nvim-treesitter": {
-      "rev": "0594d1ba",
+      "rev": "3ab4f2d2",
       "src": "https://github.com/nvim-treesitter/nvim-treesitter",
       "version": "'main'"
     },
@@ -199,7 +199,7 @@
       "src": "https://github.com/folke/which-key.nvim"
     },
     "yazi.nvim": {
-      "rev": "339035d",
+      "rev": "599d1b9",
       "src": "https://github.com/mikavilpas/yazi.nvim"
     }
   }
