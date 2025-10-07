@@ -132,7 +132,12 @@
     }
   ],
   "enabledByDefault": false,
-  "enabledFor": ["skroutz.gr", "play.google.com", "www.npmjs.com"],
+  "enabledFor": [
+    "skroutz.gr",
+    "play.google.com",
+    "www.npmjs.com",
+    "stackoverflow.com"
+  ],
   "disabledFor": [],
   "changeBrowserTheme": false,
   "syncSettings": true,
