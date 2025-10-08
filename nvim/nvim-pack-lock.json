@@ -9,7 +9,7 @@
       "src": "https://github.com/b0o/SchemaStore.nvim"
     },
     "blink.cmp": {
-      "rev": "d918ebd",
+      "rev": "8483171",
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
