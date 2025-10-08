@@ -13,7 +13,7 @@
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
-      "rev": "9d859cb",
+      "rev": "fbcb4fa",
       "src": "https://github.com/stevearc/conform.nvim"
     },
     "diffview.nvim": {
@@ -199,7 +199,7 @@
       "src": "https://github.com/folke/which-key.nvim"
     },
     "yazi.nvim": {
-      "rev": "599d1b9",
+      "rev": "5127a44",
       "src": "https://github.com/mikavilpas/yazi.nvim"
     }
   }
