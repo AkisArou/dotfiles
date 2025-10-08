@@ -5,11 +5,11 @@
       "src": "https://github.com/antoinemadec/FixCursorHold.nvim"
     },
     "SchemaStore.nvim": {
-      "rev": "f3d6d9a",
+      "rev": "7d0a0b9",
       "src": "https://github.com/b0o/SchemaStore.nvim"
     },
     "blink.cmp": {
-      "rev": "8483171",
+      "rev": "5eb4e7f",
       "src": "https://github.com/saghen/blink.cmp"
     },
     "conform.nvim": {
