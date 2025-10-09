@@ -1,9 +1,9 @@
+nvim/nvim-pack-lock.json
 .idea
 __pycache__/
 node_modules/
 bookmarks
 lazygit/state.yml
-lazy-lock.json
 tt.*
 .tests
 doc/tags
