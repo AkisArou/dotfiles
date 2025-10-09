@@ -1,6 +1,8 @@
 vim.g.is_work = vim.fn.getcwd():match("nable%-solutions") ~= nil
 vim.g.os_theme = os.getenv("THEME") or "tokyonight"
 
+vim.cmd("packadd nvim.undotree")
+
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
     local name = event.data.spec.name
@@ -93,8 +95,6 @@ vim.pack.add({
 
   github("folke/todo-comments.nvim"),
 
-  github("mbbill/undotree"),
-
   github("christoomey/vim-tmux-navigator"),
 
   github("mg979/vim-visual-multi"),
@@ -145,7 +145,6 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.snacks")
   require("plugins.todo-comments")
-  require("plugins.undotree")
   require("plugins.which-key")
   require("plugins.template-string")
   require("plugins.fidget")

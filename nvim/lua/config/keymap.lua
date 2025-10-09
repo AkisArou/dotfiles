@@ -63,3 +63,5 @@ end, opts)
 map("n", "]b", function()
   format_and_switch_buffer("bnext")
 end, opts)
+
+vim.keymap.set("n", "<leader>uu", vim.cmd.Undotree)
