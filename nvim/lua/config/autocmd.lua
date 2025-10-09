@@ -206,6 +206,15 @@ vim.api.nvim_create_autocmd("TermOpen", {
   end,
 })
 
+-- Customize the built-in undotree window
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "nvim-undotree",
+  callback = function()
+    vim.cmd.wincmd("H")
+    vim.api.nvim_win_set_width(0, 40)
+  end,
+})
+
 -- keyboard
 local session_type = os.getenv("XDG_SESSION_TYPE")
 local is_wayland = session_type == "wayland"
