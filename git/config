@@ -38,14 +38,14 @@
 
 [merge]
   conflictstyle = diff3
-  tool = diffview
+  tool = nvimdiff 
 
 [mergetool]
   prompt = false
   keepBackup = false
 
-[mergetool "diffview"]
-  cmd = nvim -n -c "DiffviewOpen" "$MERGE"
+[mergetool "nvimdiff"]
+  cmd = nvim -c "packadd nvim.difftool" -c "DiffTool" "$MERGE"
 
 [difftool]
     prompt = true
