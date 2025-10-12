@@ -40,11 +40,9 @@
   conflictstyle = diff3
   tool = nvimdiff 
 
-[mergetool]
+[mergetool "nvimdiff"]
   prompt = false
   keepBackup = false
-
-[mergetool "nvimdiff"]
   layout = "LOCAL,BASE,REMOTE / MERGED"
 
 [difftool]
