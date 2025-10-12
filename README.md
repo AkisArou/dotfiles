@@ -1,5 +1,3 @@
-#FROM MAIN
-
 # akisarou dotfiles
 
 This is the configuration of my Arch linux and other useful programs
