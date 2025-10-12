@@ -126,30 +126,6 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
--- Clear unnamed buffers
--- vim.api.nvim_create_autocmd("BufReadPost", {
---   group = augroup("clear_unnamed_bufs"),
---   pattern = "*",
---   callback = function()
---     local buffers = vim.api.nvim_list_bufs()
---
---     for _, bufnr in ipairs(buffers) do
---       if
---         vim.api.nvim_buf_is_loaded(bufnr)
---         and not vim.api.nvim_get_option_value("modified", { buf = bufnr })
---         and vim.api.nvim_buf_get_name(bufnr) == ""
---         and vim.bo.buftype ~= "quickfix"
---         and vim.bo.buftype ~= "gitcommit"
---         and vim.bo.buftype:find("^Neogit") == nil
---       then
---         vim.api.nvim_buf_delete(bufnr, {
---           force = true,
---         })
---       end
---     end
---   end,
--- })
-
 -- Autosave
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
   group = augroup("autowrite"),
@@ -174,15 +150,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
       vim.cmd('normal! g`"')
       vim.cmd("normal! zz")
     end
-  end,
-})
-
--- Refresh buffer when neogit status changed
-vim.api.nvim_create_autocmd("User", {
-  group = augroup("neogit"),
-  pattern = "NeogitStatusRefreshed",
-  callback = function()
-    vim.cmd("set autoread | checktime")
   end,
 })
 

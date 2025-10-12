@@ -58,8 +58,6 @@ vim.pack.add({
 
   github("ibhagwan/fzf-lua"),
 
-  github("NeogitOrg/neogit"),
-
   github("pwntester/octo.nvim"),
 
   github("lewis6991/gitsigns.nvim"),
@@ -134,7 +132,6 @@ vim.schedule(function()
   require("plugins.grug-far")
   require("plugins.highlighturl")
   require("plugins.nvim-colorizer")
-  require("plugins.neogit")
   require("plugins.mini")
   require("plugins.octo")
   require("plugins.snacks")
