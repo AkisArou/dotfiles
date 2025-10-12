@@ -37,8 +37,8 @@
   diffFilter = delta --color-only --features=interactive
 
 [merge]
-  conflictstyle = diff3
   tool = nvimdiff 
+  conflictstyle = diff3
 
 [mergetool]
   prompt = false
@@ -47,15 +47,18 @@
 [mergetool "nvimdiff"]
   layout = "LOCAL,BASE,REMOTE / MERGED"
 
-[difftool]
-    prompt = true
-
 [diff]
-  tool = nvimdifftool
+  tool = nvimdiff
   colorMoved = default
 
+[difftool]
+    prompt = false
+
+[difftool "nvimdiff"]
+  cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+
 [difftool "nvimdifftool"]
-  cmd = nvim -c "packadd nvim.difftool" -c "DiffTool \"$LOCAL\" \"$REMOTE\""
+  cmd = nvim -c "DiffTool \"$LOCAL\" \"$REMOTE\""
 
 [fetch]
   # Auto-fetch submodule changes (sadly, won't auto-update)
