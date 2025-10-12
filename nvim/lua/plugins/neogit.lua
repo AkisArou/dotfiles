@@ -8,7 +8,7 @@ neogit.setup({
     -- The diffview integration enables the diff popup.
     --
     -- Requires you to have `sindrets/diffview.nvim` installed.
-    diffview = true,
+    diffview = false,
 
     -- If enabled, uses fzf-lua for menu selection. If the telescope integration
     -- is also selected then telescope is used instead
@@ -24,10 +24,3 @@ neogit.setup({
 })
 
 vim.keymap.set("n", "<leader>gs", vim.cmd.Neogit)
-
-vim.keymap.set("n", "<leader>gdf", function()
-  vim.cmd("DiffviewFileHistory %")
-end, { desc = "DiffviewFileHistory current file" })
-
-vim.keymap.set("n", "<leader>gdo", vim.cmd.DiffviewOpen, { desc = "DiffviewOpen" })
-vim.keymap.set("n", "<leader>gdc", vim.cmd.DiffviewClose, { desc = "DiffviewClose" })

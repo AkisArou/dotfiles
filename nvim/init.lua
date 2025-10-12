@@ -56,8 +56,6 @@ vim.pack.add({
   github("nvim-neotest/nvim-nio"),
   github("mfussenegger/nvim-dap"),
 
-  github("sindrets/diffview.nvim"),
-
   github("ibhagwan/fzf-lua"),
 
   github("NeogitOrg/neogit"),
