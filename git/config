@@ -48,7 +48,7 @@
   layout = "LOCAL,BASE,REMOTE / MERGED"
 
 [diff]
-  tool = nvimdiff
+  tool = nvimdifftool
   colorMoved = default
 
 [difftool]
@@ -58,7 +58,7 @@
   cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
 
 [difftool "nvimdifftool"]
-  cmd = nvim -c "DiffTool \"$LOCAL\" \"$REMOTE\""
+  cmd = nvim -c "\"DiffTool $LOCAL $REMOTE\""
 
 [fetch]
   # Auto-fetch submodule changes (sadly, won't auto-update)
