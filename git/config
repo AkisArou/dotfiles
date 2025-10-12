@@ -45,16 +45,16 @@
   keepBackup = false
 
 [mergetool "nvimdiff"]
-  cmd = nvim -c "packadd nvim.difftool" -c "DiffTool" "$MERGE"
+  layout = "LOCAL,BASE,REMOTE / MERGED"
 
 [difftool]
     prompt = true
 
 [diff]
-  tool = nvimdiff
+  tool = nvimdifftool
   colorMoved = default
 
-[difftool "nvimdiff"]
+[difftool "nvimdifftool"]
   cmd = nvim -c "packadd nvim.difftool" -c "DiffTool $LOCAL $REMOTE"
 
 [fetch]
