@@ -65,3 +65,22 @@ map("n", "]b", function()
 end, opts)
 
 vim.keymap.set("n", "<leader>uu", vim.cmd.Undotree)
+
+local difftool_floating_window = require("custom.floating-window").create_floating_window_api(function(state)
+  if vim.bo[state.floating.buf].buftype ~= "terminal" then
+    vim.cmd("terminal git difftool -d")
+  end
+
+  vim.cmd("startinsert")
+end)
+
+vim.keymap.set({ "n", "t" }, "<leader>gd", difftool_floating_window.toggle_fresh)
+
+vim.keymap.set("n", "<leader>t", function()
+  vim.cmd.vnew()
+  vim.cmd.term()
+  vim.cmd.wincmd("J")
+  vim.api.nvim_win_set_height(0, 15)
+end)
+
+vim.keymap.set("n", "<leader>cp", require("custom.pnpm").install)

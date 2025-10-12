@@ -157,7 +157,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
   callback = function()
     require("plugins.schemastore")
-    require("custom.pnpm").setup()
   end,
 })
 
