@@ -55,7 +55,7 @@
   colorMoved = default
 
 [difftool "nvimdiff"]
-    cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+  cmd = nvim -c "packadd nvim.difftool" -c "DiffTool $LOCAL $REMOTE"
 
 [fetch]
   # Auto-fetch submodule changes (sadly, won't auto-update)

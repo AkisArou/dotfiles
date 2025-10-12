@@ -1,6 +1,7 @@
 vim.g.is_work = vim.fn.getcwd():match("nable%-solutions") ~= nil
 vim.g.os_theme = os.getenv("THEME") or "tokyonight"
 
+vim.cmd("packadd nvim.difftool")
 vim.cmd("packadd nvim.undotree")
 
 vim.api.nvim_create_autocmd("PackChanged", {
