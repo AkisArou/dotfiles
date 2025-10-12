@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 #FROM MAIN
 
+||||||| 24fd31a
+=======
+#FROM CONFLICT_TEST
+
+>>>>>>> conflict-test
 # akisarou dotfiles
 
 This is the configuration of my Arch linux and other useful programs
