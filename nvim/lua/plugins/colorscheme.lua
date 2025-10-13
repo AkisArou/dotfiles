@@ -16,14 +16,18 @@ local themes = {
         highlights["DiagnosticSignWarn"] = { fg = "#7a3f22" }
         highlights["DiagnosticSignInfo"] = { fg = "#2a4373" }
         highlights["DiagnosticSignHint"] = { fg = "#364a23" }
-        highlights["DiagnosticUnderlineError"] = { fg = "#4a1b22" }
         highlights["DiagnosticVirtualTextError"] = { fg = "#3b4050" }
         highlights["CursorLineNr"] = { fg = "#737aa2" }
         highlights["DiagnosticUnnecessary"] = { fg = "#6F7E99" }
       end,
     })
 
-    vim.cmd("hi HighlightUrl guifg=#5f8ae9 gui=underline")
+    vim.defer_fn(function()
+      vim.cmd([[ 
+      hi HighlightUrl guifg=#5f8ae9 gui=underline
+      hi DiagnosticUnderlineError guisp=#7a3844 gui=undercurl
+    ]])
+    end, 0)
   end,
   vscode = function()
     vim.o.background = "dark"
