@@ -17,21 +17,13 @@ require("blink-cmp").setup({
   },
 
   sources = {
-    default = (function()
-      local default_sources = {
-        "lsp",
-        "path",
-        "lazydev",
-        "buffer",
-        -- "ripgrep"
-      }
-
-      if vim.g.is_work then
-        table.insert(default_sources, "commit")
-      end
-
-      return default_sources
-    end)(),
+    default = {
+      "lsp",
+      "path",
+      "lazydev",
+      "buffer",
+      -- "ripgrep"
+    },
 
     providers = {
       lazydev = {
@@ -40,15 +32,6 @@ require("blink-cmp").setup({
         score_offset = 100, -- show at a higher priority than lsp
         fallbacks = { "lsp" },
       },
-
-      commit = vim.g.is_work and {
-        name = "Commit",
-        module = "custom.blink-commit",
-        enabled = function()
-          return vim.bo.filetype == "gitcommit"
-        end,
-        opts = {},
-      } or nil,
     },
   },
 

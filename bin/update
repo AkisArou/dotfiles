@@ -48,3 +48,7 @@ echo
 
 print_info "corepack:"
 npm install --global corepack@latest
+echo
+
+print_info "npm:"
+npm install -g npm@latest
