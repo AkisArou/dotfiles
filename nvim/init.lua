@@ -8,10 +8,6 @@ vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
     local name = event.data.spec.name
 
-    if name == "nvim-treesitter" then
-      vim.cmd("TSUpdate")
-    end
-
     if name == "blink.cmp" then
       local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
 
