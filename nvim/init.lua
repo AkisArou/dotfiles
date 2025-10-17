@@ -142,7 +142,7 @@ end)
 -- Autocmd load
 vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
-  pattern = { "*.ts", "*.tsx", "*.js", "*.jsx" },
+  pattern = { "*test.ts", "*test.tsx", "*test.js", "*test.jsx" },
   callback = function()
     require("plugins.neotest")
   end,
