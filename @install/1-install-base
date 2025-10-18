@@ -106,7 +106,7 @@ packages=(
   "scrcpy"
   "sshpass"
   "terminus-font"
-  "tldr"
+  "tealdeer"
   "tmux"
   "tree-sitter-cli-git"
   "ttf-dm-mono-git"
