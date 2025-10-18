@@ -8,6 +8,11 @@ fzf_lua.setup({
     preview = {
       layout = "vertical",
     },
+    -- Make float bottom
+    row = 1,
+    col = 0,
+    height = 0.65,
+    width = 1,
   },
   fzf_opts = { ["--cycle"] = true },
   keymap = {
