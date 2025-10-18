@@ -1,3 +1,4 @@
+require("config.packages")
 require("config.options")
 require("config.filetype")
 require("config.autocmd")
