@@ -1,5 +1,5 @@
-require("config.packages")
 require("config.options")
+require("config.packages")
 require("config.filetype")
 require("config.autocmd")
 require("config.keymap")
