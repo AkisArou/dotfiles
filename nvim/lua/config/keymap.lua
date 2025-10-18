@@ -76,7 +76,7 @@ end)
 
 vim.keymap.set({ "n", "t" }, "<leader>gd", difftool_floating_window.toggle_fresh)
 
-vim.keymap.set("n", "<leader>t", function()
+vim.keymap.set("n", "<leader>`", function()
   vim.cmd.vnew()
   vim.cmd.term()
   vim.cmd.wincmd("J")
