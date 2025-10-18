@@ -99,8 +99,8 @@ ya pkg add yazi-rs/plugins:smart-paste
 ya pkg add aresler/path-from-root
 ya pkg add llanosrocas/githead
 
-print_info "Building bat cache..."
-bat cache --build
+print_info "Downloading tldr cache..."
+tldr --update
 
 print_info "Generating zsh completions..."
 ~/dotfiles/scripts/setup-completions
