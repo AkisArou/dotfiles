@@ -166,6 +166,7 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 
 gaps inner 3
 smart_gaps inverse_outer
+hide_edge_borders smart
 
 for_window [class="^.*"] border pixel 4
 
