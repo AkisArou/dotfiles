@@ -3,7 +3,7 @@
   "blocks": [
     {
       "alignment": "left",
-      "newline": true,
+      "newline": false,
       "segments": [
         {
           "foreground": "#ffafd2",
