@@ -18,7 +18,7 @@ perms:
   user_execute_file: { foreground: "#9ece6a" }
   user_execute_other: { foreground: "#9ece6a" }
   group_read: { foreground: "#2ac3de" }
-  group_write: { foreground: "#ff9e64" }
+  group_write: { foreground: "#ff9e64", bold: false }
   group_execute: { foreground: "#9ece6a" }
   other_read: { foreground: "#2ac3de" }
   other_write: { foreground: "#ff007c" }
@@ -43,7 +43,7 @@ size:
 
 users:
   user_you: { foreground: "#3d59a1", bold: false }
-  user_root: { foreground: "#bb9af7" }
+  user_root: { foreground: "#bb9af7", bold: false }
   user_other: { foreground: "#2ac3de" }
   group_yours: { foreground: "#89ddff" }
   group_root: { foreground: "#bb9af7" }

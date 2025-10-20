@@ -8,13 +8,6 @@ source "${ZINIT_HOME}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-# plugins
-# zinit ice src"pure.zsh"
-# zinit light sindresorhus/pure
-
-zinit ice depth"1" # git clone depth
-zinit light romkatv/powerlevel10k
-
 zinit ice cloneonly
 zinit light zsh-users/zsh-autosuggestions
 
