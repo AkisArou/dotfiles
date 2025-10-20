@@ -7,5 +7,5 @@ if [ -f "$HOME/dotfiles/eza/${THEME}.yml" ]; then
 else
   echo "eza theme file does not exist. Applying default"
   mkdir -p "$HOME/.config/eza"
-  ln -sf "$HOME/dotfiles/eza/onedark.yml" "$HOME/.config/eza/theme.yml"
+  ln -sf "$HOME/dotfiles/eza/tokyonight.yml" "$HOME/.config/eza/theme.yml"
 fi
