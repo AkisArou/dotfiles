@@ -164,7 +164,7 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 
 
 
-gaps inner 3
+gaps inner 6
 smart_gaps inverse_outer
 hide_edge_borders smart
 
