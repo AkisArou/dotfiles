@@ -8,8 +8,10 @@
         {
           "foreground": "#ffafd2",
           "style": "diamond",
-          "template": "{{ .Path }} ",
-          "type": "path"
+          "type": "path",
+          "properties": {
+            "style": "full"
+          }
         },
         {
           "foreground": "#ee79d1",
@@ -62,6 +64,5 @@
       "type": "prompt"
     }
   ],
-  "console_title_template": "{{ .Folder }}",
   "version": 3
 }
