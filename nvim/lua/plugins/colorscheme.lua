@@ -19,6 +19,7 @@ local themes = {
         highlights["DiagnosticVirtualTextError"] = { fg = "#3b4050" }
         highlights["CursorLineNr"] = { fg = "#737aa2" }
         highlights["DiagnosticUnnecessary"] = { fg = "#6F7E99" }
+        highlights["FloatBorder"] = { fg = "#737aa2" }
       end,
     })
 
