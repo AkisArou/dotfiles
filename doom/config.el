@@ -1,7 +1,11 @@
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
 (setq doom-theme 'doom-dracula)
 
 (setq display-line-numbers-type t)
 
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
 (setq confirm-kill-emacs nil)
@@ -26,7 +30,6 @@
       :nv "L" #'centaur-tabs-forward
       )
 
-
 ;;
 ;; auto-save
 ;;
@@ -41,12 +44,6 @@
 ;;
 ;; lsp
 ;;
-
-(use-package! lsp-biome
-  :init
-  (setq lsp-biome-organize-imports-on-save t)
-  (setq lsp-biome-organize-imports-on-save t))
-
 (use-package! lsp-tailwindcss)
 
 (after! lsp-mode
@@ -54,29 +51,28 @@
     (setq lsp-completion-provider :none)
     (add-hook 'lsp-mode-hook #'lsp-completion-mode)))
 
-
 ;;
 ;; orderless
 ;;
 
-(with-eval-after-load 'orderless
-  (setq completion-styles '(orderless flex))
-  )
+;; (with-eval-after-load 'orderless
+;;   (setq completion-styles '(orderless flex))
+;;   )
 
-;;
-;; corfu
-;;
+;; ;;
+;; ;; corfu
+;; ;;
 
-(with-eval-after-load 'corfu
-  (unless (display-graphic-p)
-    (corfu-terminal-mode +1))
+;; (with-eval-after-load 'corfu
+;;   (unless (display-graphic-p)
+;;     (corfu-terminal-mode +1))
 
-  (setq corfu-auto t)               ;; Enable auto completion
-  (setq corfu-preselect 'directory) ;; Select the first candidate, except for directories
+;;   (setq corfu-auto t)               ;; Enable auto completion
+;;   (setq corfu-preselect 'directory) ;; Select the first candidate, except for directories
 
-  (map! :map corfu-map
-        :i "C-e" #'corfu-insert
-        )
-  )
+;;   (map! :map corfu-map
+;;         :i "C-e" #'corfu-insert
+;;         )
+;;   )
 
-(global-corfu-mode 1)
+;; (global-corfu-mode 1)
