@@ -43,15 +43,6 @@
           "type": "text"
         },
         {
-          "foreground": "#a9ffb4",
-          "properties": {
-            "style": "dallas",
-            "threshold": 5000
-          },
-          "style": "diamond",
-          "type": "executiontime"
-        },
-        {
           "properties": {
             "root_icon": "\uf292 "
           },
