@@ -80,6 +80,9 @@
   # (because there is no dedicated `reflog` section available)
   decorate = false
 
+[pull]
+  rebase = merges
+
 [push]
   # Default push should only push the current branch to its push target, regardless of its remote name
   default = upstream
