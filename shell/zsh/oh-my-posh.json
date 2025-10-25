@@ -29,31 +29,6 @@
       "type": "prompt"
     },
     {
-      "alignment": "right",
-      "segments": [
-        {
-          "type": "node",
-          "style": "plain",
-          "foreground": "#9ece6a",
-          "template": "\ue718 {{ .Full }} "
-        },
-        {
-          "foreground": "#a9ffb4",
-          "style": "plain",
-          "type": "text"
-        },
-        {
-          "properties": {
-            "root_icon": "\uf292 "
-          },
-          "style": "diamond",
-          "template": " \uf0e7 ",
-          "type": "root"
-        }
-      ],
-      "type": "prompt"
-    },
-    {
       "alignment": "left",
       "newline": true,
       "type": "prompt",
