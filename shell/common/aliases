@@ -31,3 +31,5 @@ alias ga="git add ."
 alias gc="git commit -m"
 alias gp="git pull"
 alias gP="git push"
+
+alias weather="curl wttr.in/didymoteicho"
