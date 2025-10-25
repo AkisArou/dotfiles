@@ -7,7 +7,6 @@ alias v="nvim"
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
 alias ip="ip -color=auto"
-alias grep="grep --color=auto"
 
 alias lg='lazygit'
 
