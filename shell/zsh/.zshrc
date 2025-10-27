@@ -16,5 +16,3 @@ source "$HOME/dotfiles/shell/zsh/opts"
 source "$HOME/dotfiles/shell/zsh/vim-mode"
 source "$HOME/dotfiles/shell/common/functions"
 [ -f ~/.asdf/plugins/java/set-java-home.zsh ] && . ~/.asdf/plugins/java/set-java-home.zsh
-
-export-lan-ip
