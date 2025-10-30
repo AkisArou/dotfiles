@@ -1,14 +1,23 @@
 AddKeysToAgent yes
 
+# Local host
 Host 192.168.1.2
-	HostName 192.168.1.2
-	User akisarou
+  HostName 192.168.1.2
+  User akisarou
 
+# Default settings
 Host *
-	# Always use SSH2.
-	Protocol 2
+  Protocol 2
   ConnectTimeout 10
 
+# Local network hosts
 Host 192.168.*.*
-	Protocol 2
+  Protocol 2
   Compression no
+
+# # Azure DevOps
+# Host ssh.dev.azure.com
+#   HostName ssh.dev.azure.com
+#   IdentityFile ~/.ssh/id_rsa
+#   IdentitiesOnly yes
+#   AddKeysToAgent yes
