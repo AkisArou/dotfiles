@@ -8,11 +8,6 @@
     "when": "editorFocus || editorIsOpen"
   },
   {
-    "key": "ctrl+h",
-    "command": "-extension.vim_ctrl+h",
-    "when": "editorTextFocus && vim.active && vim.use<C-h> && !inDebugRepl"
-  },
-  {
     "key": "ctrl+n",
     "command": "-workbench.action.files.newUntitledFile"
   },
@@ -52,11 +47,6 @@
     "key": "ctrl+l",
     "command": "-notebook.centerActiveCell",
     "when": "notebookEditorFocused"
-  },
-  {
-    "key": "ctrl+l",
-    "command": "-extension.vim_navigateCtrlL",
-    "when": "editorTextFocus && vim.active && vim.use<C-l> && !inDebugRepl"
   },
   {
     "key": "ctrl+left",
@@ -99,13 +89,13 @@
   //
   {
     "key": "ctrl+h",
-    "command": "workbench.action.focusLeftGroup",
-    "when": "editorTextFocus && vim.active && vim.mode != 'Insert'"
+    "command": "workbench.action.navigateLeft",
+    "when": "vim.active && vim.mode == 'Normal'"
   },
   {
     "key": "ctrl+l",
-    "command": "workbench.action.focusRightGroup",
-    "when": "editorTextFocus && vim.active && vim.mode != 'Insert'"
+    "command": "workbench.action.navigateRight",
+    "when": "vim.active && vim.mode == 'Normal'"
   },
   {
     "key": "ctrl+k",
@@ -116,14 +106,6 @@
     "key": "ctrl+j",
     "command": "workbench.action.focusBelowGroup",
     "when": "editorTextFocus && vim.active && vim.mode != 'Insert'"
-  },
-  {
-    "key": "Ctrl+h",
-    "command": "workbench.explorer.fileView.focus"
-  },
-  {
-    "key": "Ctrl+l",
-    "command": "workbench.action.focusActiveEditorGroup"
   },
 
   //
@@ -198,6 +180,15 @@
     "key": "ctrl+e",
     "command": "workbench.action.acceptSelectedQuickOpenItem",
     "when": "inQuickOpen"
+  },
+
+  //
+  // Inputs
+  //
+  {
+    "key": "ctrl+w",
+    "command": "deleteWordLeft",
+    "when": "textInputFocus && !editorReadonly"
   },
 
   //

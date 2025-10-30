@@ -55,11 +55,6 @@
   "editor.cursorSurroundingLinesStyle": "all",
   "files.autoSave": "onFocusChange",
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
     "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
@@ -111,7 +106,6 @@
   "javascript.updateImportsOnFileMove.enabled": "always",
   "javascript.preferences.importModuleSpecifier": "non-relative",
   "npm.packageManager": "npm",
-  "eslint.debug": false,
   "emmet.includeLanguages": {
     "javascript": "javascriptreact",
     "typescript": "javascriptreact"
@@ -335,5 +329,12 @@
       "when": "editorTextFocus"
     }
   ],
-  "hide-files.files": []
+  "debug.javascript.autoAttachFilter": "always",
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+  "clangd.detectExtensionConflicts": false
 }
