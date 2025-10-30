@@ -20,7 +20,7 @@ nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'lua require
 echo
 
 print_info "zinit:"
-zinit self-update
+source /usr/share/zinit/zinit.zsh
 zinit update --parallel
 echo
 
