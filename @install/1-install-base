@@ -131,6 +131,7 @@ packages=(
   "xdg-user-dirs"
   "xdg-utils"
   "yazi-git"
+  "zinit-git"
   "zsh"
 )
 
@@ -160,8 +161,6 @@ fi
 install_packages "${packages[@]}"
 
 ~/dotfiles/scripts/build-nvim
-
-bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
 
 # Install custom issue (login prompt)
 echo ""
