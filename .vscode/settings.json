@@ -55,6 +55,11 @@
   "editor.cursorSurroundingLinesStyle": "all",
   "files.autoSave": "onFocusChange",
   "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
     "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
@@ -336,5 +341,6 @@
     "markdown": false,
     "scminput": false
   },
-  "clangd.detectExtensionConflicts": false
+  "clangd.detectExtensionConflicts": false,
+  "hide-files.files": []
 }
