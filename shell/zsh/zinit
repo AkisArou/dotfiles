@@ -5,9 +5,6 @@ source /usr/share/zinit/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
-zinit ice cloneonly
-zinit light zsh-users/zsh-autosuggestions
-
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 zinit light Aloxaf/fzf-tab
