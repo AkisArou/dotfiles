@@ -181,33 +181,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_win_set_width(0, 40)
   end,
 })
-
--- keyboard
-local session_type = os.getenv("XDG_SESSION_TYPE")
-local is_wayland = session_type == "wayland"
-local is_x11 = session_type == "x11"
-
-local function config_keyboard(delay, rate)
-  if is_wayland then
-    vim.fn.system({ "swaymsg", "input", "type:keyboard", "repeat_delay", tostring(delay) })
-    vim.fn.system({ "swaymsg", "input", "type:keyboard", "repeat_rate", tostring(rate) })
-  elseif is_x11 then
-    vim.fn.system({ "xset", "r", "rate", tostring(delay), tostring(rate) })
-  end
-end
-
-vim.api.nvim_create_autocmd({ "VimEnter", "FocusGained" }, {
-  group = augroup("keyboard"),
-  callback = function()
-    vim.schedule(function()
-      config_keyboard(600, 25)
-    end)
-  end,
-})
-
-vim.api.nvim_create_autocmd({ "ExitPre", "FocusLost" }, {
-  group = augroup("keyboard"),
-  callback = function()
-    config_keyboard(220, 33)
-  end,
-})
