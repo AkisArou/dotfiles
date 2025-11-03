@@ -24,7 +24,7 @@ set $down j
 set $up k
 set $right l
 
-set $term exec zsh -lc "$TERM_LAUNCH"
+set $term st
 set $menu ~/dotfiles/rofi/launch -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font

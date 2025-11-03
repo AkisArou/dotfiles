@@ -1,1 +1,33 @@
 #!/usr/bin/zsh
+
+source "$HOME/dotfiles/shell/common/functions"
+
+wake-desktop
+NO_TMUX_AUTO_ATTACH=true "$HOME/dotfiles/foot/launch" -e zsh -c '
+# Wait-for-desktop function
+wait_for_desktop() {
+    local host=$DESKTOP
+    local timeout=120
+    local interval=2
+    local elapsed=0
+
+    echo "Waiting for $host to come online..."
+
+    while ! ping -c1 -W1 "$host" &>/dev/null; do
+        sleep $interval
+        ((elapsed += interval))
+        if ((elapsed >= timeout)); then
+            echo "Timeout waiting for $host"
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+if wait_for_desktop; then
+    ssh $DESKTOP
+else
+    echo "Could not reach $DESKTOP, aborting SSH."
+fi
+'

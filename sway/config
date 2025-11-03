@@ -15,7 +15,7 @@ set $down j
 set $up k
 set $right l
 
-set $term exec zsh -lc "$TERM_LAUNCH"
+set $term ~/dotfiles/foot/launch
 set $menu ~/dotfiles/rofi/launch -show drun
 
 #
@@ -75,7 +75,7 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
-bindsym $mod+Shift+Return exec $term
+bindsym $mod+Shift+Return exec --no-startup-id ~/dotfiles/scripts/ssh-desktop
 bindsym $mod+d exec $menu
 # bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
