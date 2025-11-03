@@ -15,7 +15,7 @@ set $down j
 set $up k
 set $right l
 
-set $term ~/dotfiles/foot/launch
+set $term exec zsh -lc "$TERM_LAUNCH"
 set $menu ~/dotfiles/rofi/launch -show drun
 
 #
@@ -75,6 +75,7 @@ bindsym $mod+q kill
 
 # Programs
 bindsym $mod+Return exec $term
+bindsym $mod+Shift+Return exec $term
 bindsym $mod+d exec $menu
 # bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch

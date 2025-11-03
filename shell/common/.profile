@@ -14,12 +14,14 @@ config_wayland() {
   export XDG_SESSION_TYPE=wayland
   export SDL_VIDEODRIVER=wayland
   export _JAVA_AWT_WM_NONREPARENTING=1
+  export TERM_LAUNCH="$HOME/dotfiles/foot/launch"
   # export QT_QPA_PLATFORM=wayland # Disable for android emulator for now
 }
 
 config_xorg() {
   export MOZ_USE_XINPUT2=1
   export MOZ_X11_EGL=1
+  export TERM_LAUNCH=st
 }
 
 # WM functions

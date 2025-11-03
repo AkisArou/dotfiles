@@ -1,6 +1,6 @@
 eval "$(oh-my-posh init zsh --config "$HOME"/dotfiles/shell/zsh/oh-my-posh.json)"
 
-if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" ]]; then
+if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && -z "$NO_TMUX_AUTO_ATTACH" ]]; then
   tmux attach-session -t default || {
     "$HOME/dotfiles/scripts/start-tmux" && tmux attach-session -t default
   }
