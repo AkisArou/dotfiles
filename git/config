@@ -21,10 +21,17 @@
   line-numbers = true
 
   # tokyonight night
+  # minus
   minus-style                   = "#a85b63"
+  minus-emph-style              = syntax "#4a272f" 
+  minus-empty-line-marker-style = "#4a272f"
   line-numbers-minus-style      = "#a85b63"
+  # plus
   plus-style                    = "#27d6b4"
+  plus-emph-style               = syntax "#0c4740"
+  plus-empty-line-marker-style  = "#243e4a"
   line-numbers-plus-style       = "#27d6b4"
+  #zero
   line-numbers-zero-style       = "#3b4261"
 
 [interactive]
