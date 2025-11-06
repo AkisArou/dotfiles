@@ -10,6 +10,7 @@ export THEME="${THEME:-tokyonight}"
 export GTK_THEME="Tokyonight-Dark"
 export QT_QPA_PLATFORMTHEME=qt6ct
 export BAT_THEME=tokyonight
+export BAT_STYLE="changes,header-filename,numbers,snip"
 
 # tokyonight
 export JQ_COLORS="0;90:33:33:37:32:37:37:36"

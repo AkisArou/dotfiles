@@ -19,6 +19,13 @@
   features = syntax-highlighting
   syntax-theme = tokyonight
   line-numbers = true
+  true-color = always
+  line-numbers-left-format = "{nm:^4}⋮ "
+  line-numbers-right-format = "{np:^4}: "
+  hunk-header-decoration-style = "#24283b ul"
+  file-style ="green"
+  file-decoration-style = "#1a1b26 ul ol" # mimic space
+
 
   # tokyonight night
   # minus
