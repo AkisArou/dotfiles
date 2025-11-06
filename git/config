@@ -23,7 +23,7 @@
   line-numbers-left-format = "{nm:^4}⋮ "
   line-numbers-right-format = "{np:^4}: "
   hunk-header-decoration-style = "#24283b ul"
-  file-style ="green"
+  file-style ="#ff9e64"
   file-decoration-style = "#1a1b26 ul ol" # mimic space
 
 
@@ -34,10 +34,10 @@
   minus-empty-line-marker-style = "#4a272f"
   line-numbers-minus-style      = "#a85b63"
   # plus
-  plus-style                    = "#27d6b4"
-  plus-emph-style               = syntax "#0c4740"
-  plus-empty-line-marker-style  = "#243e4a"
-  line-numbers-plus-style       = "#27d6b4"
+  plus-style                    = "#9ece6a"
+  plus-emph-style               = syntax "#223608"
+  plus-empty-line-marker-style  = "#223608"
+  line-numbers-plus-style       = "#9ece6a"
   #zero
   line-numbers-zero-style       = "#3b4261"
 
