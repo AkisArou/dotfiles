@@ -2,12 +2,12 @@ gui:
   nerdFontsVersion: "3"
   theme:
     activeBorderColor:
-      - "#ff9e64"
+      - "#27a1b9"
       - "bold"
     inactiveBorderColor:
-      - "#27a1b9"
+      - "#283457"
     searchingActiveBorderColor:
-      - "#ff9e64"
+      - "#27a1b9"
       - "bold"
     optionsTextColor:
       - "#7aa2f7"
