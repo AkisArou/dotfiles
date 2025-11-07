@@ -68,6 +68,8 @@ bindsym $mod+Shift+e exec ~/dotfiles/rofi/emulator
 bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
 bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 
+bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
+
 # Move your focus around
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
