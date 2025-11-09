@@ -21,7 +21,6 @@ mason_lspconfig.setup({
     "cssls",
     "tailwindcss",
     "cssmodules_ls",
-    "prismals",
     "dockerls",
     "docker_compose_language_service",
     "yamlls",
