@@ -100,6 +100,8 @@ vim.pack.add({
   github("stevearc/conform.nvim"),
 
   github("yioneko/nvim-vtsls"),
+
+  github("folke/persistence.nvim"),
 })
 
 -- Instant load
@@ -131,8 +133,7 @@ vim.schedule(function()
   require("plugins.which-key")
   require("plugins.template-string")
   require("plugins.fidget")
-
-  require("custom.revive").setup({ auto = false })
+  require("plugins.persistence")
 end)
 
 -- Autocmd load
