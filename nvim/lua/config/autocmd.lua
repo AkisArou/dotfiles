@@ -8,6 +8,17 @@ local function augroup(name)
   return created_groups[full_name]
 end
 
+-- Open help in vertical split
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "help",
+  command = "wincmd L",
+})
+
+-- Autoresize splits when terminal emulator window is resized
+vim.api.nvim_create_autocmd("VimResized", {
+  command = "wincmd =",
+})
+
 -- Enable treesitter
 vim.api.nvim_create_autocmd("FileType", {
   callback = function()

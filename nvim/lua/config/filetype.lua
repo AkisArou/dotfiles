@@ -19,6 +19,6 @@ vim.filetype.add({
     [".*/git/config.*"] = "gitconfig",
     [".*/ssh/config"] = "sshconfig",
     [".*/.+%.tmux"] = "tmux",
-    ["%.env%.[%w_.-]+"] = "sh",
+    ["%.env%.[%w_.-]+"] = "dosini",
   },
 })
