@@ -6,6 +6,14 @@ fi
 
 . ~/dotfiles/shell/common/fzf
 
+export THEME="${THEME:-tokyonight}"
+export GTK_THEME="Tokyonight-Dark"
+export QT_QPA_PLATFORMTHEME=qt6ct
+export BAT_THEME=tokyonight
+export BAT_STYLE="changes,header-filename,numbers,snip"
+# tokyonight
+export JQ_COLORS="0;90:33:33:37:32:37:37:36"
+
 export TMPDIR=/tmp
 
 export PATH="$HOME/.local/bin:$PATH"
@@ -41,14 +49,6 @@ export BROWSER="brave"
 export EDGE_PATH=$(which brave)
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
-
-export THEME="${THEME:-tokyonight}"
-export GTK_THEME="Tokyonight-Dark"
-export QT_QPA_PLATFORMTHEME=qt6ct
-export BAT_THEME=tokyonight
-export BAT_STYLE="changes,header-filename,numbers,snip"
-# tokyonight
-export JQ_COLORS="0;90:33:33:37:32:37:37:36"
 
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning"
 export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
