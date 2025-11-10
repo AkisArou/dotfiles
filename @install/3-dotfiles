@@ -63,6 +63,7 @@ create_symlink "$HOME/dotfiles/fontconfig" "$HOME/.config/fontconfig"
 create_symlink "$HOME/dotfiles/paru" "$HOME/.config/paru"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/qt6ct" "$HOME/.config/qt6ct"
+create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
 
 ./eza/apply-eza-theme
 

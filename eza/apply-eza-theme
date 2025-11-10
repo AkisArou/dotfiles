@@ -1,11 +1,3 @@
 #!/usr/bin/zsh
 
-if [ -f "$HOME/dotfiles/eza/${THEME}.yml" ]; then
-  mkdir -p "$HOME/.config/eza"
-  ln -sf "$HOME/dotfiles/eza/${THEME}.yml" "$HOME/.config/eza/theme.yml"
-  echo "Symlink created: $HOME/.config/eza/theme.yml -> $HOME/dotfiles/eza/${THEME}.yml"
-else
-  echo "eza theme file does not exist. Applying default"
-  mkdir -p "$HOME/.config/eza"
-  ln -sf "$HOME/dotfiles/eza/tokyonight.yml" "$HOME/.config/eza/theme.yml"
-fi
+ln -sf "$HOME/dotfiles/eza/${THEME:-tokyonight}.yml" "$HOME/dotfiles/eza/theme.yml"

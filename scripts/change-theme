@@ -28,7 +28,7 @@ killall waybar
 if [ -f "~/dotfiles/eza/${SELECTED_THEME}.yml" ]; then
   ln -sf "~/dotfiles/eza/${SELECTED_THEME}.yml" ~/.config/eza/theme.yml
 else
-  ln -sf "~/dotfiles/eza/onedark.yml" ~/.config/eza/theme.yml
+  ln -sf "~/dotfiles/eza/tokyonight.yml" ~/.config/eza/theme.yml
 fi
 
 # nvim
