@@ -51,6 +51,7 @@ packages=(
   "docker"
   "docker-compose"
   "dunst"
+  "emacs-nox"
   "eza"
   "fd"
   "ffmpeg"
