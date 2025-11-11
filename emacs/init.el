@@ -91,7 +91,6 @@
   (display-line-numbers-type 'relative)           ;; Use relative line numbering in programming modes.
   (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
   (history-length 25)                             ;; Set the length of the command history.
-  (indent-tabs-mode nil)                          ;; Disable the use of tabs for indentation (use spaces instead).
   (inhibit-startup-message f)                     ;; Disable the startup message when Emacs launches.
   (initial-scratch-message "")                    ;; Clear the initial message in the *scratch* buffer.
   (ispell-dictionary "en_US")                     ;; Set the default dictionary for spell checking.
@@ -101,7 +100,6 @@
   (ring-bell-function 'ignore)                    ;; Disable the audible bell.
   (split-width-threshold 300)                     ;; Prevent automatic window splitting if the window width exceeds 300 pixels.
   (switch-to-buffer-obey-display-actions t)       ;; Make buffer switching respect display actions.
-  (tab-always-indent 'complete)                   ;; Make the TAB key complete text instead of just indenting.
   (tab-width 4)                                   ;; Set the tab width to 4 spaces.
   (treesit-font-lock-level 4)                     ;; Use advanced font locking for Treesit mode.
   (truncate-lines t)                              ;; Enable line truncation to avoid wrapping long lines.
@@ -694,34 +692,35 @@
   (setq lsp-tailwindcss-add-on-mode t))
 
 ;;; oxlint / oxc_language_server
-; (defun my/oxlint-server-cmd ()
-;   "Return the path to the oxlint language server for the current project."
-;   (let ((server-path (expand-file-name "node_modules/.bin/oxc_language_server"
-;                                        (lsp-workspace-root))))
-;     (if (file-executable-p server-path)
-;         server-path
-;       (error "oxc_language_server not found in node_modules/.bin"))))
-;
-; (with-eval-after-load 'lsp-mode
-;   (lsp-register-client
-;    (make-lsp-client
-;     :new-connection (lsp-stdio-connection #'my/oxlint-server-cmd)
-;     :activation-fn (lsp-activate-on
-;                     "javascript"
-;                     "javascriptreact"
-;                     "typescript"
-;                     "typescriptreact")
-;     :server-id 'oxlint
-;     :priority -1)))
-;
-; (defun my/oxlint-fix-all ()
-;   "Apply fixes to the current buffer using oxlint."
-;   (interactive)
-;   (when-let ((client (lsp--find-clients 'oxlint)))
-;     (lsp-request
-;      "workspace/executeCommand"
-;      `(:command "oxc.fixAll"
-;                 :arguments [(:uri ,(lsp--buffer-uri))]))))
+(defun my/oxlint-server-cmd ()
+  "Return the path to the oxlint language server for the current project."
+  (let ((server-path (expand-file-name "node_modules/.bin/oxc_language_server"
+                                       (lsp-workspace-root))))
+    (if (file-executable-p server-path)
+        server-path
+      (error "oxc_language_server not found in node_modules/.bin"))))
+
+(with-eval-after-load 'lsp-mode
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection #'my/oxlint-server-cmd)
+    :activation-fn (lsp-activate-on
+                    "javascript"
+                    "javascriptreact"
+                    "typescript"
+                    "typescriptreact")
+    :server-id 'oxlint
+	:add-on? t
+    :priority -1)))
+
+(defun my/oxlint-fix-all ()
+  "Apply fixes to the current buffer using oxlint."
+  (interactive)
+  (when-let ((client (lsp--find-clients 'oxlint)))
+    (lsp-request
+     "workspace/executeCommand"
+     `(:command "oxc.fixAll"
+                :arguments [(:uri ,(lsp--buffer-uri))]))))
 
 ;;; ELDOC-BOX
 ;; eldoc-box enhances the default Eldoc experience by displaying documentation in a popup box,
