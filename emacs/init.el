@@ -346,20 +346,30 @@
 ;; For example, image files will open with `feh', while audio and video files
 ;; will utilize `mpv'.
 (use-package dired
-  :ensure nil                                                ;; This is built-in, no need to fetch it.
+  :ensure nil
   :custom
-  (dired-listing-switches "-lah --group-directories-first")  ;; Display files in a human-readable format and group directories first.
-  (dired-dwim-target t)                                      ;; Enable "do what I mean" for target directories.
+  (dired-listing-switches "-lah --group-directories-first")
+  (dired-dwim-target t)
   (dired-guess-shell-alist-user
-   '(("\\.\\(png\\|jpe?g\\|tiff\\)" "feh" "xdg-open" "open") ;; Open image files with `feh' or the default viewer.
-     ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open" "open") ;; Open audio and video files with `mpv'.
-     (".*" "open" "xdg-open")))                              ;; Default opening command for other files.
-  (dired-kill-when-opening-new-dired-buffer t)               ;; Close the previous buffer when opening a new `dired' instance.
+   '(("\\.\\(png\\|jpe?g\\|tiff\\)" "feh" "xdg-open" "open")
+     ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open" "open")
+     (".*" "open" "xdg-open")))
+  (dired-kill-when-opening-new-dired-buffer t)
   :config
+  ;; GNU ls for macOS
   (when (eq system-type 'darwin)
-    (let ((gls (executable-find "gls")))                     ;; Use GNU ls on macOS if available.
+    (let ((gls (executable-find "gls")))
       (when gls
-        (setq insert-directory-program gls)))))
+        (setq insert-directory-program gls))))
+
+  (with-eval-after-load 'evil
+    (add-hook 'dired-mode-hook
+              (lambda ()
+                ;; Use normal state in Dired
+                (evil-normalize-keymaps)
+                (evil-define-key 'normal dired-mode-map
+                  (kbd "C-e") 'dired-find-file
+                  (kbd "C-f") 'dired-up-directory)))))
 
 
 ;;; ERC
@@ -540,6 +550,8 @@
   (vertico-resize nil)                  ;; Disable resizing of the vertico minibuffer.
   (vertico-cycle nil)                   ;; Do not cycle through candidates when reaching the end of the list.
   :config
+  (define-key vertico-map (kbd "C-e") #'vertico-exit)
+
   ;; Customize the display of the current candidate in the completion list.
   ;; This will prefix the current candidate with “» ” to make it stand out.
   ;; Reference: https://github.com/minad/vertico/wiki#prefix-current-candidate-with-arrow
@@ -552,21 +564,25 @@
                    "  ")
                  cand))))
 
-;;; FUSSY (replaces ORDERLESS)
-;; Fuzzy completion style with smart scoring. Works with Vertico/Corfu.
 (use-package fussy
   :ensure t
   :straight (fussy :type git :host github :repo "jojojames/fussy")
   :init
-  ;; Use fussy as the main completion style. Keep partial-completion for files.
+  ;; Use fussy as the main completion style
   (setq completion-styles '(fussy basic)
         completion-category-defaults nil
         completion-category-overrides '((file (styles partial-completion))))
   :config
-  ;; Register the completion style
+  ;; Setup fussy with fzf-native scoring
   (fussy-setup)
-
-  ;; Corfu integration: cache management and some sensible locals
+  
+  ;; Configure fussy for VSCode-like behavior
+  (setq fussy-score-fn 'fussy-fzf-native-score)
+  (setq fussy-filter-fn 'fussy-filter-default)
+  (setq fussy-use-cache t)
+  (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
+  
+  ;; Corfu integration: cache management
   (with-eval-after-load 'corfu
     (advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
     (add-hook 'corfu-mode-hook
@@ -574,6 +590,7 @@
                 (setq-local fussy-max-candidate-limit 5000
                             fussy-default-regex-fn 'fussy-pattern-first-letter
                             fussy-prefer-prefix nil)))))
+
 
 ;;; FZF
 (use-package fzf-native
@@ -586,21 +603,6 @@
   :config
   (setq fussy-score-fn 'fussy-fzf-native-score)
   (fzf-native-load-dyn))
-
-;;; ORDERLESS
-;; Orderless enhances completion in Emacs by allowing flexible pattern matching.
-;; It works seamlessly with Vertico, enabling you to use partial strings and
-;; regular expressions to find files, buffers, and commands more efficiently.
-;; This combination provides a powerful and customizable completion experience.
-;;(use-package orderless
-;;  :ensure t
-;;  :straight t
-;;  :defer t                                    ;; Load Orderless on demand.
-;;  :after vertico                              ;; Ensure Vertico is loaded before Orderless.
-;;  :init
-;;  (setq completion-styles '(orderless basic)  ;; Set the completion styles.
-;;        completion-category-defaults nil      ;; Clear default category settings.
-;;        completion-category-overrides '((file (styles partial-completion))))) ;; Customize file completion styles.
 
 
 ;;; MARGINALIA
@@ -685,35 +687,49 @@
   :init (setq markdown-command "multimarkdown")) ;; Set the Markdown processing command.
 
 
-;;; CORFU
-;; Corfu Mode provides a text completion framework for Emacs.
-;; It enhances the editing experience by offering context-aware
-;; suggestions as you type.
-;; Corfu Mode is highly customizable and can be integrated with
-;; various modes and languages.
+
 (use-package corfu
   :ensure t
   :straight t
   :defer t
   :custom
-  (corfu-auto t)                         ;; Only completes when hitting TAB
-  (corfu-auto-delay 0.2)                 ;; Delay before popup (enable if corfu-auto is t)
-  (corfu-auto-prefix 1)                  ;; Trigger completion after typing 1 character
-  (corfu-quit-no-match t)                ;; Quit popup if no match
-  (corfu-scroll-margin 5)                ;; Margin when scrolling completions
-  (corfu-max-width 50)                   ;; Maximum width of completion popup
-  (corfu-min-width 50)                   ;; Minimum width of completion popup
-  (corfu-popupinfo-delay 0.5)            ;; Delay before showing documentation popup
-  ;;(corfu-preselect 'first)               ;; Preselect the first item
+  ;; Enable auto-completion like VSCode
+  (corfu-auto t)
+  (corfu-auto-delay 0.1)              ;; Show completions quickly like VSCode
+  (corfu-auto-prefix 1)               ;; Start completing after 1 character
+  (corfu-quit-no-match t)             ;; Quit if no match (like VSCode)
+  (corfu-quit-at-boundary 'separator) ;; Allow multi-part filtering
+  (corfu-scroll-margin 5)
+  (corfu-max-width 50)
+  (corfu-min-width 50)
+  (corfu-popupinfo-delay 0.3)         ;; Show info popup quickly
+  (corfu-preselect 'first)            ;; Preselect best match (already sorted by fzf score)
+  (corfu-preview-current t)           ;; Show preview of selected candidate
+  (corfu-cycle nil)                   ;; Don't cycle through candidates
+  (corfu-on-exact-match 'insert)      ;; Insert exact matches immediately
+
+  
   :config
   (if ek-use-nerd-fonts
-    (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+      (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+  
   :bind
   (:map corfu-map
-        ("C-e" . corfu-insert))
+        ;; VSCode-like keybindings
+        ("C-e" . corfu-insert)        ;; Keep your existing binding
+        ("C-n" . corfu-next)          ;; Ctrl-n for next
+        ("C-p" . corfu-previous))     ;; Ctrl-p for previous
+  
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode t))
+
+;; Optional: Configure completion categories for better matching
+(setq completion-category-overrides
+      '((buffer (styles fussy basic))
+        (file (styles fussy partial-completion))
+        (project-file (styles fussy))
+        (lsp-capf (styles fussy basic))))
 
 (use-package corfu-terminal
   :straight (corfu-terminal
@@ -767,12 +783,7 @@
            tsx-ts-mode                                  ;; Enable LSP for TSX
            typescript-ts-base-mode                      ;; Enable LSP for TypeScript
            css-mode                                     ;; Enable LSP for CSS
-           go-ts-mode                                   ;; Enable LSP for Go
            js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
-           prisma-mode                                  ;; Enable LSP for Prisma
-           python-base-mode                             ;; Enable LSP for Python
-           ruby-base-mode                               ;; Enable LSP for Ruby
-           rust-ts-mode                                 ;; Enable LSP for Rust
            web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
   :custom
@@ -781,7 +792,7 @@
   (lsp-completion-provider :none)                       ;; Disable the default completion provider.
   (lsp-session-file (locate-user-emacs-file ".lsp-session")) ;; Specify session file location.
   (lsp-log-io nil)                                      ;; Disable IO logging for speed.
-  (lsp-idle-delay 0.5)                                  ;; Set the delay for LSP to 0 (debouncing).
+  (lsp-idle-delay 0.1)                                  ;; Set the delay for LSP to 0 (debouncing).
   (lsp-keep-workspace-alive nil)                        ;; Disable keeping the workspace alive.
   ;; Core settings
   (lsp-enable-xref t)                                   ;; Enable cross-references.
@@ -824,15 +835,44 @@
 ;; classes within your HTML files. By using various LSP packages, you can connect
 ;; multiple LSP servers simultaneously, enhancing your coding experience across
 ;; different languages and frameworks.
+
+;;; tailwindcss
 (use-package lsp-tailwindcss
   :ensure t
   :straight t
   :defer t
-  :config
-  (add-to-list 'lsp-language-id-configuration '(".*\\.erb$" . "html")) ;; Associate ERB files with HTML.
   :init
   (setq lsp-tailwindcss-add-on-mode t))
 
+;;; oxlint / oxc_language_server
+; (defun my/oxlint-server-cmd ()
+;   "Return the path to the oxlint language server for the current project."
+;   (let ((server-path (expand-file-name "node_modules/.bin/oxc_language_server"
+;                                        (lsp-workspace-root))))
+;     (if (file-executable-p server-path)
+;         server-path
+;       (error "oxc_language_server not found in node_modules/.bin"))))
+;
+; (with-eval-after-load 'lsp-mode
+;   (lsp-register-client
+;    (make-lsp-client
+;     :new-connection (lsp-stdio-connection #'my/oxlint-server-cmd)
+;     :activation-fn (lsp-activate-on
+;                     "javascript"
+;                     "javascriptreact"
+;                     "typescript"
+;                     "typescriptreact")
+;     :server-id 'oxlint
+;     :priority -1)))
+;
+; (defun my/oxlint-fix-all ()
+;   "Apply fixes to the current buffer using oxlint."
+;   (interactive)
+;   (when-let ((client (lsp--find-clients 'oxlint)))
+;     (lsp-request
+;      "workspace/executeCommand"
+;      `(:command "oxc.fixAll"
+;                 :arguments [(:uri ,(lsp--buffer-uri))]))))
 
 ;;; ELDOC-BOX
 ;; eldoc-box enhances the default Eldoc experience by displaying documentation in a popup box,
@@ -981,6 +1021,8 @@
   :config
   (evil-set-undo-system 'undo-tree)   ;; Uses the undo-tree package as the default undo system
 
+  (define-key evil-insert-state-map (kbd "C-e") nil)
+
   ;; Set the leader key to space for easier access to custom commands. (setq evil-want-leader t)
   (setq evil-leader/in-all-states t)  ;; Make the leader key available in all states.
   (setq evil-want-fine-undo t)        ;; Evil uses finer grain undoing steps
@@ -996,7 +1038,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> s f") 'consult-find)
   (evil-define-key 'normal 'global (kbd "<leader> s g") 'consult-grep)
   (evil-define-key 'normal 'global (kbd "<leader> s G") 'consult-git-grep)
-  (evil-define-key 'normal 'global (kbd "<leader> s r") 'consult-ripgrep)
+  (evil-define-key 'normal 'global (kbd "<leader> f s") 'consult-ripgrep)
   (evil-define-key 'normal 'global (kbd "<leader> s h") 'consult-info)
   (evil-define-key 'normal 'global (kbd "<leader> /") 'consult-line)
 
@@ -1012,7 +1054,7 @@
 
   ;; Diff-HL navigation for version control
   (evil-define-key 'normal 'global (kbd "] c") 'diff-hl-next-hunk) ;; Next diff hunk
-  (evil-define-key 'normal 'global (kbd "[ c") 'diff-hl-previous-hunk) ;; Previous diff hunk
+  (evil-define-key 'normal 'global (kbd "[ c") 'diff-hl-pevious-hunk) ;; Previous diff hunk
 
   ;; NeoTree command for file exploration
   (evil-define-key 'normal 'global (kbd "<leader> e e") 'neotree-toggle)
@@ -1038,10 +1080,10 @@
   (evil-define-key 'normal 'global (kbd "<leader>SPC") 'consult-buffer) ;; Consult buffer
 
   ;; Project management keybindings
-  (evil-define-key 'normal 'global (kbd "<leader> p b") 'consult-project-buffer) ;; Consult project buffer
+  (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-project-buffer) ;; Consult project buffer
   (evil-define-key 'normal 'global (kbd "<leader> p p") 'project-switch-project) ;; Switch project
-  (evil-define-key 'normal 'global (kbd "<leader> p f") 'project-find-file) ;; Find file in project
-  (evil-define-key 'normal 'global (kbd "<leader> p g") 'project-find-regexp) ;; Find regexp in project
+  (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file) ;; Find file in project
+  (evil-define-key 'normal 'global (kbd "<leader> f s") 'project-find-regexp) ;; Find regexp in project
   (evil-define-key 'normal 'global (kbd "<leader> p k") 'project-kill-buffers) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> p D") 'project-dired) ;; Dired for project
 
@@ -1076,9 +1118,9 @@
   ;; LSP commands keybindings
   (evil-define-key 'normal lsp-mode-map
                    ;; (kbd "gd") 'lsp-find-definition                ;; evil-collection already provides gd
-                   (kbd "gr") 'lsp-find-references                   ;; Finds LSP references
-                   (kbd "<leader> c a") 'lsp-execute-code-action     ;; Execute code actions
-                   (kbd "<leader> r n") 'lsp-rename                  ;; Rename symbol
+                   (kbd "grr") 'lsp-find-references                   ;; Finds LSP references
+                   (kbd "gra") 'lsp-execute-code-action     ;; Execute code actions
+                   (kbd "grn") 'lsp-rename                  ;; Rename symbol
                    (kbd "gI") 'lsp-find-implementation               ;; Find implementation
                    (kbd "<leader> l f") 'lsp-format-buffer)          ;; Format buffer via lsp
 
@@ -1345,11 +1387,15 @@
 ;;  (load-theme 'catppuccin :no-confirm))
 
 ;;; DRACULA THEME
-(use-package dracula-theme
-  :ensure t
-  :config
-  (load-theme 'dracula t))
+;;(use-package dracula-theme
+;;  :ensure t
+;;  :config
+;;  (load-theme 'dracula t))
 
+(use-package tokyonight-themes
+  :vc (:url "https://github.com/xuchengpeng/tokyonight-themes")
+  :config
+  (load-theme 'tokyonight-night :no-confirm))
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
