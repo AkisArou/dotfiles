@@ -332,6 +332,13 @@
       (slot . 1))
      )))
 
+;;; CENTERED CURSOR
+(use-package centered-cursor-mode
+  :ensure t
+  :config
+  (global-centered-cursor-mode 1))
+
+
 
 ;;; DIRED
 ;; In Emacs, the `dired' package provides a powerful and built-in file manager
