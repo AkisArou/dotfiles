@@ -1404,6 +1404,14 @@
   :config
   (load-theme 'tokyonight-night :no-confirm))
 
+(with-eval-after-load 'tokyonight-night-theme
+  (set-face-attribute 'line-number nil
+                      :foreground "#3b4261"  ;; darker gray (matches fg-gutter)
+                      :background nil)
+  (set-face-attribute 'line-number-current-line nil
+                      :foreground "#565f89"  ;; slightly lighter for current line
+                      :background nil))
+
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
 (defun ek/first-install ()
