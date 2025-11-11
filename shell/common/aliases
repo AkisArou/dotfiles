@@ -4,12 +4,13 @@ alias sudo="sudo -E"
 alias ta="tmux attach"
 alias vim="TERM=xterm-256color vim"
 alias v="nvim"
-alias emacs='emacs -nw'
+alias emacs="emacs -nw"
+alias x="emacs"
 alias dir="dir --color=auto"
 alias grep="grep --color=auto"
 alias ip="ip -color=auto"
 
-alias lg='lazygit'
+alias lg="lazygit"
 
 alias cp="cp -i"
 alias mv="mv -i"
@@ -20,7 +21,7 @@ alias free="free -m"
 
 alias cat="bat"
 
-eza_base='eza --group-directories-first --icons=never'
+eza_base="eza --group-directories-first --icons=never"
 alias ls="$eza_base"
 alias ll="$eza_base -lh --git"
 alias la="$eza_base -lha --git"
