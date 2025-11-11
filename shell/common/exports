@@ -50,6 +50,8 @@ export EDGE_PATH=$(which brave)
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
 
+export EMACSDIR="$XDG_CONFIG_HOME/emacs"
+
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning"
 export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
 

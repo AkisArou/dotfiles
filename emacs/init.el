@@ -160,6 +160,11 @@
 ;; standard for Emacs users. You can also add more package archives later as needed.
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
+;; Add lisp/ directory to Emacs' load path
+(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+
+(require 'clipboard)
+
 ;; Define a global customizable variable `ek-use-nerd-fonts' to control the use of
 ;; Nerd Fonts symbols throughout the configuration. This boolean variable allows
 ;; users to easily enable or disable the use of symbols from Nerd Fonts, providing

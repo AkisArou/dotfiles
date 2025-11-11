@@ -21,3 +21,6 @@ st/config.h
 dwm/dwm
 dwm/config.h
 mtwm/mtwm
+emacs/*
+!emacs/init.el
+!emacs/lisp/
