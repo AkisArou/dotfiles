@@ -241,14 +241,6 @@
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
 
-  ;; Configure font settings based on the operating system.
-  ;; Ok, this kickstart is meant to be used on the terminal, not on GUI.
-  ;; But without this, I fear you could start Graphical Emacs and be sad :(
-  (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font"  :height 100)
-  (when (eq system-type 'darwin)       ;; Check if the system is macOS.
-    (setq mac-command-modifier 'meta)  ;; Set the Command key to act as the Meta key.
-    (set-face-attribute 'default nil :family "JetBrainsMono Nerd Font" :height 130))
-
   ;; Save manual customizations to a separate file instead of cluttering `init.el'.
   ;; You can M-x customize, M-x customize-group, or M-x customize-themes, etc.
   ;; The saves you do manually using the Emacs interface would overwrite this file.
@@ -1250,7 +1242,7 @@
   :config
   ;; Set the directory where `undo-tree' will save its history files.
   ;; This keeps undo history across sessions, stored in a cache directory.
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/.cache/undo"))))
+  (setq undo-tree-history-directory-alist '(("." . "~/.cache/emacs/undo"))))
 
 
 ;;; RAINBOW DELIMITERS
