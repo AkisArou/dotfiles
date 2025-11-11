@@ -377,27 +377,6 @@
                   (kbd "C-f") 'dired-up-directory)))))
 
 
-;;; ERC
-;; In this section, we introduce ERC (Emacs Relay Chat), a built-in IRC client
-;; that allows you to engage in real-time chat directly within Emacs. While
-;; we're aiming to maintain functionality similar to Neovim, it's important to
-;; recognize that Emacs is often viewed as more than just a text editor. Many
-;; users leverage Emacs for a variety of tasks beyond editing text: from watching
-;; videos and listening to music, to managing emails and even serving as a window
-;; manager in Xorg, freeing themselves from traditional desktop environments.
-;;
-;; While this kickstarter focuses on essential configurations, I wanted to present
-;; ERC as a glimpse into Emacs's versatility. With ERC, you can seamlessly connect
-;; to IRC channels and interact with communities without leaving your editor.
-(use-package erc
-  :defer t ;; Load ERC when needed rather than at startup. (Load it with `M-x erc RET')
-  :custom
-  (erc-join-buffer 'window)                                        ;; Open a new window for joining channels.
-  (erc-hide-list '("JOIN" "PART" "QUIT"))                          ;; Hide messages for joins, parts, and quits to reduce clutter.
-  (erc-timestamp-format "[%H:%M]")                                 ;; Format for timestamps in messages.
-  (erc-autojoin-channels-alist '((".*\\.libera\\.chat" "#emacs"))));; Automatically join the #emacs channel on Libera.Chat.
-
-
 ;;; ISEARCH
 ;; In this configuration, we're setting up isearch, Emacs's incremental search feature.
 ;; Since we're utilizing Vim bindings, keep in mind that classic Vim search commands
