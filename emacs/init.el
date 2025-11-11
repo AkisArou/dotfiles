@@ -1,130 +1,11 @@
 ;;; init.el --- Emacs-Kick --- A feature rich Emacs config for (neo)vi(m)mers -*- lexical-binding: t; -*-
-;; Author: Rahul Martim Juliato
 
-;; Version: 0.3.3
-;; Package-Requires: ((emacs "30.1"))
-;; License: GPL-2.0-or-later
-
-;;; Commentary:
-;; =====================================================================
-;; ==================== READ THIS BEFORE CONTINUING ====================
-;; =====================================================================
-;;
-;;                      ⣠⣶⣿⣿⣶⡄         ⠀⣀⣤⣄⡀
-;;                      ⣿⣿⣿⣿λ⣿         ⣾)⣿⣿⣿⡆
-;;                      ⠹⢿⣿⣿⡿⠃        ⠀⣿⣿⣿⣿⣿⡏⢀⣀⡀
-;;                      ⣠⣤⣦⡄           ⠈⠛⠿⣟⣋⣼⣽⣾⣽⣦⡀⠀
-;;                      ⣼⣿⣷⣾⡽⡄       ⣴⣶⣶⣿⣿⣿⡿⢿⣟⣽⣾⣿⣿⣦
-;;                     ⣸⣿⣿⣾⣿⣿⣮⣤⣤⣤⣤⡀  ⠻⣿⡯⠽⠿⠛⠛⠉⠉⢿⣿⣿⣿⣿⣷
-;;                     ⣿⣿⢻⣿⣿⣿⣛⡿⠿⠟⠛⠁⣀⣠⣤⣤⣶⣶⣶⣶⣷⣶ ⠀⠻⣿⣿⣿⣿⣇
-;;                     ⢻⣿⡆⢿⣿⣿⣿⣿⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠟ ⣠⣶⣿⣿⣿⣿
-;;                     ⠈⠛⠃⠈⢿⣿⣿⣿⣿⣿⣿⠿⠟⠛⠋⠉     ⣠⣾⣿⣿⣿⠟⠋
-;;                          ⠙⢿⣿⣿⡏         ⠀⣴⣿⣿⣿⠟
-;;                           ⢸E⣿⡇         ⣼⣿⣿⣿
-;;                           ⢸M⣿⣿        ⢸⣿⣿⣿
-;;                           ⢸A⣿⣿        ⠸⣿⣿
-;;                           ⢸C⣿⣿
-;;                           ⣼S⣿⡇
-;;                          ⠀⠻⣿⡿
-;; =====================================================================
-;; =====================================================================
-
-;; What is Emacs-Kick?
-;;
-;; Emacs-Kick is `not' a distribution.
-;;
-;; Emacs-Kick is a starting point for your own configuration.  The goal
-;; is that you can read every line of code, top-to-bottom, understand
-;; what your configuration is doing, and modify it to suit your needs.
-;;
-;; Once you've done that, you can start exploring, configuring, and
-;; tinkering to make Emacs your own! That might mean leaving Emacs
-;; Kick just the way it is for a while or immediately breaking it into
-;; modular pieces.  It's up to you!
-;;
-;; If you don't know anything about Emacs Lisp, I recommend taking
-;; some time to read through a guide.
-;; One possible example which will only take 10-15 minutes:
-;; - https://learnxinyminutes.com/docs/elisp/
-;;
-;; After understanding a bit more about Emacs Lisp, you can use `M-x
-;; info RET` (info) for a reference on how Emacs integrates it.
-;;
-;;
-;; Emacs-Kick Guide:
-;;
-;; Well, this config ASSUMES you already knows (neo)vi(m) bindings,
-;; and the bases of how it works.  This is the `Emacs config for
-;; vimmers'.  So, if you're not familiar with it, go for
-;; `kickstart.nvim', get used to it, and than come back.
-;;
-;; On Emacs, help can be found multiple ways.
-;; With this config, the leader key is SPC.
-;; - <leader> h i opens the info (Also `M-x info RET')
-;; - <leader> h v explores available variables
-;; - <leader> h f explores avaliable functions
-;; - <leader> h k explores avaliable keybindings
-;;
-;; If, at any time you need to find some functionality, Emacs `M-x'
-;; (Meta is alt on most cases, option or command), works like a
-;; command pallete, you can for example type `M-x quit' and be
-;; presented with various options to quit Emacs.
-;;
-;; Once you've completed that, you can continue working through
-;; `AND READING' the rest of the kickstart configuration.
-;;
-;; I have left several comments throughout the configuration.  These
-;; are hints about where to find more information about the relevant
-;; settings, packages, or Emacs features used in Emacs-Kick.
-;;
-;; Feel free to delete them once you know what you're doing, but they
-;; should serve as a guide for when you are first encountering a few
-;; different constructs in your Emacs config.
-;;
-;; If you encounter any errors while installing Emacs-Kick,
-;; check the *Messages* buffer for more information. You can switch
-;; buffers using `<leader> SPC`, and all option menus can be navigated
-;; with `C-p` and `C-n`.
-;;
-;; I hope you enjoy your Emacs journey,
-;; - Rahul
-;;
-;; P.S.  You can delete this when you're done too.  It's your config
-;; now! :)
-
-
-;;; Code:
-
-;; Performance Hacks
-;; Emacs is an Elisp interpreter, and when running programs or packages,
-;; it can occasionally experience pauses due to garbage collection.
-;; By increasing the garbage collection threshold, we reduce these pauses
-;; during heavy operations, leading to smoother performance.
+;; performance
 (setq gc-cons-threshold #x40000000)
 
 ;; Set the maximum output size for reading process output, allowing for larger data transfers.
 (setq read-process-output-max (* 1024 1024 4))
 
-;; Do I really need a speedy startup?
-;; Well, this config launches Emacs in about ~0.3 seconds,
-;; which, in modern terms, is a miracle considering how fast it starts
-;; with external packages.
-;; It wasn’t until the recent introduction of tools for lazy loading
-;; that a startup time of less than 20 seconds was even possible.
-;; Other fast startup methods were introduced over time.
-;; You may have heard of people running Emacs as a server,
-;; where you start it once and open multiple clients instantly connected to that server.
-;; Some even run Emacs as a systemd or sysV service, starting when the machine boots.
-;; While this is a great way of using Emacs, we WON’T be doing that here.
-;; I think 0.3 seconds is fast enough to avoid issues that could arise from
-;; running Emacs as a server, such as 'What version of Node is my LSP using?'.
-;; Again, this setup configures Emacs much like how a Vimmer would configure Neovim.
-
-
-;; Emacs comes with a built-in package manager (`package.el'), and we'll use it
-;; when it makes sense. However, `straight.el' is a bit more user-friendly and
-;; reproducible, especially for newcomers and shareable configs like emacs-kick.
-;; So we bootstrap it here.
 (setq package-enable-at-startup nil) ;; Disables the default package manager.
 (setq user-emacs-directory (expand-file-name "emacs" (getenv "XDG_CONFIG_HOME")))
 
@@ -211,7 +92,7 @@
   (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
   (history-length 25)                             ;; Set the length of the command history.
   (indent-tabs-mode nil)                          ;; Disable the use of tabs for indentation (use spaces instead).
-  (inhibit-startup-message t)                     ;; Disable the startup message when Emacs launches.
+  (inhibit-startup-message f)                     ;; Disable the startup message when Emacs launches.
   (initial-scratch-message "")                    ;; Clear the initial message in the *scratch* buffer.
   (ispell-dictionary "en_US")                     ;; Set the default dictionary for spell checking.
   (make-backup-files nil)                         ;; Disable creation of backup files.
@@ -268,23 +149,7 @@
   (file-name-shadow-mode 1)    ;; Enable shadowing of filenames for clarity.
 
   ;; Set the default coding system for files to UTF-8.
-  (modify-coding-system-alist 'file "" 'utf-8)
-
-  ;; Add a hook to run code after Emacs has fully initialized.
-  (add-hook 'after-init-hook
-            (lambda ()
-              (message "Emacs has fully loaded. This code runs after startup.")
-
-              ;; Insert a welcome message in the *scratch* buffer displaying loading time and activated packages.
-              (with-current-buffer (get-buffer-create "*scratch*")
-                (insert (format
-                         ";;    Welcome to Emacs!
-;;
-;;    Loading time : %s
-;;    Packages     : %s
-"
-                         (emacs-init-time)
-                         (length (hash-table-keys straight--recipe-cache))))))))
+  (modify-coding-system-alist 'file "" 'utf-8))
 
 
 ;;; WINDOW
