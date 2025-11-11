@@ -126,6 +126,7 @@
 ;; reproducible, especially for newcomers and shareable configs like emacs-kick.
 ;; So we bootstrap it here.
 (setq package-enable-at-startup nil) ;; Disables the default package manager.
+(setq user-emacs-directory (expand-file-name "emacs" (getenv "XDG_CONFIG_HOME")))
 
 ;; Bootstraps `straight.el'
 (setq straight-check-for-modifications nil)
