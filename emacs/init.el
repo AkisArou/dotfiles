@@ -951,20 +951,6 @@
   :defer t)
 
 
-;;; XCLIP
-;; `xclip' is an Emacs package that integrates the X Window System clipboard
-;; with Emacs. It allows seamless copying and pasting between Emacs and other
-;; applications using the clipboard. When `xclip' is enabled, any text copied
-;; in Emacs can be pasted in other applications, and vice versa, providing a
-;; smooth workflow when working across multiple environments.
-(use-package xclip
-  :ensure t
-  :straight t
-  :defer t
-  :hook
-  (after-init . xclip-mode))     ;; Enable xclip mode after initialization.
-
-
 ;;; INDENT-GUIDE
 ;; The `indent-guide' package provides visual indicators for indentation levels
 ;; in programming modes, making it easier to see code structure at a glance.
@@ -1014,6 +1000,23 @@
     '(add-hook 'js-mode-hook #'add-node-modules-path)))
 
 
+(defun ek/terminal-cursor-update ()
+  "Set cursor shape depending on Evil state in terminal."
+  (when (not (display-graphic-p))
+    (cond
+     ((evil-insert-state-p)
+      ;; vertical bar
+      (send-string-to-terminal "\e[6 q"))
+     ((evil-visual-state-p)
+      ;; block
+      (send-string-to-terminal "\e[2 q"))
+     (t
+      ;; normal, motion, replace, etc.
+      (send-string-to-terminal "\e[2 q")))))
+
+(add-hook 'post-command-hook 'ek/terminal-cursor-update)
+
+
 ;; EVIL
 ;; The `evil' package provides Vim emulation within Emacs, allowing
 ;; users to edit text in a modal way, similar to how Vim
@@ -1031,6 +1034,10 @@
   (setq evil-want-C-u-scroll t)       ;; Makes C-u scroll
   (setq evil-want-C-u-delete t)       ;; Makes C-u delete on insert mode
   :config
+  (setq evil-normal-state-cursor 'box
+        evil-insert-state-cursor 'bar
+        evil-visual-state-cursor 'box)
+
   (evil-set-undo-system 'undo-tree)   ;; Uses the undo-tree package as the default undo system
 
   (define-key evil-insert-state-map (kbd "C-e") nil)
