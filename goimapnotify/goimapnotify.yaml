@@ -1,0 +1,24 @@
+configurations:
+  - alias: Gmail
+    host: imap.gmail.com
+    port: 993
+    tls: true
+    xoAuth2: true
+    username: akisarou90@gmail.com
+    passwordCMD: "oama access akisarou90@gmail.com"
+    boxes:
+      - mailbox: INBOX
+        onNewMail: "mbsync gmail:INBOX"
+        onChangedMail: "mbsync gmail:INBOX"
+
+  - alias: Outlook
+    host: outlook.office365.com
+    port: 993
+    tls: true
+    xoAuth2: true
+    username: adamkarafyllidis@nablesolutions.com
+    passwordCMD: "oama access adamkarafyllidis@nablesolutions.com"
+    boxes:
+      - mailbox: INBOX
+        onNewMail: "mbsync nablesolutions:INBOX"
+        onChangedMail: "mbsync nablesolutions:INBOX"

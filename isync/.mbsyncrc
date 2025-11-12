@@ -1,0 +1,48 @@
+# Gmail
+IMAPAccount gmail
+Host imap.gmail.com
+User akisarou90@gmail.com
+PassCmd "oama access akisarou90@gmail.com"
+AuthMechs XOAUTH2
+TLSType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore gmail-remote
+Account gmail
+
+MaildirStore gmail-local
+Path ~/.mail/gmail/
+Inbox ~/.mail/gmail/Inbox
+SubFolders Verbatim
+
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
+Patterns *
+Create Both
+Sync All
+
+
+# Microsoft
+IMAPAccount outlook
+Host outlook.office365.com
+User adamkarafyllidis@nablesolutions.com
+PassCmd "oama access adamkarafyllidis@nablesolutions.com"
+AuthMechs XOAUTH2
+TLSType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore outlook-remote
+Account outlook
+
+MaildirStore outlook-local
+Path ~/.mail/nablesolutions/
+Inbox ~/.mail/nablesolutions/Inbox
+SubFolders Verbatim
+
+Channel outlook
+Far :outlook-remote:
+Near :outlook-local:
+Patterns *
+Create Both
+Sync All

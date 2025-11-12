@@ -1,0 +1,66 @@
+GPG - Create key:
+-----------------
+
+1. gpg --full-generate-key
+2. Select (1) RSA and RSA
+3. Finish setup
+4. Ensure gpg daemon is running
+
+
+
+
+Pass - Configure:
+-----------------
+1. pass init <my-email>
+
+2. Add the following passwords:
+   pass insert oauth/google/client_id
+   pass insert oauth/google/client_secret
+   pass insert oauth/microsoft/client_id
+   pass insert oauth/microsoft/client_secret
+
+3. Verify (e.g):
+   pass oauth/microsoft/client_id
+
+
+
+
+Gmail
+-----------------
+1. Go to https://console.cloud.google.com/apis/credentials
+2. Create credentials / OAuth client ID / Application type desktop
+3. Add email as test account (maybe a better way?)
+
+
+Outlook
+-----------------
+1. Go to azure app registrations and create one
+
+2. Add the permissions bellow:
+   IMAP.AccessAsUser.All
+   Mail.ReadWrite
+   Mail.ReadWrite.Shared
+   Mail.Send
+   Mail.Send.Shared
+   offline_access
+   SMTP.Send
+   User.Read
+
+3. click Grant admin consent for ***
+
+
+
+
+
+Oama
+-----------
+* oama authorize google <email>
+* oama authorize microsoft <email>
+
+
+
+
+isync
+-----------
+1. Ensure ~/.mail/gmail & ~/.mail/nablesolutions exist
+2. mbsync -a

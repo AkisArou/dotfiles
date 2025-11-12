@@ -26,6 +26,8 @@ sudo mkdir -p "/usr/share/chromium/extensions"
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
 sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
+sudo ln -sf "$HOME/dotfiles/systemd/user/goimapnotify.service" /etc/systemd/user/goimapnotify.service
+sudo ln -sf "$HOME/dotfiles/systemd/user/mbsync.service" /etc/systemd/user/mbsync.service
 sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
@@ -64,6 +66,11 @@ create_symlink "$HOME/dotfiles/paru" "$HOME/.config/paru"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/qt6ct" "$HOME/.config/qt6ct"
 create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
+create_symlink "$HOME/dotfiles/gnupg" "$HOME/.config/gnupg"
+create_symlink "$HOME/dotfiles/isync/.mbsyncrc" "$HOME/.mbsynrc"
+create_symlink "$HOME/dotfiles/oama" "$HOME/.config/oama"
+create_symlink "$HOME/dotfiles/goimapnotify" "$HOME/.config/goimapnotify"
+create_symlink "$HOME/dotfiles/neomutt" "$HOME/.config/neomutt"
 
 ./eza/apply-eza-theme
 

@@ -1,0 +1,13 @@
+# # source ~/.config/neomutt/vim-keys.rc
+source ~/.config/neomutt/colors/tokyonight.muttrc
+source ~/.config/neomutt/accounts/gmail.rc
+source ~/.config/neomutt/accounts/work.rc
+
+# Some global options
+set sort=date
+set sort_aux = 'reverse-date'
+set quit=yes
+
+# Macro to switch accounts quickly
+macro index <F2> "<enter-command>source ~/.config/neomutt/accounts/gmail.rc<enter>" "Switch to personal account"
+macro index <F3> "<enter-command>source ~/.config/neomutt/accounts/work.rc<enter>" "Switch to work account"
