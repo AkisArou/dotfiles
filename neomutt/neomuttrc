@@ -3,6 +3,10 @@ source ~/.config/neomutt/colors/tokyonight.muttrc
 source ~/.config/neomutt/accounts/gmail.rc
 source ~/.config/neomutt/accounts/work.rc
 
+set virtual_spoolfile=yes
+set folder=~/.mail
+source ~/.mailboxes
+
 # Some global options
 set sort=date
 set sort_aux = 'reverse-date'

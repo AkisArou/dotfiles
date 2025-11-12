@@ -71,6 +71,8 @@ create_symlink "$HOME/dotfiles/isync/.mbsyncrc" "$HOME/.mbsynrc"
 create_symlink "$HOME/dotfiles/oama" "$HOME/.config/oama"
 create_symlink "$HOME/dotfiles/goimapnotify" "$HOME/.config/goimapnotify"
 create_symlink "$HOME/dotfiles/neomutt" "$HOME/.config/neomutt"
+create_symlink "$HOME/dotfiles/neomutt/.mailboxes" "$HOME/.mailboxes"
+create_symlink "$HOME/dotfiles/notmuch/.notmuch-config" "$HOME/.notmuch-config"
 
 ./eza/apply-eza-theme
 
