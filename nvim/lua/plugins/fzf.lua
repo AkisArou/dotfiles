@@ -33,7 +33,7 @@ fzf_lua.setup({
   },
   lsp = {
     -- make lsp requests synchronous so they work with null-ls
-    async_or_timeout = 3000,
+    async_or_timeout = 10000,
   },
 })
 
