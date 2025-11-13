@@ -46,3 +46,26 @@ Near :outlook-local:
 Patterns *
 Create Both
 Sync All
+
+# Support
+IMAPAccount support
+Host outlook.office365.com
+User support@nable.gr
+PassCmd "oama access adamkarafyllidis@nablesolutions.com"
+AuthMechs XOAUTH2
+TLSType IMAPS
+CertificateFile /etc/ssl/certs/ca-certificates.crt
+
+IMAPStore support-remote
+Account support
+
+MaildirStore support-local
+Path ~/.mail/support/
+Inbox ~/.mail/support/Inbox
+
+Channel support
+Far :support-remote:
+Near :support-local:
+Patterns *
+Create Both
+Sync All
