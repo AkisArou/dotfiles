@@ -1261,7 +1261,6 @@
                       :background nil))
 (use-package mu4e
   :ensure nil
-  :defer 2
   :config
   ;; mu4e reads directly from your synced Maildirs
   (setq mu4e-maildir "~/.mail"
