@@ -21,6 +21,8 @@ Near :gmail-local:
 Patterns *
 Create Both
 Sync All
+Expunge Both
+SyncState *
 
 
 
@@ -48,6 +50,8 @@ Near :outlook-local:
 Patterns *
 Create Both
 Sync All
+Expunge Both
+SyncState *
 
 
 
@@ -74,3 +78,5 @@ Near :support-local:
 Patterns *
 Create Both
 Sync All
+Expunge Both
+SyncState *

@@ -28,6 +28,7 @@ sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.
 sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
 sudo ln -sf "$HOME/dotfiles/systemd/user/goimapnotify.service" /etc/systemd/user/goimapnotify.service
 sudo ln -sf "$HOME/dotfiles/systemd/user/mbsync.service" /etc/systemd/user/mbsync.service
+sudo ln -sf "$HOME/dotfiles/systemd/user/mbsync.timer" /etc/systemd/user/mbsync.timer
 sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
