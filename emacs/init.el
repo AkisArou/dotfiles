@@ -130,6 +130,12 @@
   ;; Makes Emacs vertical divisor the symbol │ instead of |.
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
 
+  ;; Centered cursor
+  (setq scroll-preserve-screen-position t
+		scroll-conservatively 0
+		maximum-scroll-margin 0.5
+		scroll-margin 99999)
+
   :init                        ;; Initialization settings that apply before the package is loaded.
   (tool-bar-mode -1)           ;; Disable the tool bar for a cleaner interface.
   (menu-bar-mode -1)           ;; Disable the menu bar for a more streamlined look.
@@ -192,14 +198,6 @@
       (side . bottom)
       (slot . 1))
      )))
-
-;;; CENTERED CURSOR
-(use-package centered-cursor-mode
-  :ensure t
-  :config
-  (global-centered-cursor-mode 1))
-
-
 
 ;;; DIRED
 ;; In Emacs, the `dired' package provides a powerful and built-in file manager
@@ -1218,48 +1216,28 @@
   (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)) ;; Setup icons in the marginalia mode for enhanced completion display.
 
 
-;;; CATPPUCCIN THEME
-;; The `catppuccin-theme' package provides a visually pleasing color theme
-;; for Emacs that is inspired by the popular Catppuccin color palette.
-;; This theme aims to create a comfortable and aesthetic coding environment
-;; with soft colors that are easy on the eyes.
-;;(use-package catppuccin-theme
-;;  :ensure t
-;;  :straight t
-;;  :config
-;;  (custom-set-faces
-;;   ;; Set the color for changes in the diff highlighting to blue.
-;;   `(diff-hl-change ((t (:background unspecified :foreground ,(catppuccin-get-color 'blue))))))
-;;
-;;  (custom-set-faces
-;;   ;; Set the color for deletions in the diff highlighting to red.
-;;   `(diff-hl-delete ((t (:background unspecified :foreground ,(catppuccin-get-color 'red))))))
-;;
-;;  (custom-set-faces
-;;   ;; Set the color for insertions in the diff highlighting to green.
-;;   `(diff-hl-insert ((t (:background unspecified :foreground ,(catppuccin-get-color 'green))))))
-;;
-;;  ;; Load the Catppuccin theme without prompting for confirmation.
-;;  (load-theme 'catppuccin :no-confirm))
-
-;;; DRACULA THEME
-;;(use-package dracula-theme
-;;  :ensure t
-;;  :config
-;;  (load-theme 'dracula t))
-
-(use-package tokyonight-themes
-  :vc (:url "https://github.com/xuchengpeng/tokyonight-themes")
+;;; DOOM THEMES
+(use-package doom-themes
+  :ensure t
+  :custom
+  ;; Global settings (defaults)
+  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  ;; for treemacs users
+  (doom-themes-treemacs-theme "doom-tokyo-night") ; use "doom-colors" for less minimal icon theme
   :config
-  (load-theme 'tokyonight-night :no-confirm))
+  (load-theme 'doom-tokyo-night t)
 
-(with-eval-after-load 'tokyonight-night-theme
-  (set-face-attribute 'line-number nil
-                      :foreground "#3b4261"  ;; darker gray (matches fg-gutter)
-                      :background nil)
-  (set-face-attribute 'line-number-current-line nil
-                      :foreground "#565f89"  ;; slightly lighter for current line
-                      :background nil))
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (nerd-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+;;; MU4E
 (use-package mu4e
   :ensure nil
   :config
