@@ -62,7 +62,7 @@ Oama
 
 isync
 -----------
-1. Ensure ~/.mail/gmail & ~/.mail/nablesolutions exist
+1. Ensure ~/.mail/{gmail,nablesolutions,support} exist
 2. mbsync -a
 
 
@@ -71,3 +71,10 @@ notmuch
 -----------
 1. Index emails by running:
    notmuch new
+
+
+
+mu (mu4e)
+----------
+mu init --maildir=~/.mail --my-address=akisarou90@gmail.com 
+mu index

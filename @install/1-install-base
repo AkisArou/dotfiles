@@ -90,6 +90,7 @@ packages=(
   "mesa"
   "mpv"
   "msmtp"
+  "mu"
   "nautilus"
   "ninja"
   "noto-fonts-emoji"

@@ -1261,28 +1261,32 @@
                       :background nil))
 (use-package mu4e
   :ensure nil
-  :defer 20
+  :defer 2
   :config
+  ;; mu4e reads directly from your synced Maildirs
   (setq mu4e-maildir "~/.mail"
-        ;; mu4e-get-mail-command "mbsync -a && mu index"
-        ;; mu4e-update-interval 300
         mu4e-change-filenames-when-moving t
         mu4e-headers-skip-duplicates t
         mu4e-view-show-images t
         mu4e-view-show-addresses t
-        mu4e-sent-messages-behavior 'sent)
+        mu4e-sent-messages-behavior 'sent
+        mu4e-index-cleanup nil   ;; don't delete messages missing from index
+        mu4e-index-lazy-check t  ;; faster startup, since you’re syncing externally
+        mu4e-index-update-in-background nil  ;; don’t spawn background indexer
+        mu4e-use-fancy-chars t
+        mu4e-html2text-command 'mu4e-shr2text)
 
-  ;; Use shr for HTML mail rendering
-  (setq mu4e-html2text-command 'mu4e-shr2text)
+  ;; Use shr for rendering HTML mails
+  (setq mu4e-view-prefer-html t)
 
-  ;; Global SMTP defaults
+  ;; --- SMTP defaults ---
   (setq message-send-mail-function 'smtpmail-send-it
         smtpmail-stream-type 'ssl)
 
-  ;; Multiple contexts
+  ;; --- Define contexts (accounts) ---
   (setq mu4e-contexts
         (list
-         ;; --- NABLE SOLUTIONS ---
+         ;; Nable Solutions
          (make-mu4e-context
           :name "Nable"
           :match-func
@@ -1307,7 +1311,7 @@
                                (shell-command-to-string
                                 "oama access adamkarafyllidis@nablesolutions.com"))))))))
 
-         ;; --- GMAIL ---
+         ;; Gmail
          (make-mu4e-context
           :name "Gmail"
           :match-func
@@ -1333,7 +1337,7 @@
                                (shell-command-to-string
                                 "oama access akisarou90@gmail.com"))))))))
 
-         ;; --- SUPPORT ---
+         ;; Support
          (make-mu4e-context
           :name "Support"
           :match-func
@@ -1353,22 +1357,22 @@
                    . ((lambda (&rest _)
                         (list "smtp.office365.com"
                               465
-                              "support@nable.gr"
+                              "adamkarafyllidis@nablesolutions.com"
                               (string-trim
                                (shell-command-to-string
                                 "oama access adamkarafyllidis@nablesolutions.com"))))))))))
 
-  ;; Ask which context to use by default
-  (setq mu4e-context-policy 'ask
+  ;; Ask which account to use on compose
+  (setq mu4e-context-policy 'pick-first
         mu4e-compose-context-policy 'ask)
 
-  ;; Optional shortcuts
+  ;; Folder shortcuts
   (setq mu4e-maildir-shortcuts
         '( ("/nablesolutions/Inbox" . ?n)
            ("/gmail/Inbox" . ?g)
            ("/support/Inbox" . ?s) ))
 
-  ;; Org-mode integration
+  ;; Optional org-mode integration
   (use-package org-mu4e :ensure nil)
 )
 
