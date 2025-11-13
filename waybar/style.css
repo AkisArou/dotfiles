@@ -18,6 +18,7 @@ window#waybar.hidden {
 
 window#waybar #window {
   opacity: 0.7;
+  margin-right: 50px;
 }
 
 #workspaces {
