@@ -22,7 +22,6 @@ Patterns *
 Create Both
 Sync All
 Expunge Both
-SyncState *
 
 
 
@@ -51,7 +50,6 @@ Patterns *
 Create Both
 Sync All
 Expunge Both
-SyncState *
 
 
 
@@ -79,4 +77,3 @@ Patterns *
 Create Both
 Sync All
 Expunge Both
-SyncState *
