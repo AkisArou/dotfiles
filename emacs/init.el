@@ -884,6 +884,7 @@
 
   (define-key evil-insert-state-map (kbd "C-c") 'evil-normal-state)
   (define-key evil-normal-state-map (kbd "C-c") 'evil-normal-state)
+  (define-key evil-normal-state-map (kbd "C-s") 'evil-write-all)
 
   ;; Define the leader key as Space
   (evil-set-leader 'normal (kbd "SPC"))
