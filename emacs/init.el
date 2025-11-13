@@ -1259,6 +1259,118 @@
   (set-face-attribute 'line-number-current-line nil
                       :foreground "#565f89"  ;; slightly lighter for current line
                       :background nil))
+(use-package mu4e
+  :ensure nil
+  :defer 20
+  :config
+  (setq mu4e-maildir "~/.mail"
+        ;; mu4e-get-mail-command "mbsync -a && mu index"
+        ;; mu4e-update-interval 300
+        mu4e-change-filenames-when-moving t
+        mu4e-headers-skip-duplicates t
+        mu4e-view-show-images t
+        mu4e-view-show-addresses t
+        mu4e-sent-messages-behavior 'sent)
+
+  ;; Use shr for HTML mail rendering
+  (setq mu4e-html2text-command 'mu4e-shr2text)
+
+  ;; Global SMTP defaults
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-stream-type 'ssl)
+
+  ;; Multiple contexts
+  (setq mu4e-contexts
+        (list
+         ;; --- NABLE SOLUTIONS ---
+         (make-mu4e-context
+          :name "Nable"
+          :match-func
+          (lambda (msg)
+            (when msg
+              (string-prefix-p "~/.mail/nablesolutions" (mu4e-message-field msg :maildir))))
+          :vars '((user-full-name . "Adam Karafyllidis")
+                  (user-mail-address . "adamkarafyllidis@nablesolutions.com")
+                  (mu4e-maildir . "~/.mail/nablesolutions")
+                  (mu4e-sent-folder . "/Sent")
+                  (mu4e-drafts-folder . "/Drafts")
+                  (mu4e-trash-folder . "/Trash")
+                  (mu4e-refile-folder . "/Archive")
+                  (smtpmail-smtp-server . "smtp.office365.com")
+                  (smtpmail-smtp-service . 465)
+                  (smtpmail-auth-credentials
+                   . ((lambda (&rest _)
+                        (list "smtp.office365.com"
+                              465
+                              "adamkarafyllidis@nablesolutions.com"
+                              (string-trim
+                               (shell-command-to-string
+                                "oama access adamkarafyllidis@nablesolutions.com"))))))))
+
+         ;; --- GMAIL ---
+         (make-mu4e-context
+          :name "Gmail"
+          :match-func
+          (lambda (msg)
+            (when msg
+              (string-prefix-p "~/.mail/gmail" (mu4e-message-field msg :maildir))))
+          :vars '((user-full-name . "Adam Karafyllidis")
+                  (user-mail-address . "akisarou90@gmail.com")
+                  (mu4e-maildir . "~/.mail/gmail")
+                  (mu4e-sent-folder . "/Sent")
+                  (mu4e-drafts-folder . "/Drafts")
+                  (mu4e-trash-folder . "/Trash")
+                  (mu4e-refile-folder . "/Archive")
+                  (smtpmail-smtp-server . "smtp.gmail.com")
+                  (smtpmail-smtp-service . 465)
+                  (smtpmail-auth-supported . (xoauth2))
+                  (smtpmail-auth-credentials
+                   . ((lambda (&rest _)
+                        (list "smtp.gmail.com"
+                              465
+                              "akisarou90@gmail.com"
+                              (string-trim
+                               (shell-command-to-string
+                                "oama access akisarou90@gmail.com"))))))))
+
+         ;; --- SUPPORT ---
+         (make-mu4e-context
+          :name "Support"
+          :match-func
+          (lambda (msg)
+            (when msg
+              (string-prefix-p "~/.mail/support" (mu4e-message-field msg :maildir))))
+          :vars '((user-full-name . "Adam Karafyllidis")
+                  (user-mail-address . "support@nable.gr")
+                  (mu4e-maildir . "~/.mail/support")
+                  (mu4e-sent-folder . "/Sent")
+                  (mu4e-drafts-folder . "/Drafts")
+                  (mu4e-trash-folder . "/Trash")
+                  (mu4e-refile-folder . "/Archive")
+                  (smtpmail-smtp-server . "smtp.office365.com")
+                  (smtpmail-smtp-service . 465)
+                  (smtpmail-auth-credentials
+                   . ((lambda (&rest _)
+                        (list "smtp.office365.com"
+                              465
+                              "support@nable.gr"
+                              (string-trim
+                               (shell-command-to-string
+                                "oama access adamkarafyllidis@nablesolutions.com"))))))))))
+
+  ;; Ask which context to use by default
+  (setq mu4e-context-policy 'ask
+        mu4e-compose-context-policy 'ask)
+
+  ;; Optional shortcuts
+  (setq mu4e-maildir-shortcuts
+        '( ("/nablesolutions/Inbox" . ?n)
+           ("/gmail/Inbox" . ?g)
+           ("/support/Inbox" . ?s) ))
+
+  ;; Org-mode integration
+  (use-package org-mu4e :ensure nil)
+)
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
