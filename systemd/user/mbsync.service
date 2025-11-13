@@ -4,4 +4,4 @@ Description=Mailbox synchronization service
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/mbsync -Va
-ExecStartPost=/bin/sh -c '/usr/bin/notmuch new --config="$HOME/dotfiles/notmuch/gmail-config" && /usr/bin/notmuch new --config="$HOME/dotfiles/notmuch/microsoft-config"'
+; ExecStartPost=/bin/sh -c '/usr/bin/notmuch new --config="$HOME/dotfiles/notmuch/gmail-config" && /usr/bin/notmuch new --config="$HOME/dotfiles/notmuch/microsoft-config"'
