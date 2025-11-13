@@ -64,3 +64,10 @@ isync
 -----------
 1. Ensure ~/.mail/gmail & ~/.mail/nablesolutions exist
 2. mbsync -a
+
+
+
+notmuch
+-----------
+1. Index emails by running:
+   notmuch new

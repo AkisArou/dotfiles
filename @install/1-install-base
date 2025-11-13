@@ -48,6 +48,7 @@ packages=(
   "clang"
   "cmake"
   "curl"
+  "cyrus-sasl-xoauth2-git"
   "docker"
   "docker-compose"
   "dunst"

@@ -12,7 +12,7 @@
 # the database location (in a subdirectory called ".notmuch").
 #
 [database]
-path=/home/akisarou/.mail
+path=/home/akisarou/.mail/gmail/
 # User configuration
 #
 # Here is where you can let notmuch know how you would like to be
@@ -31,7 +31,6 @@ path=/home/akisarou/.mail
 [user]
 name=Adam Karafyllidis
 primary_email=akisarou90@gmail.com
-other_email=adamkarafyllidis@nablesolutions.com
 # Configuration for "notmuch new"
 #
 # The following options are supported here:
