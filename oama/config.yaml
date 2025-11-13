@@ -26,6 +26,3 @@ services:
     device_endpoint: https://login.microsoftonline.com/nablesolutions.com/oauth2/v2.0/devicecode
     client_id_cmd: "pass oauth/microsoft/client_id | head -n1"
     client_secret_cmd: "pass oauth/microsoft/client_secret | head -n1"
-  #  auth_scope: https://outlook.office.com/IMAP.AccessAsUser.All
-  #     https://outlook.office.com/SMTP.Send
-  #     offline_access
