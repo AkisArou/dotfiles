@@ -23,6 +23,8 @@ Create Both
 Sync All
 
 
+
+
 # Microsoft
 IMAPAccount outlook
 Host outlook.office365.com
@@ -46,6 +48,9 @@ Near :outlook-local:
 Patterns *
 Create Both
 Sync All
+
+
+
 
 # Support
 IMAPAccount support
