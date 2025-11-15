@@ -893,6 +893,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> s g") 'consult-grep)
   (evil-define-key 'normal 'global (kbd "<leader> s G") 'consult-git-grep)
   (evil-define-key 'normal 'global (kbd "<leader> f s") 'consult-ripgrep)
+  (evil-define-key 'normal 'global (kbd "<leader> f q") 'consult-compile-error)
   (evil-define-key 'normal 'global (kbd "<leader> s h") 'consult-info)
   (evil-define-key 'normal 'global (kbd "<leader> /") 'consult-line)
 
