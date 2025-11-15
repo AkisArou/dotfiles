@@ -176,11 +176,11 @@
      ;;  (side . bottom)
      ;;  (slot . -1))
 
-     ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 0))
+     ;; ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+     ;;  (display-buffer-in-side-window)
+     ;;  (window-height . 0.25)
+     ;;  (side . bottom)
+     ;;  (slot . 0))
 
      ;; Example configuration for the LSP help buffer,
      ;; keeps it always on bottom using 25% of the available space:
@@ -190,13 +190,13 @@
       (side . bottom)
       (slot . 0))
 
-     ;; Configuration for displaying various diagnostic buffers on
-     ;; bottom 25%:
-     ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 1))
+     ;; ;; Configuration for displaying various diagnostic buffers on
+     ;; ;; bottom 25%:
+     ;; ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
+     ;;  (display-buffer-in-side-window)
+     ;;  (window-height . 0.25)
+     ;;  (side . bottom)
+     ;;  (slot . 1))
      )))
 
 ;;; DIRED
@@ -339,14 +339,6 @@
   (flymake-margin-indicators-string
    '((error "!»" compilation-error) (warning "»" compilation-warning)
      (note "»" compilation-info))))
-
-(use-package flymake-diagnostic-at-point
-  :after flymake
-  :config
-  (setq flymake-diagnostic-at-point-display-diagnostic-function
-        #'flymake-diagnostic-at-point-display-popup)
-  (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode))
-
 
 ;;; ORG-MODE
 ;; Org-mode is a powerful system for organizing and managing your notes,
@@ -582,24 +574,6 @@
         (file (styles fussy partial-completion))
         (project-file (styles fussy))
         (lsp-capf (styles fussy basic))))
-
-(use-package corfu-terminal
-  :straight (corfu-terminal
-             :type git
-             :host codeberg
-             :repo "akib/emacs-corfu-terminal")
-  :unless (display-graphic-p) ;; Only load in terminal
-  :config
-  (corfu-terminal-mode +1))
-
-(use-package corfu-doc-terminal
-  :straight (corfu-doc-terminal
-             :type git
-             :host codeberg
-             :repo "akib/emacs-corfu-doc-terminal")
-  :unless (display-graphic-p) ;; Only load in terminal
-  :config
-  (corfu-doc-terminal-mode +1))
 
 ;;; NERD-ICONS-CORFU
 ;; Provides Nerd Icons to be used with CORFU.
@@ -909,6 +883,22 @@
   (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error) ;; Go to next Flymake error
   (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error) ;; Go to previous Flymake error
 
+  ;; Show diagnostic at point in a popup with C-w C-d
+  ;; (defun ek/show-diagnostic-popup ()
+  ;;   (interactive)
+  ;;   (if (bound-and-true-p flymake-mode)
+  ;;       (progn
+  ;;         (require 'flymake-diagnostic-at-point nil t)
+  ;;         (if (fboundp 'flymake-diagnostic-at-point)
+  ;;             (flymake-diagnostic-at-point)
+  ;;           (if-let ((diags (flymake-diagnostics (point))))
+  ;;               (message "%s" (mapconcat (lambda (d) (flymake-diagnostic-text d)) diags "\n"))
+  ;;             (message "No diagnostics at point"))))
+  ;;     (message "Flymake is not active")))
+
+  ;; (with-eval-after-load 'evil
+  ;;   (define-key evil-window-map (kbd "C-d") #'ek/show-diagnostic-popup))
+
   ;; Dired commands for file management
   (evil-define-key 'normal 'global (kbd "<leader> x d") 'dired)
   (evil-define-key 'normal 'global (kbd "<leader> x j") 'dired-jump)
@@ -1132,7 +1122,8 @@
   (setq pulsar-pulse t)
   (setq pulsar-delay 0.025)
   (setq pulsar-iterations 10)
-  (setq pulsar-face 'evil-ex-lazy-highlight)
+  (setq pulsar-face '((t (:background "#283457" :foreground "#ffffff"))))
+
 
   (add-to-list 'pulsar-pulse-functions 'evil-scroll-down)
   (add-to-list 'pulsar-pulse-functions 'flymake-goto-next-error)
