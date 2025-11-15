@@ -340,6 +340,13 @@
    '((error "!»" compilation-error) (warning "»" compilation-warning)
      (note "»" compilation-info))))
 
+(use-package flymake-diagnostic-at-point
+  :after flymake
+  :config
+  (setq flymake-diagnostic-at-point-display-diagnostic-function
+        #'flymake-diagnostic-at-point-display-popup)
+  (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode))
+
 
 ;;; ORG-MODE
 ;; Org-mode is a powerful system for organizing and managing your notes,
