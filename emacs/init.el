@@ -839,8 +839,6 @@
   :init
   (setq evil-want-integration t)      ;; Integrate `evil' with other Emacs features (optional as it's true by default).
   (setq evil-want-keybinding nil)     ;; Disable default keybinding to set custom ones.
-  (setq evil-want-C-u-scroll t)       ;; Makes C-u scroll
-  (setq evil-want-C-u-delete t)       ;; Makes C-u delete on insert mode
   :config
   (setq evil-normal-state-cursor 'box
         evil-insert-state-cursor 'bar
@@ -932,7 +930,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> p D") 'project-dired) ;; Dired for project
 
   ;; Yank from kill ring
-  (evil-define-key 'normal 'global (kbd "P") 'consult-yank-from-kill-ring)
+  ;; (evil-define-key 'normal 'global (kbd "P") 'consult-yank-from-kill-ring)
   (evil-define-key 'normal 'global (kbd "<leader> P") 'consult-yank-from-kill-ring)
 
   ;; Embark actions for contextual commands
@@ -1137,7 +1135,23 @@
   :ensure t
   :config
   (evil-goggles-mode)
-  (setq evil-goggles-pulse t))
+  (setq evil-goggles-pulse t)
+  (setq evil-goggles-enable-yank t)
+  (setq evil-goggles-enable-paste t)
+  (setq evil-goggles-enable-surround t)
+  (setq evil-goggles-enable-set-marker t)
+  (setq evil-goggles-enable-delete nil)
+  (setq evil-goggles-enable-change nil)
+  (setq evil-goggles-enable-indent nil)
+  (setq evil-goggles-enable-join nil)
+  (setq evil-goggles-enable-fill-and-move nil)
+  (setq evil-goggles-enable-shift nil)
+  (setq evil-goggles-enable-commentary nil)
+  (setq evil-goggles-enable-nerd-commenter nil)
+  (setq evil-goggles-enable-replace-with-register nil)
+  (setq evil-goggles-enable-undo nil)
+  (setq evil-goggles-enable-redo nil)
+  (setq evil-goggles-enable-record-macro nil))
 
 ;;; DOOM MODELINE
 ;; The `doom-modeline' package provides a sleek, modern mode-line that is visually appealing
