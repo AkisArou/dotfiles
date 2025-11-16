@@ -196,10 +196,6 @@
      ;;  (slot . 1))
      )))
 
-(use-package clipboard
-  :after evil)
-
-
 ;;; DIRED
 ;; In Emacs, the `dired' package provides a powerful and built-in file manager
 ;; that allows you to navigate and manipulate files and directories directly
@@ -1009,6 +1005,10 @@
   :after evil
   :config
   (emacs-tmux-navigator-mode 1))
+
+(use-package clipboard
+  :after evil)
+
 
 ;; EVIL COLLECTION
 ;; The `evil-collection' package enhances the integration of
