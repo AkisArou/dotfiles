@@ -1158,6 +1158,16 @@
   (setq evil-goggles-enable-redo nil)
   (setq evil-goggles-enable-record-macro nil))
 
+
+;;; SMARTPARENS
+(use-package smartparens
+  :ensure smartparens  ;; install the package
+  :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
+  :config
+  ;; load default config
+  (require 'smartparens-config))
+
+
 ;;; DOOM MODELINE
 ;; The `doom-modeline' package provides a sleek, modern mode-line that is visually appealing
 ;; and functional. It integrates well with various Emacs features, enhancing the overall user
