@@ -139,10 +139,10 @@
   :init                        ;; Initialization settings that apply before the package is loaded.
   (tool-bar-mode -1)           ;; Disable the tool bar for a cleaner interface.
   (menu-bar-mode -1)           ;; Disable the menu bar for a more streamlined look.
+  (global-hl-line-mode 1)     ;; Enable highlight of the current line
 
   (when scroll-bar-mode
-    (scroll-bar-mode -1))      ;; Disable the scroll bar if it is active.
-
+  (scroll-bar-mode -1))        ;; Disable the scroll bar if it is active.
   (global-hl-line-mode -1)     ;; Disable highlight of the current line
   (global-auto-revert-mode 1)  ;; Enable global auto-revert mode to keep buffers up to date with their corresponding files.
   (recentf-mode 1)             ;; Enable tracking of recently opened files.
@@ -222,12 +222,6 @@
      (".*" "open" "xdg-open")))
   (dired-kill-when-opening-new-dired-buffer t)
   :config
-  ;; GNU ls for macOS
-  (when (eq system-type 'darwin)
-    (let ((gls (executable-find "gls")))
-      (when gls
-        (setq insert-directory-program gls))))
-
   (with-eval-after-load 'evil
     (add-hook 'dired-mode-hook
               (lambda ()
@@ -883,21 +877,21 @@
   (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error) ;; Go to next Flymake error
   (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error) ;; Go to previous Flymake error
 
-  ;; Show diagnostic at point in a popup with C-w C-d
-  ;; (defun ek/show-diagnostic-popup ()
-  ;;   (interactive)
-  ;;   (if (bound-and-true-p flymake-mode)
-  ;;       (progn
-  ;;         (require 'flymake-diagnostic-at-point nil t)
-  ;;         (if (fboundp 'flymake-diagnostic-at-point)
-  ;;             (flymake-diagnostic-at-point)
-  ;;           (if-let ((diags (flymake-diagnostics (point))))
-  ;;               (message "%s" (mapconcat (lambda (d) (flymake-diagnostic-text d)) diags "\n"))
-  ;;             (message "No diagnostics at point"))))
-  ;;     (message "Flymake is not active")))
+  ;;Show diagnostic at point in a popup with C-w C-d
+  (defun ek/show-diagnostic-popup ()
+    (interactive)
+    (if (bound-and-true-p flymake-mode)
+        (progn
+          (require 'flymake-diagnostic-at-point nil t)
+          (if (fboundp 'flymake-diagnostic-at-point)
+              (flymake-diagnostic-at-point)
+            (if-let ((diags (flymake-diagnostics (point))))
+                (message "%s" (mapconcat (lambda (d) (flymake-diagnostic-text d)) diags "\n"))
+              (message "No diagnostics at point"))))
+      (message "Flymake is not active")))
 
-  ;; (with-eval-after-load 'evil
-  ;;   (define-key evil-window-map (kbd "C-d") #'ek/show-diagnostic-popup))
+  (with-eval-after-load 'evil
+    (define-key evil-window-map (kbd "C-d") #'ek/show-diagnostic-popup))
 
   ;; Dired commands for file management
   (evil-define-key 'normal 'global (kbd "<leader> x d") 'dired)
@@ -908,9 +902,8 @@
   (evil-define-key 'normal 'global (kbd "] c") 'diff-hl-next-hunk) ;; Next diff hunk
   (evil-define-key 'normal 'global (kbd "[ c") 'diff-hl-pevious-hunk) ;; Previous diff hunk
 
-  ;; NeoTree command for file exploration
-  (evil-define-key 'normal 'global (kbd "<leader> e e") 'neotree-toggle)
-  (evil-define-key 'normal 'global (kbd "<leader> e d") 'dired-jump)
+  ;; File exploration
+  (evil-define-key 'normal 'global (kbd "<leader> e") 'dired-jump)
 
   ;; Magit keybindings for Git integration
   (evil-define-key 'normal 'global (kbd "<leader> g g") 'magit-status)      ;; Open Magit status
@@ -954,6 +947,13 @@
   (evil-define-key 'normal 'global (kbd "<leader> h f") 'describe-function) ;; Describe function
   (evil-define-key 'normal 'global (kbd "<leader> h v") 'describe-variable) ;; Describe variable
   (evil-define-key 'normal 'global (kbd "<leader> h k") 'describe-key) ;; Describe key
+
+  ;; Window movements
+  (define-key evil-normal-state-map (kbd "C-h") 'evil-window-left)
+  (define-key evil-normal-state-map (kbd "C-j") 'evil-window-down)
+  (define-key evil-normal-state-map (kbd "C-k") 'evil-window-up)
+  (define-key evil-normal-state-map (kbd "C-l") 'evil-window-right)
+
 
   ;; Tab navigation
   (evil-define-key 'normal 'global (kbd "] t") 'tab-next) ;; Go to next tab
@@ -1112,30 +1112,35 @@
 ;; useful in programming modes, where it can help users easily track
 ;; actions such as scrolling, error navigation, yanking, deleting, and
 ;; jumping to definitions.
-(use-package pulsar
-  :defer t
-  :straight t
+;; (use-package pulsar
+;;   :defer t
+;;   :straight t
+;;   :ensure t
+;;   :hook
+;;   (after-init . pulsar-global-mode)
+;;   :config
+;;   (setq pulsar-pulse t)
+;;   (setq pulsar-delay 0.025)
+;;   (setq pulsar-iterations 10)
+;;   (setq pulsar-face '((t (:background "#292e42" :foreground "#ffffff"))))
+
+
+;;   (add-to-list 'pulsar-pulse-functions 'evil-scroll-down)
+;;   (add-to-list 'pulsar-pulse-functions 'flymake-goto-next-error)
+;;   (add-to-list 'pulsar-pulse-functions 'flymake-goto-prev-error)
+;;   (add-to-list 'pulsar-pulse-functions 'evil-yank)
+;;   (add-to-list 'pulsar-pulse-functions 'evil-yank-line)
+;;   (add-to-list 'pulsar-pulse-functions 'evil-delete)
+;;   (add-to-list 'pulsar-pulse-functions 'evil-delete-line)
+;;   (add-to-list 'pulsar-pulse-functions 'evil-jump-item)
+;;   (add-to-list 'pulsar-pulse-functions 'diff-hl-next-hunk)
+;;   (add-to-list 'pulsar-pulse-functions 'diff-hl-previous-hunk))
+
+(use-package evil-goggles
   :ensure t
-  :hook
-  (after-init . pulsar-global-mode)
   :config
-  (setq pulsar-pulse t)
-  (setq pulsar-delay 0.025)
-  (setq pulsar-iterations 10)
-  (setq pulsar-face '((t (:background "#283457" :foreground "#ffffff"))))
-
-
-  (add-to-list 'pulsar-pulse-functions 'evil-scroll-down)
-  (add-to-list 'pulsar-pulse-functions 'flymake-goto-next-error)
-  (add-to-list 'pulsar-pulse-functions 'flymake-goto-prev-error)
-  (add-to-list 'pulsar-pulse-functions 'evil-yank)
-  (add-to-list 'pulsar-pulse-functions 'evil-yank-line)
-  (add-to-list 'pulsar-pulse-functions 'evil-delete)
-  (add-to-list 'pulsar-pulse-functions 'evil-delete-line)
-  (add-to-list 'pulsar-pulse-functions 'evil-jump-item)
-  (add-to-list 'pulsar-pulse-functions 'diff-hl-next-hunk)
-  (add-to-list 'pulsar-pulse-functions 'diff-hl-previous-hunk))
-
+  (evil-goggles-mode)
+  (setq evil-goggles-pulse t))
 
 ;;; DOOM MODELINE
 ;; The `doom-modeline' package provides a sleek, modern mode-line that is visually appealing
@@ -1156,24 +1161,6 @@
     (setq doom-modeline-icon nil))                     ;; Disable icons if nerd fonts are not being used.
   :hook
   (after-init . doom-modeline-mode))
-
-
-;;; NEOTREE
-;; The `neotree' package provides a file tree explorer for Emacs, allowing easy navigation
-;; through directories and files. It presents a visual representation of the file system
-;; and integrates with version control to show file states.
-(use-package neotree
-  :ensure t
-  :straight t
-  :custom
-  (neo-show-hidden-files t)                ;; By default shows hidden files (toggle with H)
-  (neo-theme 'nerd)                        ;; Set the default theme for Neotree to 'nerd' for a visually appealing look.
-  (neo-vc-integration '(face char))        ;; Enable VC integration to display file states with faces (color coding) and characters (icons).
-  :defer t                                 ;; Load the package only when needed to improve startup time.
-  :config
-  (if ek-use-nerd-fonts                    ;; Check if nerd fonts are being used.
-      (setq neo-theme 'nerd-icons)         ;; Set the theme to 'nerd-icons' if nerd fonts are available.
-    (setq neo-theme 'nerd)))               ;; Otherwise, fall back to the 'nerd' theme.
 
 
 ;;; NERD ICONS
