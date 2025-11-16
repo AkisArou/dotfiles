@@ -841,6 +841,9 @@
   :init
   (setq evil-want-integration t)      ;; Integrate `evil' with other Emacs features (optional as it's true by default).
   (setq evil-want-keybinding nil)     ;; Disable default keybinding to set custom ones.
+  (setq evil-want-C-u-scroll t)       ;; Makes C-u scroll
+  (setq evil-want-C-u-delete t)       ;; Makes C-u delete on insert mode
+
   :config
   (setq evil-normal-state-cursor 'box
         evil-insert-state-cursor 'bar
