@@ -21,7 +21,7 @@
     "Paste using wl-paste in terminal, otherwise fallback to GUI."
     (if (display-graphic-p)
         (gui-selection-value)
-      (string-trim (shell-command-to-string "wl-paste --no-newline"))))
+      (shell-command-to-string "wl-paste --no-newline")))
 
   (setq interprogram-cut-function #'my-wl-copy)
   (setq interprogram-paste-function #'my-wl-paste))
@@ -40,6 +40,6 @@
             (process-send-eof proc))))
   (setq interprogram-paste-function
         (lambda ()
-          (string-trim (shell-command-to-string "xsel --clipboard --output"))))))
+          (shell-command-to-string "xsel --clipboard --output")))))
 
 (provide 'clipboard)

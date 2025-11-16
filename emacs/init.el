@@ -45,8 +45,6 @@
 ;; Add lisp/ directory to Emacs' load path
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-(require 'clipboard)
-
 ;; Define a global customizable variable `ek-use-nerd-fonts' to control the use of
 ;; Nerd Fonts symbols throughout the configuration. This boolean variable allows
 ;; users to easily enable or disable the use of symbols from Nerd Fonts, providing
@@ -197,6 +195,10 @@
      ;;  (side . bottom)
      ;;  (slot . 1))
      )))
+
+(use-package clipboard
+  :after evil)
+
 
 ;;; DIRED
 ;; In Emacs, the `dired' package provides a powerful and built-in file manager
