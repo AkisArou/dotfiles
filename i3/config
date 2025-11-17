@@ -67,6 +67,7 @@ bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
 bindsym $mod+Shift+e exec ~/dotfiles/rofi/emulator
 bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
 bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
+bindsym $mod+Shift+bracketleft exec ~/dotfiles/rofi/launch -modi emoji -show emoji
 
 bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
 bindsym $mod+Shift+m exec ~/dotfiles/aerc/launch

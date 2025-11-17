@@ -112,6 +112,7 @@ packages=(
   "ripdrag-git"
   "ripgrep"
   "rofi"
+  "rofi-emoji"
   "rsync"
   "rustup"
   "scrcpy"
