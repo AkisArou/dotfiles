@@ -892,6 +892,9 @@
   (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error) ;; Go to next Flymake error
   (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error) ;; Go to previous Flymake error
 
+  ;; TAB
+  (evil-define-key 'insert 'global (kbd "TAB") #'tab-jump-out)
+
 ;; Trigger completion at point in Evil insert mode
   (evil-define-key 'insert 'global (kbd "M-SPC") #'completion-at-point)
 
@@ -1193,6 +1196,19 @@
   :config
   ;; load default config
   (require 'smartparens-config))
+
+
+;;; TAB-JUMP-OUT
+(use-package tab-jump-out
+  :straight (:host github :repo "zhangkaiyulw/tab-jump-out")
+  :config
+  ;; Enable the minor mode in all buffers, or you can do it per-mode
+  (define-globalized-minor-mode global-tab-jump-out-mode
+    tab-jump-out-mode
+    (lambda ()
+      (tab-jump-out-mode 1)))
+  (global-tab-jump-out-mode 1))
+
 
 
 ;;; DOOM MODELINE
