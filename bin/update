@@ -19,6 +19,10 @@ echo
 nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'lua require("plugins.lsp.mason")' -c 'MasonUpdateAll'
 echo
 
+print_info "emacs:"
+~/dotfiles/scripts/build-emacs
+echo
+
 print_info "zinit:"
 source /usr/share/zinit/zinit.zsh
 zinit update --parallel
