@@ -892,6 +892,16 @@
   (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error) ;; Go to next Flymake error
   (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error) ;; Go to previous Flymake error
 
+;; Trigger completion at point in Evil insert mode
+  (evil-define-key 'insert 'global (kbd "M-SPC") #'completion-at-point)
+
+;; Trigger completion at point in all minibuffer maps
+  (dolist (map (list minibuffer-local-map
+                   minibuffer-local-ns-map
+                   minibuffer-local-completion-map
+                   minibuffer-local-must-match-map))
+	(define-key map (kbd "M-SPC") #'completion-at-point))
+
   ;;Show diagnostic at point in a popup with C-w C-d
   (defun ek/show-diagnostic-popup ()
     (interactive)
