@@ -79,77 +79,94 @@
 ;;  This is biggest one. Keep going, plugins (oops, I mean packages) will be shorter :)
 (use-package emacs
   :ensure nil
-  :custom                                         ;; Set custom variables to configure Emacs behavior.
-  (auto-save-default nil)                         ;; Disable automatic saving of buffers.
-  (column-number-mode t)                          ;; Display the column number in the mode line.
-  (create-lockfiles nil)                          ;; Prevent the creation of lock files when editing.
-  (delete-by-moving-to-trash t)                   ;; Move deleted files to the trash instead of permanently deleting them.
-  (delete-selection-mode 1)                       ;; Enable replacing selected text with typed text.
-  (display-line-numbers-type 'relative)           ;; Use relative line numbering in programming modes.
-  (global-auto-revert-non-file-buffers t)         ;; Automatically refresh non-file buffers.
-  (history-length 25)                             ;; Set the length of the command history.
-  (inhibit-startup-message f)                     ;; Disable the startup message when Emacs launches.
-  (initial-scratch-message "")                    ;; Clear the initial message in the *scratch* buffer.
-  (ispell-dictionary "en_US")                     ;; Set the default dictionary for spell checking.
-  (make-backup-files nil)                         ;; Disable creation of backup files.
-  (pixel-scroll-precision-mode t)                 ;; Enable precise pixel scrolling.
-  (pixel-scroll-precision-use-momentum nil)       ;; Disable momentum scrolling for pixel precision.
-  (ring-bell-function 'ignore)                    ;; Disable the audible bell.
-  (split-width-threshold 300)                     ;; Prevent automatic window splitting if the window width exceeds 300 pixels.
-  (switch-to-buffer-obey-display-actions t)       ;; Make buffer switching respect display actions.
-  (tab-width 4)                                   ;; Set the tab width to 4 spaces.
-  (treesit-font-lock-level 4)                     ;; Use advanced font locking for Treesit mode.
-  (truncate-lines t)                              ;; Enable line truncation to avoid wrapping long lines.
-  (use-dialog-box nil)                            ;; Disable dialog boxes in favor of minibuffer prompts.
-  (use-short-answers t)                           ;; Use short answers in prompts for quicker responses (y instead of yes)
-  (warning-minimum-level :emergency)              ;; Set the minimum level of warnings to display.
+  :custom
+  (auto-save-default nil)
+  (column-number-mode t)
+  (create-lockfiles nil)
+  (delete-by-moving-to-trash t)
+  (delete-selection-mode 1)
+  (display-line-numbers-type 'relative)
+  (global-auto-revert-non-file-buffers t)
+  (history-length 25)
+  (inhibit-startup-message t)
+  (initial-scratch-message "")
+  (ispell-dictionary "en_US")
+  (make-backup-files nil)
+  (pixel-scroll-precision-mode t)
+  (pixel-scroll-precision-use-momentum nil)
+  (ring-bell-function 'ignore)
+  (split-width-threshold 300)
+  (switch-to-buffer-obey-display-actions t)
+  (tab-width 4)
+  (treesit-font-lock-level 4)
+  (truncate-lines t)
+  (use-dialog-box nil)
+  (use-short-answers t)
+  (warning-minimum-level :emergency)
 
-  :hook                                           ;; Add hooks to enable specific features in certain modes.
-  (prog-mode . display-line-numbers-mode)         ;; Enable line numbers in programming modes.
+  :hook
+  (prog-mode . display-line-numbers-mode)
 
   :config
-  ;; By default emacs gives you access to a lot of *special* buffers, while navigating with [b and ]b,
-  ;; this might be confusing for newcomers. This settings make sure ]b and [b will always load a
-  ;; file buffer. To see all buffers use <leader> SPC, <leader> b l, or <leader> b i.
+  ;; Skip special buffers when cycling with [b and ]b
   (defun skip-these-buffers (_window buffer _bury-or-kill)
-    "Function for `switch-to-prev-buffer-skip'."
     (string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
+  ;; Custom file
+  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+  (load custom-file 'noerror 'nomessage)
 
-  ;; Save manual customizations to a separate file instead of cluttering `init.el'.
-  ;; You can M-x customize, M-x customize-group, or M-x customize-themes, etc.
-  ;; The saves you do manually using the Emacs interface would overwrite this file.
-  ;; The following makes sure those customizations are in a separate file.
-  (setq custom-file (locate-user-emacs-file "custom-vars.el")) ;; Specify the custom file path.
-  (load custom-file 'noerror 'nomessage)                       ;; Load the custom file quietly, ignoring errors.
-
-  ;; Makes Emacs vertical divisor the symbol │ instead of |.
+  ;; Pretty vertical divider
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
 
-  ;; Centered cursor
+  ;; Centered cursor scrolling behavior
   (setq scroll-preserve-screen-position t
-		scroll-conservatively 0
-		maximum-scroll-margin 0.5
-		scroll-margin 99999)
+        scroll-conservatively 0
+        maximum-scroll-margin 0.5
+        scroll-margin 99999)
 
-  :init                        ;; Initialization settings that apply before the package is loaded.
-  (tool-bar-mode -1)           ;; Disable the tool bar for a cleaner interface.
-  (menu-bar-mode -1)           ;; Disable the menu bar for a more streamlined look.
-  (global-hl-line-mode 1)     ;; Enable highlight of the current line
+  (electric-pair-mode 1)          ;; Auto-insert matching delimiters
 
-  (when scroll-bar-mode
-  (scroll-bar-mode -1))        ;; Disable the scroll bar if it is active.
-  (global-hl-line-mode -1)     ;; Disable highlight of the current line
-  (global-auto-revert-mode 1)  ;; Enable global auto-revert mode to keep buffers up to date with their corresponding files.
-  (recentf-mode 1)             ;; Enable tracking of recently opened files.
-  (savehist-mode 1)            ;; Enable saving of command history.
-  (save-place-mode 1)          ;; Enable saving the place in files for easier return.
-  (winner-mode 1)              ;; Enable winner mode to easily undo window configuration changes.
-  (xterm-mouse-mode 1)         ;; Enable mouse support in terminal mode.
-  (file-name-shadow-mode 1)    ;; Enable shadowing of filenames for clarity.
+  ;; ───────────────────────────────────────────────────────────────
+  ;; ★ 2-space indentation for JS, TS, TSX, JSON, YAML
+  ;; ───────────────────────────────────────────────────────────────
 
-  ;; Set the default coding system for files to UTF-8.
+  ;; Modes that should always use spaces + 2-width tabs
+  (dolist (hook '(js-ts-mode-hook
+                  json-ts-mode-hook
+                  typescript-ts-mode-hook
+                  tsx-ts-mode-hook
+                  yaml-ts-mode-hook))
+    (add-hook hook
+              (lambda ()
+                (setq-local indent-tabs-mode nil)
+                (setq-local tab-width 2))))
+
+  ;; Mode-specific indent offsets
+  (setq js-indent-level 2)
+  (setq typescript-ts-mode-indent-offset 2)
+  (setq tsx-indent-offset 2)
+  (setq json-ts-mode-indent-offset 2)
+  (setq yaml-indent-offset 2)
+
+  ;; ───────────────────────────────────────────────────────────────
+
+  :init
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (global-hl-line-mode 1)
+  (when scroll-bar-mode (scroll-bar-mode -1))
+  (global-hl-line-mode -1)
+  (global-auto-revert-mode 1)
+  (recentf-mode 1)
+  (savehist-mode 1)
+  (save-place-mode 1)
+  (winner-mode 1)
+  (xterm-mouse-mode 1)
+  (file-name-shadow-mode 1)
+
+  ;; Default file encoding
   (modify-coding-system-alist 'file "" 'utf-8))
 
 
