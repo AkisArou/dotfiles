@@ -88,8 +88,8 @@
   (display-line-numbers-type 'relative)
   (global-auto-revert-non-file-buffers t)
   (history-length 25)
-  (inhibit-startup-message t)
-  (initial-scratch-message "")
+  ;; (inhibit-startup-message t)
+  ;; (initial-scratch-message "")
   (ispell-dictionary "en_US")
   (make-backup-files nil)
   (pixel-scroll-precision-mode t)
@@ -1033,6 +1033,7 @@
 
 (use-package emacs-tmux-navigator
   :after evil
+  :defer t
   :config
   (emacs-tmux-navigator-mode 1))
 
@@ -1168,6 +1169,7 @@
 
 (use-package evil-goggles
   :ensure t
+  :defer t
   :config
   (evil-goggles-mode)
   (setq evil-goggles-pulse t)
@@ -1201,6 +1203,7 @@
 ;;; TAB-JUMP-OUT
 (use-package tab-jump-out
   :straight (:host github :repo "zhangkaiyulw/tab-jump-out")
+  :defer t
   :config
   ;; Enable the minor mode in all buffers, or you can do it per-mode
   (define-globalized-minor-mode global-tab-jump-out-mode
