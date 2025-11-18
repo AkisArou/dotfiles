@@ -1147,36 +1147,7 @@
   :config)
 
 
-;;; PULSAR
-;; The `pulsar' package enhances the user experience in Emacs by providing
-;; visual feedback through pulsating highlights. This feature is especially
-;; useful in programming modes, where it can help users easily track
-;; actions such as scrolling, error navigation, yanking, deleting, and
-;; jumping to definitions.
-;; (use-package pulsar
-;;   :defer t
-;;   :straight t
-;;   :ensure t
-;;   :hook
-;;   (after-init . pulsar-global-mode)
-;;   :config
-;;   (setq pulsar-pulse t)
-;;   (setq pulsar-delay 0.025)
-;;   (setq pulsar-iterations 10)
-;;   (setq pulsar-face '((t (:background "#292e42" :foreground "#ffffff"))))
-
-
-;;   (add-to-list 'pulsar-pulse-functions 'evil-scroll-down)
-;;   (add-to-list 'pulsar-pulse-functions 'flymake-goto-next-error)
-;;   (add-to-list 'pulsar-pulse-functions 'flymake-goto-prev-error)
-;;   (add-to-list 'pulsar-pulse-functions 'evil-yank)
-;;   (add-to-list 'pulsar-pulse-functions 'evil-yank-line)
-;;   (add-to-list 'pulsar-pulse-functions 'evil-delete)
-;;   (add-to-list 'pulsar-pulse-functions 'evil-delete-line)
-;;   (add-to-list 'pulsar-pulse-functions 'evil-jump-item)
-;;   (add-to-list 'pulsar-pulse-functions 'diff-hl-next-hunk)
-;;   (add-to-list 'pulsar-pulse-functions 'diff-hl-previous-hunk))
-
+;;; EVIL-GOGGLES
 (use-package evil-goggles
   :ensure t
   :defer t
