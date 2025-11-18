@@ -264,9 +264,8 @@
   (setq isearch-lazy-count t)                  ;; Enable lazy counting to show current match information.
   (setq lazy-count-prefix-format "(%s/%s) ")   ;; Format for displaying current match count.
   (setq lazy-count-suffix-format nil)          ;; Disable suffix formatting for match count.
-  (setq search-whitespace-regexp ".*?")        ;; Allow searching across whitespace.
-  :bind (("C-s" . isearch-forward)             ;; Bind C-s to forward isearch.
-         ("C-r" . isearch-backward)))          ;; Bind C-r to backward isearch.
+  (setq search-whitespace-regexp ".*?"))        ;; Allow searching across whitespace.
+  
 
 
 ;;; VC
@@ -1207,12 +1206,19 @@
   ;; for treemacs users
   (doom-themes-treemacs-theme "doom-tokyo-night") ; use "doom-colors" for less minimal icon theme
   :config
+  ;; Load the theme
   (load-theme 'doom-tokyo-night t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
   ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
+  (doom-themes-org-config)
+
+  (custom-set-faces
+   `(isearch ((t (:foreground "#16161e" :background "#bb9af7"))))
+   `(lazy-highlight ((t (:foreground "#16161e" :background "#5e428f"))))
+   )
+  )
 
 ;;; MU4E
 (use-package mu4e
