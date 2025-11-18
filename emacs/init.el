@@ -631,9 +631,6 @@
            js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
            web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
-  :config
-  (add-hook 'lsp-mode-hook
-            (lambda () (lsp-headerline-breadcrumb-mode -1)))
   :custom
   (lsp-keymap-prefix "C-c l")                           ;; Set the prefix for LSP commands.
   (lsp-inlay-hint-enable nil)                           ;; Usage of inlay hints.
@@ -671,6 +668,7 @@
   ;; Semantic settings
   (lsp-semantic-tokens-enable nil))                     ;; Disable semantic tokens.
 
+(setq lsp-headerline-breadcrumb-enable nil)
 
 ;;; LSP Additional Servers
 ;; You can extend `lsp-mode' by integrating additional language servers for specific
