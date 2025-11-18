@@ -878,6 +878,8 @@
   (evil-set-leader 'normal (kbd "SPC"))
   (evil-set-leader 'visual (kbd "SPC"))
 
+  (evil-define-key 'normal 'global (kbd "<leader> h") 'evil-ex-nohighlight)
+
   ;; Keybindings for searching and finding files.
   (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file)
   (evil-define-key 'normal 'global (kbd "<leader> f s") 'consult-ripgrep)
