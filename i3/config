@@ -10,9 +10,9 @@ exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id  picom --config ~/.config/picom/picom.conf; 
 exec --no-startup-id sleep 0.2; nitrogen --set-zoom-fill ~/dotfiles/wallpapers/forest.jpg;
-exec --no-startup-id ~/dotfiles/scripts/inactivity
 exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec --no-startup-id ~/dotfiles/i3/listen-events
+exec --no-startup-id ~/dotfiles/i3/inactivity
 exec --no-startup-id flameshot
 exec --no-startup-id xset s off
 exec --no-startup-id xset s 0 0
