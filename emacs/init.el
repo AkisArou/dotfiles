@@ -846,7 +846,6 @@
 
 (add-hook 'post-command-hook 'ek/terminal-cursor-update)
 
-
 ;; EVIL
 ;; The `evil' package provides Vim emulation within Emacs, allowing
 ;; users to edit text in a modal way, similar to how Vim
@@ -875,7 +874,7 @@
 
   ;; Set the leader key to space for easier access to custom commands. (setq evil-want-leader t)
   (setq evil-leader/in-all-states t)  ;; Make the leader key available in all states.
-  (setq evil-want-fine-undo t)        ;; Evil uses finer grain undoing steps
+  (setq evil-want-fine-undo nil)      ;; Default but keep it for reference
 
   (define-key evil-insert-state-map (kbd "C-c") 'evil-normal-state)
   (define-key evil-normal-state-map (kbd "C-c") 'evil-normal-state)
@@ -1041,6 +1040,7 @@
 
   ;; Enable evil mode
   (evil-mode 1))
+
 
 (use-package emacs-tmux-navigator
   :after evil
