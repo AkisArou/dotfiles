@@ -538,6 +538,13 @@
   :mode ("README\\.md\\'" . gfm-mode)            ;; Use gfm-mode for README.md files.
   :init (setq markdown-command "multimarkdown")) ;; Set the Markdown processing command.
 
+;;; HL-TODO
+(use-package hl-todo
+  :vc (:url "https://github.com/tarsius/hl-todo.git")
+  :defer t
+  :hook (prog-mode . hl-todo-mode)
+  :config
+  (global-hl-todo-mode))
 
 
 (use-package corfu
