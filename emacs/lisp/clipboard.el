@@ -1,45 +1,59 @@
-;; Clipboard setup for Wayland and X11
+;; Detect display server (Wayland vs Xorg)
+(defun system-wayland-p ()
+  "Return non-nil if running under Wayland."
+  (and (getenv "WAYLAND_DISPLAY")
+       (not (string-empty-p (getenv "WAYLAND_DISPLAY")))))
+
+(defun system-xorg-p ()
+  "Return non-nil if running under Xorg."
+  (and (getenv "DISPLAY")
+       (not (string-empty-p (getenv "DISPLAY")))))
+
+;; -----------------------------
+;; Wayland clipboard functions
+;; -----------------------------
+(setq wl-copy-process nil)
+
+(defun wl-copy (text)
+  (setq wl-copy-process
+        (make-process :name "wl-copy"
+                      :buffer nil
+                      :command '("wl-copy" "-f" "-n")
+                      :connection-type 'pipe
+                      :noquery t))
+  (process-send-string wl-copy-process text)
+  (process-send-eof wl-copy-process))
+
+(defun wl-paste ()
+  (if (and wl-copy-process (process-live-p wl-copy-process))
+      nil ;; return nil if we're the current clipboard owner
+    (shell-command-to-string "wl-paste -n | tr -d '\r'")))
+
+;; --------------------------------
+;; Xorg clipboard using xsel
+;; --------------------------------
+(defun xsel-copy (text)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "xsel-copy" nil "xsel" "--clipboard" "--input")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+
+(defun xsel-paste ()
+  (shell-command-to-string "xsel --clipboard --output"))
+
+;; ------------------------------
+;; Select backend automatically
+;; ------------------------------
 (cond
- ;; Wayland
- ((and (string= (getenv "XDG_SESSION_TYPE") "wayland")
-       (executable-find "wl-copy")
-       (executable-find "wl-paste"))
-  (message "Using Wayland clipboard via wl-copy/wl-paste")
+ ((system-wayland-p)
+  (setq interprogram-cut-function #'wl-copy
+        interprogram-paste-function #'wl-paste))
 
-  (defun my-wl-copy (text)
-    "Copy TEXT using wl-copy in terminal, otherwise fallback to GUI."
-    (if (display-graphic-p)
-        (gui-select-text text)
-      (let ((proc (make-process :name "wl-copy"
-                                :buffer nil
-                                :command '("wl-copy")
-                                :connection-type 'pipe)))
-        (process-send-string proc text)
-        (process-send-eof proc))))
+ ((system-xorg-p)
+  (setq interprogram-cut-function #'xsel-copy
+        interprogram-paste-function #'xsel-paste))
 
-  (defun my-wl-paste ()
-    "Paste using wl-paste in terminal, otherwise fallback to GUI."
-    (if (display-graphic-p)
-        (gui-selection-value)
-      (shell-command-to-string "wl-paste --no-newline")))
-
-  (setq interprogram-cut-function #'my-wl-copy)
-  (setq interprogram-paste-function #'my-wl-paste))
-
- ;; X11
- ((and (fboundp 'ek/use-xsel-p)
-       (ek/use-xsel-p))
-  (message "Using X11 clipboard via xsel")
-  (setq interprogram-cut-function
-        (lambda (text &optional _)
-          (let ((proc (make-process :name "xsel"
-                                    :buffer nil
-                                    :command '("xsel" "--clipboard" "--input")
-                                    :connection-type 'pipe)))
-            (process-send-string proc text)
-            (process-send-eof proc))))
-  (setq interprogram-paste-function
-        (lambda ()
-          (shell-command-to-string "xsel --clipboard --output")))))
+ (t
+  (message "Warning: Unknown display server; clipboard integration disabled.")))
 
 (provide 'clipboard)
