@@ -879,18 +879,28 @@
   (evil-set-leader 'visual (kbd "SPC"))
 
   ;; Keybindings for searching and finding files.
-  (evil-define-key 'normal 'global (kbd "<leader> s f") 'consult-find)
-  (evil-define-key 'normal 'global (kbd "<leader> s g") 'consult-grep)
-  (evil-define-key 'normal 'global (kbd "<leader> s G") 'consult-git-grep)
+  (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file)
   (evil-define-key 'normal 'global (kbd "<leader> f s") 'consult-ripgrep)
+  (evil-define-key 'normal 'global (kbd "<leader> f S") 'consult-gitgrep)
   (evil-define-key 'normal 'global (kbd "<leader> f q") 'consult-compile-error)
-  (evil-define-key 'normal 'global (kbd "<leader> s h") 'consult-info)
+  (evil-define-key 'normal 'global (kbd "<leader> f h") 'consult-info)
+  (evil-define-key 'normal 'global (kbd "<leader> f m") 'consult-man)
   (evil-define-key 'normal 'global (kbd "<leader> /") 'consult-line)
 
   ;; Flymake navigation
-  (evil-define-key 'normal 'global (kbd "<leader> x x") 'consult-flymake);; Gives you something like `trouble.nvim'
-  (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error) ;; Go to next Flymake error
-  (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error) ;; Go to previous Flymake error
+  (evil-define-key 'normal 'global (kbd "<leader> f d") 'consult-flymake)
+  (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error)
+  (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error)
+  (evil-define-key 'normal 'global (kbd "] e") 'flymake-goto-next-error)
+  (evil-define-key 'normal 'global (kbd "[ e") 'flymake-goto-prev-error)
+
+  ;; LSP
+  (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
+  (evil-define-key 'normal 'global (kbd "grr") 'lsp-find-references)
+  (evil-define-key 'normal 'global (kbd "grn") 'lsp-rename)
+  (evil-define-key 'normal 'global (kbd "gI") 'lsp-find-implementation)
+  (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
+  (evil-define-key 'normal 'global (kbd "<leader> l f") 'lsp-format-buffer) 
 
   ;; TAB
   (evil-define-key 'insert 'global (kbd "TAB") #'tab-jump-out)
@@ -943,11 +953,9 @@
   ;; Buffer management keybindings
   (evil-define-key 'normal 'global (kbd "] b") 'switch-to-next-buffer) ;; Switch to next buffer
   (evil-define-key 'normal 'global (kbd "[ b") 'switch-to-prev-buffer) ;; Switch to previous buffer
-  (evil-define-key 'normal 'global (kbd "<leader> b i") 'consult-buffer) ;; Open consult buffer list
   (evil-define-key 'normal 'global (kbd "<leader> b b") 'ibuffer) ;; Open Ibuffer
   (evil-define-key 'normal 'global (kbd "<leader> b d") 'kill-current-buffer) ;; Kill current buffer
-  (evil-define-key 'normal 'global (kbd "<leader> b k") 'kill-current-buffer) ;; Kill current buffer
-  (evil-define-key 'normal 'global (kbd "<leader> b x") 'kill-current-buffer) ;; Kill current buffer
+  (evil-define-key 'normal 'global (kbd "<leader> b a") 'project-kill-buffers) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> b s") 'save-buffer) ;; Save buffer
   (evil-define-key 'normal 'global (kbd "<leader> b l") 'consult-buffer) ;; Consult buffer
   (evil-define-key 'normal 'global (kbd "<leader>SPC") 'consult-buffer) ;; Consult buffer
@@ -955,9 +963,6 @@
   ;; Project management keybindings
   (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-project-buffer) ;; Consult project buffer
   (evil-define-key 'normal 'global (kbd "<leader> p p") 'project-switch-project) ;; Switch project
-  (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file) ;; Find file in project
-  (evil-define-key 'normal 'global (kbd "<leader> f s") 'project-find-regexp) ;; Find regexp in project
-  (evil-define-key 'normal 'global (kbd "<leader> p k") 'project-kill-buffers) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> p D") 'project-dired) ;; Dired for project
 
   ;; Yank from kill ring
@@ -988,15 +993,6 @@
                      (interactive)
                      (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
                      (revert-buffer t t t)))
-
-  ;; LSP commands keybindings
-  (evil-define-key 'normal lsp-mode-map
-                   ;; (kbd "gd") 'lsp-find-definition                ;; evil-collection already provides gd
-                   (kbd "grr") 'lsp-find-references                   ;; Finds LSP references
-                   (kbd "gra") 'lsp-execute-code-action     ;; Execute code actions
-                   (kbd "grn") 'lsp-rename                  ;; Rename symbol
-                   (kbd "gI") 'lsp-find-implementation               ;; Find implementation
-                   (kbd "<leader> l f") 'lsp-format-buffer)          ;; Format buffer via lsp
 
 
   (defun ek/lsp-describe-and-jump ()
@@ -1033,7 +1029,6 @@
 
 (use-package emacs-tmux-navigator
   :after evil
-  :defer t
   :config
   (emacs-tmux-navigator-mode 1))
 
@@ -1051,7 +1046,7 @@
   :straight t
   :ensure t
   :custom
-  (evil-collection-want-find-usages-bindings t)
+  (evil-collection-want-find-usages-bindings nil)
   ;; Hook to initialize `evil-collection' when `evil-mode' is activated.
   :hook
   (evil-mode . evil-collection-init))
