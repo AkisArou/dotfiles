@@ -2,11 +2,9 @@
 
 INSTALL_DIR="$HOME/emacs"
 REPO_URL="https://git.savannah.gnu.org/git/emacs.git"
+NAME="Emacs"
 
 build_emacs() {
-  echo "Building Emacs..."
-  cd "$INSTALL_DIR" || exit
-
   ./autogen.sh
 
   ./configure --sysconfdir=/etc --prefix=/usr --libexecdir=/usr/lib --localstatedir=/var \
@@ -17,32 +15,6 @@ build_emacs() {
   sudo make install
 }
 
-if [ -d "$INSTALL_DIR" ]; then
-  echo "Emacs already installed... checking for updates..."
-  cd "$INSTALL_DIR" || exit
+BUILD_CALLBACK="build_emacs"
 
-  git fetch
-  LOCAL_HASH=$(git rev-parse @)
-  REMOTE_HASH=$(git rev-parse @{u})
-  BASE_HASH=$(git merge-base @ @{u})
-
-  if [ "$LOCAL_HASH" = "$REMOTE_HASH" ]; then
-    echo "Already up to date. Skipping build."
-  elif [ "$LOCAL_HASH" = "$BASE_HASH" ]; then
-    echo "Changes detected. Pulling and rebuilding Emacs..."
-    git pull --rebase
-    build_emacs
-  else
-    echo "Local changes diverged from the remote. Manual intervention required."
-    exit 1
-  fi
-else
-  echo "Emacs not found. Cloning and building..."
-  git clone "$REPO_URL" "$INSTALL_DIR"
-  cd "$INSTALL_DIR" || exit
-  build_emacs
-fi
-
-# Add emacs to PATH (temporary for current session)
-export PATH="$INSTALL_DIR/src:$PATH"
-echo "Emacs is installed and up-to-date."
+. "$HOME"/dotfiles/scripts/build-from-source
