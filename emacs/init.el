@@ -1033,7 +1033,7 @@
   (emacs-tmux-navigator-mode 1))
 
 (use-package clipboard
-  :after evil)
+  :defer t)
 
 
 ;; EVIL COLLECTION
