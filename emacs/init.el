@@ -74,6 +74,8 @@
 ;; reproducibility, and customization. As we proceed, you'll see smaller
 ;; `use-package` declarations for specific packages, which will help us enable
 ;; the desired features and improve our workflow.
+(add-hook 'minibuffer-setup-hook (lambda ()
+    (local-set-key (kbd "C-c") 'abort-minibuffers)))
 
 ;;; EMACS
 ;;  This is biggest one. Keep going, plugins (oops, I mean packages) will be shorter :)
@@ -406,6 +408,7 @@
   (vertico-cycle nil)                   ;; Do not cycle through candidates when reaching the end of the list.
   :config
   (define-key vertico-map (kbd "C-e") #'vertico-exit)
+
 
   ;; Customize the display of the current candidate in the completion list.
   ;; This will prefix the current candidate with “» ” to make it stand out.
