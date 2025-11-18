@@ -1227,6 +1227,18 @@
    )
   )
 
+;;; COLORFUL-MODE
+(use-package colorful-mode
+  :ensure t
+  :custom
+  (colorful-use-prefix t)
+  (colorful-only-strings 'only-prog)
+  (css-fontify-colors nil)
+  :config
+  (global-colorful-mode t)
+  (add-to-list 'global-colorful-modes 'helpful-mode))
+
+
 ;;; MU4E
 (use-package mu4e
   :ensure nil
