@@ -1080,6 +1080,7 @@
   :init
   (setq undo-tree-visualizer-timestamps t
         undo-tree-visualizer-diff t
+		undo-tree-auto-save-history t
         ;; Increase undo limits to avoid losing history due to Emacs' garbage collection.
         ;; These values can be adjusted based on your needs.
         ;; 10X bump of the undo limits to avoid issues with premature
