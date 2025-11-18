@@ -951,11 +951,16 @@
   (evil-define-key 'normal 'global (kbd "<leader> g b") 'vc-annotate)       ;; Annotate buffer with version control info
 
   ;; Buffer management keybindings
+  (defun kill-other-buffers ()
+	(interactive)
+	(mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+
   (evil-define-key 'normal 'global (kbd "] b") 'switch-to-next-buffer) ;; Switch to next buffer
   (evil-define-key 'normal 'global (kbd "[ b") 'switch-to-prev-buffer) ;; Switch to previous buffer
   (evil-define-key 'normal 'global (kbd "<leader> b b") 'ibuffer) ;; Open Ibuffer
   (evil-define-key 'normal 'global (kbd "<leader> b d") 'kill-current-buffer) ;; Kill current buffer
   (evil-define-key 'normal 'global (kbd "<leader> b a") 'project-kill-buffers) ;; Kill project buffers
+  (evil-define-key 'normal 'global (kbd "<leader> b o") #'kill-other-buffers) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> b s") 'save-buffer) ;; Save buffer
   (evil-define-key 'normal 'global (kbd "<leader> b l") 'consult-buffer) ;; Consult buffer
   (evil-define-key 'normal 'global (kbd "<leader>SPC") 'consult-buffer) ;; Consult buffer
