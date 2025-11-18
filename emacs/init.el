@@ -526,7 +526,7 @@
   :straight t
   :after emacs
   :custom
-  (treesit-auto-install 'prompt)
+  (treesit-auto-install t)
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode t))
@@ -1363,19 +1363,35 @@
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
 (defun ek/first-install ()
   "Install tree-sitter grammars and compile packages on first run..."
-  (interactive)                                      ;; Allow this function to be called interactively.
-  (switch-to-buffer "*Messages*")                    ;; Switch to the *Messages* buffer to display installation messages.
+  (interactive)
+  (switch-to-buffer "*Messages*")
   (message ">>> All required packages installed.")
   (message ">>> Configuring Emacs-Kick...")
   (message ">>> Configuring Tree Sitter parsers...")
+
+  ;; Load treesit-auto package
   (require 'treesit-auto)
-  (treesit-auto-install-all)                         ;; Install all available Tree Sitter grammars.
+
+  ;; Set the languages you want to install (like your Neovim list)
+  (setq treesit-auto-langs
+        '(bash c css dockerfile html javascript jsdoc
+		  lua markdown python toml
+          tsx typescript yaml))
+
+  ;; Initialize treesit-auto (adds major mode remappings etc.)
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode 1)
+
+  ;; Install all grammars
+  (treesit-auto-install-all)
+
   (message ">>> Configuring Nerd Fonts...")
   (require 'nerd-icons)
-  (nerd-icons-install-fonts)                         ;; Install all available nerd-fonts
+  (nerd-icons-install-fonts)
+
   (message ">>> Emacs-Kick installed! Press any key to close the installer and open Emacs normally. First boot will compile some extra stuff :)")
-  (read-key)                                         ;; Wait for the user to press any key.
-  (kill-emacs))                                      ;; Close Emacs after installation is complete.
+  (read-key)
+  (kill-emacs))
 
 (provide 'init)
 ;;; init.el ends here
