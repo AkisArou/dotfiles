@@ -897,7 +897,14 @@
   (evil-define-key 'normal 'global (kbd "<leader> l f") 'lsp-format-buffer) 
 
   ;; TAB
-  (evil-define-key 'insert 'global (kbd "TAB") #'tab-jump-out)
+(defun my/tab-or-up-list ()
+  "If point is before a closing delimiter, run `up-list`. Otherwise indent."
+  (interactive)
+  (if (looking-at-p "[][(){}]")
+      (up-list)
+    (indent-for-tab-command)))
+
+  (evil-define-key 'insert 'global (kbd "TAB") #'my/tab-or-up-list)
 
 ;; Trigger completion at point in Evil insert mode
   (evil-define-key 'insert 'global (kbd "M-SPC") #'completion-at-point)
@@ -1152,29 +1159,6 @@
   (setq evil-goggles-enable-undo nil)
   (setq evil-goggles-enable-redo nil)
   (setq evil-goggles-enable-record-macro nil))
-
-
-;;; SMARTPARENS
-(use-package smartparens
-  :ensure smartparens  ;; install the package
-  :hook (prog-mode text-mode markdown-mode) ;; add `smartparens-mode` to these hooks
-  :config
-  ;; load default config
-  (require 'smartparens-config))
-
-
-;;; TAB-JUMP-OUT
-(use-package tab-jump-out
-  :straight (:host github :repo "zhangkaiyulw/tab-jump-out")
-  :defer t
-  :config
-  ;; Enable the minor mode in all buffers, or you can do it per-mode
-  (define-globalized-minor-mode global-tab-jump-out-mode
-    tab-jump-out-mode
-    (lambda ()
-      (tab-jump-out-mode 1)))
-  (global-tab-jump-out-mode 1))
-
 
 
 ;;; DOOM MODELINE
