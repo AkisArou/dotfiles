@@ -1156,6 +1156,8 @@
   :hook
   (after-init . doom-modeline-mode))
 
+(with-eval-after-load 'doom-modeline
+  (setq ring-bell-function #'ignore))
 
 ;;; NERD ICONS
 ;; The `nerd-icons' package provides a set of icons for use in Emacs. These icons can
@@ -1217,6 +1219,8 @@
   (custom-set-faces
    `(isearch ((t (:foreground "#16161e" :background "#bb9af7"))))
    `(lazy-highlight ((t (:foreground "#16161e" :background "#5e428f"))))
+   `(dired-directory ((t (:foreground "#7aa2f7"))))
+   `(show-paren-match ((t (:foreground "#7aa2f7"))))
    )
   )
 
