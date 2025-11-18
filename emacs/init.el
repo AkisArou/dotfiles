@@ -1310,7 +1310,9 @@
   :ensure nil
   :config
   ;; mu4e reads directly from your synced Maildirs
-  (setq mu4e-maildir "~/.mail"
+  (setq
+        mu4e-confirm-quit nil
+        mu4e-maildir "~/.mail"
         mu4e-change-filenames-when-moving t
         mu4e-headers-skip-duplicates t
         mu4e-view-show-images t
