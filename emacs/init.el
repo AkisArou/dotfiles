@@ -631,13 +631,16 @@
            js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
            web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
+  :config
+  (add-hook 'lsp-mode-hook
+            (lambda () (lsp-headerline-breadcrumb-mode -1)))
   :custom
   (lsp-keymap-prefix "C-c l")                           ;; Set the prefix for LSP commands.
   (lsp-inlay-hint-enable nil)                           ;; Usage of inlay hints.
   (lsp-completion-provider :none)                       ;; Disable the default completion provider.
   (lsp-session-file (locate-user-emacs-file ".lsp-session")) ;; Specify session file location.
   (lsp-log-io nil)                                      ;; Disable IO logging for speed.
-  (lsp-idle-delay 0.1)                                  ;; Set the delay for LSP to 0 (debouncing).
+  (lsp-idle-delay 0)                                    ;; Set the delay for LSP to 0 (debouncing).
   (lsp-keep-workspace-alive nil)                        ;; Disable keeping the workspace alive.
   ;; Core settings
   (lsp-enable-xref t)                                   ;; Enable cross-references.
@@ -664,12 +667,7 @@
   (lsp-enable-snippet nil)                              ;; Disable snippets
   (lsp-completion-show-kind t)                          ;; Show kind in completions.
   ;; Lens settings
-  (lsp-lens-enable t)                                   ;; Enable lens support.
-  ;; Headerline settings
-  (lsp-headerline-breadcrumb-enable-symbol-numbers t)   ;; Enable symbol numbers in the headerline.
-  (lsp-headerline-arrow "▶")                            ;; Set arrow for headerline.
-  (lsp-headerline-breadcrumb-enable-diagnostics nil)    ;; Disable diagnostics in headerline.
-  (lsp-headerline-breadcrumb-icons-enable nil)          ;; Disable icons in breadcrumb.
+  (lsp-lens-enable nil)                                 ;; Disable lens support.
   ;; Semantic settings
   (lsp-semantic-tokens-enable nil))                     ;; Disable semantic tokens.
 
@@ -783,22 +781,6 @@
   (if ek-use-nerd-fonts   ;; Check if nerd fonts are being used
 	  (setopt magit-format-file-function #'magit-format-file-nerd-icons)) ;; Turns on magit nerd-icons
   :defer t)
-
-
-;;; INDENT-GUIDE
-;; The `indent-guide' package provides visual indicators for indentation levels
-;; in programming modes, making it easier to see code structure at a glance.
-;; It draws vertical lines (by default, a character of your choice) at each
-;; level of indentation, helping to improve readability and navigation within
-;; the code.
-(use-package indent-guide
-  :defer t
-  :straight t
-  :ensure t
-  :hook
-  (prog-mode . indent-guide-mode)  ;; Activate indent-guide in programming modes.
-  :config
-  (setq indent-guide-char "│"))    ;; Set the character used for the indent guide.
 
 
 ;;; ADD-NODE-MODULES-PATH
