@@ -847,7 +847,6 @@
   (setq evil-want-integration t)      ;; Integrate `evil' with other Emacs features (optional as it's true by default).
   (setq evil-want-keybinding nil)     ;; Disable default keybinding to set custom ones.
   (setq evil-want-C-u-scroll t)       ;; Makes C-u scroll
-  (setq evil-want-C-u-delete t)       ;; Makes C-u delete on insert mode
 
   :config
   (setq evil-normal-state-cursor 'box
@@ -1001,39 +1000,18 @@
                      (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
                      (revert-buffer t t t)))
 
-
-  (defun ek/lsp-describe-and-jump ()
-    "Show hover documentation and jump to *lsp-help* buffer."
-    (interactive)
-    (lsp-describe-thing-at-point)
-    (let ((help-buffer "*lsp-help*"))
-      (when (get-buffer help-buffer)
-        (switch-to-buffer-other-window help-buffer))))
-
-  ;; Emacs 31 finaly brings us support for 'floating windows' (a.k.a. "child frames")
-  ;; to terminal Emacs. If you're still using 30, docs will be shown in a buffer at the
-  ;; inferior part of your frame.
-  (evil-define-key 'normal 'global (kbd "K")
-    (if (>= emacs-major-version 31)
-        #'eldoc-box-help-at-point
-        #'ek/lsp-describe-and-jump))
-
-  ;; Commenting functionality for single and multiple lines
-  (evil-define-key 'normal 'global (kbd "gcc")
-                   (lambda ()
-                     (interactive)
-                     (if (not (use-region-p))
-                         (comment-or-uncomment-region (line-beginning-position) (line-end-position)))))
-
-  (evil-define-key 'visual 'global (kbd "gc")
-                   (lambda ()
-                     (interactive)
-                     (if (use-region-p)
-                         (comment-or-uncomment-region (region-beginning) (region-end)))))
-
   ;; Enable evil mode
   (evil-mode 1))
 
+(with-eval-after-load 'evil
+  (define-key evil-normal-state-map (kbd "K") #'eldoc-box-help-at-point))
+
+
+(use-package evil-commentary
+  :after evil
+  :straight t
+  :config
+  (evil-commentary-mode 1))
 
 (use-package emacs-tmux-navigator
   :after evil
