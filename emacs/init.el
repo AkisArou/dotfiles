@@ -707,7 +707,7 @@
                     "typescriptreact")
     :server-id 'oxlint
 	:add-on? t
-    :priority -1)))
+    :priority -2)))
 
 (defun my/oxlint-fix-all ()
   "Apply fixes to the current buffer using oxlint."
