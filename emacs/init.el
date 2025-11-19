@@ -90,8 +90,6 @@
   (display-line-numbers-type 'relative)
   (global-auto-revert-non-file-buffers t)
   (history-length 25)
-  ;; (inhibit-startup-message t)
-  ;; (initial-scratch-message "")
   (ispell-dictionary "en_US")
   (make-backup-files nil)
   (pixel-scroll-precision-mode t)
@@ -129,6 +127,7 @@
         scroll-margin 99999)
 
   (electric-pair-mode 1)          ;; Auto-insert matching delimiters
+  (superword-mode 1)              ;; Treats words with dash/underscore as single words
 
   ;; ───────────────────────────────────────────────────────────────
   ;; ★ 2-space indentation for JS, TS, TSX, JSON, YAML
