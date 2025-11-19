@@ -257,6 +257,8 @@
                   (kbd "C-e") 'dired-find-file
                   (kbd "C-f") 'dired-up-directory)))))
 
+(add-hook 'dired-mode-hook #'dired-omit-mode)
+
 
 ;;; ISEARCH
 ;; In this configuration, we're setting up isearch, Emacs's incremental search feature.
