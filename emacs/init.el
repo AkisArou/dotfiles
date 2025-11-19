@@ -1020,6 +1020,16 @@
   :config
   (evil-commentary-mode 1))
 
+(use-package evil-numbers
+  :after evil
+  :straight t
+  :config
+  (evil-define-key '(normal visual) 'global
+    (kbd "C-a") 'evil-numbers/inc-at-pt
+    (kbd "C-x") 'evil-numbers/dec-at-pt
+    (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental
+    (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental))
+
 (use-package emacs-tmux-navigator
   :after evil
   :config
