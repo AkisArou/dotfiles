@@ -219,6 +219,13 @@
 ;;; CLIPBOARD
 (use-package clipboard)
 
+(use-package clipetty
+  :ensure t
+  :hook ((after-init . (lambda ()
+                         (when (getenv "SSH_TTY")
+                           (global-clipetty-mode 1))))))
+
+
 ;;; DIRED
 ;; In Emacs, the `dired' package provides a powerful and built-in file manager
 ;; that allows you to navigate and manipulate files and directories directly
