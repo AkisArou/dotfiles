@@ -172,6 +172,7 @@ fi
 install_packages "${packages[@]}"
 
 ~/dotfiles/scripts/build-nvim
+~/dotfiles/scripts/build-emacs
 
 # Install custom issue (login prompt)
 echo ""
