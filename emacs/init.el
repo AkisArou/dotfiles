@@ -1014,12 +1014,14 @@
   (define-key evil-normal-state-map (kbd "K") #'eldoc-box-help-at-point))
 
 
+;;; EVIL-COMMENTARY
 (use-package evil-commentary
   :after evil
   :straight t
   :config
   (evil-commentary-mode 1))
 
+;;; EVIL-NUMBERS
 (use-package evil-numbers
   :after evil
   :straight t
@@ -1030,6 +1032,7 @@
     (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental
     (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental))
 
+;;; EMACS-TMUX-NAVIGATOR
 (use-package emacs-tmux-navigator
   :after evil
   :config
@@ -1082,6 +1085,61 @@
   :config
   (global-evil-matchit-mode 1))
 
+;;; EVIL-TEXTOBJ-ANYBLOCK
+(use-package evil-textobj-anyblock
+  :straight (:host github :repo "noctuid/evil-textobj-anyblock")
+  :after evil
+  :config
+  (evil-define-text-object my-evil-textobj-anyblock-inner-quote
+  (count &optional beg end type)
+  "Select the closest outer quote."
+  (let ((evil-textobj-anyblock-blocks
+         '(("'" . "'")
+           ("\"" . "\"")
+           ("`" . "'")
+           ("“" . "”"))))
+    (evil-textobj-anyblock--make-textobj beg end type count nil)))
+
+(evil-define-text-object my-evil-textobj-anyblock-a-quote
+  (count &optional beg end type)
+  "Select the closest outer quote."
+  (let ((evil-textobj-anyblock-blocks
+         '(("'" . "'")
+           ("\"" . "\"")
+           ("`" . "'")
+           ("“" . "”"))))
+    (evil-textobj-anyblock--make-textobj beg end type count t)))
+
+(define-key evil-inner-text-objects-map "q" 'my-evil-textobj-anyblock-inner-quote)
+(define-key evil-outer-text-objects-map "q" 'my-evil-textobj-anyblock-a-quote)
+  )
+
+
+;;; EVIL-GOGGLES
+(use-package evil-goggles
+  :ensure t
+  :after evil
+  :config
+  (evil-goggles-mode)
+  (setq evil-goggles-pulse t)
+  (setq evil-goggles-enable-yank t)
+  (setq evil-goggles-enable-paste t)
+  (setq evil-goggles-enable-surround t)
+  (setq evil-goggles-enable-set-marker t)
+  (setq evil-goggles-enable-delete nil)
+  (setq evil-goggles-enable-change nil)
+  (setq evil-goggles-enable-indent nil)
+  (setq evil-goggles-enable-join nil)
+  (setq evil-goggles-enable-fill-and-move nil)
+  (setq evil-goggles-enable-shift nil)
+  (setq evil-goggles-enable-commentary nil)
+  (setq evil-goggles-enable-nerd-commenter nil)
+  (setq evil-goggles-enable-replace-with-register nil)
+  (setq evil-goggles-enable-undo nil)
+  (setq evil-goggles-enable-redo nil)
+  (setq evil-goggles-enable-record-macro nil))
+
+
 
 ;; UNDO TREE
 ;; The `undo-tree' package provides an advanced and visual way to
@@ -1130,31 +1188,6 @@
   :straight t
   :ensure t
   :config)
-
-
-;;; EVIL-GOGGLES
-(use-package evil-goggles
-  :ensure t
-  :defer t
-  :config
-  (evil-goggles-mode)
-  (setq evil-goggles-pulse t)
-  (setq evil-goggles-enable-yank t)
-  (setq evil-goggles-enable-paste t)
-  (setq evil-goggles-enable-surround t)
-  (setq evil-goggles-enable-set-marker t)
-  (setq evil-goggles-enable-delete nil)
-  (setq evil-goggles-enable-change nil)
-  (setq evil-goggles-enable-indent nil)
-  (setq evil-goggles-enable-join nil)
-  (setq evil-goggles-enable-fill-and-move nil)
-  (setq evil-goggles-enable-shift nil)
-  (setq evil-goggles-enable-commentary nil)
-  (setq evil-goggles-enable-nerd-commenter nil)
-  (setq evil-goggles-enable-replace-with-register nil)
-  (setq evil-goggles-enable-undo nil)
-  (setq evil-goggles-enable-redo nil)
-  (setq evil-goggles-enable-record-macro nil))
 
 
 ;;; DOOM MODELINE
