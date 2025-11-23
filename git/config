@@ -87,6 +87,7 @@
   # Disable decorate for reflog
   # (because there is no dedicated `reflog` section available)
   decorate = false
+	date = format-local:%A %d/%m/%Y %H:%M 
 
 [pull]
   rebase = merges
