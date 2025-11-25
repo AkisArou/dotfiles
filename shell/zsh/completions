@@ -1,12 +1,12 @@
 #!/usr/bin/zsh
 
-# completions
-autoload -Uz compinit 
-if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-	compinit;
-else
-	compinit -C;
-fi;
+autoload -Uz zrecompile
+autoload -Uz compinit
+dump=$ZSH_COMPDUMP
 
-fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
-source "$HOME/dotfiles/scripts/try-source-completions"
+if [[ -s $dump(#qN.mh+24) && (! -s "$dump.zwc" || "$dump" -nt "$dump.zwc") ]]; then
+    compinit -i d $ZSH_COMPDUMP
+    zrecompile $ZSH_COMPDUMP
+fi
+
+compinit -C

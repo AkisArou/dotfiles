@@ -106,7 +106,6 @@ tldr --update
 
 print_info "Generating zsh completions..."
 ~/dotfiles/scripts/setup-completions
-source "$HOME/dotfiles/scripts/try-source-completions"
 
 print_info "Install GTK Tokyonight theme..."
 ~/dotfiles/scripts/install-tokyonight-gtk

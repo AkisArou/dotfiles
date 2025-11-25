@@ -17,6 +17,7 @@ export BAT_STYLE="changes,header-filename,numbers,snip"
 export JQ_COLORS="0;90:33:33:37:32:37:37:36"
 
 export TMPDIR=/tmp
+export ZSH_COMPDUMP="${ZDOTFILES}/.zcompdump"
 
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
