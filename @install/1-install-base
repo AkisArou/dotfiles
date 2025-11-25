@@ -58,7 +58,6 @@ packages=(
   "ffmpeg"
   "figlet"
   "flameshot"
-  "foot"
   "fwupd"
   "fzf"
   "genymotion"
