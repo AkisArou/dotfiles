@@ -5,6 +5,10 @@ source /usr/share/zinit/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
+
+zinit ice depth"1"
+zinit light romkatv/powerlevel10k
+
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 zinit light Aloxaf/fzf-tab

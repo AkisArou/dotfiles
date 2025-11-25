@@ -93,7 +93,6 @@ packages=(
   "ninja"
   "noto-fonts-emoji"
   "oama-bin"
-  "oh-my-posh"
   "openssh"
   "pass"
   "pavucontrol"
