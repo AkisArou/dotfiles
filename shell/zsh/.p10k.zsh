@@ -25,9 +25,6 @@ local RED1="#db4b4b"
 local TEAL="#1abc9c"
 local TERMINAL_BLACK="#414868"
 local YELLOW="#e0af68"
-local GIT_ADD="#449dab"
-local GIT_CHANGE="#6183bb"
-local GIT_DELETE="#914c54"
 
 # =====================[ Powerlevel10k Config ]=====================
 'builtin' 'local' '-a' 'p10k_config_opts'
