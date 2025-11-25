@@ -61,6 +61,8 @@ local GIT_DELETE="#914c54"
     vim_shell
     per_directory_history
     newline
+    # node_version
+    # package
   )
 
   # --------------------- General Options ---------------------
