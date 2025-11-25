@@ -132,9 +132,6 @@ local YELLOW="#e0af68"
   typeset -g POWERLEVEL9K_VCS_LOADING_VISUAL_IDENTIFIER_COLOR=244
   typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION=
   typeset -g POWERLEVEL9K_VCS_BACKENDS=(git)
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=76
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=76
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=178
 
   function my_git_formatter() {
     emulate -L zsh
@@ -150,7 +147,7 @@ local YELLOW="#e0af68"
     }
 
     local meta=$(hex_to_truecolor $FG)
-    local clean=$(hex_to_truecolor $GREEN)
+    local clean=$(hex_to_truecolor $GREEN2)
     local modified=$(hex_to_truecolor $YELLOW)
     local untracked=$(hex_to_truecolor $BLUE)
     local conflicted=$(hex_to_truecolor $RED)
