@@ -102,7 +102,7 @@ local GIT_DELETE="#914c54"
   # --------------------- Directory ---------------------
   typeset -g POWERLEVEL9K_DIR_FOREGROUND=$BLUE5
   typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=$BLUE2
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=$BLUE
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=$BLUE1
   typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=true
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
   typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=
@@ -118,6 +118,58 @@ local GIT_DELETE="#914c54"
   typeset -g POWERLEVEL9K_DIR_CLASSES=()
 
   # --------------------- Git Status Formatter ---------------------
+  function my_git_formatter() {
+    emulate -L zsh
+    local meta=$FG
+    local clean=$GREEN
+    local modified=$YELLOW
+    local untracked=$BLUE
+    local conflicted=$RED
+
+    if [[ -n $P9K_CONTENT ]]; then
+      typeset -g my_git_format=$P9K_CONTENT
+      return
+    fi
+
+    local res
+    if [[ -n $VCS_STATUS_LOCAL_BRANCH ]]; then
+      local branch=${(V)VCS_STATUS_LOCAL_BRANCH}
+      (( $#branch > 32 )) && branch[13,-13]="…"
+      res+="${clean}${branch//\%/%%}"
+    fi
+
+    if [[ -n $VCS_STATUS_TAG && -z $VCS_STATUS_LOCAL_BRANCH ]]; then
+      local tag=${(V)VCS_STATUS_TAG}
+      (( $#tag > 32 )) && tag[13,-13]="…"
+      res+="${meta}#${clean}${tag//\%/%%}"
+    fi
+
+    [[ -z $VCS_STATUS_LOCAL_BRANCH && -z $VCS_STATUS_TAG ]] && res+="${meta}@${clean}${VCS_STATUS_COMMIT[1,8]}"
+
+    if [[ -n ${VCS_STATUS_REMOTE_BRANCH:#$VCS_STATUS_LOCAL_BRANCH} ]]; then
+      res+="${meta}:${clean}${(V)VCS_STATUS_REMOTE_BRANCH//\%/%%}"
+    fi
+
+    if [[ $VCS_STATUS_COMMIT_SUMMARY == (|*[^[:alnum:]])(wip|WIP)(|[^[:alnum:]]*) ]]; then
+      res+=" ${modified}wip"
+    fi
+
+    (( VCS_STATUS_COMMITS_AHEAD )) && res+="${clean}⇡${VCS_STATUS_COMMITS_AHEAD}"
+    (( VCS_STATUS_COMMITS_BEHIND )) && res+="${clean}⇣${VCS_STATUS_COMMITS_BEHIND}"
+    (( VCS_STATUS_PUSH_COMMITS_AHEAD )) && res+="${clean}⇢${VCS_STATUS_PUSH_COMMITS_AHEAD}"
+    (( VCS_STATUS_PUSH_COMMITS_BEHIND )) && res+="${clean}⇠${VCS_STATUS_PUSH_COMMITS_BEHIND}"
+    (( VCS_STATUS_STASHES )) && res+=" ${clean}*${VCS_STATUS_STASHES}"
+    [[ -n $VCS_STATUS_ACTION ]] && res+=" ${conflicted}${VCS_STATUS_ACTION}"
+    (( VCS_STATUS_NUM_CONFLICTED )) && res+=" ${conflicted}~${VCS_STATUS_NUM_CONFLICTED}"
+    (( VCS_STATUS_NUM_STAGED )) && res+=" ${modified}+${VCS_STATUS_NUM_STAGED}"
+    (( VCS_STATUS_NUM_UNSTAGED )) && res+=" ${modified}!${VCS_STATUS_NUM_UNSTAGED}"
+    (( VCS_STATUS_NUM_UNTRACKED )) && res+=" ${untracked}${POWERLEVEL9K_VCS_UNTRACKED_ICON}${VCS_STATUS_NUM_UNTRACKED}"
+    (( VCS_STATUS_HAS_UNSTAGED == -1 )) && res+=" ${modified}─"
+
+    typeset -g my_git_format=$res
+  }
+  functions -M my_git_formatter 2>/dev/null
+
   typeset -g POWERLEVEL9K_VCS_MAX_INDEX_SIZE_DIRTY=-1
   typeset -g POWERLEVEL9K_VCS_DISABLED_WORKDIR_PATTERN='~'
   typeset -g POWERLEVEL9K_VCS_DISABLE_GITSTATUS_FORMATTING=true
@@ -129,64 +181,8 @@ local GIT_DELETE="#914c54"
   typeset -g POWERLEVEL9K_VCS_CONFLICTED_MAX_NUM=-1
   typeset -g POWERLEVEL9K_VCS_COMMITS_AHEAD_MAX_NUM=-1
   typeset -g POWERLEVEL9K_VCS_COMMITS_BEHIND_MAX_NUM=-1
-  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_COLOR=76
-  typeset -g POWERLEVEL9K_VCS_LOADING_VISUAL_IDENTIFIER_COLOR=244
-  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION=
-  typeset -g POWERLEVEL9K_VCS_BACKENDS=(git)
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=76
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=76
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=178
-
-  function my_git_formatter() {
-    emulate -L zsh
-
-    # Convert hex to true color ANSI
-    hex_to_truecolor() {
-      local hex=$1
-      [[ $hex == \#* ]] && hex=${hex#\#}
-      local r=$((16#${hex[1,2]}))
-      local g=$((16#${hex[3,4]}))
-      local b=$((16#${hex[5,6]}))
-      echo -n "\x1b[38;2;${r};${g};${b}m"
-    }
-
-    local meta=$(hex_to_truecolor $FG)
-    local clean=$(hex_to_truecolor $GREEN)
-    local modified=$(hex_to_truecolor $YELLOW)
-    local untracked=$(hex_to_truecolor $BLUE)
-    local conflicted=$(hex_to_truecolor $RED)
-    local reset=$'\x1b[0m'
-
-    local res=""
-
-    if [[ -n $VCS_STATUS_LOCAL_BRANCH ]]; then
-      local branch=${(V)VCS_STATUS_LOCAL_BRANCH}
-      (( $#branch > 32 )) && branch[13,-13]="…"
-      res+="${clean}${branch//\%/%%}${reset} "
-    fi
-
-    if [[ -n $VCS_STATUS_TAG && -z $VCS_STATUS_LOCAL_BRANCH ]]; then
-      res+="${meta}#${clean}${VCS_STATUS_TAG//\%/%%}${reset} "
-    fi
-
-    if [[ -z $VCS_STATUS_LOCAL_BRANCH && -z $VCS_STATUS_TAG ]]; then
-      res+="${meta}@${clean}${VCS_STATUS_COMMIT[1,8]}${reset} "
-    fi
-
-    (( VCS_STATUS_COMMITS_BEHIND )) && res+="${clean}⇣${VCS_STATUS_COMMITS_BEHIND}${reset} "
-    (( VCS_STATUS_COMMITS_AHEAD )) && res+="${clean}⇡${VCS_STATUS_COMMITS_AHEAD}${reset} "
-    (( VCS_STATUS_NUM_STAGED )) && res+="${modified}+${VCS_STATUS_NUM_STAGED}${reset} "
-    (( VCS_STATUS_NUM_UNSTAGED )) && res+="${modified}!${VCS_STATUS_NUM_UNSTAGED}${reset} "
-    (( VCS_STATUS_NUM_UNTRACKED )) && res+="${untracked}?${VCS_STATUS_NUM_UNTRACKED}${reset} "
-    (( VCS_STATUS_NUM_CONFLICTED )) && res+="${conflicted}~${VCS_STATUS_NUM_CONFLICTED}${reset} "
-
-    # Remove trailing space
-    res=${res%% }
-
-    typeset -g my_git_format=$res
-  }
-
-  functions -M my_git_formatter 2>/dev/null
+  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_COLOR=$GREEN
+  typeset -g POWERLEVEL9K_VCS_LOADING_VISUAL_IDENTIFIER_COLOR=$DARK5
 
   # --------------------- Status Segment ---------------------
   typeset -g POWERLEVEL9K_STATUS_EXTENDED_STATES=true
@@ -245,3 +241,4 @@ local GIT_DELETE="#914c54"
 typeset -g POWERLEVEL9K_CONFIG_FILE=${${(%):-%x}:a}
 (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
 'builtin' 'unset' 'p10k_config_opts'
+
