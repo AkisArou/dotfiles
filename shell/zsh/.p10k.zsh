@@ -100,10 +100,10 @@ local GIT_DELETE="#914c54"
   typeset -g POWERLEVEL9K_PROMPT_CHAR_LEFT_PROMPT_FIRST_SEGMENT_START_SYMBOL=
 
   # --------------------- Directory ---------------------
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$BLUE5
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=$BLUE
   typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=$BLUE2
   typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=$BLUE
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=true
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=false
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
   typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=
   local anchor_files=(.git .node-version .tool-versions .mise.toml .shorten_folder_marker Cargo.toml package.json)
