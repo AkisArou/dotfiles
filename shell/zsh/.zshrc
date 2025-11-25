@@ -14,6 +14,5 @@ source "$HOME/dotfiles/shell/zsh/history"
 source "$HOME/dotfiles/shell/zsh/opts"
 source "$HOME/dotfiles/shell/zsh/vim-mode"
 source "$HOME/dotfiles/shell/common/functions"
-[ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ] && . "$HOME/.asdf/plugins/java/set-java-home.zsh"
-
 source "$HOME/dotfiles/shell/zsh/.p10k.zsh"
+[ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ] && . "$HOME/.asdf/plugins/java/set-java-home.zsh"
