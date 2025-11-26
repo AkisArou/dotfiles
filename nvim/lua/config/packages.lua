@@ -91,7 +91,10 @@ vim.pack.add({
 
   github("folke/which-key.nvim"),
 
-  github("mikavilpas/yazi.nvim"),
+  -- github("mikavilpas/yazi.nvim"),
+  github("stevearc/oil.nvim"),
+  github("JezerM/oil-lsp-diagnostics.nvim"),
+  github("refractalize/oil-git-status.nvim"),
 
   github("folke/lazydev.nvim"),
 
@@ -113,7 +116,8 @@ vim.schedule(function()
   require("plugins.treesitter")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
-  require("plugins.yazi")
+  -- require("plugins.yazi")
+  require("plugins.oil")
   require("plugins.fzf")
   require("plugins.lsp.conform")
   require("plugins.lsp.lsp")
