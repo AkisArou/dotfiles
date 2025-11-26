@@ -52,12 +52,12 @@ local YELLOW="#e0af68"
   # --------------------- Right Prompt ---------------------
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     status
-    command_execution_time
     background_jobs
     context
     vim_shell
     per_directory_history
     newline
+    # command_execution_time
     # node_version
     # package
   )
