@@ -28,11 +28,11 @@ vim.pack.add({
   github("j-hui/fidget.nvim"),
   github("folke/tokyonight.nvim"),
   github("nvim-lua/plenary.nvim"),
+  github("nvim-tree/nvim-web-devicons"),
   github("nvim-lualine/lualine.nvim"),
   github("arnamak/stay-centered.nvim"),
 
   github("Bilal2453/luvit-meta"),
-  github("nvim-tree/nvim-web-devicons"),
 
   github("RubixDev/mason-update-all"),
   github("williamboman/mason-lspconfig.nvim"),
