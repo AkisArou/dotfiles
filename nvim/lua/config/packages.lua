@@ -31,6 +31,7 @@ vim.pack.add({
   github("nvim-tree/nvim-web-devicons"),
   github("nvim-lualine/lualine.nvim"),
   github("arnamak/stay-centered.nvim"),
+  github("fei6409/log-highlight.nvim"),
 
   github("Bilal2453/luvit-meta"),
 
