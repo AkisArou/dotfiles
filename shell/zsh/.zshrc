@@ -1,10 +1,10 @@
-source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-
 if [[ -z "$TMUX" && "$TERM_PROGRAM" != "vscode" && -z "$NO_TMUX_AUTO_ATTACH" ]]; then
   tmux attach-session -t default || {
     "$HOME/dotfiles/scripts/start-tmux" && tmux attach-session -t default
   }
 fi
+
+source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 
 source <(fzf --zsh)
 source "$HOME/dotfiles/shell/zsh/completions"
