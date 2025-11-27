@@ -20,7 +20,7 @@ local themes = {
         highlights["CursorLineNr"] = { fg = "#737aa2" }
         highlights["DiagnosticUnnecessary"] = { fg = "#6F7E99" }
         highlights["FloatBorder"] = { fg = "#737aa2" }
-        highlights["MatchParen"] = { fg = "#9d7cd8", bold = true }
+        highlights["MatchParen"] = { fg = "#7aa2f7", bg = "#394b70", bold = true }
       end,
     })
 
