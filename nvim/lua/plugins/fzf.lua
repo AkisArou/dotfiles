@@ -1,6 +1,8 @@
 local actions = require("fzf-lua.actions")
 local fzf_lua = require("fzf-lua")
 
+local img_previewer = { "ueberzugpp" }
+
 fzf_lua.setup({
   "hide",
   winopts = {
@@ -13,6 +15,17 @@ fzf_lua.setup({
     col = 0,
     height = 0.65,
     width = 1,
+  },
+  previewers = {
+    builtin = {
+      extensions = {
+        ["png"] = img_previewer,
+        ["jpg"] = img_previewer,
+        ["jpeg"] = img_previewer,
+        ["gif"] = img_previewer,
+      },
+      ueberzug_scaler = "fit_contain",
+    },
   },
   fzf_opts = { ["--cycle"] = true },
   keymap = {

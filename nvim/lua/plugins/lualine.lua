@@ -31,7 +31,14 @@ require("lualine").setup({
       },
       "nvim-dap-ui",
       "branch",
-      "diff",
+      {
+        "diff",
+        symbols = {
+          added = " ",
+          modified = " ",
+          removed = " ",
+        },
+      },
       "progress",
       "location",
     },
