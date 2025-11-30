@@ -78,3 +78,29 @@ vim.api.nvim_create_user_command("Z", function()
 end, {})
 
 vim.cmd([[cabbrev wqa Z]])
+
+-- Disable built-in runtime plugins
+local disabled_builtins = {
+  "gzip",
+  "tar",
+  "tarPlugin",
+  "zip",
+  "zipPlugin",
+  "getscript",
+  "getscriptPlugin",
+  "vimball",
+  "vimballPlugin",
+  "2html_plugin",
+  "logipat",
+  "rrhelper",
+  "netrw",
+  "netrwPlugin",
+  "netrwSettings",
+  "netrwFileHandlers",
+  "tutor",
+  "tohtml",
+}
+
+for _, plugin in ipairs(disabled_builtins) do
+  vim.g["loaded_" .. plugin] = 1
+end
