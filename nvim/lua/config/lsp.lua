@@ -20,6 +20,8 @@ vim.lsp.enable({
   "oxlint",
 })
 
+local fzf = require("fzf-lua")
+
 vim.api.nvim_create_autocmd("LspAttach", {
   group = vim.api.nvim_create_augroup("akisarou.lsp", {}),
   callback = function(args)
@@ -27,16 +29,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
       vim.keymap.set(mode, keys, func, { buffer = args.buf, desc = "LSP: " .. desc })
     end
 
-    local fzf = require("fzf-lua")
-
     map("n", "grr", function()
       fzf.lsp_references({
         ignore_current_line = true,
-        winopts = {
-          preview = {
-            layout = "vertical",
-          },
-        },
       })
     end, "Show references")
 
@@ -45,13 +40,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("n", "gd", function()
       fzf.lsp_definitions({
         jump1 = true,
-        winopts = {
-          preview = {
-            layout = "vertical",
-          },
-        },
       })
-    end, "Show definitions")
+    end, "Go definitions")
+
+    map("n", "gri", fzf.lsp_implementations, "Go implementations")
+
+    map("n", "grt", fzf.lsp_typedefs, "Go type definitions")
 
     map({ "n", "v" }, "gra", function()
       local ommited_actions = {
