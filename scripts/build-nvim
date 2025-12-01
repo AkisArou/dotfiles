@@ -3,6 +3,7 @@
 INSTALL_DIR="$HOME/neovim"
 REPO_URL="https://github.com/neovim/neovim"
 NAME="Neovim"
+BIN_DIR=bin
 
 build_neovim() {
   CC=clang make CMAKE_BUILD_TYPE=Release \
@@ -10,6 +11,22 @@ build_neovim() {
   make install
 }
 
+post_build_neovim() {
+  cd "$INSTALL_DIR" || return 1
+
+  FILE="runtime/doc/news.txt"
+
+  # Check if file changed between previous HEAD and new HEAD
+  if git diff --quiet HEAD@{1} HEAD -- "$FILE"; then
+    echo "No updates in $FILE."
+  else
+    echo "===== Updates detected in $FILE ====="
+    git diff HEAD@{1} HEAD -- "$FILE"
+    echo "====================================="
+  fi
+}
+
 BUILD_CALLBACK="build_neovim"
+POST_BUILD_CALLBACK="post_build_neovim"
 
 . "$HOME"/dotfiles/scripts/build-from-source

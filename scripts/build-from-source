@@ -7,7 +7,8 @@
 #   INSTALL_DIR
 #   REPO_URL
 #   NAME
-#   BUILD_CALLBACK   (name of the build function)
+#   BUILD_CALLBACK                   (name of the function)
+#   POST_BUILD_CALLBACK (optional)   (name of the function)
 
 # Ensure required vars exist
 if [ -z "$INSTALL_DIR" ] || [ -z "$REPO_URL" ] || [ -z "$NAME" ] || [ -z "$BUILD_CALLBACK" ]; then
@@ -26,6 +27,12 @@ build() {
   echo "Building $NAME..."
   cd "$INSTALL_DIR" || exit 1
   $BUILD_CALLBACK
+}
+
+post_build() {
+  if [ -n "$POST_BUILD_CALLBACK" ] && command -v "$POST_BUILD_CALLBACK" >/dev/null 2>&1; then
+    "$POST_BUILD_CALLBACK"
+  fi
 }
 
 # Clone or update repository
@@ -47,6 +54,7 @@ if [ -d "$INSTALL_DIR" ]; then
     echo "Changes detected for $NAME. Pulling and rebuilding..."
     git pull --rebase
     build
+    post_build
   else
     echo "Local changes diverged from remote for $NAME. Manual intervention required."
     return 1
