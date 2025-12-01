@@ -8,13 +8,13 @@ vim.api.nvim_create_autocmd("PackChanged", {
     if name == "blink.cmp" then
       local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
 
-      vim.notify("Building blink.cmp at " .. plugin_path, vim.log.levels.INFO)
+      vim.notify("\nBuilding blink.cmp at " .. plugin_path, vim.log.levels.INFO)
       local result = vim.system({ "cargo", "build", "--release" }, { cwd = plugin_path }):wait()
 
       if result.code == 0 then
-        vim.notify("Building blink.cmp done", vim.log.levels.INFO)
+        vim.notify("\nBuilding blink.cmp done", vim.log.levels.INFO)
       else
-        vim.notify("Building blink.cmp failed", vim.log.levels.ERROR)
+        vim.notify("\nBuilding blink.cmp failed", vim.log.levels.ERROR)
       end
     end
   end,
