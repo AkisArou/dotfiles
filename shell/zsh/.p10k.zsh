@@ -88,7 +88,7 @@ local YELLOW="#e0af68"
   typeset -g POWERLEVEL9K_MULTILINE_FIRST_PROMPT_GAP_CHAR=' '
 
   # --------------------- Prompt Char ---------------------
-  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=$GREEN
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=$MAGENTA
   typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=$RED
   typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='❯'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VICMD_CONTENT_EXPANSION='❮'
@@ -147,7 +147,7 @@ local YELLOW="#e0af68"
     }
 
     local meta=$(hex_to_truecolor $FG)
-    local clean=$(hex_to_truecolor $GREEN2)
+    local clean=$(hex_to_truecolor $DARK5)
     local modified=$(hex_to_truecolor $YELLOW)
     local untracked=$(hex_to_truecolor $BLUE)
     local conflicted=$(hex_to_truecolor $RED)
