@@ -192,3 +192,50 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_win_set_width(0, 40)
   end,
 })
+
+-- Modify notmuch-* file CursorLine
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "notmuch-*",
+  callback = function()
+    vim.cmd([[
+      highlight CursorLine term=NONE cterm=NONE gui=NONE
+    ]])
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "notmuch-folders",
+  callback = function(event)
+    vim.schedule(function()
+      vim.cmd([[
+      highlight CursorLine term=NONE cterm=NONE gui=NONE
+    ]])
+
+      vim.cmd([[
+      function! ShowAutoRead(thread_id)
+        call s:show(a:thread_id)
+        ruby << EOF
+          $messages.each do |msg|
+            if msg.mail.tags.include?('unread')
+              do_tag('id:' + msg.message_id, '-unread')
+            end
+          end
+        EOF
+  endfunction
+
+  " Override <Enter> in show view
+  let g:notmuch_custom_show_maps = get(g:, 'notmuch_custom_show_maps', {})
+  let g:notmuch_custom_show_maps['<Enter>'] = 'ShowAutoRead(VIM::evaluate("get_thread_id"))'
+]])
+
+      vim.keymap.set("n", "q", function()
+        vim.cmd("bdelete")
+        vim.cmd("highlight CursorLine term=NONE cterm=NONE gui=NONE")
+      end, {
+        buffer = event.buf,
+        silent = true,
+        desc = "Quit notmuch",
+      })
+    end)
+  end,
+})
