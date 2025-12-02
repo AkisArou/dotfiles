@@ -22,6 +22,7 @@ require("blink-cmp").setup({
       "path",
       "lazydev",
       "buffer",
+      "git",
       -- "ripgrep"
     },
 
@@ -31,6 +32,14 @@ require("blink-cmp").setup({
         module = "lazydev.integrations.blink",
         score_offset = 100, -- show at a higher priority than lsp
         fallbacks = { "lsp" },
+      },
+      git = {
+        module = "blink-cmp-git",
+        name = "Git",
+        enabled = function()
+          return vim.tbl_contains({ "octo", "gitcommit" }, vim.bo.filetype)
+        end,
+        opts = {},
       },
     },
   },

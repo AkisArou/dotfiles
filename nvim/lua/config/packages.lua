@@ -101,6 +101,7 @@ vim.pack.add({
   github("folke/lazydev.nvim"),
 
   github("saghen/blink.cmp"),
+  github("Kaiser-Yang/blink-cmp-git"),
 
   github("stevearc/conform.nvim"),
 
