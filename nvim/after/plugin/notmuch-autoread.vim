@@ -1,30 +1,68 @@
-" " Auto-mark messages as read when opened in notmuch-vim
-"
-" echo "EEEEEEEEEEE"
-"
-" " Only run when Notmuch is loaded
-" augroup NotmuchAutoRead
-"   autocmd!
-"   " After the Notmuch-Vim plugin is loaded
-"   autocmd User NotmuchLoaded call s:SetupAutoRead()
-"   echo "AAAAAAAAAA"
-" augroup END
-"
-" function! s:SetupAutoRead()
-"   " Define a global function to mark messages as read
-"   function! ShowAutoRead(thread_id)
-"     call s:show(a:thread_id)
-"     ruby << EOF
-" $messages.each do |msg|
-"   if msg.mail.tags.include?('unread')
-"     do_tag('id:' + msg.message_id, '-unread')
-"   end
-" end
-" EOF
-"   endfunction
-"
-"   " Override <Enter> in show view
-"   let g:notmuch_custom_show_maps = get(g:, 'notmuch_custom_show_maps', {})
-"   let g:notmuch_custom_show_maps['<Enter>'] = 'ShowAutoRead(VIM::evaluate("get_thread_id"))'
-" endfunction
-"
+" Single function to find and call a script-local function with optional args
+function! s:call_snr(funcname, ...)
+  " Find full <SNR>xx function name
+  let fullfunc = ''
+  for f in split(execute('function'), "\n")
+    if f =~ a:funcname
+      let fullfunc = matchstr(f, 'function\s\+\zs<SNR>\d\+_' . a:funcname)
+      if !empty(fullfunc)
+        break
+      endif
+    endif
+  endfor
+
+  if empty(fullfunc)
+    return
+  endif
+
+  " Call it
+  if a:0
+    execute 'call ' . fullfunc . '(' . join(a:000, ', ') . ')'
+  else
+    execute 'call ' . fullfunc . '()'
+  endif
+endfunction
+
+autocmd FileType notmuch-show call s:call_snr('search_tag', "'-unread'")
+autocmd FileType notmuch-folders call timer_start(0, {-> s:call_snr('folders_refresh')})
+
+
+let g:notmuch_folders_maps = {
+	\ '<C-e>':	'folders_show_search()',
+	\ '<Enter>':	'folders_show_search()',
+	\ 's':		'folders_search_prompt()',
+	\ '=':		'folders_refresh()',
+	\ 'c':		'compose()',
+	\ }
+
+
+let g:notmuch_search_maps = {
+	\ '<C-e>':	'search_show_thread(1)',
+	\ 'q':		'kill_this_buffer()',
+	\ '<Enter>':	'search_show_thread(1)',
+	\ '<Space>':	'search_show_thread(2)',
+	\ 'A':		'search_tag("-inbox -unread")',
+	\ 'I':		'search_tag("-unread")',
+	\ 't':		'search_tag("")',
+	\ 's':		'search_search_prompt()',
+	\ '=':		'search_refresh()',
+	\ '?':		'search_info()',
+	\ 'c':		'compose()',
+	\ }
+
+let g:notmuch_show_maps = {
+	\ 'q':		'kill_this_buffer()',
+	\ 'A':		'show_tag("-inbox -unread")',
+	\ 'I':		'show_tag("-unread")',
+	\ 't':		'show_tag("")',
+	\ 'o':		'show_open_msg()',
+	\ 'e':		'show_extract_msg()',
+	\ 's':		'show_save_msg()',
+	\ 'p':		'show_save_patches()',
+	\ 'r':		'show_reply()',
+	\ '?':		'show_info()',
+	\ '.':		'show_copy_id()',
+	\ '<Tab>':	'show_next_msg()',
+	\ '<Space>':	'show_message_tag("-inbox -unread")',
+	\ 'c':		'compose()',
+	\ }

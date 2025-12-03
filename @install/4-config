@@ -142,4 +142,7 @@ else
   fi
 fi
 
+print_info "Installing ruby gems..."
+gem install neovim
+
 print_success "DONE!"

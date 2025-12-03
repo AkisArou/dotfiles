@@ -46,6 +46,7 @@ packages=(
   "brave-bin"
   "brightnessctl"
   "ccache" # For faster nvim builds
+  "chromium"
   "clang"
   "cmake"
   "curl"

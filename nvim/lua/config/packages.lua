@@ -34,7 +34,6 @@ vim.pack.add({
   github("fei6409/log-highlight.nvim"),
   github("3rd/image.nvim"),
   github("felipec/notmuch-vim"),
-  -- github("neovim/neovim-ruby"),
 
   github("Bilal2453/luvit-meta"),
 
