@@ -26,6 +26,13 @@ endfunction
 autocmd FileType notmuch-show call s:call_snr('search_tag', "'-unread'")
 autocmd FileType notmuch-folders call timer_start(0, {-> s:call_snr('folders_refresh')})
 
+	let g:notmuch_folders = [
+		\ [ 'new', 'tag:inbox and tag:unread' ],
+		\ [ 'inbox', 'tag:inbox' ],
+		\ [ 'gmail', 'folder:gmail/Inbox' ],
+		\ [ 'nablesolutions', 'folder:nablesolutions/Inbox' ],
+		\ [ 'support', 'folder:support/Inbox' ],
+		\ ]
 
 let g:notmuch_folders_maps = {
 	\ '<C-e>':	'folders_show_search()',
