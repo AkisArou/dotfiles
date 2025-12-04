@@ -5,7 +5,7 @@ syntax match nmSearchFrom	/.\{-21}/			contained nextgroup=nmSearchSubject
 syntax match nmSearchSubject	/.\{0,}\(([^()]\+)$\)\@=/	contained nextgroup=nmSearchTags
 syntax match nmSearchTags	/.\+$/				contained
 syntax match nmSearchUnread /.*\cunread\c.*/ containedin=nmSearch
-syntax match nmSearchAttachment /.*\cattachment\c.*/ containedin=nmSearchTags
+syntax match nmSearchAttachment /\cattachment\c/ containedin=nmSearchTags
 
 highlight link nmSearchDate Statement
 highlight link nmSearchNum Type
