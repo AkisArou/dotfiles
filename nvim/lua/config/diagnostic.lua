@@ -13,7 +13,7 @@ vim.diagnostic.config({
       -- [vim.diagnostic.severity.HINT] = " ",
     },
   },
-  jump = { float = true },
+  -- jump = { float = true },
 })
 
 local diagnostic_goto = function(next, severity)

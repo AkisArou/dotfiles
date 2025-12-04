@@ -110,6 +110,14 @@ vim.pack.add({
   github("folke/persistence.nvim"),
 })
 
+vim.pack.add({
+  github("felipec/notmuch-vim"),
+}, vim.env.NVIM_EMAIL ~= nil and {} or {
+  load = function()
+    return false
+  end,
+})
+
 -- Instant load
 require("plugins.colorscheme")
 require("plugins.lualine")
@@ -142,9 +150,7 @@ vim.schedule(function()
   require("plugins.fidget")
   require("plugins.persistence")
 
-  vim.pack.add({
-    github("felipec/notmuch-vim"),
-  })
+  vim.cmd("packadd notmuch-vim")
 end)
 
 -- Autocmd load
