@@ -33,7 +33,6 @@ vim.pack.add({
   github("arnamak/stay-centered.nvim"),
   github("fei6409/log-highlight.nvim"),
   github("3rd/image.nvim"),
-  github("felipec/notmuch-vim"),
 
   github("Bilal2453/luvit-meta"),
 
@@ -142,6 +141,10 @@ vim.schedule(function()
   require("plugins.template-string")
   require("plugins.fidget")
   require("plugins.persistence")
+
+  vim.pack.add({
+    github("felipec/notmuch-vim"),
+  })
 end)
 
 -- Autocmd load
