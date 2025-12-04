@@ -192,29 +192,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_win_set_width(0, 40)
   end,
 })
-
--- Modify notmuch-* file CursorLine
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "notmuch-*",
-  callback = function()
-    vim.cmd("highlight CursorLine term=NONE cterm=NONE gui=NONE")
-  end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "notmuch-folders",
-  callback = function(event)
-    vim.schedule(function()
-      vim.cmd("highlight CursorLine term=NONE cterm=NONE gui=NONE")
-
-      vim.keymap.set("n", "q", function()
-        vim.cmd("bdelete")
-        vim.cmd("highlight CursorLine term=NONE cterm=NONE gui=NONE")
-      end, {
-        buffer = event.buf,
-        silent = true,
-        desc = "Quit notmuch",
-      })
-    end)
-  end,
-})

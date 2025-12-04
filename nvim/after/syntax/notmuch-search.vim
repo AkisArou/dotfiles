@@ -6,6 +6,7 @@ syntax match nmSearchSubject	/.\{0,}\(([^()]\+)$\)\@=/	contained nextgroup=nmSea
 syntax match nmSearchTags	/.\+$/				contained
 syntax match nmSearchUnread /.*\cunread\c.*/ containedin=nmSearch
 syntax match nmSearchAttachment /\cattachment\c/ containedin=nmSearchTags
+highlight CursorLine term=NONE cterm=NONE gui=NONE
 
 highlight link nmSearchDate Statement
 highlight link nmSearchNum Type
