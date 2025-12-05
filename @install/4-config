@@ -17,6 +17,7 @@ sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
 systemctl enable --user --now goimapnotify
 systemctl enable --user --now mbsync.timer
+systemctl enable --user --now vdirsyncer.timer
 
 print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
