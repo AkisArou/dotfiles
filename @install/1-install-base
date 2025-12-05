@@ -85,6 +85,7 @@ packages=(
   "lazygit"
   "libheif" # Needed by ueberzug to render inside nvim
   "libinput"
+  "libinput-tools"
   "libreoffice-still"
   "librewolf-bin"
   "libva-utils"
