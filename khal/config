@@ -1,0 +1,22 @@
+[calendars]
+
+[[google_local]]
+path = ~/.local/share/calendars/google/*
+type = discover
+
+#[locale]
+#timeformat = %H:%M
+#dateformat = %d/%m/%Y
+#longdateformat = %d/%m/%Y
+#datetimeformat = %d/%m/%Y %H:%M
+#longdatetimeformat = %d/%m/%Y %H:%M
+
+[locale]
+longdateformat = %Y-%m-%d
+dateformat = %Y-%m-%d
+longdatetimeformat = %Y-%m-%d %H:%M
+datetimeformat = %Y-%m-%d %H:%M
+timeformat = %H:%M
+
+[default]
+default_calendar = akisarou90@gmail.com
