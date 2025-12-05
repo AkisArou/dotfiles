@@ -369,7 +369,10 @@
 ;; it's explicitly needed, which can help speed up Emacs startup time.
 (use-package org
   :ensure nil     ;; This is built-in, no need to fetch it.
-  :defer t)       ;; Defer loading Org-mode until it's needed.
+  :defer t
+  :config
+  (setq org-directory "~/org/"))
+
 
 
 ;;; WHICH-KEY

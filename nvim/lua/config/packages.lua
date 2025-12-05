@@ -108,6 +108,9 @@ vim.pack.add({
   github("yioneko/nvim-vtsls"),
 
   github("folke/persistence.nvim"),
+
+  github("nvim-orgmode/orgmode"),
+  github("BartSte/nvim-khalorg"),
 })
 
 vim.pack.add({
@@ -151,6 +154,7 @@ vim.schedule(function()
   require("plugins.persistence")
 
   vim.cmd("packadd notmuch-vim")
+  require("plugins.orgmode")
 end)
 
 -- Autocmd load
