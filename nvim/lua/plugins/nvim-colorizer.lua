@@ -1,7 +1,8 @@
 require("colorizer").setup({
   filetypes = {
-    "*", -- Highlight all files, but customize some others.
-    "!notmuch-search", -- Exclude vim from highlighting.
+    "*",
+    "!notmuch-search",
+    "!notmuch-show",
   },
   user_default_options = {
     tailwind = true,
