@@ -8,7 +8,7 @@ syntax match nmSearchUnread /.*\cunread\c.*/ containedin=nmSearch
 syntax match nmSearchAttachment /\cattachment\c/ containedin=nmSearchTags
 highlight CursorLine term=NONE cterm=NONE gui=NONE
 
-highlight link nmSearchDate Statement
+highlight nmSearchDate guifg=#565f89
 highlight link nmSearchNum Type
 highlight link nmSearchFrom Include
 highlight link nmSearchSubject Normal
