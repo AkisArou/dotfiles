@@ -206,14 +206,20 @@ vim.api.nvim_create_autocmd("FileType", {
 
       local pat = "^[^<]+<[^>]+>.-%(%[.-%]%)$"
 
+      local found_first = false
+
       for i, line in ipairs(lines) do
         if line:match(pat) then
-          local lnum = math.max(i - 2, 0)
-
-          vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
-            virt_lines = { virt_line, virt_line },
-            virt_lines_above = true,
-          })
+          if not found_first then
+            -- skip the first match entirely
+            found_first = true
+          else
+            -- handle all later matches
+            local lnum = math.max(i - 2, 0)
+            vim.api.nvim_buf_set_extmark(bufnr, ns, lnum, 0, {
+              virt_lines = { virt_line, virt_line },
+            })
+          end
         end
       end
     end)
