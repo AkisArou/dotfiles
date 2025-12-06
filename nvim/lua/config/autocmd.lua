@@ -204,10 +204,15 @@ vim.api.nvim_create_autocmd("FileType", {
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
       local virt_line = { { "", "Normal" } }
 
+      local pat = "^[^<]+<[^>]+>.-%(%[.-%]%)$"
+
       for i, line in ipairs(lines) do
-        if line:match("^%S+ <%S+@%S+>") then
-          vim.api.nvim_buf_set_extmark(bufnr, ns, i - 2, 0, {
+        if line:match(pat) then
+          local lnum = math.max(i - 2, 0)
+
+          vim.api.nvim_buf_set_extmark(bufnr, ns, i - 1, 0, {
             virt_lines = { virt_line, virt_line },
+            virt_lines_above = true,
           })
         end
       end
