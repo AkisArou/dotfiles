@@ -19,6 +19,7 @@
     "clock",
     "network",
     "tray",
+    "custom/mail",
   ],
   "sway/scratchpad": {
     "format": "{icon} {count}",
@@ -124,5 +125,13 @@
   "tray": {
     // "icon-size": 21,
     "spacing": 10,
+  },
+  "custom/mail": {
+    "exec": "~/dotfiles/waybar/notmuch-module",
+    "interval": 10,
+    "return-type": "json",
+    "format": "{}",
+    "tooltip": true,
+    "on-click": "~/dotfiles/sway/open-mail",
   },
 }

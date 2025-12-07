@@ -1,0 +1,3 @@
+#!/usr/bin/zsh
+
+~/dotfiles/foot/launch -e zsh -c "NVIM_EMAIL=true nvim -c NotMuch"

@@ -1,0 +1,9 @@
+#!/usr/bin/zsh
+
+count=$(notmuch count tag:unread)
+
+if [ "$count" -gt 0 ]; then
+  echo "{\"text\": \"󰇮 $count\", \"tooltip\": \"Unread: $count\", \"class\": \"mail-unread\"}"
+else
+  echo ""
+fi

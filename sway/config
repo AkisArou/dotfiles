@@ -94,8 +94,7 @@ bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 bindsym $mod+Shift+bracketleft exec ~/dotfiles/rofi/launch -modi emoji -show emoji
 
 bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
-# bindsym $mod+Shift+m exec ~/dotfiles/aerc/launch
-bindsym $mod+Shift+m exec ~/dotfiles/foot/launch -e zsh -c "NVIM_EMAIL=true nvim -c NotMuch" 
+bindsym $mod+Shift+m exec ~/dotfiles/sway/open-mail
 
 
 # Move your focus around
