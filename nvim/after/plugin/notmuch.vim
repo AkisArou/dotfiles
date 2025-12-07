@@ -80,4 +80,22 @@ function! s:setup_notmuch() abort
     \ '<Space>':	'show_message_tag("-inbox -unread")',
     \ 'c':		'compose()',
     \ }
+
+
+  highlight nmComposeHelp        guifg=#7aa2f7      gui=none      " blue
+  highlight nmComposeHelpLine    guifg=#f7768e      gui=bold      " red (error-like)
+
+  highlight nmFoldersCount       guifg=#7aa2f7      gui=none      " yellow (statement)
+  highlight nmFoldersName        guifg=#bb9af7      gui=none      " magenta (type)
+  highlight nmFoldersSearch      guifg=#7dcfff      gui=none      " cyan (string-like)
+
+  highlight CursorLine           term=NONE cterm=NONE gui=NONE
+
+  highlight nmSearchDate         guifg=#7aa2f7      gui=none      " yellow
+  highlight nmSearchNum          guifg=#bb9af7      gui=none      " magenta
+  highlight nmSearchFrom         guifg=#7aa2f7      gui=none      " blue
+  highlight nmSearchSubject      guifg=#c0caf5      gui=none      " normal fg
+  highlight nmSearchTags         guifg=#7dcfff      gui=none      " cyan
+
+  highlight Folded gui=none      guifg=#565f89      guibg=#1f2335
 endfunction
