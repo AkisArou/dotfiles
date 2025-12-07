@@ -18,26 +18,26 @@ users:
   group_root: { foreground: Default }
 perms:
   user_read:
-    foreground: Yellow
+    foreground: DarkGray
     is_bold: false
   user_write:
-    foreground: Red
+    foreground: DarkGray
     is_bold: false
   user_execute_file:
-    foreground: Green
+    foreground: DarkGray
     is_bold: false
   user_execute_other:
-    foreground: Green
+    foreground: Cyan
     is_bold: false
   group_read:
-    foreground: Yellow
+    foreground: DarkGray
   group_write:
-    foreground: Red
+    foreground: DarkGray
   group_execute:
-    foreground: Green
+    foreground: DarkGray
   other_read:
-    foreground: Yellow
+    foreground: DarkGray
   other_write:
-    foreground: Red
+    foreground: DarkGray
   other_execute:
-    foreground: Green
+    foreground: DarkGray
