@@ -8,8 +8,8 @@ configurations:
     passwordCMD: "oama access akisarou90@gmail.com"
     boxes:
       - mailbox: INBOX
-        onNewMail: "mbsync gmail:INBOX && notmuch new && notify-send 'Gmail' 'New mail in Inbox'"
-        onChangedMail: "mbsync gmail:INBOX && notmuch new && notify-send 'Gmail' 'Mail changed in Inbox'"
+        onNewMail: "mbsync gmail:INBOX && notmuch new"
+        onChangedMail: "mbsync gmail:INBOX && notmuch new"
 
   - alias: Outlook
     host: outlook.office365.com
@@ -20,8 +20,8 @@ configurations:
     passwordCMD: "oama access adamkarafyllidis@nablesolutions.com"
     boxes:
       - mailbox: INBOX
-        onNewMail: "mbsync outlook:INBOX && notmuch new && notify-send 'Nable Solutions' 'New mail in Inbox'"
-        onChangedMail: "mbsync outlook:INBOX && notmuch new && notify-send 'Nable Solutions' 'Mail changed in Inbox'"
+        onNewMail: "mbsync outlook:INBOX && notmuch new"
+        onChangedMail: "mbsync outlook:INBOX && notmuch new"
 
   - alias: Support
     host: outlook.office365.com
@@ -32,5 +32,5 @@ configurations:
     passwordCMD: "oama access adamkarafyllidis@nablesolutions.com"
     boxes:
       - mailbox: INBOX
-        onNewMail: "mbsync support:INBOX && notmuch new && notify-send 'Support' 'New mail in Inbox'"
-        onChangedMail: "mbsync support:INBOX && notmuch new && notify-send 'Support' 'Mail changed in Inbox'"
+        onNewMail: "mbsync support:INBOX && notmuch new"
+        onChangedMail: "mbsync support:INBOX && notmuch new"

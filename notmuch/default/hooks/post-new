@@ -1,0 +1,24 @@
+#!/usr/bin/zsh
+
+unread_json="$(notmuch search --format=json 'tag:unread')"
+
+[ -z "$unread_json" ] && exit 0
+
+current_ts=$(date +%s)
+
+echo "$unread_json" | jq -r '.[].query[0]' | while read -r msgid; do
+  [ "$msgid" = "null" ] && continue
+
+  msg_json="$(notmuch show --body=false --format=json "$msgid")"
+
+  ts=$(echo "$msg_json" | jq '.[0][0][0].timestamp')
+  age=$((current_ts - ts))
+
+  # Only notify if <60 seconds old
+  if [ "$age" -le 60 ]; then
+    to_field=$(echo "$msg_json" | jq -r '.[0][0][0].headers.To')
+    subject=$(echo "$msg_json" | jq -r '.[0][0][0].headers.Subject')
+
+    notify-send "$to_field" "$subject"
+  fi
+done
