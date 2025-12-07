@@ -114,9 +114,6 @@ print_info "Install GTK Tokyonight theme..."
 print_info "Installing tmp plugins..."
 ~/.tmux/plugins/tpm/bin/clean_plugins all
 
-print_info "Installing yazi plugins..."
-ya pack -u
-
 print_info "Removing thunar extra desktop files..."
 sudo rm -rf /usr/share/applications/{thunar-bulk-rename.desktop,thunar-settings.desktop}
 
