@@ -1286,6 +1286,28 @@
   (advice-add op :around #'my/evil-flash-motion))
 
 
+;;; NOTMUCH
+(require 'notmuch)
+
+(setq notmuch-saved-searches
+      '((:name "unread" 
+               :query "tag:inbox and tag:unread" 
+               :count-query "tag:inbox and tag:unread" 
+               :sort-order newest-first)
+        (:name "inbox" 
+               :query "tag:inbox" 
+               :count-query "tag:inbox" 
+               :sort-order newest-first)
+        (:name "gmail" 
+               :query "folder:gmail/Inbox" 
+               :sort-order newest-first)
+        (:name "nablesolutions" 
+               :query "folder:nablesolutions/Inbox"
+               :sort-order newest-first)
+        (:name "support" 
+               :query "folder:support/Inbox" 
+               :sort-order newest-first)))
+
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
 (defun ek/first-install ()
