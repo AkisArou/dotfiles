@@ -503,10 +503,6 @@
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref))
 
-;; integration with the `consult' package:
-(add-hook 'consult-after-jump-hook #'pulsar-recenter-top)
-(add-hook 'consult-after-jump-hook #'pulsar-reveal-entry)
-
 ;;; EMBARK
 ;; Embark provides a powerful contextual action menu for Emacs, allowing
 ;; you to perform various operations on completion candidates and other items.
@@ -1118,41 +1114,7 @@
     (evil-textobj-anyblock--make-textobj beg end type count t)))
 
 (define-key evil-inner-text-objects-map "q" 'my-evil-textobj-anyblock-inner-quote)
-(define-key evil-outer-text-objects-map "q" 'my-evil-textobj-anyblock-a-quote)
-  )
-
-
-;;; PULSAR
-;; The `pulsar' package enhances the user experience in Emacs by providing
-;; visual feedback through pulsating highlights. This feature is especially
-;; useful in programming modes, where it can help users easily track
-;; actions such as scrolling, error navigation, yanking, deleting, and
-;; jumping to definitions.
-(use-package pulsar
-  :defer t
-  :straight t
-  :ensure t
-  :hook
-  (after-init . pulsar-global-mode)
-  :config
-  (setq pulsar-pulse t)
-  (setq pulsar-delay 0.025)
-  (setq pulsar-iterations 10)
-  (setq pulsar-face 'evil-ex-lazy-highlight)
-
-  (add-to-list 'pulsar-pulse-functions 'evil-scroll-down)
-  (add-to-list 'pulsar-pulse-functions 'flymake-goto-next-error)
-  (add-to-list 'pulsar-pulse-functions 'flymake-goto-prev-error)
-  (add-to-list 'pulsar-pulse-functions 'evil-yank)
-  (add-to-list 'pulsar-pulse-functions 'evil-yank-line)
-  (add-to-list 'pulsar-pulse-functions 'evil-delete)
-  (add-to-list 'pulsar-pulse-functions 'evil-delete-line)
-  (add-to-list 'pulsar-pulse-functions 'evil-jump-item)
-  (add-to-list 'pulsar-pulse-functions 'diff-hl-next-hunk)
-  (add-to-list 'pulsar-pulse-functions 'diff-hl-previous-hunk))
-
-
-
+(define-key evil-outer-text-objects-map "q" 'my-evil-textobj-anyblock-a-quote))
 
 ;; UNDO TREE
 ;; The `undo-tree' package provides an advanced and visual way to
@@ -1301,6 +1263,33 @@
   :config
   (global-colorful-mode t)
   (add-to-list 'global-colorful-modes 'helpful-mode))
+
+
+;;; HIGHLIGHT VIM OP
+(defface my/flash-face
+  '((t (:background "#7b5fbf" :extend t)))
+  "Face used to flash evil operator ranges.")
+
+(defun my/flash-region (beg end)
+  "Flash the region from BEG to END using a temporary overlay."
+  (let ((ov (make-overlay beg end)))
+    (overlay-put ov 'face 'my/flash-face)
+    (run-at-time 0.08 nil #'delete-overlay ov)))
+
+(defun my/evil-flash-motion (orig beg end &rest args)
+  "Flash region affected by evil operator."
+  (let ((result (apply orig beg end args)))
+    ;; absolutely ensure region is not active
+    (deactivate-mark)
+    ;; flash without leaving any highlight behind
+    (my/flash-region beg end)
+    result))
+
+;; Advice evil operators that use (beg end)
+(dolist (op '(evil-yank
+              evil-yank-line))
+  (advice-add op :around #'my/evil-flash-motion))
+
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
