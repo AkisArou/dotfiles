@@ -1315,6 +1315,14 @@
     (error "Sending message cancelled: empty subject.")))
 (add-hook 'message-send-hook 'my-notmuch-mua-empty-subject-check)
 
+(use-package notmuch-indicator
+  :ensure t
+  :init
+  (setq notmuch-indicator-args
+     '((:terms "tag:inbox and tag:unread" :label "📨 ")))
+  :config
+  (notmuch-indicator-mode 1))
+
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
 (defun ek/first-install ()

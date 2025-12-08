@@ -68,6 +68,8 @@ export SUDO_PROMPT="$(tput setaf 1 bold)Password:$(tput sgr0) "
 
 export EXPO_NO_TYPESCRIPT_SETUP=1
 
+export NOTMUCH_PROFILE=default
+
 if [[ -n $WAYLAND_DISPLAY ]]; then
   export ELECTRON_OZONE_PLATFORM_HINT=wayland
 fi
