@@ -1232,8 +1232,6 @@
   ;; Global settings (defaults)
   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  ;; for treemacs users
-  (doom-themes-treemacs-theme "doom-tokyo-night") ; use "doom-colors" for less minimal icon theme
   :config
   ;; Load the theme
   (load-theme 'doom-tokyo-night t)
@@ -1248,8 +1246,7 @@
    `(lazy-highlight ((t (:foreground "#16161e" :background "#5e428f"))))
    `(dired-directory ((t (:foreground "#7aa2f7"))))
    `(show-paren-match ((t (:foreground "#7aa2f7"))))
-   )
-  )
+   `(typescript-ts-jsx-attribute-face ((t (:foreground "#7dcfff"))))))
 
 (set-face-foreground 'show-paren-mismatch nil)
 (set-face-background 'show-paren-mismatch nil)
