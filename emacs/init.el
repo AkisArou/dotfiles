@@ -1251,6 +1251,10 @@
    )
   )
 
+(set-face-foreground 'show-paren-mismatch nil)
+(set-face-background 'show-paren-mismatch nil)
+
+
 ;;; COLORFUL-MODE
 (use-package colorful-mode
   :ensure t
