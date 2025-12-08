@@ -1308,6 +1308,13 @@
                :query "folder:support/Inbox" 
                :sort-order newest-first)))
 
+(defun my-notmuch-mua-empty-subject-check ()
+  "Request confirmation before sending a message with empty subject"
+  (when (and (null (message-field-value "Subject"))
+             (not (y-or-n-p "Subject is empty, send anyway? ")))
+    (error "Sending message cancelled: empty subject.")))
+(add-hook 'message-send-hook 'my-notmuch-mua-empty-subject-check)
+
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
 (defun ek/first-install ()
