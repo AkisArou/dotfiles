@@ -43,7 +43,7 @@
   "editor.hover.enabled": true,
   "editor.inlayHints.enabled": "off",
   "editor.linkedEditing": true,
-  "editor.smoothScrolling": true,
+  "editor.smoothScrolling": false,
   "editor.fontFamily": "Hack Nerd Font",
   "editor.fontSize": 13.5,
   "editor.suggest.showSnippets": false,
