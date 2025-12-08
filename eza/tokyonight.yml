@@ -2,7 +2,7 @@ date: { foreground: DarkGray }
 
 filekinds:
   normal:
-    foreground: Blue
+    foreground: White
   directory:
     foreground: Blue
   symlink:
