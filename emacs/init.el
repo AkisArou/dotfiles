@@ -912,6 +912,9 @@
   (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
   (evil-define-key 'normal 'global (kbd "<leader> l f") 'lsp-format-buffer) 
 
+  ;; Notmuch
+  (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch) 
+
   ;; TAB
 (defun my/tab-or-up-list ()
   "If point is before a closing delimiter, run `up-list`. Otherwise indent."
