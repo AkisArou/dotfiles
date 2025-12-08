@@ -1328,6 +1328,10 @@
   (notmuch-indicator-mode 1))
 
 
+;;; shr
+(setq shr-use-colors nil)
+
+
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
 (defun ek/first-install ()
   "Install tree-sitter grammars and compile packages on first run..."
