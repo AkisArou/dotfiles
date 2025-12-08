@@ -1292,6 +1292,7 @@
 ;;; NOTMUCH
 (require 'notmuch)
 
+(setq notmuch-show-empty-saved-searches t)
 (setq notmuch-saved-searches
       '((:name "unread" 
                :query "tag:inbox and tag:unread" 
