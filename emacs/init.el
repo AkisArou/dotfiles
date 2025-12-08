@@ -643,6 +643,10 @@
            js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
            web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
+  :config
+  (set-face-attribute 'lsp-face-highlight-textual nil
+						:background "#292e42"
+						:weight 'normal)
   :custom
   (lsp-keymap-prefix "C-c l")                           ;; Set the prefix for LSP commands.
   (lsp-inlay-hint-enable nil)                           ;; Usage of inlay hints.
@@ -679,6 +683,9 @@
   (lsp-lens-enable nil)                                 ;; Disable lens support.
   ;; Semantic settings
   (lsp-semantic-tokens-enable nil))                     ;; Disable semantic tokens.
+
+(add-hook 'dired-mode-hook #'lsp-dired-mode)
+
 
 (setq lsp-headerline-breadcrumb-enable nil)
 
@@ -1142,18 +1149,6 @@
   ;; Set the directory where `undo-tree' will save its history files.
   ;; This keeps undo history across sessions, stored in a cache directory.
   (setq undo-tree-history-directory-alist '(("." . "~/.cache/emacs/undo"))))
-
-
-;;; RAINBOW DELIMITERS
-;; The `rainbow-delimiters' package provides colorful parentheses, brackets, and braces
-;; to enhance readability in programming modes. Each level of nested delimiter is assigned
-;; a different color, making it easier to match pairs visually.
-(use-package rainbow-delimiters
-  :defer t
-  :straight t
-  :ensure t
-  :hook
-  (prog-mode . rainbow-delimiters-mode))
 
 
 ;;; DOTENV
