@@ -75,7 +75,7 @@
 ;; `use-package` declarations for specific packages, which will help us enable
 ;; the desired features and improve our workflow.
 (add-hook 'minibuffer-setup-hook (lambda ()
-	(local-set-key (kbd "C-c") 'abort-minibuffers)))
+								   (local-set-key (kbd "C-c") 'abort-minibuffers)))
 
 ;;; EMACS
 ;;  This is biggest one. Keep going, plugins (oops, I mean packages) will be shorter :)
@@ -347,7 +347,7 @@
   :config
   (setq eldoc-idle-delay 0)                  ;; Automatically fetch doc help
   (setq eldoc-echo-area-use-multiline-p nil) ;; We use the "K" floating help instead
-											 ;; set to t if you want docs on the echo area
+  ;; set to t if you want docs on the echo area
   (setq eldoc-echo-area-display-truncation-message nil)
   :init
   (global-eldoc-mode))
@@ -621,6 +621,33 @@
   :defer t
   :after (:all corfu))
 
+;;; MASON
+(use-package mason
+  :ensure t
+  :config
+  ;; List of packages to ensure
+  (defvar my-mason-packages
+	'("vtsls"
+	  "lua-language-server"
+	  "json-lsp"
+	  "html-lsp"
+	  "css-lsp"
+	  "tailwindcss-language-server"
+	  "cssmodules-language-server"
+	  "docker-language-server"
+	  "docker-compose-language-service"
+	  "yaml-language-server"
+	  "clangd"
+	  "mdx_analyzer"
+	  "prettierd"
+	  "taplo"))
+
+  ;; Initialize Mason and install packages
+  (mason-ensure
+   (lambda ()
+	 (dolist (pkg my-mason-packages)
+	   (ignore-errors (mason-install pkg))))))
+
 
 ;;; LSP
 ;; Emacs comes with an integrated LSP client called `eglot', which offers basic LSP functionality.
@@ -651,8 +678,8 @@
   :commands lsp
   :config
   (set-face-attribute 'lsp-face-highlight-textual nil
-						:background "#292e42"
-						:weight 'normal)
+					  :background "#292e42"
+					  :weight 'normal)
   :custom
   (lsp-keymap-prefix "C-c l")                           ;; Set the prefix for LSP commands.
   (lsp-inlay-hint-enable nil)                           ;; Usage of inlay hints.
@@ -660,7 +687,7 @@
   (lsp-session-file (locate-user-emacs-file ".lsp-session")) ;; Specify session file location.
   (lsp-log-io nil)                                      ;; Disable IO logging for speed.
   (lsp-idle-delay 0)                                    ;; Set the delay for LSP to 0 (debouncing).
-  (lsp-keep-workspace-alive nil)                        ;; Disable keeping the workspace alive.
+  (lsp-keep-workspace-alive t)                          ;; Keep the workspace alive.
   ;; Core settings
   (lsp-enable-xref t)                                   ;; Enable cross-references.
   (lsp-auto-configure t)                                ;; Automatically configure LSP.
@@ -784,6 +811,24 @@
 	 "workspace/executeCommand"
 	 `(:command "oxc.fixAll"
 				:arguments [(:uri ,(lsp--buffer-uri))]))))
+
+
+;; FORMAT-ALL
+(use-package format-all
+  :ensure t
+  :hook (prog-mode . format-all-mode)
+  :config
+  (setq-default format-all-formatters
+				'(("JavaScript" . (prettierd))
+				  ("JSX"        . (prettierd))
+				  ("TypeScript" . (prettierd))
+				  ("TSX"        . (prettierd))
+				  ("JSON"       . (prettierd))
+				  ("YAML"       . (prettierd)))))
+
+(add-hook 'emacs-lisp-mode-hook 'format-all-mode)
+(add-hook 'format-all-mode-hook 'format-all-ensure-formatter)
+
 
 ;;; ELDOC-BOX
 ;; eldoc-box enhances the default Eldoc experience by displaying documentation in a popup box,
@@ -966,23 +1011,23 @@
   (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch)
 
   ;; TAB
-(defun my/tab-or-up-list ()
-  "If point is before a closing delimiter, run `up-list`. Otherwise indent."
-  (interactive)
-  (if (looking-at-p "[][(){}]")
-	  (up-list)
-	(indent-for-tab-command)))
+  (defun my/tab-or-up-list ()
+	"If point is before a closing delimiter, run `up-list`. Otherwise indent."
+	(interactive)
+	(if (looking-at-p "[][(){}]")
+		(up-list)
+	  (indent-for-tab-command)))
 
   (evil-define-key 'insert 'global (kbd "TAB") #'my/tab-or-up-list)
 
-;; Trigger completion at point in Evil insert mode
+  ;; Trigger completion at point in Evil insert mode
   (evil-define-key 'insert 'global (kbd "M-SPC") #'completion-at-point)
 
-;; Trigger completion at point in all minibuffer maps
+  ;; Trigger completion at point in all minibuffer maps
   (dolist (map (list minibuffer-local-map
-				   minibuffer-local-ns-map
-				   minibuffer-local-completion-map
-				   minibuffer-local-must-match-map))
+					 minibuffer-local-ns-map
+					 minibuffer-local-completion-map
+					 minibuffer-local-must-match-map))
 	(define-key map (kbd "M-SPC") #'completion-at-point))
 
   ;;Show diagnostic at point in a popup with C-w C-d
@@ -1022,15 +1067,34 @@
   (evil-define-key 'normal 'global (kbd "<leader> g b") 'vc-annotate)       ;; Annotate buffer with version control info
 
   ;; Buffer management keybindings
+  (defun my/project-kill-buffers-no-confirm ()
+	"Kill all file buffers in the current project, skipping special buffers and LSP.
+  Modified buffers are automatically saved before being killed."
+	(interactive)
+	(let ((project (project-current)))
+	  (when project
+		(dolist (buf (project-buffers project))
+		  ;; Only handle normal file buffers
+		  (when (and (buffer-file-name buf)
+					 (not (string-match-p "^\\*" (buffer-name buf))))
+			(with-current-buffer buf
+			  ;; Save if modified
+			  (when (buffer-modified-p)
+				(save-buffer))
+			  ;; Kill buffer
+			  (kill-buffer buf)))))))
+
   (defun kill-other-buffers ()
 	(interactive)
-	(mapc 'kill-buffer (delq (current-buffer) (buffer-list))))
+	(dolist (buf (delq (current-buffer) (buffer-list)))
+	  (unless (string-prefix-p "*" (buffer-name buf))
+		(kill-buffer buf))))
 
   (evil-define-key 'normal 'global (kbd "] b") 'switch-to-next-buffer) ;; Switch to next buffer
   (evil-define-key 'normal 'global (kbd "[ b") 'switch-to-prev-buffer) ;; Switch to previous buffer
   (evil-define-key 'normal 'global (kbd "<leader> b b") 'ibuffer) ;; Open Ibuffer
   (evil-define-key 'normal 'global (kbd "<leader> b d") 'kill-current-buffer) ;; Kill current buffer
-  (evil-define-key 'normal 'global (kbd "<leader> b a") 'project-kill-buffers) ;; Kill project buffers
+  (evil-define-key 'normal 'global (kbd "<leader> b a") 'my/project-kill-buffers-no-confirm) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> b o") #'kill-other-buffers) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> b s") 'save-buffer) ;; Save buffer
   (evil-define-key 'normal 'global (kbd "<leader> b l") 'consult-buffer) ;; Consult buffer
@@ -1064,11 +1128,11 @@
 
 
   ;; Custom example. Formatting with prettier tool.
-  (evil-define-key 'normal 'global (kbd "<leader> m p")
-				   (lambda ()
-					 (interactive)
-					 (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
-					 (revert-buffer t t t)))
+  (evil-define-key 'normal 'global (kbd "<leader> b f")
+	(lambda ()
+	  (interactive)
+	  (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
+	  (revert-buffer t t t)))
 
   ;; Enable evil mode
   (evil-mode 1))
@@ -1428,7 +1492,7 @@
   :ensure t
   :init
   (setq notmuch-indicator-args
-	 '((:terms "tag:inbox and tag:unread" :label "📨 ")))
+		'((:terms "tag:inbox and tag:unread" :label "📨 ")))
   :config
   (notmuch-indicator-mode 1))
 
@@ -1452,8 +1516,8 @@
   ;; Set the languages you want to install (like your Neovim list)
   (setq treesit-auto-langs
 		'(bash c css dockerfile html javascript jsdoc
-		  lua markdown python toml
-		  tsx typescript yaml))
+			   lua markdown python toml
+			   tsx typescript yaml))
 
   ;; Initialize treesit-auto (adds major mode remappings etc.)
   (treesit-auto-add-to-auto-mode-alist 'all)
