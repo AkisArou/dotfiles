@@ -1092,32 +1092,99 @@
 
 
 ;;; EVIL-TEXTOBJ-ANYBLOCK
+;;; SMART QUOTE TEXTOBJ (inner + outer, jumps to next quote on line)
 (use-package evil-textobj-anyblock
   :straight (:host github :repo "noctuid/evil-textobj-anyblock")
   :after evil
   :config
-  (evil-define-text-object my-evil-textobj-anyblock-inner-quote
-  (count &optional beg end type)
-  "Select the closest outer quote."
-  (let ((evil-textobj-anyblock-blocks
-		 '(("'" . "'")
-		   ("\"" . "\"")
-		   ("`" . "'")
-		   ("“" . "”"))))
-	(evil-textobj-anyblock--make-textobj beg end type count nil)))
+  (defvar my/quote-pairs
+	'(("'" . "'")
+	  ("\"" . "\"")
+	  ("`" . "`")
+	  ("“" . "”"))
+	"Supported quote delimiters.")
 
-(evil-define-text-object my-evil-textobj-anyblock-a-quote
-  (count &optional beg end type)
-  "Select the closest outer quote."
-  (let ((evil-textobj-anyblock-blocks
-		 '(("'" . "'")
-		   ("\"" . "\"")
-		   ("`" . "'")
-		   ("“" . "”"))))
-	(evil-textobj-anyblock--make-textobj beg end type count t)))
+  ;; --------------------------------------------------------------------------
+  ;; FIXED: TRUE inside-quote detection (works with multiple pairs per line)
+  ;; --------------------------------------------------------------------------
+  (defun my/find-containing-quote ()
+	"Return (OPEN . CLOSE) if point is inside a quote pair on the line."
+	(save-excursion
+	  (let* ((line-beg (line-beginning-position))
+			 (line-end (line-end-position))
+			 ;; list of all (OPEN . CLOSE) sorted by position
+			 (pairs '()))
+		;; Collect all quote pairs on the current line
+		(dolist (pair my/quote-pairs)
+		  (let ((open (car pair))
+				(close (cdr pair)))
+			(save-excursion
+			  (goto-char line-beg)
+			  (while (search-forward open line-end t)
+				(let ((op (match-beginning 0)))
+				  (when (search-forward close line-end t)
+					(push (cons op (match-beginning 0)) pairs)))))))
+		;; Sort them by opening position
+		(setq pairs (sort pairs (lambda (a b) (< (car a) (car b)))))
+		;; Now check if point lies inside any
+		(let ((pos (point)))
+		  (catch 'return
+			(dolist (p pairs)
+			  (when (and (< (car p) pos) (< pos (cdr p)))
+				(throw 'return p)))
+			nil)))))
 
-(define-key evil-inner-text-objects-map "q" 'my-evil-textobj-anyblock-inner-quote)
-(define-key evil-outer-text-objects-map "q" 'my-evil-textobj-anyblock-a-quote))
+  ;; --------------------------------------------------------------------------
+  ;; Find next quote pair on same line
+  ;; --------------------------------------------------------------------------
+  (defun my/find-next-quote (count)
+	(let ((regex (regexp-opt (mapcar #'car my/quote-pairs)))
+		  (line-end (line-end-position))
+		  open-pos close-pos)
+	  (catch 'return
+		(dotimes (_ (or count 1))
+		  (unless (re-search-forward regex line-end t)
+			(throw 'return nil))
+		  (setq open-pos (match-beginning 0))
+		  (let* ((open-str (buffer-substring-no-properties open-pos (1+ open-pos)))
+				 (close-str (cdr (assoc open-str my/quote-pairs))))
+			(unless (search-forward close-str line-end t)
+			  (throw 'return nil))
+			(setq close-pos (match-beginning 0))))
+		(cons open-pos close-pos))))
+
+  ;; --------------------------------------------------------------------------
+  ;; Build text object range
+  ;; --------------------------------------------------------------------------
+  (defun my/make-quote-range (count outer)
+	(let* ((bounds (or (my/find-containing-quote)
+					   (my/find-next-quote count))))
+	  (unless bounds (user-error "No quote pair found"))
+	  (let* ((open (car bounds))
+			 (close (cdr bounds))
+			 (beg (if outer open (1+ open)))
+			 (end (if outer (1+ close) close)))
+		(evil-range beg end 'exclusive))))
+
+  ;; --------------------------------------------------------------------------
+  ;; Text objects
+  ;; --------------------------------------------------------------------------
+  (evil-define-text-object my/inner-smart-quote
+	(count &optional beg end type)
+	(my/make-quote-range count nil))
+
+  (evil-define-text-object my/outer-smart-quote
+	(count &optional beg end type)
+	(my/make-quote-range count t))
+
+  ;; Bind q
+  (define-key evil-inner-text-objects-map "q" #'my/inner-smart-quote)
+  (define-key evil-outer-text-objects-map "q" #'my/outer-smart-quote)
+
+  ;; Make i"/i'/i` work identically
+  (dolist (key '("\"" "'" "`"))
+	(define-key evil-inner-text-objects-map key #'my/inner-smart-quote)
+	(define-key evil-outer-text-objects-map key #'my/outer-smart-quote)))
 
 ;; UNDO TREE
 ;; The `undo-tree' package provides an advanced and visual way to
