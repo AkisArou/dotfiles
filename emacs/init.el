@@ -603,7 +603,7 @@
 
   :bind
   (:map corfu-map
-		;; VSCode-like keybindings
+		("RET" . nil)
 		("C-e" . corfu-insert)        ;; Keep your existing binding
 		("C-n" . corfu-next)          ;; Ctrl-n for next
 		("C-p" . corfu-previous))     ;; Ctrl-p for previous
