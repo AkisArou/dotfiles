@@ -13,18 +13,18 @@
 (setq straight-check-for-modifications nil)
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el"
-        (or (bound-and-true-p straight-base-dir)
-            user-emacs-directory)))
-      (bootstrap-version 7))
+	   (expand-file-name
+		"straight/repos/straight.el/bootstrap.el"
+		(or (bound-and-true-p straight-base-dir)
+			user-emacs-directory)))
+	  (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
+	(with-current-buffer
+		(url-retrieve-synchronously
+		 "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+		 'silent 'inhibit-cookies)
+	  (goto-char (point-max))
+	  (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 (straight-use-package '(project :type built-in))
 (straight-use-package 'use-package)
@@ -75,7 +75,7 @@
 ;; `use-package` declarations for specific packages, which will help us enable
 ;; the desired features and improve our workflow.
 (add-hook 'minibuffer-setup-hook (lambda ()
-    (local-set-key (kbd "C-c") 'abort-minibuffers)))
+	(local-set-key (kbd "C-c") 'abort-minibuffers)))
 
 ;;; EMACS
 ;;  This is biggest one. Keep going, plugins (oops, I mean packages) will be shorter :)
@@ -92,6 +92,7 @@
   (history-length 25)
   (ispell-dictionary "en_US")
   (make-backup-files nil)
+  (confirm-kill-processes nil)
   (pixel-scroll-precision-mode t)
   (pixel-scroll-precision-use-momentum nil)
   (ring-bell-function 'ignore)
@@ -110,7 +111,7 @@
   :config
   ;; Skip special buffers when cycling with [b and ]b
   (defun skip-these-buffers (_window buffer _bury-or-kill)
-    (string-match "\\*[^*]+\\*" (buffer-name buffer)))
+	(string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
   ;; Custom file
@@ -122,9 +123,9 @@
 
   ;; Centered cursor scrolling behavior
   (setq scroll-preserve-screen-position t
-        scroll-conservatively 0
-        maximum-scroll-margin 0.5
-        scroll-margin 99999)
+		scroll-conservatively 0
+		maximum-scroll-margin 0.5
+		scroll-margin 99999)
 
   (electric-pair-mode 1)          ;; Auto-insert matching delimiters
   (superword-mode 1)              ;; Treats words with dash/underscore as single words
@@ -135,14 +136,14 @@
 
   ;; Modes that should always use spaces + 2-width tabs
   (dolist (hook '(js-ts-mode-hook
-                  json-ts-mode-hook
-                  typescript-ts-mode-hook
-                  tsx-ts-mode-hook
-                  yaml-ts-mode-hook))
-    (add-hook hook
-              (lambda ()
-                (setq-local indent-tabs-mode nil)
-                (setq-local tab-width 2))))
+				  json-ts-mode-hook
+				  typescript-ts-mode-hook
+				  tsx-ts-mode-hook
+				  yaml-ts-mode-hook))
+	(add-hook hook
+			  (lambda ()
+				(setq-local indent-tabs-mode nil)
+				(setq-local tab-width 2))))
 
   ;; Mode-specific indent offsets
   (setq js-indent-level 2)
@@ -170,6 +171,11 @@
   ;; Default file encoding
   (modify-coding-system-alist 'file "" 'utf-8))
 
+;;; WHITESPACE
+(use-package whitespace
+  :ensure nil
+  :hook (before-save . whitespace-cleanup))
+
 
 ;;; WINDOW
 ;; This section configures window management in Emacs, enhancing the way buffers
@@ -185,34 +191,34 @@
   :custom
   (display-buffer-alist
    '(
-     ;; ("\\*.*e?shell\\*"
-     ;;  (display-buffer-in-side-window)
-     ;;  (window-height . 0.25)
-     ;;  (side . bottom)
-     ;;  (slot . -1))
+	 ;; ("\\*.*e?shell\\*"
+	 ;;  (display-buffer-in-side-window)
+	 ;;  (window-height . 0.25)
+	 ;;  (side . bottom)
+	 ;;  (slot . -1))
 
-     ;; ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
-     ;;  (display-buffer-in-side-window)
-     ;;  (window-height . 0.25)
-     ;;  (side . bottom)
-     ;;  (slot . 0))
+	 ;; ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+	 ;;  (display-buffer-in-side-window)
+	 ;;  (window-height . 0.25)
+	 ;;  (side . bottom)
+	 ;;  (slot . 0))
 
-     ;; Example configuration for the LSP help buffer,
-     ;; keeps it always on bottom using 25% of the available space:
-     ("\\*\\(lsp-help\\)\\*"
-      (display-buffer-in-side-window)
-      (window-height . 0.25)
-      (side . bottom)
-      (slot . 0))
+	 ;; Example configuration for the LSP help buffer,
+	 ;; keeps it always on bottom using 25% of the available space:
+	 ("\\*\\(lsp-help\\)\\*"
+	  (display-buffer-in-side-window)
+	  (window-height . 0.25)
+	  (side . bottom)
+	  (slot . 0))
 
-     ;; ;; Configuration for displaying various diagnostic buffers on
-     ;; ;; bottom 25%:
-     ;; ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
-     ;;  (display-buffer-in-side-window)
-     ;;  (window-height . 0.25)
-     ;;  (side . bottom)
-     ;;  (slot . 1))
-     )))
+	 ;; ;; Configuration for displaying various diagnostic buffers on
+	 ;; ;; bottom 25%:
+	 ;; ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
+	 ;;  (display-buffer-in-side-window)
+	 ;;  (window-height . 0.25)
+	 ;;  (side . bottom)
+	 ;;  (slot . 1))
+	 )))
 
 
 ;;; CLIPBOARD
@@ -221,8 +227,8 @@
 (use-package clipetty
   :ensure t
   :hook ((after-init . (lambda ()
-                         (when (getenv "SSH_TTY")
-                           (global-clipetty-mode 1))))))
+						 (when (getenv "SSH_TTY")
+						   (global-clipetty-mode 1))))))
 
 
 ;;; DIRED
@@ -244,18 +250,18 @@
   (dired-dwim-target t)
   (dired-guess-shell-alist-user
    '(("\\.\\(png\\|jpe?g\\|tiff\\)" "feh" "xdg-open" "open")
-     ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open" "open")
-     (".*" "open" "xdg-open")))
+	 ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open" "open")
+	 (".*" "open" "xdg-open")))
   (dired-kill-when-opening-new-dired-buffer t)
   :config
   (with-eval-after-load 'evil
-    (add-hook 'dired-mode-hook
-              (lambda ()
-                ;; Use normal state in Dired
-                (evil-normalize-keymaps)
-                (evil-define-key 'normal dired-mode-map
-                  (kbd "C-e") 'dired-find-file
-                  (kbd "C-f") 'dired-up-directory)))))
+	(add-hook 'dired-mode-hook
+			  (lambda ()
+				;; Use normal state in Dired
+				(evil-normalize-keymaps)
+				(evil-define-key 'normal dired-mode-map
+				  (kbd "C-e") 'dired-find-file
+				  (kbd "C-f") 'dired-up-directory)))))
 
 (add-hook 'dired-mode-hook #'dired-omit-mode)
 
@@ -275,7 +281,7 @@
   (setq lazy-count-prefix-format "(%s/%s) ")   ;; Format for displaying current match count.
   (setq lazy-count-suffix-format nil)          ;; Disable suffix formatting for match count.
   (setq search-whitespace-regexp ".*?"))        ;; Allow searching across whitespace.
-  
+
 
 
 ;;; VC
@@ -298,20 +304,20 @@
   :config
   ;; Better colors for <leader> g b  (blame file)
   (setq vc-annotate-color-map
-        '((20 . "#f5e0dc")
-          (40 . "#f2cdcd")
-          (60 . "#f5c2e7")
-          (80 . "#cba6f7")
-          (100 . "#f38ba8")
-          (120 . "#eba0ac")
-          (140 . "#fab387")
-          (160 . "#f9e2af")
-          (180 . "#a6e3a1")
-          (200 . "#94e2d5")
-          (220 . "#89dceb")
-          (240 . "#74c7ec")
-          (260 . "#89b4fa")
-          (280 . "#b4befe"))))
+		'((20 . "#f5e0dc")
+		  (40 . "#f2cdcd")
+		  (60 . "#f5c2e7")
+		  (80 . "#cba6f7")
+		  (100 . "#f38ba8")
+		  (120 . "#eba0ac")
+		  (140 . "#fab387")
+		  (160 . "#f9e2af")
+		  (180 . "#a6e3a1")
+		  (200 . "#94e2d5")
+		  (220 . "#89dceb")
+		  (240 . "#74c7ec")
+		  (260 . "#89b4fa")
+		  (280 . "#b4befe"))))
 
 
 ;;; SMERGE
@@ -324,10 +330,10 @@
   :ensure nil                                  ;; This is built-in, no need to fetch it.
   :defer t
   :bind (:map smerge-mode-map
-              ("C-c ^ u" . smerge-keep-upper)  ;; Keep the changes from the upper version.
-              ("C-c ^ l" . smerge-keep-lower)  ;; Keep the changes from the lower version.
-              ("C-c ^ n" . smerge-next)        ;; Move to the next conflict.
-              ("C-c ^ p" . smerge-previous)))  ;; Move to the previous conflict.
+			  ("C-c ^ u" . smerge-keep-upper)  ;; Keep the changes from the upper version.
+			  ("C-c ^ l" . smerge-keep-lower)  ;; Keep the changes from the lower version.
+			  ("C-c ^ n" . smerge-next)        ;; Move to the next conflict.
+			  ("C-c ^ p" . smerge-previous)))  ;; Move to the previous conflict.
 
 
 ;;; ELDOC
@@ -341,7 +347,7 @@
   :config
   (setq eldoc-idle-delay 0)                  ;; Automatically fetch doc help
   (setq eldoc-echo-area-use-multiline-p nil) ;; We use the "K" floating help instead
-                                             ;; set to t if you want docs on the echo area
+											 ;; set to t if you want docs on the echo area
   (setq eldoc-echo-area-display-truncation-message nil)
   :init
   (global-eldoc-mode))
@@ -359,7 +365,7 @@
   :custom
   (flymake-margin-indicators-string
    '((error "!»" compilation-error) (warning "»" compilation-warning)
-     (note "»" compilation-info))))
+	 (note "»" compilation-info))))
 
 ;;; ORG-MODE
 ;; Org-mode is a powerful system for organizing and managing your notes,
@@ -425,13 +431,13 @@
   ;; This will prefix the current candidate with “» ” to make it stand out.
   ;; Reference: https://github.com/minad/vertico/wiki#prefix-current-candidate-with-arrow
   (advice-add #'vertico--format-candidate :around
-              (lambda (orig cand prefix suffix index _start)
-                (setq cand (funcall orig cand prefix suffix index _start))
-                (concat
-                 (if (= vertico--index index)
-                     (propertize "» " 'face '(:foreground "#80adf0" :weight bold))
-                   "  ")
-                 cand))))
+			  (lambda (orig cand prefix suffix index _start)
+				(setq cand (funcall orig cand prefix suffix index _start))
+				(concat
+				 (if (= vertico--index index)
+					 (propertize "» " 'face '(:foreground "#80adf0" :weight bold))
+				   "  ")
+				 cand))))
 
 (use-package fussy
   :ensure t
@@ -439,26 +445,26 @@
   :init
   ;; Use fussy as the main completion style
   (setq completion-styles '(fussy basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles partial-completion))))
+		completion-category-defaults nil
+		completion-category-overrides '((file (styles partial-completion))))
   :config
   ;; Setup fussy with fzf-native scoring
   (fussy-setup)
-  
+
   ;; Configure fussy for VSCode-like behavior
   (setq fussy-score-fn 'fussy-fzf-native-score)
   (setq fussy-filter-fn 'fussy-filter-default)
   (setq fussy-use-cache t)
   (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
-  
+
   ;; Corfu integration: cache management
   (with-eval-after-load 'corfu
-    (advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
-    (add-hook 'corfu-mode-hook
-              (lambda ()
-                (setq-local fussy-max-candidate-limit 5000
-                            fussy-default-regex-fn 'fussy-pattern-first-letter
-                            fussy-prefer-prefix nil)))))
+	(advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
+	(add-hook 'corfu-mode-hook
+			  (lambda ()
+				(setq-local fussy-max-candidate-limit 5000
+							fussy-default-regex-fn 'fussy-pattern-first-letter
+							fussy-prefer-prefix nil)))))
 
 
 ;;; FZF
@@ -501,7 +507,7 @@
 
   ;; Use Consult for xref locations with a preview feature.
   (setq xref-show-xrefs-function #'consult-xref
-        xref-show-definitions-function #'consult-xref))
+		xref-show-definitions-function #'consult-xref))
 
 ;;; EMBARK
 ;; Embark provides a powerful contextual action menu for Emacs, allowing
@@ -583,28 +589,28 @@
   (corfu-cycle nil)                   ;; Don't cycle through candidates
   (corfu-on-exact-match 'insert)      ;; Insert exact matches immediately
 
-  
+
   :config
   (if ek-use-nerd-fonts
-      (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-  
+	  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
   :bind
   (:map corfu-map
-        ;; VSCode-like keybindings
-        ("C-e" . corfu-insert)        ;; Keep your existing binding
-        ("C-n" . corfu-next)          ;; Ctrl-n for next
-        ("C-p" . corfu-previous))     ;; Ctrl-p for previous
-  
+		;; VSCode-like keybindings
+		("C-e" . corfu-insert)        ;; Keep your existing binding
+		("C-n" . corfu-next)          ;; Ctrl-n for next
+		("C-p" . corfu-previous))     ;; Ctrl-p for previous
+
   :init
   (global-corfu-mode)
   (corfu-popupinfo-mode t))
 
 ;; Optional: Configure completion categories for better matching
 (setq completion-category-overrides
-      '((buffer (styles fussy basic))
-        (file (styles fussy partial-completion))
-        (project-file (styles fussy))
-        (lsp-capf (styles fussy basic))))
+	  '((buffer (styles fussy basic))
+		(file (styles fussy partial-completion))
+		(project-file (styles fussy))
+		(lsp-capf (styles fussy basic))))
 
 ;;; NERD-ICONS-CORFU
 ;; Provides Nerd Icons to be used with CORFU.
@@ -635,13 +641,13 @@
   :straight t
   :defer t
   :hook (;; Replace XXX-mode with concrete major mode (e.g. python-mode)
-         (lsp-mode . lsp-enable-which-key-integration)  ;; Integrate with Which Key
-         ((js-mode                                      ;; Enable LSP for JavaScript
-           tsx-ts-mode                                  ;; Enable LSP for TSX
-           typescript-ts-base-mode                      ;; Enable LSP for TypeScript
-           css-mode                                     ;; Enable LSP for CSS
-           js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
-           web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
+		 (lsp-mode . lsp-enable-which-key-integration)  ;; Integrate with Which Key
+		 ((js-mode                                      ;; Enable LSP for JavaScript
+		   tsx-ts-mode                                  ;; Enable LSP for TSX
+		   typescript-ts-base-mode                      ;; Enable LSP for TypeScript
+		   css-mode                                     ;; Enable LSP for CSS
+		   js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
+		   web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
   :config
   (set-face-attribute 'lsp-face-highlight-textual nil
@@ -708,32 +714,32 @@
 (defun my/oxlint-server-cmd ()
   "Return the path to the oxlint language server for the current project."
   (let ((server-path (expand-file-name "node_modules/.bin/oxc_language_server"
-                                       (lsp-workspace-root))))
-    (if (file-executable-p server-path)
-        server-path
-      (error "oxc_language_server not found in node_modules/.bin"))))
+									   (lsp-workspace-root))))
+	(if (file-executable-p server-path)
+		server-path
+	  (error "oxc_language_server not found in node_modules/.bin"))))
 
 (with-eval-after-load 'lsp-mode
   (lsp-register-client
    (make-lsp-client
-    :new-connection (lsp-stdio-connection #'my/oxlint-server-cmd)
-    :activation-fn (lsp-activate-on
-                    "javascript"
-                    "javascriptreact"
-                    "typescript"
-                    "typescriptreact")
-    :server-id 'oxlint
+	:new-connection (lsp-stdio-connection #'my/oxlint-server-cmd)
+	:activation-fn (lsp-activate-on
+					"javascript"
+					"javascriptreact"
+					"typescript"
+					"typescriptreact")
+	:server-id 'oxlint
 	:add-on? t
-    :priority -2)))
+	:priority -2)))
 
 (defun my/oxlint-fix-all ()
   "Apply fixes to the current buffer using oxlint."
   (interactive)
   (when-let ((client (lsp--find-clients 'oxlint)))
-    (lsp-request
-     "workspace/executeCommand"
-     `(:command "oxc.fixAll"
-                :arguments [(:uri ,(lsp--buffer-uri))]))))
+	(lsp-request
+	 "workspace/executeCommand"
+	 `(:command "oxc.fixAll"
+				:arguments [(:uri ,(lsp--buffer-uri))]))))
 
 ;;; ELDOC-BOX
 ;; eldoc-box enhances the default Eldoc experience by displaying documentation in a popup box,
@@ -764,16 +770,16 @@
   :ensure t
   :hook
   (find-file . (lambda ()
-                 (global-diff-hl-mode)           ;; Enable Diff-HL mode for all files.
-                 (diff-hl-flydiff-mode)          ;; Automatically refresh diffs.
-                 (diff-hl-margin-mode)))         ;; Show diff indicators in the margin.
+				 (global-diff-hl-mode)           ;; Enable Diff-HL mode for all files.
+				 (diff-hl-flydiff-mode)          ;; Automatically refresh diffs.
+				 (diff-hl-margin-mode)))         ;; Show diff indicators in the margin.
   :custom
   (diff-hl-side 'left)                           ;; Set the side for diff indicators.
   (diff-hl-margin-symbols-alist '((insert . "┃") ;; Customize symbols for each change type.
-                                  (delete . "-")
-                                  (change . "┃")
-                                  (unknown . "┆")
-                                  (ignored . "i"))))
+								  (delete . "-")
+								  (change . "┃")
+								  (unknown . "┆")
+								  (ignored . "i"))))
 
 
 ;;; MAGIT
@@ -824,28 +830,28 @@
   ;; Makes sure you are using the local bin for your
   ;; node project. Local eslint, typescript server...
   (eval-after-load 'typescript-ts-mode
-    '(add-hook 'typescript-ts-mode-hook #'add-node-modules-path))
+	'(add-hook 'typescript-ts-mode-hook #'add-node-modules-path))
   (eval-after-load 'tsx-ts-mode
-    '(add-hook 'tsx-ts-mode-hook #'add-node-modules-path))
+	'(add-hook 'tsx-ts-mode-hook #'add-node-modules-path))
   (eval-after-load 'typescriptreact-mode
-    '(add-hook 'typescriptreact-mode-hook #'add-node-modules-path))
+	'(add-hook 'typescriptreact-mode-hook #'add-node-modules-path))
   (eval-after-load 'js-mode
-    '(add-hook 'js-mode-hook #'add-node-modules-path)))
+	'(add-hook 'js-mode-hook #'add-node-modules-path)))
 
 
 (defun ek/terminal-cursor-update ()
   "Set cursor shape depending on Evil state in terminal."
   (when (not (display-graphic-p))
-    (cond
-     ((evil-insert-state-p)
-      ;; vertical bar
-      (send-string-to-terminal "\e[6 q"))
-     ((evil-visual-state-p)
-      ;; block
-      (send-string-to-terminal "\e[2 q"))
-     (t
-      ;; normal, motion, replace, etc.
-      (send-string-to-terminal "\e[2 q")))))
+	(cond
+	 ((evil-insert-state-p)
+	  ;; vertical bar
+	  (send-string-to-terminal "\e[6 q"))
+	 ((evil-visual-state-p)
+	  ;; block
+	  (send-string-to-terminal "\e[2 q"))
+	 (t
+	  ;; normal, motion, replace, etc.
+	  (send-string-to-terminal "\e[2 q")))))
 
 (add-hook 'post-command-hook 'ek/terminal-cursor-update)
 
@@ -867,8 +873,8 @@
 
   :config
   (setq evil-normal-state-cursor 'box
-        evil-insert-state-cursor 'bar
-        evil-visual-state-cursor 'box)
+		evil-insert-state-cursor 'bar
+		evil-visual-state-cursor 'box)
 
   (evil-set-undo-system 'undo-tree)   ;; Uses the undo-tree package as the default undo system
 
@@ -910,18 +916,18 @@
   (evil-define-key 'normal 'global (kbd "grn") 'lsp-rename)
   (evil-define-key 'normal 'global (kbd "gI") 'lsp-find-implementation)
   (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
-  (evil-define-key 'normal 'global (kbd "<leader> l f") 'lsp-format-buffer) 
+  (evil-define-key 'normal 'global (kbd "<leader> l f") 'lsp-format-buffer)
 
   ;; Notmuch
-  (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch) 
+  (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch)
 
   ;; TAB
 (defun my/tab-or-up-list ()
   "If point is before a closing delimiter, run `up-list`. Otherwise indent."
   (interactive)
   (if (looking-at-p "[][(){}]")
-      (up-list)
-    (indent-for-tab-command)))
+	  (up-list)
+	(indent-for-tab-command)))
 
   (evil-define-key 'insert 'global (kbd "TAB") #'my/tab-or-up-list)
 
@@ -930,26 +936,26 @@
 
 ;; Trigger completion at point in all minibuffer maps
   (dolist (map (list minibuffer-local-map
-                   minibuffer-local-ns-map
-                   minibuffer-local-completion-map
-                   minibuffer-local-must-match-map))
+				   minibuffer-local-ns-map
+				   minibuffer-local-completion-map
+				   minibuffer-local-must-match-map))
 	(define-key map (kbd "M-SPC") #'completion-at-point))
 
   ;;Show diagnostic at point in a popup with C-w C-d
   (defun ek/show-diagnostic-popup ()
-    (interactive)
-    (if (bound-and-true-p flymake-mode)
-        (progn
-          (require 'flymake-diagnostic-at-point nil t)
-          (if (fboundp 'flymake-diagnostic-at-point)
-              (flymake-diagnostic-at-point)
-            (if-let ((diags (flymake-diagnostics (point))))
-                (message "%s" (mapconcat (lambda (d) (flymake-diagnostic-text d)) diags "\n"))
-              (message "No diagnostics at point"))))
-      (message "Flymake is not active")))
+	(interactive)
+	(if (bound-and-true-p flymake-mode)
+		(progn
+		  (require 'flymake-diagnostic-at-point nil t)
+		  (if (fboundp 'flymake-diagnostic-at-point)
+			  (flymake-diagnostic-at-point)
+			(if-let ((diags (flymake-diagnostics (point))))
+				(message "%s" (mapconcat (lambda (d) (flymake-diagnostic-text d)) diags "\n"))
+			  (message "No diagnostics at point"))))
+	  (message "Flymake is not active")))
 
   (with-eval-after-load 'evil
-    (define-key evil-window-map (kbd "C-d") #'ek/show-diagnostic-popup))
+	(define-key evil-window-map (kbd "C-d") #'ek/show-diagnostic-popup))
 
   ;; Dired commands for file management
   (evil-define-key 'normal 'global (kbd "<leader> x d") 'dired)
@@ -1006,7 +1012,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> h f") 'describe-function) ;; Describe function
   (evil-define-key 'normal 'global (kbd "<leader> h v") 'describe-variable) ;; Describe variable
   (evil-define-key 'normal 'global (kbd "<leader> h k") 'describe-key) ;; Describe key
-  
+
 
   ;; Tab navigation
   (evil-define-key 'normal 'global (kbd "] t") 'tab-next) ;; Go to next tab
@@ -1015,10 +1021,10 @@
 
   ;; Custom example. Formatting with prettier tool.
   (evil-define-key 'normal 'global (kbd "<leader> m p")
-                   (lambda ()
-                     (interactive)
-                     (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
-                     (revert-buffer t t t)))
+				   (lambda ()
+					 (interactive)
+					 (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
+					 (revert-buffer t t t)))
 
   ;; Enable evil mode
   (evil-mode 1))
@@ -1040,10 +1046,10 @@
   :straight t
   :config
   (evil-define-key '(normal visual) 'global
-    (kbd "C-a") 'evil-numbers/inc-at-pt
-    (kbd "C-x") 'evil-numbers/dec-at-pt
-    (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental
-    (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental))
+	(kbd "C-a") 'evil-numbers/inc-at-pt
+	(kbd "C-x") 'evil-numbers/dec-at-pt
+	(kbd "g C-a") 'evil-numbers/inc-at-pt-incremental
+	(kbd "g C-x") 'evil-numbers/dec-at-pt-incremental))
 
 ;;; EMACS-TMUX-NAVIGATOR
 (use-package emacs-tmux-navigator
@@ -1094,21 +1100,21 @@
   (count &optional beg end type)
   "Select the closest outer quote."
   (let ((evil-textobj-anyblock-blocks
-         '(("'" . "'")
-           ("\"" . "\"")
-           ("`" . "'")
-           ("“" . "”"))))
-    (evil-textobj-anyblock--make-textobj beg end type count nil)))
+		 '(("'" . "'")
+		   ("\"" . "\"")
+		   ("`" . "'")
+		   ("“" . "”"))))
+	(evil-textobj-anyblock--make-textobj beg end type count nil)))
 
 (evil-define-text-object my-evil-textobj-anyblock-a-quote
   (count &optional beg end type)
   "Select the closest outer quote."
   (let ((evil-textobj-anyblock-blocks
-         '(("'" . "'")
-           ("\"" . "\"")
-           ("`" . "'")
-           ("“" . "”"))))
-    (evil-textobj-anyblock--make-textobj beg end type count t)))
+		 '(("'" . "'")
+		   ("\"" . "\"")
+		   ("`" . "'")
+		   ("“" . "”"))))
+	(evil-textobj-anyblock--make-textobj beg end type count t)))
 
 (define-key evil-inner-text-objects-map "q" 'my-evil-textobj-anyblock-inner-quote)
 (define-key evil-outer-text-objects-map "q" 'my-evil-textobj-anyblock-a-quote))
@@ -1126,15 +1132,15 @@
   (after-init . global-undo-tree-mode)
   :init
   (setq undo-tree-visualizer-timestamps t
-        undo-tree-visualizer-diff t
+		undo-tree-visualizer-diff t
 		undo-tree-auto-save-history t
-        ;; Increase undo limits to avoid losing history due to Emacs' garbage collection.
-        ;; These values can be adjusted based on your needs.
-        ;; 10X bump of the undo limits to avoid issues with premature
-        ;; Emacs GC which truncates the undo history very aggressively.
-        undo-limit 800000                     ;; Limit for undo entries.
-        undo-strong-limit 12000000            ;; Strong limit for undo entries.
-        undo-outer-limit 120000000)           ;; Outer limit for undo entries.
+		;; Increase undo limits to avoid losing history due to Emacs' garbage collection.
+		;; These values can be adjusted based on your needs.
+		;; 10X bump of the undo limits to avoid issues with premature
+		;; Emacs GC which truncates the undo history very aggressively.
+		undo-limit 800000                     ;; Limit for undo entries.
+		undo-strong-limit 12000000            ;; Strong limit for undo entries.
+		undo-outer-limit 120000000)           ;; Outer limit for undo entries.
   :config
   ;; Set the directory where `undo-tree' will save its history files.
   ;; This keeps undo history across sessions, stored in a cache directory.
@@ -1165,8 +1171,8 @@
   (doom-modeline-vcs-max-length 25)                    ;; Limit the version control system (VCS) branch name length to 25 characters.
   :config
   (if ek-use-nerd-fonts                                ;; Check if nerd fonts are being used.
-      (setq doom-modeline-icon t)                      ;; Enable icons in the mode line if nerd fonts are used.
-    (setq doom-modeline-icon nil))                     ;; Disable icons if nerd fonts are not being used.
+	  (setq doom-modeline-icon t)                      ;; Enable icons in the mode line if nerd fonts are used.
+	(setq doom-modeline-icon nil))                     ;; Disable icons if nerd fonts are not being used.
   :hook
   (after-init . doom-modeline-mode))
 
@@ -1259,21 +1265,21 @@
 (defun my/flash-region (beg end)
   "Flash the region from BEG to END using a temporary overlay."
   (let ((ov (make-overlay beg end)))
-    (overlay-put ov 'face 'my/flash-face)
-    (run-at-time 0.08 nil #'delete-overlay ov)))
+	(overlay-put ov 'face 'my/flash-face)
+	(run-at-time 0.08 nil #'delete-overlay ov)))
 
 (defun my/evil-flash-motion (orig beg end &rest args)
   "Flash region affected by evil operator."
   (let ((result (apply orig beg end args)))
-    ;; absolutely ensure region is not active
-    (deactivate-mark)
-    ;; flash without leaving any highlight behind
-    (my/flash-region beg end)
-    result))
+	;; absolutely ensure region is not active
+	(deactivate-mark)
+	;; flash without leaving any highlight behind
+	(my/flash-region beg end)
+	result))
 
 ;; Advice evil operators that use (beg end)
 (dolist (op '(evil-yank
-              evil-yank-line))
+			  evil-yank-line))
   (advice-add op :around #'my/evil-flash-motion))
 
 
@@ -1282,36 +1288,36 @@
 
 (setq notmuch-show-empty-saved-searches t)
 (setq notmuch-saved-searches
-      '((:name "unread" 
-               :query "tag:inbox and tag:unread" 
-               :count-query "tag:inbox and tag:unread" 
-               :sort-order newest-first)
-        (:name "inbox" 
-               :query "tag:inbox" 
-               :count-query "tag:inbox" 
-               :sort-order newest-first)
-        (:name "gmail" 
-               :query "folder:gmail/Inbox" 
-               :sort-order newest-first)
-        (:name "nablesolutions" 
-               :query "folder:nablesolutions/Inbox"
-               :sort-order newest-first)
-        (:name "support" 
-               :query "folder:support/Inbox" 
-               :sort-order newest-first)))
+	  '((:name "unread"
+			   :query "tag:inbox and tag:unread"
+			   :count-query "tag:inbox and tag:unread"
+			   :sort-order newest-first)
+		(:name "inbox"
+			   :query "tag:inbox"
+			   :count-query "tag:inbox"
+			   :sort-order newest-first)
+		(:name "gmail"
+			   :query "folder:gmail/Inbox"
+			   :sort-order newest-first)
+		(:name "nablesolutions"
+			   :query "folder:nablesolutions/Inbox"
+			   :sort-order newest-first)
+		(:name "support"
+			   :query "folder:support/Inbox"
+			   :sort-order newest-first)))
 
 (defun my-notmuch-mua-empty-subject-check ()
   "Request confirmation before sending a message with empty subject"
   (when (and (null (message-field-value "Subject"))
-             (not (y-or-n-p "Subject is empty, send anyway? ")))
-    (error "Sending message cancelled: empty subject.")))
+			 (not (y-or-n-p "Subject is empty, send anyway? ")))
+	(error "Sending message cancelled: empty subject.")))
 (add-hook 'message-send-hook 'my-notmuch-mua-empty-subject-check)
 
 (use-package notmuch-indicator
   :ensure t
   :init
   (setq notmuch-indicator-args
-     '((:terms "tag:inbox and tag:unread" :label "📨 ")))
+	 '((:terms "tag:inbox and tag:unread" :label "📨 ")))
   :config
   (notmuch-indicator-mode 1))
 
@@ -1334,9 +1340,9 @@
 
   ;; Set the languages you want to install (like your Neovim list)
   (setq treesit-auto-langs
-        '(bash c css dockerfile html javascript jsdoc
+		'(bash c css dockerfile html javascript jsdoc
 		  lua markdown python toml
-          tsx typescript yaml))
+		  tsx typescript yaml))
 
   ;; Initialize treesit-auto (adds major mode remappings etc.)
   (treesit-auto-add-to-auto-mode-alist 'all)
