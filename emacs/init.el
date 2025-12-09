@@ -424,6 +424,13 @@
   (vertico-resize nil)                  ;; Disable resizing of the vertico minibuffer.
   (vertico-cycle nil)                   ;; Do not cycle through candidates when reaching the end of the list.
   :config
+  (defun my/vertico-backward-kill-word ()
+	(interactive)
+	(if (bound-and-true-p evil-local-mode)
+		(evil-delete-backward-word 1)
+	  (backward-kill-word 1)))
+
+  (define-key vertico-map (kbd "C-w") #'my/vertico-backward-kill-word)
   (define-key vertico-map (kbd "C-e") #'vertico-exit)
 
 
