@@ -704,11 +704,55 @@
 
 ;;; tailwindcss
 (use-package lsp-tailwindcss
-  :ensure t
+  :after lsp-mode
   :straight t
   :defer t
   :init
-  (setq lsp-tailwindcss-add-on-mode t))
+
+  ;; Validation
+  (setq lsp-tailwindcss-validate t)
+  (setq lsp-tailwindcss-add-on-mode t)
+
+  ;; Lint rules
+  (setq lsp-tailwindcss-lint-css-conflict "error"
+		lsp-tailwindcss-lint-invalid-apply "error"
+		lsp-tailwindcss-lint-invalid-screen "error"
+		lsp-tailwindcss-lint-invalid-variant "error"
+		lsp-tailwindcss-lint-invalid-config-path "error"
+		lsp-tailwindcss-lint-invalid-tailwind-directive "error"
+		lsp-tailwindcss-lint-recommended-variant-order "warning")
+
+  ;; Equivalent: includeLanguages → NOT NEEDED in Emacs
+  ;; (lsp-tailwindcss activates by major-mode & config rules)
+
+  ;; classAttributes
+  (setq lsp-tailwindcss-class-attributes
+		["class" "className" "style" "classList"])
+
+  ;; classFunctions
+  (setq lsp-tailwindcss-class-functions
+		["cn" "clsx" "tw" "tw.color" "tw.style"])
+
+  ;; experimental.configFile
+  (setq lsp-tailwindcss-experimental-config-file
+		(ht
+		 ("apps/client/assistant-prm-airport/back-office/src/styles.css"
+		  ["apps/client/assistant-prm-airport/back-office/src/**"
+		   "packages/assistant-prm-airport/frontend/coordinator/**"])
+
+		 ("apps/client/assistant-prm-airport/agent/tailwind.config.ts"
+		  ["apps/client/assistant-prm-airport/agent/**"])
+
+		 ("apps/client/volunteer/back-office/tailwind.config.ts"
+		  "packages/assistant-volunteer/**")
+
+		 ("apps/website/nable/tailwind.config.ts"
+		  "apps/website/nable/**")
+
+		 ("packages/shared/react/heroui/src/index.css"
+		  "packages/shared/react/heroui/**")))
+  )
+
 
 ;;; oxlint / oxc_language_server
 (defun my/oxlint-server-cmd ()
@@ -730,7 +774,7 @@
 					"typescriptreact")
 	:server-id 'oxlint
 	:add-on? t
-	:priority -2)))
+	:priority -1)))
 
 (defun my/oxlint-fix-all ()
   "Apply fixes to the current buffer using oxlint."
