@@ -1085,19 +1085,6 @@
   (global-evil-surround-mode 1))
 
 
-;; EVIL MATCHIT
-;; The `evil-matchit' package extends `evil-mode' by enabling
-;; text object matching for structures such as parentheses, HTML
-;; tags, and other paired delimiters. This makes it easier to
-;; navigate and manipulate code blocks.
-;; Just use % for jumping between matching structures to check it out.
-(use-package evil-matchit
-  :ensure t
-  :straight t
-  :after evil-collection
-  :config
-  (global-evil-matchit-mode 1))
-
 ;;; EVIL-TEXTOBJ-ANYBLOCK
 (use-package evil-textobj-anyblock
   :straight (:host github :repo "noctuid/evil-textobj-anyblock")
