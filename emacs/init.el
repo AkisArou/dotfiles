@@ -210,14 +210,6 @@
 	  (window-height . 0.25)
 	  (side . bottom)
 	  (slot . 0))
-
-	 ;; ;; Configuration for displaying various diagnostic buffers on
-	 ;; ;; bottom 25%:
-	 ;; ("\\*\\(Flymake diagnostics\\|xref\\|ivy\\|Swiper\\|Completions\\)"
-	 ;;  (display-buffer-in-side-window)
-	 ;;  (window-height . 0.25)
-	 ;;  (side . bottom)
-	 ;;  (slot . 1))
 	 )))
 
 
@@ -353,19 +345,53 @@
   (global-eldoc-mode))
 
 
-;;; FLYMAKE
-;; Flymake is an on-the-fly syntax checking extension that provides real-time feedback
-;; about errors and warnings in your code as you write. This can greatly enhance your
-;; coding experience by catching issues early. The configuration below activates
-;; Flymake mode in programming buffers.
-(use-package flymake
-  :ensure nil          ;; This is built-in, no need to fetch it.
+;;; FLYCHECK
+(use-package flycheck
+  :ensure t
   :defer t
-  :hook (prog-mode . flymake-mode)
-  :custom
-  (flymake-margin-indicators-string
-   '((error "!»" compilation-error) (warning "»" compilation-warning)
-	 (note "»" compilation-info))))
+  :config
+  ;; Display errors a little quicker (default is 0.9s)
+  (setq flycheck-display-errors-delay 0.25)
+  :init (global-flycheck-mode))
+
+(with-eval-after-load 'flycheck
+  (require 'flycheck-posframe)
+  (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
+;; ;; (use-package flycheck-posframe
+;; ;;   :ensure t
+;; ;;   :after flycheck
+;; ;;   :config
+;; ;;   (setq
+;; ;;    flycheck-idle-change-delay 0
+;; ;;    flycheck-idle-buffer-switch-delay 0
+;; ;;    flycheck-posframe-warning-prefix "⚠ "
+;; ;;    flycheck-posframe-info-prefix "ⓘ "
+;; ;;    flycheck-posframe-error-prefix "⮾ ")
+
+;; ;;   (defun my/flycheck-posframe-hide-on-move ()
+;; ;;	"Hide Flycheck posframe immediately on any command (cursor move, typing, etc.)."
+;; ;;	(posframe-hide flycheck-posframe-buffer))
+
+;; ;;   (add-hook 'post-command-hook #'my/flycheck-posframe-hide-on-move)
+
+
+;; ;;   ;; (defun +syntax--flycheck-posframe-hide-h ()
+;; ;;   ;;	(posframe-hide flycheck-posframe-buffer))
+
+;; ;;   ;; (add-hook 'post-command-hook #'+syntax--flycheck-posframe-hide-h)
+
+;; ;;   ;; (add-hook 'flycheck-posframe-inhibit-functions
+;; ;;   ;;			#'evil-insert-state-p
+;; ;;   ;;			#'evil-replace-state-p)
+
+;; ;;   ;; (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+;; ;;   (add-hook 'flycheck-posframe-inhibit-functions #'evil-insert-state-p)
+;; ;;   (add-hook 'flycheck-posframe-inhibit-functions #'evil-replace-state-p)
+;; ;;   )
+
 
 ;;; ORG-MODE
 ;; Org-mode is a powerful system for organizing and managing your notes,
@@ -520,6 +546,11 @@
   ;; Use Consult for xref locations with a preview feature.
   (setq xref-show-xrefs-function #'consult-xref
 		xref-show-definitions-function #'consult-xref))
+
+(use-package consult-flycheck
+  :ensure t
+  :straight t
+  :defer t)
 
 ;;; EMBARK
 ;; Embark provides a powerful contextual action menu for Emacs, allowing
@@ -730,7 +761,7 @@
   (lsp-enable-text-document-color t)                    ;; Enable text document color.
   ;; Modeline settings
   (lsp-modeline-code-actions-enable nil)                ;; Keep modeline clean.
-  (lsp-modeline-diagnostics-enable nil)                 ;; Use `flymake' instead.
+  (lsp-modeline-diagnostics-enable nil)                 ;; Use `flycheck' instead.
   (lsp-modeline-workspace-status-enable t)              ;; Display "LSP" in the modeline when enabled.
   (lsp-signature-doc-lines 1)                           ;; Limit echo area to one line.
   (lsp-eldoc-render-all t)                              ;; Render all ElDoc messages.
@@ -1050,10 +1081,21 @@
   (evil-define-key 'normal 'global (kbd "<leader> f l") 'vertico-repeat)
   (evil-define-key 'normal 'global (kbd "<leader> /") 'consult-line)
 
-  ;; Flymake navigation
-  (evil-define-key 'normal 'global (kbd "<leader> f d") 'consult-flymake)
-  (evil-define-key 'normal 'global (kbd "] d") 'flymake-goto-next-error)
-  (evil-define-key 'normal 'global (kbd "[ d") 'flymake-goto-prev-error)
+  ;; Flycheck navigation
+  (with-eval-after-load 'evil
+	(define-key evil-window-map (kbd "C-d") #'flycheck-posframe-display-errors-manually))
+
+  (evil-define-key 'normal 'global (kbd "<leader> f d") 'consult-flycheck)
+
+  (defun my-show-flycheck-posframe-after (&rest _)
+	"Show flycheck posframe after navigation."
+	(run-with-idle-timer 0 nil #'flycheck-posframe-display-errors-manually))
+
+  (advice-add 'flycheck-next-error :after #'my-show-flycheck-posframe-after)
+  (advice-add 'flycheck-previous-error :after #'my-show-flycheck-posframe-after)
+
+  (evil-define-key 'normal 'global (kbd "] d") 'flycheck-next-error)
+  (evil-define-key 'normal 'global (kbd "[ d") 'flycheck-previous-error)
   (evil-define-key 'normal 'global (kbd "] e") 'flymake-goto-next-error)
   (evil-define-key 'normal 'global (kbd "[ e") 'flymake-goto-prev-error)
 
@@ -1088,22 +1130,6 @@
 					 minibuffer-local-completion-map
 					 minibuffer-local-must-match-map))
 	(define-key map (kbd "M-SPC") #'completion-at-point))
-
-  ;;Show diagnostic at point in a popup with C-w C-d
-  (defun ek/show-diagnostic-popup ()
-	(interactive)
-	(if (bound-and-true-p flymake-mode)
-		(progn
-		  (require 'flymake-diagnostic-at-point nil t)
-		  (if (fboundp 'flymake-diagnostic-at-point)
-			  (flymake-diagnostic-at-point)
-			(if-let ((diags (flymake-diagnostics (point))))
-				(message "%s" (mapconcat (lambda (d) (flymake-diagnostic-text d)) diags "\n"))
-			  (message "No diagnostics at point"))))
-	  (message "Flymake is not active")))
-
-  (with-eval-after-load 'evil
-	(define-key evil-window-map (kbd "C-d") #'ek/show-diagnostic-popup))
 
   ;; Dired commands for file management
   (evil-define-key 'normal 'global (kbd "<leader> x d") 'dired)
