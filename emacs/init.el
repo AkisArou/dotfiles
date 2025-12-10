@@ -432,7 +432,8 @@
 
   (define-key vertico-map (kbd "C-w") #'my/vertico-backward-kill-word)
   (define-key vertico-map (kbd "C-e") #'vertico-exit)
-
+  (define-key vertico-map (kbd "C-d") #'vertico-scroll-up)
+  (define-key vertico-map (kbd "C-u") #'vertico-scroll-down)
 
   ;; Customize the display of the current candidate in the completion list.
   ;; This will prefix the current candidate with “» ” to make it stand out.
