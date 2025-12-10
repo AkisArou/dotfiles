@@ -1112,7 +1112,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> e") 'dired-jump)
 
   ;; Magit keybindings for Git integration
-  (evil-define-key 'normal 'global (kbd "<leader> g g") 'magit-status)      ;; Open Magit status
+  (evil-define-key 'normal 'global (kbd "<leader> g s") 'magit-status)      ;; Open Magit status
   (evil-define-key 'normal 'global (kbd "<leader> g l") 'magit-log-current) ;; Show current log
   (evil-define-key 'normal 'global (kbd "<leader> g f") 'magit-log-buffer-file) ;; Show current log for buffer
   (evil-define-key 'normal 'global (kbd "<leader> g d") 'magit-diff-buffer-file) ;; Show diff for the current file
@@ -1150,11 +1150,30 @@
   (evil-define-key 'normal 'global (kbd "<leader> b a") 'my/project-kill-buffers-no-confirm) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> b o") #'kill-other-buffers) ;; Kill project buffers
   (evil-define-key 'normal 'global (kbd "<leader> b s") 'save-buffer) ;; Save buffer
-  (evil-define-key 'normal 'global (kbd "<leader> b l") 'consult-buffer) ;; Consult buffer
-  (evil-define-key 'normal 'global (kbd "<leader>SPC") 'consult-buffer) ;; Consult buffer
 
   ;; Project management keybindings
-  (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-project-buffer) ;; Consult project buffer
+  (defun get-project-root ()
+	(when (fboundp 'projectile-project-root)
+	  (projectile-project-root)))
+
+  ;; Ripgrep the current word from project root
+  (defun consult-ripgrep-region-or-word ()
+	"Run `consult-ripgrep` on selected region in visual mode, or word at point otherwise."
+	(interactive)
+	;; Save and deactivate region to avoid sticky visual selection
+	(when (use-region-p)
+	  (deactivate-mark))
+	(let ((search-text
+		   (if (use-region-p)
+			   ;; If a region is active (still), use it
+			   (buffer-substring-no-properties (region-beginning) (region-end))
+			 ;; Otherwise, use word at point
+			 (thing-at-point 'word t))))
+	  (consult-ripgrep (get-project-root) search-text)))
+
+  (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-buffer-other-window) ;; Consult buffers
+  (evil-define-key 'normal global-map (kbd "<leader> f w") #'consult-ripgrep-region-or-word)
+  (evil-define-key 'visual global-map (kbd "<leader> f w") #'consult-ripgrep-region-or-word)
   (evil-define-key 'normal 'global (kbd "<leader> p p") 'project-switch-project) ;; Switch project
   (evil-define-key 'normal 'global (kbd "<leader> p D") 'project-dired) ;; Dired for project
 
