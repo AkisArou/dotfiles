@@ -458,39 +458,6 @@
 
 (add-hook 'after-init-hook #'global-flycheck-mode)
 
-;; ;; (use-package flycheck-posframe
-;; ;;   :ensure t
-;; ;;   :after flycheck
-;; ;;   :config
-;; ;;   (setq
-;; ;;    flycheck-idle-change-delay 0
-;; ;;    flycheck-idle-buffer-switch-delay 0
-;; ;;    flycheck-posframe-warning-prefix "⚠ "
-;; ;;    flycheck-posframe-info-prefix "ⓘ "
-;; ;;    flycheck-posframe-error-prefix "⮾ ")
-
-;; ;;   (defun my/flycheck-posframe-hide-on-move ()
-;; ;;	"Hide Flycheck posframe immediately on any command (cursor move, typing, etc.)."
-;; ;;	(posframe-hide flycheck-posframe-buffer))
-
-;; ;;   (add-hook 'post-command-hook #'my/flycheck-posframe-hide-on-move)
-
-
-;; ;;   ;; (defun +syntax--flycheck-posframe-hide-h ()
-;; ;;   ;;	(posframe-hide flycheck-posframe-buffer))
-
-;; ;;   ;; (add-hook 'post-command-hook #'+syntax--flycheck-posframe-hide-h)
-
-;; ;;   ;; (add-hook 'flycheck-posframe-inhibit-functions
-;; ;;   ;;			#'evil-insert-state-p
-;; ;;   ;;			#'evil-replace-state-p)
-
-;; ;;   ;; (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
-;; ;;   (add-hook 'flycheck-posframe-inhibit-functions #'evil-insert-state-p)
-;; ;;   (add-hook 'flycheck-posframe-inhibit-functions #'evil-replace-state-p)
-;; ;;   )
-
-
 ;;; ORG-MODE
 ;; Org-mode is a powerful system for organizing and managing your notes,
 ;; tasks, and documents in plain text. It offers features like task management,
