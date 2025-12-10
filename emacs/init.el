@@ -257,6 +257,9 @@
 	 (".*" "open" "xdg-open")))
   (dired-kill-when-opening-new-dired-buffer t)
   :config
+  (add-hook 'dired-mode-hook #'dired-hide-details-mode)
+  (add-hook 'dired-mode-hook #'dired-omit-mode)
+
   ;; Evil integration
   (with-eval-after-load 'evil
 	(add-hook 'dired-mode-hook
@@ -1280,7 +1283,7 @@
 	  (deactivate-mark)
 	  (consult-ripgrep (get-project-root) search-text)))
 
-  (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-buffer-other-window) ;; Consult buffers
+  (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-project-buffer) ;; Consult buffers
   (evil-define-key 'normal global-map (kbd "<leader> f w") #'consult-ripgrep-region-or-word)
   (evil-define-key 'visual global-map (kbd "<leader> f w") #'consult-ripgrep-region-or-word)
   (evil-define-key 'normal 'global (kbd "<leader> p p") 'project-switch-project) ;; Switch project
