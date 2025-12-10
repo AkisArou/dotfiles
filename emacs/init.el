@@ -266,6 +266,7 @@
 			  (lambda ()
 				(evil-normalize-keymaps)
 				(evil-define-key 'normal dired-mode-map
+				  (kbd "%") 'dired-create-empty-file
 				  (kbd "C-x") #'wdired-change-to-wdired-mode
 				  (kbd "C-e") 'dired-find-file
 				  (kbd "C-f") 'dired-up-directory)))))
