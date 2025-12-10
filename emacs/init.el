@@ -1096,8 +1096,46 @@
 
   (evil-define-key 'normal 'global (kbd "] d") 'flycheck-next-error)
   (evil-define-key 'normal 'global (kbd "[ d") 'flycheck-previous-error)
-  (evil-define-key 'normal 'global (kbd "] e") 'flymake-goto-next-error)
-  (evil-define-key 'normal 'global (kbd "[ e") 'flymake-goto-prev-error)
+
+  (defun my/flycheck-next-error-of-severity (severity)
+	"Go to the next Flycheck error of SEVERITY, wrapping to the beginning if needed."
+	(interactive)
+	(let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
+							   (flycheck-overlay-errors-in (point-min) (point-max))))
+		   (next (seq-find (lambda (e) (> (flycheck-error-pos e) (point))) errors)))
+	  (if next
+		  (goto-char (flycheck-error-pos next))
+		;; Wrap to the first error
+		(if errors
+			(goto-char (flycheck-error-pos (car errors)))
+		  (message "No %s errors found" severity)))))
+
+  (defun my/flycheck-previous-error-of-severity (severity)
+	"Go to the previous Flycheck error of SEVERITY, wrapping to the end if needed."
+	(interactive)
+	(let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
+							   (flycheck-overlay-errors-in (point-min) (point-max))))
+		   (prev (car (last (seq-filter (lambda (e) (< (flycheck-error-pos e) (point))) errors)))))
+	  (if prev
+		  (goto-char (flycheck-error-pos prev))
+		;; Wrap to the last error
+		(if errors
+			(goto-char (flycheck-error-pos (car (last errors))))
+		  (message "No %s errors found" severity)))))
+
+  ;; Specific wrappers
+  (defun my/flycheck-next-error-only () (interactive) (my/flycheck-next-error-of-severity 'error))
+  (defun my/flycheck-previous-error-only () (interactive) (my/flycheck-previous-error-of-severity 'error))
+  (defun my/flycheck-next-warning-only () (interactive) (my/flycheck-next-error-of-severity 'warning))
+  (defun my/flycheck-previous-warning-only () (interactive) (my/flycheck-previous-error-of-severity 'warning))
+
+  ;; Keybindings
+  (evil-define-key 'normal 'global (kbd "] e") 'my/flycheck-next-error-only)
+  (evil-define-key 'normal 'global (kbd "[ e") 'my/flycheck-previous-error-only)
+  (evil-define-key 'normal 'global (kbd "] w") 'my/flycheck-next-warning-only)
+  (evil-define-key 'normal 'global (kbd "[ w") 'my/flycheck-previous-warning-only)
+  (evil-define-key 'normal 'global (kbd "] d") 'flycheck-next-error)
+  (evil-define-key 'normal 'global (kbd "[ d") 'flycheck-previous-error)
 
   ;; LSP
   (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
@@ -1276,6 +1314,7 @@
   :ensure t
   :custom
   (evil-collection-want-find-usages-bindings nil)
+  (evil-collection-want-unimpaired-p nil)
   ;; Hook to initialize `evil-collection' when `evil-mode' is activated.
   :hook
   (evil-mode . evil-collection-init))
