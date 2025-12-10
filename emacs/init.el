@@ -15,19 +15,6 @@
 (setq package-enable-at-startup nil) ;; Disables the default package manager.
 (setq user-emacs-directory (expand-file-name "emacs" (getenv "XDG_CONFIG_HOME")))
 
-;; Startup time
-(defun efs/display-startup-time ()
-  (message
-   "Emacs loaded in %s with %d garbage collections."
-   (format
-	"%.2f seconds"
-	(float-time
-	 (time-subtract after-init-time before-init-time)))
-   gcs-done))
-
-(add-hook 'emacs-startup-hook #'efs/display-startup-time)
-
-
 ;; Bootstraps `straight.el'
 (setq straight-check-for-modifications nil)
 (defvar bootstrap-version)
