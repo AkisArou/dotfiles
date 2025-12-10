@@ -1,13 +1,32 @@
 ;;; init.el --- Emacs-Kick --- A feature rich Emacs config for (neo)vi(m)mers -*- lexical-binding: t; -*-
 
 ;; performance
-(setq gc-cons-threshold #x40000000)
+;; Temporarily raise GC threshold during startup for speed
+(defvar ek--startup-gc-cons-threshold #x40000000)
+(setq gc-cons-threshold ek--startup-gc-cons-threshold)
+
+;; Temporarily disable expensive file handlers during startup
+(defvar ek--saved-file-name-handler-alist file-name-handler-alist)
+(setq file-name-handler-alist nil)
 
 ;; Set the maximum output size for reading process output, allowing for larger data transfers.
 (setq read-process-output-max (* 1024 1024 4))
 
 (setq package-enable-at-startup nil) ;; Disables the default package manager.
 (setq user-emacs-directory (expand-file-name "emacs" (getenv "XDG_CONFIG_HOME")))
+
+;; Startup time
+(defun efs/display-startup-time ()
+  (message
+   "Emacs loaded in %s with %d garbage collections."
+   (format
+	"%.2f seconds"
+	(float-time
+	 (time-subtract after-init-time before-init-time)))
+   gcs-done))
+
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
+
 
 ;; Bootstraps `straight.el'
 (setq straight-check-for-modifications nil)
@@ -174,6 +193,7 @@
 ;;; WHITESPACE
 (use-package whitespace
   :ensure nil
+  :defer t
   :hook (before-save . whitespace-cleanup))
 
 
@@ -188,6 +208,7 @@
 ;; other types of buffers in side windows, allowing for a more organized workspace.
 (use-package window
   :ensure nil       ;; This is built-in, no need to fetch it.
+  :defer t
   :custom
   (display-buffer-alist
    '(
@@ -214,10 +235,12 @@
 
 
 ;;; CLIPBOARD
-(use-package clipboard)
+(use-package clipboard
+  :defer t)
 
 (use-package clipetty
   :ensure t
+  :defer t
   :hook ((after-init . (lambda ()
 						 (when (getenv "SSH_TTY")
 						   (global-clipetty-mode 1))))))
@@ -335,6 +358,7 @@
 ;; The following settings enhance the isearch experience:
 (use-package isearch
   :ensure nil                                  ;; This is built-in, no need to fetch it.
+  :defer t
   :config
   (setq isearch-lazy-count t)                  ;; Enable lazy counting to show current match information.
   (setq lazy-count-prefix-format "(%s/%s) ")   ;; Format for displaying current match count.
@@ -382,6 +406,7 @@
 (use-package forge
   :after magit
   :ensure t
+  :defer t
   :init
   (setq forge-add-default-sections t)
   (setq forge-add-default-bindings t))
@@ -434,6 +459,7 @@
 ;; The following line enables Eldoc globally for all buffers.
 (use-package eldoc
   :ensure nil                                ;; This is built-in, no need to fetch it.
+  :defer t
   :config
   (setq eldoc-idle-delay 0)                  ;; Automatically fetch doc help
   (setq eldoc-echo-area-use-multiline-p nil) ;; We use the "K" floating help instead
@@ -508,6 +534,7 @@
 (use-package vertico
   :ensure t
   :straight t
+  :defer t
   :hook
   (after-init . vertico-mode)           ;; Enable vertico after Emacs has initialized.
   :custom
@@ -545,6 +572,7 @@
 (use-package fussy
   :ensure t
   :straight (fussy :type git :host github :repo "jojojames/fussy")
+  :defer t
   :init
   ;; Use fussy as the main completion style
   (setq completion-styles '(fussy basic)
@@ -573,6 +601,7 @@
 ;;; FZF
 (use-package fzf-native
   :ensure t
+  :defer t
   :straight
   (fzf-native
    :repo "dangduc/fzf-native"
@@ -591,6 +620,7 @@
 (use-package marginalia
   :ensure t
   :straight t
+  :defer t
   :hook
   (after-init . marginalia-mode))
 
@@ -635,6 +665,7 @@
 (use-package embark-consult
   :ensure t
   :straight t
+  :defer t
   :hook
   (embark-collect-mode . consult-preview-at-point-mode)) ;; Enable preview in Embark collect mode.
 
@@ -747,6 +778,7 @@
 ;;; MASON
 (use-package mason
   :ensure t
+  :defer t
   :config
   ;; List of packages to ensure
   (defvar my-mason-packages
@@ -848,6 +880,7 @@
 			 :host github
 			 :repo "sdvcrx/lsp-vtsls")
   :after lsp-mode
+  :defer t
   :config
   ;; core vtsls settings
   (setq
@@ -969,6 +1002,7 @@
 ;; FORMAT-ALL
 (use-package format-all
   :ensure t
+  :defer t
   :hook (prog-mode . format-all-mode)
   :config
   (setq-default format-all-formatters
@@ -1042,10 +1076,11 @@
 (use-package magit
   :ensure t
   :straight t
+  :defer t
   :config
   (if ek-use-nerd-fonts   ;; Check if nerd fonts are being used
 	  (setopt magit-format-file-function #'magit-format-file-nerd-icons)) ;; Turns on magit nerd-icons
-  :defer t)
+  )
 
 
 ;;; ADD-NODE-MODULES-PATH
@@ -1103,6 +1138,7 @@
   :straight (:host github
 				   :repo "victorteokw/tab-jump-out")
   :ensure t
+  :defer t
   :bind
   ("TAB" . tab-jump-out)  ;; optional, binds tab-jump-out to Tab
   :config
@@ -1633,6 +1669,7 @@
 ;;; COLORFUL-MODE
 (use-package colorful-mode
   :ensure t
+  :defer t
   :custom
   (colorful-use-prefix t)
   (colorful-only-strings 'only-prog)
@@ -1700,6 +1737,7 @@
 
 (use-package notmuch-indicator
   :ensure t
+  :defer t
   :init
   (setq notmuch-indicator-args
 		'((:terms "tag:inbox and tag:unread" :label "󰇮 ")))
