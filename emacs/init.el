@@ -748,9 +748,28 @@
 			 :repo "sdvcrx/lsp-vtsls")
   :after lsp-mode
   :config
-  (setq lsp-eldoc-render-all t
-		lsp-vtsls-server-side-fuzzy-match t
-		lsp-vtsls-entries-limit 10))
+  ;; core vtsls settings
+  (setq
+   lsp-eldoc-render-all t
+   lsp-vtsls-server-side-fuzzy-match t
+   lsp-vtsls-entries-limit 5000
+   lsp-vtsls-auto-use-workspace-tsdk t)
+
+  ;; formatting disabled
+  (lsp-register-custom-settings
+   '(("typescript.format.enable" nil)
+	 ("javascript.format.enable" nil)))
+
+  ;; TS/JS preferences
+  (setq ts/js-preferences
+		'(:quote
+		  (:importModuleSpecifier "relative"
+								  :quoteStyle "single"
+								  :semi "remove")))
+
+  (lsp-register-custom-settings
+   `(("typescript.preferences" ,ts/js-preferences)
+	 ("javascript.preferences" ,ts/js-preferences))))
 
 (add-hook 'dired-mode-hook #'lsp-dired-mode)
 
