@@ -235,73 +235,95 @@
 ;; and associations for opening various file types with their respective applications.
 ;; For example, image files will open with `feh', while audio and video files
 ;; will utilize `mpv'.
-(use-package dired
-  :ensure nil
+;; (use-package dired
+;;   :ensure nil
+;;   :init
+;;   (setq dired-dwim-target t  ; suggest a target for moving/copying intelligently
+;;		;; don't prompt to revert, just do it
+;;		dired-auto-revert-buffer #'dired-buffer-stale-p
+;;		;; Always copy/delete recursively
+;;		dired-recursive-copies  'always
+;;		dired-recursive-deletes 'top
+;;		;; Ask whether destination dirs should get created when copying/removing files.
+;;		dired-create-destination-dirs 'ask
+;;		;; Screens are larger nowadays, we can afford slightly larger thumbnails
+;;		image-dired-thumb-size 150)
+;;   :custom
+;;   (dired-listing-switches "-lah --group-directories-first")
+;;   (dired-dwim-target t)
+;;   (dired-guess-shell-alist-user
+;;    '(("\\.\\(png\\|jpe?g\\|tiff\\)" "feh" "xdg-open" "open")
+;;	 ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open" "open")
+;;	 (".*" "open" "xdg-open")))
+;;   (dired-kill-when-opening-new-dired-buffer t)
+;;   :config
+;;   (add-hook 'dired-mode-hook #'dired-hide-details-mode)
+;;   (add-hook 'dired-mode-hook #'dired-omit-mode)
+
+;;   ;; Evil integration
+;;   (with-eval-after-load 'evil
+;;	(add-hook 'dired-mode-hook
+;;			  (lambda ()
+;;				(evil-normalize-keymaps)
+;;				(evil-define-key 'normal dired-mode-map
+;;				  (kbd "%") 'dired-create-empty-file
+;;				  (kbd "C-x") #'wdired-change-to-wdired-mode
+;;				  (kbd "C-e") 'dired-find-file
+;;				  (kbd "C-f") 'dired-up-directory)))))
+
+;; (use-package dired-x
+;;   :ensure nil
+;;   :hook (dired-mode . dired-omit-mode)
+;;   :config
+;;   (setq dired-omit-verbose nil
+;;		dired-omit-files
+;;		(concat dired-omit-files
+;;				"\\|^\\.DS_Store\\'"
+;;				"\\|^flycheck_.*"
+;;				"\\|^\\.project\\(?:ile\\)?\\'"
+;;				"\\|^\\.\\(?:svn\\|git\\)\\'"
+;;				"\\|^\\.ccls-cache\\'"
+;;				"\\|\\(?:\\.js\\)?\\.meta\\'"
+;;				"\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'"))
+;;   ;; Disable the prompt about whether I want to kill the Dired buffer for a
+;;   ;; deleted directory. Of course I do!
+;;   (setq dired-clean-confirm-killing-deleted-buffers nil)
+;;   ;; Let OS decide how to open certain files
+;;   (when-let (cmd (cond ((featurep :system 'macos) "open")
+;;					   ((featurep :system 'linux) "xdg-open")
+;;					   ((featurep :system 'windows) "start")))
+;;	(setq dired-guess-shell-alist-user
+;;		  `(("\\.\\(?:docx\\|pdf\\|djvu\\|eps\\)\\'" ,cmd)
+;;			("\\.\\(?:jpe?g\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+;;			("\\.\\(?:xcf\\)\\'" ,cmd)
+;;			("\\.csv\\'" ,cmd)
+;;			("\\.tex\\'" ,cmd)
+;;			("\\.\\(?:mp4\\|mkv\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+;;			("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)
+;;			("\\.html?\\'" ,cmd)
+;;			("\\.md\\'" ,cmd)))))
+
+
+;;; DIRVISH
+(use-package dirvish
+  :ensure t
+  :defer t
+  :config
+  (set-face-attribute 'dirvish-hl-line nil
+					  :foreground 'unspecified
+					  :background 'unspecified
+					  :weight 'normal)
+  (set-face-attribute 'highlight nil :background "#000000" :foreground 'unspecified)
   :init
-  (setq dired-dwim-target t  ; suggest a target for moving/copying intelligently
-		;; don't prompt to revert, just do it
-		dired-auto-revert-buffer #'dired-buffer-stale-p
-		;; Always copy/delete recursively
-		dired-recursive-copies  'always
-		dired-recursive-deletes 'top
-		;; Ask whether destination dirs should get created when copying/removing files.
-		dired-create-destination-dirs 'ask
-		;; Screens are larger nowadays, we can afford slightly larger thumbnails
-		image-dired-thumb-size 150)
-  :custom
-  (dired-listing-switches "-lah --group-directories-first")
-  (dired-dwim-target t)
-  (dired-guess-shell-alist-user
-   '(("\\.\\(png\\|jpe?g\\|tiff\\)" "feh" "xdg-open" "open")
-	 ("\\.\\(mp[34]\\|m4a\\|ogg\\|flac\\|webm\\|mkv\\)" "mpv" "xdg-open" "open")
-	 (".*" "open" "xdg-open")))
-  (dired-kill-when-opening-new-dired-buffer t)
-  :config
-  (add-hook 'dired-mode-hook #'dired-hide-details-mode)
-  (add-hook 'dired-mode-hook #'dired-omit-mode)
-
-  ;; Evil integration
-  (with-eval-after-load 'evil
-	(add-hook 'dired-mode-hook
-			  (lambda ()
-				(evil-normalize-keymaps)
-				(evil-define-key 'normal dired-mode-map
-				  (kbd "%") 'dired-create-empty-file
-				  (kbd "C-x") #'wdired-change-to-wdired-mode
-				  (kbd "C-e") 'dired-find-file
-				  (kbd "C-f") 'dired-up-directory)))))
-
-(use-package dired-x
-  :ensure nil
-  :hook (dired-mode . dired-omit-mode)
-  :config
-  (setq dired-omit-verbose nil
-		dired-omit-files
-		(concat dired-omit-files
-				"\\|^\\.DS_Store\\'"
-				"\\|^flycheck_.*"
-				"\\|^\\.project\\(?:ile\\)?\\'"
-				"\\|^\\.\\(?:svn\\|git\\)\\'"
-				"\\|^\\.ccls-cache\\'"
-				"\\|\\(?:\\.js\\)?\\.meta\\'"
-				"\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'"))
-  ;; Disable the prompt about whether I want to kill the Dired buffer for a
-  ;; deleted directory. Of course I do!
-  (setq dired-clean-confirm-killing-deleted-buffers nil)
-  ;; Let OS decide how to open certain files
-  (when-let (cmd (cond ((featurep :system 'macos) "open")
-					   ((featurep :system 'linux) "xdg-open")
-					   ((featurep :system 'windows) "start")))
-	(setq dired-guess-shell-alist-user
-		  `(("\\.\\(?:docx\\|pdf\\|djvu\\|eps\\)\\'" ,cmd)
-			("\\.\\(?:jpe?g\\|png\\|gif\\|xpm\\)\\'" ,cmd)
-			("\\.\\(?:xcf\\)\\'" ,cmd)
-			("\\.csv\\'" ,cmd)
-			("\\.tex\\'" ,cmd)
-			("\\.\\(?:mp4\\|mkv\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
-			("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)
-			("\\.html?\\'" ,cmd)
-			("\\.md\\'" ,cmd)))))
+  (dirvish-override-dired-mode)
+  (add-hook 'dired-mode-hook
+			(lambda ()
+			  (evil-normalize-keymaps)
+			  (evil-define-key 'normal dirvish-mode-map
+				(kbd "%") 'dired-create-empty-file
+				(kbd "C-x") #'wdired-change-to-wdired-mode
+				(kbd "C-e") 'dired-find-file
+				(kbd "C-f") 'dired-up-directory))))
 
 ;;; ISEARCH
 ;; In this configuration, we're setting up isearch, Emacs's incremental search feature.
@@ -1135,6 +1157,7 @@
   (setq evil-want-integration t)      ;; Integrate `evil' with other Emacs features (optional as it's true by default).
   (setq evil-want-keybinding nil)     ;; Disable default keybinding to set custom ones.
   (setq evil-want-C-u-scroll t)       ;; Makes C-u scroll
+  (setq evil-symbol-word-search t)
 
   :config
   (setq evil-normal-state-cursor 'box
@@ -1158,6 +1181,7 @@
   (evil-set-leader 'visual (kbd "SPC"))
 
   (evil-define-key 'normal 'global (kbd "<leader> h") 'evil-ex-nohighlight)
+  (evil-define-key 'normal 'global (kbd "/") 'consult-line)
 
   ;; Keybindings for searching and finding files.
   (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file)
@@ -1249,8 +1273,8 @@
   (evil-define-key 'normal 'global (kbd "<leader> x f") 'find-file)
 
   ;; Diff-HL navigation for version control
-  (evil-define-key 'normal 'global (kbd "] c") 'diff-hl-next-hunk) ;; Next diff hunk
-  (evil-define-key 'normal 'global (kbd "[ c") 'diff-hl-pevious-hunk) ;; Previous diff hunk
+  (evil-define-key 'normal 'global (kbd "] h") 'diff-hl-next-hunk) ;; Next diff hunk
+  (evil-define-key 'normal 'global (kbd "[ h") 'diff-hl-pevious-hunk) ;; Previous diff hunk
 
   ;; File exploration
   (evil-define-key 'normal 'global (kbd "<leader> e") 'dired-jump)
@@ -1755,7 +1779,7 @@
   (consult-gh-enable-default-keybindings))
 
 
-;; Install `consult-gh-embark' for embark actions
+;;; Install `consult-gh-embark' for embark actions
 (use-package consult-gh-embark
   :config
   :ensure t
@@ -1763,14 +1787,13 @@
   (consult-gh-embark-mode +1))
 
 
-;; Install `consult-gh-forge' for forge actions
+;;; Install `consult-gh-forge' for forge actions
 (use-package consult-gh-forge
   :config
   :ensure t
   :defer t
   (consult-gh-forge-mode +1)
   (setq consult-gh-forge-timeout-seconds 20))
-
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
