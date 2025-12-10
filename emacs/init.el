@@ -739,10 +739,21 @@
   ;; Semantic settings
   (lsp-semantic-tokens-enable nil))                     ;; Disable semantic tokens.
 
+(setq lsp-headerline-breadcrumb-enable nil)
+
+(use-package lsp-vtsls
+  :straight (lsp-vtsls
+			 :type git
+			 :host github
+			 :repo "sdvcrx/lsp-vtsls")
+  :after lsp-mode
+  :config
+  (setq lsp-eldoc-render-all t
+		lsp-vtsls-server-side-fuzzy-match t
+		lsp-vtsls-entries-limit 10))
+
 (add-hook 'dired-mode-hook #'lsp-dired-mode)
 
-
-(setq lsp-headerline-breadcrumb-enable nil)
 
 ;;; LSP Additional Servers
 ;; You can extend `lsp-mode' by integrating additional language servers for specific
