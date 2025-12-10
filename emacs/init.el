@@ -373,6 +373,22 @@
 			  ("C-c ^ p" . smerge-previous)))  ;; Move to the previous conflict.
 
 
+
+(use-package git-timemachine
+  :ensure t
+  :straight (git-timemachine :type git :host github :repo "emacsmirror/git-timemachine")
+  :defer t
+  :init
+  ;; Ensure the mode map exists before we define keys
+  (with-eval-after-load 'git-timemachine
+	(evil-define-key 'normal git-timemachine-mode-map
+	  (kbd "C-j") 'git-timemachine-show-previous-revision
+	  (kbd "C-k") 'git-timemachine-show-next-revision
+	  (kbd "gb")  'git-timemachine-blame
+	  (kbd "gtc") 'git-timemachine-show-commit))
+  :config
+  (setq git-timemachine-show-minibuffer-details t))
+
 ;;; ELDOC
 ;; Eldoc provides helpful inline documentation for functions and variables
 ;; in the minibuffer, enhancing the development experience. It can be particularly useful
@@ -1231,6 +1247,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> g d") 'magit-diff-buffer-file) ;; Show diff for the current file
   (evil-define-key 'normal 'global (kbd "<leader> g D") 'diff-hl-show-hunk) ;; Show diff for a hunk
   (evil-define-key 'normal 'global (kbd "<leader> g b") 'vc-annotate)       ;; Annotate buffer with version control info
+  (evil-define-key 'normal 'global (kbd "<leader> g t") 'git-timemachine)       ;; Annotate buffer with version control info
 
   ;; Buffer management keybindings
   (defun my/project-kill-buffers-no-confirm ()
