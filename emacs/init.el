@@ -1147,15 +1147,10 @@
 	"Show flycheck posframe after navigation."
 	(run-with-idle-timer 0 nil #'flycheck-posframe-display-errors-manually))
 
-  (advice-add 'flycheck-next-error :after #'my-show-flycheck-posframe-after)
-  (advice-add 'flycheck-previous-error :after #'my-show-flycheck-posframe-after)
-
-  (evil-define-key 'normal 'global (kbd "] d") 'flycheck-next-error)
-  (evil-define-key 'normal 'global (kbd "[ d") 'flycheck-previous-error)
-
   (defun my/flycheck-next-error-of-severity (severity)
 	"Go to the next Flycheck error of SEVERITY, wrapping to the beginning if needed."
 	(interactive)
+	(my-show-flycheck-posframe-after)
 	(let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
 							   (flycheck-overlay-errors-in (point-min) (point-max))))
 		   (next (seq-find (lambda (e) (> (flycheck-error-pos e) (point))) errors)))
@@ -1169,6 +1164,7 @@
   (defun my/flycheck-previous-error-of-severity (severity)
 	"Go to the previous Flycheck error of SEVERITY, wrapping to the end if needed."
 	(interactive)
+	(my-show-flycheck-posframe-after)
 	(let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
 							   (flycheck-overlay-errors-in (point-min) (point-max))))
 		   (prev (car (last (seq-filter (lambda (e) (< (flycheck-error-pos e) (point))) errors)))))
