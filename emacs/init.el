@@ -1714,8 +1714,7 @@
 ;;; YAML
 (use-package yaml
   :ensure t
-  :defer t
-  )
+  :defer t)
 
 
 ;;; CONSULT-GH
@@ -1751,6 +1750,7 @@
   :config
   :ensure t
   :defer t
+  :init
   (consult-gh-embark-mode +1))
 
 
@@ -1759,6 +1759,7 @@
   :config
   :ensure t
   :defer t
+  :init
   (consult-gh-forge-mode +1)
   (setq consult-gh-forge-timeout-seconds 20))
 
