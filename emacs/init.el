@@ -449,6 +449,8 @@
 				   "  ")
 				 cand))))
 
+(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
+
 (use-package fussy
   :ensure t
   :straight (fussy :type git :host github :repo "jojojames/fussy")
@@ -1045,6 +1047,7 @@
   (evil-define-key 'normal 'global (kbd "<leader> f q") 'consult-compile-error)
   (evil-define-key 'normal 'global (kbd "<leader> f h") 'consult-info)
   (evil-define-key 'normal 'global (kbd "<leader> f m") 'consult-man)
+  (evil-define-key 'normal 'global (kbd "<leader> f l") 'vertico-repeat)
   (evil-define-key 'normal 'global (kbd "<leader> /") 'consult-line)
 
   ;; Flymake navigation
