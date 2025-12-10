@@ -1032,6 +1032,18 @@
 
 (add-hook 'post-command-hook 'ek/terminal-cursor-update)
 
+
+;; TAB-JUMP-OUT
+(use-package tab-jump-out
+  :straight (:host github
+				   :repo "victorteokw/tab-jump-out")
+  :ensure t
+  :bind
+  ("TAB" . tab-jump-out)  ;; optional, binds tab-jump-out to Tab
+  :config
+  (tab-jump-out-mode 1))
+
+
 ;; EVIL
 ;; The `evil' package provides Vim emulation within Emacs, allowing
 ;; users to edit text in a modal way, similar to how Vim
@@ -1147,16 +1159,6 @@
 
   ;; Notmuch
   (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch)
-
-  ;; TAB
-  (defun my/tab-or-up-list ()
-	"If point is before a closing delimiter, run `up-list`. Otherwise indent."
-	(interactive)
-	(if (looking-at-p "[][(){}]")
-		(up-list)
-	  (indent-for-tab-command)))
-
-  (evil-define-key 'insert 'global (kbd "TAB") #'my/tab-or-up-list)
 
   ;; Trigger completion at point in Evil insert mode
   (evil-define-key 'insert global-map (kbd "C-SPC") #'completion-at-point)
