@@ -773,6 +773,7 @@
 	  "json-lsp"
 	  "html-lsp"
 	  "css-lsp"
+	  "gopls"
 	  "tailwindcss-language-server"
 	  "cssmodules-language-server"
 	  "docker-language-server"
@@ -815,6 +816,7 @@
 		   typescript-ts-base-mode                      ;; Enable LSP for TypeScript
 		   css-mode                                     ;; Enable LSP for CSS
 		   js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
+		   go-ts-mode                                   ;; Enable LSP for Go
 		   web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
   :config
