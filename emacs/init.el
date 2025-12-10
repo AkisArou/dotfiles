@@ -222,8 +222,7 @@
 
 
 ;;; CLIPBOARD
-(use-package clipboard
-  :defer t)
+(use-package clipboard)
 
 (use-package clipetty
   :ensure t
