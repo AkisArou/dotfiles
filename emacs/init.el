@@ -1160,15 +1160,11 @@
   (defun consult-ripgrep-region-or-word ()
 	"Run `consult-ripgrep` on selected region in visual mode, or word at point otherwise."
 	(interactive)
-	;; Save and deactivate region to avoid sticky visual selection
-	(when (use-region-p)
-	  (deactivate-mark))
-	(let ((search-text
-		   (if (use-region-p)
-			   ;; If a region is active (still), use it
-			   (buffer-substring-no-properties (region-beginning) (region-end))
-			 ;; Otherwise, use word at point
-			 (thing-at-point 'word t))))
+	(let ((search-text (if (use-region-p)
+						   (buffer-substring-no-properties (region-beginning) (region-end))
+						 (thing-at-point 'word t))))
+	  ;; Deactivate the region so it doesn't interfere with the search
+	  (deactivate-mark)
 	  (consult-ripgrep (get-project-root) search-text)))
 
   (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-buffer-other-window) ;; Consult buffers
