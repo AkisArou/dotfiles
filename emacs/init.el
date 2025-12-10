@@ -1633,7 +1633,7 @@
   :ensure t
   :init
   (setq notmuch-indicator-args
-		'((:terms "tag:inbox and tag:unread" :label "📨 ")))
+		'((:terms "tag:inbox and tag:unread" :label "󰇮 ")))
   :config
   (notmuch-indicator-mode 1))
 
