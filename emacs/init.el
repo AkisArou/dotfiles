@@ -356,6 +356,12 @@
 		  (260 . "#89b4fa")
 		  (280 . "#b4befe"))))
 
+;;; GIT-MODES
+(use-package git-modes
+  :ensure t
+  :defer t
+  )
+
 
 ;;; SMERGE
 ;; Smerge is included for resolving merge conflicts in files. It provides a simple interface
@@ -374,6 +380,7 @@
 
 
 
+;;; GIT-TIMEMACHINE
 (use-package git-timemachine
   :ensure t
   :straight (git-timemachine :type git :host github :repo "emacsmirror/git-timemachine")
@@ -1248,6 +1255,11 @@
   (evil-define-key 'normal 'global (kbd "<leader> g D") 'diff-hl-show-hunk) ;; Show diff for a hunk
   (evil-define-key 'normal 'global (kbd "<leader> g b") 'vc-annotate)       ;; Annotate buffer with version control info
   (evil-define-key 'normal 'global (kbd "<leader> g t") 'git-timemachine)       ;; Annotate buffer with version control info
+  (evil-define-key 'normal 'global
+	(kbd "<leader> g i")
+	(lambda ()
+	  (interactive)
+	  (consult-gh-issue-list "nablesolutions/nable-solutions")))
 
   ;; Buffer management keybindings
   (defun my/project-kill-buffers-no-confirm ()
@@ -1698,6 +1710,56 @@
 
 ;;; shr
 (setq shr-use-colors nil)
+
+
+;;; YAML
+(use-package yaml
+  :ensure t
+  :defer t)
+
+(use-package consult-gh
+  :after consult
+  :ensure t
+  :defer t
+  :custom
+  (consult-gh-default-clone-directory "~/projects")
+  (consult-gh-show-preview t)
+  (consult-gh-preview-key "C-o")
+  (consult-gh-repo-action #'consult-gh--repo-browse-files-action)
+  (consult-gh-large-file-warning-threshold 2500000)
+  (consult-gh-confirm-name-before-fork nil)
+  (consult-gh-confirm-before-clone t)
+  (consult-gh-notifications-show-unread-only nil)
+  (consult-gh-default-interactive-command #'consult-gh-transient)
+  (consult-gh-prioritize-local-folder nil)
+  (consult-gh-group-dashboard-by :reason)
+  ;;;; Optional
+  (consult-gh-repo-preview-major-mode nil) ; show readmes in their original format
+  (consult-gh-preview-major-mode 'org-mode) ; use 'org-mode for editing comments, commit messages, ...
+  :config
+  ;; Remember visited orgs and repos across sessions
+  (add-to-list 'savehist-additional-variables 'consult-gh--known-orgs-list)
+  (add-to-list 'savehist-additional-variables 'consult-gh--known-repos-list)
+  ;; Enable default keybindings (e.g. for commenting on issues, prs, ...)
+  (consult-gh-enable-default-keybindings))
+
+
+;; Install `consult-gh-embark' for embark actions
+(use-package consult-gh-embark
+  :config
+  :ensure t
+  :defer t
+  (consult-gh-embark-mode +1))
+
+
+;; Install `consult-gh-forge' for forge actions
+(use-package consult-gh-forge
+  :config
+  :ensure t
+  :defer t
+  (consult-gh-forge-mode +1)
+  (setq consult-gh-forge-timeout-seconds 20))
+
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
