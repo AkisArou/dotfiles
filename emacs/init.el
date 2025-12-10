@@ -1073,7 +1073,8 @@
   (evil-define-key 'insert 'global (kbd "TAB") #'my/tab-or-up-list)
 
   ;; Trigger completion at point in Evil insert mode
-  (evil-define-key 'insert 'global (kbd "M-SPC") #'completion-at-point)
+  (evil-define-key 'insert global-map (kbd "C-SPC") #'completion-at-point)
+  (evil-define-key 'insert global-map (kbd "C-@")   #'completion-at-point)
 
   ;; Trigger completion at point in all minibuffer maps
   (dolist (map (list minibuffer-local-map
