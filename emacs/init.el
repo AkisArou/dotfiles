@@ -356,6 +356,14 @@
 		  (260 . "#89b4fa")
 		  (280 . "#b4befe"))))
 
+;;; FORGE
+(use-package forge
+  :after magit
+  :ensure t
+  :init
+  (setq forge-add-default-sections t)
+  (setq forge-add-default-bindings t))
+
 ;;; GIT-MODES
 (use-package git-modes
   :ensure t
@@ -1715,8 +1723,11 @@
 ;;; YAML
 (use-package yaml
   :ensure t
-  :defer t)
+  :defer t
+  )
 
+
+;;; CONSULT-GH
 (use-package consult-gh
   :after consult
   :ensure t
