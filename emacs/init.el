@@ -237,6 +237,17 @@
 ;; will utilize `mpv'.
 (use-package dired
   :ensure nil
+  :init
+  (setq dired-dwim-target t  ; suggest a target for moving/copying intelligently
+		;; don't prompt to revert, just do it
+		dired-auto-revert-buffer #'dired-buffer-stale-p
+		;; Always copy/delete recursively
+		dired-recursive-copies  'always
+		dired-recursive-deletes 'top
+		;; Ask whether destination dirs should get created when copying/removing files.
+		dired-create-destination-dirs 'ask
+		;; Screens are larger nowadays, we can afford slightly larger thumbnails
+		image-dired-thumb-size 150)
   :custom
   (dired-listing-switches "-lah --group-directories-first")
   (dired-dwim-target t)
@@ -246,17 +257,47 @@
 	 (".*" "open" "xdg-open")))
   (dired-kill-when-opening-new-dired-buffer t)
   :config
+  ;; Evil integration
   (with-eval-after-load 'evil
 	(add-hook 'dired-mode-hook
 			  (lambda ()
-				;; Use normal state in Dired
 				(evil-normalize-keymaps)
 				(evil-define-key 'normal dired-mode-map
+				  (kbd "C-x") #'wdired-change-to-wdired-mode
 				  (kbd "C-e") 'dired-find-file
 				  (kbd "C-f") 'dired-up-directory)))))
 
-(add-hook 'dired-mode-hook #'dired-omit-mode)
-
+(use-package dired-x
+  :ensure nil
+  :hook (dired-mode . dired-omit-mode)
+  :config
+  (setq dired-omit-verbose nil
+		dired-omit-files
+		(concat dired-omit-files
+				"\\|^\\.DS_Store\\'"
+				"\\|^flycheck_.*"
+				"\\|^\\.project\\(?:ile\\)?\\'"
+				"\\|^\\.\\(?:svn\\|git\\)\\'"
+				"\\|^\\.ccls-cache\\'"
+				"\\|\\(?:\\.js\\)?\\.meta\\'"
+				"\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'"))
+  ;; Disable the prompt about whether I want to kill the Dired buffer for a
+  ;; deleted directory. Of course I do!
+  (setq dired-clean-confirm-killing-deleted-buffers nil)
+  ;; Let OS decide how to open certain files
+  (when-let (cmd (cond ((featurep :system 'macos) "open")
+					   ((featurep :system 'linux) "xdg-open")
+					   ((featurep :system 'windows) "start")))
+	(setq dired-guess-shell-alist-user
+		  `(("\\.\\(?:docx\\|pdf\\|djvu\\|eps\\)\\'" ,cmd)
+			("\\.\\(?:jpe?g\\|png\\|gif\\|xpm\\)\\'" ,cmd)
+			("\\.\\(?:xcf\\)\\'" ,cmd)
+			("\\.csv\\'" ,cmd)
+			("\\.tex\\'" ,cmd)
+			("\\.\\(?:mp4\\|mkv\\|avi\\|flv\\|rm\\|rmvb\\|ogv\\)\\(?:\\.part\\)?\\'" ,cmd)
+			("\\.\\(?:mp3\\|flac\\)\\'" ,cmd)
+			("\\.html?\\'" ,cmd)
+			("\\.md\\'" ,cmd)))))
 
 ;;; ISEARCH
 ;; In this configuration, we're setting up isearch, Emacs's incremental search feature.
