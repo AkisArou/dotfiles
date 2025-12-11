@@ -1,4 +1,4 @@
 package internal
 
 
-const SocketPath = "/tmp/emacs-client.sock"
+const SocketPath = "/tmp/emacs-preload.sock"

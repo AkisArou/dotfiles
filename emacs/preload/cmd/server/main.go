@@ -19,7 +19,6 @@ type State struct {
 	nextDaemonId DaemonId
 }
 
-
 func main() {
 	if err := os.RemoveAll(internal.SocketPath); err != nil {
 		panic(err)
@@ -43,7 +42,7 @@ func main() {
 			fmt.Println("accept error:", err)
 			continue
 		}
-		go handleConn(&state,conn)
+		go handleConn(&state, conn)
 	}
 }
 
@@ -85,9 +84,9 @@ func handleRequestID(s *State, c net.Conn) {
 }
 
 func createDaemon() DaemonId {
-	id := DaemonId(strconv.FormatInt( time.Now().UnixNano(), 10))
+	id := DaemonId(strconv.FormatInt(time.Now().UnixNano(), 10))
 
-	cmd := exec.Command("emacs", "--daemon="+string(id))
+	cmd := exec.Command("emacs", "--fg-daemon="+string(id))
 
 	if err := cmd.Start(); err != nil {
 		panic("No daemon created")

@@ -1,0 +1,10 @@
+#!/usr/bin/zsh
+
+SOCKET=/tmp/emacs-preload.sock
+
+if [ ! -e "$SOCKET" ]; then
+  ~/.local/bin/emacs-preload-server &
+  emacs
+else
+  emacs-preload-client -e '(display-splash-screen)'
+fi
