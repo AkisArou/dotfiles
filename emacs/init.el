@@ -326,17 +326,106 @@
 					  :foreground 'unspecified
 					  :background 'unspecified
 					  :weight 'normal)
+
   (set-face-attribute 'highlight nil :background "#000000" :foreground 'unspecified)
+
+  (setq dirvish-default-sort 'directories-first)
+  (setq dirvish-reuse-session nil)
+  (setq dirvish-path-separators '("~" "/" "/"))
+  (setq dired-listing-switches "-Alh --group-directories-first --sort=name")
+
   :init
   (dirvish-override-dired-mode)
+
   (add-hook 'dired-mode-hook
 			(lambda ()
 			  (evil-normalize-keymaps)
+
+			  ;; ------------------------------
+			  ;; MAIN KEYBINDINGS (NORMAL MODE)
+			  ;; ------------------------------
 			  (evil-define-key 'normal dirvish-mode-map
-				(kbd "%") 'dired-create-empty-file
+				;; Your existing bindings
+				(kbd "%")   #'dired-create-empty-file
 				(kbd "C-x") #'wdired-change-to-wdired-mode
-				(kbd "C-e") 'dired-find-file
-				(kbd "C-f") 'dired-up-directory))))
+				(kbd "C-e") #'dired-find-file
+				(kbd "C-f") #'dired-up-directory
+
+				;; Doom’s bindings
+				(kbd "?")   #'dirvish-dispatch
+				(kbd "q")   #'dirvish-quit
+				(kbd "b")   #'dirvish-quick-access
+				(kbd "p")   #'dirvish-yank
+				(kbd "S")   #'dirvish-quicksort
+				(kbd "F")   #'dirvish-layout-toggle
+				(kbd "z")   #'dirvish-history-jump
+				(kbd "gh")  #'dirvish-subtree-up
+				(kbd "gl")  #'dirvish-subtree-toggle
+				(kbd "h")   #'dired-up-directory
+				(kbd "l")   #'dired-find-file
+
+				(kbd "TAB") #'dirvish-subtree-toggle
+
+				(kbd "M-b") #'dirvish-history-go-backward
+				(kbd "M-f") #'dirvish-history-go-forward
+				(kbd "M-n") #'dirvish-narrow
+				(kbd "M-m") #'dirvish-mark-menu
+				(kbd "M-s") #'dirvish-setup-menu
+				(kbd "M-e") #'dirvish-emerge-menu)
+
+			  ;; ------------------------------
+			  ;; NORMAL + VISUAL (ng in Doom)
+			  ;; ------------------------------
+			  (evil-define-key '(normal visual) dirvish-mode-map
+				(kbd "f")   #'dirvish-file-info-menu
+				(kbd "S")   #'dirvish-quicksort  ;; duplicated in Doom
+				(kbd "TAB") #'dirvish-subtree-toggle
+				(kbd "M-b") #'dirvish-history-go-backward
+				(kbd "M-f") #'dirvish-history-go-forward
+				(kbd "M-n") #'dirvish-narrow
+				(kbd "M-m") #'dirvish-mark-menu
+				(kbd "M-s") #'dirvish-setup-menu
+				(kbd "M-e") #'dirvish-emerge-menu)
+
+			  ;; ------------------------------
+			  ;; MOTION MAP BINDINGS
+			  ;; ------------------------------
+			  (evil-define-key 'motion dirvish-mode-map
+				(kbd "[h") #'dirvish-history-go-backward
+				(kbd "]h") #'dirvish-history-go-forward
+				(kbd "[e") #'dirvish-emerge-next-group
+				(kbd "]e") #'dirvish-emerge-previous-group)
+
+			  ;; ------------------------------
+			  ;; GUI MOTION KEYS (gm)
+			  ;; ------------------------------
+			  (evil-define-key 'motion dirvish-mode-map
+				[left]  #'dired-up-directory
+				[right] #'dired-find-file)
+
+			  ;; ------------------------------
+			  ;; PREFIX "y" (YANK)
+			  ;; ------------------------------
+			  (define-prefix-command 'dirvish-yank-prefix)
+			  (define-key dirvish-mode-map (kbd "y") 'dirvish-yank-prefix)
+
+			  (evil-define-key 'normal dirvish-yank-prefix
+				(kbd "l") #'dirvish-copy-file-true-path
+				(kbd "n") #'dirvish-copy-file-name
+				(kbd "p") #'dirvish-copy-file-path
+				(kbd "r") #'dirvish-copy-remote-path
+				(kbd "y") #'dired-do-copy)
+
+			  ;; ------------------------------
+			  ;; PREFIX "s" (SYMLINKS)
+			  ;; ------------------------------
+			  (define-prefix-command 'dirvish-symlink-prefix)
+			  (define-key dirvish-mode-map (kbd "s") 'dirvish-symlink-prefix)
+
+			  (evil-define-key 'normal dirvish-symlink-prefix
+				(kbd "s") #'dirvish-symlink
+				(kbd "S") #'dirvish-relative-symlink
+				(kbd "h") #'dirvish-hardlink))))
 
 ;;; ISEARCH
 ;; In this configuration, we're setting up isearch, Emacs's incremental search feature.
