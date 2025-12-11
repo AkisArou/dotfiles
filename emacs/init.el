@@ -332,7 +332,7 @@
   (setq dirvish-default-sort 'directories-first)
   (setq dirvish-reuse-session nil)
   (setq dirvish-path-separators '("~" "/" "/"))
-  (setq dired-listing-switches "-Alh --group-directories-first --sort=name")
+  (setq dired-listing-switches "-AX --group-directories-first")
 
   :init
   (dirvish-override-dired-mode)
