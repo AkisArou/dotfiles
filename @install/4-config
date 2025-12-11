@@ -18,6 +18,7 @@ sudo systemctl enable --now power-profiles-daemon
 systemctl enable --user --now goimapnotify
 systemctl enable --user --now mbsync.timer
 systemctl enable --user --now vdirsyncer.timer
+systemctl enable --user --now emacs-preload.service
 
 print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then

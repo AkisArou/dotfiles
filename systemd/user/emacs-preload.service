@@ -1,0 +1,11 @@
+[Unit]
+Description=Initialize Emacs Preload Server
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/akisarou/.local/bin/emacs-preload-server
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+
+# Module root
+MODULE_ROOT=~/dotfiles/emacs/preload
+
+# Build server and client in parallel
+(cd $MODULE_ROOT && go build -o ~/.local/bin/emacs-preload-server ./cmd/server) &
+(cd $MODULE_ROOT && go build -o ~/.local/bin/emacs-preload-client ./cmd/client) &
+
+# Wait for all background jobs to finish
+wait
+
+chmod +x ~/.local/bin/emacs-preload-server
+chmod +x ~/.local/bin/emacs-preload-client
