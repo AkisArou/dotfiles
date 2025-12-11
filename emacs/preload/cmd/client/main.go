@@ -34,7 +34,9 @@ func main() {
 	}()
 
 	// Launch emacsclient and block until it exits
-	cmd := exec.Command("emacsclient", "-c", "-s", id)
+    args := []string{"-c", "-s", id}
+    args = append(args, os.Args[1:]...)
+    cmd := exec.Command("emacsclient", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -45,7 +47,6 @@ func main() {
 	//TODO: do not wait to close. fire and forget
 	killDaemon(id)
 }
-
 
 func killDaemon(id string) {
 	killCmd := exec.Command("emacsclient", "-s", id, "--eval", "(kill-emacs)")
