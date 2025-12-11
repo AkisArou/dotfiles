@@ -1,7 +1,7 @@
 package main
 
 import (
-	"akisarou/emacs-pool/internal"
+	"akisarou/emacs-preload/internal"
 	"bufio"
 	"fmt"
 	"net"
