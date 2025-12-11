@@ -1,6 +1,6 @@
 [Unit]
 Description=Initialize Emacs Preload Server
-After=default.target
+After=graphical.target
 
 [Service]
 Type=oneshot
@@ -9,6 +9,7 @@ Environment=HOME=/home/akisarou
 Environment=XDG_CONFIG_HOME=/home/akisarou/.config
 Environment=SSH_AUTH_SOCK=%t/keyring/ssh
 ExecStart=/home/akisarou/.local/bin/emacs-preload-server
+ExecStart=/bin/zsh -c 'source /home/akisarou/.zshenv; exec /home/akisarou/.local/bin/emacs-preload-server'
 RemainAfterExit=yes
 
 [Install]
