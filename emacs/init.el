@@ -80,8 +80,6 @@
 ;; reproducibility, and customization. As we proceed, you'll see smaller
 ;; `use-package` declarations for specific packages, which will help us enable
 ;; the desired features and improve our workflow.
-(add-hook 'minibuffer-setup-hook (lambda ()
-								   (local-set-key (kbd "C-c") 'abort-minibuffers)))
 
 ;;; EMACS
 ;;  This is biggest one. Keep going, plugins (oops, I mean packages) will be shorter :)
@@ -177,6 +175,8 @@
   ;; Default file encoding
   (modify-coding-system-alist 'file "" 'utf-8))
 
+(add-hook 'minibuffer-setup-hook (lambda ()
+								   (local-set-key (kbd "C-c") 'abort-minibuffers)))
 ;;; WHITESPACE
 (use-package whitespace
   :ensure nil
@@ -231,6 +231,10 @@
 						 (when (getenv "SSH_TTY")
 						   (global-clipetty-mode 1))))))
 
+
+;;; POSFRAME
+(use-package posframe
+  :ensure t)
 
 ;;; DIRED
 ;; In Emacs, the `dired' package provides a powerful and built-in file manager
@@ -400,8 +404,7 @@
 ;;; GIT-MODES
 (use-package git-modes
   :ensure t
-  :defer t
-  )
+  :defer t)
 
 
 ;;; SMERGE

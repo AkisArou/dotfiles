@@ -35,6 +35,7 @@
 
 ;;; Code:
 (require 'flycheck)
+(require 'posframe)
 
 (defgroup flycheck-posframe nil
   "Display Flycheck errors in tooltips using posframe.el."
