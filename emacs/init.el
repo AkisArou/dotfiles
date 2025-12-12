@@ -168,8 +168,6 @@
   (recentf-mode 1)
   (savehist-mode 1)
   (save-place-mode 1)
-  (winner-mode 1)
-  (xterm-mouse-mode 1)
   (file-name-shadow-mode 1)
 
   ;; Default file encoding
