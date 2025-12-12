@@ -1,7 +1,6 @@
 package main
 
 import (
-	"akisarou/emacs-preload/internal"
 	"bufio"
 	"fmt"
 	"net"
@@ -13,6 +12,8 @@ import (
 	"time"
 )
 
+const SocketPath = "/tmp/emacs-preload.sock"
+
 type DaemonId string
 
 type State struct {
@@ -20,17 +21,17 @@ type State struct {
 }
 
 func main() {
-	if err := os.RemoveAll(internal.SocketPath); err != nil {
+	if err := os.RemoveAll(SocketPath); err != nil {
 		panic(err)
 	}
 
-	ln, err := net.Listen("unix", internal.SocketPath)
+	ln, err := net.Listen("unix", SocketPath)
 	if err != nil {
 		panic(err)
 	}
 	defer ln.Close()
 
-	fmt.Println("Server listening on", internal.SocketPath)
+	fmt.Println("Server listening on", SocketPath)
 
 	state := State{
 		nextDaemonId: createDaemon(),

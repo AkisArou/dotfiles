@@ -1,9 +1,9 @@
 package main
 
 import (
-	"akisarou/emacs-preload/internal"
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -12,8 +12,10 @@ import (
 	"syscall"
 )
 
+const SocketPath = "/tmp/emacs-preload.sock"
+
 func main() {
-	conn, err := net.Dial("unix", internal.SocketPath)
+	conn, err := net.Dial("unix", SocketPath)
 	if err != nil {
 		panic(err)
 	}
@@ -33,10 +35,19 @@ func main() {
 		os.Exit(1)
 	}()
 
-	// Launch emacsclient and block until it exits
-    args := []string{"-c", "-s", id}
-    args = append(args, os.Args[1:]...)
-    cmd := exec.Command("emacsclient", args...)
+
+
+	pwd, err := os.Getwd()
+	if err != nil {
+			log.Fatal(err)
+	}
+
+	eval := fmt.Sprintf(`(progn (let ((buf (generate-new-buffer "*new*"))) (switch-to-buffer buf) (setq default-directory "%s/") (display-splash-screen) (setq default-directory "%s/")))`, pwd, pwd)
+
+	args := []string{"-c", "-s", id, "--eval", eval}
+	args = append(args, os.Args[1:]...)
+	cmd := exec.Command("emacsclient", args...)
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

@@ -18,3 +18,5 @@ source "$HOME/dotfiles/shell/zsh/.p10k.zsh"
 [ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ] && . "$HOME/.asdf/plugins/java/set-java-home.zsh"
 
 fast-theme XDG:tokyonight &>/dev/null
+
+alias EM="go run /home/akisarou/dotfiles/emacs/preload/cmd/client/main.go"

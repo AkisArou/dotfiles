@@ -109,6 +109,7 @@
   (use-short-answers t)
   (warning-minimum-level :emergency)
 
+
   :hook
   (prog-mode . display-line-numbers-mode)
 
