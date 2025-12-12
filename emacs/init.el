@@ -483,7 +483,6 @@
 (use-package forge
   :after magit
   :ensure t
-  :defer t
   :init
   (setq forge-add-default-sections t)
   (setq forge-add-default-bindings t))
@@ -848,7 +847,6 @@
   :if ek-use-nerd-fonts
   :ensure t
   :straight t
-  :defer t
   :after (:all corfu))
 
 ;;; MASON
@@ -958,7 +956,6 @@
 			 :host github
 			 :repo "sdvcrx/lsp-vtsls")
   :after lsp-mode
-  :defer t
   :config
   ;; core vtsls settings
   (setq
@@ -997,7 +994,6 @@
 (use-package lsp-tailwindcss
   :after lsp-mode
   :straight t
-  :defer t
   :init
 
   ;; Validation
@@ -1837,7 +1833,6 @@
 (use-package consult-gh
   :after consult
   :ensure t
-  :defer t
   :custom
   (consult-gh-default-clone-directory "~/projects")
   (consult-gh-show-preview t)
