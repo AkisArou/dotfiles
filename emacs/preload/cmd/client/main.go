@@ -35,14 +35,22 @@ func main() {
 		os.Exit(1)
 	}()
 
-
-
 	pwd, err := os.Getwd()
 	if err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 
-	eval := fmt.Sprintf(`(progn (let ((buf (generate-new-buffer "*new*"))) (switch-to-buffer buf) (setq default-directory "%s/") (display-splash-screen) (setq default-directory "%s/")))`, pwd, pwd)
+	// eval := fmt.Sprintf(`(progn (let ((buf (generate-new-buffer "*new*"))) (switch-to-buffer buf) (setq default-directory "%s/") (display-splash-screen) (setq default-directory "%s/")))`, pwd, pwd)
+
+	eval := fmt.Sprintf(`(progn
+	(when (get-buffer "*Warnings*")
+		(delete-windows-on "*Warnings*")
+		(kill-buffer "*Warnings*"))
+	(let ((buf (generate-new-buffer "*new*")))
+		(switch-to-buffer buf)
+		(setq default-directory "%s/")
+		(display-splash-screen)
+		(setq default-directory "%s/")))`, pwd, pwd)
 
 	args := []string{"-c", "-s", id, "--eval", eval}
 	args = append(args, os.Args[1:]...)
