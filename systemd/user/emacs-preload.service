@@ -5,11 +5,15 @@ After=graphical.target
 [Service]
 Type=oneshot
 User=akisarou
+HOME=/home/akisarou
 Environment=HOME=/home/akisarou
+Environment=TERM=tmux-256color
+Environment=COLORTERM=truecolor
 Environment=XDG_CONFIG_HOME=/home/akisarou/.config
 Environment=SSH_AUTH_SOCK=%t/keyring/ssh
+PassEnvironment=TERM COLORTERM
 ExecStart=/home/akisarou/.local/bin/emacs-preload-server
-ExecStart=/bin/zsh -c 'source /home/akisarou/.zshenv; exec /home/akisarou/.local/bin/emacs-preload-server'
+ExecStart=/bin/zsh -c 'source /home/akisarou/.zshenv; TERM=tmux-256color exec /home/akisarou/.local/bin/emacs-preload-server'
 RemainAfterExit=yes
 Restart=on-failure
 

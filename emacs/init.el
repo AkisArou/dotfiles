@@ -163,7 +163,6 @@
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (global-hl-line-mode 1)
-  (when scroll-bar-mode (scroll-bar-mode -1))
   (global-hl-line-mode -1)
   (global-auto-revert-mode 1)
   (recentf-mode 1)
@@ -1442,10 +1441,10 @@
   (evil-define-key 'normal 'global (kbd "<leader> u") 'undo-tree-visualize)
 
   ;; Help keybindings
-  (evil-define-key 'normal 'global (kbd "<leader> h m") 'describe-mode) ;; Describe current mode
-  (evil-define-key 'normal 'global (kbd "<leader> h f") 'describe-function) ;; Describe function
-  (evil-define-key 'normal 'global (kbd "<leader> h v") 'describe-variable) ;; Describe variable
-  (evil-define-key 'normal 'global (kbd "<leader> h k") 'describe-key) ;; Describe key
+  ;; (evil-define-key 'normal 'global (kbd "<leader> h m") 'describe-mode) ;; Describe current mode
+  ;; (evil-define-key 'normal 'global (kbd "<leader> h f") 'describe-function) ;; Describe function
+  ;; (evil-define-key 'normal 'global (kbd "<leader> h v") 'describe-variable) ;; Describe variable
+  ;; (evil-define-key 'normal 'global (kbd "<leader> h k") 'describe-key) ;; Describe key
 
 
   ;; Tab navigation
@@ -1858,8 +1857,8 @@
   (consult-gh-preview-major-mode 'org-mode) ; use 'org-mode for editing comments, commit messages, ...
   :config
   ;; Remember visited orgs and repos across sessions
-  (add-to-list 'savehist-additional-variables 'consult-gh--known-orgs-list)
-  (add-to-list 'savehist-additional-variables 'consult-gh--known-repos-list)
+  ;; (add-to-list 'savehist-additional-variables 'consult-gh--known-orgs-list)
+  ;; (add-to-list 'savehist-additional-variables 'consult-gh--known-repos-list)
   ;; Enable default keybindings (e.g. for commenting on issues, prs, ...)
   (consult-gh-enable-default-keybindings))
 

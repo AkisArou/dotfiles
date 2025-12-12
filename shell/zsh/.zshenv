@@ -1,2 +1,2 @@
-source "$HOME/dotfiles/shell/common/exports"
-source "$HOME/dotfiles/shell/common/aliases"
+source "/home/akisarou/dotfiles/shell/common/exports"
+source "/home/akisarou/dotfiles/shell/common/aliases"
