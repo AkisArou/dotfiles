@@ -652,7 +652,6 @@
 (use-package fussy
   :ensure t
   :straight (fussy :type git :host github :repo "jojojames/fussy")
-  :defer t
   :init
   ;; Use fussy as the main completion style
   (setq completion-styles '(fussy basic)
@@ -681,7 +680,6 @@
 ;;; FZF
 (use-package fzf-native
   :ensure t
-  :defer t
   :straight
   (fzf-native
    :repo "dangduc/fzf-native"
