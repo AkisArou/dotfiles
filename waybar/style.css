@@ -44,9 +44,7 @@ window#waybar #window {
 }
 
 #workspaces button.urgent {
-  background-color: #f7768e;
-  color: #000000;
-  font-weight: bold;
+  background-color: #db4b4b;
 }
 
 label.module {
