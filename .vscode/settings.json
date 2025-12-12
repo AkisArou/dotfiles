@@ -40,7 +40,7 @@
   "editor.suggest.localityBonus": true,
   "editor.inlineSuggest.enabled": true,
   "editor.suggestSelection": "first",
-  "editor.hover.enabled": true,
+  "editor.hover.enabled": "on",
   "editor.inlayHints.enabled": "off",
   "editor.linkedEditing": true,
   "editor.smoothScrolling": false,
