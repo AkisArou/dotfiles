@@ -103,12 +103,15 @@
   (ring-bell-function 'ignore)
   (split-width-threshold 300)
   (switch-to-buffer-obey-display-actions t)
-  (tab-width 4)
+  (tab-width 2)
   (treesit-font-lock-level 4)
   (truncate-lines t)
   (use-dialog-box nil)
   (use-short-answers t)
   (warning-minimum-level :emergency)
+  (indent-tabs-mode t)
+  (default-tab-width 2)
+
 
 
   :hook
@@ -148,7 +151,7 @@
 				  yaml-ts-mode-hook))
 	(add-hook hook
 			  (lambda ()
-				(setq-local indent-tabs-mode nil)
+				(global-set-key (kbd "TAB") 'self-insert-command)
 				(setq-local tab-width 2))))
 
   ;; Mode-specific indent offsets
