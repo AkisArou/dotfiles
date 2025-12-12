@@ -39,6 +39,7 @@
 ;; In Emacs, a package is a collection of Elisp code that extends the editor's functionality,
 ;; much like plugins do in Neovim. We need to import this package to add package archives.
 (require 'package)
+(require 'project)
 
 ;; Add MELPA (Milkypostman's Emacs Lisp Package Archive) to the list of package archives.
 ;; This allows you to install packages from this widely-used repository, similar to how
@@ -343,13 +344,11 @@
 			  ;; MAIN KEYBINDINGS (NORMAL MODE)
 			  ;; ------------------------------
 			  (evil-define-key 'normal dirvish-mode-map
-				;; Your existing bindings
 				(kbd "%")   #'dired-create-empty-file
 				(kbd "C-x") #'wdired-change-to-wdired-mode
 				(kbd "C-e") #'dired-find-file
 				(kbd "C-f") #'dired-up-directory
 
-				;; Doom’s bindings
 				(kbd "?")   #'dirvish-dispatch
 				(kbd "q")   #'dirvish-quit
 				(kbd "b")   #'dirvish-quick-access
@@ -357,10 +356,9 @@
 				(kbd "S")   #'dirvish-quicksort
 				(kbd "F")   #'dirvish-layout-toggle
 				(kbd "z")   #'dirvish-history-jump
+				(kbd "gr")  #'project-dired
 				(kbd "gh")  #'dirvish-subtree-up
 				(kbd "gl")  #'dirvish-subtree-toggle
-				(kbd "h")   #'dired-up-directory
-				(kbd "l")   #'dired-find-file
 
 				(kbd "TAB") #'dirvish-subtree-toggle
 
@@ -393,13 +391,6 @@
 				(kbd "]h") #'dirvish-history-go-forward
 				(kbd "[e") #'dirvish-emerge-next-group
 				(kbd "]e") #'dirvish-emerge-previous-group)
-
-			  ;; ------------------------------
-			  ;; GUI MOTION KEYS (gm)
-			  ;; ------------------------------
-			  (evil-define-key 'motion dirvish-mode-map
-				[left]  #'dired-up-directory
-				[right] #'dired-find-file)
 
 			  ;; ------------------------------
 			  ;; PREFIX "y" (YANK)
