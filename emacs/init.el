@@ -850,6 +850,7 @@
   ;; first function returning a result wins.  Note that the list of buffer-local
   ;; completion functions takes precedence over the global list.
   (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
   ;; (add-hook 'completion-at-point-functions #'cape-history)
   ;; ...
   )
@@ -918,6 +919,7 @@
 		   css-mode                                     ;; Enable LSP for CSS
 		   js-ts-mode                                   ;; Enable LSP for JavaScript (TS mode)
 		   go-ts-mode                                   ;; Enable LSP for Go
+		   json-ts-mode                                 ;; Enable LSP for JSON
 		   web-mode) . lsp-deferred))                   ;; Enable LSP for Web (HTML)
   :commands lsp
   :config
