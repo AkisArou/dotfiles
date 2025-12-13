@@ -649,45 +649,58 @@
 
 (add-hook 'minibuffer-setup-hook #'vertico-repeat-save)
 
+(use-package orderless
+  :straight t
+  :ensure t
+  :commands (orderless-filter))
+
+(use-package flx-rs
+  :ensure t
+  :straight
+  (flx-rs
+   :repo "jcs-elpa/flx-rs"
+   :fetcher github
+   :files (:defaults "bin"))
+  :config
+  ;; (setq fussy-score-fn 'fussy-flx-rs-score)
+  (flx-rs-load-dyn))
+
+(use-package fzf-native
+  :straight (fzf-native
+			 :repo "dangduc/fzf-native"
+			 :host github
+			 :files (:defaults "bin"))
+  :config
+  (fzf-native-load-dyn))
+
+
 (use-package fussy
   :ensure t
-  :straight (fussy :type git :host github :repo "jojojames/fussy")
-  :init
-  ;; Use fussy as the main completion style
-  (setq completion-styles '(fussy basic)
-		completion-category-defaults nil
-		completion-category-overrides '((file (styles partial-completion))))
+  :straight
+  (fussy :type git :host github :repo "jojojames/fussy")
   :config
-  ;; Setup fussy with fzf-native scoring
-  (fussy-setup)
-
-  ;; Configure fussy for VSCode-like behavior
-  (setq fussy-score-fn 'fussy-fzf-native-score)
-  (setq fussy-filter-fn 'fussy-filter-default)
+  ;; (setq fussy-score-fn 'fussy-flx-rs-score)
+  (setq fussy-filter-fn 'fussy-filter-orderless-flex)
   (setq fussy-use-cache t)
   (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
 
-  ;; Corfu integration: cache management
   (with-eval-after-load 'corfu
 	(advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
 	(add-hook 'corfu-mode-hook
 			  (lambda ()
 				(setq-local fussy-max-candidate-limit 5000
 							fussy-default-regex-fn 'fussy-pattern-first-letter
-							fussy-prefer-prefix nil)))))
+							fussy-prefer-prefix nil))))
+  (fussy-setup))
 
+(defun my/fussy-use-flx-rs ()
+  (setq-local fussy-score-fn #'fussy-flx-rs-score))
 
-;;; FZF
-(use-package fzf-native
-  :ensure t
-  :straight
-  (fzf-native
-   :repo "dangduc/fzf-native"
-   :host github
-   :files (:defaults "bin"))
-  :config
-  (setq fussy-score-fn 'fussy-fzf-native-score)
-  (fzf-native-load-dyn))
+(defun my/fussy-use-fzf-native ()
+  (setq-local fussy-score-fn #'fussy-fzf-native-score))
+
+(add-hook 'corfu-mode-hook #'my/fussy-use-flx-rs)
+(add-hook 'minibuffer-setup-hook #'my/fussy-use-fzf-native)
 
 
 ;;; MARGINALIA
