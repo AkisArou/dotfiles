@@ -866,7 +866,6 @@
 ;;; MASON
 (use-package mason
   :ensure t
-  :defer t
   :config
   ;; List of packages to ensure
   (defvar my-mason-packages
