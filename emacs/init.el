@@ -662,7 +662,6 @@
    :fetcher github
    :files (:defaults "bin"))
   :config
-  ;; (setq fussy-score-fn 'fussy-flx-rs-score)
   (flx-rs-load-dyn))
 
 (use-package fzf-native
@@ -679,7 +678,6 @@
   :straight
   (fussy :type git :host github :repo "jojojames/fussy")
   :config
-  ;; (setq fussy-score-fn 'fussy-flx-rs-score)
   (setq fussy-filter-fn 'fussy-filter-orderless-flex)
   (setq fussy-use-cache t)
   (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
