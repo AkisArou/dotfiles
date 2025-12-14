@@ -30,7 +30,6 @@ packages=(
   "7zip"
   "acpi"
   "adw-gtk-theme"
-  "aerc"
   "alacritty"
   "android-studio"
   "asdf-vm"
