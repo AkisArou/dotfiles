@@ -574,7 +574,10 @@
   :ensure nil     ;; This is built-in, no need to fetch it.
   :defer t
   :config
-  (setq org-directory "~/org/"))
+  (setq
+   org-directory "~/org/"
+   org-agenda-files  '("~/org/calendar.org")
+   ))
 
 
 
