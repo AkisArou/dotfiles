@@ -1250,6 +1250,7 @@
   (setq evil-want-keybinding nil)     ;; Disable default keybinding to set custom ones.
   (setq evil-want-C-u-scroll t)       ;; Makes C-u scroll
   (setq evil-symbol-word-search t)
+  (setq evil-search-module 'evil-search)
 
   :config
   (setq evil-normal-state-cursor 'box
@@ -1273,7 +1274,7 @@
   (evil-set-leader 'visual (kbd "SPC"))
 
   (evil-define-key 'normal 'global (kbd "<leader> h") 'evil-ex-nohighlight)
-  (evil-define-key 'normal 'global (kbd "/") 'consult-line)
+  ;; (evil-define-key 'normal 'global (kbd "/") 'consult-line)
 
   ;; Keybindings for searching and finding files.
   (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file)
@@ -1890,6 +1891,23 @@
   (setq consult-gh-forge-timeout-seconds 20))
 
 (use-package magit-log-file)
+
+(defun my/minibuffer-setup-dabbrev ()
+  "Setup dabbrev completion in minibuffer for evil search."
+  (when (eq this-command 'evil-ex-search-forward)
+	(setq-local completion-at-point-functions
+				(list #'cape-dabbrev))))
+
+(add-hook 'minibuffer-setup-hook #'my/minibuffer-setup-dabbrev)
+
+;; Enable corfu in minibuffer
+(defun corfu-enable-always-in-minibuffer ()
+  "Enable Corfu in minibuffer."
+  (unless (or (bound-and-true-p mct--active)
+			  (bound-and-true-p vertico--input))
+	(corfu-mode 1)))
+
+(add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
