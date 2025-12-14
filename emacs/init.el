@@ -1374,7 +1374,7 @@
   ;; Magit keybindings for Git integration
   (evil-define-key 'normal 'global (kbd "<leader> g s") 'magit-status)      ;; Open Magit status
   (evil-define-key 'normal 'global (kbd "<leader> g l") 'magit-log-current) ;; Show current log
-  (evil-define-key 'normal 'global (kbd "<leader> g f") 'magit-log-buffer-file) ;; Show current log for buffer
+  (evil-define-key 'normal 'global (kbd "<leader> g f") 'my/git-file-history) ;; Show current log for buffer
   (evil-define-key 'normal 'global (kbd "<leader> g d") 'magit-diff-buffer-file) ;; Show diff for the current file
   (evil-define-key 'normal 'global (kbd "<leader> g D") 'diff-hl-show-hunk) ;; Show diff for a hunk
   (evil-define-key 'normal 'global (kbd "<leader> g b") 'vc-annotate)       ;; Annotate buffer with version control info
@@ -1888,6 +1888,8 @@
   :init
   (consult-gh-forge-mode +1)
   (setq consult-gh-forge-timeout-seconds 20))
+
+(use-package magit-log-file)
 
 
 ;;; UTILITARY FUNCTION TO INSTALL EMACS-KICK
