@@ -1469,6 +1469,8 @@
 	  (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
 	  (revert-buffer t t t)))
 
+
+  ;; Text-objects
   (defun my-evil-find-nearest-quote ()
 	"Find the nearest quote character."
 	(let ((point (point))
@@ -1560,6 +1562,14 @@
   :after evil-collection
   :config
   (global-evil-surround-mode 1))
+
+;; EVIL-TEXTOBJ-TREE-SITTER
+(use-package evil-textobj-tree-sitter
+  :after evil-collection
+  :ensure t
+  :config
+  (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
+  (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner")))
 
 
 ;; UNDO TREE
