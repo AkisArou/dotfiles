@@ -1618,11 +1618,8 @@
   (evil-mode . evil-collection-init))
 
 
-(use-package evil-terminal-cursor-changer
-  :ensure t
-  :after evil
-  :config
-  (etcc-on))
+(use-package evil-cursor
+  :after evil)
 
 ;; EVIL SURROUND
 ;; The `evil-surround' package provides text object surround
