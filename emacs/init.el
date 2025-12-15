@@ -1581,26 +1581,28 @@
 ;; undo history as a tree structure, making it easier to manage
 ;; changes in your buffers.
 (use-package undo-tree
-  :defer t
-  :ensure t
   :straight t
-  :hook
-  (after-init . global-undo-tree-mode)
   :init
-  (setq undo-tree-visualizer-timestamps t
+  ;; Persistent undo history
+  (setq undo-tree-auto-save-history t
+		undo-tree-visualizer-timestamps t
 		undo-tree-visualizer-diff t
-		undo-tree-auto-save-history t
-		;; Increase undo limits to avoid losing history due to Emacs' garbage collection.
-		;; These values can be adjusted based on your needs.
-		;; 10X bump of the undo limits to avoid issues with premature
-		;; Emacs GC which truncates the undo history very aggressively.
-		undo-limit 800000                     ;; Limit for undo entries.
-		undo-strong-limit 12000000            ;; Strong limit for undo entries.
-		undo-outer-limit 120000000)           ;; Outer limit for undo entries.
+
+		;; Undo limits are in BYTES, not entries
+		;; These values allow very deep undo history
+		undo-limit 800000
+		undo-strong-limit 12000000
+		undo-outer-limit 120000000
+
+		;; Where undo-tree stores history files
+		undo-tree-history-directory-alist
+		`(("." . ,(expand-file-name "undo" "~/.cache/emacs/"))))
+
+  ;; Ensure the undo directory exists
+  (make-directory (expand-file-name "undo" "~/.cache/emacs/") t)
+
   :config
-  ;; Set the directory where `undo-tree' will save its history files.
-  ;; This keeps undo history across sessions, stored in a cache directory.
-  (setq undo-tree-history-directory-alist '(("." . "~/.cache/emacs/undo"))))
+  (global-undo-tree-mode 1))
 
 
 ;;; DOTENV
