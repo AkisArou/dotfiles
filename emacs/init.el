@@ -1295,23 +1295,6 @@
 	'(add-hook 'js-mode-hook #'add-node-modules-path)))
 
 
-(defun ek/terminal-cursor-update ()
-  "Set cursor shape depending on Evil state in terminal."
-  (when (not (display-graphic-p))
-	(cond
-	 ((evil-insert-state-p)
-	  ;; vertical bar
-	  (send-string-to-terminal "\e[6 q"))
-	 ((evil-visual-state-p)
-	  ;; block
-	  (send-string-to-terminal "\e[2 q"))
-	 (t
-	  ;; normal, motion, replace, etc.
-	  (send-string-to-terminal "\e[2 q")))))
-
-(add-hook 'post-command-hook 'ek/terminal-cursor-update)
-
-
 ;; TAB-JUMP-OUT
 (use-package tab-jump-out
   :straight (:host github
@@ -1634,6 +1617,12 @@
   :hook
   (evil-mode . evil-collection-init))
 
+
+(use-package evil-terminal-cursor-changer
+  :ensure t
+  :after evil
+  :config
+  (etcc-on))
 
 ;; EVIL SURROUND
 ;; The `evil-surround' package provides text object surround
