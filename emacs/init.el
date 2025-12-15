@@ -113,7 +113,7 @@
   (use-short-answers t)
   (read-process-output-max (* 1024 1024))
   (warning-minimum-level :emergency)
-
+  (read-extended-command-predicate #'command-completion-default-include-p)
 
   :hook
   (prog-mode . display-line-numbers-mode)
@@ -809,7 +809,6 @@
   :straight t
   :defer t
   :custom
-  ;; Enable auto-completion like VSCode
   (corfu-auto t)
   (corfu-auto-delay 0.1)              ;; Show completions quickly like VSCode
   (corfu-auto-prefix 1)               ;; Start completing after 1 character
@@ -828,6 +827,21 @@
   :config
   (if ek-use-nerd-fonts
 	  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+  (defun my/corfu-popupinfo-skip-tailwind (orig-fun &rest args)
+	"Skip popupinfo for Module type completions (kind 9)."
+	(let* ((candidate (and (>= corfu--index 0)
+						   (< corfu--index (length corfu--candidates))
+						   (nth corfu--index corfu--candidates)))
+		   (props (and candidate (text-properties-at 0 candidate)))
+		   (lsp-item (plist-get props 'lsp-completion-unresolved-item))
+		   (kind (and lsp-item (plist-get lsp-item :kind))))
+	  ;; Skip if it's kind 9 (Module)
+	  (unless (eq kind 9)
+		(apply orig-fun args))))
+
+  (advice-add 'corfu-popupinfo--show :around #'my/corfu-popupinfo-skip-tailwind)
+
 
   :bind
   (:map corfu-map
@@ -950,6 +964,7 @@
   (lsp-enable-folding nil)                              ;; Disable folding.
   (lsp-enable-imenu t)                                  ;; Enable Imenu support.
   (lsp-enable-indentation nil)                          ;; Disable indentation.
+  (lsp-enable-formatting nil)
   (lsp-enable-on-type-formatting nil)                   ;; Disable on-type formatting.
   (lsp-enable-suggest-server-download t)                ;; Enable server download suggestion.
   (lsp-enable-symbol-highlighting t)                    ;; Enable symbol highlighting.
@@ -969,9 +984,7 @@
   (lsp-lens-enable nil)                                 ;; Disable lens support.
   ;; Semantic settings
   (lsp-semantic-tokens-enable nil)                     ;; Disable semantic tokens.
-  (lsp-enable-on-type-formatting nil)
-  (lsp-enable-indentation nil)
-  (lsp-enable-formatting nil))
+  )
 
 
 (setq lsp-headerline-breadcrumb-enable nil)
@@ -1071,35 +1084,32 @@
 		lsp-tailwindcss-lint-invalid-tailwind-directive "error"
 		lsp-tailwindcss-lint-recommended-variant-order "warning")
 
-  ;; Equivalent: includeLanguages → NOT NEEDED in Emacs
-  ;; (lsp-tailwindcss activates by major-mode & config rules)
-
-  ;; classAttributes
+  ;; ;; classAttributes
   (setq lsp-tailwindcss-class-attributes
 		["class" "className" "style" "classList"])
 
-  ;; classFunctions
+  ;; ;; classFunctions
   (setq lsp-tailwindcss-class-functions
 		["cn" "clsx" "tw" "tw.color" "tw.style"])
 
-  ;; experimental.configFile
-  (setq lsp-tailwindcss-experimental-config-file
-		(ht
-		 ("apps/client/assistant-prm-airport/back-office/src/styles.css"
-		  ["apps/client/assistant-prm-airport/back-office/src/**"
-		   "packages/assistant-prm-airport/frontend/coordinator/**"])
+  ;; ;; experimental.configFile
+  ;; (setq lsp-tailwindcss-experimental-config-file
+  ;;		(ht
+  ;;		 ("apps/client/assistant-prm-airport/back-office/src/styles.css"
+  ;;		  ["apps/client/assistant-prm-airport/back-office/src/**"
+  ;;		   "packages/assistant-prm-airport/frontend/coordinator/**"])
 
-		 ("apps/client/assistant-prm-airport/agent/tailwind.config.ts"
-		  ["apps/client/assistant-prm-airport/agent/**"])
+  ;;		 ("apps/client/assistant-prm-airport/agent/tailwind.config.ts"
+  ;;		  ["apps/client/assistant-prm-airport/agent/**"])
 
-		 ("apps/client/volunteer/back-office/tailwind.config.ts"
-		  "packages/assistant-volunteer/**")
+  ;;		 ("apps/client/volunteer/back-office/tailwind.config.ts"
+  ;;		  "packages/assistant-volunteer/**")
 
-		 ("apps/website/nable/tailwind.config.ts"
-		  "apps/website/nable/**")
+  ;;		 ("apps/website/nable/tailwind.config.ts"
+  ;;		  "apps/website/nable/**")
 
-		 ("packages/shared/react/heroui/src/index.css"
-		  "packages/shared/react/heroui/**")))
+  ;;		 ("packages/shared/react/heroui/src/index.css"
+  ;;		  "packages/shared/react/heroui/**")))
   )
 
 
