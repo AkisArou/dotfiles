@@ -175,6 +175,7 @@
   (savehist-mode 1)
   (save-place-mode 1)
   (file-name-shadow-mode 1)
+  (electric-indent-mode -1)
 
   ;; Default file encoding
   (modify-coding-system-alist 'file "" 'utf-8))
@@ -237,7 +238,6 @@
 	  (side . bottom)
 	  (slot . 0))
 	 )))
-
 
 ;;; CLIPBOARD
 (use-package clipboard)
