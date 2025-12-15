@@ -964,7 +964,11 @@
   ;; Lens settings
   (lsp-lens-enable nil)                                 ;; Disable lens support.
   ;; Semantic settings
-  (lsp-semantic-tokens-enable nil))                     ;; Disable semantic tokens.
+  (lsp-semantic-tokens-enable nil)                     ;; Disable semantic tokens.
+  (lsp-enable-on-type-formatting nil)
+  (lsp-enable-indentation nil)
+  (lsp-enable-formatting nil))
+
 
 (setq lsp-headerline-breadcrumb-enable nil)
 
@@ -1091,22 +1095,27 @@
 				:arguments [(:uri ,(lsp--buffer-uri))]))))
 
 
-;; FORMAT-ALL
-(use-package format-all
+;; APHELEIA
+(use-package apheleia
   :ensure t
-  :defer t
-  :hook (prog-mode . format-all-mode)
   :config
-  (setq-default format-all-formatters
-				'(("JavaScript" . (prettierd))
-				  ("JSX"        . (prettierd))
-				  ("TypeScript" . (prettierd))
-				  ("TSX"        . (prettierd))
-				  ("JSON"       . (prettierd))
-				  ("YAML"       . (prettierd)))))
+  ;; Define prettierd formatter
+  (setf (alist-get 'prettierd apheleia-formatters)
+		'("prettierd" "--stdin-filepath" filepath))
 
-(add-hook 'emacs-lisp-mode-hook 'format-all-mode)
-(add-hook 'format-all-mode-hook 'format-all-ensure-formatter)
+  ;; Associate modes
+  (dolist (mode '(typescript-mode
+				  typescript-ts-mode
+				  javascript-mode
+				  javascript-ts-mode
+				  tsx-ts-mode
+				  yaml-ts-mode
+				  json-mode
+				  css-mode
+				  html-mode))
+	(setf (alist-get mode apheleia-mode-alist) 'prettierd))
+
+  (apheleia-global-mode +1))
 
 
 ;;; ELDOC-BOX
@@ -1347,7 +1356,6 @@
   (evil-define-key 'normal 'global (kbd "grn") 'lsp-rename)
   (evil-define-key 'normal 'global (kbd "gI") 'lsp-find-implementation)
   (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
-  (evil-define-key 'normal 'global (kbd "<leader> l f") 'lsp-format-buffer)
 
   ;; Notmuch
   (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch)
