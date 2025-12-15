@@ -84,6 +84,9 @@
 
 ;;; EMACS
 ;;  This is biggest one. Keep going, plugins (oops, I mean packages) will be shorter :)
+(put 'compile-command 'safe-local-variable
+	 (lambda (v) (stringp v)))
+
 (use-package emacs
   :ensure nil
   :custom

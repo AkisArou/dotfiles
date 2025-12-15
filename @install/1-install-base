@@ -179,6 +179,8 @@ install_packages "${packages[@]}"
 
 ~/dotfiles/scripts/build-nvim
 
+cargo install emacs-lsp-booster
+
 # Install custom issue (login prompt)
 echo ""
 print_info "Installing login screen..."
