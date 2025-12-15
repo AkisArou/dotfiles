@@ -1689,6 +1689,10 @@
   :config)
 
 
+(use-package json-mode
+  :ensure t)
+
+
 ;;; DOOM MODELINE
 ;; The `doom-modeline' package provides a sleek, modern mode-line that is visually appealing
 ;; and functional. It integrates well with various Emacs features, enhancing the overall user
