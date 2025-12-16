@@ -24,4 +24,5 @@ mtwm/mtwm
 emacs/*
 !emacs/init.el
 !emacs/lisp/
+!emacs/modules/
 !emacs/preload/
