@@ -5,8 +5,10 @@
 
 ;;; Code:
 
-(put 'compile-command 'safe-local-variable
-	 (lambda (v) (stringp v)))
+;; Disable prompts for local variables and eval
+(setq enable-local-variables :all
+	  enable-local-eval t)
+
 
 ;;; EMACS
 (use-package emacs

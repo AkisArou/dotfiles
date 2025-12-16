@@ -48,7 +48,6 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "modules" user-emacs-directory))
 
-
 (use-package init-core)
 (use-package init-ui)
 (use-package init-editor)

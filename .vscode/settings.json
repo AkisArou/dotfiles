@@ -9,19 +9,19 @@
   "workbench.editor.enablePreview": false,
   "workbench.colorTheme": "Tokyo Night",
   "workbench.colorCustomizations": {
-	"errorLens.errorBackground": "#85524594",
-	"errorLens.errorForeground": "#855245e1",
-	"errorLens.warningBackground": "#63421d80",
-	"errorLens.warningForeground": "#63421d",
-	"errorLens.infoBackground": "#1d634280",
-	"errorLens.infoForeground": "#1d6342",
-	"errorLens.hintBackground": "#1d634280",
-	"statusBar.background": "#1F1F1F",
-	"statusBar.foreground": "#ffffff",
-	"statusBar.noFolderBackground": "#1F1F1F",
-	"statusBar.debuggingBackground": "#1F1F1F",
-	"statusBar.debuggingForeground": "#ffffff",
-	"statusBarItem.remoteBackground": "#1F1F1F"
+    "errorLens.errorBackground": "#85524594",
+    "errorLens.errorForeground": "#855245e1",
+    "errorLens.warningBackground": "#63421d80",
+    "errorLens.warningForeground": "#63421d",
+    "errorLens.infoBackground": "#1d634280",
+    "errorLens.infoForeground": "#1d6342",
+    "errorLens.hintBackground": "#1d634280",
+    "statusBar.background": "#1F1F1F",
+    "statusBar.foreground": "#ffffff",
+    "statusBar.noFolderBackground": "#1F1F1F",
+    "statusBar.debuggingBackground": "#1F1F1F",
+    "statusBar.debuggingForeground": "#ffffff",
+    "statusBarItem.remoteBackground": "#1F1F1F"
   },
   "breadcrumbs.enabled": false,
   "explorer.compactFolders": false,
@@ -48,7 +48,7 @@
   "editor.fontSize": 13.5,
   "editor.suggest.showSnippets": false,
   "editor.quickSuggestions": {
-	"strings": "on"
+    "strings": "on"
   },
   "editor.experimental.preferTreeSitter.typescript": true,
   "editor.cursorSurroundingLines": 100,
@@ -56,24 +56,29 @@
   "editor.scrollBeyondLastLine": true,
   "files.autoSave": "onFocusChange",
   "files.exclude": {
-	"USE_GITIGNORE": true
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
-	"**/.bloop": true,
-	"**/.metals": true,
-	"**/.ammonite": true
+    "**/.bloop": true,
+    "**/.metals": true,
+    "**/.ammonite": true
   },
   "search.exclude": {
-	"**/node_modules": true,
-	"**/bower_components": true,
-	"**/coverage": true,
-	"**/dist": true,
-	"**/build": true,
-	"**/.build": true,
-	"**/.gh-pages": true
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.build": true,
+    "**/.gh-pages": true
   },
   "files.associations": {
-	"*.css": "tailwindcss"
+    "*.css": "tailwindcss"
   },
   "stylelint.packageManager": "pnpm",
   "css.validate": true,
@@ -84,12 +89,12 @@
   "less.lint.unknownAtRules": "ignore",
   "telemetry.telemetryLevel": "crash",
   "[json]": {
-	"editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescript]": {
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"editor.suggestSelection": "recentlyUsed",
-	"editor.suggest.showKeywords": true
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.suggestSelection": "recentlyUsed",
+    "editor.suggest.showKeywords": true
   },
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.inlayHints.enumMemberValues.enabled": true,
@@ -108,35 +113,35 @@
   "javascript.preferences.importModuleSpecifier": "non-relative",
   "npm.packageManager": "npm",
   "emmet.includeLanguages": {
-	"javascript": "javascriptreact",
-	"typescript": "javascriptreact"
+    "javascript": "javascriptreact",
+    "typescript": "javascriptreact"
   },
   "emmet.excludeLanguages": ["markdown", "typescript"],
   "shellcheck.ignorePatterns": {
-	"**/*.env.*": true
+    "**/*.env.*": true
   },
   "git.enableSmartCommit": true,
   "git.confirmSync": false,
   "cSpell.userWords": ["stylelint", "TSES", "tsserverlibrary"],
   "debug.javascript.defaultRuntimeExecutable": {
-	"pwa-node": "~/.asdf/shims/node"
+    "pwa-node": "~/.asdf/shims/node"
   },
   "terminal.integrated.fontSize": 12,
   "terminal.integrated.cursorBlinking": true,
   "redhat.telemetry.enabled": false,
   "vim.handleKeys": {
-	"<C-p>": false,
-	"<C-d>": true,
-	"<C-s>": false,
-	"<C-z>": false
+    "<C-p>": false,
+    "<C-d>": true,
+    "<C-s>": false,
+    "<C-z>": false
   },
   "[c]": {
-	"editor.defaultFormatter": "ms-vscode.cpptools"
+    "editor.defaultFormatter": "ms-vscode.cpptools"
   },
   "C_Cpp.clang_format_style": "{ BasedOnStyle: LLVM, IndentWidth: 4, UseTab: Never, BreakBeforeBraces: Attach, AllowShortFunctionsOnASingleLine: None, ColumnLimit: 0 }",
   "react-native-tools.showUserTips": false,
   "settingsSync.ignoredExtensions": [
-	"undefined_publisher.vscode-npm-workspaces"
+    "undefined_publisher.vscode-npm-workspaces"
   ],
   "conventionalCommits.showNewVersionNotes": false,
   "vim.shell": "/usr/bin/zsh",
@@ -147,189 +152,190 @@
   "vim.useSystemClipboard": true,
   "vim.leader": "<space>",
   "vim.normalModeKeyBindings": [
-	// Surround
-	{
-	  "before": ["s"],
-	  "after": []
-	},
-	{
-	  "before": ["s", "d"],
-	  "after": ["d", "s"]
-	},
-	{
-	  "before": ["s", "r"],
-	  "after": ["c", "s"]
-	},
-	{
-	  "before": ["s", "a"],
-	  "after": ["y", "s"]
-	}
+    // Surround
+    {
+      "before": ["s"],
+      "after": []
+    },
+    {
+      "before": ["s", "d"],
+      "after": ["d", "s"]
+    },
+    {
+      "before": ["s", "r"],
+      "after": ["c", "s"]
+    },
+    {
+      "before": ["s", "a"],
+      "after": ["y", "s"]
+    }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
-	// Core
-	{
-	  "before": ["<leader>", "h"],
-	  "commands": [":nohl"]
-	},
+    // Core
+    {
+      "before": ["<leader>", "h"],
+      "commands": [":nohl"]
+    },
 
-	// Buffers
-	{
-	  "before": ["<leader>", "f", "e"],
-	  "commands": ["workbench.action.showAllEditors"]
-	},
-	{
-	  "before": ["<leader>", "b", "d"],
-	  "commands": ["workbench.action.closeActiveEditor"]
-	},
-	{
-	  "before": ["<leader>", "b", "a"],
-	  "commands": ["openEditors.closeAll"]
-	},
-	{
-	  "before": ["<leader>", "b", "l"],
-	  "commands": ["workbench.action.closeEditorsToTheRight"]
-	},
-	{
-	  "before": ["<leader>", "b", "h"],
-	  "commands": ["workbench.action.closeEditorsToTheLeft"]
-	},
-	{
-	  "before": ["<leader>", "b", "o"],
-	  "commands": ["workbench.action.closeOtherEditors"]
-	},
-	{
-	  "before": ["[", "b"],
-	  "commands": ["workbench.action.previousEditor"]
-	},
-	{
-	  "before": ["]", "b"],
-	  "commands": ["workbench.action.nextEditor"]
-	},
+    // Buffers
+    {
+      "before": ["<leader>", "f", "e"],
+      "commands": ["workbench.action.showAllEditors"]
+    },
+    {
+      "before": ["<leader>", "b", "d"],
+      "commands": ["workbench.action.closeActiveEditor"]
+    },
+    {
+      "before": ["<leader>", "b", "a"],
+      "commands": ["openEditors.closeAll"]
+    },
+    {
+      "before": ["<leader>", "b", "l"],
+      "commands": ["workbench.action.closeEditorsToTheRight"]
+    },
+    {
+      "before": ["<leader>", "b", "h"],
+      "commands": ["workbench.action.closeEditorsToTheLeft"]
+    },
+    {
+      "before": ["<leader>", "b", "o"],
+      "commands": ["workbench.action.closeOtherEditors"]
+    },
+    {
+      "before": ["[", "b"],
+      "commands": ["workbench.action.previousEditor"]
+    },
+    {
+      "before": ["]", "b"],
+      "commands": ["workbench.action.nextEditor"]
+    },
 
-	// LSP
-	{
-	  "before": ["g", "r", "n"],
-	  "commands": ["editor.action.rename"],
-	  "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
-	},
-	{
-	  "before": ["g", "d"],
-	  "commands": ["editor.action.revealDefinition"]
-	},
-	{
-	  "before": ["g", "r", "r"],
-	  "commands": ["editor.action.goToReferences"]
-	},
-	{
-	  "before": ["Shift+K"],
-	  "commands": ["editor.action.showHover"]
-	},
-	{
-	  "before": ["ctrl+w", "ctrl+d"],
-	  "commands": ["editor.action.showHover"],
-	  "when": "editorTextFocus"
-	},
+    // LSP
+    {
+      "before": ["g", "r", "n"],
+      "commands": ["editor.action.rename"],
+      "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+    },
+    {
+      "before": ["g", "d"],
+      "commands": ["editor.action.revealDefinition"]
+    },
+    {
+      "before": ["g", "r", "r"],
+      "commands": ["editor.action.goToReferences"]
+    },
+    {
+      "before": ["Shift+K"],
+      "commands": ["editor.action.showHover"]
+    },
+    {
+      "before": ["ctrl+w", "ctrl+d"],
+      "commands": ["editor.action.showHover"],
+      "when": "editorTextFocus"
+    },
 
-	// Files
-	{
-	  "before": ["<leader>", "f", "f"],
-	  "commands": ["workbench.action.quickOpen"]
-	},
-	{
-	  "before": ["g", "r", "a"],
-	  "commands": ["editor.action.quickFix"],
-	  "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
-	},
-	{
-	  "before": ["<leader>", "e"],
-	  "commands": ["workbench.action.toggleSidebarVisibility"]
-	},
+    // Files
+    {
+      "before": ["<leader>", "f", "f"],
+      "commands": ["workbench.action.quickOpen"]
+    },
+    {
+      "before": ["g", "r", "a"],
+      "commands": ["editor.action.quickFix"],
+      "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
+    },
+    {
+      "before": ["<leader>", "e"],
+      "commands": ["workbench.action.toggleSidebarVisibility"]
+    },
 
-	// Diagnostics
-	{
-	  "before": ["]", "d"],
-	  "commands": ["editor.action.marker.next"],
-	  "when": "editorTextFocus"
-	},
-	{
-	  "before": ["[", "d"],
-	  "commands": ["editor.action.marker.prev"],
-	  "when": "editorTextFocus"
-	},
-	{
-	  "before": ["]", "e"],
-	  "commands": ["go-to-next-error.next.error"],
-	  "when": "editorFocus"
-	},
-	{
-	  "before": ["[", "e"],
-	  "commands": ["go-to-next-error.prev.error"],
-	  "when": "editorFocus"
-	},
-	{
-	  "before": ["]", "w"],
-	  "commands": ["go-to-next-error.next.warning"],
-	  "when": "editorFocus"
-	},
-	{
-	  "before": ["[", "w"],
-	  "commands": ["go-to-next-error.prev.warning"],
-	  "when": "editorFocus"
-	},
+    // Diagnostics
+    {
+      "before": ["]", "d"],
+      "commands": ["editor.action.marker.next"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["[", "d"],
+      "commands": ["editor.action.marker.prev"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["]", "e"],
+      "commands": ["go-to-next-error.next.error"],
+      "when": "editorFocus"
+    },
+    {
+      "before": ["[", "e"],
+      "commands": ["go-to-next-error.prev.error"],
+      "when": "editorFocus"
+    },
+    {
+      "before": ["]", "w"],
+      "commands": ["go-to-next-error.next.warning"],
+      "when": "editorFocus"
+    },
+    {
+      "before": ["[", "w"],
+      "commands": ["go-to-next-error.prev.warning"],
+      "when": "editorFocus"
+    },
 
-	// Grep
-	{
-	  "before": ["<leader>", "f", "s"],
-	  "commands": ["workbench.action.findInFiles"],
-	  "when": "editorTextFocus"
-	},
-	{
-	  "before": ["<leader>", "f", "w"],
-	  "commands": ["extension.searchUnderCursor"],
-	  "when": "editorTextFocus"
-	},
+    // Grep
+    {
+      "before": ["<leader>", "f", "s"],
+      "commands": ["workbench.action.findInFiles"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "f", "w"],
+      "commands": ["extension.searchUnderCursor"],
+      "when": "editorTextFocus"
+    },
 
-	// Git
-	{
-	  "before": ["<leader>", "g", "s"],
-	  "commands": ["workbench.view.scm"],
-	  "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
-	},
+    // Git
+    {
+      "before": ["<leader>", "g", "s"],
+      "commands": ["workbench.view.scm"],
+      "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+    },
 
-	// Debug
-	{
-	  "before": ["<leader>", "d", "b"],
-	  "commands": ["editor.debug.action.toggleBreakpoint"],
-	  "when": "editorTextFocus"
-	},
-	{
-	  "before": ["<leader>", "d", "c"],
-	  "commands": ["workbench.action.debug.continue"],
-	  "when": "editorTextFocus && inDebugMode"
-	},
-	{
-	  "before": ["<leader>", "d", "c"],
-	  "commands": ["workbench.action.debug.selectandstart"],
-	  "when": "editorTextFocus && !inDebugMode"
-	},
-	{
-	  "before": ["<leader>", "d", "w"],
-	  "commands": ["editor.debug.action.showDebugHover"],
-	  "when": "editorTextFocus"
-	},
-	{
-	  "before": ["<leader>", "d", "d"],
-	  "commands": ["workbench.action.debug.disconnect"],
-	  "when": "editorTextFocus"
-	}
+    // Debug
+    {
+      "before": ["<leader>", "d", "b"],
+      "commands": ["editor.debug.action.toggleBreakpoint"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "d", "c"],
+      "commands": ["workbench.action.debug.continue"],
+      "when": "editorTextFocus && inDebugMode"
+    },
+    {
+      "before": ["<leader>", "d", "c"],
+      "commands": ["workbench.action.debug.selectandstart"],
+      "when": "editorTextFocus && !inDebugMode"
+    },
+    {
+      "before": ["<leader>", "d", "w"],
+      "commands": ["editor.debug.action.showDebugHover"],
+      "when": "editorTextFocus"
+    },
+    {
+      "before": ["<leader>", "d", "d"],
+      "commands": ["workbench.action.debug.disconnect"],
+      "when": "editorTextFocus"
+    }
   ],
   "debug.javascript.autoAttachFilter": "always",
   "github.copilot.enable": {
-	"*": false,
-	"plaintext": false,
-	"markdown": false,
-	"scminput": false
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
   },
   "clangd.detectExtensionConflicts": false,
-  "github.copilot.nextEditSuggestions.enabled": true
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "hide-files.files": []
 }
