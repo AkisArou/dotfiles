@@ -784,6 +784,28 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode t))
 
+;;; JTSX
+(use-package jtsx
+  :ensure t
+  :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
+		 ("\\.tsx\\'" . jtsx-tsx-mode)
+		 ("\\.ts\\'" . jtsx-typescript-mode))
+  :commands jtsx-install-treesit-language
+  :hook ((jtsx-jsx-mode . hs-minor-mode)
+		 (jtsx-tsx-mode . hs-minor-mode)
+		 (jtsx-typescript-mode . hs-minor-mode))
+  :custom
+  ;; Optional customizations
+  (js-indent-level 2)
+  (typescript-ts-mode-indent-offset 2)
+  ;; (jtsx-switch-indent-offset 0)
+  ;; (jtsx-indent-statement-block-regarding-standalone-parent nil)
+  ;; (jtsx-jsx-element-move-allow-step-out t)
+  ;; (jtsx-enable-jsx-electric-closing-element t)
+  ;; (jtsx-enable-electric-open-newline-between-jsx-element-tags t)
+  ;; (jtsx-enable-jsx-element-tags-auto-sync nil)
+  ;; (jtsx-enable-all-syntax-highlighting-features t)
+  )
 
 ;;; MARKDOWN-MODE
 ;; Markdown Mode provides support for editing Markdown files in Emacs,
@@ -986,45 +1008,44 @@
   (lsp-lens-enable nil)                                 ;; Disable lens support.
   ;; Semantic settings
   (lsp-semantic-tokens-enable nil)                     ;; Disable semantic tokens.
+  :preface
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+	"Try to parse bytecode instead of json."
+	(or
+	 (when (equal (following-char) ?#)
+	   (let ((bytecode (read (current-buffer))))
+		 (when (byte-code-function-p bytecode)
+		   (funcall bytecode))))
+	 (apply old-fn args)))
+  (advice-add (if (progn (require 'json)
+						 (fboundp 'json-parse-buffer))
+				  'json-parse-buffer
+				'json-read)
+			  :around
+			  #'lsp-booster--advice-json-parse)
+
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+	"Prepend emacs-lsp-booster command to lsp CMD."
+	(let ((orig-result (funcall old-fn cmd test?)))
+	  (if (and (not test?)                             ;; for check lsp-server-present?
+			   (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+			   lsp-use-plists
+			   (not (functionp 'json-rpc-connection))  ;; native json-rpc
+			   (executable-find "emacs-lsp-booster"))
+		  (progn
+			(when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+			  (setcar orig-result command-from-exec-path))
+			(message "Using emacs-lsp-booster for %s!" orig-result)
+			(cons "emacs-lsp-booster" orig-result))
+		orig-result)))
+
+  :init
+  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+  (setq lsp-headerline-breadcrumb-enable nil)
   )
 
 
-(setq lsp-headerline-breadcrumb-enable nil)
 
-;; ----------------------------
-;; LSP Booster advices
-;; ----------------------------
-(defun lsp-booster--advice-json-parse (old-fn &rest args)
-  "Try to parse bytecode instead of json."
-  (or
-   (when (equal (following-char) ?#)
-	 (let ((bytecode (read (current-buffer))))
-	   (when (byte-code-function-p bytecode)
-		 (funcall bytecode))))
-   (apply old-fn args)))
-(advice-add (if (progn (require 'json)
-					   (fboundp 'json-parse-buffer))
-				'json-parse-buffer
-			  'json-read)
-			:around
-			#'lsp-booster--advice-json-parse)
-
-(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-  "Prepend emacs-lsp-booster command to lsp CMD."
-  (let ((orig-result (funcall old-fn cmd test?)))
-	(if (and (not test?)                             ;; for check lsp-server-present?
-			 (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-			 lsp-use-plists
-			 (not (functionp 'json-rpc-connection))  ;; native json-rpc
-			 (executable-find "emacs-lsp-booster"))
-		(progn
-		  (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-			(setcar orig-result command-from-exec-path))
-		  (message "Using emacs-lsp-booster for %s!" orig-result)
-		  (cons "emacs-lsp-booster" orig-result))
-	  orig-result)))
-
-(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 
 
 (use-package lsp-vtsls
