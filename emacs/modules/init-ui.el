@@ -19,9 +19,7 @@
   (doom-modeline-buffer-name t)                        ;; Show the buffer name in the mode line.
   (doom-modeline-vcs-max-length 25)                    ;; Limit the version control system (VCS) branch name length to 25 characters.
   :config
-  (if ek-use-nerd-fonts                                ;; Check if nerd fonts are being used.
-	  (setq doom-modeline-icon t)                      ;; Enable icons in the mode line if nerd fonts are used.
-	(setq doom-modeline-icon nil))                     ;; Disable icons if nerd fonts are not being used.
+  (setq doom-modeline-icon t)
   :hook
   (after-init . doom-modeline-mode))
 
@@ -33,7 +31,6 @@
 ;; enhance the visual appearance of various modes and packages, making it easier to
 ;; distinguish between different file types and functionalities.
 (use-package nerd-icons
-  :if ek-use-nerd-fonts                   ;; Load the package only if the user has configured to use nerd fonts.
   :ensure t                               ;; Ensure the package is installed.
   :straight t
   :defer t)                               ;; Load the package only when needed to improve startup time.
@@ -44,7 +41,6 @@
 ;; providing visual icons for files and directories. This enhances the Dired
 ;; interface by making it easier to identify file types at a glance.
 (use-package nerd-icons-dired
-  :if ek-use-nerd-fonts                   ;; Load the package only if the user has configured to use nerd fonts.
   :ensure t                               ;; Ensure the package is installed.
   :straight t
   :defer t                                ;; Load the package only when needed to improve startup time.
@@ -58,7 +54,6 @@
 ;; `marginalia'. This provides visual cues for the completion candidates,
 ;; making it easier to distinguish between different types of items.
 (use-package nerd-icons-completion
-  :if ek-use-nerd-fonts                   ;; Load the package only if the user has configured to use nerd fonts.
   :ensure t                               ;; Ensure the package is installed.
   :straight t
   :after (:all nerd-icons marginalia)     ;; Load after `nerd-icons' and `marginalia' to ensure proper integration.

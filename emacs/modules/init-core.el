@@ -8,20 +8,7 @@
 (put 'compile-command 'safe-local-variable
 	 (lambda (v) (stringp v)))
 
-;; Define a global customizable variable `ek-use-nerd-fonts' to control the use of
-;; Nerd Fonts symbols throughout the configuration. This boolean variable allows
-;; users to easily enable or disable the use of symbols from Nerd Fonts, providing
-;; flexibility in appearance settings. By setting it to `t', we enable Nerd Fonts
-;; symbols; setting it to `nil' would disable them.
-(defcustom ek-use-nerd-fonts t
-  "Configuration for using Nerd Fonts Symbols."
-  :type 'boolean
-  :group 'appearance)
-
-
-
 ;;; EMACS
-
 (use-package emacs
   :ensure nil
   :custom

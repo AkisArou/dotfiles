@@ -136,8 +136,7 @@
 
 
   :config
-  (if ek-use-nerd-fonts
-	  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
 
   (defun my/corfu-popupinfo-skip-tailwind (orig-fun &rest args)
 	"Skip popupinfo for Module type completions (kind 9)."
@@ -189,9 +188,7 @@
 
 
 ;;; NERD-ICONS-CORFU
-;; Provides Nerd Icons to be used with CORFU.
 (use-package nerd-icons-corfu
-  :if ek-use-nerd-fonts
   :ensure t
   :straight t
   :after (:all corfu))

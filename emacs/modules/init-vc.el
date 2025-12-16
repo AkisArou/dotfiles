@@ -6,14 +6,6 @@
 ;;; Code:
 
 ;;; VC
-;; The VC (Version Control) package is included here for awareness and completeness.
-;; While its support for Git is limited and generally considered subpar, it is good to know
-;; that it exists and can be used for other version control systems like Mercurial,
-;; Subversion, and Bazaar.
-;; Magit, which is often regarded as the "father" of Neogit, will be configured later
-;; for an enhanced Git experience.
-;; The keybindings below serve as a reminder of some common VC commands.
-;; But don't worry, you can always use `M-x command' :)
 (use-package vc
   :ensure nil                        ;; This is built-in, no need to fetch it.
   :defer t
@@ -55,11 +47,6 @@
 
 
 ;;; SMERGE
-;; Smerge is included for resolving merge conflicts in files. It provides a simple interface
-;; to help you keep changes from either the upper or lower version during a merge.
-;; This package is built-in, so there's no need to fetch it separately.
-;; The keybindings below did not needed to be setted, are here just to show
-;; you how to work with it in case you are curious about it.
 (use-package smerge-mode
   :ensure nil                                  ;; This is built-in, no need to fetch it.
   :defer t
@@ -89,17 +76,6 @@
 
 
 ;;; DIFF-HL
-;; The `diff-hl' package provides visual indicators for version control changes
-;; directly in the margin of the buffer, showing lines added, deleted, or changed.
-;; This is useful for tracking modifications while you edit files. When enabled,
-;; it automatically activates in every buffer that has a corresponding version
-;; control backend, offering a seamless experience.
-;;
-;; In comparison, Neovim users often rely on plugins like `gitsigns.nvim' or
-;; `vim-signify', which provide similar functionalities by displaying Git
-;; changes in the gutter and offer additional features like highlighting
-;; changed lines and displaying blame information. `diff-hl' aims to provide
-;; a comparable experience in Emacs with its own set of customizations.
 (use-package diff-hl
   :defer t
   :straight t
@@ -119,28 +95,12 @@
 
 
 ;;; MAGIT
-;; `magit' is a powerful Git interface for Emacs that provides a complete
-;; set of features to manage Git repositories. With its intuitive interface,
-;; you can easily stage, commit, branch, merge, and perform other Git
-;; operations directly from Emacs. Magit’s powerful UI allows for a seamless
-;; workflow, enabling you to visualize your repository's history and manage
-;; changes efficiently.
-;;
-;; In the Neovim ecosystem, similar functionality is provided by plugins such as
-;; `fugitive.vim', which offers a robust Git integration with commands that
-;; allow you to perform Git operations directly within Neovim. Another popular
-;; option is `neogit', which provides a more modern and user-friendly interface
-;; for Git commands in Neovim, leveraging features like diff views and staging
-;; changes in a visual format. Both of these plugins aim to replicate and
-;; extend the powerful capabilities that Magit offers in Emacs.
 (use-package magit
   :ensure t
   :straight t
   :defer t
   :config
-  (if ek-use-nerd-fonts   ;; Check if nerd fonts are being used
-	  (setopt magit-format-file-function #'magit-format-file-nerd-icons)) ;; Turns on magit nerd-icons
-  )
+  (setopt magit-format-file-function #'magit-format-file-nerd-icons))
 
 
 ;;; CONSULT-GH
