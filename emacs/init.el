@@ -140,7 +140,6 @@
 
   (electric-pair-mode 1)
   (electric-indent-mode 1)
-  (electric-layout-mode 1)
   (superword-mode 1)
 
   ;; ───────────────────────────────────────────────────────────────
@@ -164,6 +163,29 @@
   (setq tsx-indent-offset 2)
   (setq json-ts-mode-indent-offset 2)
   (setq yaml-indent-offset 2)
+
+  (defun my-typescript-smart-newline ()
+	"Smart newline handling for TypeScript with proper brace indentation."
+	(interactive)
+	(let ((in-braces (and (eq (char-before) ?{)
+						  (eq (char-after) ?}))))
+	  (newline-and-indent)
+	  (when in-braces
+		(save-excursion
+		  (forward-line 1)
+		  (let ((target-col (save-excursion
+							  (forward-line -2)
+							  (back-to-indentation)
+							  (current-column))))
+			(beginning-of-line)
+			(skip-chars-forward " \t")
+			(delete-region (line-beginning-position) (point))
+			(indent-to target-col))))))
+
+  (dolist (hook '(typescript-ts-mode-hook tsx-ts-mode-hook js-ts-mode-hook))
+	(add-hook hook
+			  (lambda ()
+				(local-set-key (kbd "RET") 'my-typescript-smart-newline))))
 
   ;; ───────────────────────────────────────────────────────────────
 
