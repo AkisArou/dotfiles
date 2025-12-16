@@ -1887,8 +1887,7 @@
 
 ;;; YAML
 (use-package yaml
-  :ensure t
-  :defer t)
+  :ensure t)
 
 
 ;;; CONSULT-GH

@@ -2,6 +2,9 @@
   name = AkisArou
   email = akisarou90@gmail.com
 
+[github]
+	user = AkisArou
+
 [includeIf "gitdir:~/nable-solutions/.git"]
   path = ./config-nable
 
@@ -30,7 +33,7 @@
   # tokyonight night
   # minus
   minus-style                   = "#a85b63"
-  minus-emph-style              = syntax "#4a272f" 
+  minus-emph-style              = syntax "#4a272f"
   minus-empty-line-marker-style = "#4a272f"
   line-numbers-minus-style      = "#a85b63"
   # plus
@@ -45,7 +48,7 @@
   diffFilter = delta --color-only
 
 [merge]
-  tool = nvimdiff 
+  tool = nvimdiff
   conflictStyle = zdiff3
 
 [mergetool]
@@ -60,7 +63,7 @@
   colorMoved = default
 
 [difftool]
-    prompt = false
+	prompt = false
 
 [difftool "nvimdiff"]
   cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
@@ -87,7 +90,7 @@
   # Disable decorate for reflog
   # (because there is no dedicated `reflog` section available)
   decorate = false
-	date = format-local:%A %d/%m/%Y %H:%M 
+	date = format-local:%A %d/%m/%Y %H:%M
 
 [pull]
   rebase = merges
