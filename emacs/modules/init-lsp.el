@@ -219,7 +219,7 @@
 									   (lsp-workspace-root))))
 	(if (file-executable-p server-path)
 		server-path
-	  (error "oxc_language_server not found in node_modules/.bin"))))
+	  (error "Oxc_language_server not found in node_modules/.bin"))))
 
 (with-eval-after-load 'lsp-mode
   (lsp-register-client
