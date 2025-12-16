@@ -138,8 +138,10 @@
 		maximum-scroll-margin 0.5
 		scroll-margin 99999)
 
-  (electric-pair-mode 1)          ;; Auto-insert matching delimiters
-  (superword-mode 1)              ;; Treats words with dash/underscore as single words
+  (electric-pair-mode 1)
+  (electric-indent-mode 1)
+  (electric-layout-mode 1)
+  (superword-mode 1)
 
   ;; ───────────────────────────────────────────────────────────────
   ;; ★ 2-space indentation for JS, TS, TSX, JSON, YAML
@@ -175,7 +177,6 @@
   (savehist-mode 1)
   (save-place-mode 1)
   (file-name-shadow-mode 1)
-  (electric-indent-mode -1)
 
   ;; Default file encoding
   (modify-coding-system-alist 'file "" 'utf-8))
