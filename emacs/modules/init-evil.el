@@ -344,6 +344,13 @@
   (define-key evil-outer-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.outer"))
   (define-key evil-inner-text-objects-map "f" (evil-textobj-tree-sitter-get-textobj "function.inner")))
 
+;; EVIL-ANZU
+(use-package evil-anzu
+  :after evil
+  :ensure t
+  :init
+  (global-anzu-mode 1))
+
 
 ;;; HIGHLIGHT VIM OP
 (defface my/flash-face
