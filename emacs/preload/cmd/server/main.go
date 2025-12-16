@@ -68,7 +68,6 @@ func handleConn(s *State, c net.Conn) {
 		switch {
 		case line == "REQUEST_ID":
 			handleRequestID(s, c)
-
 		default:
 			c.Write([]byte("ERR unknown command\n"))
 		}
@@ -93,5 +92,11 @@ func createDaemon() DaemonId {
 		panic("No daemon created")
 	}
 
+	// Option A: fire-and-reap to avoid zombie processes
+	go func() {
+		_ = cmd.Wait()
+	}()
+
 	return id
 }
+
