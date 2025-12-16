@@ -784,29 +784,6 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode t))
 
-;;; JTSX
-(use-package jtsx
-  :ensure t
-  :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
-		 ("\\.tsx\\'" . jtsx-tsx-mode)
-		 ("\\.ts\\'" . jtsx-typescript-mode))
-  :commands jtsx-install-treesit-language
-  :hook ((jtsx-jsx-mode . hs-minor-mode)
-		 (jtsx-tsx-mode . hs-minor-mode)
-		 (jtsx-typescript-mode . hs-minor-mode))
-  :custom
-  ;; Optional customizations
-  (js-indent-level 2)
-  (typescript-ts-mode-indent-offset 2)
-  ;; (jtsx-switch-indent-offset 0)
-  ;; (jtsx-indent-statement-block-regarding-standalone-parent nil)
-  ;; (jtsx-jsx-element-move-allow-step-out t)
-  ;; (jtsx-enable-jsx-electric-closing-element t)
-  ;; (jtsx-enable-electric-open-newline-between-jsx-element-tags t)
-  ;; (jtsx-enable-jsx-element-tags-auto-sync nil)
-  ;; (jtsx-enable-all-syntax-highlighting-features t)
-  )
-
 ;;; MARKDOWN-MODE
 ;; Markdown Mode provides support for editing Markdown files in Emacs,
 ;; enabling features like syntax highlighting, previews, and more.
