@@ -219,5 +219,16 @@
   (setq lazy-count-suffix-format nil)          ;; Disable suffix formatting for match count.
   (setq search-whitespace-regexp ".*?"))        ;; Allow searching across whitespace.
 
+
+;;; MAN
+(defun my-man-pager ()
+  "Act as a man pager for emacsclient."
+  (require 'man)
+  (let ((Man-notify-method 'pushy))
+	(Man-mode)))
+
+(setq Man-notify-method 'pushy)
+
+
 (provide 'init-core)
 ;;; init-core.el ends here
