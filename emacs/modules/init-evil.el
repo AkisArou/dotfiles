@@ -30,6 +30,7 @@
 
   (evil-set-undo-system 'undo-tree)   ;; Uses the undo-tree package as the default undo system
 
+  (define-key evil-motion-state-map (kbd "C-z") nil)
   (define-key evil-insert-state-map (kbd "C-e") nil)
 
   ;; Set the leader key to space for easier access to custom commands. (setq evil-want-leader t)
