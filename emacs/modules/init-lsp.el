@@ -144,6 +144,7 @@
 
 
 
+;;; LSP-VTSLS
 (use-package lsp-vtsls
   :straight (lsp-vtsls
 			 :type git
@@ -160,20 +161,22 @@
 
   ;; formatting disabled
   (lsp-register-custom-settings
-   '(("typescript.format.enable" nil)
-	 ("javascript.format.enable" nil)))
+   '(("typescript.format.enable" nil t)
+	 ("javascript.format.enable" nil t)))
 
   ;; TS/JS preferences
-  (setq ts/js-preferences
-		'(:quote
-		  (:importModuleSpecifier "relative"
-								  :quoteStyle "single"
-								  :semi "remove")))
+  (let ((preferences
+		 (list :includePackageJsonAutoImports "on"
+			   :importModuleSpecifier "non-relative"
+			   :importModuleSpecifierEnding "js"
+			   :useAliasesForRenames nil
+			   :autoImportSpecifierExcludeRegexes
+			   (vector "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$"))))
+	(lsp-register-custom-settings
+	 `(("typescript.preferences" ,preferences t)
+	   ("javascript.preferences" ,preferences t)))))
 
-  (lsp-register-custom-settings
-   `(("typescript.preferences" ,ts/js-preferences)
-	 ("javascript.preferences" ,ts/js-preferences))))
-
+;; TODO: move
 (add-hook 'dired-mode-hook #'lsp-dired-mode)
 
 
