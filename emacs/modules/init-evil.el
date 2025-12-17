@@ -110,11 +110,13 @@
   (evil-define-key 'normal 'global (kbd "[ d") 'flycheck-previous-error)
 
   ;; LSP
-  (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
+  (evil-define-key 'normal 'global (kbd "gd") 'lsp-find-definition)
   (evil-define-key 'normal 'global (kbd "grr") 'lsp-find-references)
-  (evil-define-key 'normal 'global (kbd "grn") 'lsp-rename)
-  (evil-define-key 'normal 'global (kbd "gI") 'lsp-find-implementation)
+  (evil-define-key 'normal 'global (kbd "gD") 'lsp-find-declaration)
+  (evil-define-key 'normal 'global (kbd "gri") 'lsp-find-implementation)
+  (evil-define-key 'normal 'global (kbd "grt") 'lsp-find-type-definition)
   (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
+  (evil-define-key 'normal 'global (kbd "grn") 'lsp-rename)
 
   ;; Notmuch
   (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch)
