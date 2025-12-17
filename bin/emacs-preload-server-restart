@@ -1,0 +1,6 @@
+#!/usr/bin/zsh
+
+killall -q emacs
+killall -q emacs-preload-server
+
+setsid emacs-preload-server >/dev/null 2>&1 </dev/null &
