@@ -3,20 +3,20 @@ vim.cmd("packadd nvim.undotree")
 
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
-    local name = event.data.spec.name
+	local name = event.data.spec.name
 
-    if name == "blink.cmp" then
-      local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
+	if name == "blink.cmp" then
+	  local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
 
-      vim.notify("\nBuilding blink.cmp at " .. plugin_path, vim.log.levels.INFO)
-      local result = vim.system({ "cargo", "build", "--release" }, { cwd = plugin_path }):wait()
+	  vim.notify("\nBuilding blink.cmp at " .. plugin_path, vim.log.levels.INFO)
+	  local result = vim.system({ "cargo", "build", "--release" }, { cwd = plugin_path }):wait()
 
-      if result.code == 0 then
-        vim.notify("\nBuilding blink.cmp done", vim.log.levels.INFO)
-      else
-        vim.notify("\nBuilding blink.cmp failed", vim.log.levels.ERROR)
-      end
-    end
+	  if result.code == 0 then
+		vim.notify("\nBuilding blink.cmp done", vim.log.levels.INFO)
+	  else
+		vim.notify("\nBuilding blink.cmp failed", vim.log.levels.ERROR)
+	  end
+	end
   end,
 })
 
@@ -52,8 +52,6 @@ vim.pack.add({
   github("mfussenegger/nvim-dap"),
 
   github("ibhagwan/fzf-lua"),
-
-  github("pwntester/octo.nvim"),
 
   github("lewis6991/gitsigns.nvim"),
 
@@ -93,7 +91,6 @@ vim.pack.add({
 
   github("folke/which-key.nvim"),
 
-  -- github("mikavilpas/yazi.nvim"),
   github("stevearc/oil.nvim"),
   github("JezerM/oil-lsp-diagnostics.nvim"),
   github("refractalize/oil-git-status.nvim"),
@@ -108,17 +105,6 @@ vim.pack.add({
   github("yioneko/nvim-vtsls"),
 
   github("folke/persistence.nvim"),
-
-  github("nvim-orgmode/orgmode"),
-  github("BartSte/nvim-khalorg"),
-})
-
-vim.pack.add({
-  github("felipec/notmuch-vim"),
-}, vim.env.NVIM_EMAIL ~= nil and {} or {
-  load = function()
-    return false
-  end,
 })
 
 -- Instant load
@@ -130,7 +116,6 @@ vim.schedule(function()
   require("plugins.treesitter")
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
-  -- require("plugins.yazi")
   require("plugins.oil")
   require("plugins.fzf")
   require("plugins.lsp.conform")
@@ -145,16 +130,12 @@ vim.schedule(function()
   require("plugins.highlighturl")
   require("plugins.nvim-colorizer")
   require("plugins.mini")
-  require("plugins.octo")
   require("plugins.snacks")
   require("plugins.todo-comments")
   require("plugins.which-key")
   require("plugins.template-string")
   require("plugins.fidget")
   require("plugins.persistence")
-
-  vim.cmd("packadd notmuch-vim")
-  require("plugins.orgmode")
 end)
 
 -- Autocmd load
@@ -162,7 +143,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
   pattern = { "*test.ts", "*test.tsx", "*test.js", "*test.jsx" },
   callback = function()
-    require("plugins.neotest")
+	require("plugins.neotest")
   end,
 })
 
@@ -170,7 +151,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
   pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
   callback = function()
-    require("plugins.schemastore")
+	require("plugins.schemastore")
   end,
 })
 
@@ -178,7 +159,7 @@ vim.api.nvim_create_autocmd("InsertEnter", {
   once = true,
   pattern = "*",
   callback = function()
-    require("plugins.neotab")
-    require("plugins.vim-visual-multi")
+	require("plugins.neotab")
+	require("plugins.vim-visual-multi")
   end,
 })

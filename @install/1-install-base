@@ -53,7 +53,6 @@ packages=(
   "docker"
   "docker-compose"
   "dunst"
-  "elinks"
   "eza"
   "fd"
   "ffmpeg"
@@ -118,7 +117,6 @@ packages=(
   "rofi"
   "rofi-emoji"
   "rsync"
-  "ruby-mail"
   "rustup"
   "scrcpy"
   "sshpass"
@@ -161,14 +159,14 @@ fi
 # Do not 'install' both, because of potential downsides
 if gpu_has_amd; then
   packages+=(
-    "radeontop"
-    "vulkan-radeon"
+	"radeontop"
+	"vulkan-radeon"
   )
 elif gpu_has_intel; then
   packages+=(
-    "intel-gpu-tools"
-    "intel-media-driver"
-    "vulkan-intel"
+	"intel-gpu-tools"
+	"intel-media-driver"
+	"vulkan-intel"
   )
 fi
 

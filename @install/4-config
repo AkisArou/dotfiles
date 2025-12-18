@@ -18,7 +18,6 @@ sudo systemctl enable --now power-profiles-daemon
 systemctl enable --user --now goimapnotify
 systemctl enable --user --now mbsync.timer
 systemctl enable --user --now vdirsyncer.timer
-systemctl enable --user --now emacs-preload.service
 
 print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
@@ -127,22 +126,19 @@ if [[ -z "$remote_url" ]]; then
   git remote add origin git@github.com:AkisArou/dotfiles.git
 else
   if [[ "$remote_url" != git@github.com:* ]]; then
-    echo "Remote origin is not configured via SSH."
-    echo "Removing HTTP origin..."
-    git remote remove origin
+	echo "Remote origin is not configured via SSH."
+	echo "Removing HTTP origin..."
+	git remote remove origin
 
-    echo "Adding SSH origin..."
-    git remote add origin git@github.com:AkisArou/dotfiles.git
+	echo "Adding SSH origin..."
+	git remote add origin git@github.com:AkisArou/dotfiles.git
 
-    echo "Setting upstream branch of main to origin/main..."
-    git branch --set-upstream-to=origin/main main
+	echo "Setting upstream branch of main to origin/main..."
+	git branch --set-upstream-to=origin/main main
   else
-    echo "Remote origin is already configured via SSH."
+	echo "Remote origin is already configured via SSH."
   fi
 fi
-
-print_info "Installing ruby gems..."
-gem install neovim
 
 print_info "Installing python bins with pipx..."
 pipx install khalorg
