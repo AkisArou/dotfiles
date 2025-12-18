@@ -19,7 +19,10 @@
   :init (flycheck-color-mode-line-mode))
 
 (with-eval-after-load 'flycheck
-  (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
+  (add-hook 'flycheck-mode-hook
+            (lambda ()
+              (unless (derived-mode-p 'emacs-lisp-mode)
+                (flycheck-color-mode-line-mode 1))))
 
   (require 'flycheck-posframe)
   (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode))
