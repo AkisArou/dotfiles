@@ -7,7 +7,7 @@
 
 ;; Disable prompts for local variables and eval
 (setq enable-local-variables :all
-	  enable-local-eval t)
+      enable-local-eval t)
 
 
 ;;; EMACS
@@ -46,7 +46,7 @@
   :config
   ;; Skip special buffers when cycling with [b and ]b
   (defun skip-these-buffers (_window buffer _bury-or-kill)
-	(string-match "\\*[^*]+\\*" (buffer-name buffer)))
+    (string-match "\\*[^*]+\\*" (buffer-name buffer)))
   (setq switch-to-prev-buffer-skip 'skip-these-buffers)
 
   ;; Custom file
@@ -58,9 +58,9 @@
 
   ;; Centered cursor scrolling behavior
   (setq scroll-preserve-screen-position t
-		scroll-conservatively 0
-		maximum-scroll-margin 0.5
-		scroll-margin 99999)
+        scroll-conservatively 0
+        maximum-scroll-margin 0.5
+        scroll-margin 99999)
 
   (electric-pair-mode 1)
   (electric-indent-mode 1)
@@ -71,45 +71,59 @@
   ;; ───────────────────────────────────────────────────────────────
 
   ;; Modes that should always use spaces + 2-width tabs
-  (dolist (hook '(js-ts-mode-hook
-				  json-ts-mode-hook
-				  typescript-ts-mode-hook
-				  tsx-ts-mode-hook
-				  yaml-ts-mode-hook))
-	(add-hook hook
-			  (lambda ()
-				(setq-local indent-tabs-mode nil)
-				(setq-local tab-width 2))))
+  (setq-default indent-tabs-mode nil) ; always use spaces
+  (setq-default tab-width 2)
+  (setq-default standard-indent 2)
+
+  (add-hook 'prog-mode-hook
+            (lambda ()
+              (setq-local indent-tabs-mode nil)
+              (setq-local tab-width 2)))
+
 
   ;; Mode-specific indent offsets
-  (setq js-indent-level 2)
-  (setq typescript-ts-mode-indent-offset 2)
-  (setq tsx-indent-offset 2)
-  (setq json-ts-mode-indent-offset 2)
-  (setq yaml-indent-offset 2)
+  (setq
+   c-basic-offset 2
+   js-indent-level 2
+   typescript-indent-level 2
+   typescript-ts-mode-indent-offset 2
+   tsx-indent-offset 2
+   json-ts-mode-indent-offset 2
+   yaml-indent-offset 2
+   python-indent-offset 2
+   ruby-indent-level 2
+   sh-basic-offset 2
+   css-indent-offset 2
+   sgml-basic-offset 2 ; HTML/XML
+   yaml-indent-offset 2
+   web-mode-markup-indent-offset 2
+   web-mode-css-indent-offset 2
+   web-mode-code-indent-offset 2
+   lisp-body-indent 2)
+
 
   (defun my-typescript-smart-newline ()
-	"Smart newline handling for TypeScript with proper brace indentation."
-	(interactive)
-	(let ((in-braces (and (eq (char-before) ?{)
-						  (eq (char-after) ?}))))
-	  (newline-and-indent)
-	  (when in-braces
-		(save-excursion
-		  (forward-line 1)
-		  (let ((target-col (save-excursion
-							  (forward-line -2)
-							  (back-to-indentation)
-							  (current-column))))
-			(beginning-of-line)
-			(skip-chars-forward " \t")
-			(delete-region (line-beginning-position) (point))
-			(indent-to target-col))))))
+    "Smart newline handling for TypeScript with proper brace indentation."
+    (interactive)
+    (let ((in-braces (and (eq (char-before) ?{)
+                          (eq (char-after) ?}))))
+      (newline-and-indent)
+      (when in-braces
+        (save-excursion
+          (forward-line 1)
+          (let ((target-col (save-excursion
+                              (forward-line -2)
+                              (back-to-indentation)
+                              (current-column))))
+            (beginning-of-line)
+            (skip-chars-forward " \t")
+            (delete-region (line-beginning-position) (point))
+            (indent-to target-col))))))
 
   (dolist (hook '(typescript-ts-mode-hook tsx-ts-mode-hook js-ts-mode-hook))
-	(add-hook hook
-			  (lambda ()
-				(local-set-key (kbd "RET") 'my-typescript-smart-newline))))
+    (add-hook hook
+              (lambda ()
+                (local-set-key (kbd "RET") 'my-typescript-smart-newline))))
 
   ;; ───────────────────────────────────────────────────────────────
 
@@ -128,18 +142,18 @@
   (modify-coding-system-alist 'file "" 'utf-8))
 
 (add-hook 'minibuffer-setup-hook (lambda ()
-								   (local-set-key (kbd "C-c") 'abort-minibuffers)))
+                                   (local-set-key (kbd "C-c") 'abort-minibuffers)))
 
 (defun local/postprocess-compilation-buffer ()
   "Clear compilation buffer if terminal clear sequences appear, then apply ANSI colors."
   (let ((inhibit-read-only t))
-	(goto-char compilation-filter-start)
-	;; Check for clear screen sequences at the start of new output
-	(when (looking-at "\033\\[2J\033\\[3J\033\\[H")
-	  ;; Clear the entire buffer
-	  (delete-region (point-min) (point-max)))
-	;; Apply ANSI colors to the new output
-	(ansi-color-apply-on-region compilation-filter-start (point-max))))
+    (goto-char compilation-filter-start)
+    ;; Check for clear screen sequences at the start of new output
+    (when (looking-at "\033\\[2J\033\\[3J\033\\[H")
+      ;; Clear the entire buffer
+      (delete-region (point-min) (point-max)))
+    ;; Apply ANSI colors to the new output
+    (ansi-color-apply-on-region compilation-filter-start (point-max))))
 
 (add-hook 'compilation-filter-hook 'local/postprocess-compilation-buffer)
 
@@ -165,26 +179,26 @@
   :custom
   (display-buffer-alist
    '(
-	 ;; ("\\*.*e?shell\\*"
-	 ;;  (display-buffer-in-side-window)
-	 ;;  (window-height . 0.25)
-	 ;;  (side . bottom)
-	 ;;  (slot . -1))
+     ;; ("\\*.*e?shell\\*"
+     ;;  (display-buffer-in-side-window)
+     ;;  (window-height . 0.25)
+     ;;  (side . bottom)
+     ;;  (slot . -1))
 
-	 ;; ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
-	 ;;  (display-buffer-in-side-window)
-	 ;;  (window-height . 0.25)
-	 ;;  (side . bottom)
-	 ;;  (slot . 0))
+     ;; ("\\*\\(Backtrace\\|Warnings\\|Compile-Log\\|[Hh]elp\\|Messages\\|Bookmark List\\|Ibuffer\\|Occur\\|eldoc.*\\)\\*"
+     ;;  (display-buffer-in-side-window)
+     ;;  (window-height . 0.25)
+     ;;  (side . bottom)
+     ;;  (slot . 0))
 
-	 ;; Example configuration for the LSP help buffer,
-	 ;; keeps it always on bottom using 25% of the available space:
-	 ("\\*\\(lsp-help\\)\\*"
-	  (display-buffer-in-side-window)
-	  (window-height . 0.25)
-	  (side . bottom)
-	  (slot . 0))
-	 )))
+     ;; Example configuration for the LSP help buffer,
+     ;; keeps it always on bottom using 25% of the available space:
+     ("\\*\\(lsp-help\\)\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 0))
+     )))
 
 ;;; CLIPBOARD
 (use-package clipboard)
@@ -193,8 +207,8 @@
   :ensure t
   :defer t
   :hook ((after-init . (lambda ()
-						 (when (getenv "SSH_TTY")
-						   (global-clipetty-mode 1))))))
+                         (when (getenv "SSH_TTY")
+                           (global-clipetty-mode 1))))))
 
 
 ;;; POSFRAME
@@ -225,7 +239,7 @@
   "Act as a man pager for emacsclient."
   (require 'man)
   (let ((Man-notify-method 'pushy))
-	(Man-mode)))
+    (Man-mode)))
 
 (setq Man-notify-method 'pushy)
 
