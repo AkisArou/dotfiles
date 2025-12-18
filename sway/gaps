@@ -1,5 +1,5 @@
 #!/usr/bin/zsh
 
 if [ "$ULTRAWIDE" ]; then
-  swaymsg "gaps inner 0; gaps horizontal 1700; smart_gaps inverse_outer"
+  swaymsg "gaps inner 6; gaps horizontal 1700; smart_gaps inverse_outer"
 fi
