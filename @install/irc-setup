@@ -1,0 +1,16 @@
+1. help purple (Those entries should exist)
+<root> * eionrobb-msteams-personal (Teams (Personal))
+<root> * eionrobb-msteams (Teams (Work and School))
+
+2. account add eionrobb-msteams <email>
+
+3. account <email> set nick_format %full_name
+   then enter: save
+
+4. account <email> on
+
+5. Register locally for Bitlbee:
+   register <password>
+
+6. Next connection:
+   identify <password> or /oper <username> <password>

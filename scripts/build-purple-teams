@@ -1,0 +1,14 @@
+#!/bin/sh
+
+INSTALL_DIR="$HOME/purple-teams"
+REPO_URL="https://github.com/EionRobb/purple-teams"
+NAME="Purple-Teams"
+
+build_purple_teams() {
+  make
+  sudo make install
+}
+
+BUILD_CALLBACK="build_purple_teams"
+
+. "$HOME"/dotfiles/scripts/build-from-source
