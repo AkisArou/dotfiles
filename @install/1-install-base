@@ -147,7 +147,6 @@ packages=(
   "xdg-desktop-portal-gtk"
   "xdg-user-dirs"
   "xdg-utils"
-  "libpurple"
   "yazi-git"
   "zinit-git"
   "zsh"

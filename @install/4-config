@@ -15,7 +15,6 @@ sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
-sudo systemctl enable --now bitlbee
 systemctl enable --user --now goimapnotify
 systemctl enable --user --now mbsync.timer
 systemctl enable --user --now vdirsyncer.timer
