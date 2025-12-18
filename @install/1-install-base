@@ -81,6 +81,7 @@ packages=(
   "kitty"
   "lazydocker"
   "lazygit"
+  "libgccjit"
   "libheif" # Needed by ueberzug to render inside nvim
   "libinput"
   "libinput-tools"
@@ -159,14 +160,14 @@ fi
 # Do not 'install' both, because of potential downsides
 if gpu_has_amd; then
   packages+=(
-	"radeontop"
-	"vulkan-radeon"
+    "radeontop"
+    "vulkan-radeon"
   )
 elif gpu_has_intel; then
   packages+=(
-	"intel-gpu-tools"
-	"intel-media-driver"
-	"vulkan-intel"
+    "intel-gpu-tools"
+    "intel-media-driver"
+    "vulkan-intel"
   )
 fi
 

@@ -11,7 +11,7 @@ build_emacs() {
     --disable-build-details --with-cairo --with-harfbuzz --with-libsystemd --with-modules \
     --with-native-compilation=aot --with-tree-sitter --without-x --without-sound
 
-  CC=clang make -j8
+  make -j8
   sudo make install
 }
 
