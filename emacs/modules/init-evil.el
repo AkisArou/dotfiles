@@ -369,7 +369,7 @@
   (define-key evil-visual-state-map (kbd "C-p") #'evil-mc-make-and-goto-prev-match)
   (define-key evil-normal-state-map (kbd "C-x") #'evil-mc-skip-and-goto-next-match)
   (define-key evil-visual-state-map (kbd "C-x") #'evil-mc-skip-and-goto-next-match)
-  (define-key evil-normal-state-map (kbd "C-c") #'evil-mc-undo-all-cursors))
+  (define-key evil-normal-state-map [escape] #'evil-mc-undo-all-cursors))
 
 
 ;;; HIGHLIGHT VIM OP
