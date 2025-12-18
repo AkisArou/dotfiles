@@ -22,8 +22,7 @@
 (use-package dotenv-mode
   :defer t
   :straight t
-  :ensure t
-  :config)
+  :ensure t)
 
 
 ;;; JSON-MODE
@@ -33,6 +32,14 @@
 ;;; YAML
 (use-package yaml
   :ensure t)
+
+;;; EMMET-MODE
+(use-package emmet-mode
+  :ensure t
+  :hook ((html-mode . emmet-mode)
+         (tsx-ts-mode . emmet-mode))
+  :config
+  (define-key emmet-mode-keymap (kbd "C-e") 'emmet-expand-line))
 
 
 ;;; ADD-NODE-MODULES-PATH
@@ -59,13 +66,13 @@
   ;; Makes sure you are using the local bin for your
   ;; node project. Local eslint, typescript server...
   (eval-after-load 'typescript-ts-mode
-	'(add-hook 'typescript-ts-mode-hook #'add-node-modules-path))
+    '(add-hook 'typescript-ts-mode-hook #'add-node-modules-path))
   (eval-after-load 'tsx-ts-mode
-	'(add-hook 'tsx-ts-mode-hook #'add-node-modules-path))
+    '(add-hook 'tsx-ts-mode-hook #'add-node-modules-path))
   (eval-after-load 'typescriptreact-mode
-	'(add-hook 'typescriptreact-mode-hook #'add-node-modules-path))
+    '(add-hook 'typescriptreact-mode-hook #'add-node-modules-path))
   (eval-after-load 'js-mode
-	'(add-hook 'js-mode-hook #'add-node-modules-path)))
+    '(add-hook 'js-mode-hook #'add-node-modules-path)))
 
 
 (provide 'init-lang)
