@@ -25,13 +25,15 @@
 
   :config
   (setq evil-normal-state-cursor 'box
-		evil-insert-state-cursor 'bar
-		evil-visual-state-cursor 'box)
+        evil-insert-state-cursor 'bar
+        evil-visual-state-cursor 'box)
 
   (evil-set-undo-system 'undo-tree)   ;; Uses the undo-tree package as the default undo system
 
   (define-key evil-motion-state-map (kbd "C-z") nil)
   (define-key evil-insert-state-map (kbd "C-e") nil)
+  (define-key evil-normal-state-map (kbd "C-n") nil)
+  (define-key evil-normal-state-map (kbd "C-p") nil)
 
   ;; Set the leader key to space for easier access to custom commands. (setq evil-want-leader t)
   (setq evil-leader/in-all-states t)  ;; Make the leader key available in all states.
@@ -60,41 +62,41 @@
 
   ;; Flycheck navigation
   (with-eval-after-load 'evil
-	(define-key evil-window-map (kbd "C-d") #'flycheck-posframe-display-errors-manually))
+    (define-key evil-window-map (kbd "C-d") #'flycheck-posframe-display-errors-manually))
 
   (evil-define-key 'normal 'global (kbd "<leader> f d") 'consult-flycheck)
 
   (defun my-show-flycheck-posframe-after (&rest _)
-	"Show flycheck posframe after navigation."
-	(run-with-idle-timer 0 nil #'flycheck-posframe-display-errors-manually))
+    "Show flycheck posframe after navigation."
+    (run-with-idle-timer 0 nil #'flycheck-posframe-display-errors-manually))
 
   (defun my/flycheck-next-error-of-severity (severity)
-	"Go to the next Flycheck error of SEVERITY, wrapping to the beginning if needed."
-	(interactive)
-	(my-show-flycheck-posframe-after)
-	(let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
-							   (flycheck-overlay-errors-in (point-min) (point-max))))
-		   (next (seq-find (lambda (e) (> (flycheck-error-pos e) (point))) errors)))
-	  (if next
-		  (goto-char (flycheck-error-pos next))
-		;; Wrap to the first error
-		(if errors
-			(goto-char (flycheck-error-pos (car errors)))
-		  (message "No %s errors found" severity)))))
+    "Go to the next Flycheck error of SEVERITY, wrapping to the beginning if needed."
+    (interactive)
+    (my-show-flycheck-posframe-after)
+    (let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
+                               (flycheck-overlay-errors-in (point-min) (point-max))))
+           (next (seq-find (lambda (e) (> (flycheck-error-pos e) (point))) errors)))
+      (if next
+          (goto-char (flycheck-error-pos next))
+        ;; Wrap to the first error
+        (if errors
+            (goto-char (flycheck-error-pos (car errors)))
+          (message "No %s errors found" severity)))))
 
   (defun my/flycheck-previous-error-of-severity (severity)
-	"Go to the previous Flycheck error of SEVERITY, wrapping to the end if needed."
-	(interactive)
-	(my-show-flycheck-posframe-after)
-	(let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
-							   (flycheck-overlay-errors-in (point-min) (point-max))))
-		   (prev (car (last (seq-filter (lambda (e) (< (flycheck-error-pos e) (point))) errors)))))
-	  (if prev
-		  (goto-char (flycheck-error-pos prev))
-		;; Wrap to the last error
-		(if errors
-			(goto-char (flycheck-error-pos (car (last errors))))
-		  (message "No %s errors found" severity)))))
+    "Go to the previous Flycheck error of SEVERITY, wrapping to the end if needed."
+    (interactive)
+    (my-show-flycheck-posframe-after)
+    (let* ((errors (seq-filter (lambda (e) (eq (flycheck-error-level e) severity))
+                               (flycheck-overlay-errors-in (point-min) (point-max))))
+           (prev (car (last (seq-filter (lambda (e) (< (flycheck-error-pos e) (point))) errors)))))
+      (if prev
+          (goto-char (flycheck-error-pos prev))
+        ;; Wrap to the last error
+        (if errors
+            (goto-char (flycheck-error-pos (car (last errors))))
+          (message "No %s errors found" severity)))))
 
   ;; Specific wrappers
   (defun my/flycheck-next-error-only () (interactive) (my/flycheck-next-error-of-severity 'error))
@@ -128,10 +130,10 @@
 
   ;; Trigger completion at point in all minibuffer maps
   (dolist (map (list minibuffer-local-map
-					 minibuffer-local-ns-map
-					 minibuffer-local-completion-map
-					 minibuffer-local-must-match-map))
-	(define-key map (kbd "M-SPC") #'completion-at-point))
+                     minibuffer-local-ns-map
+                     minibuffer-local-completion-map
+                     minibuffer-local-must-match-map))
+    (define-key map (kbd "M-SPC") #'completion-at-point))
 
   ;; Dired commands for file management
   (evil-define-key 'normal 'global (kbd "<leader> x d") 'dired)
@@ -154,34 +156,34 @@
   (evil-define-key 'normal 'global (kbd "<leader> g b") 'vc-annotate)       ;; Annotate buffer with version control info
   (evil-define-key 'normal 'global (kbd "<leader> g t") 'git-timemachine)       ;; Annotate buffer with version control info
   (evil-define-key 'normal 'global
-	(kbd "<leader> g i")
-	(lambda ()
-	  (interactive)
-	  (consult-gh-issue-list "nablesolutions/nable-solutions")))
+    (kbd "<leader> g i")
+    (lambda ()
+      (interactive)
+      (consult-gh-issue-list "nablesolutions/nable-solutions")))
 
   ;; Buffer management keybindings
   (defun my/project-kill-buffers-no-confirm ()
-	"Kill all file buffers in the current project, skipping special buffers and LSP.
-	Modified buffers are automatically saved before being killed."
-	(interactive)
-	(let ((project (project-current)))
-	  (when project
-		(dolist (buf (project-buffers project))
-		  ;; Only handle normal file buffers
-		  (when (and (buffer-file-name buf)
-					 (not (string-match-p "^\\*" (buffer-name buf))))
-			(with-current-buffer buf
-			  ;; Save if modified
-			  (when (buffer-modified-p)
-				(save-buffer))
-			  ;; Kill buffer
-			  (kill-buffer buf)))))))
+    "Kill all file buffers in the current project, skipping special buffers and LSP.
+  Modified buffers are automatically saved before being killed."
+    (interactive)
+    (let ((project (project-current)))
+      (when project
+        (dolist (buf (project-buffers project))
+          ;; Only handle normal file buffers
+          (when (and (buffer-file-name buf)
+                     (not (string-match-p "^\\*" (buffer-name buf))))
+            (with-current-buffer buf
+              ;; Save if modified
+              (when (buffer-modified-p)
+                (save-buffer))
+              ;; Kill buffer
+              (kill-buffer buf)))))))
 
   (defun kill-other-buffers ()
-	(interactive)
-	(dolist (buf (delq (current-buffer) (buffer-list)))
-	  (unless (string-prefix-p "*" (buffer-name buf))
-		(kill-buffer buf))))
+    (interactive)
+    (dolist (buf (delq (current-buffer) (buffer-list)))
+      (unless (string-prefix-p "*" (buffer-name buf))
+        (kill-buffer buf))))
 
   (evil-define-key 'normal 'global (kbd "] b") 'switch-to-next-buffer) ;; Switch to next buffer
   (evil-define-key 'normal 'global (kbd "[ b") 'switch-to-prev-buffer) ;; Switch to previous buffer
@@ -193,19 +195,19 @@
 
   ;; Project management keybindings
   (defun get-project-root ()
-	(when (fboundp 'projectile-project-root)
-	  (projectile-project-root)))
+    (when (fboundp 'projectile-project-root)
+      (projectile-project-root)))
 
   ;; Ripgrep the current word from project root
   (defun consult-ripgrep-region-or-word ()
-	"Run `consult-ripgrep` on selected region in visual mode, or word at point otherwise."
-	(interactive)
-	(let ((search-text (if (use-region-p)
-						   (buffer-substring-no-properties (region-beginning) (region-end))
-						 (thing-at-point 'word t))))
-	  ;; Deactivate the region so it doesn't interfere with the search
-	  (deactivate-mark)
-	  (consult-ripgrep (get-project-root) search-text)))
+    "Run `consult-ripgrep` on selected region in visual mode, or word at point otherwise."
+    (interactive)
+    (let ((search-text (if (use-region-p)
+                           (buffer-substring-no-properties (region-beginning) (region-end))
+                         (thing-at-point 'word t))))
+      ;; Deactivate the region so it doesn't interfere with the search
+      (deactivate-mark)
+      (consult-ripgrep (get-project-root) search-text)))
 
   (evil-define-key 'normal 'global (kbd "<leader> f e") 'consult-project-buffer) ;; Consult buffers
   (evil-define-key 'normal global-map (kbd "<leader> f w") #'consult-ripgrep-region-or-word)
@@ -237,36 +239,36 @@
 
   ;; Custom example. Formatting with prettier tool.
   (evil-define-key 'normal 'global (kbd "<leader> b f")
-	(lambda ()
-	  (interactive)
-	  (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
-	  (revert-buffer t t t)))
+    (lambda ()
+      (interactive)
+      (shell-command (concat "prettier --write " (shell-quote-argument (buffer-file-name))))
+      (revert-buffer t t t)))
 
 
   ;; Text-objects
   (defun my-evil-find-nearest-quote ()
-	"Find the nearest quote character."
-	(let ((point (point))
-		  (quotes '(?\" ?\' ?\`))
-		  (nearest nil)
-		  (min-dist most-positive-fixnum))
-	  (dolist (q quotes)
-		(save-excursion
-		  (let ((pos (search-backward (char-to-string q) nil t)))
-			(when (and pos (< (- point pos) min-dist))
-			  (setq min-dist (- point pos))
-			  (setq nearest q)))))
-	  nearest))
+    "Find the nearest quote character."
+    (let ((point (point))
+          (quotes '(?\" ?\' ?\`))
+          (nearest nil)
+          (min-dist most-positive-fixnum))
+      (dolist (q quotes)
+        (save-excursion
+          (let ((pos (search-backward (char-to-string q) nil t)))
+            (when (and pos (< (- point pos) min-dist))
+              (setq min-dist (- point pos))
+              (setq nearest q)))))
+      nearest))
 
   (evil-define-text-object evil-inner-any-quote (count &optional beg end type)
-	(let ((quote (my-evil-find-nearest-quote)))
-	  (when quote
-		(evil-select-quote quote beg end type count nil))))
+    (let ((quote (my-evil-find-nearest-quote)))
+      (when quote
+        (evil-select-quote quote beg end type count nil))))
 
   (evil-define-text-object evil-a-any-quote (count &optional beg end type)
-	(let ((quote (my-evil-find-nearest-quote)))
-	  (when quote
-		(evil-select-quote quote beg end type count t))))
+    (let ((quote (my-evil-find-nearest-quote)))
+      (when quote
+        (evil-select-quote quote beg end type count t))))
 
   (define-key evil-inner-text-objects-map "q" 'evil-inner-any-quote)
   (define-key evil-outer-text-objects-map "q" 'evil-a-any-quote)
@@ -291,10 +293,10 @@
   :straight t
   :config
   (evil-define-key '(normal visual) 'global
-	(kbd "C-a") 'evil-numbers/inc-at-pt
-	(kbd "C-x") 'evil-numbers/dec-at-pt
-	(kbd "g C-a") 'evil-numbers/inc-at-pt-incremental
-	(kbd "g C-x") 'evil-numbers/dec-at-pt-incremental))
+    (kbd "C-a") 'evil-numbers/inc-at-pt
+    (kbd "C-x") 'evil-numbers/dec-at-pt
+    (kbd "g C-a") 'evil-numbers/inc-at-pt-incremental
+    (kbd "g C-x") 'evil-numbers/dec-at-pt-incremental))
 
 ;;; EMACS-TMUX-NAVIGATOR
 (use-package emacs-tmux-navigator
@@ -355,6 +357,21 @@
   (global-anzu-mode 1))
 
 
+;; EVIL-ANZU
+(use-package evil-mc
+  :after evil
+  :config
+  (global-evil-mc-mode 1)
+
+  (define-key evil-normal-state-map (kbd "C-n") #'evil-mc-make-and-goto-next-match)
+  (define-key evil-visual-state-map (kbd "C-n") #'evil-mc-make-and-goto-next-match)
+  (define-key evil-normal-state-map (kbd "C-p") #'evil-mc-make-and-goto-prev-match)
+  (define-key evil-visual-state-map (kbd "C-p") #'evil-mc-make-and-goto-prev-match)
+  (define-key evil-normal-state-map (kbd "C-x") #'evil-mc-skip-and-goto-next-match)
+  (define-key evil-visual-state-map (kbd "C-x") #'evil-mc-skip-and-goto-next-match)
+  (define-key evil-normal-state-map (kbd "C-c") #'evil-mc-undo-all-cursors))
+
+
 ;;; HIGHLIGHT VIM OP
 (defface my/flash-face
   '((t (:background "#7b5fbf" :extend t)))
@@ -363,21 +380,21 @@
 (defun my/flash-region (beg end)
   "Flash the region from BEG to END using a temporary overlay."
   (let ((ov (make-overlay beg end)))
-	(overlay-put ov 'face 'my/flash-face)
-	(run-at-time 0.08 nil #'delete-overlay ov)))
+    (overlay-put ov 'face 'my/flash-face)
+    (run-at-time 0.08 nil #'delete-overlay ov)))
 
 (defun my/evil-flash-motion (orig beg end &rest args)
   "Flash region affected by evil operator."
   (let ((result (apply orig beg end args)))
-	;; absolutely ensure region is not active
-	(deactivate-mark)
-	;; flash without leaving any highlight behind
-	(my/flash-region beg end)
-	result))
+    ;; absolutely ensure region is not active
+    (deactivate-mark)
+    ;; flash without leaving any highlight behind
+    (my/flash-region beg end)
+    result))
 
 ;; Advice evil operators that use (beg end)
 (dolist (op '(evil-yank
-			  evil-yank-line))
+              evil-yank-line))
   (advice-add op :around #'my/evil-flash-motion))
 
 
@@ -385,8 +402,8 @@
 (defun my/minibuffer-setup-dabbrev ()
   "Setup dabbrev completion in minibuffer for evil search."
   (when (eq this-command 'evil-ex-search-forward)
-	(setq-local completion-at-point-functions
-				(list #'cape-dabbrev))))
+    (setq-local completion-at-point-functions
+                (list #'cape-dabbrev))))
 
 (add-hook 'minibuffer-setup-hook #'my/minibuffer-setup-dabbrev)
 
@@ -394,8 +411,8 @@
 (defun corfu-enable-always-in-minibuffer ()
   "Enable Corfu in minibuffer."
   (unless (or (bound-and-true-p mct--active)
-			  (bound-and-true-p vertico--input))
-	(corfu-mode 1)))
+              (bound-and-true-p vertico--input))
+    (corfu-mode 1)))
 
 (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer 1)
 
