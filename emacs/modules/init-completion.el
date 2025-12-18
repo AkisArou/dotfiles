@@ -83,6 +83,9 @@
   (advice-add #'register-preview :override #'consult-register-window)
   (setq register-preview-delay 0.5)
 
+  (add-hook 'consult-after-jump-hook
+			(lambda () (flycheck-mode 1)))
+
   ;; Use Consult for xref locations with a preview feature.
   (setq xref-show-xrefs-function #'consult-xref
 		xref-show-definitions-function #'consult-xref))
