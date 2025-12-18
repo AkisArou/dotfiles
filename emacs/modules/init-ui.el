@@ -86,6 +86,11 @@
    `(show-paren-match ((t (:foreground "#7aa2f7"))))
    `(typescript-ts-jsx-attribute-face ((t (:foreground "#7dcfff"))))))
 
+(set-face-attribute 'button nil
+					:foreground "#7aa2f7"
+					:underline t
+					:weight 'bold)
+
 (set-face-foreground 'show-paren-mismatch nil)
 (set-face-background 'show-paren-mismatch nil)
 
