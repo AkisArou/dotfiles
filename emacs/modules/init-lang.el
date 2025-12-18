@@ -39,6 +39,7 @@
   :hook ((html-mode . emmet-mode)
          (tsx-ts-mode . emmet-mode))
   :config
+  (add-to-list 'emmet-jsx-major-modes 'tsx-ts-mode)
   (define-key emmet-mode-keymap (kbd "C-e") 'emmet-expand-line))
 
 
