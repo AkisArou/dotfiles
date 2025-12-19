@@ -28,6 +28,16 @@
         evil-insert-state-cursor 'bar
         evil-visual-state-cursor 'box)
 
+  ;; PERF: Stop copying the selection to the clipboard each time the cursor
+  ;; moves in visual mode. Why? Because on most non-X systems (and in terminals
+  ;; with clipboard plugins like xclip.el active), Emacs will spin up a new
+  ;; process to communicate with the clipboard for each movement. On Windows,
+  ;; older versions of macOS (pre-vfork), and Waylang (without pgtk), this is
+  ;; super expensive and can lead to freezing and/or zombie processes.
+  ;;
+  ;; UX: It also clobbers clipboard managers (see emacs-evil/evil#336).
+  (setq evil-visual-update-x-selection-p nil)
+
   (evil-set-undo-system 'undo-tree)   ;; Uses the undo-tree package as the default undo system
 
   (define-key evil-motion-state-map (kbd "C-z") nil)
@@ -278,6 +288,14 @@
 
 (with-eval-after-load 'evil
   (define-key evil-normal-state-map (kbd "K") #'eldoc-box-help-at-point))
+
+;; Ensure `evil-shift-width' always matches `tab-width'; evil does not police
+;; this itself, so we must. Except in org-mode, where `tab-width' *must*
+;; default to 8, which isn't a sensible default for `evil-shift-width'.
+(add-hook 'after-change-major-mode-hook
+          (defun +evil-adjust-shift-width-h ()
+            (unless (derived-mode-p 'org-mode)
+              (setq-local evil-shift-width tab-width))))
 
 
 ;;; EVIL-COMMENTARY

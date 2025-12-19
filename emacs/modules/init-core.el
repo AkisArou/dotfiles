@@ -9,6 +9,14 @@
 (setq enable-local-variables :all
       enable-local-eval t)
 
+(use-package gcmh
+  :ensure t
+  :config
+  (setq gcmh-idle-delay 'auto  ; default is 15s
+        gcmh-auto-idle-delay-factor 10
+        gcmh-high-cons-threshold (* 64 1024 1024))  ; 64mb
+  :init
+  (gcmh-mode 1))
 
 ;;; EMACS
 (use-package emacs
@@ -44,6 +52,19 @@
   (prog-mode . display-line-numbers-mode)
 
   :config
+  ;; PERF: Disable bidirectional text scanning for a modest performance boost.
+  ;;   I've set this to `nil' in the past, but the `bidi-display-reordering's docs
+  ;;   say that is an undefined state and suggest this to be just as good:
+  (setq-default bidi-display-reordering 'left-to-right
+                bidi-paragraph-direction 'left-to-right)
+  ;; PERF: A second, case-insensitive pass over `auto-mode-alist' is time wasted.
+  (setq auto-mode-case-fold nil)
+
+  ;; PERF: Disabling BPA makes redisplay faster, but might produce incorrect
+  ;;   reordering of bidirectional text with embedded parentheses (and other
+  ;;   bracket characters whose 'paired-bracket' Unicode property is non-nil).
+  (setq bidi-inhibit-bpa t)  ; Emacs 27+ only
+
   ;; Skip special buffers when cycling with [b and ]b
   (defun skip-these-buffers (_window buffer _bury-or-kill)
     (string-match "\\*[^*]+\\*" (buffer-name buffer)))
@@ -53,8 +74,42 @@
   (setq custom-file (locate-user-emacs-file "custom-vars.el"))
   (load custom-file 'noerror 'nomessage)
 
+  ;; Reduce the clutter in the fringes; we'd like to reserve that space for more
+  ;; useful information, like diff-hl and flycheck.
+  (setq indicate-buffer-boundaries nil
+        indicate-empty-lines nil)
+
+  ;; Don't resize the frames in steps; it looks weird, especially in tiling window
+  ;; managers, where it can leave unseemly gaps.
+  (setq frame-resize-pixelwise t)
+
+  ;; But do not resize windows pixelwise, this can cause crashes in some cases
+  ;; when resizing too many windows at once or rapidly.
+  (setq window-resize-pixelwise nil)
+
+  ;; Allow for minibuffer-ception. Sometimes we need another minibuffer command
+  ;; while we're in the minibuffer.
+  (setq enable-recursive-minibuffers t)
+
+  ;; Show current key-sequence in minibuffer ala 'set showcmd' in vim. Any
+  ;; feedback after typing is better UX than no feedback at all.
+  (setq echo-keystrokes 0.02)
+
+  ;; Try to keep the cursor out of the read-only portions of the minibuffer.
+  (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
+  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+  ;; Explicitly define a width to reduce the cost of on-the-fly computation
+  (setq-default display-line-numbers-width 3)
+
+  ;; Show absolute line numbers for narrowed regions to make it easier to tell the
+  ;; buffer is narrowed, and where you are, exactly.
+  (setq-default display-line-numbers-widen t)
+
   ;; Pretty vertical divider
   (set-display-table-slot standard-display-table 'vertical-border (make-glyph-code ?│))
+
+  (setq ansi-color-for-comint-mode t)
 
   ;; Centered cursor scrolling behavior
   (setq scroll-preserve-screen-position t

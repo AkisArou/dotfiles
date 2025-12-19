@@ -15,22 +15,25 @@
    ("C-x v D" . vc-root-diff)        ;; Show differences for the entire repository.
    ("C-x v v" . vc-next-action))     ;; Perform the next version control action.
   :config
+  (setq-default vc-ignore-dir-regexp (format "%s\\|%s"
+                                             locate-dominating-stop-dir-regexp
+                                             "[/\\\\]node_modules"))
   ;; Better colors for <leader> g b  (blame file)
   (setq vc-annotate-color-map
-		'((20 . "#f5e0dc")
-		  (40 . "#f2cdcd")
-		  (60 . "#f5c2e7")
-		  (80 . "#cba6f7")
-		  (100 . "#f38ba8")
-		  (120 . "#eba0ac")
-		  (140 . "#fab387")
-		  (160 . "#f9e2af")
-		  (180 . "#a6e3a1")
-		  (200 . "#94e2d5")
-		  (220 . "#89dceb")
-		  (240 . "#74c7ec")
-		  (260 . "#89b4fa")
-		  (280 . "#b4befe"))))
+        '((20 . "#f5e0dc")
+          (40 . "#f2cdcd")
+          (60 . "#f5c2e7")
+          (80 . "#cba6f7")
+          (100 . "#f38ba8")
+          (120 . "#eba0ac")
+          (140 . "#fab387")
+          (160 . "#f9e2af")
+          (180 . "#a6e3a1")
+          (200 . "#94e2d5")
+          (220 . "#89dceb")
+          (240 . "#74c7ec")
+          (260 . "#89b4fa")
+          (280 . "#b4befe"))))
 
 ;;; FORGE
 (use-package forge
@@ -51,10 +54,10 @@
   :ensure nil                                  ;; This is built-in, no need to fetch it.
   :defer t
   :bind (:map smerge-mode-map
-			  ("C-c ^ u" . smerge-keep-upper)  ;; Keep the changes from the upper version.
-			  ("C-c ^ l" . smerge-keep-lower)  ;; Keep the changes from the lower version.
-			  ("C-c ^ n" . smerge-next)        ;; Move to the next conflict.
-			  ("C-c ^ p" . smerge-previous)))  ;; Move to the previous conflict.
+              ("C-c ^ u" . smerge-keep-upper)  ;; Keep the changes from the upper version.
+              ("C-c ^ l" . smerge-keep-lower)  ;; Keep the changes from the lower version.
+              ("C-c ^ n" . smerge-next)        ;; Move to the next conflict.
+              ("C-c ^ p" . smerge-previous)))  ;; Move to the previous conflict.
 
 
 
@@ -66,11 +69,11 @@
   :init
   ;; Ensure the mode map exists before we define keys
   (with-eval-after-load 'git-timemachine
-	(evil-define-key 'normal git-timemachine-mode-map
-	  (kbd "C-j") 'git-timemachine-show-previous-revision
-	  (kbd "C-k") 'git-timemachine-show-next-revision
-	  (kbd "gb")  'git-timemachine-blame
-	  (kbd "gtc") 'git-timemachine-show-commit))
+    (evil-define-key 'normal git-timemachine-mode-map
+      (kbd "C-j") 'git-timemachine-show-previous-revision
+      (kbd "C-k") 'git-timemachine-show-next-revision
+      (kbd "gb")  'git-timemachine-blame
+      (kbd "gtc") 'git-timemachine-show-commit))
   :config
   (setq git-timemachine-show-minibuffer-details t))
 
@@ -80,18 +83,28 @@
   :defer t
   :straight t
   :ensure t
+  :config
+  (setq diff-hl-global-modes '(not image-mode pdf-view-mode))
+  ;; PERF: A slightly faster algorithm for diffing.
+  (setq vc-git-diff-switches '("--histogram"))
+  ;; PERF: Slightly more conservative delay before updating the diff
+  (setq diff-hl-flydiff-delay 0.5)  ; default: 0.3
+  ;; PERF: don't block Emacs when updating vc gutter
+  (setq diff-hl-update-async t)
+  ;; UX: get realtime feedback in diffs after staging/unstaging hunks.
+  (setq diff-hl-show-staged-changes nil)
   :hook
   (find-file . (lambda ()
-				 (global-diff-hl-mode)           ;; Enable Diff-HL mode for all files.
-				 (diff-hl-flydiff-mode)          ;; Automatically refresh diffs.
-				 (diff-hl-margin-mode)))         ;; Show diff indicators in the margin.
+                 (global-diff-hl-mode)           ;; Enable Diff-HL mode for all files.
+                 (diff-hl-flydiff-mode)          ;; Automatically refresh diffs.
+                 (diff-hl-margin-mode)))         ;; Show diff indicators in the margin.
   :custom
   (diff-hl-side 'left)                           ;; Set the side for diff indicators.
   (diff-hl-margin-symbols-alist '((insert . "┃") ;; Customize symbols for each change type.
-								  (delete . "-")
-								  (change . "┃")
-								  (unknown . "┆")
-								  (ignored . "i"))))
+                                  (delete . "-")
+                                  (change . "┃")
+                                  (unknown . "┆")
+                                  (ignored . "i"))))
 
 
 ;;; MAGIT
@@ -119,7 +132,7 @@
   (consult-gh-default-interactive-command #'consult-gh-transient)
   (consult-gh-prioritize-local-folder nil)
   (consult-gh-group-dashboard-by :reason)
-	;;;; Optional
+  ;;;; Optional
   (consult-gh-repo-preview-major-mode nil) ; show readmes in their original format
   (consult-gh-preview-major-mode 'org-mode) ; use 'org-mode for editing comments, commit messages, ...
   :config
