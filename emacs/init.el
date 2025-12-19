@@ -6,6 +6,8 @@
 ;;; Code:
 
 ;; Performance
+(setq native-comp-speed 3)
+
 ;; Temporarily raise GC threshold during startup for speed
 (defvar ek--startup-gc-cons-threshold #x40000000)
 (setq gc-cons-threshold ek--startup-gc-cons-threshold)
@@ -24,18 +26,18 @@
 (setq straight-check-for-modifications nil)
 (defvar bootstrap-version)
 (let ((bootstrap-file
-	   (expand-file-name
-		"straight/repos/straight.el/bootstrap.el"
-		(or (bound-and-true-p straight-base-dir)
-			user-emacs-directory)))
-	  (bootstrap-version 7))
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
-	(with-current-buffer
-		(url-retrieve-synchronously
-		 "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-		 'silent 'inhibit-cookies)
-	  (goto-char (point-max))
-	  (eval-print-last-sexp)))
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 (straight-use-package '(project :type built-in))
 (straight-use-package 'use-package)
@@ -75,9 +77,9 @@
   (require 'treesit-auto)
 
   (setq treesit-auto-langs
-		'(bash c css dockerfile html javascript jsdoc
-			   lua markdown python toml
-			   tsx typescript yaml))
+        '(bash c css dockerfile html javascript jsdoc
+               lua markdown python toml
+               tsx typescript yaml))
 
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode 1)

@@ -5,6 +5,10 @@ REPO_URL="https://git.savannah.gnu.org/git/emacs.git"
 NAME="Emacs"
 
 build_emacs() {
+  export CFLAGS="-O2 -march=native -mtune=native -pipe -fomit-frame-pointer"
+  export CXXFLAGS="$CFLAGS"
+  export LDFLAGS="-Wl,-O1"
+
   ./autogen.sh
 
   ./configure --sysconfdir=/etc --prefix=/usr --libexecdir=/usr/lib --localstatedir=/var \
