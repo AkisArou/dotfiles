@@ -8,7 +8,7 @@ exec --no-startup-id dex --autostart --environment i3
 exec_always --no-startup-id ~/dotfiles/polybar/init
 exec --no-startup-id dbus-update-activation-environment --all
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
-exec --no-startup-id  picom --config ~/.config/picom/picom.conf; 
+exec --no-startup-id  picom --config ~/.config/picom/picom.conf;
 exec --no-startup-id sleep 0.2; nitrogen --set-zoom-fill ~/dotfiles/wallpapers/forest.jpg;
 exec --no-startup-id ~/dotfiles/scripts/start-tmux
 exec --no-startup-id ~/dotfiles/i3/listen-events
@@ -70,7 +70,7 @@ bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 bindsym $mod+Shift+bracketleft exec ~/dotfiles/rofi/launch -modi emoji -show emoji
 
 bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
-bindsym $mod+Shift+m exec ~/dotfiles/aerc/launch
+bindsym $mod+m exec ~/dotfiles/i3/open-mail
 
 # Move your focus around
 bindsym $mod+$left focus left
