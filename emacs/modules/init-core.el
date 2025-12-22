@@ -194,7 +194,59 @@
   (file-name-shadow-mode 1)
 
   ;; Default file encoding
-  (modify-coding-system-alist 'file "" 'utf-8))
+  (modify-coding-system-alist 'file "" 'utf-8)
+
+  ;; -------------------------------
+  ;; Tree-sitter grammar sources
+  ;; -------------------------------
+
+  (setq treesit-language-source-alist
+        '((bash             . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (c                . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (css              . ("https://github.com/tree-sitter/tree-sitter-css"))
+          (diff             . ("https://github.com/the-mikedavis/tree-sitter-diff"))
+          (dockerfile       . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+          (editorconfig     . ("https://github.com/ObserverOfTime/tree-sitter-editorconfig"))
+          (git_config       . ("https://github.com/the-mikedavis/tree-sitter-git-config"))
+          (gitignore        . ("https://github.com/shunsambongi/tree-sitter-gitignore"))
+          (html             . ("https://github.com/tree-sitter/tree-sitter-html"))
+          (javascript       . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
+          (jsdoc            . ("https://github.com/tree-sitter/tree-sitter-jsdoc"))
+          (json             . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (jsonc            . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (lua              . ("https://github.com/tree-sitter-grammars/tree-sitter-lua"))
+          (luadoc           . ("https://github.com/tree-sitter-grammars/tree-sitter-luadoc"))
+          (luap             . ("https://github.com/tree-sitter-grammars/tree-sitter-luap"))
+          (markdown         . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "master" "tree-sitter-markdown/src"))
+          (markdown_inline  . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown" "master" "tree-sitter-markdown-inline/src"))
+          (python           . ("https://github.com/tree-sitter/tree-sitter-python"))
+          (query            . ("https://github.com/tree-sitter/tree-sitter-query"))
+          (regex            . ("https://github.com/tree-sitter/tree-sitter-regex"))
+          (scss             . ("https://github.com/tree-sitter/tree-sitter-scss"))
+          (ssh_config       . ("https://github.com/metio/tree-sitter-ssh-config"))
+          (tmux             . ("https://github.com/Freed-Wu/tree-sitter-tmux"))
+          (toml             . ("https://github.com/tree-sitter/tree-sitter-toml"))
+          (tsx              . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+          (typescript       . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
+          (vim              . ("https://github.com/tree-sitter-grammars/tree-sitter-vim"))
+          (vimdoc           . ("https://github.com/neovim/tree-sitter-vimdoc"))
+          (yaml             . ("https://github.com/ikatyang/tree-sitter-yaml"))))
+
+  ;; -------------------------------
+  ;; Prefer tree-sitter modes
+  ;; -------------------------------
+
+  (setq major-mode-remap-alist
+        '((bash-mode        . bash-ts-mode)
+          (c-mode           . c-ts-mode)
+          (css-mode         . css-ts-mode)
+          (dockerfile-mode  . dockerfile-ts-mode)
+          (json-mode        . json-ts-mode)
+          (python-mode      . python-ts-mode)
+          (js-mode          . js-ts-mode)
+          (js-json-mode     . json-ts-mode)
+          (typescript-mode  . typescript-ts-mode)
+          (yaml-mode        . yaml-ts-mode))))
 
 (add-hook 'minibuffer-setup-hook (lambda ()
                                    (local-set-key (kbd "C-c") 'abort-minibuffers)))
