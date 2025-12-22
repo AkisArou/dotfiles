@@ -65,17 +65,7 @@
 (use-package init-email)
 (use-package init-dap)
 (use-package init-evil)
-
-(use-package elfeed
-  :ensure t
-  :config
-  (setq-default elfeed-search-filter "")
-
-  (setq elfeed-feeds
-        '("https://expo.dev/changelog/rss.xml"
-          "https://reactnative.dev/blog/rss.xml"
-          "https://devblogs.microsoft.com/typescript/feed/"))
-  )
+(use-package init-elfeed)
 
 
 (defun ek/first-install ()

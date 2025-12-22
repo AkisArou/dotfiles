@@ -58,7 +58,11 @@
   (evil-set-leader 'visual (kbd "SPC"))
 
   (evil-define-key 'normal 'global (kbd "<leader> h") 'evil-ex-nohighlight)
-  ;; (evil-define-key 'normal 'global (kbd "/") 'consult-line)
+
+  (evil-define-key 'normal 'global (kbd "<leader> r") (lambda()
+                                                        (interactive)
+                                                        (elfeed-update)
+                                                        (elfeed)))
 
   ;; Keybindings for searching and finding files.
   (evil-define-key 'normal 'global (kbd "<leader> f f") 'project-find-file)
