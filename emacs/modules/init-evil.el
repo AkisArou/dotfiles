@@ -382,6 +382,7 @@
 ;; EVIL-ANZU
 (use-package evil-mc
   :after evil
+  :ensure t
   :config
   (global-evil-mc-mode 1)
 
