@@ -21,9 +21,9 @@
 
 (use-package fzf-native
   :straight (fzf-native
-			 :repo "dangduc/fzf-native"
-			 :host github
-			 :files (:defaults "bin"))
+             :repo "dangduc/fzf-native"
+             :host github
+             :files (:defaults "bin"))
   :config
   (fzf-native-load-dyn))
 
@@ -38,12 +38,12 @@
   (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
 
   (with-eval-after-load 'corfu
-	(advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
-	(add-hook 'corfu-mode-hook
-			  (lambda ()
-				(setq-local fussy-max-candidate-limit 5000
-							fussy-default-regex-fn 'fussy-pattern-first-letter
-							fussy-prefer-prefix nil))))
+    (advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
+    (add-hook 'corfu-mode-hook
+              (lambda ()
+                (setq-local fussy-max-candidate-limit 5000
+                            fussy-default-regex-fn 'fussy-pattern-first-letter
+                            fussy-prefer-prefix nil))))
   (fussy-setup))
 
 (defun my/fussy-use-flx-rs ()
@@ -84,11 +84,11 @@
   (setq register-preview-delay 0.5)
 
   (add-hook 'consult-after-jump-hook
-			(lambda () (flycheck-mode 1)))
+            (lambda () (flycheck-mode 1)))
 
   ;; Use Consult for xref locations with a preview feature.
   (setq xref-show-xrefs-function #'consult-xref
-		xref-show-definitions-function #'consult-xref))
+        xref-show-definitions-function #'consult-xref))
 
 (use-package consult-flycheck
   :ensure t
@@ -125,7 +125,7 @@
   :defer t
   :custom
   (corfu-auto t)
-  (corfu-auto-delay 0.1)              ;; Show completions quickly like VSCode
+  (corfu-auto-delay 0)              ;; Show completions quickly like VSCode
   (corfu-auto-prefix 1)               ;; Start completing after 1 character
   (corfu-quit-no-match t)             ;; Quit if no match (like VSCode)
   (corfu-quit-at-boundary 'separator) ;; Allow multi-part filtering
@@ -143,26 +143,26 @@
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
 
   (defun my/corfu-popupinfo-skip-tailwind (orig-fun &rest args)
-	"Skip popupinfo for Module type completions (kind 9)."
-	(let* ((candidate (and (>= corfu--index 0)
-						   (< corfu--index (length corfu--candidates))
-						   (nth corfu--index corfu--candidates)))
-		   (props (and candidate (text-properties-at 0 candidate)))
-		   (lsp-item (plist-get props 'lsp-completion-unresolved-item))
-		   (kind (and lsp-item (plist-get lsp-item :kind))))
-	  ;; Skip if it's kind 9 (Module)
-	  (unless (eq kind 9)
-		(apply orig-fun args))))
+    "Skip popupinfo for Module type completions (kind 9)."
+    (let* ((candidate (and (>= corfu--index 0)
+                           (< corfu--index (length corfu--candidates))
+                           (nth corfu--index corfu--candidates)))
+           (props (and candidate (text-properties-at 0 candidate)))
+           (lsp-item (plist-get props 'lsp-completion-unresolved-item))
+           (kind (and lsp-item (plist-get lsp-item :kind))))
+      ;; Skip if it's kind 9 (Module)
+      (unless (eq kind 9)
+        (apply orig-fun args))))
 
   (advice-add 'corfu-popupinfo--show :around #'my/corfu-popupinfo-skip-tailwind)
 
 
   :bind
   (:map corfu-map
-		("RET" . nil)
-		("C-e" . corfu-insert)        ;; Keep your existing binding
-		("C-n" . corfu-next)          ;; Ctrl-n for next
-		("C-p" . corfu-previous))     ;; Ctrl-p for previous
+        ("RET" . nil)
+        ("C-e" . corfu-insert)        ;; Keep your existing binding
+        ("C-n" . corfu-next)          ;; Ctrl-n for next
+        ("C-p" . corfu-previous))     ;; Ctrl-p for previous
 
   :init
   (global-corfu-mode)
@@ -170,10 +170,10 @@
 
 ;; Optional: Configure completion categories for better matching
 (setq completion-category-overrides
-	  '((buffer (styles fussy basic))
-		(file (styles fussy partial-completion))
-		(project-file (styles fussy))
-		(lsp-capf (styles fussy basic))))
+      '((buffer (styles fussy basic))
+        (file (styles fussy partial-completion))
+        (project-file (styles fussy))
+        (lsp-capf (styles fussy basic))))
 
 ;; Add extensions
 (use-package cape
