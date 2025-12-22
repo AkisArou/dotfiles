@@ -66,6 +66,14 @@
 (use-package init-dap)
 (use-package init-evil)
 
+(use-package elfeed
+  :ensure t
+  :config
+  (setq elfeed-feeds
+        '("https://expo.dev/changelog/rss.xml"
+          "https://reactnative.dev/blog/rss.xml"))
+  )
+
 
 (defun ek/first-install ()
   "Install tree-sitter grammars and compile packages on first run..."
