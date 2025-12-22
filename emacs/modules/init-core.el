@@ -299,5 +299,10 @@
 (setq Man-notify-method 'pushy)
 
 
+;;; HT
+;; (tailwindcss config needs it)
+(use-package ht
+  :ensure t)
+
 (provide 'init-core)
 ;;; init-core.el ends here
