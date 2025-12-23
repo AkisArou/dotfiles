@@ -73,8 +73,6 @@ create_symlink "$HOME/dotfiles/isync/.mbsyncrc" "$HOME/.mbsyncrc"
 create_symlink "$HOME/dotfiles/oama" "$HOME/.config/oama"
 create_symlink "$HOME/dotfiles/goimapnotify" "$HOME/.config/goimapnotify"
 create_symlink "$HOME/dotfiles/notmuch" "$HOME/.config/notmuch"
-create_symlink "$HOME/dotfiles/vdirsyncer" "$HOME/.config/vdirsyncer"
-create_symlink "$HOME/dotfiles/khal" "$HOME/.config/khal"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 
 ./eza/apply-eza-theme

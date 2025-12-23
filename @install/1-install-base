@@ -76,8 +76,6 @@ packages=(
   "isync"
   "iwd"
   "jq"
-  "khal"
-  "khalorg"
   "kitty"
   "lazydocker"
   "lazygit"
@@ -132,7 +130,6 @@ packages=(
   "ueberzugpp"
   "unzip" # Needed by asdf
   "update-grub"
-  "vdirsyncer"
   "vdpauinfo"
   "visual-studio-code-bin"
   "vulkan-tools"
