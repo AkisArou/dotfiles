@@ -8,6 +8,11 @@ filekinds:
     foreground: Cyan
   executable:
     foreground: Green
+    is_bold: false
+file_type:
+  source:
+    foreground: Cyan
+    is_bold: false
 date:
   foreground: DarkGray
 users:
