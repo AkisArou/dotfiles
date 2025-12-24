@@ -19,9 +19,9 @@ X11
 Common
 
 - Editor:
-  nvim (configured for web dev)
-  emacs
-  vim (minimal config)
+  nvim (configured for web dev),
+  emacs,
+  vim (minimal config),
   vscode (configuration at .vscode)
 - Browsers: brave, librewolf
 - Terminal: alacritty, kitty
