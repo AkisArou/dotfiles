@@ -1,21 +1,30 @@
-date: { foreground: DarkGray }
-
 filekinds:
   normal:
     foreground: White
   directory:
     foreground: Blue
+    is_bold: false
   symlink:
     foreground: Cyan
   executable:
     foreground: Green
+date:
+  foreground: DarkGray
 users:
-  user_you: { foreground: DarkGray, is_bold: false }
-  user_root: { foreground: Cyan }
-  user_other: { foreground: Default }
-  group_yours: { foreground: Yellow, is_bold: false }
-  group_other: { foreground: Default }
-  group_root: { foreground: Default }
+  user_you:
+    foreground: DarkGray
+    is_bold: false
+  user_root:
+    foreground: Cyan
+  user_other:
+    foreground: Default
+  group_yours:
+    foreground: Yellow
+    is_bold: false
+  group_other:
+    foreground: Default
+  group_root:
+    foreground: Default
 perms:
   user_read:
     foreground: DarkGray
