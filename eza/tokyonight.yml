@@ -13,6 +13,8 @@ file_type:
   source:
     foreground: Cyan
     is_bold: false
+  build:
+    is_bold: false
 date:
   foreground: DarkGray
 users:
