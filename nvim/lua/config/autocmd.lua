@@ -192,36 +192,3 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.api.nvim_win_set_width(0, 40)
   end,
 })
-
--- Add virt_lines for margin for notmuch-show bufs
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "notmuch-show",
-  callback = function()
-    vim.schedule(function()
-      local bufnr = vim.api.nvim_get_current_buf()
-      local ns = vim.api.nvim_create_namespace("NotmuchMargins")
-
-      local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-      local virt_line = { { "", "Normal" } }
-
-      local pat = "^[^<]+<[^>]+>.-%(%[.-%]%)$"
-
-      local found_first = false
-
-      for i, line in ipairs(lines) do
-        if line:match(pat) then
-          if not found_first then
-            -- skip the first match entirely
-            found_first = true
-          else
-            -- handle all later matches
-            local lnum = math.max(i - 2, 0)
-            vim.api.nvim_buf_set_extmark(bufnr, ns, lnum, 0, {
-              virt_lines = { virt_line, virt_line },
-            })
-          end
-        end
-      end
-    end)
-  end,
-})
