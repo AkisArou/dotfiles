@@ -18,20 +18,22 @@ X11
 
 Common
 
-- Editor: nvim (configured for web dev) | vim (minimal config) | vscode (configuration at .vscode) | zed
-- Browsers: librewolf, brave
-- Terminal: alacritty | kitty
-- Filemanager: yazi, thunar
+- Editor:
+  nvim (configured for web dev)
+  emacs
+  vim (minimal config)
+  vscode (configuration at .vscode)
+- Browsers: brave, librewolf
+- Terminal: alacritty, kitty
+- Filemanager: yazi, nautilus
 - Notifications: dunst
-- Shell: zsh & bash
+- Shell: zsh
 - Screenshot: flameshot
 
 Also:
 
 - git config
 - fzf, fd, rg
-- vscode dark & tokyonight themes
-- vscode settings & keybindings at .vscode
 - various helper scripts
 
 ## Screenshots
