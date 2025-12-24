@@ -48,7 +48,7 @@
   diffFilter = delta --color-only
 
 [merge]
-  tool = nvimdiff
+	tool = vscode-diff
   conflictStyle = zdiff3
 
 [mergetool]
@@ -57,6 +57,9 @@
 
 [mergetool "nvimdiff"]
   layout = "LOCAL,BASE,REMOTE / MERGED"
+
+[mergetool "vscode-diff"]
+	cmd = nvim \"$MERGED\" -c \"CodeDiff merge \\\"$MERGED\\\"\"
 
 [diff]
   tool = nvimdifftool

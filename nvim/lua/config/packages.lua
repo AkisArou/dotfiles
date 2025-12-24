@@ -3,20 +3,20 @@ vim.cmd("packadd nvim.undotree")
 
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
-	local name = event.data.spec.name
+    local name = event.data.spec.name
 
-	if name == "blink.cmp" then
-	  local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
+    if name == "blink.cmp" then
+      local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/blink.cmp"
 
-	  vim.notify("\nBuilding blink.cmp at " .. plugin_path, vim.log.levels.INFO)
-	  local result = vim.system({ "cargo", "build", "--release" }, { cwd = plugin_path }):wait()
+      vim.notify("\nBuilding blink.cmp at " .. plugin_path, vim.log.levels.INFO)
+      local result = vim.system({ "cargo", "build", "--release" }, { cwd = plugin_path }):wait()
 
-	  if result.code == 0 then
-		vim.notify("\nBuilding blink.cmp done", vim.log.levels.INFO)
-	  else
-		vim.notify("\nBuilding blink.cmp failed", vim.log.levels.ERROR)
-	  end
-	end
+      if result.code == 0 then
+        vim.notify("\nBuilding blink.cmp done", vim.log.levels.INFO)
+      else
+        vim.notify("\nBuilding blink.cmp failed", vim.log.levels.ERROR)
+      end
+    end
   end,
 })
 
@@ -105,6 +105,9 @@ vim.pack.add({
   github("yioneko/nvim-vtsls"),
 
   github("folke/persistence.nvim"),
+
+  github("MunifTanjim/nui.nvim"),
+  github("esmuellert/vscode-diff.nvim"),
 })
 
 -- Instant load
@@ -143,7 +146,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
   pattern = { "*test.ts", "*test.tsx", "*test.js", "*test.jsx" },
   callback = function()
-	require("plugins.neotest")
+    require("plugins.neotest")
   end,
 })
 
@@ -151,7 +154,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   once = true,
   pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
   callback = function()
-	require("plugins.schemastore")
+    require("plugins.schemastore")
   end,
 })
 
@@ -159,7 +162,7 @@ vim.api.nvim_create_autocmd("InsertEnter", {
   once = true,
   pattern = "*",
   callback = function()
-	require("plugins.neotab")
-	require("plugins.vim-visual-multi")
+    require("plugins.neotab")
+    require("plugins.vim-visual-multi")
   end,
 })
