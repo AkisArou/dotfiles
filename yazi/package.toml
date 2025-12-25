@@ -15,8 +15,8 @@ hash = "8e710db726e2f280668c3c6e873041b4"
 
 [[plugin.deps]]
 use = "aresler/path-from-root"
-rev = "c4f03df"
-hash = "5022fdb08fcb05c10eb59b63663edb10"
+rev = "3daa62f"
+hash = "f3375d21ceb5f49d2d50ad199262006a"
 
 [[plugin.deps]]
 use = "llanosrocas/githead"
