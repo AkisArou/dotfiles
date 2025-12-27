@@ -50,7 +50,7 @@ map("n", "<leader>xq", "<cmd>copen<CR>", opts)
 -- Keybinding for saving and closing the current buffer
 local function format_and_switch_buffer(cmd)
   if vim.bo.modifiable then
-	vim.cmd("lua require('conform').format()")
+    vim.cmd("lua require('conform').format()")
   end
 
   vim.cmd(cmd)
@@ -65,18 +65,6 @@ map("n", "]b", function()
 end, opts)
 
 map("n", "<leader>uu", vim.cmd.Undotree)
-
-map(
-  { "n", "t" },
-  "<leader>gd",
-  require("custom.floating-window").create_floating_window_api(function(state)
-	if vim.bo[state.floating.buf].buftype ~= "terminal" then
-	  vim.cmd("terminal git difftool -d")
-	end
-
-	vim.cmd("startinsert")
-  end).toggle_fresh
-)
 
 map("n", "<leader>`", function()
   vim.cmd.vnew()

@@ -141,6 +141,7 @@ vim.schedule(function()
   require("plugins.fidget")
   require("plugins.persistence")
   require("plugins.octo")
+  require("plugins.vscode-diff")
 end)
 
 -- Autocmd load
