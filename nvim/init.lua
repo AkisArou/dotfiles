@@ -5,3 +5,4 @@ vim.g.is_difftool = vim.iter(vim.v.argv):any(function(a)
 end)
 
 require("config")
+require("custom.temp-worktree")
