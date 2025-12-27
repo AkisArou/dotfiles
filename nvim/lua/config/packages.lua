@@ -109,6 +109,7 @@ vim.pack.add({
   github("MunifTanjim/nui.nvim"),
   github("esmuellert/vscode-diff.nvim"),
   github("pwntester/octo.nvim"),
+  github("NeogitOrg/neogit"),
 })
 
 -- Instant load
@@ -142,6 +143,7 @@ vim.schedule(function()
   require("plugins.persistence")
   require("plugins.octo")
   require("plugins.vscode-diff")
+  require("plugins.neogit")
 end)
 
 -- Autocmd load
