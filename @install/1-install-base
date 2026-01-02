@@ -144,7 +144,7 @@ packages=(
   "xdg-desktop-portal-gtk"
   "xdg-user-dirs"
   "xdg-utils"
-  "yazi-git"
+  "yazi"
   "zinit-git"
   "zsh"
 )
