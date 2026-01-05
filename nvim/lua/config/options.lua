@@ -58,7 +58,6 @@ opt.shortmess:append("c") -- hide all the completion messages, e.g. "-- XXX comp
 opt.whichwrap:append("<,>,[,],h,l") -- keys allowed to move to the previous/next line when the beginning/end of line is reached
 opt.formatoptions:remove({ "c", "r", "o" }) -- This is a sequence of letters which describes how automatic formatting is to be done
 opt.linebreak = true
-opt.linebreak = true
 opt.nrformats = "blank"
 opt.foldenable = false -- Disable folding by default
 opt.foldmethod = "manual"
