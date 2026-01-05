@@ -78,8 +78,6 @@ end, {})
 
 vim.cmd([[cabbrev wqa Z]])
 
-vim.cmd([[let $RUBYOPT="-W0"]]) -- Disable ruby warnings (notmuch-vim spams)
-
 -- Disable built-in runtime plugins
 local disabled_builtins = {
   "gzip",
