@@ -24,12 +24,16 @@ local themes = {
       end,
     })
 
+    vim.cmd([[
+      hi FzfLuaHeaderText guifg=#434a65
+      hi FzfLuaHeaderBind guifg=#434a65
+      hi manOptionDesc guifg=#41a6b5
+    ]])
+
     vim.defer_fn(function()
       vim.cmd([[ 
       hi HighlightUrl guifg=#5f8ae9 gui=underline
       hi DiagnosticUnderlineError guisp=#7a3844 gui=undercurl
-      hi FzfLuaHeaderText guifg=#434a65
-      hi FzfLuaHeaderBind guifg=#434a65
     ]])
     end, 0)
   end,
