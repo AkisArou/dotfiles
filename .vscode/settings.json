@@ -56,11 +56,6 @@
   "editor.scrollBeyondLastLine": true,
   "files.autoSave": "onFocusChange",
   "files.exclude": {
-    "**/.git": true,
-    "**/.svn": true,
-    "**/.hg": true,
-    "**/.DS_Store": true,
-    "**/Thumbs.db": true,
     "USE_GITIGNORE": true
   },
   "files.watcherExclude": {
@@ -245,10 +240,6 @@
       "commands": ["editor.action.quickFix"],
       "when": "editorHasCodeActionsProvider && textInputFocus && !editorReadonly"
     },
-    {
-      "before": ["<leader>", "e"],
-      "commands": ["workbench.action.toggleSidebarVisibility"]
-    },
 
     // Diagnostics
     {
@@ -336,6 +327,5 @@
     "scminput": false
   },
   "clangd.detectExtensionConflicts": false,
-  "github.copilot.nextEditSuggestions.enabled": true,
-  "hide-files.files": []
+  "github.copilot.nextEditSuggestions.enabled": true
 }
