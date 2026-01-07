@@ -56,16 +56,7 @@ vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#1f1f1f" })
 
 vim.keymap.set("n", "<leader>fa", fzf_lua.builtin, { desc = "Builtin" })
 
-vim.keymap.set("n", "<leader>ff", function()
-  fzf_lua.files({
-    winopts = {
-      border = "none",
-      preview = {
-        hidden = "hidden",
-      },
-    },
-  })
-end, { desc = "Fuzzy find files in cwd" })
+vim.keymap.set("n", "<leader>ff", fzf_lua.files, { desc = "Fuzzy find files in cwd" })
 
 vim.keymap.set("n", "<leader>fr", fzf_lua.oldfiles, { desc = "Fuzzy find recent files" })
 
