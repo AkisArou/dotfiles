@@ -82,38 +82,49 @@ vim.keymap.set("n", "<leader>gb", fzf_lua.git_branches, { desc = "Git branches" 
 
 vim.keymap.set("n", "<leader>ft", fzf_lua.treesitter, { desc = "Treesitter" })
 
+local get_commit_hash = function(selected)
+  -- Defensive check
+  if not selected or selected == false then
+    return
+  end
+
+  -- Normalize to string
+  local line
+  if type(selected) == "table" and #selected > 0 then
+    line = selected[1]
+  elseif type(selected) == "string" then
+    line = selected
+  else
+    -- Unknown type, ignore
+    return
+  end
+
+  -- Extract commit hash
+  local commit_hash = line:match("^(%w+)")
+
+  if commit_hash == nil then
+    vim.notify("Failed to extract commit hash from line", vim.log.levels.WARN)
+  end
+
+  return commit_hash
+end
+
 vim.keymap.set("n", "<leader>gc", function()
   fzf_lua.git_commits({
     winopts = { preview = { layout = "flex" } },
     actions = {
       ["ctrl-w"] = function(selected)
-        -- Defensive check
-        if not selected or selected == false then
+        local commit_hash = get_commit_hash(selected)
+
+        if commit_hash == nil then
           return
         end
 
-        -- Normalize to string
-        local line
-        if type(selected) == "table" and #selected > 0 then
-          line = selected[1]
-        elseif type(selected) == "string" then
-          line = selected
-        else
-          -- Unknown type, ignore
-          return
-        end
-
-        -- Extract commit hash
-        local commit_hash = line:match("^(%w+)")
-        if commit_hash then
-          local success, err = pcall(function()
-            require("custom.temp-worktree").open_git_worktree(commit_hash)
-          end)
-          if not success then
-            vim.notify("Failed to open worktree: " .. tostring(err), vim.log.levels.ERROR)
-          end
-        else
-          vim.notify("Failed to extract commit hash from line", vim.log.levels.WARN)
+        local success, err = pcall(function()
+          require("custom.temp-worktree").open_git_worktree(commit_hash)
+        end)
+        if not success then
+          vim.notify("Failed to open worktree: " .. tostring(err), vim.log.levels.ERROR)
         end
       end,
     },
@@ -127,7 +138,18 @@ vim.keymap.set("n", "<leader>gf", function()
         layout = "flex",
       },
     },
-    actions = { ["ctrl-o"] = actions.git_checkout },
+    actions = {
+      ["ctrl-o"] = actions.git_checkout,
+      ["ctrl-g"] = function(selected)
+        local commit_hash = get_commit_hash(selected)
+
+        if commit_hash == nil then
+          return
+        end
+
+        vim.cmd("CodeDiff file HEAD " .. commit_hash)
+      end,
+    },
   })
 end, { desc = "Buffer commit history" })
 
