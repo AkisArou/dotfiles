@@ -2,8 +2,15 @@
 
 source ~/.env
 
+rofi_cmd=(
+  rofi
+  -config "$HOME/dotfiles/rofi/${THEME:-tokyonight}.rasi"
+  -matching fuzzy
+  -sorting-method fzf
+)
+
 if [ "$ULTRAWIDE" ] || [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-  rofi -config ~/dotfiles/rofi/"${THEME:-tokyonight}".rasi "$@"
+  "${rofi_cmd[@]}" "$@"
 else
-  rofi -config ~/dotfiles/rofi/"${THEME:-tokyonight}".rasi "$@" -dpi 152
+  "${rofi_cmd[@]}" -dpi 152 "$@"
 fi
