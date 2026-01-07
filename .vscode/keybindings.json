@@ -204,16 +204,6 @@
   // File explorer
   //
   {
-    "key": "space e",
-    "command": "workbench.action.toggleSidebarVisibility",
-    "when": "sideBarVisible"
-  },
-  {
-    "key": "space e",
-    "command": "workbench.view.explorer",
-    "when": "!sideBarVisible"
-  },
-  {
     "key": "r",
     "command": "renameFile",
     "when": "filesExplorerFocus && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
