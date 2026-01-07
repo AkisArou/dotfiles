@@ -17,7 +17,7 @@ FZF_TOKYONIGHT="\
   --color=prompt:#a9b7e8 \
   --color=query:#a9b7e8 \
   --color=scrollbar:#27a1b9 \
-  --color=separator:#2e3c64 \
+  --color=separator:#292e42 \
   --color=spinner:#ff007c \
 "
 
@@ -96,9 +96,9 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --info=inline-right \
   --ansi \
   --cycle \
-  --pointer='▸' \
   --layout=reverse \
   --border=none \
+  --no-separator \
   --history=$history_file \
   $(eval echo \$"$FZF_THEME")
 "
