@@ -82,3 +82,9 @@ Various
 
   Then add to /etc/fstab to make it permanent:
   /swapfile none swap defaults,pri=10 0 0
+
+
+Brave Debloat
+-------------
+https://github.com/MulesGaming/brave-debloatinator/wiki/Additional-Resources#other-tools
+https://github.com/libalpm64/Better-Brave-Browser/blob/main/README.md
