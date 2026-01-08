@@ -7,8 +7,11 @@ local themes = {
         highlights["@variable.parameter"] = { fg = colors.fg_dark }
         highlights["@variable.builtin.javascript"] = { fg = colors.teal }
         highlights["@variable.builtin.typescript"] = { fg = colors.teal }
-        highlights["@variable.builtin.tsx"] = { fg = colors.teal }
-        highlights["@lsp.typemod.variable.defaultLibrary.typescriptreact"] = { fg = colors.teal }
+        highlights["@variable.builtin.tsx"] = { fg = colors.blue }
+        highlights["@function.method.call"] = { fg = colors.blue }
+        highlights["@function.method.call.tsx"] = { fg = colors.blue }
+        highlights["@lsp.typemod.variable.defaultLibrary.typescriptreact"] = { fg = colors.blue }
+        highlights["Special"] = { fg = colors.blue }
         highlights["Search"] = { bg = "#5e428f" }
         highlights["IncSearch"] = { bg = colors.magenta, fg = colors.bg_dark }
         highlights["Title"] = { fg = "#c0caf5" }
@@ -21,6 +24,11 @@ local themes = {
         highlights["DiagnosticUnnecessary"] = { fg = "#6F7E99" }
         highlights["FloatBorder"] = { fg = "#737aa2" }
         highlights["MatchParen"] = { fg = "#7aa2f7", bg = "#394b70", bold = true }
+        highlights["Type"] = { fg = colors.fg_dark }
+        highlights["@variable.member"] = { fg = colors.fg_dark }
+        highlights["@variable.member.tsx"] = { fg = colors.fg_dark }
+        highlights["@property"] = { fg = colors.fg_dark }
+        highlights["@keyword.import"] = { fg = colors.magenta }
       end,
     })
 
