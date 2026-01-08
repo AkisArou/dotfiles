@@ -51,8 +51,10 @@ label.module {
   margin-right: 10px;
 }
 
+#clock,
+#pulseaudio,
+#bluetooth,
 #network {
-  color: @bar-foreground;
   opacity: 0.8;
 }
 
