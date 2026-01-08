@@ -147,7 +147,7 @@ vim.keymap.set("n", "<leader>gf", function()
           return
         end
 
-        vim.cmd("CodeDiff file " .. commit_hash .. " HEAD")
+        vim.cmd("CodeDiff file HEAD " .. commit_hash)
       end,
     },
   })
