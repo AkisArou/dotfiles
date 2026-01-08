@@ -107,7 +107,7 @@ vim.pack.add({
   github("folke/persistence.nvim"),
 
   github("MunifTanjim/nui.nvim"),
-  github("esmuellert/vscode-diff.nvim"),
+  github("esmuellert/codediff.nvim"),
   github("pwntester/octo.nvim"),
   github("NeogitOrg/neogit"),
 })
@@ -142,7 +142,7 @@ vim.schedule(function()
   require("plugins.fidget")
   require("plugins.persistence")
   require("plugins.octo")
-  require("plugins.vscode-diff")
+  require("plugins.codediff")
   require("plugins.neogit")
 end)
 
