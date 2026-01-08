@@ -86,10 +86,11 @@ Various
 
 Brave Debloat
 -------------
+* Guides:
 https://github.com/MulesGaming/brave-debloatinator/wiki/Additional-Resources#other-tools
 https://github.com/libalpm64/Better-Brave-Browser/blob/main/README.md
 
-append to /etc/hosts
+* Append to /etc/hosts
 
 0.0.0.0 rewards.brave.com
 0.0.0.0 api.rewards.brave.com
@@ -108,3 +109,5 @@ append to /etc/hosts
 0.0.0.0 p3a.brave.com
 0.0.0.0 star-randsrv.bsg.brave.com
 0.0.0.0 usage-ping.brave.com
+
+then: resolvectl flush-caches
