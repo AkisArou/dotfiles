@@ -30,6 +30,7 @@ local themes = {
         highlights["@property"] = { fg = colors.fg_dark }
         highlights["@keyword.import"] = { fg = colors.magenta }
         highlights["TabLineSel"] = { fg = colors.fg, bg = colors.bg_dark1 }
+        highlights["@tag.builtin.tsx"] = { fg = colors.blue }
       end,
     })
 
