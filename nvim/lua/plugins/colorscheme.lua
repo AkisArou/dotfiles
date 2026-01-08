@@ -12,7 +12,6 @@ local themes = {
         highlights["@function.method.call.tsx"] = { fg = colors.blue }
         highlights["@lsp.type.enum"] = { fg = colors.teal }
         highlights["@lsp.typemod.variable.defaultLibrary.typescriptreact"] = { fg = colors.blue }
-        highlights["Special"] = { fg = colors.blue }
         highlights["Search"] = { bg = "#5e428f" }
         highlights["IncSearch"] = { bg = colors.magenta, fg = colors.bg_dark }
         highlights["Title"] = { fg = "#c0caf5" }
