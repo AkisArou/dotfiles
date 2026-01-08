@@ -76,7 +76,7 @@ require("oil").setup({
     ["<C-f>"] = { "actions.parent", mode = "n" },
     ["<Leader>yp"] = "actions.copy_entry_path",
     ["<Leader>yf"] = "actions.copy_entry_filename",
-    ["gr"] = "actions.open_cwd",
+    ["ge"] = "actions.open_cwd",
     ["gd"] = {
       desc = "Toggle file detail view",
       callback = function()
