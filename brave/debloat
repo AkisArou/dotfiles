@@ -1,0 +1,4 @@
+#!/usr/bin/zsh
+
+sudo mkdir /etc/brave/policies/managed -p
+sudo cp $HOME/dotfiles/brave/policies.json /etc/brave/policies/managed

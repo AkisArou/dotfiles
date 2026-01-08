@@ -1,0 +1,10 @@
+{
+  "BraveRewardsDisabled": true,
+  "BraveWalletDisabled": true,
+  "BraveVPNDisabled": 1,
+  "BraveAIChatEnabled": false,
+  "NewTabPageLocation": "https://search.brave.com",
+  "TorDisabled": false,
+  "PasswordManagerEnabled": false,
+  "DnsOverHttpsMode": "automatic"
+}
