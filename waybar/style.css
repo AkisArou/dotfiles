@@ -52,7 +52,8 @@ label.module {
 }
 
 #network {
-  color: #9ece6a;
+  color: @bar-foreground;
+  opacity: 0.7;
 }
 
 @keyframes blink {
