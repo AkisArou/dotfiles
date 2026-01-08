@@ -67,6 +67,7 @@ packages=(
   "github-cli"
   "gnome-terminal"
   "gnupg"
+  "go"
   "goimapnotify"
   "grim"
   "gtk-engine-murrine" # Needed by gtk tokyonight
