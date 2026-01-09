@@ -22,7 +22,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
 ---@param value string|vim.pack.Spec
 ---@return string|vim.pack.Spec
-local function github(value)
+local function gh(value)
   if type(value) == "string" then
     return "https://github.com/" .. value
   end
@@ -32,91 +32,91 @@ local function github(value)
 end
 
 vim.pack.add({
-  github("j-hui/fidget.nvim"),
-  github("folke/tokyonight.nvim"),
-  github("nvim-lua/plenary.nvim"),
-  github("nvim-tree/nvim-web-devicons"),
-  github("nvim-lualine/lualine.nvim"),
-  github("arnamak/stay-centered.nvim"),
-  github("fei6409/log-highlight.nvim"),
-  github("3rd/image.nvim"),
+  gh("j-hui/fidget.nvim"),
+  gh("folke/tokyonight.nvim"),
+  gh("nvim-lua/plenary.nvim"),
+  gh("nvim-tree/nvim-web-devicons"),
+  gh("nvim-lualine/lualine.nvim"),
+  gh("arnamak/stay-centered.nvim"),
+  gh("fei6409/log-highlight.nvim"),
+  gh("3rd/image.nvim"),
 
-  github("Bilal2453/luvit-meta"),
+  gh("Bilal2453/luvit-meta"),
 
-  github("RubixDev/mason-update-all"),
-  github("williamboman/mason-lspconfig.nvim"),
-  github("mason-org/mason.nvim"),
-  github("jay-babu/mason-nvim-dap.nvim"),
+  gh("RubixDev/mason-update-all"),
+  gh("williamboman/mason-lspconfig.nvim"),
+  gh("mason-org/mason.nvim"),
+  gh("jay-babu/mason-nvim-dap.nvim"),
 
-  github({ src = "nvim-treesitter/nvim-treesitter", version = "main" }),
-  github({ src = "nvim-treesitter/nvim-treesitter-textobjects", version = "main" }),
-  github("nvim-treesitter/nvim-treesitter-context"),
-  github("windwp/nvim-ts-autotag"),
-  github("folke/ts-comments.nvim"),
+  gh({ src = "nvim-treesitter/nvim-treesitter", version = "main" }),
+  gh({ src = "nvim-treesitter/nvim-treesitter-textobjects", version = "main" }),
+  gh("nvim-treesitter/nvim-treesitter-context"),
+  gh("windwp/nvim-ts-autotag"),
+  gh("folke/ts-comments.nvim"),
 
-  github("rcarriga/nvim-dap-ui"),
-  github("nvim-neotest/nvim-nio"),
-  github("mfussenegger/nvim-dap"),
+  gh("rcarriga/nvim-dap-ui"),
+  gh("nvim-neotest/nvim-nio"),
+  gh("mfussenegger/nvim-dap"),
 
-  github("ibhagwan/fzf-lua"),
+  gh("ibhagwan/fzf-lua"),
 
-  github("lewis6991/gitsigns.nvim"),
+  gh("lewis6991/gitsigns.nvim"),
 
-  github("MagicDuck/grug-far.nvim"),
+  gh("MagicDuck/grug-far.nvim"),
 
-  github("itchyny/vim-highlighturl"),
+  gh("itchyny/vim-highlighturl"),
 
-  github("echasnovski/mini.cursorword"),
-  github("echasnovski/mini.surround"),
-  github("echasnovski/mini.pairs"),
-  github("echasnovski/mini.ai"),
+  gh("echasnovski/mini.cursorword"),
+  gh("echasnovski/mini.surround"),
+  gh("echasnovski/mini.pairs"),
+  gh("echasnovski/mini.ai"),
 
-  github("kawre/neotab.nvim"),
+  gh("kawre/neotab.nvim"),
 
-  github("nvim-neotest/nvim-nio"),
-  github("antoinemadec/FixCursorHold.nvim"),
-  github("nvim-neotest/neotest"),
-  github("markandrus/neotest-node-test-runner"),
+  gh("nvim-neotest/nvim-nio"),
+  gh("antoinemadec/FixCursorHold.nvim"),
+  gh("nvim-neotest/neotest"),
+  gh("markandrus/neotest-node-test-runner"),
 
-  github("catgoose/nvim-colorizer.lua"),
+  gh("catgoose/nvim-colorizer.lua"),
 
-  github("mfussenegger/nvim-lint"),
+  gh("mfussenegger/nvim-lint"),
 
-  github("stevearc/overseer.nvim"),
+  gh("stevearc/overseer.nvim"),
 
-  github("b0o/SchemaStore.nvim"),
+  gh("b0o/SchemaStore.nvim"),
 
-  github("folke/snacks.nvim"),
+  gh("folke/snacks.nvim"),
 
-  github("axelvc/template-string.nvim"),
+  gh("axelvc/template-string.nvim"),
 
-  github("folke/todo-comments.nvim"),
+  gh("folke/todo-comments.nvim"),
 
-  github("christoomey/vim-tmux-navigator"),
+  gh("christoomey/vim-tmux-navigator"),
 
-  github("mg979/vim-visual-multi"),
+  gh("mg979/vim-visual-multi"),
 
-  github("folke/which-key.nvim"),
+  gh("folke/which-key.nvim"),
 
-  github("stevearc/oil.nvim"),
-  github("JezerM/oil-lsp-diagnostics.nvim"),
-  github("refractalize/oil-git-status.nvim"),
+  gh("stevearc/oil.nvim"),
+  gh("JezerM/oil-lsp-diagnostics.nvim"),
+  gh("refractalize/oil-git-status.nvim"),
 
-  github("folke/lazydev.nvim"),
+  gh("folke/lazydev.nvim"),
 
-  github("saghen/blink.cmp"),
-  github("Kaiser-Yang/blink-cmp-git"),
+  gh("saghen/blink.cmp"),
+  gh("Kaiser-Yang/blink-cmp-git"),
 
-  github("stevearc/conform.nvim"),
+  gh("stevearc/conform.nvim"),
 
-  github("yioneko/nvim-vtsls"),
+  gh("yioneko/nvim-vtsls"),
 
-  github("folke/persistence.nvim"),
+  gh("folke/persistence.nvim"),
 
-  github("MunifTanjim/nui.nvim"),
-  github("esmuellert/codediff.nvim"),
-  github("pwntester/octo.nvim"),
-  github("NeogitOrg/neogit"),
+  gh("MunifTanjim/nui.nvim"),
+  gh("esmuellert/codediff.nvim"),
+  gh("pwntester/octo.nvim"),
+  gh("NeogitOrg/neogit"),
 })
 
 -- Instant load
