@@ -20,7 +20,8 @@ fi
 mkdir -p "$HOME/.ssh"
 mkdir -p "$HOME/.local/share/applications"
 mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
-sudo mkdir -p "/usr/share/chromium/extensions"
+sudo mkdir -p /usr/share/chromium/extensions
+sudo mkdir -p /etc/brave/policies/managed
 
 # linking
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
@@ -31,6 +32,7 @@ sudo ln -sf "$HOME/dotfiles/systemd/user/emacs-preload.service" /etc/systemd/use
 sudo ln -sf "$HOME/dotfiles/systemd/user/mbsync.service" /etc/systemd/user/mbsync.service
 sudo ln -sf "$HOME/dotfiles/systemd/user/mbsync.timer" /etc/systemd/user/mbsync.timer
 sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
+sudo ln -sf "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/policies.json"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"

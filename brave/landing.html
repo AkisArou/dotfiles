@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Tab</title>
+    <style>
+      /* Base styles */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(135deg, #15161e, #1f1f2e);
+        color: #a9b1d6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      /* Container */
+      .container {
+        display: flex;
+        align-items: center;
+        opacity: 40%;
+        gap: 60px;
+        background: rgba(30, 30, 50, 0.4);
+        padding: 40px 60px;
+        border-radius: 24px;
+        backdrop-filter: blur(12px);
+        transition: transform 0.3s ease;
+      }
+
+      /* Images */
+      .container img {
+        height: 120px;
+        transition:
+          transform 0.3s ease,
+          filter 0.3s ease;
+        cursor: pointer;
+      }
+
+      .container img:hover {
+        transform: rotate(-10deg) scale(1.1);
+        filter: drop-shadow(0 0 20px #61dafb);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Tux.svg/1280px-Tux.svg.png"
+        alt="Tux logo"
+      />
+
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Arch_Linux_%22Crystal%22_icon.svg/2048px-Arch_Linux_%22Crystal%22_icon.svg.png"
+        alt="Arch Linux Logo"
+      />
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Vimlogo.svg/1200px-Vimlogo.svg.png"
+        alt="Vim Logo"
+      />
+
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Neovim-mark.svg/1680px-Neovim-mark.svg.png"
+        alt="Neovim Logo"
+      />
+
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/EmacsIcon.svg/1200px-EmacsIcon.svg.png"
+        alt="Emacs Logo"
+      />
+
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/8/83/The_GNU_logo.png"
+        alt="GNU Logo"
+      />
+    </div>
+  </body>
+</html>

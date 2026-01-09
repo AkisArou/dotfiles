@@ -3,7 +3,7 @@
   "BraveWalletDisabled": true,
   "BraveVPNDisabled": 1,
   "BraveAIChatEnabled": false,
-  "NewTabPageLocation": "https://search.brave.com",
+  "NewTabPageLocation": "file:///home/akisarou/dotfiles/brave/landing.html",
   "TorDisabled": false,
   "PasswordManagerEnabled": false,
   "DnsOverHttpsMode": "automatic"
