@@ -20,8 +20,15 @@ vim.api.nvim_create_autocmd("PackChanged", {
   end,
 })
 
-local github = function(path)
-  return "https://github.com/" .. path
+---@param value string|vim.pack.Spec
+---@return string|vim.pack.Spec
+local function github(value)
+  if type(value) == "string" then
+    return "https://github.com/" .. value
+  end
+
+  value.src = "https://github.com/" .. value.src
+  return value
 end
 
 vim.pack.add({
@@ -41,8 +48,8 @@ vim.pack.add({
   github("mason-org/mason.nvim"),
   github("jay-babu/mason-nvim-dap.nvim"),
 
-  { src = github("nvim-treesitter/nvim-treesitter"), version = "main" },
-  { src = github("nvim-treesitter/nvim-treesitter-textobjects"), version = "main" },
+  github({ src = "nvim-treesitter/nvim-treesitter", version = "main" }),
+  github({ src = "nvim-treesitter/nvim-treesitter-textobjects", version = "main" }),
   github("nvim-treesitter/nvim-treesitter-context"),
   github("windwp/nvim-ts-autotag"),
   github("folke/ts-comments.nvim"),
