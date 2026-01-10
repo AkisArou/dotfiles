@@ -82,9 +82,7 @@ require("oil").setup({
       callback = function()
         detail = not detail
         if detail then
-          require("oil").set_columns({ "permissions", "size", "mtime", "icon" })
-        else
-          require("oil").set_columns({ "icon" })
+          require("oil").set_columns({ "permissions", "size", "mtime" })
         end
       end,
     },
