@@ -84,7 +84,7 @@ require("oil").setup({
         if detail then
           require("oil").set_columns({ "permissions", "size", "mtime" })
         else
-          require("oil").set_columns()
+          require("oil").set_columns({})
         end
       end,
     },
