@@ -5,10 +5,6 @@ local img_previewer = { "ueberzugpp" }
 
 fzf_lua.setup({
   "hide",
-  defaults = {
-    file_icons = "mini",
-  },
-
   winopts = {
     border = "none",
     preview = {
