@@ -44,6 +44,13 @@ local themes = {
         hi DiagnosticUnderlineError guisp=#7a3844 gui=undercurl
         hi FzfLuaHeaderText guifg=#434a65
         hi FzfLuaHeaderBind guifg=#434a65
+        hi MiniIconsAzure guifg=#7aa2f7
+        hi MiniIconsGreen guifg=#7aa2f7
+        hi MiniIconsYellow guifg=#7aa2f7
+        hi MiniIconsGray guifg=#7aa2f7
+        hi MiniIconsOrange guifg=#7aa2f7
+        hi MiniIconsPurple guifg=#7aa2f7
+        hi MiniIconsRed guifg=#7aa2f7
       ]])
     end, 0)
   end,

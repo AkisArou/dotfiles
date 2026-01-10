@@ -1,3 +1,5 @@
+-- require("mini.icons").setup()
+
 require("mini.cursorword").setup()
 
 require("mini.surround").setup()

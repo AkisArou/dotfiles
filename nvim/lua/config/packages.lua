@@ -35,7 +35,7 @@ vim.pack.add({
   gh("j-hui/fidget.nvim"),
   gh("folke/tokyonight.nvim"),
   gh("nvim-lua/plenary.nvim"),
-  gh("nvim-tree/nvim-web-devicons"),
+  gh("nvim-mini/mini.icons"),
   gh("nvim-lualine/lualine.nvim"),
   gh("arnamak/stay-centered.nvim"),
   gh("fei6409/log-highlight.nvim"),
