@@ -9,6 +9,7 @@ exec --no-startup-id ~/.local/bin/emacs-preload-server
 exec --no-startup-id ~/dotfiles/sway/listen-events
 exec_always ~/dotfiles/sway/gaps
 exec --no-startup-id flameshot
+exec --no-startup-id xrdb -merge ~/.Xresources
 
 set $mod Mod4
 set $left h
