@@ -177,7 +177,3 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     require("plugins.vim-visual-multi")
   end,
 })
-
-
-
-vim.
