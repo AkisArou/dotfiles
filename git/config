@@ -61,7 +61,7 @@
 	cmd = nvim \"$MERGED\" -c \"CodeDiff merge \\\"$MERGED\\\"\"
 
 [diff]
-  tool = nvimdifftool
+	tool = codediff
   colorMoved = default
 
 [difftool]
@@ -72,6 +72,9 @@
 
 [difftool "nvimdifftool"]
   cmd = nvim -c "\"DiffTool $LOCAL $REMOTE\""
+
+[difftool "codediff"]
+	cmd = nvim "\"$LOCAL\" \"$REMOTE\" +\"CodeDiff $LOCAL $REMOTE\""
 
 [fetch]
   # Auto-fetch submodule changes (sadly, won't auto-update)
