@@ -74,7 +74,7 @@
   cmd = nvim -c "\"DiffTool $LOCAL $REMOTE\""
 
 [difftool "codediff"]
-	cmd = nvim "\"$LOCAL\" \"$REMOTE\" +\"CodeDiff $LOCAL $REMOTE\""
+  cmd = "$HOME/dotfiles/git/codediff" "$LOCAL" "$REMOTE"
 
 [fetch]
   # Auto-fetch submodule changes (sadly, won't auto-update)

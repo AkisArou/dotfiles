@@ -4,6 +4,8 @@ This is the configuration of my Arch linux and other useful programs
 
 ## Packages
 
+eeeee
+
 Wayland
 
 - WM: sway
