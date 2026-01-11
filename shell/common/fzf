@@ -3,8 +3,8 @@
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
 FZF_TOKYONIGHT="\
-  --color=bg+:#1f2335 \
-  --color=bg:#1a1b26 \
+  --color=bg:#16161e\
+  --color=bg+:#343a55  \
   --color=border:#27a1b9 \
   --color=fg:#929fdb \
   --color=gutter:#16161e \
