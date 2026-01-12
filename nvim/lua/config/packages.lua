@@ -115,7 +115,6 @@ vim.pack.add({
   gh("MunifTanjim/nui.nvim"),
   gh("esmuellert/codediff.nvim"),
   gh("pwntester/octo.nvim"),
-  gh("NeogitOrg/neogit"),
 
   gh("nvim-orgmode/orgmode"),
 })
@@ -151,7 +150,6 @@ vim.schedule(function()
   require("plugins.persistence")
   require("plugins.octo")
   require("plugins.codediff")
-  require("plugins.neogit")
   require("plugins.orgmode")
 end)
 
