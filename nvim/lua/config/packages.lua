@@ -1,4 +1,4 @@
-vim.cmd("packadd nvim.difftool")
+-- vim.cmd("packadd nvim.difftool")
 vim.cmd("packadd nvim.undotree")
 
 vim.api.nvim_create_autocmd("PackChanged", {
