@@ -26,6 +26,10 @@ require("blink-cmp").setup({
       -- "ripgrep"
     },
 
+    per_filetype = {
+      org = { "orgmode" },
+    },
+
     providers = {
       lazydev = {
         name = "LazyDev",
@@ -40,6 +44,11 @@ require("blink-cmp").setup({
           return vim.tbl_contains({ "octo", "gitcommit" }, vim.bo.filetype)
         end,
         opts = {},
+      },
+      orgmode = {
+        name = "Orgmode",
+        module = "orgmode.org.autocompletion.blink",
+        fallbacks = { "buffer" },
       },
     },
   },

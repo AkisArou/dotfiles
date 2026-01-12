@@ -116,6 +116,8 @@ vim.pack.add({
   gh("esmuellert/codediff.nvim"),
   gh("pwntester/octo.nvim"),
   gh("NeogitOrg/neogit"),
+
+  gh("nvim-orgmode/orgmode"),
 })
 
 -- Instant load
@@ -150,6 +152,7 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
+  require("plugins.orgmode")
 end)
 
 -- Autocmd load
