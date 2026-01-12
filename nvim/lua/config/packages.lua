@@ -1,5 +1,4 @@
 -- vim.cmd("packadd nvim.difftool")
-vim.cmd("packadd nvim.undotree")
 
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
@@ -151,6 +150,8 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.orgmode")
+
+  vim.cmd("packadd nvim.undotree")
 end)
 
 -- Autocmd load
