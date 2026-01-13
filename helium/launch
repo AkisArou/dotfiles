@@ -1,2 +1,0 @@
-#!/usr/bin/zsh
-/usr/bin/helium-browser --password-store=basic --remote-debugging-port=9222 "$@"
