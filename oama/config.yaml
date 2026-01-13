@@ -17,7 +17,7 @@ services:
   google:
     client_id_cmd: "pass oauth/gmail/client_id | head -n1"
     client_secret_cmd: "pass oauth/gmail/client_secret | head -n1"
-    auth_scope: https://mail.google.com/
+    auth_scope: "https://mail.google.com/ https://www.googleapis.com/auth/calendar"
 
   microsoft:
     tenant: nablesolutions.com
