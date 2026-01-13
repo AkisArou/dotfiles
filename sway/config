@@ -80,8 +80,8 @@ bindsym $mod+Return exec $term
 bindsym $mod+Shift+Return exec --no-startup-id ~/dotfiles/scripts/ssh-desktop
 bindsym $mod+d exec $menu
 # bindsym $mod+d exec $menu
-bindsym $mod+b exec ~/dotfiles/helium/launch
-bindsym $mod+Shift+n exec ~/dotfiles/helium/launch --incognito
+bindsym $mod+b exec ~/dotfiles/brave/launch
+bindsym $mod+Shift+n exec ~/dotfiles/brave/launch --incognito
 bindsym $mod+Shift+t exec ~/dotfiles/brave/launch --incognito --tor
 bindsym $mod+p exec flameshot gui
 
