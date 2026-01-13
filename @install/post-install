@@ -89,6 +89,9 @@ Brave Debloat
 * UI Flags:
 #brave-compact-horizontal-tabs
 
+* Toolbar
+Settings -> Appearance -> Customize your toolbar -> Disable all except "Forward" button
+
 * Guides:
 https://github.com/MulesGaming/brave-debloatinator/wiki/Additional-Resources#other-tools
 https://github.com/libalpm64/Better-Brave-Browser/blob/main/README.md
