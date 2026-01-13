@@ -12,6 +12,10 @@ configuration {
     kb-page-next: "Page_Down,Control+d";
     kb-page-prev: "Page_Up,Control+u";
     kb-accept-entry: "Control+e,Return,KP_Enter";
+    matching: "fuzzy";
+    tokenize: true;
+    sort: true;
+    sorting-method: "fzf";
 }
 
 #window {

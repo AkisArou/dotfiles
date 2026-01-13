@@ -5,8 +5,6 @@ source ~/.env
 rofi_cmd=(
   rofi
   -config "$HOME/dotfiles/rofi/${THEME:-tokyonight}.rasi"
-  -matching fuzzy
-  -sorting-method fzf
 )
 
 if [ "$ULTRAWIDE" ] || [ "$XDG_SESSION_TYPE" = "wayland" ]; then
