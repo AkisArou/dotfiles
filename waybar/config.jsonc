@@ -18,7 +18,6 @@
     "sway/language",
     "clock",
     "network",
-    "tray",
     "custom/mail",
     "systemd-failed-units",
   ],
