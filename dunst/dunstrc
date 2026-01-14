@@ -2,7 +2,7 @@
     width = (300, 800)
     height = (0,100)
     origin = top-left
-    offset = 350x-17
+    offset = 300x-17
     scale = 0
     frame_width = 1
     corner_radius = 3
