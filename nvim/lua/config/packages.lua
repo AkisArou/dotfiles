@@ -179,9 +179,3 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     require("plugins.vim-visual-multi")
   end,
 })
-
-vim.opt.runtimepath:append("~/projects/mycal/clients/neovim")
-
-require("mycal").setup({
-  mycal_cmd = "/home/akisarou/projects/mycal/dist/cli.js",
-})
