@@ -1,8 +1,8 @@
 [global]
-    width = 300
+    width = (300, 800)
     height = (0,100)
-    origin = top-center
-    offset = 0x-17
+    origin = top-left
+    offset = 350x-17
     scale = 0
     frame_width = 1
     corner_radius = 3
@@ -18,7 +18,7 @@
     separator_height = 2
     padding = 1
     horizontal_padding = 4
-    text_icon_padding = 10
+    text_icon_padding = 1
     gap_size = 0
     separator_color = frame
     sort = yes
@@ -36,8 +36,8 @@
     show_indicators = yes
     enable_recursive_icon_lookup = true
     icon_position = left
-    min_icon_size = 12
-    max_icon_size = 24
+    min_icon_size = 1
+    max_icon_size = 12
     sticky_history = yes
     history_length = 20
     browser = /usr/bin/xdg-open
@@ -59,7 +59,7 @@
 [urgency_low]
     background = "#0f1016"
     foreground = "#c0caf5"
-    frame_color = "#7aa2f7"
+    frame_color = "#9d7cd8"
 
 [urgency_normal]
     background = "#0f1016"
@@ -69,20 +69,4 @@
 [urgency_critical]
     background = "#0f1016"
     foreground = "#c0caf5"
-    frame_color = "#f7768e"
-
-# VScode
-#[urgency_low]
-#    background = "#1F1F1F"
-#    foreground = "#D4D4D4"
-#    frame_color = "#808080"
-#
-#[urgency_normal]
-#    background = "#1F1F1F"
-#    foreground = "#D4D4D4"
-#    frame_color = "#808080"
-#
-#[urgency_critical]
-#    background = "#F44747"
-#    foreground = "#1F1F1F"
-#    frame_color = "#F44747"
+    frame_color = "#bb9af7"
