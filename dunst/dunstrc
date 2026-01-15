@@ -17,8 +17,8 @@
     indicate_hidden = yes
     separator_height = 2
     padding = 1
-    horizontal_padding = 4
-    text_icon_padding = 1
+    horizontal_padding = 8
+    text_icon_padding = 8
     gap_size = 0
     separator_color = frame
     sort = yes
