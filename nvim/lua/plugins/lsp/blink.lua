@@ -4,12 +4,26 @@ require("lazydev").setup({
   },
 })
 
+local select_count = 10
+
 require("blink-cmp").setup({
   keymap = {
     preset = "default",
     ["<C-e>"] = { "select_and_accept" },
     ["<C-b>"] = { "scroll_documentation_up", "fallback" },
     ["<C-f>"] = { "scroll_documentation_down", "fallback" },
+    ["<C-d>"] = {
+      function(cmp)
+        return cmp.select_next({ count = select_count })
+      end,
+      "fallback",
+    },
+    ["<C-u>"] = {
+      function(cmp)
+        return cmp.select_prev({ count = select_count })
+      end,
+      "fallback",
+    },
   },
 
   appearance = {
