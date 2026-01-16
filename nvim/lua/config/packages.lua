@@ -107,7 +107,7 @@ vim.pack.add({
 
   gh("stevearc/conform.nvim"),
 
-  gh("yioneko/nvim-vtsls"),
+  -- gh("yioneko/nvim-vtsls"),
 
   gh("folke/persistence.nvim"),
 

@@ -15,9 +15,10 @@ vim.lsp.enable({
   "npmls",
   "tailwindcss",
   "taplo",
-  "vtsls",
+  -- "vtsls",
   "yamlls",
   "oxlint",
+  "tsgo",
 })
 
 local fzf = require("fzf-lua")
