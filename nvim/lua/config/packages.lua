@@ -1,5 +1,3 @@
--- vim.cmd("packadd nvim.difftool")
-
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
     local name = event.data.spec.name
