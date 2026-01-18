@@ -26,3 +26,4 @@ emacs/*
 !emacs/lisp/
 !emacs/modules/
 !emacs/preload/
+/yazi/package.toml
