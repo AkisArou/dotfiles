@@ -25,6 +25,10 @@ Performance
   # Do not load the 'iTCO_wdt' watchdog module on boot.
   blacklist iTCO_wdt
 
+* Makepkg Optimization
+  Remove any -march and -mtune flags, then add -march=native
+  https://wiki.archlinux.org/title/Makepkg#Optimization
+
 Applications
 ------------
 * Android studio - Use WLToolkit on wayland 
