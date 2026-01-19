@@ -26,8 +26,16 @@ Performance
   blacklist iTCO_wdt
 
 * Makepkg Optimization
-  Remove any -march and -mtune flags, then add -march=native
   https://wiki.archlinux.org/title/Makepkg#Optimization
+
+  # CC
+  /etc/makepkg.conf
+  Remove any -march and -mtune flags, then add -march=native
+
+  # Rust
+  /etc/makepkg.conf.d/rust.conf
+  RUSTFLAGS="-C force-frame-pointers=yes -C target-cpu=native"
+
 
 Applications
 ------------
