@@ -14,12 +14,6 @@ require("lualine").setup({
     lualine_a = {},
     lualine_b = {},
     lualine_c = {
-      {
-        "filetype",
-        colored = true,
-        icon_only = true,
-        icon = { align = "right" },
-      },
       { "filename" },
       { "diagnostics", symbols = { error = " ", warn = " ", info = " " }, update_in_insert = true },
     },
