@@ -38,13 +38,12 @@ window#waybar #window {
 }
 
 #workspaces button.focused {
-  /* background-color: #51504f; */
   background-color: @focused-button-background;
   color: #ffffff;
 }
 
 #workspaces button.urgent {
-  background-color: #db4b4b;
+  background-color: #9d7cd8;
 }
 
 label.module {
