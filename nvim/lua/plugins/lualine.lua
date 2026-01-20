@@ -19,10 +19,6 @@ require("lualine").setup({
     },
     lualine_x = {
       { tsc, icon = "", color = "DiagnosticError" },
-      {
-        "lsp_status",
-        ignore_lsp = { "cssmodules_ls", "tailwindcss" },
-      },
       "nvim-dap-ui",
       "branch",
       {
