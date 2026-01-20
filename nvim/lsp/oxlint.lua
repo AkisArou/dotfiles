@@ -1,18 +1,15 @@
 return {
-  cmd = { vim.fn.fnamemodify("./node_modules/.bin/" .. "oxc_language_server", ":p") },
+  cmd = { vim.fn.fnamemodify("./node_modules/.bin/" .. "oxlint", ":p"), "--lsp" },
   filetypes = {
-    "astro",
     "javascript",
     "javascriptreact",
-    "svelte",
+    "javascript.jsx",
     "typescript",
-    "typescript.tsx",
     "typescriptreact",
-    "vue",
+    "typescript.tsx",
   },
   root_dir = vim.fn.getcwd(),
-  single_file_support = false,
-
+  workspace_required = true,
   commands = {
     OxcFixAll = {
       function()
