@@ -53,7 +53,6 @@ local YELLOW="#e0af68"
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     status
     background_jobs
-    context
     vim_shell
     per_directory_history
     newline
@@ -218,7 +217,7 @@ local YELLOW="#e0af68"
 
   # --------------------- Context ---------------------
   typeset -g POWERLEVEL9K_CONTEXT_ROOT_FOREGROUND=$RED
-  typeset -g POWERLEVEL9K_CONTEXT_{REMOTE,REMOTE_SUDO}_FOREGROUND=$ORANGE
+  typeset -g POWERLEVEL9K_CONTEXT_{REMOTE,REMOTE_SUDO}_FOREGROUND=$COMMENT
   typeset -g POWERLEVEL9K_CONTEXT_FOREGROUND=$FG
   typeset -g POWERLEVEL9K_CONTEXT_ROOT_TEMPLATE='%B%n@%m'
   typeset -g POWERLEVEL9K_CONTEXT_{REMOTE,REMOTE_SUDO}_TEMPLATE='%n@%m'
