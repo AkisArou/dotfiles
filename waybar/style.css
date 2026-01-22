@@ -43,6 +43,7 @@ window#waybar #window {
 }
 
 #workspaces button.urgent {
+  color: black;
   background-color: #9d7cd8;
 }
 
