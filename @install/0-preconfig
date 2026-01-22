@@ -17,4 +17,6 @@ else
   print_success "Current shell is already zsh."
 fi
 
+"$HOME/dotfiles/scripts/ssh-gen"
+
 print_success "DONE!"

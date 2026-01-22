@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+KEY_PATH="$HOME/.ssh/id_rsa"
+
+if [ ! -f "$KEY_PATH" ]; then
+    echo "SSH key not found at $KEY_PATH. Generating a new RSA key..."
+    mkdir -p "$HOME/.ssh"
+    chmod 700 "$HOME/.ssh"
+    ssh-keygen -t rsa-sha2-256 -f "$KEY_PATH"
+else
+    echo "SSH key already exists at $KEY_PATH. No action taken."
+fi
