@@ -3,19 +3,23 @@ local util = require("custom.util")
 require("snacks").setup({
   styles = {
     input = {
+      width = 40,
+      border = false,
       backdrop = true,
       relative = "cursor",
       b = {
-        completion = true, -- blink completions in input
+        completion = true,
+      },
+      keys = {
+        n_ctrlc = { "<C-c>", { "cancel" }, mode = "n", expr = true },
       },
     },
   },
-  input = {},
-  bigfile = {
-    -- your bigfile configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
+  input = {
+    icon_pos = false,
+    prompt_pos = "left",
   },
+  bigfile = {},
 })
 
 local keys = {
@@ -51,7 +55,7 @@ local keys = {
   {
     "<leader>ba",
     function()
-      util.write_format()
+      util.write_format_all()
       Snacks.bufdelete.all()
     end,
     desc = "Buffer delete all",
