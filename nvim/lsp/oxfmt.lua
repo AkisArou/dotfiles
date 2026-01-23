@@ -1,0 +1,22 @@
+return {
+  -- cmd = { vim.fn.fnamemodify("./node_modules/.bin/" .. "oxfmt", ":p"), "--lsp" },
+  -- filetypes = {
+  --   "yaml",
+  --   "markdown",
+  --   "mdx",
+  --   "scss",
+  --   "json",
+  --   "json5",
+  --   "jsonc",
+  --   "css",
+  --   "html",
+  --   "javascript",
+  --   "javascriptreact",
+  --   "javascript.jsx",
+  --   "typescript",
+  --   "typescriptreact",
+  --   "typescript.tsx",
+  -- },
+  -- root_dir = vim.fn.getcwd(),
+  -- workspace_required = true,
+}
