@@ -1,3 +1,5 @@
+vim.loader.enable(true)
+
 require("config.options")
 require("config.packages")
 require("config.filetype")
