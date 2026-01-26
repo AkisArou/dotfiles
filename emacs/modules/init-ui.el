@@ -78,12 +78,21 @@
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config)
 
+
+  (with-eval-after-load 'notmuch
+    (set-face-foreground 'notmuch-tag-unread "#7dcfff")
+    (set-face-foreground 'notmuch-tag-face "#7aa2f7")
+    (set-face-foreground 'notmuch-search-date "#7aa2f7")
+    (set-face-foreground 'notmuch-tree-match-date-face "#7aa2f7")
+    (set-face-foreground 'notmuch-tree-no-match-date-face "#7aa2f7"))
+
   (custom-set-faces
    `(isearch ((t (:foreground "#16161e" :background "#bb9af7"))))
    `(evil-ex-search ((t (:foreground "#16161e" :background "#bb9af7"))))
    `(lazy-highlight ((t (:background "#5e428f"))))
    `(dired-directory ((t (:foreground "#7aa2f7"))))
    `(show-paren-match ((t (:foreground "#7aa2f7"))))
+   `(doom-modeline-buffer-modified ((t (:foreground "#7aa2f7"))))
    `(typescript-ts-jsx-attribute-face ((t (:foreground "#7dcfff"))))))
 
 (set-face-attribute 'button nil
