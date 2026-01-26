@@ -52,8 +52,6 @@ fzf_lua.setup({
 
 fzf_lua.register_ui_select()
 
-vim.api.nvim_set_hl(0, "FzfLuaBorder", { fg = "#1f1f1f" })
-
 vim.keymap.set("n", "<leader>fa", fzf_lua.builtin, { desc = "Builtin" })
 
 vim.keymap.set("n", "<leader>ff", fzf_lua.files, { desc = "Fuzzy find files in cwd" })
