@@ -82,9 +82,9 @@
   (with-eval-after-load 'notmuch
     (set-face-foreground 'notmuch-tag-unread "#7dcfff")
     (set-face-foreground 'notmuch-tag-face "#7aa2f7")
-    (set-face-foreground 'notmuch-search-date "#7aa2f7")
-    (set-face-foreground 'notmuch-tree-match-date-face "#7aa2f7")
-    (set-face-foreground 'notmuch-tree-no-match-date-face "#7aa2f7"))
+    (set-face-foreground 'notmuch-search-date "#565f89")
+    (set-face-foreground 'notmuch-tree-match-date-face "#565f89")
+    (set-face-foreground 'notmuch-tree-no-match-date-face "#565f89"))
 
   (custom-set-faces
    `(isearch ((t (:foreground "#16161e" :background "#bb9af7"))))
