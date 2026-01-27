@@ -3,7 +3,7 @@ local util = require("custom.util")
 require("snacks").setup({
   styles = {
     input = {
-      width = 40,
+      width = 70,
       border = false,
       backdrop = true,
       relative = "cursor",
