@@ -38,6 +38,10 @@ local themes = {
       --   delete = "#914c54",
       -- }
       on_highlights = function(highlights, colors)
+        highlights["Visual"] = { bg = "#24283b" }
+        highlights["CursorLine"] = { bg = "#24283b" }
+        highlights["MiniCursorword"] = { bg = "#292e42" }
+        highlights["MiniCursorwordCurrent"] = { bg = "#292e42" }
         highlights["@tag.tsx"] = { fg = colors.magenta }
         highlights["@variable.parameter"] = { fg = colors.fg_dark }
         highlights["@variable.builtin.javascript"] = { fg = colors.teal }
@@ -58,7 +62,7 @@ local themes = {
         highlights["CursorLineNr"] = { fg = "#737aa2" }
         highlights["DiagnosticUnnecessary"] = { fg = "#6F7E99" }
         highlights["FloatBorder"] = { fg = "#737aa2" }
-        highlights["MatchParen"] = { fg = "#7aa2f7", bg = "#394b70", bold = true }
+        highlights["MatchParen"] = { fg = "#737aa2", bg = "#282c3f", bold = true }
         highlights["Type"] = { fg = colors.fg_dark }
         highlights["@variable.member"] = { fg = colors.fg_dark }
         highlights["@variable.member.tsx"] = { fg = colors.fg_dark }
