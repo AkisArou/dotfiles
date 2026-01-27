@@ -65,6 +65,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
         "Fix all detected spelling",
         "Change spelling to",
         "Convert named export",
+        "Disable react/jsx-no-undef",
       }
 
       fzf.lsp_code_actions({
