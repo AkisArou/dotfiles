@@ -42,7 +42,7 @@ hi("WinSeparator", { fg = "#111111" })
 hi("StatusLine", { fg = c.light_gray, bg = "#111111" })
 hi("StatusLineNC", { fg = c.dark_gray, bg = "#111111" })
 
-hi("Visual", { bg = "#222222" })
+hi("Visual", { bg = "#1a1a1a" })
 hi("Search", { fg = c.black, bg = c.orange })
 hi("Special", { fg = c.light_gray })
 
