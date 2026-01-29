@@ -59,7 +59,7 @@ FZF_VSCODE="\
   --color=spinner:#4ec9b0 \
 "
 
-FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
+FZF_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
 
 if [ -n "$ZSH_VERSION" ]; then
   zstyle ':fzf-tab:*' use-fzf-default-opts yes
@@ -84,4 +84,8 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   $(eval echo \$"$FZF_THEME")
 "
 
-zstyle ':fzf-tab:*' fzf-flags '--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55'
+FZF_TAB_TOKYONIGHT="--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55"
+FZF_TAB_LINUX_TTY="--color=fg:#aaaaaa,bg:#000000,fg+:#aaaaaa,bg+:#111111"
+
+FZF_TAB_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
+zstyle ":fzf-tab:*" fzf-flags $(eval echo \$"$FZF_TAB_THEME")
