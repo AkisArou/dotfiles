@@ -31,14 +31,12 @@ else
   ln -sf "~/dotfiles/eza/tokyonight.yml" ~/.config/eza/theme.yml
 fi
 
-# nvim
-for addr in $XDG_RUNTIME_DIR/nvim.*; do
-  nvim --server $addr --remote-send ":colorscheme $SELECTED_THEME<CR>"
-done
-
 # tmux
 tmux source ~/dotfiles/tmux/.tmux.conf
 tmux source ~/dotfiles/tmux/"$SELECTED_THEME".tmux
+
+# p10k
+p10k reload
 
 export THEME=$SELECTED_THEME
 source ~/.zshrc
