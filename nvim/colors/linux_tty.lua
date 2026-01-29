@@ -7,7 +7,7 @@ vim.g.colors_name = "linux_tty"
 
 local c = {
   black = "#000000",
-  red = "#aa0000",
+  red = "#ff4444",
   green = "#00aa00",
   yellow = "#aaaa00",
   orange = "#aa5500",
@@ -19,6 +19,8 @@ local c = {
   white = "#ffffff",
 }
 
+---@param group string
+---@param opts vim.api.keyset.highlight
 local function hi(group, opts)
   vim.api.nvim_set_hl(0, group, opts)
 end
@@ -69,10 +71,21 @@ hi("Delimiter", { fg = c.light_gray })
 --------------------------------------------------
 -- Diagnostics (subtle)
 --------------------------------------------------
-hi("DiagnosticError", { fg = c.red })
-hi("DiagnosticWarn", { fg = c.orange })
-hi("DiagnosticInfo", { fg = c.cyan })
-hi("DiagnosticHint", { fg = c.dark_gray })
+local diagnosticColor = {
+  error = "#aa0000",
+  warn = c.orange,
+  info = c.cyan,
+  hint = c.dark_gray,
+}
+
+hi("DiagnosticError", { fg = diagnosticColor.error, underline = false })
+hi("DiagnosticWarn", { fg = diagnosticColor.warn, underline = false })
+hi("DiagnosticInfo", { fg = diagnosticColor.info, underline = false })
+hi("DiagnosticHint", { fg = diagnosticColor.hint })
+hi("DiagnosticUnderlineError", { sp = diagnosticColor.error, underline = false, undercurl = true })
+hi("DiagnosticUnderlineWarn", { sp = diagnosticColor.warn, underline = false, undercurl = true })
+hi("DiagnosticUnderlineInfo", { sp = diagnosticColor.info, underline = false, undercurl = true })
+hi("DiagnosticUnderlineHint", { sp = diagnosticColor.hint, underline = false, undercurl = true })
 
 --------------------------------------------------
 -- Tree-sitter (INTENTIONALLY MINIMAL)
@@ -124,3 +137,10 @@ hi("BlinkCmpMenuSelection", { bg = c.black })
 --------------------------------------------------
 hi("lualine_c_normal", { bg = c.black })
 hi("lualine_x_normal", { bg = c.black })
+
+--------------------------------------------------
+-- FZF
+--------------------------------------------------
+hi("FzfLuaBorder", { fg = c.dark_gray })
+hi("FzfLuaHeaderText", { fg = c.dark_gray })
+hi("FzfLuaHeaderBind", { fg = c.dark_gray })
