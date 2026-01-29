@@ -3,10 +3,10 @@
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
 FZF_TOKYONIGHT="\
-  --color=bg:#16161e\
-  --color=bg+:#343a55  \
+  --color=bg:#000000 \
+  --color=bg+:#16161e  \
   --color=border:#27a1b9 \
-  --color=fg:#929fdb \
+  --color=fg:#d4d4d4 \
   --color=gutter:#16161e \
   --color=header:#434a65 \
   --color=hl+:#7dcfff \
@@ -19,6 +19,25 @@ FZF_TOKYONIGHT="\
   --color=scrollbar:#27a1b9 \
   --color=separator:#292e42 \
   --color=spinner:#ff007c \
+"
+
+FZF_LINUX_TTY="\
+  --color=bg:#000000 \
+  --color=bg+:#111111 \
+  --color=border:#555555 \
+  --color=fg:#aaaaaa \
+  --color=gutter:#000000 \
+  --color=header:#555555 \
+  --color=hl:#00aaaa \
+  --color=hl+:#00aaaa \
+  --color=info:#555555 \
+  --color=marker:#00aa00 \
+  --color=pointer:#aaaaaa \
+  --color=prompt:#aaaaaa \
+  --color=query:#aaaaaa \
+  --color=scrollbar:#555555 \
+  --color=separator:#555555 \
+  --color=spinner:#aa00aa \
 "
 
 FZF_VSCODE="\

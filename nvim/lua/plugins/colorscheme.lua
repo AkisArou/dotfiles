@@ -143,6 +143,9 @@ local themes = {
 }
 
 local selectedTheme = vim.g.os_theme or "tokyonight"
-themes[selectedTheme]()
+
+if themes[selectedTheme] then
+ themes[selectedTheme]()
+end
 
 pcall(vim.cmd.colorscheme, selectedTheme)
