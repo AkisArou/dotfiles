@@ -116,8 +116,8 @@ hi("@lsp.type.type", { link = "@type" })
 --------------------------------------------------
 -- Blink.cmp
 --------------------------------------------------
-hi("BlinkCmpMenu", { bg = c.black })
-hi("BlinkCmpMenuSelection", { bg = "#212121" })
+hi("BlinkCmpMenu", { bg = "#111111" })
+hi("BlinkCmpMenuSelection", { bg = c.black })
 
 --------------------------------------------------
 -- Lualine
