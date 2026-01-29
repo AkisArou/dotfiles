@@ -37,6 +37,7 @@ hi("Cursor", { fg = c.black, bg = c.light_gray })
 hi("CursorLine", { bg = "#111111" })
 hi("LineNr", { fg = c.dark_gray })
 hi("CursorLineNr", { fg = c.light_gray })
+hi("WinSeparator", { fg = "#111111" })
 
 hi("StatusLine", { fg = c.light_gray, bg = "#111111" })
 hi("StatusLineNC", { fg = c.dark_gray, bg = "#111111" })
