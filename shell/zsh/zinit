@@ -12,7 +12,6 @@ zinit light romkatv/powerlevel10k
 zinit light zdharma-continuum/fast-syntax-highlighting
 
 zinit light Aloxaf/fzf-tab
-zstyle ':fzf-tab:*' fzf-flags '--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55'
 zstyle ':fzf-tab:*' fzf-command 'ftb-tmux-popup'
 
 zinit light kutsan/zsh-system-clipboard

@@ -1,70 +1,174 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<theme name="TokyoNight" author="Folke Lemaitre" version="1.0">
-    <colors>
-        <color name="background" value="#1a1b26"/>
-        <color name="foreground" value="#c0caf5"/>
-        <color name="caret" value="#DBC08A"/>
-        <color name="selection" value="#283457"/>
-        <color name="lineHighlight" value="#00000030"/>
-        <color name="findHighlight" value="#ffa300"/>
-        <color name="gutterForeground" value="#3b415caa"/>
-        <color name="invisibles" value="#4f4f5e"/>
-        <color name="shadow" value="#00000010"/>
-    </colors>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>author</key>
+	<string>Folke Lemaitre (TTY adapted)</string>
+	<key>colorSpaceName</key>
+	<string>sRGB</string>
+	<key>name</key>
+	<string>TokyoNight-TTY</string>
 
-    <rules>
-        <!-- Comments -->
-        <rule scope="comment" color="#565f89" fontStyle="italic"/>
-        <rule scope="comment.block.documentation" color="#565f89" fontStyle="italic"/>
-        <rule scope="punctuation.definition.comment" color="#565f89" fontStyle="italic"/>
+	<key>settings</key>
+	<array>
 
-        <!-- Strings -->
-        <rule scope="string" color="#9ece6a"/>
-        <rule scope="meta.property.lua,string.unquoted.key.lua" color="#73daca"/>
-        <rule scope="constant.other.symbol" color="#73daca"/>
+	<!-- Global UI -->
+	<dict>
+		<key>settings</key>
+		<dict>
+			<key>background</key>
+			<string>#000000</string>
+			<key>foreground</key>
+			<string>#aaaaaa</string>
+			<key>caret</key>
+			<string>#aaaaaa</string>
 
-        <!-- Numbers, Boolean, Null -->
-        <rule scope="constant.numeric,constant.language,variable.other.constant" color="#ff9e64"/>
+			<key>selection</key>
+			<string>#111111</string>
+			<key>selectionBorder</key>
+			<string>#555555</string>
 
-        <!-- Keywords -->
-        <rule scope="keyword,keyword.control,storage.type" color="#bb9af7"/>
-        <rule scope="keyword.operator.logical,keyword.operator.ternary" color="#bb9af7"/>
-        <rule scope="keyword.other.DML" color="#7dcfff"/>
-        <rule scope="storage.modifier,meta.var.expr storage.type" color="#9d7cd8"/>
+			<key>lineHighlight</key>
+			<string>#111111</string>
 
-        <!-- Functions & Methods -->
-        <rule scope="entity.name.function,meta.function-call" color="#7aa2f7"/>
-        <rule scope="variable.parameter.function" color="#e0af68"/>
+			<key>gutterForeground</key>
+			<string>#555555</string>
+			<key>invisibles</key>
+			<string>#555555</string>
 
-        <!-- Classes, Tags, Support -->
-        <rule scope="entity.name.tag,entity.name.class" color="#bb9af7"/>
-        <rule scope="support.class,support.type" color="#0db9d7"/>
-        <rule scope="variable.other.object.property" color="#c0caf5"/>
-        <rule scope="variable.other.property" color="#7dcfff"/>
+			<key>findHighlight</key>
+			<string>#aa5500</string>
+			<key>findHighlightForeground</key>
+			<string>#000000</string>
+		</dict>
+	</dict>
 
-        <!-- Operators & Punctuation -->
-        <rule scope="keyword.operator,punctuation" color="#89ddff"/>
+	<!-- Comments -->
+	<dict>
+		<key>scope</key>
+		<string>comment, comment.block.documentation, punctuation.definition.comment</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#555555</string>
+			<key>fontStyle</key>
+			<string>italic</string>
+		</dict>
+	</dict>
 
-        <!-- HTML / CSS / Vue -->
-        <rule scope="entity.other.attribute-name" color="#73daca"/>
-        <rule scope="meta.directive.vue" color="#bb9af7"/>
-        <rule scope="meta.directive.vue punctuation.separator.key-value.html" color="#89ddff"/>
-        <rule scope="entity.name.tag.css" color="#0db9d7"/>
-        <rule scope="entity.other.attribute-name.id" color="#fc7b7b"/>
-        <rule scope="support.constant.property-value" color="#ff9e64"/>
+	<!-- Numbers / Constants -->
+	<dict>
+		<key>scope</key>
+		<string>constant.numeric, constant.language, variable.other.constant</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#aa5500</string>
+		</dict>
+	</dict>
 
-        <!-- Errors / Warnings / Info -->
-        <rule scope="markup.error" color="#db4b4b" background="#2d202a"/>
-        <rule scope="markup.warning" color="#e0af68" background="#2e2a2d"/>
-        <rule scope="markup.info" color="#0db9d7" background="#192b38"/>
+	<!-- Strings -->
+	<dict>
+		<key>scope</key>
+		<string>string</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#00aa00</string>
+		</dict>
+	</dict>
 
-        <!-- Regex -->
-        <rule scope="string.regexp" color="#b4f9f8"/>
-        <rule scope="constant.character.escape" color="#89ddff"/>
-        <rule scope="constant.character.escape.backslash" color="#c0caf5"/>
-        <rule scope="keyword.operator.quantifier.regexp" color="#89ddff"/>
-        <rule scope="constant.other.character-class.regexp" color="#bb9af7"/>
-        <rule scope="constant.other.character-class.set.regexp,punctuation.definition.character-class.regexp" color="#e0af68"/>
-        <rule scope="punctuation.definition.group" color="#f7768e"/>
-    </rules>
-</theme>
+	<!-- Keywords -->
+	<dict>
+		<key>scope</key>
+		<string>keyword, keyword.control, storage.type</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#aa00aa</string>
+		</dict>
+	</dict>
+
+	<!-- Operators / punctuation -->
+	<dict>
+		<key>scope</key>
+		<string>keyword.operator, punctuation</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#00aaaa</string>
+		</dict>
+	</dict>
+
+	<!-- Functions -->
+	<dict>
+		<key>scope</key>
+		<string>entity.name.function, meta.function-call</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#6666ee</string>
+		</dict>
+	</dict>
+
+	<!-- Variables -->
+	<dict>
+		<key>scope</key>
+		<string>variable, support.variable</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#aaaaaa</string>
+		</dict>
+	</dict>
+
+	<!-- Types / Classes -->
+	<dict>
+		<key>scope</key>
+		<string>entity.name.class, support.type</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#00aaaa</string>
+		</dict>
+	</dict>
+
+	<!-- Errors -->
+	<dict>
+		<key>scope</key>
+		<string>invalid, markup.error</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#aa0000</string>
+		</dict>
+	</dict>
+
+	<!-- Warnings -->
+	<dict>
+		<key>scope</key>
+		<string>markup.warning</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#aa5500</string>
+		</dict>
+	</dict>
+
+	<!-- Info -->
+	<dict>
+		<key>scope</key>
+		<string>markup.info</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#00aaaa</string>
+		</dict>
+	</dict>
+
+	</array>
+
+	<key>uuid</key>
+	<string>06f855e3-9fb7-4fb1-b790-aef06065f34e</string>
+</dict>
+</plist>
+

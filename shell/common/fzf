@@ -22,8 +22,8 @@ FZF_TOKYONIGHT="\
 "
 
 FZF_LINUX_TTY="\
-  --color=bg:#000000 \
-  --color=bg+:#111111 \
+  --color=bg:#111111 \
+  --color=bg+:#000000 \
   --color=border:#555555 \
   --color=fg:#aaaaaa \
   --color=gutter:#000000 \
@@ -59,44 +59,6 @@ FZF_VSCODE="\
   --color=spinner:#4ec9b0 \
 "
 
-FZF_GRUVBOX="\
-  --color=bg:#282828 \
-  --color=bg+:#3c3836 \
-  --color=border:#282828 \
-  --color=fg:#d4be98 \
-  --color=gutter:#3c3836 \
-  --color=header:#7daea3 \
-  --color=hl:#d3869b \
-  --color=hl+:#89b482 \
-  --color=info:#7daea3 \
-  --color=marker:#89b482 \
-  --color=pointer:#89b482 \
-  --color=prompt:#d3869b \
-  --color=query:#d4be98:regular \
-  --color=scrollbar:#3c3836 \
-  --color=separator:#7daea3 \
-  --color=spinner:#89b482 \
-"
-
-FZF_ONEDARK="\
-  --color=bg:#1a1d21 \
-  --color=bg+:#222222 \
-  --color=border:#1f1f1f \
-  --color=fg:#919baa \
-  --color=gutter:#2D2D2D \
-  --color=header:#919baa \
-  --color=hl:#c678dd \
-  --color=hl+:#98c379 \
-  --color=info:#8db9e2 \
-  --color=marker:#56b6c2 \
-  --color=pointer:#56b6c2 \
-  --color=prompt:#c678dd \
-  --color=query:#dcdfe4:regular \
-  --color=scrollbar:#313640 \
-  --color=separator:#223e55 \
-  --color=spinner:#56b6c2 \
-"
-
 FZF_THEME="FZF_$(echo "$THEME" | tr '[:lower:]' '[:upper:]')"
 
 if [ -n "$ZSH_VERSION" ]; then
@@ -121,3 +83,5 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   --history=$history_file \
   $(eval echo \$"$FZF_THEME")
 "
+
+zstyle ':fzf-tab:*' fzf-flags '--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55'

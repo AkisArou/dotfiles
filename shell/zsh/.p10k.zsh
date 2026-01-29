@@ -28,8 +28,8 @@
 
 
 # =====================[ Linux TTY Colors ]=====================
-local BLUE="#4444ee"
-local BLUE0="#4444ee"
+local BLUE="#6666ee"
+local BLUE0="#6666ee"
 local BLUE1="#00aaaa"
 local BLUE2="#00aaaa"
 local BLUE5="#00aaaa"

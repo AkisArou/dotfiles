@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-VALID_THEMES=("vscode" "tokyonight" "onedark" "gruvbox")
+VALID_THEMES=("vscode" "tokyonight" "linux_tty")
 
 SELECTED_THEME=$1
 
