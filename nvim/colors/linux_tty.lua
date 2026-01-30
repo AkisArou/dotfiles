@@ -127,7 +127,7 @@ hi("@lsp.type.function", { link = "@function" })
 hi("@lsp.type.variable", { link = "@variable" })
 hi("@lsp.type.keyword", { link = "@keyword" })
 hi("@lsp.type.type", { link = "@type" })
-hi("@lsp.type.property", { fg = "#777777" })
+hi("@lsp.type.property", { fg = "#888888" })
 
 --------------------------------------------------
 -- Blink.cmp
