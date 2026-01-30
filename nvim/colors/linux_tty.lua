@@ -6,6 +6,7 @@ vim.opt.termguicolors = true
 vim.g.colors_name = "linux_tty"
 
 local c = {
+  accent = "#9d7cd8",
   black = "#0c0c0c",
   red = "#ff4444",
   green = "#00aa00",
@@ -56,7 +57,7 @@ hi("Number", { fg = c.magenta })
 hi("Boolean", { fg = c.orange })
 hi("Float", { fg = c.magenta })
 
-hi("Keyword", { fg = "#9d7cd8" })
+hi("Keyword", { fg = c.accent })
 hi("Conditional", { fg = c.magenta })
 hi("Repeat", { fg = c.magenta })
 
