@@ -57,3 +57,28 @@ perms:
     foreground: DarkGray
   other_execute:
     foreground: DarkGray
+size:
+  major:
+    foreground: DarkGray
+  minor:
+    foreground: DarkGray
+  number_byte:
+    foreground: DarkGray
+  number_kilo:
+    foreground: DarkGray
+  number_mega:
+    foreground: DarkGray
+  number_giga:
+    foreground: DarkGray
+  number_huge:
+    foreground: DarkGray
+  unit_byte:
+    foreground: DarkGray
+  unit_kilo:
+    foreground: DarkGray
+  unit_mega:
+    foreground: DarkGray
+  unit_giga:
+    foreground: DarkGray
+  unit_huge:
+    foreground: DarkGray
