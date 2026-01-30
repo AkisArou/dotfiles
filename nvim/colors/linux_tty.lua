@@ -56,7 +56,7 @@ hi("Number", { fg = c.magenta })
 hi("Boolean", { fg = c.orange })
 hi("Float", { fg = c.magenta })
 
-hi("Keyword", { fg = c.magenta })
+hi("Keyword", { fg = "#9d7cd8" })
 hi("Conditional", { fg = c.magenta })
 hi("Repeat", { fg = c.magenta })
 
@@ -102,7 +102,7 @@ hi("@number", { fg = c.magenta })
 hi("@boolean", { fg = c.orange })
 hi("@constant", { fg = c.magenta })
 
-hi("@keyword", { fg = c.magenta })
+hi("@keyword", { link = "Keyword" })
 hi("@keyword.return", { fg = c.magenta })
 
 hi("@type", { fg = c.cyan })
