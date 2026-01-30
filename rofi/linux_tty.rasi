@@ -1,14 +1,14 @@
 * {
     foreground: #aaaaaa;
-    background-color: #000000;
-    active-background: #333333;
+    background-color: #0c0c0c;
+    active-background: #222222;
     urgent-background: #f7768e;
     urgent-foreground: #282a36;
     selected-background: var(active-background);
     selected-urgent-background: var(urgent-background);
     selected-active-background: var(active-background);
     separatorcolor: var(active-background);
-    bordercolor: #333333;
+    bordercolor: #222222;
 }
 
 @import "./config.rasi"
