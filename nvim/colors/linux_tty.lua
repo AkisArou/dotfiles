@@ -106,7 +106,7 @@ hi("@constant", { fg = c.magenta })
 hi("@keyword", { link = "Keyword" })
 hi("@keyword.return", { fg = c.magenta })
 
-hi("@type", { fg = c.cyan })
+hi("@type", { fg = c.light_gray })
 hi("@type.builtin", { fg = c.cyan })
 
 -- Functions are *not* highlighted loudly
