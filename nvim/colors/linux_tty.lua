@@ -7,6 +7,7 @@ vim.g.colors_name = "linux_tty"
 
 local c = {
   accent = "#9d7cd8",
+  accent_subtle = "#A999C2",
   black = "#0c0c0c",
   red = "#ff4444",
   green = "#009966",
@@ -111,8 +112,8 @@ hi("@type", { fg = c.light_gray })
 hi("@type.builtin", { fg = c.cyan })
 
 -- Functions are *not* highlighted loudly
-hi("@function", { fg = "#A999C2" })
-hi("@function.call", { fg = "#A999C2" })
+hi("@function", { fg = c.accent_subtle })
+hi("@function.call", { fg = c.accent_subtle })
 
 -- Variables intentionally uncolored
 hi("@variable", { fg = c.light_gray })
@@ -120,6 +121,9 @@ hi("@variable.builtin", { fg = c.light_gray })
 
 -- Punctuation stays neutral
 hi("@punctuation", { fg = c.light_gray })
+
+-- Tag
+hi("@tag.tsx", { fg = c.accent_subtle })
 
 --------------------------------------------------
 -- LSP semantic tokens (keep restrained)
