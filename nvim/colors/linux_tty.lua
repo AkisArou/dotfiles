@@ -6,7 +6,7 @@ vim.opt.termguicolors = true
 vim.g.colors_name = "linux_tty"
 
 local c = {
-  black = "#000000",
+  black = "#0c0c0c",
   red = "#ff4444",
   green = "#00aa00",
   yellow = "#aaaa00",
@@ -130,8 +130,8 @@ hi("@lsp.type.type", { link = "@type" })
 --------------------------------------------------
 -- Blink.cmp
 --------------------------------------------------
-hi("BlinkCmpMenu", { bg = "#111111" })
-hi("BlinkCmpMenuSelection", { bg = c.black })
+hi("BlinkCmpMenu", { bg = "#000000" })
+hi("BlinkCmpMenuSelection", { bg = "#222222" })
 
 --------------------------------------------------
 -- Lualine

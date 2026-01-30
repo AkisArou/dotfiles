@@ -1,5 +1,5 @@
-@define-color bar-background #000000;
+@define-color bar-background #0c0c0c;
 @define-color bar-foreground #999999;
-@define-color focused-button-background #222222;
+@define-color focused-button-background #333333;
 
 @import "./style.css";
