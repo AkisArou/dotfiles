@@ -16,7 +16,7 @@ local c = {
   blue = "#6666ee",
   magenta = "#cc33cc",
   cyan = "#00aaaa",
-  light_gray = "#999999",
+  light_gray = "#bbbbbb",
   dark_gray = "#555555",
   white = "#ffffff",
 }
@@ -132,7 +132,7 @@ hi("@lsp.type.function", { link = "@function" })
 hi("@lsp.type.variable", { link = "@variable" })
 hi("@lsp.type.keyword", { link = "@keyword" })
 hi("@lsp.type.type", { link = "@type" })
-hi("@lsp.type.property", { fg = "#888888" })
+hi("@lsp.type.property", { fg = "#aaaaaa" })
 
 --------------------------------------------------
 -- Blink.cmp
