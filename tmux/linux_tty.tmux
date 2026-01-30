@@ -29,4 +29,4 @@ setw -g window-status-style "NONE,fg=#555555,bg=#0c0c0c"
 setw -g window-status-format "#[fg=#0c0c0c,bg=#0c0c0c,nobold,nounderscore,noitalics]#[default]  #I:#W #F"
 setw -g window-status-current-format "#[fg=#999999,bg=#0c0c0c,nobold,nounderscore,noitalics]  #I:#W #F"
 
-set -g @prefix_highlight_output_prefix "#[fg=#aa5500]#[bg=#0c0c0c]#[fg=#aa5500]#[bg=#0c0c0c]"
+set -g @prefix_highlight_output_prefix "#[fg=##e17100]#[bg=#0c0c0c]#[fg=##e17100]#[bg=#0c0c0c]"
