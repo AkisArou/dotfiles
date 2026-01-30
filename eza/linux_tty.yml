@@ -2,7 +2,7 @@ filekinds:
   normal:
     foreground: White
   directory:
-    foreground: Blue
+    foreground: "#9d7cd8"
     is_bold: false
   symlink:
     foreground: Cyan
