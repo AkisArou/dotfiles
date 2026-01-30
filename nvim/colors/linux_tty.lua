@@ -110,8 +110,8 @@ hi("@type", { fg = c.cyan })
 hi("@type.builtin", { fg = c.cyan })
 
 -- Functions are *not* highlighted loudly
-hi("@function", { fg = c.light_gray })
-hi("@function.call", { fg = c.light_gray })
+hi("@function", { fg = "#9480b3" })
+hi("@function.call", { fg = "#9480b3" })
 
 -- Variables intentionally uncolored
 hi("@variable", { fg = c.light_gray })
