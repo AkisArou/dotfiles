@@ -156,4 +156,4 @@ hi("FzfLuaHeaderBind", { fg = c.dark_gray })
 --------------------------------------------------
 -- Oil
 --------------------------------------------------
-hi("OilDir", { fg = c.blue })
+hi("OilDir", { fg = c.accent })
