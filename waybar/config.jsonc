@@ -31,7 +31,7 @@
   "pulseaudio": {
     "scroll-step": 1,
 
-    // "format": "<span color='#7aa2f7'>{icon}</span> {volume}%",
+    // "format": "<span color='#9d7cd8'>{icon}</span> {volume}%",
     // "format": "<span color='#bb9af7>{icon}</span> {volume}%",
     "format": "<span color='#d3869b>{icon}</span> {volume}%",
     "format-bluetooth": "{volume}% {icon} {format_source}",
@@ -51,12 +51,12 @@
     "on-click": "pavucontrol",
   },
   "memory": {
-    "format": "<span color='#7aa2f7'>MEM</span> {}%",
+    "format": "<span color='#9d7cd8'>MEM</span> {}%",
     // "format": "<span color='#bb9af7'>MEM</span> {}%",
     // "format": "<span color='#d3869b'>MEM</span> {}%",
   },
   "cpu": {
-    "format": "<span color='#7aa2f7'>CPU</span> {usage}%",
+    "format": "<span color='#9d7cd8'>CPU</span> {usage}%",
     // "format": "<span color='#bb9af7'>CPU</span> {usage}%",
     // "format": "<span color='#d3869b'>CPU</span> {usage}%",
     "tooltip": false,
@@ -67,10 +67,10 @@
       "warning": 15,
       "critical": 5,
     },
-    "format": "<span color='#7aa2f7'>BAT</span> {capacity}%",
+    "format": "<span color='#9d7cd8'>BAT</span> {capacity}%",
     // "format": "<span color='#bb9af7'>BAT</span> {capacity}%",
     // "format": "<span color='#d3869b'>BAT</span> {capacity}%",
-    "format-charging": "<span color='#7aa2f7'>BAT</span> {capacity}%",
+    "format-charging": "<span color='#9d7cd8'>BAT</span> {capacity}%",
     // "format-charging": "<span color='#bb9af7'>BAT</span> {capacity}%",
     // "format-charging": "<span color='#d3869b'>BAT</span> {capacity}%",
     "format-plugged": "{capacity}%",
@@ -90,7 +90,7 @@
   },
   "backlight": {
     // "device": "acpi_video1",
-    "format": "<span color='#7aa2f7'>BRT</span> {percent}%",
+    "format": "<span color='#9d7cd8'>BRT</span> {percent}%",
     // "format": "<span color='#bb9af7'>BRT</span> {percent}%",
     // "format": "<span color='#d3869b'>BRT</span> {percent}%",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
@@ -102,7 +102,7 @@
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
   },
   "bluetooth": {
-    "format": "<span color='#7aa2f7'>BT</span> {status}",
+    "format": "<span color='#9d7cd8'>BT</span> {status}",
     // "format": "<span color='#bb9af7'>BT</span> {status}",
     // "format": "<span color='#d3869b'>BT</span> {status}",
     "format-connected": "{device_alias}",
