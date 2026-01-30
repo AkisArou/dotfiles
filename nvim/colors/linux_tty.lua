@@ -44,7 +44,8 @@ hi("StatusLine", { fg = c.light_gray, bg = "#111111" })
 hi("StatusLineNC", { fg = c.dark_gray, bg = "#111111" })
 
 hi("Visual", { bg = "#1a1a1a" })
-hi("Search", { fg = c.black, bg = c.orange })
+hi("Search", { fg = c.light_gray, bg = "#3c0366" })
+hi("CurSearch", { fg = c.light_gray, bg = "#59168b" })
 hi("Special", { fg = c.light_gray })
 
 --------------------------------------------------
