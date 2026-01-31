@@ -1,0 +1,21 @@
+{
+  "name": "linux-tty-theme",
+  "displayName": "Linux TTY",
+  "description": "Minimal Linux virtual console–inspired colorscheme for low visual noise and high signal",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Linux TTY",
+        "uiTheme": "vs-dark",
+        "path": "./themes/linux_tty.json"
+      }
+    ]
+  }
+}

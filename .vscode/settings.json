@@ -7,7 +7,7 @@
   "workbench.tree.indent": 12,
   "workbench.editor.sharedViewState": true,
   "workbench.editor.enablePreview": false,
-  "workbench.colorTheme": "Tokyo Night",
+  "workbench.colorTheme": "Linux TTY",
   "workbench.colorCustomizations": {
     "errorLens.errorBackground": "#85524594",
     "errorLens.errorForeground": "#855245e1",
