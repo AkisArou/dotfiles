@@ -1,7 +1,9 @@
 {
+  "$schema": "vscode://schemas/color-theme",
   "name": "Linux TTY",
   "type": "dark",
   "colors": {
+    "titleBar.activeBackground": "#0c0c0c",
     "editor.background": "#0c0c0c",
     "editor.foreground": "#bbbbbb",
     "editorCursor.foreground": "#bbbbbb",
@@ -10,16 +12,15 @@
     "editorLineNumber.foreground": "#555555",
     "editorLineNumber.activeForeground": "#bbbbbb",
     "editor.selectionBackground": "#1a1a1a",
-    "editor.inactiveSelectionBackground": "#1a1a1a",
+    "editor.inactiveSelectionBackground": "#1a1a1a80",
     "editor.findMatchBackground": "#3c0366",
     "editor.findMatchHighlightBackground": "#3c036680",
-    "editor.currentFindMatchBackground": "#59168b",
     "editorWidget.background": "#000000",
     "editorWidget.border": "#555555",
     "editorSuggestWidget.background": "#000000",
     "editorSuggestWidget.border": "#555555",
     "editorSuggestWidget.selectedBackground": "#222222",
-    "statusBar.background": "#111111",
+    "statusBar.background": "#0c0c0c",
     "statusBar.foreground": "#bbbbbb",
     "statusBar.noFolderBackground": "#111111",
     "statusBar.debuggingBackground": "#111111",
@@ -28,7 +29,9 @@
     "activityBar.inactiveForeground": "#555555",
     "sideBar.background": "#0c0c0c",
     "sideBar.foreground": "#bbbbbb",
-    "sideBarTitle.foreground": "#bbbbbb",
+    "sideBarTitle.foreground": "#111111",
+    "sideBarSectionHeader.background": "#111111",
+    "sideBarSectionHeader.foreground": "#bbbbbb",
     "list.activeSelectionBackground": "#222222",
     "list.activeSelectionForeground": "#bbbbbb",
     "list.inactiveSelectionBackground": "#1a1a1a",
@@ -74,9 +77,7 @@
     "button.background": "#9d7cd8",
     "button.foreground": "#0c0c0c",
     "button.hoverBackground": "#A999C2",
-    "focusBorder": "#9d7cd8",
-    "menu.foreground": "#c0c0c0",
-    "menubar.selectionForeground": "#c0c0c0"
+    "focusBorder": "#9d7cd8"
   },
   "tokenColors": [
     {
