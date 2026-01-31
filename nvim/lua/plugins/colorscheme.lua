@@ -96,10 +96,6 @@ local themes = {
       ]])
     end, 0)
   end,
-  vscode = function()
-    vim.o.background = "dark"
-    require("vscode").setup()
-  end,
 }
 
 local selectedTheme = vim.g.os_theme or "tokyonight"

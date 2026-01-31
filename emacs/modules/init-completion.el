@@ -125,9 +125,9 @@
   :defer t
   :custom
   (corfu-auto t)
-  (corfu-auto-delay 0)              ;; Show completions quickly like VSCode
+  (corfu-auto-delay 0)                ;; Show completions quickly
   (corfu-auto-prefix 1)               ;; Start completing after 1 character
-  (corfu-quit-no-match t)             ;; Quit if no match (like VSCode)
+  (corfu-quit-no-match t)             ;; Quit if no match
   (corfu-quit-at-boundary 'separator) ;; Allow multi-part filtering
   (corfu-scroll-margin 5)
   (corfu-max-width 50)

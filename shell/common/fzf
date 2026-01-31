@@ -40,25 +40,6 @@ FZF_LINUX_TTY="\
   --color=spinner:#aa00aa \
 "
 
-FZF_VSCODE="\
-  --color=bg:#1f1f1f \
-  --color=bg+:#222222 \
-  --color=border:#1f1f1f \
-  --color=fg:#d4d4d4 \
-  --color=gutter:#2D2D2D \
-  --color=header:#646695 \
-  --color=hl:#C586C0 \
-  --color=hl+:#608b4e \
-  --color=info:#8db9e2 \
-  --color=marker:#4EC9B0 \
-  --color=pointer:#4EC9B0 \
-  --color=prompt:#C586C0 \
-  --color=query:#d4d4d4:regular \
-  --color=scrollbar:#2d2d2d \
-  --color=separator:#223e55 \
-  --color=spinner:#4ec9b0 \
-"
-
 FZF_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
 
 if [ -n "$ZSH_VERSION" ]; then
