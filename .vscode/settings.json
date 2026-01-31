@@ -31,6 +31,7 @@
   "editor.lineNumbers": "relative",
   "editor.suggest.insertMode": "replace",
   "editor.scrollbar.horizontal": "hidden",
+  "editor.bracketPairColorization.enabled": false,
   "editor.fontWeight": "normal",
   "editor.minimap.enabled": false,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -337,5 +338,8 @@
   },
   "clangd.detectExtensionConflicts": false,
   "github.copilot.nextEditSuggestions.enabled": true,
-  "hide-files.files": []
+  "hide-files.files": [],
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  }
 }
