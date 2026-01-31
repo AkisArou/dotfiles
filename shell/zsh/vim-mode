@@ -54,22 +54,22 @@ bindkey -M vicmd 'vv' edit-command-line
 bindkey -M viins '^H' backward-delete-char # ^H is same as ^h
 bindkey -M viins '^W' backward-kill-word
 
-function vi-jk-escape() {
-  LBUFFER+='j'         # insert 'j'
-  zle reset-prompt     # redraw line so 'j' appears
+vi-jk-escape() {
+  zle self-insert        # insert 'j' into buffer
+  zle -R                 # force immediate redraw to display it
+
   local key
   if read -t 0.3 -k 1 key; then
-    if [[ $key == 'k' ]]; then
-      LBUFFER="${LBUFFER%j}"  # delete the 'j'
-      zle vi-cmd-mode         # switch to normal mode
+    if [[ $key == k ]]; then
+      LBUFFER=${LBUFFER%j}
+      zle vi-cmd-mode
     else
-      LBUFFER+="$key"         # insert the second key normally
+      zle -U "$key"      # re-queue the key so ZLE processes it normally
     fi
   fi
 }
 zle -N vi-jk-escape
 bindkey -M viins 'j' vi-jk-escape
-
 
 
 ############
