@@ -201,7 +201,7 @@ bindsym $mod+Shift+0 move container to workspace number $ws10
 gaps inner 6
 hide_edge_borders smart
 
-for_window [class="^.*"] border pixel 4
+for_window [class="^.*"] border pixel 3
 
 for_window [shell="xwayland"] title_format "[XWayland] %title"
 for_window [window_role="About"] floating enable
