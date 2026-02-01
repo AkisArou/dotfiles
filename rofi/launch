@@ -4,7 +4,7 @@ source ~/.env
 
 rofi_cmd=(
   rofi
-  -config "$HOME/dotfiles/rofi/${THEME:-tokyonight}.rasi"
+  -config "$HOME/dotfiles/rofi/${THEME:-linux_tty}.rasi"
 )
 
 if [ "$ULTRAWIDE" ] || [ "$XDG_SESSION_TYPE" = "wayland" ]; then

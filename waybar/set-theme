@@ -1,0 +1,29 @@
+#!/usr/bin/zsh
+
+set -eu
+
+# Color palette
+tokyonight="#7aa2f7"
+linux_tty="#9d7cd8"
+
+CONFIG_FILE="$HOME/dotfiles/waybar/config.jsonc"
+THEME="${1:-linux_tty}"
+
+case "$THEME" in
+tokyonight)
+  NEW_COLOR="$tokyonight"
+  ;;
+linux_tty)
+  NEW_COLOR="$linux_tty"
+  ;;
+*)
+  echo "Error: unknown theme '$THEME'"
+  exit 1
+  ;;
+esac
+
+sed -i \
+  "s/<span[[:space:]]\\+color=['\"][^'\"]*['\"]/<span color='${NEW_COLOR}'/g" \
+  "$CONFIG_FILE"
+
+echo "Waybar span color set to $THEME ($NEW_COLOR)"

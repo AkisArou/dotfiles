@@ -22,6 +22,7 @@ fi
 echo "THEME set to $SELECTED_THEME in ~/.env"
 
 # waybar
+"$HOME/dotfiles/waybar/set-theme" $THEME
 killall waybar
 ~/dotfiles/waybar/launch-waybar &
 
