@@ -38,5 +38,12 @@ tmux source ~/dotfiles/tmux/"$SELECTED_THEME".tmux
 # p10k
 p10k reload
 
+# xResources
+"$HOME/dotfiles/xorg/set-theme" $THEME
+
+# Polybar
+"$HOME/dotfiles/polybar/set-theme" $THEME
+"$HOME/dotfiles/polybar/init"
+
 export THEME=$SELECTED_THEME
 source ~/.zshrc

@@ -1,0 +1,13 @@
+#!/usr/bin/zsh
+
+THEME="${1:-linux_tty}"
+
+SELECTED_THEME_FILE="$HOME/dotfiles/polybar/themes/$THEME.ini"
+THEME_FILE="$HOME/dotfiles/polybar/themes/theme.ini"
+
+[ -f "$SELECTED_THEME_FILE" ] || {
+  echo "Polybar theme not found: $THEME"
+  exit 1
+}
+
+ln -sf "$SELECTED_THEME_FILE" "$THEME_FILE"
