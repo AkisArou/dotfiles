@@ -8,7 +8,7 @@ vim.g.colors_name = "linux_tty"
 local c = {
   accent_subtle = "#B8C8F7",
   black = "#0c0c0c",
-  red = "#ff4444",
+  red = "#f7768e",
   green = "#009966",
   yellow = "#aaaa00",
   orange = "#ff9e64",
@@ -75,7 +75,7 @@ hi("Delimiter", { fg = c.light_gray })
 -- Diagnostics (subtle)
 --------------------------------------------------
 local diagnosticColor = {
-  error = "#aa0000",
+  error = "#7a3844",
   warn = c.orange,
   info = c.cyan,
   hint = c.dark_gray,

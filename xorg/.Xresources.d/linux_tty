@@ -7,7 +7,7 @@
 *.selectionBackground: #111111
 ! normal
 *.color0:  #000000
-*.color1:  #ff4444
+*.color1:  #f7768e
 *.color2:  #009966
 *.color3:  #ff9e64
 *.color4:  #7aa2f7
@@ -16,7 +16,7 @@
 *.color7:  #aaaaaa
 ! bright
 *.color8:  #555555
-*.color9:  #ff4444
+*.color9:  #f7768e
 *.color10: #009966
 *.color11: #ff9e64
 *.color12: #7aa2f7
@@ -25,4 +25,4 @@
 *.color15: #aaaaaa
 ! extended
 *.color16: #e17100
-*.color17: #ff4444
+*.color17: #f7768e

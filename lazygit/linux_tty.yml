@@ -24,7 +24,7 @@ gui:
 
     # Git states
     unstagedChangesColor:
-      - "#ff4444" # red
+      - "#f7768e" # red
     cherryPickedCommitFgColor:
       - "#dddddd"
     cherryPickedCommitBgColor:
