@@ -77,6 +77,7 @@ create_symlink "$HOME/dotfiles/oama" "$HOME/.config/oama"
 create_symlink "$HOME/dotfiles/goimapnotify" "$HOME/.config/goimapnotify"
 create_symlink "$HOME/dotfiles/notmuch" "$HOME/.config/notmuch"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
+create_symlink "$HOME/dotfiles/ripgrep/.ripgreprc" "$HOME/.ripgreprc"
 create_symlink "$HOME/dotfiles/.vscode/linux_tty" "$HOME/.vscode/extensions/linux_tty"
 
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"

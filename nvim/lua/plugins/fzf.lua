@@ -28,6 +28,9 @@ fzf_lua.setup({
     },
   },
   fzf_opts = { ["--cycle"] = true },
+  grep = {
+    rg_opts = "--column --no-heading --line-number --max-columns=4096 --hidden --glob '!node_modules/*' --glob '!.git/*' --no-follow --color=always --colors 'path:fg:blue' --colors 'match:fg:cyan' --colors 'line:fg:green' -e",
+  },
   keymap = {
     fzf = { ["ctrl-q"] = "select-all+accept" },
     builtin = {
