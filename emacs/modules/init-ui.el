@@ -5,6 +5,9 @@
 
 ;;; Code:
 
+(load-theme 'linux-tty t)
+
+
 ;;; DOOM MODELINE
 ;; The `doom-modeline' package provides a sleek, modern mode-line that is visually appealing
 ;; and functional. It integrates well with various Emacs features, enhancing the overall user
@@ -63,42 +66,42 @@
 
 
 ;;; DOOM THEMES
-(use-package doom-themes
-  :ensure t
-  :custom
-  ;; Global settings (defaults)
-  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
-  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  :config
-  ;; Load the theme
-  (load-theme 'doom-tokyo-night t)
+;; (use-package doom-themes
+;;   :ensure t
+;;   :custom
+;;   ;; Global settings (defaults)
+;;   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+;;   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+;;   :config
+;;   ;; Load the theme
+;;   (load-theme 'doom-tokyo-night t)
 
-  ;; Enable flashing mode-line on errors
-  (doom-themes-visual-bell-config)
-  ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config)
+;;   ;; Enable flashing mode-line on errors
+;;   (doom-themes-visual-bell-config)
+;;   ;; Corrects (and improves) org-mode's native fontification.
+;;   (doom-themes-org-config)
 
 
-  (with-eval-after-load 'notmuch
-    (set-face-foreground 'notmuch-tag-unread "#7dcfff")
-    (set-face-foreground 'notmuch-tag-face "#7aa2f7")
-    (set-face-foreground 'notmuch-search-date "#565f89")
-    (set-face-foreground 'notmuch-tree-match-date-face "#565f89")
-    (set-face-foreground 'notmuch-tree-no-match-date-face "#565f89"))
+;;   (with-eval-after-load 'notmuch
+;;     (set-face-foreground 'notmuch-tag-unread "#7dcfff")
+;;     (set-face-foreground 'notmuch-tag-face "#7aa2f7")
+;;     (set-face-foreground 'notmuch-search-date "#565f89")
+;;     (set-face-foreground 'notmuch-tree-match-date-face "#565f89")
+;;     (set-face-foreground 'notmuch-tree-no-match-date-face "#565f89"))
 
-  (custom-set-faces
-   `(isearch ((t (:foreground "#16161e" :background "#bb9af7"))))
-   `(evil-ex-search ((t (:foreground "#16161e" :background "#bb9af7"))))
-   `(lazy-highlight ((t (:background "#5e428f"))))
-   `(dired-directory ((t (:foreground "#7aa2f7"))))
-   `(show-paren-match ((t (:foreground "#7aa2f7"))))
-   `(doom-modeline-buffer-modified ((t (:foreground "#7aa2f7"))))
-   `(typescript-ts-jsx-attribute-face ((t (:foreground "#7dcfff"))))))
+;;   (custom-set-faces
+;;    `(isearch ((t (:foreground "#16161e" :background "#bb9af7"))))
+;;    `(evil-ex-search ((t (:foreground "#16161e" :background "#bb9af7"))))
+;;    `(lazy-highlight ((t (:background "#5e428f"))))
+;;    `(dired-directory ((t (:foreground "#7aa2f7"))))
+;;    `(show-paren-match ((t (:foreground "#7aa2f7"))))
+;;    `(doom-modeline-buffer-modified ((t (:foreground "#7aa2f7"))))
+;;    `(typescript-ts-jsx-attribute-face ((t (:foreground "#7dcfff"))))))
 
 (set-face-attribute 'button nil
-					:foreground "#7aa2f7"
-					:underline t
-					:weight 'bold)
+                    :foreground "#7aa2f7"
+                    :underline t
+                    :weight 'bold)
 
 (set-face-foreground 'show-paren-mismatch nil)
 (set-face-background 'show-paren-mismatch nil)

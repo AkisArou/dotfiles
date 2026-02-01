@@ -1,0 +1,371 @@
+(deftheme linux-tty
+  "Minimal Linux virtual console–inspired colorscheme for Emacs
+Designed for low visual noise and high signal")
+
+(let ((accent "#9d7cd8")
+      (accent-subtle "#A999C2")
+      (black "#0c0c0c")
+      (red "#ff4444")
+      (green "#009966")
+      (yellow "#aaaa00")
+      (orange "#e17100")
+      (blue "#6666ee")
+      (magenta "#cc33cc")
+      (cyan "#00aaaa")
+      (light-gray "#bbbbbb")
+      (dark-gray "#555555")
+      (white "#ffffff")
+      (very-dark "#111111")
+      (darker-bg "#000000")
+      (error-red "#aa0000"))
+
+  (custom-theme-set-faces
+   'linux-tty
+
+   ;; UI
+   `(default ((t :foreground ,light-gray :background ,black)))
+   `(cursor ((t :foreground ,black :background ,light-gray)))
+   `(mode-line ((t :foreground ,light-gray :background ,very-dark :box nil)))
+   `(mode-line-inactive ((t :foreground ,dark-gray :background ,very-dark :box nil)))
+   `(header-line ((t :foreground ,light-gray :background ,very-dark :box nil)))
+   `(fringe ((t :foreground ,dark-gray :background ,black)))
+   `(line-number ((t :foreground ,dark-gray :background ,black)))
+   `(line-number-current-line ((t :foreground ,light-gray :background ,black :bold t)))
+   `(hl-line ((t :background ,very-dark)))
+   `(region ((t :background "#1a1a1a")))
+   `(secondary-selection ((t :background "#1a1a1a")))
+
+   ;; Search
+   `(isearch ((t :foreground ,light-gray :background "#3c0366" :bold t)))
+   `(isearch-fail ((t :background ,error-red)))
+   `(lazy-highlight ((t :background "#3c036680")))
+
+   ;; UI Elements
+   `(minibuffer-prompt ((t :foreground ,accent)))
+   `(window-divider ((t :foreground ,very-dark)))
+   `(vertical-border ((t :foreground ,very-dark)))
+
+   ;; Syntax highlighting
+   `(font-lock-comment-face ((t :foreground ,dark-gray :slant italic)))
+   `(font-lock-string-face ((t :foreground ,green)))
+   `(font-lock-character-face ((t :foreground ,green)))
+   `(font-lock-number-face ((t :foreground ,magenta)))
+   `(font-lock-builtin-face ((t :foreground ,cyan)))
+   `(font-lock-constant-face ((t :foreground ,magenta)))
+   `(font-lock-keyword-face ((t :foreground ,accent)))
+   `(font-lock-type-face ((t :foreground ,cyan)))
+   `(font-lock-function-name-face ((t :foreground ,accent-subtle)))
+   `(font-lock-variable-name-face ((t :foreground ,light-gray)))
+   `(font-lock-warning-face ((t :foreground ,orange)))
+   `(font-lock-negation-char-face ((t :foreground ,red)))
+
+   ;; Parenthesis matching
+   `(show-paren-match ((t :foreground ,light-gray :background "#222222" :bold t)))
+   `(show-paren-mismatch ((t :foreground ,white :background ,error-red)))
+
+   ;; Diff
+   `(diff-added ((t :foreground ,green)))
+   `(diff-removed ((t :foreground ,red)))
+   `(diff-context ((t :foreground ,light-gray)))
+   `(diff-file-header ((t :foreground ,accent :bold t)))
+   `(diff-function ((t :foreground ,accent-subtle)))
+
+   ;; Flycheck/Flymake diagnostics
+   `(flymake-error ((t :underline (:style wave :color ,error-red))))
+   `(flymake-warning ((t :underline (:style wave :color ,orange))))
+   `(flymake-note ((t :underline (:style wave :color ,cyan))))
+
+   `(flycheck-error ((t :underline (:style wave :color ,error-red))))
+   `(flycheck-warning ((t :underline (:style wave :color ,orange))))
+   `(flycheck-info ((t :underline (:style wave :color ,cyan))))
+
+   ;; Compilation
+   `(compilation-error ((t :foreground ,error-red)))
+   `(compilation-warning ((t :foreground ,orange)))
+   `(compilation-info ((t :foreground ,cyan)))
+   `(compilation-line-number ((t :foreground ,dark-gray)))
+
+   ;; Org mode
+   `(org-level-1 ((t :foreground ,accent :bold t :height 1.2)))
+   `(org-level-2 ((t :foreground ,accent-subtle :bold t :height 1.1)))
+   `(org-level-3 ((t :foreground ,accent-subtle :bold t)))
+   `(org-level-4 ((t :foreground ,accent-subtle)))
+   `(org-level-5 ((t :foreground ,accent-subtle)))
+   `(org-level-6 ((t :foreground ,accent-subtle)))
+   `(org-level-7 ((t :foreground ,accent-subtle)))
+   `(org-level-8 ((t :foreground ,accent-subtle)))
+   `(org-code ((t :foreground ,green)))
+   `(org-verbatim ((t :foreground ,green)))
+   `(org-quote ((t :foreground ,dark-gray :slant italic)))
+   `(org-block ((t :foreground ,light-gray :background ,very-dark)))
+   `(org-block-begin-line ((t :foreground ,dark-gray :slant italic)))
+   `(org-block-end-line ((t :foreground ,dark-gray :slant italic)))
+   `(org-meta-line ((t :foreground ,dark-gray :slant italic)))
+   `(org-link ((t :foreground ,cyan :underline t)))
+   `(org-date ((t :foreground ,cyan)))
+   `(org-todo ((t :foreground ,orange :bold t)))
+   `(org-done ((t :foreground ,green :bold t)))
+   `(org-tag ((t :foreground ,dark-gray :background ,very-dark)))
+
+   ;; Magit
+   `(magit-diff-added ((t :foreground ,green)))
+   `(magit-diff-removed ((t :foreground ,red)))
+   `(magit-diff-context ((t :foreground ,light-gray)))
+   `(magit-branch-local ((t :foreground ,accent)))
+   `(magit-branch-remote ((t :foreground ,cyan)))
+   `(magit-head ((t :foreground ,accent :bold t)))
+   `(magit-tag ((t :foreground ,yellow)))
+   `(magit-section-heading ((t :foreground ,accent :bold t)))
+   `(magit-hash ((t :foreground ,dark-gray)))
+
+   ;; Completion
+   `(completions-first-difference ((t :foreground ,accent)))
+   `(completions-common-part ((t :foreground ,light-gray)))
+
+   ;; Dired
+   `(dired-directory ((t :foreground ,accent)))
+   `(dired-symlink ((t :foreground ,cyan)))
+   `(dired-perm-write ((t :foreground ,green)))
+
+   ;; Company (autocomplete)
+   `(company-tooltip ((t :foreground ,light-gray :background ,darker-bg)))
+   `(company-tooltip-selection ((t :foreground ,light-gray :background "#222222")))
+   `(company-tooltip-common ((t :foreground ,accent)))
+   `(company-tooltip-annotation ((t :foreground ,dark-gray)))
+   `(company-scrollbar-bg ((t :background ,very-dark)))
+   `(company-scrollbar-fg ((t :background ,dark-gray)))
+
+   ;; LSP
+   `(lsp-ui-doc-background ((t :background ,very-dark)))
+   `(lsp-ui-sideline-global ((t :foreground ,dark-gray)))
+   `(lsp-inlay-hint ((t :foreground ,dark-gray :height 0.9)))
+
+   ;; Markdown
+   `(markdown-code-face ((t :foreground ,green :background ,very-dark)))
+   `(markdown-inline-code-face ((t :foreground ,green)))
+   `(markdown-pre-face ((t :foreground ,green :background ,very-dark)))
+   `(markdown-header-face ((t :foreground ,accent :bold t)))
+   `(markdown-link-face ((t :foreground ,cyan :underline t)))
+   `(markdown-url-face ((t :foreground ,cyan)))
+   `(markdown-bold-face ((t :weight bold)))
+   `(markdown-italic-face ((t :slant italic)))
+
+   ;; Rainbow delimiters
+   `(rainbow-delimiters-depth-1-face ((t :foreground ,light-gray)))
+   `(rainbow-delimiters-depth-2-face ((t :foreground ,accent-subtle)))
+   `(rainbow-delimiters-depth-3-face ((t :foreground ,accent)))
+   `(rainbow-delimiters-depth-4-face ((t :foreground ,accent-subtle)))
+   `(rainbow-delimiters-depth-5-face ((t :foreground ,accent)))
+   `(rainbow-delimiters-depth-6-face ((t :foreground ,accent-subtle)))
+   `(rainbow-delimiters-depth-7-face ((t :foreground ,accent)))
+   `(rainbow-delimiters-depth-8-face ((t :foreground ,accent-subtle)))
+   `(rainbow-delimiters-unmatched-face ((t :foreground ,error-red)))
+
+   ;; Eshell
+   `(eshell-prompt ((t :foreground ,accent :bold t)))
+   `(eshell-ls-directory ((t :foreground ,accent)))
+   `(eshell-ls-symlink ((t :foreground ,cyan)))
+   `(eshell-ls-executable ((t :foreground ,green)))
+
+   ;; Info
+   `(info-header-node ((t :foreground ,accent :bold t)))
+   `(info-header-xref ((t :foreground ,cyan :underline t)))
+   `(info-menu-header ((t :foreground ,accent :bold t)))
+   `(info-node ((t :foreground ,accent :bold t)))
+   `(info-reference-item ((t :foreground ,cyan)))
+   `(info-title-1 ((t :foreground ,accent :bold t :height 1.2)))
+   `(info-title-2 ((t :foreground ,accent-subtle :bold t :height 1.1)))
+   `(info-title-3 ((t :foreground ,accent-subtle :bold t)))
+   `(info-title-4 ((t :foreground ,accent-subtle :bold t)))
+
+   ;; Whitespace mode
+   `(whitespace-space ((t :foreground ,very-dark)))
+   `(whitespace-tab ((t :foreground ,very-dark)))
+   `(whitespace-newline ((t :foreground ,very-dark)))
+   `(whitespace-trailing ((t :background ,error-red)))
+   `(whitespace-line ((t :background "#1a1a1a")))
+
+   ;; Rainbow mode
+   `(rainbow-identifiers-identifier-1 ((t :foreground ,accent)))
+   `(rainbow-identifiers-identifier-2 ((t :foreground ,accent-subtle)))
+   `(rainbow-identifiers-identifier-3 ((t :foreground ,cyan)))
+   `(rainbow-identifiers-identifier-4 ((t :foreground ,green)))
+   `(rainbow-identifiers-identifier-5 ((t :foreground ,magenta)))
+   `(rainbow-identifiers-identifier-6 ((t :foreground ,orange)))
+   `(rainbow-identifiers-identifier-7 ((t :foreground ,red)))
+   `(rainbow-identifiers-identifier-8 ((t :foreground ,yellow)))
+   `(rainbow-identifiers-identifier-9 ((t :foreground ,blue)))
+
+   ;; Undo tree
+   `(undo-tree-visualizer-current-face ((t :foreground ,accent)))
+   `(undo-tree-visualizer-default-face ((t :foreground ,light-gray)))
+   `(undo-tree-visualizer-unmodified-face ((t :foreground ,dark-gray)))
+   `(undo-tree-visualizer-register-face ((t :foreground ,yellow)))
+
+   ;; Evil (Vim emulation)
+   `(evil-cursor ((t :background ,accent)))
+   `(evil-ex-substitute-match ((t :background "#3c0366" :foreground ,light-gray)))
+   `(evil-ex-substitute-replacement ((t :background "#222222" :foreground ,green)))
+   `(evil-search-highlight-persist-highlight-face ((t :background "#3c0366")))
+
+   ;; Vertico (completion UI)
+   `(vertico-current ((t :background "#222222" :foreground ,light-gray :bold t)))
+   `(vertico-group-title ((t :foreground ,accent :bold t)))
+   `(vertico-group-separator ((t :foreground ,dark-gray)))
+
+   ;; Corfu (in-buffer completion)
+   `(corfu-current ((t :background "#222222" :foreground ,light-gray :bold t)))
+   `(corfu-default ((t :background ,darker-bg :foreground ,light-gray)))
+   `(corfu-border ((t :background ,very-dark)))
+   `(corfu-popupchild ((t :background ,darker-bg)))
+
+   ;; Orderless (fuzzy completion)
+   `(orderless-match-face-0 ((t :foreground ,accent :weight bold)))
+   `(orderless-match-face-1 ((t :foreground ,accent-subtle :weight bold)))
+   `(orderless-match-face-2 ((t :foreground ,cyan :weight bold)))
+   `(orderless-match-face-3 ((t :foreground ,green :weight bold)))
+
+   ;; Marginalia (completion annotations)
+   `(marginalia-archive ((t :foreground ,dark-gray)))
+   `(marginalia-char ((t :foreground ,magenta)))
+   `(marginalia-date ((t :foreground ,cyan)))
+   `(marginalia-directory ((t :foreground ,accent)))
+   `(marginalia-documentation ((t :foreground ,dark-gray :slant italic)))
+   `(marginalia-file-priv-dir ((t :foreground ,accent)))
+   `(marginalia-file-priv-exec ((t :foreground ,green)))
+   `(marginalia-file-priv-link ((t :foreground ,cyan)))
+   `(marginalia-file-priv-rare ((t :foreground ,orange)))
+   `(marginalia-file-priv-read ((t :foreground ,dark-gray)))
+   `(marginalia-file-priv-write ((t :foreground ,green)))
+   `(marginalia-key ((t :foreground ,accent)))
+   `(marginalia-mode ((t :foreground ,dark-gray)))
+   `(marginalia-modified ((t :foreground ,orange)))
+   `(marginalia-size ((t :foreground ,dark-gray)))
+   `(marginalia-string ((t :foreground ,green)))
+   `(marginalia-symbol ((t :foreground ,magenta)))
+   `(marginalia-type ((t :foreground ,cyan)))
+
+   ;; Consult
+   `(consult-help ((t :foreground ,dark-gray)))
+   `(consult-highlight-match ((t :foreground ,accent :bold t)))
+   `(consult-preview-cursor ((t :background ,accent :foreground ,black)))
+   `(consult-preview-line ((t :background "#222222")))
+
+   ;; Embark
+   `(embark-selected ((t :background "#222222")))
+   `(embark-target ((t :foreground ,accent :underline t)))
+
+   ;; Nerd Icons
+   `(nerd-icons-dsilver ((t :foreground ,light-gray)))
+   `(nerd-icons-dgreen ((t :foreground ,green)))
+   `(nerd-icons-dblue ((t :foreground ,blue)))
+   `(nerd-icons-dpurple ((t :foreground ,accent)))
+   `(nerd-icons-dmaroon ((t :foreground ,magenta)))
+   `(nerd-icons-dcyan ((t :foreground ,cyan)))
+   `(nerd-icons-orange ((t :foreground ,orange)))
+
+   ;; Elfeed (RSS reader)
+   `(elfeed-search-feed-face ((t :foreground ,accent)))
+   `(elfeed-search-tag-face ((t :foreground ,dark-gray)))
+   `(elfeed-search-date-face ((t :foreground ,dark-gray)))
+   `(elfeed-search-title-face ((t :foreground ,light-gray)))
+   `(elfeed-search-unread-count-face ((t :foreground ,orange)))
+   `(elfeed-log-error-level-face ((t :foreground ,error-red)))
+   `(elfeed-log-warn-level-face ((t :foreground ,orange)))
+   `(elfeed-log-info-level-face ((t :foreground ,cyan)))
+
+   ;; Notmuch (email)
+   `(notmuch-search-count ((t :foreground ,dark-gray)))
+   `(notmuch-search-date ((t :foreground ,dark-gray)))
+   `(notmuch-search-matching-authors ((t :foreground ,light-gray)))
+   `(notmuch-search-subject ((t :foreground ,light-gray)))
+   `(notmuch-search-unread-face ((t :weight bold)))
+   `(notmuch-message-summary-face ((t :foreground ,light-gray :background ,very-dark)))
+   `(notmuch-tag-face ((t :foreground ,dark-gray)))
+   `(notmuch-tag-unread ((t :foreground ,orange :bold t)))
+   `(notmuch-crypto-signature-good ((t :foreground ,green)))
+   `(notmuch-crypto-signature-bad ((t :foreground ,error-red)))
+
+   ;; Doom Modeline
+   `(doom-modeline-bar ((t :background ,accent)))
+   `(doom-modeline-battery-critical ((t :foreground ,error-red)))
+   `(doom-modeline-battery-warning ((t :foreground ,orange)))
+   `(doom-modeline-battery-normal ((t :foreground ,green)))
+   `(doom-modeline-evil-normal-state ((t :foreground ,accent)))
+   `(doom-modeline-evil-insert-state ((t :foreground ,green)))
+   `(doom-modeline-evil-visual-state ((t :foreground ,yellow)))
+   `(doom-modeline-evil-operator-state ((t :foreground ,orange)))
+   `(doom-modeline-evil-motion-state ((t :foreground ,magenta)))
+   `(doom-modeline-evil-emacs-state ((t :foreground ,cyan)))
+   `(doom-modeline-evil-replace-state ((t :foreground ,error-red)))
+   `(doom-modeline-info ((t :foreground ,cyan)))
+   `(doom-modeline-warning ((t :foreground ,orange)))
+   `(doom-modeline-error ((t :foreground ,error-red)))
+   `(doom-modeline-urgent ((t :foreground ,error-red)))
+   `(doom-modeline-notification ((t :foreground ,cyan)))
+   `(doom-modeline-buffer-modified ((t :foreground ,orange :bold t)))
+   `(doom-modeline-project-parent-dir ((t :foreground ,accent)))
+   `(doom-modeline-project-dir ((t :foreground ,accent)))
+   `(doom-modeline-lsp ((t :foreground ,green)))
+   `(doom-modeline-lsp-error ((t :foreground ,error-red)))
+   `(doom-modeline-lsp-warning ((t :foreground ,orange)))
+   `(doom-modeline-debug ((t :foreground ,magenta)))
+   `(doom-modeline-debug-visual ((t :foreground ,magenta)))
+   `(doom-modeline-highlight ((t :background ,accent :foreground ,black)))
+   `(doom-modeline-icon ((t :foreground ,accent)))
+
+   ;; Treesitter
+   `(tree-sitter-hl-face:function ((t :foreground ,accent-subtle)))
+   `(tree-sitter-hl-face:method ((t :foreground ,accent-subtle)))
+   `(tree-sitter-hl-face:function.call ((t :foreground ,accent-subtle)))
+   `(tree-sitter-hl-face:type ((t :foreground ,cyan)))
+   `(tree-sitter-hl-face:type.builtin ((t :foreground ,cyan)))
+   `(tree-sitter-hl-face:property ((t :foreground ,light-gray)))
+   `(tree-sitter-hl-face:variable.parameter ((t :foreground ,light-gray)))
+   `(tree-sitter-hl-face:comment ((t :foreground ,dark-gray :slant italic)))
+   `(tree-sitter-hl-face:string ((t :foreground ,green)))
+   `(tree-sitter-hl-face:number ((t :foreground ,magenta)))
+   `(tree-sitter-hl-face:keyword ((t :foreground ,accent)))
+   `(tree-sitter-hl-face:operator ((t :foreground ,light-gray)))
+   `(tree-sitter-hl-face:variable ((t :foreground ,light-gray)))
+
+   ;; Forge (GitHub/GitLab integration)
+   `(forge-post-author ((t :foreground ,accent :bold t)))
+   `(forge-post-date ((t :foreground ,dark-gray)))
+   `(forge-issue-label ((t :foreground ,dark-gray :background ,very-dark)))
+   `(forge-issue-milestone-open ((t :foreground ,green)))
+   `(forge-issue-milestone-closed ((t :foreground ,dark-gray)))
+   `(forge-pullreq-branch ((t :foreground ,cyan)))
+   `(forge-pullreq-state-open ((t :foreground ,green)))
+   `(forge-pullreq-state-merged ((t :foreground ,accent)))
+   `(forge-pullreq-state-draft ((t :foreground ,dark-gray)))
+   `(forge-pullreq-state-closed ((t :foreground ,error-red)))
+
+   ;; Dape (debugger)
+   `(dape-breakpoint ((t :background ,error-red :foreground ,white)))
+   `(dape-breakpoint-disabled ((t :background ,dark-gray :foreground ,light-gray)))
+   `(dape-fringe-breakpoint ((t :foreground ,error-red)))
+   `(dape-fringe-breakpoint-disabled ((t :foreground ,dark-gray)))
+
+   ;; Posframe (popover frame)
+   `(posframe-border ((t :background ,dark-gray)))
+
+   ;; Which-key (keybinding help)
+   `(which-key-group-description-face ((t :foreground ,light-gray)))
+   `(which-key-command-description-face ((t :foreground ,light-gray)))
+   `(which-key-local-map-description-face ((t :foreground ,accent)))
+   `(which-key-separator-face ((t :foreground ,dark-gray)))
+   `(which-key-note-face ((t :foreground ,dark-gray :slant italic)))
+   `(which-key-postfix-title-face ((t :foreground ,dark-gray)))
+   `(which-key-highlighted-command-face ((t :foreground ,green :underline t)))
+   `(which-key-key-face ((t :foreground ,accent :bold t)))
+
+   ;; Pulse (highlight changes)
+   `(pulse-highlight-face ((t :background "#222222")))
+   `(pulse-highlight-start-face ((t :background "#333333")))
+   ))
+
+(custom-theme-set-variables
+ 'linux-tty)
+
+(provide-theme 'linux-tty)
