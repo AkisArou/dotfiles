@@ -1,0 +1,39 @@
+gui:
+  nerdFontsVersion: "3"
+  theme:
+    # Borders
+    activeBorderColor:
+      - "#A999C2" # urls → strong blue
+      - "bold"
+    inactiveBorderColor:
+      - "#555555" # selection-background
+
+    searchingActiveBorderColor:
+      - "#9d7cd8"
+      - "bold"
+
+    # Text / selections
+    optionsTextColor:
+      - "#9d7cd8" # blue / violet
+    defaultFgColor:
+      - "#dddddd" # foreground
+    selectedLineBgColor:
+      - "#111111"
+    selectedRangeBgColor:
+      - "#111111"
+
+    # Git states
+    unstagedChangesColor:
+      - "#ff4444" # red
+    cherryPickedCommitFgColor:
+      - "#dddddd"
+    cherryPickedCommitBgColor:
+      - "#aa00aa" # magenta
+    markedBaseCommitFgColor:
+      - "#000000"
+    markedBaseCommitBgColor:
+      - "#ff9e64" # yellow / orange
+
+    # Commit / diff emphasis
+    diffAddedColor:
+      - "#009966" #
