@@ -17,7 +17,7 @@ local c = {
   cyan = "#7dcfff",
   light_gray = "#bbbbbb",
   dark_gray = "#555555",
-  white = "#ffffff",
+  white = "#ffffff", 
 }
 
 ---@param group string

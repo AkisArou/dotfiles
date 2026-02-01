@@ -13,8 +13,8 @@
     "editorLineNumber.activeForeground": "#bbbbbb",
     "editor.selectionBackground": "#1a1a1a",
     "editor.inactiveSelectionBackground": "#1a1a1a80",
-    "editor.findMatchBackground": "#3c0366",
-    "editor.findMatchHighlightBackground": "#3c036680",
+    "editor.findMatchBackground": "#1a2d5f",
+    "editor.findMatchHighlightBackground": "#1a2d5f80",
     "editorWidget.background": "#000000",
     "editorWidget.border": "#555555",
     "editorSuggestWidget.background": "#000000",
@@ -63,12 +63,12 @@
     "terminal.ansiBrightMagenta": "#cc33cc",
     "terminal.ansiBrightCyan": "#7dcfff",
     "terminal.ansiBrightWhite": "#ffffff",
-    "editorError.foreground": "#aa0000",
-    "editorWarning.foreground": "#e17100",
+    "editorError.foreground": "#7a3844",
+    "editorWarning.foreground": "#ff9e64",
     "editorInfo.foreground": "#7dcfff",
     "editorHint.foreground": "#555555",
-    "problemsErrorIcon.foreground": "#aa0000",
-    "problemsWarningIcon.foreground": "#e17100",
+    "problemsErrorIcon.foreground": "#7a3844",
+    "problemsWarningIcon.foreground": "#ff9e64",
     "problemsInfoIcon.foreground": "#7dcfff",
     "input.background": "#111111",
     "input.foreground": "#bbbbbb",
@@ -113,7 +113,7 @@
       "name": "Boolean",
       "scope": ["constant.language.boolean"],
       "settings": {
-        "foreground": "#e17100"
+        "foreground": "#ff9e64"
       }
     },
     {

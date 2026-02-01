@@ -2,22 +2,22 @@
   "Minimal Linux virtual console–inspired colorscheme for Emacs
 Designed for low visual noise and high signal")
 
-(let ((accent "#9d7cd8")
-      (accent-subtle "#A999C2")
+(let ((accent "#7aa2f7")
+      (accent-subtle "#B8C8F7")
       (black "#0c0c0c")
       (red "#f7768e")
       (green "#009966")
       (yellow "#aaaa00")
       (orange "#ff9e64")
-      (blue "#9d7cd8")
-      (magenta "#cc33cc")
+      (blue "#7aa2f7")
+      (magenta "#9d7cd8")
       (cyan "#7dcfff")
       (light-gray "#bbbbbb")
       (dark-gray "#555555")
       (white "#ffffff")
       (very-dark "#111111")
       (darker-bg "#000000")
-      (error-red "#aa0000"))
+      (error-red "#7a3844"))
 
   (custom-theme-set-faces
    'linux-tty
@@ -36,9 +36,9 @@ Designed for low visual noise and high signal")
    `(secondary-selection ((t :background "#1a1a1a")))
 
    ;; Search
-   `(isearch ((t :foreground ,light-gray :background "#3c0366" :bold t)))
+   `(isearch ((t :foreground ,light-gray :background "#1a2d5f" :bold t)))
    `(isearch-fail ((t :background ,error-red)))
-   `(lazy-highlight ((t :background "#3c036680")))
+   `(lazy-highlight ((t :background "#1a2d5f80")))
 
    ;; UI Elements
    `(minibuffer-prompt ((t :foreground ,accent)))
@@ -204,9 +204,9 @@ Designed for low visual noise and high signal")
 
    ;; Evil (Vim emulation)
    `(evil-cursor ((t :background ,accent)))
-   `(evil-ex-substitute-match ((t :background "#3c0366" :foreground ,light-gray)))
+   `(evil-ex-substitute-match ((t :background "#1a2d5f" :foreground ,light-gray)))
    `(evil-ex-substitute-replacement ((t :background "#222222" :foreground ,green)))
-   `(evil-search-highlight-persist-highlight-face ((t :background "#3c0366")))
+   `(evil-search-highlight-persist-highlight-face ((t :background "#1a2d5f")))
 
    ;; Vertico (completion UI)
    `(vertico-current ((t :background "#222222" :foreground ,light-gray :bold t)))
