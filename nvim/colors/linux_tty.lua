@@ -154,6 +154,7 @@ hi("lualine_x_normal", { bg = c.black })
 hi("FzfLuaBorder", { fg = c.dark_gray })
 hi("FzfLuaHeaderText", { fg = c.dark_gray })
 hi("FzfLuaHeaderBind", { fg = c.dark_gray })
+hi("FzfLuaLivePrompt", { fg = c.light_gray })
 
 --------------------------------------------------
 -- Oil
