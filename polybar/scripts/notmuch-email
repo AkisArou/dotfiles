@@ -1,0 +1,9 @@
+#!/usr/bin/zsh
+
+count=$(notmuch count tag:unread)
+
+if [ "$count" -gt 0 ]; then
+  echo "%{F#FFFFFF}󰇮 $count%{F-}"
+else
+  echo ""
+fi
