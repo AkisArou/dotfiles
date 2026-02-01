@@ -30,13 +30,13 @@ case "${THEME:-tokyonight}" in
   linux_tty|*)
     local BLUE="#7aa2f7"
     local BLUE0="#7aa2f7"
-    local BLUE1="#00aaaa"
-    local BLUE2="#00aaaa"
-    local BLUE5="#00aaaa"
+    local BLUE1="#7dcfff"
+    local BLUE2="#7dcfff"
+    local BLUE5="#7dcfff"
     local BLUE6="#aaaaaa"
     local BLUE7="#555555"
     local COMMENT="#555555"
-    local CYAN="#00aaaa"
+    local CYAN="#7dcfff"
     local DARK3="#555555"
     local DARK5="#666666"
     local FG="#999999"
@@ -52,7 +52,7 @@ case "${THEME:-tokyonight}" in
     local PURPLE="#c800de"
     local RED="#a50036"
     local RED1="#a50036"
-    local TEAL="#00aaaa"
+    local TEAL="#7dcfff"
     local TERMINAL_BLACK="#000000"
     ;;
 esac

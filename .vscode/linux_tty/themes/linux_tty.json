@@ -53,7 +53,7 @@
     "terminal.ansiYellow": "#aaaa00",
     "terminal.ansiBlue": "#6666ee",
     "terminal.ansiMagenta": "#cc33cc",
-    "terminal.ansiCyan": "#00aaaa",
+    "terminal.ansiCyan": "#7dcfff",
     "terminal.ansiWhite": "#bbbbbb",
     "terminal.ansiBrightBlack": "#555555",
     "terminal.ansiBrightRed": "#f7768e",
@@ -61,15 +61,15 @@
     "terminal.ansiBrightYellow": "#aaaa00",
     "terminal.ansiBrightBlue": "#6666ee",
     "terminal.ansiBrightMagenta": "#cc33cc",
-    "terminal.ansiBrightCyan": "#00aaaa",
+    "terminal.ansiBrightCyan": "#7dcfff",
     "terminal.ansiBrightWhite": "#ffffff",
     "editorError.foreground": "#aa0000",
     "editorWarning.foreground": "#e17100",
-    "editorInfo.foreground": "#00aaaa",
+    "editorInfo.foreground": "#7dcfff",
     "editorHint.foreground": "#555555",
     "problemsErrorIcon.foreground": "#aa0000",
     "problemsWarningIcon.foreground": "#e17100",
-    "problemsInfoIcon.foreground": "#00aaaa",
+    "problemsInfoIcon.foreground": "#7dcfff",
     "input.background": "#111111",
     "input.foreground": "#bbbbbb",
     "input.border": "#555555",
@@ -99,7 +99,7 @@
       "name": "String Escape",
       "scope": ["constant.character.escape"],
       "settings": {
-        "foreground": "#00aaaa"
+        "foreground": "#7dcfff"
       }
     },
     {
@@ -148,14 +148,14 @@
       "name": "Type",
       "scope": ["support.type"],
       "settings": {
-        "foreground": "#00aaaa"
+        "foreground": "#7dcfff"
       }
     },
     {
       "name": "Built-in Type",
       "scope": ["support.type.builtin", "support.type.primitive"],
       "settings": {
-        "foreground": "#00aaaa"
+        "foreground": "#7dcfff"
       }
     },
     {

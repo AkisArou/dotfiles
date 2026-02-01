@@ -12,7 +12,7 @@
 *.color3:  #ff9e64
 *.color4:  #7aa2f7
 *.color5:  #aa00aa
-*.color6:  #00aaaa
+*.color6:  #7dcfff
 *.color7:  #aaaaaa
 ! bright
 *.color8:  #555555
@@ -21,7 +21,7 @@
 *.color11: #ff9e64
 *.color12: #7aa2f7
 *.color13: #cc33cc
-*.color14: #00aaaa
+*.color14: #7dcfff
 *.color15: #aaaaaa
 ! extended
 *.color16: #e17100
