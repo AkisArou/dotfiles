@@ -6,14 +6,14 @@ vim.opt.termguicolors = true
 vim.g.colors_name = "linux_tty"
 
 local c = {
-  accent_subtle = "#A999C2",
+  accent_subtle = "#B8C8F7",
   black = "#0c0c0c",
   red = "#ff4444",
   green = "#009966",
   yellow = "#aaaa00",
   orange = "#ff9e64",
-  blue = "#9d7cd8",
-  magenta = "#cc33cc",
+  blue = "#7aa2f7",
+  magenta = "#9d7cd8",
   cyan = "#00aaaa",
   light_gray = "#bbbbbb",
   dark_gray = "#555555",
@@ -105,7 +105,9 @@ hi("@boolean", { fg = c.orange })
 hi("@constant", { fg = c.magenta })
 
 hi("@keyword", { link = "Keyword" })
+hi("@keyword.conditional", { fg = c.magenta })
 hi("@keyword.return", { fg = c.magenta })
+hi("@keyword.repeat", { fg = c.magenta })
 
 hi("@type", { fg = c.light_gray })
 hi("@type.builtin", { fg = c.cyan })
@@ -156,7 +158,7 @@ hi("FzfLuaHeaderBind", { fg = c.dark_gray })
 --------------------------------------------------
 -- Oil
 --------------------------------------------------
-hi("OilDir", { fg = c.accent_subtle })
+hi("OilDir", { fg = "#7aa2f7" })
 
 --------------------------------------------------
 -- highlightUrl

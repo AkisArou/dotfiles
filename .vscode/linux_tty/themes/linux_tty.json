@@ -74,10 +74,10 @@
     "input.foreground": "#bbbbbb",
     "input.border": "#555555",
     "inputOption.activeBackground": "#222222",
-    "button.background": "#9d7cd8",
+    "button.background": "#7aa2f7",
     "button.foreground": "#0c0c0c",
-    "button.hoverBackground": "#A999C2",
-    "focusBorder": "#9d7cd8"
+    "button.hoverBackground": "#B8C8F7",
+    "focusBorder": "#7aa2f7"
   },
   "tokenColors": [
     {
@@ -106,7 +106,7 @@
       "name": "Number",
       "scope": ["constant.numeric"],
       "settings": {
-        "foreground": "#cc33cc"
+        "foreground": "#9d7cd8"
       }
     },
     {
@@ -120,28 +120,28 @@
       "name": "Constant",
       "scope": ["constant.language", "constant.other"],
       "settings": {
-        "foreground": "#cc33cc"
+        "foreground": "#9d7cd8"
       }
     },
     {
       "name": "Keyword",
       "scope": ["keyword", "storage.modifier", "storage.type"],
       "settings": {
-        "foreground": "#9d7cd8"
+        "foreground": "#7aa2f7"
       }
     },
     {
       "name": "Keyword Return",
       "scope": ["keyword.control.return", "keyword.control.flow"],
       "settings": {
-        "foreground": "#cc33cc"
+        "foreground": "#9d7cd8"
       }
     },
     {
       "name": "Conditional & Repeat",
       "scope": ["keyword.control.conditional", "keyword.control.loop"],
       "settings": {
-        "foreground": "#cc33cc"
+        "foreground": "#9d7cd8"
       }
     },
     {
@@ -169,14 +169,14 @@
       "name": "Function",
       "scope": ["entity.name.function", "support.function"],
       "settings": {
-        "foreground": "#A999C2"
+        "foreground": "#B8C8F7"
       }
     },
     {
       "name": "Function Call",
       "scope": ["meta.function-call", "variable.function"],
       "settings": {
-        "foreground": "#A999C2"
+        "foreground": "#B8C8F7"
       }
     },
     {
@@ -222,14 +222,14 @@
       "name": "Tag",
       "scope": ["entity.name.tag", "support.class.component"],
       "settings": {
-        "foreground": "#A999C2"
+        "foreground": "#B8C8F7"
       }
     },
     {
       "name": "Markup Heading",
       "scope": ["markup.heading"],
       "settings": {
-        "foreground": "#9d7cd8",
+        "foreground": "#7aa2f7",
         "fontStyle": "bold"
       }
     },

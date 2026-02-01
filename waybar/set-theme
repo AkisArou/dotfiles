@@ -4,7 +4,7 @@ set -eu
 
 # Color palette
 tokyonight="#7aa2f7"
-linux_tty="#9d7cd8"
+linux_tty="#7aa2f7"
 
 CONFIG_FILE="$HOME/dotfiles/waybar/config.jsonc"
 THEME="${1:-linux_tty}"

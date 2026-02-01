@@ -28,8 +28,8 @@ case "${THEME:-tokyonight}" in
     local YELLOW="#e0af68"
     ;;
   linux_tty|*)
-    local BLUE="#9d7cd8"
-    local BLUE0="#9d7cd8"
+    local BLUE="#7aa2f7"
+    local BLUE0="#7aa2f7"
     local BLUE1="#00aaaa"
     local BLUE2="#00aaaa"
     local BLUE5="#00aaaa"

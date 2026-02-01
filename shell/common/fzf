@@ -28,8 +28,8 @@ FZF_LINUX_TTY="\
   --color=fg:#777777 \
   --color=gutter:#111111 \
   --color=header:#555555 \
-  --color=hl:#9d7cd8 \
-  --color=hl+:#9d7cd8 \
+  --color=hl:#7aa2f7 \
+  --color=hl+:#7aa2f7 \
   --color=info:#555555 \
   --color=marker:#009966 \
   --color=pointer:#222222 \
@@ -37,7 +37,7 @@ FZF_LINUX_TTY="\
   --color=query:#aaaaaa \
   --color=scrollbar:#555555 \
   --color=separator:#555555 \
-  --color=spinner:#aa00aa \
+  --color=spinner:#9d7cd8 \
 "
 
 FZF_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"

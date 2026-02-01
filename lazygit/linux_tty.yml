@@ -28,7 +28,7 @@ gui:
     cherryPickedCommitFgColor:
       - "#dddddd"
     cherryPickedCommitBgColor:
-      - "#aa00aa" # magenta
+      - "#9d7cd8" # magenta
     markedBaseCommitFgColor:
       - "#000000"
     markedBaseCommitBgColor:
