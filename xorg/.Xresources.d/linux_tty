@@ -9,8 +9,8 @@
 *.color0:  #000000
 *.color1:  #ff4444
 *.color2:  #009966
-*.color3:  #e17100
-*.color4:  #6666ee
+*.color3:  #ff9e64
+*.color4:  #9d7cd8
 *.color5:  #aa00aa
 *.color6:  #00aaaa
 *.color7:  #aaaaaa
@@ -18,8 +18,8 @@
 *.color8:  #555555
 *.color9:  #ff4444
 *.color10: #009966
-*.color11: #e17100
-*.color12: #3333cc
+*.color11: #ff9e64
+*.color12: #9d7cd8
 *.color13: #cc33cc
 *.color14: #00aaaa
 *.color15: #aaaaaa

@@ -36,7 +36,7 @@
 			<string>#555555</string>
 
 			<key>findHighlight</key>
-			<string>##e17100</string>
+			<string>##ff9e64</string>
 			<key>findHighlightForeground</key>
 			<string>#000000</string>
 		</dict>
@@ -62,7 +62,7 @@
 		<key>settings</key>
 		<dict>
 			<key>foreground</key>
-			<string>##e17100</string>
+			<string>##ff9e64</string>
 		</dict>
 	</dict>
 
@@ -106,7 +106,7 @@
 		<key>settings</key>
 		<dict>
 			<key>foreground</key>
-			<string>#6666ee</string>
+			<string>#9d7cd8</string>
 		</dict>
 	</dict>
 
@@ -150,7 +150,7 @@
 		<key>settings</key>
 		<dict>
 			<key>foreground</key>
-			<string>##e17100</string>
+			<string>##ff9e64</string>
 		</dict>
 	</dict>
 

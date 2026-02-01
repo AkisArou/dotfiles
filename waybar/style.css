@@ -34,17 +34,17 @@ window#waybar #window {
 }
 
 #workspaces button:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: @button-hover-background;
 }
 
 #workspaces button.focused {
-  background-color: @focused-button-background;
-  color: #ffffff;
+  background-color: @button-focused-background;
+  color: @button-focused-color;
 }
 
 #workspaces button.urgent {
-  color: black;
-  background-color: #9d7cd8;
+  background-color: @button-urgent-background;
+  color: @button-urgent-color;
 }
 
 label.module {
@@ -59,13 +59,13 @@ label.module {
 
 @keyframes blink {
   to {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: @blink-background;
   }
 }
 
 #battery.critical:not(.charging) {
-  color: #f7768e;
-  background-color: rgba(255, 0, 0, 0.1);
+  color: @critical-color;
+  background-color: @critical-background;
   padding: 0 5px;
   animation-name: blink;
   animation-duration: 0.5s;
@@ -75,7 +75,7 @@ label.module {
 }
 
 #battery.warning:not(.charging) {
-  color: #ff9e64;
-  background-color: rgba(255, 165, 0, 0.1);
+  color: @warning-color;
+  background-color: @warning-background;
   padding: 0 5px;
 }

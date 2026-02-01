@@ -1,5 +1,13 @@
 @define-color bar-background #15161e;
 @define-color bar-foreground #a9b1d6;
-@define-color focused-button-background #414868;
+@define-color button-hover-background rgba(0, 0, 0, 0.2);
+@define-color button-focused-background #414868;
+@define-color button-focused-color #eeeeee;
+@define-color button-urgent-color #15161e;
+@define-color blink-background #000000;
+@define-color critical-background rgba(255, 0, 0, 0.1);
+@define-color critical-color #f7768e;
+@define-color warning-background rgba(255, 165, 0, 0.1);
+@define-color warning-color #ff9e64;
 
 @import "./style.css";

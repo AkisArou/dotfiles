@@ -6,14 +6,13 @@ vim.opt.termguicolors = true
 vim.g.colors_name = "linux_tty"
 
 local c = {
-  accent = "#9d7cd8",
   accent_subtle = "#A999C2",
   black = "#0c0c0c",
   red = "#ff4444",
   green = "#009966",
   yellow = "#aaaa00",
-  orange = "#e17100",
-  blue = "#6666ee",
+  orange = "#ff9e64",
+  blue = "#9d7cd8",
   magenta = "#cc33cc",
   cyan = "#00aaaa",
   light_gray = "#bbbbbb",
@@ -59,7 +58,7 @@ hi("Number", { fg = c.magenta })
 hi("Boolean", { fg = c.orange })
 hi("Float", { fg = c.magenta })
 
-hi("Keyword", { fg = c.accent })
+hi("Keyword", { fg = c.blue })
 hi("Conditional", { fg = c.magenta })
 hi("Repeat", { fg = c.magenta })
 
@@ -156,4 +155,4 @@ hi("FzfLuaHeaderBind", { fg = c.dark_gray })
 --------------------------------------------------
 -- Oil
 --------------------------------------------------
-hi("OilDir", { fg = c.accent })
+hi("OilDir", { fg = c.accent_subtle })
