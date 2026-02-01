@@ -44,6 +44,7 @@ Designed for low visual noise and high signal")
    `(minibuffer-prompt ((t :foreground ,accent)))
    `(window-divider ((t :foreground ,very-dark)))
    `(vertical-border ((t :foreground ,very-dark)))
+   `(widget-field ((t :background ,dark-gray)))
 
    ;; Syntax highlighting
    `(font-lock-comment-face ((t :foreground ,dark-gray :slant italic)))
