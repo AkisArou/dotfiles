@@ -107,7 +107,7 @@
     "spacing": 10,
   },
   "custom/mail": {
-    "exec": "~/dotfiles/waybar/notmuch-module",
+    "exec": "~/dotfiles/waybar/modules/notmuch-module",
     "interval": 10,
     "return-type": "json",
     "format": "{}",

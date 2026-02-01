@@ -11,4 +11,4 @@
 @define-color warning-background rgba(255, 165, 0, 0.1);
 @define-color warning-color #ff9e64;
 
-@import "./style.css";
+@import "./../style.css";
