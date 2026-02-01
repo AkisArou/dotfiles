@@ -79,8 +79,6 @@ create_symlink "$HOME/dotfiles/notmuch" "$HOME/.config/notmuch"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/.vscode/linux_tty" "$HOME/.vscode/extensions/linux_tty"
 
-./eza/apply-eza-theme
-
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json" "/usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"

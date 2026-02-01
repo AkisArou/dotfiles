@@ -26,11 +26,8 @@ echo "THEME set to $SELECTED_THEME in ~/.env"
 killall waybar
 ~/dotfiles/waybar/launch-waybar &
 
-if [ -f "~/dotfiles/eza/${SELECTED_THEME}.yml" ]; then
-  ln -sf "~/dotfiles/eza/${SELECTED_THEME}.yml" ~/.config/eza/theme.yml
-else
-  ln -sf "~/dotfiles/eza/tokyonight.yml" ~/.config/eza/theme.yml
-fi
+# eza
+"$HOME/dotfiles/eza/set-theme" $THEME
 
 # tmux
 tmux source ~/dotfiles/tmux/.tmux.conf

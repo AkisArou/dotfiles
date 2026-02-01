@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+
+THEME="${1:-linux_tty}"
+
+ln -sf "$HOME/dotfiles/eza/${THEME}.yml" "$HOME/dotfiles/eza/theme.yml"
