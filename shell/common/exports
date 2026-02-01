@@ -77,6 +77,13 @@ else
   export EMULATOR_WIDTH=473
 fi
 
-if [[ "$XDG_SESSION_TYPE" == "tty" && -n "$TMUX" ]]; then
+# zsh-system-clipboard
+if [[ "$XDG_SESSION_TYPE" == "wayland" || -n "$WAYLAND_DISPLAY" ]]; then
+  export ZSH_SYSTEM_CLIPBOARD_METHOD=wlc
+
+elif [[ "$XDG_SESSION_TYPE" == "x11" || -n "$DISPLAY" ]]; then
+  export ZSH_SYSTEM_CLIPBOARD_METHOD=xsc
+
+elif [[ "$XDG_SESSION_TYPE" == "tty" && -n "$TMUX" ]]; then
   export ZSH_SYSTEM_CLIPBOARD_METHOD=tmux
 fi
