@@ -123,6 +123,7 @@ hi("@punctuation", { fg = c.light_gray })
 
 -- Tag
 hi("@tag.tsx", { fg = c.accent_subtle })
+hi("@tag.builtin.tsx", { fg = c.accent_subtle })
 
 --------------------------------------------------
 -- LSP semantic tokens (keep restrained)
