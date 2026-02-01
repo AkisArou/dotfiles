@@ -1,5 +1,7 @@
 #!/usr/bin/zsh
 
+[[ "$XDG_SESSION_TYPE" == "wayland" ]] || exit 0
+
 if [ -f ~/.env ]; then
   source ~/.env
 fi

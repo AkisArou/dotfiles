@@ -1,5 +1,7 @@
 #!/usr/bin/zsh
 
+[[ "$XDG_SESSION_TYPE" == "x11" ]] || exit 0
+
 FONT_FAMILY="Hack Nerd Font Mono"
 
 if [ "$ULTRAWIDE" ]; then
