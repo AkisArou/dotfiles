@@ -160,4 +160,4 @@ hi("OilDir", { fg = c.accent_subtle })
 --------------------------------------------------
 -- highlightUrl
 --------------------------------------------------
-hi("highlightUrl", { fg = "#51a2ff" })
+hi("highlightUrl", { fg = "#0092b8" })
