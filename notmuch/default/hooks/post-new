@@ -1,10 +1,18 @@
 #!/usr/bin/zsh
 
+STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/notmuch/last-notification-ts"
+TEMP_FILE="${XDG_RUNTIME_DIR:-/tmp}/notmuch-newest-ts.$$"
+mkdir -p "$(dirname "$STATE_FILE")"
+
+# Read last notification timestamp
+last_notified_ts=0
+[ -f "$STATE_FILE" ] && last_notified_ts=$(cat "$STATE_FILE")
+
 unread_json="$(notmuch search --format=json 'tag:unread')"
 
 [ -z "$unread_json" ] && exit 0
 
-current_ts=$(date +%s)
+echo "0" > "$TEMP_FILE"
 
 echo "$unread_json" | jq -r '.[].query[0]' | while read -r msgid; do
   [ "$msgid" = "null" ] && continue
@@ -12,13 +20,21 @@ echo "$unread_json" | jq -r '.[].query[0]' | while read -r msgid; do
   msg_json="$(notmuch show --body=false --format=json "$msgid")"
 
   ts=$(echo "$msg_json" | jq '.[0][0][0].timestamp')
-  age=$((current_ts - ts))
 
-  # Only notify if <60 seconds old
-  if [ "$age" -le 60 ]; then
+  # Only notify if newer than last notification
+  if [ "$ts" -gt "$last_notified_ts" ]; then
     to_field=$(echo "$msg_json" | jq -r '.[0][0][0].headers.To')
     subject=$(echo "$msg_json" | jq -r '.[0][0][0].headers.Subject')
 
     dunstify "$to_field" "$subject"
+    
+    # Track newest timestamp in temp file
+    newest_ts=$(cat "$TEMP_FILE")
+    [ "$ts" -gt "$newest_ts" ] && echo "$ts" > "$TEMP_FILE"
   fi
 done
+
+# Update state file with newest notification timestamp
+newest_ts=$(cat "$TEMP_FILE")
+[ "$newest_ts" -gt 0 ] && echo "$newest_ts" > "$STATE_FILE"
+rm -f "$TEMP_FILE"
