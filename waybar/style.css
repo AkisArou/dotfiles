@@ -57,6 +57,10 @@ label.module {
   opacity: 0.8;
 }
 
+#network.disconnected {
+  color: @critical-color;
+}
+
 @keyframes blink {
   to {
     background-color: @blink-background;
