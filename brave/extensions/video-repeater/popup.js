@@ -10,6 +10,16 @@ window.addEventListener("load", () => {
   });
 });
 
+// Save start time as user types
+startTimeInput.addEventListener("input", () => {
+  chrome.storage.local.set({ startTime: startTimeInput.value });
+});
+
+// Save end time as user types
+endTimeInput.addEventListener("input", () => {
+  chrome.storage.local.set({ endTime: endTimeInput.value });
+});
+
 document.getElementById("applyButton").addEventListener("click", async () => {
   const startTime = startTimeInput.value;
   const endTime = endTimeInput.value;
@@ -27,8 +37,6 @@ document.getElementById("applyButton").addEventListener("click", async () => {
     { action: "applyLoop", startTime, endTime },
     (response) => {
       if (response && response.status) {
-        // Save values only on successful apply
-        chrome.storage.local.set({ startTime, endTime });
         document.getElementById("status").textContent = response.message;
       } else {
         document.getElementById("status").textContent =
