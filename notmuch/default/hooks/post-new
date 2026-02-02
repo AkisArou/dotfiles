@@ -19,6 +19,6 @@ echo "$unread_json" | jq -r '.[].query[0]' | while read -r msgid; do
     to_field=$(echo "$msg_json" | jq -r '.[0][0][0].headers.To')
     subject=$(echo "$msg_json" | jq -r '.[0][0][0].headers.Subject')
 
-    notify-send "$to_field" "$subject"
+    dunstify "$to_field" "$subject"
   fi
 done
