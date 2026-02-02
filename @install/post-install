@@ -129,3 +129,9 @@ https://github.com/libalpm64/Better-Brave-Browser/blob/main/README.md
 0.0.0.0 usage-ping.brave.com
 
 then: resolvectl flush-caches
+
+Brave local extensions
+----------------------
+- brave://extensions/
+- Toggle developer mode
+- Load unpacked

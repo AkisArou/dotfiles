@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Repeater</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Video Repeater</h1>
+      <div class="form-group">
+        <label for="startTime">Start Time</label>
+        <input
+          type="text"
+          id="startTime"
+          placeholder="min:sec or hour:min:sec"
+        />
+      </div>
+      <div class="form-group">
+        <label for="endTime">End Time</label>
+        <input type="text" id="endTime" placeholder="min:sec or hour:min:sec" />
+      </div>
+      <button id="applyButton" class="btn">Apply Loop</button>
+      <button id="stopButton" class="btn stop">Stop Loop</button>
+      <div id="status" class="status"></div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

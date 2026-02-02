@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Video Repeater",
+  "version": "1.0.0",
+  "description": "Repeat videos with ease",
+  "permissions": ["scripting", "activeTab", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Video Repeater"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
