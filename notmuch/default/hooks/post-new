@@ -12,7 +12,7 @@ unread_json="$(notmuch search --format=json 'tag:unread')"
 
 [ -z "$unread_json" ] && exit 0
 
-echo "0" > "$TEMP_FILE"
+echo "0" >"$TEMP_FILE"
 
 echo "$unread_json" | jq -r '.[].query[0]' | while read -r msgid; do
   [ "$msgid" = "null" ] && continue
@@ -27,14 +27,14 @@ echo "$unread_json" | jq -r '.[].query[0]' | while read -r msgid; do
     subject=$(echo "$msg_json" | jq -r '.[0][0][0].headers.Subject')
 
     dunstify "$to_field" "$subject"
-    
+
     # Track newest timestamp in temp file
     newest_ts=$(cat "$TEMP_FILE")
-    [ "$ts" -gt "$newest_ts" ] && echo "$ts" > "$TEMP_FILE"
+    [ "$ts" -gt "$newest_ts" ] && echo "$ts" >"$TEMP_FILE"
   fi
 done
 
 # Update state file with newest notification timestamp
 newest_ts=$(cat "$TEMP_FILE")
-[ "$newest_ts" -gt 0 ] && echo "$newest_ts" > "$STATE_FILE"
+[ "$newest_ts" -gt 0 ] && echo "$newest_ts" >"$STATE_FILE"
 rm -f "$TEMP_FILE"
