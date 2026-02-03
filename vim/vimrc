@@ -168,7 +168,7 @@ nnoremap x "_x
 xnoremap < <gv
 xnoremap > >gv
 
-nnoremap <leader>w :w<CR>
+nnoremap <C-s> :w<CR>
 nnoremap <leader>h :nohl<CR>
 
 
