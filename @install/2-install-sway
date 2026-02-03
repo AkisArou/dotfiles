@@ -10,6 +10,7 @@ echo ""
 packages=(
   "foot"
   "foot-terminfo"
+  "hyprpicker"
   "polkit"
   "sway"
   "swaybg"

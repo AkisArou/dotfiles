@@ -84,6 +84,7 @@ bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+n exec ~/dotfiles/brave/launch --incognito
 bindsym $mod+Shift+t exec ~/dotfiles/brave/launch --incognito --tor
 bindsym $mod+p exec flameshot gui
+bindsym $mod+Shift+p exec hyprpicker
 
 floating_modifier $mod normal
 
