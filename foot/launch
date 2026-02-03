@@ -9,7 +9,7 @@ FONT=HackNerdFontMono-Regular:size=
 if [ "$ULTRAWIDE" ]; then
   FONT="$FONT"10
 else
-  FONT="$FONT"11
+  FONT="$FONT"10.5
 fi
 
 foot --override include=~/dotfiles/foot/"${THEME:-linux_tty}".ini --font="$FONT" "$@"
