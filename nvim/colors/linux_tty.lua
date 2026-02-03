@@ -17,7 +17,7 @@ local c = {
   cyan = "#7dcfff",
   light_gray = "#bbbbbb",
   dark_gray = "#555555",
-  white = "#ffffff", 
+  white = "#ffffff",
 }
 
 ---@param group string
@@ -43,7 +43,7 @@ hi("WinSeparator", { fg = "#111111" })
 hi("StatusLine", { fg = c.light_gray, bg = "#111111" })
 hi("StatusLineNC", { fg = c.dark_gray, bg = "#111111" })
 
-hi("Visual", { bg = "#1a1a1a" })
+hi("Visual", { bg = "#313131" })
 hi("Search", { fg = c.light_gray, bg = "#1a2d5f" })
 hi("CurSearch", { fg = c.light_gray, bg = "#0f1a38" })
 hi("Special", { fg = c.light_gray })
