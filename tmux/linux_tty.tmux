@@ -1,4 +1,4 @@
-set -g mode-style "bg=#1a1a1a"
+set -g mode-style "bg=#313131"
 
 set -g message-style "fg=#999999,bg=#111111"
 set -g message-command-style "fg=#999999,bg=#111111"
