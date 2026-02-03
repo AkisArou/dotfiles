@@ -2,7 +2,7 @@
 ! Linux TTY
 ! ----------
 *.foreground: #dddddd
-*.background: #0c0c0c
+*.background: #111111
 *.selectionForeground: #aaaaaa
 *.selectionBackground: #111111
 ! normal

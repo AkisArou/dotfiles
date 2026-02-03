@@ -4,7 +4,7 @@ Designed for low visual noise and high signal")
 
 (let ((accent "#7aa2f7")
       (accent-subtle "#B8C8F7")
-      (black "#0c0c0c")
+      (black "#111111")
       (red "#f7768e")
       (green "#009966")
       (yellow "#aaaa00")
