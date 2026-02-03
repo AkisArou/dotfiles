@@ -341,5 +341,6 @@
   "hide-files.files": [],
   "extensions.experimental.affinity": {
     "asvetliakov.vscode-neovim": 1
-  }
+  },
+  "gitlens.codeLens.enabled": false
 }
