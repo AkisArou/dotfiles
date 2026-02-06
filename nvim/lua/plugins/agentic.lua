@@ -19,4 +19,3 @@ end, { desc = "New Agentic Session" })
 vim.keymap.set({ "n", "v", "i" }, "<leader>ar", function()
   agentic.restore_session()
 end, { desc = "Agentic Restore session", silent = true })
-
