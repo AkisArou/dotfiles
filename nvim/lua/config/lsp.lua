@@ -20,7 +20,7 @@ vim.lsp.enable({
   "oxlint",
   "oxfmt",
   "tsgo",
-  "copilot",
+  -- "copilot",
 })
 
 local fzf = require("fzf-lua")
