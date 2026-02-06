@@ -122,6 +122,8 @@ vim.pack.add({
   gh("pwntester/octo.nvim"),
 
   gh("NeogitOrg/neogit"),
+  gh("MeanderingProgrammer/render-markdown.nvim"),
+  gh("folke/sidekick.nvim"),
 })
 
 -- Instant load
@@ -194,3 +196,43 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     require("plugins.vim-visual-multi")
   end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  once = true,
+  pattern = { "markdown", "Avante" },
+  callback = function()
+    require("render-markdown").setup({
+      file_types = { "markdown", "Avante" },
+    })
+  end,
+})
+
+require("sidekick").setup({
+  {
+    -- add any options here
+    cli = {
+      mux = {
+        backend = "tmux",
+        enabled = true,
+      },
+    },
+  },
+})
+
+vim.keymap.set({ "n", "v" }, "<leader>aa", ":Sidekick cli toggle name=copilot<CR>")
+
+vim.keymap.set({ "x", "n" }, "<leader>at", function()
+  require("sidekick.cli").send({ msg = "{this}" })
+end, { desc = "send this" })
+
+vim.keymap.set("n", "<leader>af", function()
+  require("sidekick.cli").send({ msg = "{file}" })
+end, { desc = "send file" })
+
+vim.keymap.set("x", "<leader>av", function()
+  require("sidekick.cli").send({ msg = "{selection}" })
+end, { desc = "send visual selection" })
+
+vim.keymap.set({ "n", "x" }, "<leader>ap", function()
+  require("sidekick.cli").prompt()
+end, { desc = "sidekick select prompt" })
