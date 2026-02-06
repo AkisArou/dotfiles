@@ -158,6 +158,7 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
+  require("plugins.sidekick")
 
   vim.cmd("packadd nvim.undotree")
 end)

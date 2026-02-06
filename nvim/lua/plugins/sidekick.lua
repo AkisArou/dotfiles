@@ -9,7 +9,7 @@ require("sidekick").setup({
   },
 })
 
-vim.keymap.set({ "n", "v" }, "<leader>aa", ":Sidekick cli toggle name=copilot<CR>")
+vim.keymap.set({ "n", "v" }, "<leader>aa", ":Sidekick cli toggle name=opencode<CR>")
 
 vim.keymap.set({ "x", "n" }, "<leader>at", function()
   require("sidekick.cli").send({ msg = "{this}" })
