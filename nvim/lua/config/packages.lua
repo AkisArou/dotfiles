@@ -19,8 +19,6 @@ vim.api.nvim_create_autocmd("PackChanged", {
 
     if name == "blink.cmp" then
       build_plugin("blink.cmp", { "cargo", "build", "--release" })
-    elseif name == "CopilotChat.nvim" then
-      build_plugin("CopilotChat.nvim", { "make", "tiktoken" })
     end
   end,
 })
@@ -124,9 +122,6 @@ vim.pack.add({
   gh("pwntester/octo.nvim"),
 
   gh("NeogitOrg/neogit"),
-
-  gh("MeanderingProgrammer/render-markdown.nvim"),
-  gh("CopilotC-Nvim/CopilotChat.nvim"),
 })
 
 -- Instant load
@@ -161,7 +156,6 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
-  require("plugins.render-markdown")
 
   vim.cmd("packadd nvim.undotree")
 end)
