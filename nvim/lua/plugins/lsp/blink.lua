@@ -24,6 +24,7 @@ require("blink-cmp").setup({
       end,
       "fallback",
     },
+    ["<C-k>"] = { "fallback", "show_signature", "hide_signature" },
   },
 
   appearance = {

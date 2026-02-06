@@ -165,3 +165,66 @@ hi("OilDir", { fg = "#7aa2f7" })
 -- highlightUrl
 --------------------------------------------------
 hi("highlightUrl", { fg = "#0092b8" })
+
+--------------------------------------------------
+-- Avante
+--------------------------------------------------
+hi("AvanteTitle", { fg = c.green, bg = c.black })
+hi("AvanteReversedTitle", { fg = c.black })
+hi("AvanteSubtitle", { fg = c.light_gray, bg = c.black })
+hi("AvanteReversedSubtitle", { fg = c.black })
+hi("AvanteThirdTitle", { fg = c.light_gray, bg = c.black })
+hi("AvanteReversedThirdTitle", { fg = c.black })
+
+hi("AvanteSuggestion", { link = "Comment" })
+hi("AvanteAnnotation", { link = "Comment" })
+hi("AvantePopupHint", { link = "NormalFloat" })
+hi("AvanteInlineHint", { link = "Keyword" })
+
+hi("AvanteToBeDeleted", { bg = "#7a3844", strikethrough = true })
+hi("AvanteToBeDeletedWOStrikethrough", { bg = "#551a1e" })
+
+hi("AvanteConfirmTitle", { fg = c.black, bg = c.red })
+
+hi("AvanteButtonDefault", { fg = c.black, bg = c.light_gray })
+hi("AvanteButtonDefaultHover", { fg = c.black, bg = c.green })
+hi("AvanteButtonPrimary", { fg = c.black, bg = c.light_gray })
+hi("AvanteButtonPrimaryHover", { fg = c.black, bg = c.cyan })
+hi("AvanteButtonDanger", { fg = c.black, bg = c.light_gray })
+hi("AvanteButtonDangerHover", { fg = c.black, bg = c.red })
+
+hi("AvantePromptInput", {})
+hi("AvantePromptInputBorder", { link = "NormalFloat" })
+
+hi("AvanteSidebarWinSeparator", { fg = "#222222", bg = c.black })
+hi("AvanteSidebarWinHorizontalSeparator", { fg = "#555555", bg = c.black })
+hi("AvanteSidebarNormal", { link = "Normal" })
+hi("AvanteCommentFg", { fg = c.dark_gray })
+hi("AvanteReversedNormal", { fg = c.black, bg = c.light_gray })
+
+-- Spinners
+hi("AvanteStateSpinnerGenerating", { fg = c.black, bg = "#9d7cd8" })
+hi("AvanteStateSpinnerToolCalling", { fg = c.black, bg = c.cyan })
+hi("AvanteStateSpinnerFailed", { fg = c.black, bg = c.red })
+hi("AvanteStateSpinnerSucceeded", { fg = c.green })
+hi("AvanteStateSpinnerSearching", { fg = c.black, bg = "#9d7cd8" })
+hi("AvanteStateSpinnerThinking", { fg = c.black, bg = "#9d7cd8" })
+hi("AvanteStateSpinnerCompacting", { fg = c.black, bg = "#9d7cd8" })
+
+-- Tasks
+hi("AvanteTaskRunning", { fg = "#9d7cd8", bg = c.black })
+hi("AvanteTaskCompleted", { fg = c.green, bg = c.black })
+hi("AvanteTaskFailed", { fg = c.red, bg = c.black })
+hi("AvanteThinking", { fg = "#9d7cd8", bg = c.black })
+
+-- Conflict
+hi("AvanteConflictCurrent", { bg = "#551a1e", bold = true, fg = c.light_gray })
+hi("AvanteConflictCurrentLabel", { bg = "#551a1e", bold = true, fg = c.light_gray })
+
+hi("AvanteConflictIncoming", { bg = "#313131", fg = c.light_gray })
+hi("AvanteConflictIncomingLabel", { bg = "#313131", fg = c.light_gray })
+
+--------------------------------------------------
+-- render-markdown
+--------------------------------------------------
+hi("RenderMarkdownCode", { fg = "#9d7cd8", bg = c.black })

@@ -96,6 +96,7 @@ packages=(
   "ninja"
   "noto-fonts-emoji"
   "oama-bin"
+  "opencode-bin"
   "openslide" # Needed by ueberzug
   "openssh"
   "pass"

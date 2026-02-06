@@ -63,10 +63,11 @@ vim.pack.add({
 
   gh("itchyny/vim-highlighturl"),
 
-  gh("echasnovski/mini.cursorword"),
-  gh("echasnovski/mini.surround"),
-  gh("echasnovski/mini.pairs"),
-  gh("echasnovski/mini.ai"),
+  gh("nvim-mini/mini.icons"),
+  gh("nvim-mini/mini.cursorword"),
+  gh("nvim-mini/mini.surround"),
+  gh("nvim-mini/mini.pairs"),
+  gh("nvim-mini/mini.ai"),
 
   gh("kawre/neotab.nvim"),
 
@@ -115,6 +116,9 @@ vim.pack.add({
   gh("pwntester/octo.nvim"),
 
   gh("NeogitOrg/neogit"),
+
+  gh("MeanderingProgrammer/render-markdown.nvim"),
+  gh("carlos-algms/agentic.nvim"),
 })
 
 -- Instant load
@@ -149,6 +153,8 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
+  require("plugins.render-markdown")
+  require("plugins.agentic")
 
   vim.cmd("packadd nvim.undotree")
 end)
@@ -167,6 +173,15 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
   callback = function()
     require("plugins.schemastore")
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "markdown" },
+  callback = function()
+    require("render-markdown").setup({
+      file_types = { "markdown" },
+    })
   end,
 })
 

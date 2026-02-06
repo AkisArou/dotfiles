@@ -2,6 +2,7 @@ local util = require("custom.util")
 
 require("snacks").setup({
   styles = {
+    terminal = {},
     input = {
       width = 70,
       border = false,
