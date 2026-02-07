@@ -124,6 +124,7 @@ vim.pack.add({
   gh("NeogitOrg/neogit"),
   gh("MeanderingProgrammer/render-markdown.nvim"),
   gh("folke/sidekick.nvim"),
+  gh("sudo-tee/opencode.nvim"),
 })
 
 -- Instant load
@@ -158,7 +159,7 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
-  require("plugins.sidekick")
+  -- require("plugins.sidekick")
 
   vim.cmd("packadd nvim.undotree")
 end)
@@ -200,10 +201,11 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 
 vim.api.nvim_create_autocmd("FileType", {
   once = true,
-  pattern = { "markdown", "Avante" },
+  pattern = { "markdown", "opencode_output" },
   callback = function()
     require("render-markdown").setup({
-      file_types = { "markdown", "Avante" },
+      anti_conceal = { enabled = false },
+      file_types = { "markdown", "opencode_output" },
     })
   end,
 })
