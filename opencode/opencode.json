@@ -13,5 +13,11 @@
       "command": ["tsgo", "--lsp", "--stdio"],
       "extensions": [".cjs", ".mjs", ".js", ".jsx", ".ts", ".tsx", ".mts"]
     }
+  },
+  "mcp": {
+    "tanstack": {
+      "type": "local",
+      "command": ["npx", "@tanstack/cli", "mcp"]
+    }
   }
 }
