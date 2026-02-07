@@ -129,11 +129,3 @@
 
 [credentials]
 	helper = --help
-
-[alias]
-  ai = "!GIT_EDITOR='sh -c \"nvim \
-    +\\\"silent read !OPENCODE_CLIENT=cli opencode run --command commit-msg\\\" \
-    +\\\"1delete\\\" \
-    +\\\"normal gg\\\" \
-    \\\"$1\\\"\"' git commit"
-

@@ -130,6 +130,7 @@ vim.pack.add({
 -- Instant load
 require("plugins.colorscheme")
 require("plugins.lualine")
+require("plugins.opencode")
 
 -- Deferred load
 vim.schedule(function()
@@ -159,7 +160,6 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
-  require("plugins.opencode")
 
   vim.cmd("packadd nvim.undotree")
 end)
