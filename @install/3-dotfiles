@@ -79,6 +79,7 @@ create_symlink "$HOME/dotfiles/notmuch" "$HOME/.config/notmuch"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/ripgrep" "$HOME/.config/ripgrep"
 create_symlink "$HOME/dotfiles/.vscode/linux_tty" "$HOME/.vscode/extensions/linux_tty"
+create_symlink "$HOME/dotfiles/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
 
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
 sudo ln -sf "$HOME/dotfiles/brave/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json" "/usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json"
