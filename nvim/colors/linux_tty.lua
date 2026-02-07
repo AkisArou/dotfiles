@@ -95,6 +95,7 @@ hi("DiagnosticUnderlineHint", { sp = diagnosticColor.hint, underline = false, un
 --------------------------------------------------
 -- Most nodes inherit Normal unless explicitly useful
 
+hi("TreesitterContext", { bg = "#0d0d0d" })
 hi("@comment", { link = "Comment" })
 
 hi("@string", { fg = c.green })
