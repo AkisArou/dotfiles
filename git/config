@@ -129,3 +129,13 @@
 
 [credentials]
 	helper = --help
+
+[alias]
+  ai = "!f() { \
+    GIT_EDITOR='nvim \
+      +\"silent read !opencode run --command commit-msg\" \
+      +\"1delete\" \
+      +\"normal gg\"' \
+    git commit; \
+  }; f"
+
