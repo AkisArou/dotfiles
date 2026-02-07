@@ -20,6 +20,7 @@ fi
 mkdir -p "$HOME/.ssh"
 mkdir -p "$HOME/.local/share/applications"
 mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
+mkdir -p "$HOME/.config/opencode"
 sudo mkdir -p /usr/share/chromium/extensions
 sudo mkdir -p /etc/brave/policies/managed
 
