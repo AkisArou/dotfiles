@@ -169,7 +169,9 @@ hi("highlightUrl", { fg = "#0092b8" })
 --------------------------------------------------
 -- render-markdown
 --------------------------------------------------
-hi("RenderMarkdownCode", { fg = "#9d7cd8", bg = c.black })
+hi("RenderMarkdownCode", { fg = c.magenta, bg = c.black })
+hi("RenderMarkdownH1Bg", { fg = c.magenta })
+hi("RenderMarkdownH2Bg", { fg = c.cyan })
 
 --------------------------------------------------
 -- WhichKey
