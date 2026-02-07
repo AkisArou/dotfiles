@@ -172,6 +172,6 @@ hi("highlightUrl", { fg = "#0092b8" })
 hi("RenderMarkdownCode", { fg = "#9d7cd8", bg = c.black })
 
 --------------------------------------------------
--- sidekick
+-- WhichKey
 --------------------------------------------------
-hi("SidekickChat", { bg = "#0d0d0d" })
+hi("WhichKeyNormal", { bg = "#0d0d0d" })

@@ -10,36 +10,26 @@ return {
   },
   root_dir = vim.fn.getcwd(),
   workspace_required = true,
-  commands = {
-    OxcFixAll = {
-      function()
-        local client = vim.lsp.get_clients({ bufnr = 0, name = "oxlint" })[1]
-        if client == nil then
-          return
-        end
-
-        ---@diagnostic disable-next-line: param-type-mismatch
-        client.request("workspace/executeCommand", {
-          command = "oxc.fixAll",
-          arguments = {
-            {
-              uri = vim.uri_from_bufnr(0),
-            },
-          },
-        }, nil, 0)
-      end,
-      description = "Apply fixes to current buffer using oxlint (--fix)",
-    },
-  },
-  docs = {
-    description = [[
-https://oxc.rs
-
-A collection of JavaScript tools written in Rust.
-
-```sh
-npm install [-g] oxlint
-```
-]],
-  },
+  on_attach = function(client, bufnr)
+    vim.api.nvim_buf_create_user_command(bufnr, "LspOxlintFixAll", function()
+      client:exec_cmd({
+        title = "Apply Oxlint automatic fixes",
+        command = "oxc.fixAll",
+        arguments = { { uri = vim.uri_from_bufnr(bufnr) } },
+      })
+    end, {
+      desc = "Apply Oxlint automatic fixes",
+    })
+  end,
+  -- init_options = {
+  --   settings = {
+  --     -- ['run'] = 'onType',
+  --     -- ['configPath'] = nil,
+  --     -- ['tsConfigPath'] = nil,
+  --     -- ['unusedDisableDirectives'] = 'allow',
+  --     -- ['typeAware'] = false,
+  --     -- ['disableNestedConfig'] = false,
+  --     -- ['fixKind'] = 'safe_fix',
+  --   },
+  -- },
 }
