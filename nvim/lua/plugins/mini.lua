@@ -31,3 +31,14 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.cmd([[cnoreabbrev <expr> git getcmdtype() == ':' ? 'Git' : 'git']])
+
+vim.api.nvim_create_autocmd("BufWinEnter", {
+  callback = function(ev)
+    local buf = ev.buf
+    local name = vim.api.nvim_buf_get_name(buf)
+
+    if name:match("git show$") then
+      vim.bo[buf].filetype = "gitcommit"
+    end
+  end,
+})
