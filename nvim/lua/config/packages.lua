@@ -125,6 +125,7 @@ vim.pack.add({
   gh("MeanderingProgrammer/render-markdown.nvim"),
   gh("folke/sidekick.nvim"),
   gh("sudo-tee/opencode.nvim"),
+  gh("nvim-mini/mini-git"),
 })
 
 -- Instant load
