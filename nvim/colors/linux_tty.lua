@@ -35,7 +35,7 @@ vim.cmd("syntax reset")
 --------------------------------------------------
 hi("Normal", { fg = c.light_gray, bg = c.black })
 hi("Cursor", { fg = c.black, bg = c.light_gray })
-hi("CursorLine", { bg = c.black })
+hi("CursorLine", { bg = "#0d0d0d" })
 hi("LineNr", { fg = c.dark_gray })
 hi("CursorLineNr", { fg = c.light_gray })
 hi("WinSeparator", { fg = c.black })
