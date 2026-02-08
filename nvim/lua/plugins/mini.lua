@@ -30,8 +30,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-vim.cmd([[cnoreabbrev <expr> git getcmdtype() == ':' ? 'Git' : 'git']])
-
 vim.api.nvim_create_autocmd("BufWinEnter", {
   callback = function(ev)
     local buf = ev.buf
