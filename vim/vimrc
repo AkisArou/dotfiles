@@ -139,10 +139,6 @@ nnoremap <silent> <leader>bd :bdelete<CR>
 nnoremap <silent> <leader>bo :wa!<CR> :call CloseOtherBuffers()<CR>
 nnoremap <silent> <leader>ba :wa!<CR> :bufdo bdelete<CR>
 
-" Move blocks
-xnoremap J :m '>+1<CR>gv=gv
-xnoremap K :m '<-2<CR>gv=gv
-
 " Cursor stays in place when moving screen
 function! Scroll(direction)
   set lazyredraw
