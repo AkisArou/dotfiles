@@ -122,16 +122,17 @@ vim.pack.add({
   gh("pwntester/octo.nvim"),
 
   gh("NeogitOrg/neogit"),
+  gh("nvim-mini/mini-git"),
   gh("MeanderingProgrammer/render-markdown.nvim"),
   gh("folke/sidekick.nvim"),
   gh("sudo-tee/opencode.nvim"),
-  gh("nvim-mini/mini-git"),
+
+  gh("carloscalla/notepad.nvim"),
 })
 
 -- Instant load
 require("plugins.colorscheme")
 require("plugins.lualine")
-require("plugins.opencode")
 
 -- Deferred load
 vim.schedule(function()
@@ -161,6 +162,8 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
+  require("plugins.opencode")
+  require("plugins.notepad")
 
   vim.cmd("packadd nvim.undotree")
 end)
