@@ -37,12 +37,7 @@ require("blink-cmp").setup({
       "path",
       "lazydev",
       "buffer",
-      "git",
-      -- "ripgrep"
-    },
-
-    per_filetype = {
-      org = { "orgmode" },
+      "dap",
     },
 
     providers = {
@@ -52,18 +47,13 @@ require("blink-cmp").setup({
         score_offset = 100, -- show at a higher priority than lsp
         fallbacks = { "lsp" },
       },
-      git = {
-        module = "blink-cmp-git",
-        name = "Git",
+      dap = {
+        name = "Dap",
+        module = "blink-cmp-dap",
         enabled = function()
-          return vim.tbl_contains({ "octo", "gitcommit" }, vim.bo.filetype)
+          return vim.tbl_contains({ "dap-repl", "dapui_watches", "dapui_hover" }, vim.bo.filetype)
         end,
         opts = {},
-      },
-      orgmode = {
-        name = "Orgmode",
-        module = "orgmode.org.autocompletion.blink",
-        fallbacks = { "buffer" },
       },
     },
   },

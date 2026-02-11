@@ -109,7 +109,7 @@ vim.pack.add({
   gh("folke/lazydev.nvim"),
 
   gh("saghen/blink.cmp"),
-  gh("Kaiser-Yang/blink-cmp-git"),
+  gh("mayromr/blink-cmp-dap"),
 
   gh("stevearc/conform.nvim"),
 
