@@ -1,0 +1,29 @@
+# Linux TTY Theme
+
+[colors.primary]
+background = "#111111"
+foreground = "#dddddd"
+
+[colors.selection]
+text = "#aaaaaa"
+background = "#111111"
+
+[colors.normal]
+black = "#000000"
+red = "#f7768e"
+green = "#009966"
+yellow = "#ff9e64"
+blue = "#7aa2f7"
+magenta = "#9d7cd8"
+cyan = "#7dcfff"
+white = "#aaaaaa"
+
+[colors.bright]
+black = "#555555"
+red = "#f7768e"
+green = "#009966"
+yellow = "#ff9e64"
+blue = "#7aa2f7"
+magenta = "#cc33cc"
+cyan = "#7dcfff"
+white = "#aaaaaa"

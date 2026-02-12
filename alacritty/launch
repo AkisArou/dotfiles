@@ -1,9 +1,16 @@
 #!/usr/bin/zsh
 
-if [ "$ULTRAWIDE" ]; then
-  font_size=9
-else
-  font_size=10.5
+if [ -f ~/.env ]; then
+  source ~/.env
 fi
 
-alacritty --option="font.size=$font_size"
+if [ "$ULTRAWIDE" ]; then
+  FONT_SIZE=10
+else
+  FONT_SIZE=10.5
+fi
+
+alacritty \
+  -o "font.size=$FONT_SIZE" \
+  -o "general.import=['~/dotfiles/alacritty/${THEME:-linux_tty}.toml']" \
+  "$@"

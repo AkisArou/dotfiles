@@ -1,9 +1,16 @@
 #!/usr/bin/zsh
 
-if [ "$ULTRAWIDE" ]; then
-  font_size=10
-else
-  font_size=11
+if [ -f ~/.env ]; then
+  source ~/.env
 fi
 
-kitty -o "font.size=$font_size"
+if [ "$ULTRAWIDE" ]; then
+  FONT_SIZE=10
+else
+  FONT_SIZE=10.5
+fi
+
+kitty \
+  -o font_size="$FONT_SIZE" \
+  -o "include ~/dotfiles/kitty/${THEME:-linux_tty}.conf" \
+  "$@"
