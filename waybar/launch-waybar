@@ -8,6 +8,6 @@ fi
 
 killall waybar
 
-STYLE="$HOME/dotfiles/waybar/themes/${THEME:-linux_tty}.css"
+STYLE="$HOME/dotfiles/waybar/themes/${THEME:-nevermore}.css"
 
 waybar --style "$STYLE"

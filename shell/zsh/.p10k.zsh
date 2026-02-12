@@ -27,7 +27,7 @@ case "${THEME:-tokyonight}" in
     local TERMINAL_BLACK="#414868"
     local YELLOW="#e0af68"
     ;;
-  linux_tty|*)
+  nevermore|*)
     local BLUE="#7aa2f7"
     local BLUE0="#7aa2f7"
     local BLUE1="#7dcfff"

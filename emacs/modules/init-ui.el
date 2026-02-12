@@ -5,7 +5,7 @@
 
 ;;; Code:
 
-(load-theme 'linux-tty t)
+(load-theme 'nevermore t)
 
 
 ;;; DOOM MODELINE

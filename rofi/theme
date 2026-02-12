@@ -1,5 +1,5 @@
 #!/usr/bin/zsh
 
-theme=$(echo -e "tokyonight\nlinux_tty" | ~/dotfiles/rofi/launch -dmenu -p "Theme")
+theme=$(echo -e "tokyonight\nnevermore" | ~/dotfiles/rofi/launch -dmenu -p "Theme")
 
 ~/dotfiles/scripts/change-theme $theme

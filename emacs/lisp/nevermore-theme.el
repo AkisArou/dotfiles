@@ -1,5 +1,5 @@
-(deftheme linux-tty
-  "Minimal Linux virtual console–inspired colorscheme for Emacs
+(deftheme nevermore
+  "Minimal colorscheme for Emacs
 Designed for low visual noise and high signal")
 
 (let ((accent "#7aa2f7")
@@ -20,7 +20,7 @@ Designed for low visual noise and high signal")
       (error-red "#7a3844"))
 
   (custom-theme-set-faces
-   'linux-tty
+   'nevermore
 
    ;; UI
    `(default ((t :foreground ,light-gray :background ,black)))
@@ -367,6 +367,6 @@ Designed for low visual noise and high signal")
    ))
 
 (custom-theme-set-variables
- 'linux-tty)
+ 'nevermore)
 
-(provide-theme 'linux-tty)
+(provide-theme 'nevermore)

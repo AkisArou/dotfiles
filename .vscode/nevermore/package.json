@@ -1,6 +1,6 @@
 {
-  "name": "linux-tty-theme",
-  "displayName": "Linux TTY",
+  "name": "nevermore-theme",
+  "displayName": "Nevermore",
   "description": "Minimal Linux virtual console–inspired colorscheme for low visual noise and high signal",
   "version": "1.0.0",
   "engines": {
@@ -12,9 +12,9 @@
   "contributes": {
     "themes": [
       {
-        "label": "Linux TTY",
+        "label": "Nevermore",
         "uiTheme": "vs-dark",
-        "path": "./themes/linux_tty.json"
+        "path": "./themes/nevermore.json"
       }
     ]
   }

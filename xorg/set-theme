@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-THEME="${1:-linux_tty}"
+THEME="${1:-nevermore}"
 
 SELECTED_THEME_FILE="$HOME/dotfiles/xorg/.Xresources.d/$THEME"
 THEME_FILE="$HOME/dotfiles/xorg/.Xresources.d/theme"

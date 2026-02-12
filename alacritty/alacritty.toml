@@ -25,4 +25,4 @@ family = "HackNerdFont"
 style = "Italic"
 
 [general]
-import = ["~/dotfiles/alacritty/linux_tty.toml"]
+import = ["~/dotfiles/alacritty/nevermore.toml"]

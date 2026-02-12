@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rofi_command="rofi -config ""$HOME""/dotfiles/rofi/"${THEME:-linux_tty}".rasi -dmenu $* -p Emulator -l 5 -i"
+rofi_command="rofi -config ""$HOME""/dotfiles/rofi/"${THEME:-nevermore}".rasi -dmenu $* -p Emulator -l 5 -i"
 
 choice=$("$ANDROID_HOME"/emulator/emulator -list-avds | $rofi_command)
 "$ANDROID_HOME"/emulator/emulator -avd "$choice" -netdelay none -netspeed full &

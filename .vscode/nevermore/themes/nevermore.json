@@ -1,6 +1,6 @@
 {
   "$schema": "vscode://schemas/color-theme",
-  "name": "Linux TTY",
+  "name": "Nevermore",
   "type": "dark",
   "colors": {
     "titleBar.activeBackground": "#111111",

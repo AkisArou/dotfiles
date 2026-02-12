@@ -12,4 +12,4 @@ else
   FONT="$FONT"10.5
 fi
 
-foot --override include=~/dotfiles/foot/"${THEME:-linux_tty}".ini --font="$FONT" "$@"
+foot --override include=~/dotfiles/foot/"${THEME:-nevermore}".ini --font="$FONT" "$@"

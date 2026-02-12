@@ -4,17 +4,17 @@ set -eu
 
 # Color palette
 tokyonight="#7aa2f7"
-linux_tty="#7aa2f7"
+nevermore="#7aa2f7"
 
 CONFIG_FILE="$HOME/dotfiles/waybar/config.jsonc"
-THEME="${1:-linux_tty}"
+THEME="${1:-nevermore}"
 
 case "$THEME" in
 tokyonight)
   NEW_COLOR="$tokyonight"
   ;;
-linux_tty)
-  NEW_COLOR="$linux_tty"
+nevermore)
+  NEW_COLOR="$nevermore"
   ;;
 *)
   echo "Error: unknown theme '$THEME'"

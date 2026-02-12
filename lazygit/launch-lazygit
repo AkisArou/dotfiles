@@ -2,4 +2,4 @@
 
 source ~/.env
 
-/usr/bin/lazygit --use-config-file=$HOME/dotfiles/lazygit/config.yml,$HOME/dotfiles/lazygit/"${THEME:-linux_tty}".yml "$@"
+/usr/bin/lazygit --use-config-file=$HOME/dotfiles/lazygit/config.yml,$HOME/dotfiles/lazygit/"${THEME:-nevermore}".yml "$@"

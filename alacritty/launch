@@ -12,5 +12,5 @@ fi
 
 alacritty \
   -o "font.size=$FONT_SIZE" \
-  -o "general.import=['~/dotfiles/alacritty/${THEME:-linux_tty}.toml']" \
+  -o "general.import=['~/dotfiles/alacritty/${THEME:-nevermore}.toml']" \
   "$@"
