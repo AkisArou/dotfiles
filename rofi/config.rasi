@@ -28,7 +28,7 @@ configuration {
 }
 
 #mainbox {
-    border:           3;
+    border:           2;
     border-radius:    6;
     border-color:     var(bordercolor);
     padding: 15px;
@@ -70,12 +70,12 @@ configuration {
 
 #element.normal.active {
     background-color: var(active-background);
-    text-color:       var(foreground);
+    text-color:       var(active-foreground);
 }
 
 #element.selected.normal {
     background-color: var(selected-background);
-    text-color:       var(foreground);
+    text-color:       var(selected-foreground);
 }
 
 #element.selected.urgent {
