@@ -1,3 +1,5 @@
+return {}
+
 -- local preferences = {
 --   includePackageJsonAutoImports = "on",
 --   importModuleSpecifier = "non-relative",
