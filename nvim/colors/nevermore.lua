@@ -127,8 +127,6 @@ hi("@punctuation", { fg = c.light_gray })
 hi("@tag.tsx", { fg = c.accent_subtle })
 hi("@tag.builtin.tsx", { fg = c.accent_subtle })
 
--- Markdown
-hi("@markup.heading.3.markdown", { guibg = #222222, cterm = nil, gui = nil })
 --------------------------------------------------
 -- LSP semantic tokens (keep restrained)
 --------------------------------------------------
@@ -149,6 +147,12 @@ hi("MiniCursorword", { bg = "#333333" })
 --------------------------------------------------
 hi("BlinkCmpMenu", { bg = "#000000" })
 hi("BlinkCmpMenuSelection", { bg = "#222222" })
+
+--------------------------------------------------
+-- Lualine
+--------------------------------------------------
+hi("lualine_c_normal", { bg = c.black })
+hi("lualine_x_normal", { bg = c.black })
 
 --------------------------------------------------
 -- FZF
@@ -174,7 +178,7 @@ hi("highlightUrl", { fg = "#0092b8" })
 hi("RenderMarkdownCode", { fg = c.magenta, bg = c.black })
 hi("RenderMarkdownH1Bg", { fg = c.magenta })
 hi("RenderMarkdownH2Bg", { fg = c.cyan })
-hi("RenderMarkdownH3Bg", { bg = c.dark_gray })
+
 --------------------------------------------------
 -- WhichKey
 --------------------------------------------------
@@ -187,43 +191,4 @@ hi("MasonNormal", { bg = c.black, fg = c.light_gray })
 hi("MasonHeader", { bg = c.magenta, fg = c.black })
 hi("MasonHighlight", { fg = c.cyan })
 hi("MasonHighlightBlockBold", { bg = c.cyan, fg = c.black })
-hi("MasonMutedBlock", { bg = "#333333" })
-
---------------------------------------------------
--- Lualine
---------------------------------------------------
-local function set_lualine_highlights()
-  hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
-  hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
-  hi("lualine_c_insert", { bg = c.black, fg = c.light_gray })
-  hi("lualine_x_insert", { bg = c.black, fg = c.light_gray })
-  hi("lualine_c_command", { bg = c.black, fg = c.light_gray })
-  hi("lualine_x_command", { bg = c.black, fg = c.light_gray })
-  hi("lualine_c_visual", { bg = c.black, fg = c.light_gray })
-  hi("lualine_x_visual", { bg = c.black, fg = c.light_gray })
-  hi("lualine_c_replace", { bg = c.black, fg = c.light_gray })
-  hi("lualine_x_replace", { bg = c.black, fg = c.light_gray })
-  hi("lualine_c_inactive", { bg = c.black, fg = c.dark_gray })
-  hi("lualine_x_inactive", { bg = c.black, fg = c.dark_gray })
-end
-
---------------------------------------------------
--- Intro screen (magenta until first buffer)
---------------------------------------------------
-set_lualine_highlights()
-
-hi("Normal", { fg = c.magenta, bg = c.black })
-vim.api.nvim_create_autocmd("UIEnter", {
-  once = true,
-  callback = function()
-    vim.defer_fn(function()
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "InsertEnter" }, {
-        once = true,
-        callback = function()
-          hi("Normal", { fg = c.light_gray, bg = c.black })
-          set_lualine_highlights()
-        end,
-      })
-    end, 0)
-  end,
-})
+hi("MasonMutedBlock", { bg = c.dark_gray })
