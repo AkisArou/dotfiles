@@ -184,3 +184,12 @@ hi("RenderMarkdownH2Bg", { fg = c.cyan })
 -- WhichKey
 --------------------------------------------------
 hi("WhichKeyNormal", { bg = "#0d0d0d" })
+
+--------------------------------------------------
+-- Mason
+--------------------------------------------------
+hi("MasonNormal", { bg = c.black, fg = c.light_gray })
+hi("MasonHeader", { bg = c.magenta, fg = c.black })
+hi("MasonHighlight", { fg = c.cyan })
+hi("MasonHighlightBlockBold", { bg = c.cyan, fg = c.black })
+hi("MasonMutedBlock", { bg = c.dark_gray })
