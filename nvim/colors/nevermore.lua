@@ -1,5 +1,4 @@
 -- nevermore.lua
--- Minimal Linux virtual console–inspired colorscheme
 -- Designed for low visual noise and high signal
 
 vim.opt.termguicolors = true
