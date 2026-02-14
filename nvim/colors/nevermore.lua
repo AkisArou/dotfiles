@@ -127,6 +127,8 @@ hi("@punctuation", { fg = c.light_gray })
 hi("@tag.tsx", { fg = c.accent_subtle })
 hi("@tag.builtin.tsx", { fg = c.accent_subtle })
 
+-- Markdown
+hi("@markup.heading.3.markdown", { guibg = #222222, cterm = nil, gui = nil })
 --------------------------------------------------
 -- LSP semantic tokens (keep restrained)
 --------------------------------------------------
@@ -172,7 +174,7 @@ hi("highlightUrl", { fg = "#0092b8" })
 hi("RenderMarkdownCode", { fg = c.magenta, bg = c.black })
 hi("RenderMarkdownH1Bg", { fg = c.magenta })
 hi("RenderMarkdownH2Bg", { fg = c.cyan })
-
+hi("RenderMarkdownH3Bg", { bg = c.dark_gray })
 --------------------------------------------------
 -- WhichKey
 --------------------------------------------------
@@ -185,7 +187,7 @@ hi("MasonNormal", { bg = c.black, fg = c.light_gray })
 hi("MasonHeader", { bg = c.magenta, fg = c.black })
 hi("MasonHighlight", { fg = c.cyan })
 hi("MasonHighlightBlockBold", { bg = c.cyan, fg = c.black })
-hi("MasonMutedBlock", { bg = c.dark_gray })
+hi("MasonMutedBlock", { bg = "#333333" })
 
 --------------------------------------------------
 -- Lualine
