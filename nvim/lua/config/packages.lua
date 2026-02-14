@@ -13,6 +13,18 @@ local function build_plugin(plugin_name, command)
   end
 end
 
+function Delete_unused_packs()
+  vim.pack.del(vim
+    .iter(vim.pack.get())
+    :filter(function(x)
+      return not x.active
+    end)
+    :map(function(x)
+      return x.spec.name
+    end)
+    :totable())
+end
+
 vim.api.nvim_create_autocmd("PackChanged", {
   callback = function(event)
     local name = event.data.spec.name
