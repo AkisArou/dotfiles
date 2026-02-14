@@ -35,7 +35,15 @@ require("treesitter-context").setup({ mode = "cursor", max_lines = 3 })
 
 require("nvim-ts-autotag").setup()
 
-require("ts-comments").setup()
+require("ts_context_commentstring").setup()
+
+require("mini.comment").setup({
+  options = {
+    custom_commentstring = function()
+      return require("ts_context_commentstring.internal").calculate_commentstring() or vim.bo.commentstring
+    end,
+  },
+})
 
 vim.keymap.set({ "x", "o" }, "af", function()
   require("nvim-treesitter-textobjects.select").select_textobject("@function.outer", "textobjects")

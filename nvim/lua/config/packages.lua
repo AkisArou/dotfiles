@@ -55,7 +55,7 @@ vim.pack.add({
   gh({ src = "nvim-treesitter/nvim-treesitter-textobjects", version = "main" }),
   gh("nvim-treesitter/nvim-treesitter-context"),
   gh("windwp/nvim-ts-autotag"),
-  gh("folke/ts-comments.nvim"),
+  gh("JoosepAlviste/nvim-ts-context-commentstring"),
 
   gh("rcarriga/nvim-dap-ui"),
   gh("nvim-neotest/nvim-nio"),
@@ -69,6 +69,7 @@ vim.pack.add({
 
   gh("itchyny/vim-highlighturl"),
 
+  gh("nvim-mini/mini.comment"),
   gh("nvim-mini/mini.icons"),
   gh("nvim-mini/mini.cursorword"),
   gh("nvim-mini/mini.surround"),
