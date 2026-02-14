@@ -213,6 +213,7 @@ vim.api.nvim_create_autocmd("User", {
         local bufnr = vim.fn.bufnr(path)
 
         if bufnr >= 0 then
+          vim.bo[bufnr].buflisted = false
           vim.cmd.bwipeout({ bufnr, bang = true })
         end
       end
