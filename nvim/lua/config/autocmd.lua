@@ -137,12 +137,29 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
--- Autosave
+-- Autosave (only for existing files that have been modified)
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
   group = augroup("autowrite"),
   pattern = "*",
   callback = function()
-    vim.cmd("silent! wall")
+    -- Only save buffers that:
+    -- 1. Are normal buffers (not special buffers)
+    -- 2. Have a name (file path)
+    -- 3. The file actually exists on disk (prevents recreating deleted files)
+    -- 4. Have been modified
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if
+        vim.api.nvim_buf_is_valid(buf)
+        and vim.bo[buf].modified
+        and vim.bo[buf].buftype == ""
+        and vim.api.nvim_buf_get_name(buf) ~= ""
+        and vim.uv.fs_stat(vim.api.nvim_buf_get_name(buf))
+      then
+        vim.api.nvim_buf_call(buf, function()
+          vim.cmd("silent! write")
+        end)
+      end
+    end
   end,
 })
 
@@ -202,11 +219,11 @@ vim.api.nvim_create_autocmd("User", {
     end
     for _, action in ipairs(e.data.actions) do
       if action.entry_type == "file" and action.type == "delete" then
-        local file = action.url:sub(7)
-        local bufnr = vim.fn.bufnr(file)
+        local _, path = require("oil.util").parse_url(action.url)
+        local bufnr = vim.fn.bufnr(path)
 
         if bufnr >= 0 then
-          vim.api.nvim_buf_delete(bufnr, { force = true })
+          Snacks.bufdelete.delete({ buf = bufnr, force = true, wipe = true })
         end
       end
     end
