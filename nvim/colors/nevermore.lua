@@ -149,18 +149,6 @@ hi("BlinkCmpMenu", { bg = "#000000" })
 hi("BlinkCmpMenuSelection", { bg = "#222222" })
 
 --------------------------------------------------
--- Lualine
---------------------------------------------------
-hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
-hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
-hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
-hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
-hi("lualine_c_insert", { bg = c.black, fg = c.light_gray })
-hi("lualine_x_insert", { bg = c.black, fg = c.light_gray })
-hi("lualine_c_command", { bg = c.black, fg = c.light_gray })
-hi("lualine_x_command", { bg = c.black, fg = c.light_gray })
-
---------------------------------------------------
 -- FZF
 --------------------------------------------------
 hi("FzfLuaBorder", { fg = c.dark_gray })
@@ -198,3 +186,42 @@ hi("MasonHeader", { bg = c.magenta, fg = c.black })
 hi("MasonHighlight", { fg = c.cyan })
 hi("MasonHighlightBlockBold", { bg = c.cyan, fg = c.black })
 hi("MasonMutedBlock", { bg = c.dark_gray })
+
+--------------------------------------------------
+-- Lualine
+--------------------------------------------------
+local function set_lualine_highlights()
+  hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
+  hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
+  hi("lualine_c_insert", { bg = c.black, fg = c.light_gray })
+  hi("lualine_x_insert", { bg = c.black, fg = c.light_gray })
+  hi("lualine_c_command", { bg = c.black, fg = c.light_gray })
+  hi("lualine_x_command", { bg = c.black, fg = c.light_gray })
+  hi("lualine_c_visual", { bg = c.black, fg = c.light_gray })
+  hi("lualine_x_visual", { bg = c.black, fg = c.light_gray })
+  hi("lualine_c_replace", { bg = c.black, fg = c.light_gray })
+  hi("lualine_x_replace", { bg = c.black, fg = c.light_gray })
+  hi("lualine_c_inactive", { bg = c.black, fg = c.dark_gray })
+  hi("lualine_x_inactive", { bg = c.black, fg = c.dark_gray })
+end
+
+--------------------------------------------------
+-- Intro screen (magenta until first buffer)
+--------------------------------------------------
+set_lualine_highlights()
+
+hi("Normal", { fg = c.magenta, bg = c.black })
+vim.api.nvim_create_autocmd("UIEnter", {
+  once = true,
+  callback = function()
+    vim.defer_fn(function()
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "InsertEnter" }, {
+        once = true,
+        callback = function()
+          hi("Normal", { fg = c.light_gray, bg = c.black })
+          set_lualine_highlights()
+        end,
+      })
+    end, 0)
+  end,
+})
