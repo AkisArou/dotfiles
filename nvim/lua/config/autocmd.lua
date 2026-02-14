@@ -206,13 +206,14 @@ vim.api.nvim_create_autocmd("User", {
     if e.data.actions == nil then
       return
     end
+
     for _, action in ipairs(e.data.actions) do
       if action.entry_type == "file" and action.type == "delete" then
         local _, path = require("oil.util").parse_url(action.url)
         local bufnr = vim.fn.bufnr(path)
 
         if bufnr >= 0 then
-          Snacks.bufdelete.delete({ buf = bufnr, force = true, wipe = true })
+          vim.cmd.bwipeout({ bufnr, bang = true })
         end
       end
     end
