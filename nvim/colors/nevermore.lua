@@ -29,19 +29,6 @@ end
 vim.cmd("highlight clear")
 vim.cmd("syntax reset")
 
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    hi("Normal", { fg = c.magenta })
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufEnter", {
-  callback = function()
-    hi("Normal", { fg = c.light_gray })
-    hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
-    hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
-  end,
-})
 --------------------------------------------------
 -- Core UI
 --------------------------------------------------
@@ -164,8 +151,14 @@ hi("BlinkCmpMenuSelection", { bg = "#222222" })
 --------------------------------------------------
 -- Lualine
 --------------------------------------------------
-hi("lualine_c_normal", { bg = c.black })
-hi("lualine_x_normal", { bg = c.black })
+hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
+hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
+hi("lualine_c_normal", { bg = c.black, fg = c.light_gray })
+hi("lualine_x_normal", { bg = c.black, fg = c.light_gray })
+hi("lualine_c_insert", { bg = c.black, fg = c.light_gray })
+hi("lualine_x_insert", { bg = c.black, fg = c.light_gray })
+hi("lualine_c_command", { bg = c.black, fg = c.light_gray })
+hi("lualine_x_command", { bg = c.black, fg = c.light_gray })
 
 --------------------------------------------------
 -- FZF
