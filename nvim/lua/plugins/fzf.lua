@@ -11,10 +11,10 @@ fzf_lua.setup({
       layout = "vertical",
     },
     -- Make float bottom
-    -- row = 1,
-    -- col = 0,
-    -- height = 0.65,
-    -- width = 1,
+    row = 1,
+    col = 0,
+    height = 0.65,
+    width = 1,
   },
   previewers = {
     builtin = {
