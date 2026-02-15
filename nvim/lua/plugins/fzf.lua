@@ -11,10 +11,10 @@ fzf_lua.setup({
       layout = "vertical",
     },
     -- Make float bottom
-    row = 1,
-    col = 0,
-    height = 0.65,
-    width = 1,
+    -- row = 1,
+    -- col = 0,
+    -- height = 0.65,
+    -- width = 1,
   },
   previewers = {
     builtin = {
@@ -48,7 +48,6 @@ fzf_lua.setup({
     },
   },
   lsp = {
-    -- make lsp requests synchronous so they work with null-ls
     async_or_timeout = 10000,
   },
 })
