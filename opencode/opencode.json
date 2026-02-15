@@ -15,6 +15,10 @@
     }
   },
   "mcp": {
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest", "--autoConnect"]
+    },
     "tanstack": {
       "type": "local",
       "command": ["npx", "@tanstack/cli", "mcp"]
