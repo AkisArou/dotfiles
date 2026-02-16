@@ -8,12 +8,12 @@ echo
 
 print_info "nvim:"
 ~/dotfiles/scripts/build-nvim
-rm -rf ~/dotfiles/nvim/nvim-pack-lock.json
 echo
 
 nvim --headless \
-  -c "lua vim.pack.update(nil, { force = true })" \
   -c "lua Delete_unused_packs()" \
+  -c "!rm -rf ~/dotfiles/nvim/nvim-pack-lock.json" \
+  -c "lua vim.pack.update(nil, { force = true })" \
   -c "quit"
 echo
 echo
