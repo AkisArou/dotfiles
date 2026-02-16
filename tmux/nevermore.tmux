@@ -4,7 +4,7 @@ set -g message-style "fg=#999999,bg=#121212"
 set -g message-command-style "fg=#999999,bg=#121212"
 
 set -g pane-border-style "fg=#121212"
-set -g pane-active-border-style "fg=#999999"
+set -g pane-active-border-style "fg=#444444"
 
 set -g popup-style "bg=#121212,fg=#999999"
 set -g popup-border-style "bg=#121212,fg=#999999"
