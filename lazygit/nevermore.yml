@@ -18,9 +18,9 @@ gui:
     defaultFgColor:
       - "#dddddd" # foreground
     selectedLineBgColor:
-      - "#111111"
+      - "#121212"
     selectedRangeBgColor:
-      - "#111111"
+      - "#121212"
 
     # Git states
     unstagedChangesColor:

@@ -1,12 +1,12 @@
 # Nevermore Theme
 
 [colors.primary]
-background = "#111111"
+background = "#121212"
 foreground = "#dddddd"
 
 [colors.selection]
 text = "#aaaaaa"
-background = "#111111"
+background = "#121212"
 
 [colors.normal]
 black = "#000000"

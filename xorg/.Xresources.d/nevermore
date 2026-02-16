@@ -2,9 +2,9 @@
 ! Nevermore
 ! ----------
 *.foreground: #dddddd
-*.background: #111111
+*.background: #121212
 *.selectionForeground: #aaaaaa
-*.selectionBackground: #111111
+*.selectionBackground: #121212
 ! normal
 *.color0:  #000000
 *.color1:  #f7768e

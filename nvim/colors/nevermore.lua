@@ -6,7 +6,7 @@ vim.g.colors_name = "nevermore"
 
 local c = {
   accent_subtle = "#B8C8F7",
-  black = "#111111",
+  black = "#121212",
   red = "#f7768e",
   green = "#009966",
   yellow = "#aaaa00",
@@ -14,7 +14,7 @@ local c = {
   blue = "#7aa2f7",
   magenta = "#9d7cd8",
   cyan = "#7dcfff",
-  light_gray = "#bbbbbb",
+  light_gray = "#bfbfbf",
   dark_gray = "#555555",
   white = "#ffffff",
 }
@@ -34,7 +34,7 @@ vim.cmd("syntax reset")
 --------------------------------------------------
 hi("Normal", { fg = c.light_gray, bg = c.black })
 hi("Cursor", { fg = c.black, bg = c.light_gray })
-hi("CursorLine", { bg = "#0d0d0d" })
+hi("CursorLine", { bg = "#0e0e0e" })
 hi("LineNr", { fg = c.dark_gray })
 hi("CursorLineNr", { fg = c.light_gray })
 hi("WinSeparator", { fg = c.black })
@@ -134,7 +134,7 @@ hi("@lsp.type.function", { link = "@function" })
 hi("@lsp.type.variable", { link = "@variable" })
 hi("@lsp.type.keyword", { link = "@keyword" })
 hi("@lsp.type.type", { link = "@type" })
-hi("@lsp.type.property", { fg = "#aaaaaa" })
+hi("@lsp.type.property", { fg = "#acacaa" })
 
 --------------------------------------------------
 -- Blink.cmp
@@ -145,7 +145,7 @@ hi("MiniCursorword", { bg = "#333333" })
 --------------------------------------------------
 -- Blink.cmp
 --------------------------------------------------
-hi("BlinkCmpMenu", { bg = "#000000" })
+hi("BlinkCmpMenu", { bg = "#0c0c0c" })
 hi("BlinkCmpMenuSelection", { bg = "#222222" })
 
 --------------------------------------------------

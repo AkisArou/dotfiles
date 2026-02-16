@@ -1,6 +1,6 @@
 * {
     foreground: #aaaaaa;
-    background-color: #111111;
+    background-color: #121212;
     active-background: #3F3256;
     active-foreground: var(foreground); 
     urgent-background: #f7768e;

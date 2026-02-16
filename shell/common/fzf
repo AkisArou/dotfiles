@@ -23,10 +23,10 @@ FZF_TOKYONIGHT="\
 
 FZF_NEVERMORE="\
   --color=bg:#1b1b1b \
-  --color=bg+:#111111 \
+  --color=bg+:#121212 \
   --color=border:#555555 \
   --color=fg:#777777 \
-  --color=gutter:#111111 \
+  --color=gutter:#121212 \
   --color=header:#555555 \
   --color=hl:#7aa2f7 \
   --color=hl+:#7aa2f7 \
@@ -66,7 +66,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 "
 
 FZF_TAB_TOKYONIGHT="--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55"
-FZF_TAB_NEVERMORE="--color=fg:#999999,bg:#000000,fg+:#999999,bg+:#111111"
+FZF_TAB_NEVERMORE="--color=fg:#999999,bg:#000000,fg+:#999999,bg+:#121212"
 
 FZF_TAB_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
 zstyle ":fzf-tab:*" fzf-flags $(eval echo \$"$FZF_TAB_THEME")

@@ -23,12 +23,12 @@
 			<string>#aaaaaa</string>
 
 			<key>selection</key>
-			<string>#111111</string>
+			<string>#121212</string>
 			<key>selectionBorder</key>
 			<string>#555555</string>
 
 			<key>lineHighlight</key>
-			<string>#111111</string>
+			<string>#121212</string>
 
 			<key>gutterForeground</key>
 			<string>#555555</string>
