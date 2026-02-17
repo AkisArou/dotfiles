@@ -197,15 +197,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "markdown" },
-  callback = function()
-    require("render-markdown").setup({
-      file_types = { "markdown" },
-    })
-  end,
-})
-
 vim.api.nvim_create_autocmd("InsertEnter", {
   once = true,
   pattern = "*",
