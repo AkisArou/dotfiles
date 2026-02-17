@@ -169,5 +169,49 @@ vim.keymap.set("n", "<leader>fe", function()
         hidden = "hidden",
       },
     },
+    actions = {
+      ["ctrl-/"] = function(selected, opts)
+        local path = require("fzf-lua.path")
+        local files = {}
+
+        if selected and #selected > 1 then
+          -- User multi-selected specific buffers
+          for _, sel in ipairs(selected) do
+            local entry = path.entry_to_file(sel, opts)
+            if entry.bufnr then
+              local bufname = vim.api.nvim_buf_get_name(entry.bufnr)
+              if bufname ~= "" then
+                table.insert(files, bufname)
+              end
+            end
+          end
+        else
+          -- No multi-selection, get all listed buffers
+          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.api.nvim_buf_is_loaded(buf) and vim.bo[buf].buflisted then
+              local bufname = vim.api.nvim_buf_get_name(buf)
+              if bufname ~= "" then
+                table.insert(files, bufname)
+              end
+            end
+          end
+        end
+
+        if #files == 0 then
+          return
+        end
+
+        require("opencode.core").open({
+          new_session = false,
+          focus = "input",
+          start_insert = true,
+        })
+
+        local context = require("opencode.context")
+        for _, file in ipairs(files) do
+          context.add_file(file)
+        end
+      end,
+    },
   })
 end, { desc = "Buffers" })
