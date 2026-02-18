@@ -5,6 +5,26 @@ local themes = {
         vscBack = "#121314",
       },
     })
+
+    -- Create custom lualine theme with overridden backgrounds
+    local vscode_lualine = require("lualine.themes.vscode")
+    local bg = "#121314"
+    local bg2 = "#252526"
+
+    vscode_lualine.normal.b.bg = bg2
+    vscode_lualine.normal.c.bg = bg
+    vscode_lualine.insert.b.bg = bg2
+    vscode_lualine.insert.c.bg = bg
+    vscode_lualine.visual.b.bg = bg
+    vscode_lualine.replace.b.bg = bg2
+    vscode_lualine.replace.c.bg = bg
+    vscode_lualine.command.b.bg = bg2
+    vscode_lualine.command.c.bg = bg
+    vscode_lualine.inactive.b.bg = bg
+    vscode_lualine.inactive.c.bg = bg
+
+    -- Store globally so lualine.lua can use it
+    vim.g.lualine_theme_override = vscode_lualine
   end,
   tokyonight = function()
     require("tokyonight").setup({

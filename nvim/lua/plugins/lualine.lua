@@ -5,7 +5,7 @@ end
 
 require("lualine").setup({
   options = {
-    -- theme = vim.g.os_theme,
+    theme = vim.g.lualine_theme_override or vim.g.os_theme,
     disabled_filetypes = { "man" },
     component_separators = "",
     icons_enabled = true,
