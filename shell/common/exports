@@ -8,10 +8,10 @@ fi
 
 . ~/dotfiles/shell/common/fzf
 
-export THEME="${THEME:-nevermore}"
+export THEME="${THEME:-$DEFAULT_THEME}"
 export GTK_THEME="Tokyonight-Dark"
 export QT_QPA_PLATFORMTHEME=qt6ct
-export BAT_THEME=tokyonight
+export BAT_THEME=$THEME
 export BAT_STYLE="changes,header-filename,numbers,snip"
 export JQ_COLORS="0;90:33:33:37:32:37:37:36" # tokyonight
 

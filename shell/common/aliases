@@ -20,7 +20,7 @@ alias rm="rm -i"
 alias df="df -h"
 alias free="free -m"
 
-alias cat="bat --theme=${THEME:-nevermore}"
+alias cat="bat --theme=${THEME:-$DEFAULT_THEME}"
 
 eza_base="eza --group-directories-first --icons=never"
 alias ls="$eza_base"

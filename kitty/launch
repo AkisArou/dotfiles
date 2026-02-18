@@ -12,5 +12,5 @@ fi
 
 kitty \
   -o font_size="$FONT_SIZE" \
-  -o "include ~/dotfiles/kitty/${THEME:-nevermore}.conf" \
+  -o "include ~/dotfiles/kitty/${THEME:-$DEFAULT_THEME}.conf" \
   "$@"

@@ -1,5 +1,7 @@
 source ~/dotfiles/scripts/hw-info
 
+export DEFAULT_THEME=vscode
+
 [ "$HOST" = "arch-desktop" ] && export ULTRAWIDE=1
 
 if gpu_has_amd; then

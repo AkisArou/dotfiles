@@ -4,7 +4,7 @@ source ~/.env
 
 rofi_cmd=(
   rofi
-  -config "$HOME/dotfiles/rofi/${THEME:-nevermore}.rasi"
+  -config "$HOME/dotfiles/rofi/${THEME:-$DEFAULT_THEME}.rasi"
 )
 
 if [ "$ULTRAWIDE" ] || [ "$XDG_SESSION_TYPE" = "wayland" ]; then

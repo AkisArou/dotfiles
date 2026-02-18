@@ -1,7 +1,7 @@
 @define-color bar-background #121314;
 @define-color bar-foreground #D4D4D4;
 @define-color button-hover-background rgba(255, 255, 255, 0.1);
-@define-color button-focused-background #1F1F1F;
+@define-color button-focused-background #444444;
 @define-color button-focused-color #D4D4D4;
 @define-color button-urgent-background #569CD6;
 @define-color button-urgent-color #121314;
