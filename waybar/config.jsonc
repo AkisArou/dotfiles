@@ -30,7 +30,7 @@
   },
   "pulseaudio": {
     "scroll-step": 1,
-    "format": "<span color='#7aa2f7'>{icon}</span> {volume}%",
+    "format": "<span color='#569CD6'>{icon}</span> {volume}%",
     "format-bluetooth": "{volume}% {icon} {format_source}",
     "format-bluetooth-muted": " {icon} {format_source}",
     "format-muted": " {format_source}",
@@ -48,10 +48,10 @@
     "on-click": "pavucontrol",
   },
   "memory": {
-    "format": "<span color='#7aa2f7'>MEM</span> {}%",
+    "format": "<span color='#569CD6'>MEM</span> {}%",
   },
   "cpu": {
-    "format": "<span color='#7aa2f7'>CPU</span> {usage}%",
+    "format": "<span color='#569CD6'>CPU</span> {usage}%",
     "tooltip": false,
   },
   "battery": {
@@ -59,8 +59,8 @@
       "warning": 15,
       "critical": 5,
     },
-    "format": "<span color='#7aa2f7'>BAT</span> {capacity}%",
-    "format-charging": "<span color='#7aa2f7'>BAT</span> {capacity}%",
+    "format": "<span color='#569CD6'>BAT</span> {capacity}%",
+    "format-charging": "<span color='#569CD6'>BAT</span> {capacity}%",
     "format-plugged": "{capacity}%",
     "format-alt": "{time} {icon}",
     "format-icons": ["", "", "", "", ""],
@@ -75,7 +75,7 @@
     },
   },
   "backlight": {
-    "format": "<span color='#7aa2f7'>BRT</span> {percent}%",
+    "format": "<span color='#569CD6'>BRT</span> {percent}%",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
     "tooltip": false,
   },
@@ -85,7 +85,7 @@
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
   },
   "bluetooth": {
-    "format": "<span color='#7aa2f7'>BT</span> {status}",
+    "format": "<span color='#569CD6'>BT</span> {status}",
     "format-connected": "{device_alias}",
     "format-connected-battery": "{device_alias} {device_battery_percentage}%",
     "format-device-preference": ["device1", "device2"], // preference list deciding the displayed device

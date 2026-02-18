@@ -54,6 +54,7 @@ vim.pack.add({
   gh("arnamak/stay-centered.nvim"),
   gh("fei6409/log-highlight.nvim"),
   gh("3rd/image.nvim"),
+  gh("Mofiqul/vscode.nvim"),
 
   gh("Bilal2453/luvit-meta"),
 

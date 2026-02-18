@@ -1,0 +1,33 @@
+# VS Code Dark+ Theme
+
+[colors.primary]
+background = "#121314"
+foreground = "#D4D4D4"
+
+[colors.cursor]
+text = "#121314"
+cursor = "#D4D4D4"
+
+[colors.selection]
+text = "#D4D4D4"
+background = "#264F78"
+
+[colors.normal]
+black = "#000000"
+red = "#F44747"
+green = "#6A9955"
+yellow = "#DCDCAA"
+blue = "#569CD6"
+magenta = "#C586C0"
+cyan = "#4EC9B0"
+white = "#D4D4D4"
+
+[colors.bright]
+black = "#808080"
+red = "#D16969"
+green = "#B5CEA8"
+yellow = "#D7BA7D"
+blue = "#9CDCFE"
+magenta = "#C586C0"
+cyan = "#4FC1FF"
+white = "#FFFFFF"

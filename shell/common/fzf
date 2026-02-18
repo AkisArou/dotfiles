@@ -40,6 +40,25 @@ FZF_NEVERMORE="\
   --color=spinner:#9d7cd8 \
 "
 
+FZF_VSCODE="\
+  --color=bg:#121314 \
+  --color=bg+:#1F1F1F \
+  --color=border:#444444 \
+  --color=fg:#D4D4D4 \
+  --color=gutter:#121314 \
+  --color=header:#636369 \
+  --color=hl:#569CD6 \
+  --color=hl+:#4FC1FF \
+  --color=info:#636369 \
+  --color=marker:#81b88b \
+  --color=pointer:#569CD6 \
+  --color=prompt:#D4D4D4 \
+  --color=query:#D4D4D4 \
+  --color=scrollbar:#424242 \
+  --color=separator:#444444 \
+  --color=spinner:#C586C0 \
+"
+
 FZF_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
 
 if [ -n "$ZSH_VERSION" ]; then
@@ -67,6 +86,7 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 
 FZF_TAB_TOKYONIGHT="--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55"
 FZF_TAB_NEVERMORE="--color=fg:#999999,bg:#000000,fg+:#999999,bg+:#121212"
+FZF_TAB_VSCODE="--color=fg:#D4D4D4,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F"
 
 FZF_TAB_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
 zstyle ":fzf-tab:*" fzf-flags $(eval echo \$"$FZF_TAB_THEME")

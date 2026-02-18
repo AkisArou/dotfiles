@@ -1,0 +1,217 @@
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>author</key>
+	<string>akisarou</string>
+	<key>colorSpaceName</key>
+	<string>sRGB</string>
+	<key>name</key>
+	<string>VSCode-Dark</string>
+
+	<key>settings</key>
+	<array>
+
+	<!-- Global UI -->
+	<dict>
+		<key>settings</key>
+		<dict>
+			<key>background</key>
+			<string>#121314</string>
+			<key>foreground</key>
+			<string>#D4D4D4</string>
+			<key>caret</key>
+			<string>#D4D4D4</string>
+
+			<key>selection</key>
+			<string>#264F78</string>
+			<key>selectionBorder</key>
+			<string>#444444</string>
+
+			<key>lineHighlight</key>
+			<string>#222222</string>
+
+			<key>gutterForeground</key>
+			<string>#5A5A5A</string>
+			<key>invisibles</key>
+			<string>#373737</string>
+
+			<key>findHighlight</key>
+			<string>#613315</string>
+			<key>findHighlightForeground</key>
+			<string>#D4D4D4</string>
+		</dict>
+	</dict>
+
+	<!-- Comments -->
+	<dict>
+		<key>scope</key>
+		<string>comment, comment.block.documentation, punctuation.definition.comment</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#6A9955</string>
+			<key>fontStyle</key>
+			<string>italic</string>
+		</dict>
+	</dict>
+
+	<!-- Numbers / Constants -->
+	<dict>
+		<key>scope</key>
+		<string>constant.numeric, constant.language, variable.other.constant</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#B5CEA8</string>
+		</dict>
+	</dict>
+
+	<!-- Strings -->
+	<dict>
+		<key>scope</key>
+		<string>string</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#CE9178</string>
+		</dict>
+	</dict>
+
+	<!-- Keywords -->
+	<dict>
+		<key>scope</key>
+		<string>keyword, keyword.control, storage.type</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#569CD6</string>
+		</dict>
+	</dict>
+
+	<!-- Control flow keywords -->
+	<dict>
+		<key>scope</key>
+		<string>keyword.control.conditional, keyword.control.loop, keyword.control.flow</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#C586C0</string>
+		</dict>
+	</dict>
+
+	<!-- Operators / punctuation -->
+	<dict>
+		<key>scope</key>
+		<string>keyword.operator, punctuation</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#D4D4D4</string>
+		</dict>
+	</dict>
+
+	<!-- Functions -->
+	<dict>
+		<key>scope</key>
+		<string>entity.name.function, meta.function-call</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#DCDCAA</string>
+		</dict>
+	</dict>
+
+	<!-- Variables -->
+	<dict>
+		<key>scope</key>
+		<string>variable, support.variable</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#9CDCFE</string>
+		</dict>
+	</dict>
+
+	<!-- Types / Classes -->
+	<dict>
+		<key>scope</key>
+		<string>entity.name.class, support.type, entity.name.type</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#4EC9B0</string>
+		</dict>
+	</dict>
+
+	<!-- Built-in types -->
+	<dict>
+		<key>scope</key>
+		<string>support.type.builtin, storage.type.builtin</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#569CD6</string>
+		</dict>
+	</dict>
+
+	<!-- Errors -->
+	<dict>
+		<key>scope</key>
+		<string>invalid, markup.error</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#F44747</string>
+		</dict>
+	</dict>
+
+	<!-- Warnings -->
+	<dict>
+		<key>scope</key>
+		<string>markup.warning</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#e2c08d</string>
+		</dict>
+	</dict>
+
+	<!-- Info -->
+	<dict>
+		<key>scope</key>
+		<string>markup.info</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#569CD6</string>
+		</dict>
+	</dict>
+
+	<!-- String escape -->
+	<dict>
+		<key>scope</key>
+		<string>constant.character.escape</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#D7BA7D</string>
+		</dict>
+	</dict>
+
+	<!-- Regex -->
+	<dict>
+		<key>scope</key>
+		<string>string.regexp</string>
+		<key>settings</key>
+		<dict>
+			<key>foreground</key>
+			<string>#D16969</string>
+		</dict>
+	</dict>
+
+	</array>
+
+	<key>uuid</key>
+	<string>a1b2c3d4-e5f6-7890-abcd-ef1234567890</string>
+</dict>
+</plist>

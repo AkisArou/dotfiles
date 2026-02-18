@@ -5,6 +5,7 @@ set -eu
 # Color palette
 tokyonight="#7aa2f7"
 nevermore="#7aa2f7"
+vscode="#569CD6"
 
 CONFIG_FILE="$HOME/dotfiles/waybar/config.jsonc"
 THEME="${1:-nevermore}"
@@ -15,6 +16,9 @@ tokyonight)
   ;;
 nevermore)
   NEW_COLOR="$nevermore"
+  ;;
+vscode)
+  NEW_COLOR="$vscode"
   ;;
 *)
   echo "Error: unknown theme '$THEME'"

@@ -1,0 +1,32 @@
+! ----------
+! VS Code Dark+
+! ----------
+*.foreground: #D4D4D4
+*.background: #121314
+*.cursorColor: #D4D4D4
+*.selectionForeground: #D4D4D4
+*.selectionBackground: #264F78
+! normal
+*.color0:  #000000
+*.color1:  #F44747
+*.color2:  #6A9955
+*.color3:  #DCDCAA
+*.color4:  #569CD6
+*.color5:  #C586C0
+*.color6:  #4EC9B0
+*.color7:  #D4D4D4
+! bright
+*.color8:  #808080
+*.color9:  #D16969
+*.color10: #B5CEA8
+*.color11: #D7BA7D
+*.color12: #9CDCFE
+*.color13: #C586C0
+*.color14: #4FC1FF
+*.color15: #FFFFFF
+! extended
+*.color16: #CE9178
+*.color17: #F44747
+
+Nsxiv.window.foreground: #6A9955
+Nsxiv.mark.foreground: #F44747

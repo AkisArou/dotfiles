@@ -1,0 +1,84 @@
+filekinds:
+  normal:
+    foreground: White
+  directory:
+    foreground: Blue
+    is_bold: false
+  symlink:
+    foreground: Cyan
+  executable:
+    foreground: Green
+    is_bold: false
+file_type:
+  source:
+    foreground: Cyan
+    is_bold: false
+  build:
+    is_bold: false
+date:
+  foreground: DarkGray
+users:
+  user_you:
+    foreground: DarkGray
+    is_bold: false
+  user_root:
+    foreground: Cyan
+  user_other:
+    foreground: Default
+  group_yours:
+    foreground: Yellow
+    is_bold: false
+  group_other:
+    foreground: Default
+  group_root:
+    foreground: Default
+perms:
+  user_read:
+    foreground: DarkGray
+    is_bold: false
+  user_write:
+    foreground: DarkGray
+    is_bold: false
+  user_execute_file:
+    foreground: DarkGray
+    is_bold: false
+  user_execute_other:
+    foreground: Cyan
+    is_bold: false
+  group_read:
+    foreground: DarkGray
+  group_write:
+    foreground: DarkGray
+  group_execute:
+    foreground: DarkGray
+  other_read:
+    foreground: DarkGray
+  other_write:
+    foreground: DarkGray
+  other_execute:
+    foreground: DarkGray
+size:
+  major:
+    foreground: DarkGray
+  minor:
+    foreground: DarkGray
+  number_byte:
+    foreground: DarkGray
+  number_kilo:
+    foreground: DarkGray
+  number_mega:
+    foreground: DarkGray
+  number_giga:
+    foreground: DarkGray
+  number_huge:
+    foreground: DarkGray
+  unit_byte:
+    foreground: DarkGray
+  unit_kilo:
+    foreground: DarkGray
+  unit_mega:
+    foreground: DarkGray
+  unit_giga:
+    foreground: DarkGray
+  unit_huge:
+    foreground: DarkGray

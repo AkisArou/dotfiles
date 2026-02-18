@@ -1,4 +1,11 @@
 local themes = {
+  vscode = function()
+    require("vscode").setup({
+      color_overrides = {
+        vscBack = "#121314",
+      },
+    })
+  end,
   tokyonight = function()
     require("tokyonight").setup({
       style = "night",
@@ -98,7 +105,7 @@ local themes = {
   end,
 }
 
-local selectedTheme = vim.g.os_theme or "tokyonight"
+local selectedTheme = "vscode"
 
 if themes[selectedTheme] then
   themes[selectedTheme]()
