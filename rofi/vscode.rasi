@@ -10,7 +10,7 @@
     selected-urgent-background: var(urgent-background);
     selected-active-background: var(active-background);
     separatorcolor: var(active-background);
-    bordercolor: #444444;
+    bordercolor: #2D2D2D;
 }
 
 @import "./config.rasi"
