@@ -103,6 +103,7 @@ hi("@string.escape", { fg = c.cyan })
 hi("@number", { fg = c.magenta })
 hi("@boolean", { fg = c.orange })
 hi("@constant", { fg = c.magenta })
+hi("@constant.builtin", { fg = c.magenta })
 
 hi("@keyword", { link = "Keyword" })
 hi("@keyword.conditional", { fg = c.magenta })
