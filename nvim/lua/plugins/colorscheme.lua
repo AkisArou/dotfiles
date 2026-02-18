@@ -125,7 +125,7 @@ local themes = {
   end,
 }
 
-local selectedTheme = "vscode"
+local selectedTheme = vim.g.os_theme or "vscode"
 
 if themes[selectedTheme] then
   themes[selectedTheme]()
