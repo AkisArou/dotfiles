@@ -19,18 +19,17 @@
 [delta]
   navigate = true    # use n and N to move between diff sections
   dark = true
-  features = syntax-highlighting
-  syntax-theme = vscode
+  features = vscode
   line-numbers = true
   true-color = always
   line-numbers-left-format = "{nm:^4}⋮ "
   line-numbers-right-format = "{np:^4}: "
+
+[delta "tokyonight"]
+  syntax-theme = tokyonight
   hunk-header-decoration-style = "#24283b ul"
-  file-style ="#ff9e64"
-  file-decoration-style = "#1a1b26 ul ol" # mimic space
-
-
-  # tokyonight night
+  file-style = "#ff9e64"
+  file-decoration-style = "#1a1b26 ul ol"
   # minus
   minus-style                   = "#a85b63"
   minus-emph-style              = syntax "#4a272f"
@@ -41,8 +40,26 @@
   plus-emph-style               = syntax "#223608"
   plus-empty-line-marker-style  = "#223608"
   line-numbers-plus-style       = "#9ece6a"
-  #zero
+  # zero
   line-numbers-zero-style       = "#3b4261"
+
+[delta "vscode"]
+  syntax-theme = vscode
+  hunk-header-decoration-style = "#252526 ul"
+  file-style = "#DCDCAA"
+  file-decoration-style = "#121314 ul ol"
+  # minus
+  minus-style                   = "#F44747"
+  minus-emph-style              = syntax "#4b1818"
+  minus-empty-line-marker-style = "#4b1818"
+  line-numbers-minus-style      = "#F44747"
+  # plus
+  plus-style                    = "#6A9955"
+  plus-emph-style               = syntax "#373d29"
+  plus-empty-line-marker-style  = "#373d29"
+  line-numbers-plus-style       = "#6A9955"
+  # zero
+  line-numbers-zero-style       = "#5a5a5a"
 
 [interactive]
   diffFilter = delta --color-only
