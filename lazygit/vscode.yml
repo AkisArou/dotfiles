@@ -32,7 +32,7 @@ gui:
     markedBaseCommitFgColor:
       - "#121314"
     markedBaseCommitBgColor:
-      - "#CE9178"
+      - "#C48081"
 
     # Commit / diff emphasis
     diffAddedColor:

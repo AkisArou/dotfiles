@@ -65,7 +65,7 @@
       (blue-green "#4EC9B0")
       (light-green "#B5CEA8")
       (red "#F44747")
-      (orange "#CE9178")
+      (orange "#C48081")
       (light-red "#D16969")
       (yellow-orange "#D7BA7D")
       (yellow "#DCDCAA")

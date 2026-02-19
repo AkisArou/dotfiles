@@ -1,12 +1,12 @@
 /* VS Code Dark Theme Colors */
 :root {
   /* Base colors */
-  --vsc-front: #D4D4D4;
-  --vsc-back: #1F1F1F;
+  --vsc-front: #d4d4d4;
+  --vsc-back: #1f1f1f;
 
   /* Tab colors */
-  --vsc-tab-current: #1F1F1F;
-  --vsc-tab-other: #2D2D2D;
+  --vsc-tab-current: #1f1f1f;
+  --vsc-tab-other: #2d2d2d;
   --vsc-tab-outside: #252526;
 
   /* Sidebar colors */
@@ -15,10 +15,10 @@
   --vsc-left-light: #636369;
 
   /* Popup colors */
-  --vsc-popup-front: #BBBBBB;
+  --vsc-popup-front: #bbbbbb;
   --vsc-popup-back: #202020;
-  --vsc-popup-highlight-blue: #04395E;
-  --vsc-popup-highlight-gray: #343B41;
+  --vsc-popup-highlight-blue: #04395e;
+  --vsc-popup-highlight-gray: #343b41;
 
   /* Split/border colors */
   --vsc-split-light: #898989;
@@ -27,17 +27,17 @@
 
   /* Cursor/selection colors */
   --vsc-cursor-dark-dark: #222222;
-  --vsc-cursor-dark: #51504F;
-  --vsc-cursor-light: #AEAFAD;
-  --vsc-selection: #264F78;
-  --vsc-line-number: #5A5A5A;
+  --vsc-cursor-dark: #51504f;
+  --vsc-cursor-light: #aeafad;
+  --vsc-selection: #264f78;
+  --vsc-line-number: #5a5a5a;
 
   /* Diff colors */
-  --vsc-diff-red-dark: #4B1818;
-  --vsc-diff-red-light: #6F1313;
-  --vsc-diff-red-light-light: #FB0101;
-  --vsc-diff-green-dark: #373D29;
-  --vsc-diff-green-light: #4B5632;
+  --vsc-diff-red-dark: #4b1818;
+  --vsc-diff-red-light: #6f1313;
+  --vsc-diff-red-light-light: #fb0101;
+  --vsc-diff-green-dark: #373d29;
+  --vsc-diff-green-light: #4b5632;
   --vsc-search-current: #515c6a;
   --vsc-search: #613315;
 
@@ -61,30 +61,30 @@
   --vsc-fold-background: #202d39;
 
   /* Suggestion colors */
-  --vsc-suggestion: #6A6A6A;
+  --vsc-suggestion: #6a6a6a;
 
   /* Syntax colors */
   --vsc-gray: #808080;
   --vsc-violet: #646695;
-  --vsc-blue: #569CD6;
-  --vsc-accent-blue: #4FC1FF;
-  --vsc-dark-blue: #223E55;
+  --vsc-blue: #569cd6;
+  --vsc-accent-blue: #4fc1ff;
+  --vsc-dark-blue: #223e55;
   --vsc-medium-blue: #18a2fe;
-  --vsc-disabled-blue: #729DB3;
-  --vsc-light-blue: #9CDCFE;
-  --vsc-green: #6A9955;
-  --vsc-blue-green: #4EC9B0;
-  --vsc-light-green: #B5CEA8;
-  --vsc-red: #F44747;
-  --vsc-orange: #CE9178;
-  --vsc-light-red: #D16969;
-  --vsc-yellow-orange: #D7BA7D;
-  --vsc-yellow: #DCDCAA;
-  --vsc-dark-yellow: #FFD602;
-  --vsc-pink: #C586C0;
+  --vsc-disabled-blue: #729db3;
+  --vsc-light-blue: #9cdcfe;
+  --vsc-green: #6a9955;
+  --vsc-blue-green: #4ec9b0;
+  --vsc-light-green: #b5cea8;
+  --vsc-red: #f44747;
+  --vsc-orange: #c48081;
+  --vsc-light-red: #d16969;
+  --vsc-yellow-orange: #d7ba7d;
+  --vsc-yellow: #dcdcaa;
+  --vsc-dark-yellow: #ffd602;
+  --vsc-pink: #c586c0;
 
   /* Low contrast */
-  --vsc-dim-highlight: #51504F;
+  --vsc-dim-highlight: #51504f;
 
   /* UI specific colors */
   --vsc-ui-blue: #084671;
@@ -97,44 +97,44 @@
 [data-theme="light"] {
   /* Base colors */
   --vsc-front: #343434;
-  --vsc-back: #FFFFFF;
+  --vsc-back: #ffffff;
 
   /* Tab colors */
-  --vsc-tab-current: #FFFFFF;
-  --vsc-tab-other: #CECECE;
-  --vsc-tab-outside: #E8E8E8;
+  --vsc-tab-current: #ffffff;
+  --vsc-tab-other: #cecece;
+  --vsc-tab-outside: #e8e8e8;
 
   /* Sidebar colors */
-  --vsc-left-dark: #C4C4C4;
-  --vsc-left-mid: #E5E5E5;
-  --vsc-left-light: #F3F3F3;
+  --vsc-left-dark: #c4c4c4;
+  --vsc-left-mid: #e5e5e5;
+  --vsc-left-light: #f3f3f3;
 
   /* Popup colors */
   --vsc-popup-front: #000000;
-  --vsc-popup-back: #F8F8F8;
+  --vsc-popup-back: #f8f8f8;
   --vsc-popup-highlight-blue: #0064c1;
   --vsc-popup-highlight-gray: #767676;
 
   /* Split/border colors */
-  --vsc-split-light: #EEEEEE;
-  --vsc-split-dark: #DDDDDD;
-  --vsc-split-thumb: #DFDFDF;
+  --vsc-split-light: #eeeeee;
+  --vsc-split-dark: #dddddd;
+  --vsc-split-thumb: #dfdfdf;
 
   /* Cursor/selection colors */
-  --vsc-cursor-dark-dark: #E5E5E5;
-  --vsc-cursor-dark: #6F6F6F;
+  --vsc-cursor-dark-dark: #e5e5e5;
+  --vsc-cursor-dark: #6f6f6f;
   --vsc-cursor-light: #767676;
-  --vsc-selection: #ADD6FF;
+  --vsc-selection: #add6ff;
   --vsc-line-number: #098658;
 
   /* Diff colors */
-  --vsc-diff-red-dark: #FFCCCC;
-  --vsc-diff-red-light: #FFA3A3;
-  --vsc-diff-red-light-light: #FFCCCC;
-  --vsc-diff-green-dark: #DBE6C2;
-  --vsc-diff-green-light: #EBF1DD;
-  --vsc-search-current: #A8AC94;
-  --vsc-search: #F8C9AB;
+  --vsc-diff-red-dark: #ffcccc;
+  --vsc-diff-red-light: #ffa3a3;
+  --vsc-diff-red-light-light: #ffcccc;
+  --vsc-diff-green-dark: #dbe6c2;
+  --vsc-diff-green-light: #ebf1dd;
+  --vsc-search-current: #a8ac94;
+  --vsc-search: #f8c9ab;
 
   /* Git colors */
   --vsc-git-added: #587c0c;
@@ -149,7 +149,7 @@
   --vsc-git-submodule: #1258a7;
 
   /* Context colors */
-  --vsc-context: #D2D2D2;
+  --vsc-context: #d2d2d2;
   --vsc-context-current: #929292;
 
   /* Fold colors */
@@ -161,22 +161,22 @@
   /* Syntax colors */
   --vsc-gray: #000000;
   --vsc-violet: #000080;
-  --vsc-blue: #0000FF;
-  --vsc-accent-blue: #4FC1FF;
-  --vsc-dark-blue: #007ACC;
+  --vsc-blue: #0000ff;
+  --vsc-accent-blue: #4fc1ff;
+  --vsc-dark-blue: #007acc;
   --vsc-medium-blue: #18a2fe;
-  --vsc-disabled-blue: #729DB3;
-  --vsc-light-blue: #0451A5;
+  --vsc-disabled-blue: #729db3;
+  --vsc-light-blue: #0451a5;
   --vsc-green: #008000;
-  --vsc-blue-green: #16825D;
+  --vsc-blue-green: #16825d;
   --vsc-light-green: #098658;
-  --vsc-red: #FF0000;
-  --vsc-orange: #C72E0F;
-  --vsc-light-red: #A31515;
+  --vsc-red: #ff0000;
+  --vsc-orange: #c72e0f;
+  --vsc-light-red: #a31515;
   --vsc-yellow-orange: #800000;
-  --vsc-yellow: #795E26;
-  --vsc-pink: #AF00DB;
+  --vsc-yellow: #795e26;
+  --vsc-pink: #af00db;
 
   /* Low contrast */
-  --vsc-dim-highlight: #B2DFDB;
+  --vsc-dim-highlight: #b2dfdb;
 }

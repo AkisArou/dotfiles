@@ -25,7 +25,7 @@
 *.color14: #4FC1FF
 *.color15: #FFFFFF
 ! extended
-*.color16: #CE9178
+*.color16: #C48081
 *.color17: #F44747
 
 Nsxiv.window.foreground: #6A9955

@@ -1,14 +1,26 @@
 local themes = {
   vscode = function()
+    local bgColor = "#121314"
+
+    vim.o.background = "dark"
+
     require("vscode").setup({
       color_overrides = {
-        vscBack = "#121314",
+        vscBack = bgColor,
+        vscOrange = "#C48081",
+      },
+      group_overrides = {
+        Search = { fg = "NONE", bg = "#2a4856" },
+        IncSearch = { fg = "NONE", bg = "#242526" },
+        CurSearch = { fg = "NONE", bg = "#17262d" },
+        ["@variable"] = { fg = "#4FC1FF" },
+        ["@lsp.type.variable"] = { fg = "#4FC1FF" },
       },
     })
 
     -- Create custom lualine theme with overridden backgrounds
     local vscode_lualine = require("lualine.themes.vscode")
-    local bg = "#121314"
+    local bg = bgColor
     local bg2 = "#252526"
 
     vscode_lualine.normal.b.bg = bg2
