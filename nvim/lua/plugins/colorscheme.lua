@@ -13,8 +13,8 @@ local themes = {
         Search = { fg = "NONE", bg = "#2a4856" },
         IncSearch = { fg = "NONE", bg = "#242526" },
         CurSearch = { fg = "NONE", bg = "#17262d" },
-        ["@variable"] = { fg = "#4FC1FF" },
-        ["@lsp.type.variable"] = { fg = "#4FC1FF" },
+        MiniCursorword = { bg = "#1a2d38" },
+        MiniCursorwordCurrent = { bg = "#17262d" },
       },
     })
 
