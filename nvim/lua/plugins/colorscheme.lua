@@ -19,6 +19,8 @@ local themes = {
         PmenuSel = { bg = "#343B41" },
         DiagnosticError = { bg = bgColor, fg = "#F44747" },
         FzfLuaBorder = { fg = "#444444" },
+        FzfLuaHeaderText = { fg = "#343B41" },
+        FzfLuaHeaderBind = { fg = "#343B41" },
       },
     })
 
