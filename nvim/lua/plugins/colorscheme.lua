@@ -17,25 +17,24 @@ local themes = {
         MiniCursorword = { bg = "#1a2d38" },
         MiniCursorwordCurrent = { bg = "#17262d" },
         PmenuSel = { bg = "#343B41" },
+        DiagnosticError = { bg = bgColor, fg = "#F44747" },
       },
     })
 
     -- Create custom lualine theme with overridden backgrounds
     local vscode_lualine = require("lualine.themes.vscode")
-    local bg = bgColor
-    local bg2 = "#252526"
 
-    vscode_lualine.normal.b.bg = bg2
-    vscode_lualine.normal.c.bg = bg
-    vscode_lualine.insert.b.bg = bg2
-    vscode_lualine.insert.c.bg = bg
-    vscode_lualine.visual.b.bg = bg
-    vscode_lualine.replace.b.bg = bg2
-    vscode_lualine.replace.c.bg = bg
-    vscode_lualine.command.b.bg = bg2
-    vscode_lualine.command.c.bg = bg
-    vscode_lualine.inactive.b.bg = bg
-    vscode_lualine.inactive.c.bg = bg
+    vscode_lualine.normal.b.bg = bgColor
+    vscode_lualine.normal.c.bg = bgColor
+    vscode_lualine.insert.b.bg = bgColor
+    vscode_lualine.insert.c.bg = bgColor
+    vscode_lualine.visual.b.bg = bgColor
+    vscode_lualine.replace.b.bg = bgColor
+    vscode_lualine.replace.c.bg = bgColor
+    vscode_lualine.command.b.bg = bgColor
+    vscode_lualine.command.c.bg = bgColor
+    vscode_lualine.inactive.b.bg = bgColor
+    vscode_lualine.inactive.c.bg = bgColor
 
     -- Store globally so lualine.lua can use it
     vim.g.lualine_theme_override = vscode_lualine
