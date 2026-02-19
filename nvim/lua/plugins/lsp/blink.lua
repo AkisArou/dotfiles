@@ -60,9 +60,7 @@ require("blink-cmp").setup({
 
   completion = {
     menu = {
-      draw = {
-        treesitter = { "lsp" },
-      },
+      draw = vim.g.disable_blink_treesitter and {} or { treesitter = { "lsp" } },
     },
     accept = { auto_brackets = { enabled = false } },
     documentation = {

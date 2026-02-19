@@ -3,6 +3,7 @@ local themes = {
     local bgColor = "#121314"
 
     vim.o.background = "dark"
+    vim.g.disable_blink_treesitter = true
 
     require("vscode").setup({
       color_overrides = {
@@ -15,6 +16,7 @@ local themes = {
         CurSearch = { fg = "NONE", bg = "#17262d" },
         MiniCursorword = { bg = "#1a2d38" },
         MiniCursorwordCurrent = { bg = "#17262d" },
+        PmenuSel = { bg = "#343B41" },
       },
     })
 
