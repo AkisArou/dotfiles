@@ -208,13 +208,6 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "markdown", "opencode_output" },
-  callback = function()
-    vim.opt_local.wrap = false
-  end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
   once = true,
   pattern = { "markdown", "opencode_output" },
   callback = function()
