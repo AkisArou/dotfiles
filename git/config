@@ -20,7 +20,7 @@
   navigate = true    # use n and N to move between diff sections
   dark = true
   features = syntax-highlighting
-  syntax-theme = tokyonight
+  syntax-theme = vscode
   line-numbers = true
   true-color = always
   line-numbers-left-format = "{nm:^4}⋮ "
