@@ -6,8 +6,8 @@ set -g message-command-style "fg=#AEAFAD,bg=#121314"
 set -g pane-border-style "fg=#444444"
 set -g pane-active-border-style "fg=#569CD6"
 
-set -g popup-style "bg=#202020,fg=#BBBBBB"
-set -g popup-border-style "bg=#202020,fg=#BBBBBB"
+set -g popup-style "bg=#121314,fg=#D4D4D4"
+set -g popup-border-style "bg=#121314,fg=#D4D4D4"
 set -g popup-border-lines none
 
 set -g status "on"
