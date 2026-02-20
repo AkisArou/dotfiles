@@ -25,4 +25,4 @@ family = "HackNerdFont"
 style = "Italic"
 
 [general]
-import = ["~/dotfiles/alacritty/nevermore.toml"]
+import = ["~/dotfiles/alacritty/vscode.toml"]
