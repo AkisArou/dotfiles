@@ -201,3 +201,8 @@ let s:plugin_file = expand('~/.local/share/nvim/site/pack/core/opt/vim-tmux-navi
 if filereadable(s:plugin_file)
   execute 'source' fnameescape(s:plugin_file)
 endif
+
+let s:vscode_file = expand('~/dotfiles/vim/vscode.vim')
+if filereadable(s:vscode_file)
+  execute 'source' fnameescape(s:vscode_file)
+endif
