@@ -7,7 +7,7 @@ fi
 FONT=HackNerdFontMono-Regular:size=
 
 if [ "$ULTRAWIDE" ]; then
-  FONT="$FONT"10
+  FONT="$FONT"12
 else
   FONT="$FONT"10.5
 fi
