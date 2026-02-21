@@ -211,9 +211,6 @@ vim.api.nvim_create_autocmd("FileType", {
   once = true,
   pattern = { "markdown", "opencode_output" },
   callback = function()
-    require("render-markdown").setup({
-      anti_conceal = { enabled = false },
-      file_types = { "markdown", "Avante", "copilot-chat", "opencode_output" },
-    })
+    require("plugins.render-markdown")
   end,
 })

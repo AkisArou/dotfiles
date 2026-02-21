@@ -103,7 +103,7 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- check for spell in text filetypes
 vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("wrap_spell"),
+  group = augroup("spell"),
   pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
   callback = function()
     -- Skip lsp doc window
@@ -112,6 +112,27 @@ vim.api.nvim_create_autocmd("FileType", {
     end
 
     vim.opt_local.spell = true
+  end,
+})
+
+-- wrapping and better opts for filetypes
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("wrap"),
+  pattern = { "gitcommit", "markdown", "opencode_output" },
+  callback = function()
+    vim.opt_local.wrap = true
+
+    vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", {
+      buffer = 0,
+      expr = true,
+      silent = true,
+    })
+
+    vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", {
+      buffer = 0,
+      expr = true,
+      silent = true,
+    })
   end,
 })
 
