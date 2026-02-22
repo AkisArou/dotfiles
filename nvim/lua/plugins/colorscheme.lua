@@ -27,17 +27,29 @@ local themes = {
     -- Create custom lualine theme with overridden backgrounds
     local vscode_lualine = require("lualine.themes.vscode")
 
+    local lualineFgColor = "#AEAFAD"
     vscode_lualine.normal.b.bg = bgColor
+    vscode_lualine.normal.b.fg = lualineFgColor
     vscode_lualine.normal.c.bg = bgColor
+    vscode_lualine.normal.c.fg = lualineFgColor
     vscode_lualine.insert.b.bg = bgColor
+    vscode_lualine.insert.b.fg = lualineFgColor
     vscode_lualine.insert.c.bg = bgColor
+    vscode_lualine.insert.c.fg = lualineFgColor
     vscode_lualine.visual.b.bg = bgColor
+    vscode_lualine.visual.b.fg = lualineFgColor
     vscode_lualine.replace.b.bg = bgColor
+    vscode_lualine.replace.b.fg = lualineFgColor
     vscode_lualine.replace.c.bg = bgColor
+    vscode_lualine.replace.c.fg = lualineFgColor
     vscode_lualine.command.b.bg = bgColor
+    vscode_lualine.command.b.fg = lualineFgColor
     vscode_lualine.command.c.bg = bgColor
+    vscode_lualine.command.c.fg = lualineFgColor
     vscode_lualine.inactive.b.bg = bgColor
+    vscode_lualine.inactive.b.fg = lualineFgColor
     vscode_lualine.inactive.c.bg = bgColor
+    vscode_lualine.inactive.c.fg = lualineFgColor
 
     -- Store globally so lualine.lua can use it
     vim.g.lualine_theme_override = vscode_lualine
