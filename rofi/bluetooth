@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-
-if [ -f ~/.env ]; then
-  source ~/.env
-fi
-
 #             __ _       _     _            _              _   _
 #  _ __ ___  / _(_)     | |__ | |_   _  ___| |_ ___   ___ | |_| |__
 # | '__/ _ \| |_| |_____| '_ \| | | | |/ _ \ __/ _ \ / _ \| __| '_ \
@@ -19,7 +14,7 @@ fi
 # Thanks to x70b1 (https://github.com/polybar/polybar-scripts/tree/master/polybar-scripts/system-bluetooth-bluetoothctl)
 #
 # Depends on:
-#   Arch repositories: rofi, bluez-utils (contains bluetoothctl)
+#   Arch repositories: rofi, bluez-utils (contains bluetoothctl), bc
 
 # Constants
 divider="---------"
@@ -62,13 +57,12 @@ scan_on() {
 # Toggles scanning state
 toggle_scan() {
   if scan_on; then
-    kill $(pgrep -f "bluetoothctl scan on")
+    kill $(pgrep -f "bluetoothctl --timeout 5 scan on")
     bluetoothctl scan off
     show_menu
   else
-    bluetoothctl scan on &
+    bluetoothctl --timeout 5 scan on
     echo "Scanning..."
-    sleep 5
     show_menu
   fi
 }
