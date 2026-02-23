@@ -16,10 +16,10 @@ require("snacks").setup({
       },
     },
   },
-  input = {
-    icon_pos = false,
-    prompt_pos = "left",
-  },
+  -- input = {
+  --   icon_pos = false,
+  --   prompt_pos = "left",
+  -- },
   bigfile = {},
 })
 
