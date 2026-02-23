@@ -1,0 +1,25 @@
+#!/usr/bin/zsh
+
+# Kill already running dublicate process
+_ps="waybar swaybg"
+for _prs in $_ps; do
+  if [ "$(pidof "${_prs}")" ]; then
+    killall -9 "${_prs}"
+  fi
+done
+
+swaybg --output '*' --mode fill --image /home/akisarou/dotfiles/wallpapers/forest.jpg &
+
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+exec dbus-update-activation-environment --all &
+
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XCURSOR_SIZE XCURSOR_THEME &
+
+# exec "$HOME/dotfiles/waybar/launch-waybar" &
+
+exec "$HOME/dotfiles/scripts/start-tmux" &
+
+exec flameshot &
+
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=wlroots XCURSOR_SIZE XCURSOR_THEME
