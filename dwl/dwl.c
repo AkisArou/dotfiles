@@ -300,6 +300,7 @@ static int keyrepeat(void *data);
 static void killclient(const Arg *arg);
 static void locksession(struct wl_listener *listener, void *data);
 static void mapnotify(struct wl_listener *listener, void *data);
+static void mastercol(Monitor *m);
 static void maximizenotify(struct wl_listener *listener, void *data);
 static void monocle(Monitor *m);
 static void movestack(const Arg *arg);
@@ -1811,6 +1812,48 @@ unset_fullscreen:
 			setfullscreen(w, 0);
 	}
 }
+
+void
+mastercol(Monitor *m)
+{
+	unsigned int h, w, r, e = m->gaps, mw, mx, ty;
+	int i, n = 0;
+	Client *c;
+
+	wl_list_for_each(c, &clients, link)
+		if (VISIBLEON(c, m) && !c->isfloating && !c->isfullscreen)
+			n++;
+	if (n == 0)
+		return;
+	if (smartgaps == n)
+		e = 0;
+
+	if (n > m->nmaster)
+		mw = m->nmaster ? (int)roundf((m->w.width + gappx*e) * m->mfact) : 0;
+	else
+		mw = m->w.width;
+	i = 0;
+	mx = ty = gappx*e;
+	wl_list_for_each(c, &clients, link) {
+		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
+			continue;
+		if (i < m->nmaster) {
+			r = MIN(n, m->nmaster) - i;
+			w = (mw - mx - gappx*e - gappx*e * (r - 1)) / r;
+			resize(c, (struct wlr_box){.x = m->w.x + mx, .y = m->w.y + gappx*e,
+				.width = w, .height = m->w.height - 2*gappx*e}, 0);
+			mx += c->geom.width + gappx*e;
+		} else {
+			r = n - i;
+			h = (m->w.height - ty - gappx*e - gappx*e * (r - 1)) / r;
+			resize(c, (struct wlr_box){.x = m->w.x + mw, .y = m->w.y + ty,
+				.width = m->w.width - mw - gappx*e, .height = h}, 0);
+			ty += c->geom.height + gappx*e;
+		}
+		i++;
+	}
+}
+
 
 void
 maximizenotify(struct wl_listener *listener, void *data)
