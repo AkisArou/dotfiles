@@ -6,7 +6,6 @@
     "sway/scratchpad",
     "custom/media",
     "sway/window",
-    "custom/dwl",
   ],
   "modules-right": [
     "sway/scratchpad",
@@ -121,10 +120,5 @@
     "format-ok": "✓",
     "system": true,
     "user": true,
-  },
-  "custom/dwl": {
-    "exec": "~/dotfiles/waybar/modules/dwl",
-    "format": "{}",
-    "return-type": "json",
   },
 }
