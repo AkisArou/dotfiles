@@ -83,3 +83,7 @@ label.module {
   background-color: @warning-background;
   padding: 0 5px;
 }
+
+#custom-dwl {
+  padding: 0 10px;
+}

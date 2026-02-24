@@ -55,7 +55,7 @@
 readonly dwl_output_filename="$HOME"/.cache/dwltags                  # File to watch for dwl output
 readonly labels=("1" "2" "3" "4" "5" "6" "7" "8" "9")                # Number of lables must match dwl's config.h tagcount
 pango_tag_default="<span                      foreground='#808080'>" # VSCode yellow: --vsc-yellow
-pango_tag_active="<span overline='single' overline_color='#c48081'>" # VSCode orange: --vsc-orange
+pango_tag_active="<span foreground='#808080'>"                       # VSCode orange: --vsc-orange
 pango_tag_selected="<span                     foreground='#569cd6'>" # VSCode blue: --vsc-blue
 pango_tag_urgent="<span                       background='#f44747'>" # VSCode red: --vsc-red
 pango_layout="<span                           foreground='#c48081'>" # VSCode orange: --vsc-orange
@@ -66,7 +66,14 @@ hide_unused_tags=false                                               # Set to 't
 
 dwl_log_lines_per_focus_change=7                                        # This has changed several times as dwl has developed and may not yet be rock solid
 full_components_list=($(seq 0 $((${#labels[@]} - 1))) "layout" "title") # (1, 2, ... length_of_$labels) + "layout" + "title"
-monitor="${1}"
+
+if [ -n "$1" ]; then
+  monitor="$1"
+else
+  monitor="$(for d in /sys/class/drm/card*-*; do
+    [ "$(cat "$d/status" 2>/dev/null)" = "connected" ] && echo "$d" | sed -E 's#.*/card[0-9]-##' && break
+  done)"
+fi
 
 _cycle() {
   output_text=""
@@ -83,14 +90,16 @@ _cycle() {
       mask=$((1 << component))
       tag_text=${labels[component]}
       # Show only occupied tags OR the current one (i3-like)
-      if ! (( (activetags & mask) != 0 || (selectedtags & mask) != 0 )); then
+      if ! (((activetags & mask) != 0 || (selectedtags & mask) != 0)); then
         continue
       fi
-      # Wrap component in the applicable nestable pango spans
-      if (("${activetags}" & mask)) 2>/dev/null; then tag_text="${pango_tag_active}${tag_text}</span>"; fi
-      if (("${urgenttags}" & mask)) 2>/dev/null; then tag_text="${pango_tag_urgent}${tag_text}</span>"; fi
-      if (("${selectedtags}" & mask)) 2>/dev/null; then
+      # Apply only the highest priority span: selected > urgent > active > default
+      if ((selectedtags & mask)) 2>/dev/null; then
         tag_text="${pango_tag_selected}${tag_text}</span>"
+      elif ((urgenttags & mask)) 2>/dev/null; then
+        tag_text="${pango_tag_urgent}${tag_text}</span>"
+      elif ((activetags & mask)) 2>/dev/null; then
+        tag_text="${pango_tag_active}${tag_text}</span>"
       else
         tag_text="${pango_tag_default}${tag_text}</span>"
       fi
