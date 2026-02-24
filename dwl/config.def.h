@@ -23,6 +23,19 @@ static const float fullscreen_bg[]         = {0.0f, 0.0f, 0.0f, 1.0f}; /* You ca
 /* logging */
 static int log_level = WLR_ERROR;
 
+/* Autostart */
+static const char *const autostart[] = {
+    "swaybg", "--output", "*", "--mode", "fill", "--image", "/home/akisarou/dotfiles/wallpapers/forest.jpg", NULL,
+    "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1", NULL,
+    "dbus-update-activation-environment", "--all", NULL,
+    "systemctl", "--user", "import-environment", "WAYLAND_DISPLAY", "DISPLAY", "XDG_CURRENT_DESKTOP", "XCURSOR_SIZE", "XCURSOR_THEME", NULL,
+    "sh", "-c", "$HOME/dotfiles/waybar/launch-waybar", NULL,
+    "sh", "-c", "$HOME/dotfiles/scripts/start-tmux", NULL,
+    "flameshot", NULL,
+    "dbus-update-activation-environment", "--systemd", "WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=wlroots", "XCURSOR_SIZE", "XCURSOR_THEME", NULL,
+    NULL // terminate array
+};
+
 static const Rule rules[] = {
 	/* app_id             title       tags mask     isfloating   monitor */
 	{ "Gimp_EXAMPLE",     NULL,       0,            1,           -1 }, /* Start on currently visible tags floating, not tiled */

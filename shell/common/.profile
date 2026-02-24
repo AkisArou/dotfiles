@@ -36,7 +36,7 @@ run_dwl() {
   config_wayland
   export XDG_CURRENT_DESKTOP=wlroots
   export XDG_SESSION_DESKTOP=wlroots
-  exec dbus-run-session dwl -s /home/akisarou/dotfiles/dwl/startup >/home/akisarou/.cache/dwltags
+  exec dbus-run-session dwl >/home/akisarou/.cache/dwltags
 }
 
 run_i3() {
