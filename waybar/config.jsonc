@@ -6,6 +6,7 @@
     "sway/scratchpad",
     "custom/media",
     "sway/window",
+    "custom/dwl#eDP-1",
   ],
   "modules-right": [
     "sway/scratchpad",
@@ -120,5 +121,10 @@
     "format-ok": "✓",
     "system": true,
     "user": true,
+  },
+  "custom/dwl#eDP-1": {
+    "exec": "~/dotfiles/waybar/modules/dwl eDP-1",
+    "format": "{}",
+    "return-type": "json",
   },
 }
