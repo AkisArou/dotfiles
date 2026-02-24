@@ -50,6 +50,7 @@ static const Layout layouts[] = {
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
 	{ "||=",      mastercol },
+	{ NULL,       NULL }, /* terminate */
 };
 
 /* monitors */
@@ -177,6 +178,7 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_Tab,        view,             {0} },
 	{ MODKEY,                    XKB_KEY_g,          togglegaps,       {0} },
 	{ MODKEY,                    XKB_KEY_q,          killclient,       {0} },
+	{ MODKEY,                    XKB_KEY_n,          nextlayout,       {0} },
 	// { MODKEY,                    XKB_KEY_t,          setlayout,        {.v = &layouts[0]} },
 	// { MODKEY,                    XKB_KEY_u,          setlayout,        {.v = &layouts[1]} },
 	// { MODKEY,                    XKB_KEY_m,          setlayout,        {.v = &layouts[2]} },
