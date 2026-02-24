@@ -26,8 +26,8 @@ static int log_level = WLR_ERROR;
 /* Autostart */
 static const char *const autostart[] = {
     "swaybg", "--output", "*", "--mode", "fill", "--image", "/home/akisarou/dotfiles/wallpapers/forest.jpg", NULL,
-    "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1", NULL,
     "dbus-update-activation-environment", "--all", NULL,
+    "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1", NULL,
     "systemctl", "--user", "import-environment", "WAYLAND_DISPLAY", "DISPLAY", "XDG_CURRENT_DESKTOP", "XCURSOR_SIZE", "XCURSOR_THEME", NULL,
     "sh", "-c", "$HOME/dotfiles/waybar/launch-waybar", NULL,
     "sh", "-c", "$HOME/dotfiles/scripts/start-tmux", NULL,
