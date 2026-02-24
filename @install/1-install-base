@@ -74,6 +74,7 @@ packages=(
   "gvim"
   "htop"
   "imagemagick"
+  "inotify-tools"
   "isync"
   "iwd"
   "jq"
