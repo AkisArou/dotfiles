@@ -32,7 +32,7 @@ static const char *const autostart[] = {
     "sh", "-c", "$HOME/dotfiles/waybar/launch-waybar", NULL,
     "sh", "-c", "$HOME/dotfiles/scripts/start-tmux", NULL,
     "flameshot", NULL,
-    "dbus-update-activation-environment", "--systemd", "WAYLAND_DISPLAY", "XDG_CURRENT_DESKTOP=wlroots", "XCURSOR_SIZE", "XCURSOR_THEME", NULL,
+    "/home/akisarou/.local/bin/emacs-preload-server", NULL,
     NULL // terminate array
 };
 
@@ -136,25 +136,35 @@ static const enum libinput_config_tap_button_map button_map = LIBINPUT_CONFIG_TA
 
 /* commands */
 static const char *termcmd[] = { "/home/akisarou/dotfiles/foot/launch", NULL };
+static const char *sshdesktopcmd[] = { "/home/akisarou/dotfiles/scripts/ssh-desktop", NULL };
 static const char *menucmd[] = { "/home/akisarou/dotfiles/rofi/launch", "-show", "drun", NULL };
 static const char *browsercmd[] = {"/home/akisarou/dotfiles/brave/launch", NULL};
 static const char *browserprivatecmd[] = {"/home/akisarou/dotfiles/brave/launch", "--incognito", NULL};
 static const char *browsertorcmd[] = {"/home/akisarou/dotfiles/brave/launch", "--incognito", "--tor", NULL};
-static const char *bluetoothmenucmd[] = {"/home/akisarou/dotfiles/rofi/bluetooth", NULL};
-static const char *powermenucmd[] = {"/home/akisarou/dotfiles/rofi/powermenu", NULL};
 static const char *flameshotcmd[] = {"flameshot", "gui", NULL};
+static const char *hyprpickercmd[] = {"hyprpicker", "-a", "-l", NULL};
+static const char *bluetoothmenucmd[] = {"/home/akisarou/dotfiles/rofi/bluetooth", NULL};
+static const char *emulatorcmd[] = {"/home/akisarou/dotfiles/rofi/emulator", NULL};
+static const char *powermenucmd[] = {"/home/akisarou/dotfiles/rofi/powermenu", NULL};
+static const char *genymotionemulatorcmd[] = {"/home/akisarou/dotfiles/scripts/start-genymotion-emulator", NULL};
+static const char *openemailcmd[] = {"/home/akisarou/dotfiles/sway/open-mail", NULL};
 
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
 	/* modifier                  key                 function          argument */
-	{ MODKEY,                    XKB_KEY_d,          spawn,            {.v = menucmd} },
 	{ MODKEY,                    XKB_KEY_Return,     spawn,            {.v = termcmd} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Return,     spawn,            {.v = sshdesktopcmd} },
+	{ MODKEY,                    XKB_KEY_d,          spawn,            {.v = menucmd} },
   { MODKEY,                    XKB_KEY_b,          spawn,            {.v = browsercmd}},
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_N,          spawn,            {.v = browserprivatecmd}},
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_T,          spawn,            {.v = browsertorcmd}},
-  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B,          spawn,            {.v = bluetoothmenucmd}},
-  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          spawn,            {.v = powermenucmd}},
   { MODKEY,                    XKB_KEY_p,          spawn,            {.v = flameshotcmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_p,          spawn,            {.v = hyprpickercmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B,          spawn,            {.v = bluetoothmenucmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_e,          spawn,            {.v = emulatorcmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          spawn,            {.v = powermenucmd}},
+  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_g,          spawn,            {.v = genymotionemulatorcmd}},
+  { MODKEY,                    XKB_KEY_m,          spawn,            {.v = openemailcmd}},
 	{ MODKEY,                    XKB_KEY_j,          focusstack,       {.i = +1} },
 	{ MODKEY,                    XKB_KEY_k,          focusstack,       {.i = -1} },
   { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_J,          movestack,        {.i = +1} },
@@ -167,9 +177,9 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_Tab,        view,             {0} },
 	{ MODKEY,                    XKB_KEY_g,          togglegaps,       {0} },
 	{ MODKEY,                    XKB_KEY_q,          killclient,       {0} },
-	{ MODKEY,                    XKB_KEY_t,          setlayout,        {.v = &layouts[0]} },
-	{ MODKEY,                    XKB_KEY_u,          setlayout,        {.v = &layouts[1]} },
-	{ MODKEY,                    XKB_KEY_m,          setlayout,        {.v = &layouts[2]} },
+	// { MODKEY,                    XKB_KEY_t,          setlayout,        {.v = &layouts[0]} },
+	// { MODKEY,                    XKB_KEY_u,          setlayout,        {.v = &layouts[1]} },
+	// { MODKEY,                    XKB_KEY_m,          setlayout,        {.v = &layouts[2]} },
   { MODKEY,                    XKB_KEY_c,          setlayout,        {.v = &layouts[3]} },
 	{ MODKEY,                    XKB_KEY_space,      setlayout,        {0} },
 	{ MODKEY,                    XKB_KEY_e,          togglefloating,   {0} },
