@@ -82,8 +82,8 @@ _cycle() {
     [0-9] | [1-9][0-9])
       mask=$((1 << component))
       tag_text=${labels[component]}
-      # Skip if the tag is unused and hide_unused_tags is true
-      if [[ "${hide_unused_tags}" = true ]] && ! ((("${activetags}" | "${urgenttags}" | "${selectedtags}") & mask)); then
+      # Show only occupied tags OR the current one (i3-like)
+      if ! (( (activetags & mask) != 0 || (selectedtags & mask) != 0 )); then
         continue
       fi
       # Wrap component in the applicable nestable pango spans
