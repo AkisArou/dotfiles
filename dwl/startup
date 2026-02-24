@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/usr/bin/env sh
 
 # Kill already running dublicate process
 _ps="waybar swaybg"
@@ -16,7 +16,7 @@ exec dbus-update-activation-environment --all &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XCURSOR_SIZE XCURSOR_THEME &
 
-# exec "$HOME/dotfiles/waybar/launch-waybar" &
+exec "$HOME/dotfiles/waybar/launch-waybar" &
 
 exec "$HOME/dotfiles/scripts/start-tmux" &
 
