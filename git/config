@@ -17,7 +17,7 @@
   whitespace = -trailing-space
 
 [delta]
-  navigate = true    # use n and N to move between diff sections
+	navigate = true
   dark = true
   features = vscode
   line-numbers = true
@@ -62,7 +62,7 @@
   line-numbers-zero-style       = "#5a5a5a"
 
 [interactive]
-  diffFilter = delta --color-only
+	diffFilter = delta --color-only
 
 [merge]
 	tool = codediff
