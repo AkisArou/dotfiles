@@ -19,6 +19,7 @@ vim.lsp.enable({
   "yamlls",
   "oxlint",
   "oxfmt",
+  "rust_analyzer",
   -- "tsgo",
 })
 
