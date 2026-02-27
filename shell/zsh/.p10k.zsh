@@ -22,7 +22,6 @@ case "${THEME:-tokyonight}" in
     local ORANGE="#ff9e64"
     local PURPLE="#9d7cd8"
     local RED="#f7768e"
-    local RED1="#db4b4b"
     local TEAL="#1abc9c"
     local TERMINAL_BLACK="#414868"
     local YELLOW="#e0af68"
@@ -50,8 +49,7 @@ case "${THEME:-tokyonight}" in
     local ORANGE="#C48081"
     local YELLOW="#DCDCAA"
     local PURPLE="#C586C0"
-    local RED="#F44747"
-    local RED1="#E4676B"
+    local RED="#E4676B"
     local TEAL="#4EC9B0"
     local TERMINAL_BLACK="#121314"
     ;;
@@ -79,7 +77,6 @@ case "${THEME:-tokyonight}" in
     local YELLOW="#AAAA00"
     local PURPLE="#9d7cd8"
     local RED="#f7768e"
-    local RED1="#f7768e"
     local TEAL="#7dcfff"
     local TERMINAL_BLACK="#000000"
     ;;
