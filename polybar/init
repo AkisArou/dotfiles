@@ -8,8 +8,8 @@ if [ "$ULTRAWIDE" ]; then
   POLY_FONT="$FONT_FAMILY":size=9
   POLY_BAR_HEIGHT="16pt"
 else
-  POLY_FONT="$FONT_FAMILY":size=15
-  POLY_BAR_HEIGHT="22pt"
+  POLY_FONT="$FONT_FAMILY":size=14\;3
+  POLY_BAR_HEIGHT="18pt"
 fi
 
 export POLY_FONT
