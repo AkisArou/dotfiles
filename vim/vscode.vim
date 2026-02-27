@@ -84,11 +84,11 @@ endif
 
 let s:cdNone = {'gui': 'NONE', 'cterm': 'NONE', 'cterm256': 'NONE'}
 let s:cdFront = {'gui': '#D4D4D4', 'cterm': s:cterm05, 'cterm256': '188'}
-let s:cdBack = {'gui': '#121314', 'cterm': s:cterm00, 'cterm256': '234'}
+let s:cdBack = {'gui': '#18191A', 'cterm': s:cterm00, 'cterm256': '234'}
 if g:codedark_modern | let s:cdBack = {'gui': '#1f1f1f', 'cterm': 'NONE', 'cterm256': '234'} | endif
 if g:codedark_transparent | let s:cdBack = {'gui': 'NONE', 'cterm': 'NONE', 'cterm256': 'NONE'} | endif
 
-let s:cdTabCurrent = {'gui': '#121314', 'cterm': s:cterm00, 'cterm256': '234'}
+let s:cdTabCurrent = {'gui': '#18191A', 'cterm': s:cterm00, 'cterm256': '234'}
 if g:codedark_modern | let s:cdTabCurrent = {'gui': '#1f1f1f', 'cterm': s:cterm00, 'cterm256': '234'} | endif
 let s:cdTabOther = {'gui': '#2D2D2D', 'cterm': s:cterm01, 'cterm256': '236'}
 if g:codedark_modern | let s:cdTabOther = {'gui': '#181818', 'cterm': s:cterm01, 'cterm256': '236'} | endif
