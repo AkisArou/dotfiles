@@ -51,7 +51,7 @@ case "${THEME:-tokyonight}" in
     local YELLOW="#DCDCAA"
     local PURPLE="#C586C0"
     local RED="#F44747"
-    local RED1="#D16969"
+    local RED1="#E4676B"
     local TEAL="#4EC9B0"
     local TERMINAL_BLACK="#121314"
     ;;
