@@ -17,7 +17,7 @@ map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window w
 map("n", "x", '"_x')
 
 -- keep yanked text on paste
-map("x", "p", [["_dP]], opts)
+map("v", "p", "P", opts)
 
 -- Stay in indent mode
 map("v", "<", "<gv", opts)
