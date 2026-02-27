@@ -197,12 +197,9 @@ endfunction
 
 :autocmd CursorMoved,CursorMovedI * call CentreCursor()
 
+execute 'source' fnameescape(expand('~/dotfiles/vim/vscode.vim'))
+
 let s:plugin_file = expand('~/.local/share/nvim/site/pack/core/opt/vim-tmux-navigator/plugin/tmux_navigator.vim')
 if filereadable(s:plugin_file)
   execute 'source' fnameescape(s:plugin_file)
-endif
-
-let s:vscode_file = expand('~/dotfiles/vim/vscode.vim')
-if filereadable(s:vscode_file)
-  execute 'source' fnameescape(s:vscode_file)
 endif
