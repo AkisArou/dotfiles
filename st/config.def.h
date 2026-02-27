@@ -7,7 +7,7 @@
  */
 static char *font = "Hack Nerd Font Mono:pixelsize=12:antialias=true:autohint=true";
 static int borderpx_x = 20;
-static int borderpx_y = 0;
+static int borderpx_y = 5;
 
 /*
  * What program is execed by st depends of these precedence rules:

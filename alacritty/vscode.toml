@@ -1,11 +1,11 @@
 # VS Code Dark+ Theme
 
 [colors.primary]
-background = "#121314"
+background = "#18191A"
 foreground = "#D4D4D4"
 
 [colors.cursor]
-text = "#121314"
+text = "#18191A"
 cursor = "#D4D4D4"
 
 [colors.selection]
