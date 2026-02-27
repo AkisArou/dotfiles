@@ -2,13 +2,13 @@
 ! VS Code Dark+
 ! ----------
 *.foreground: #D4D4D4
-*.background: #121314
+*.background: #18191A
 *.cursorColor: #D4D4D4
 *.selectionForeground: #D4D4D4
 *.selectionBackground: #264F78
 ! normal
 *.color0:  #000000
-*.color1:  #F44747
+*.color1:  #E4676B
 *.color2:  #6A9955
 *.color3:  #DCDCAA
 *.color4:  #569CD6
