@@ -7,8 +7,8 @@
 @define-color button-urgent-color #18191A;
 @define-color blink-background #18191A;
 @define-color critical-background rgba(244, 71, 71, 0.1);
-@define-color critical-color #F44747;
+@define-color critical-color #E4676B;
 @define-color warning-background rgba(226, 192, 141, 0.1);
-@define-color warning-color #e2c08d;
+@define-color warning-color #d7ba7d;
 
 @import "./../style.css";
