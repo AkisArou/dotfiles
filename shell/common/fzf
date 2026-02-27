@@ -41,11 +41,11 @@ FZF_NEVERMORE="\
 "
 
 FZF_VSCODE="\
-  --color=bg:#121314 \
+  --color=bg:#18191A \
   --color=bg+:#1F1F1F \
   --color=border:#444444 \
   --color=fg:#808080 \
-  --color=gutter:#121314 \
+  --color=gutter:#18191A \
   --color=header:#636369 \
   --color=hl:#4ec9b0 \
   --color=hl+:#4ec9b0 \
