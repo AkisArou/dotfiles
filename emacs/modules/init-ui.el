@@ -82,10 +82,10 @@
   (doom-themes-org-config)
 
 
-  (set-face-background 'default "#121314")
+  (set-face-background 'default "#18191a")
 
   (custom-set-faces
-   `(mode-line ((t (:background ,(doom-color "#121314"))))))
+   `(mode-line ((t (:background ,(doom-color "#18191a"))))))
 
 
                                         ; tokyonight
