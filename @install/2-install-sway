@@ -18,6 +18,7 @@ packages=(
   "swayidle"
   "waybar"
   "wl-clipboard"
+  "wl-clip-persist"
   "xdg-desktop-portal-wlr"
   "xorg-xwayland"
 )
