@@ -3,7 +3,7 @@
 
 (let (;; UI colors
       (front "#D4D4D4")
-      (back "#121314")
+      (back "#18191a")
 
       (tab-current "#1F1F1F")
       (tab-other "#2D2D2D")
