@@ -1,6 +1,6 @@
 local themes = {
   vscode = function()
-    local bgColor = "#121314"
+    local bgColor = "#18191A"
 
     vim.o.background = "dark"
     vim.g.disable_blink_treesitter = true
