@@ -146,6 +146,7 @@ vim.pack.add({
 -- Instant load
 require("plugins.colorscheme")
 require("plugins.lualine")
+require("plugins.fzf")
 
 -- Deferred load
 vim.schedule(function()
@@ -153,7 +154,6 @@ vim.schedule(function()
   require("plugins.stay-centered")
   require("plugins.vim-tmux-navigator")
   require("plugins.oil")
-  require("plugins.fzf")
   require("plugins.lsp.conform")
   require("plugins.lsp.lsp")
   require("plugins.lsp.mason")
