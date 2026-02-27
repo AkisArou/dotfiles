@@ -15,6 +15,6 @@ XTerm.*.backarrowKey: false
 XTerm.ttyModes: erase ^?
 XTerm*savelines: 16384
 
-st.font: HackNerdFont Mono:size=10
+st.font: HackNerdFont Mono:size=11
 
 #include ".Xresources.d/theme"
