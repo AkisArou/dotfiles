@@ -38,7 +38,7 @@ vim.api.nvim_create_autocmd("PackChanged", {
 ---@param value string|vim.pack.Spec
 ---@param url string
 ---@return string|vim.pack.Spec
-local function provider(value, url)
+local function make_spec(value, url)
   if type(value) == "string" then
     return url .. value
   end
@@ -50,7 +50,7 @@ end
 ---@param value string|vim.pack.Spec
 ---@return string|vim.pack.Spec
 local function gh(value)
-  return provider(value, "https://github.com/")
+  return make_spec(value, "https://github.com/")
 end
 
 vim.pack.add({
