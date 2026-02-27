@@ -17,7 +17,7 @@ local themes = {
         MiniCursorword = { bg = "#1a2d38" },
         MiniCursorwordCurrent = { bg = "#17262d" },
         PmenuSel = { bg = "#343B41" },
-        DiagnosticError = { bg = bgColor, fg = "#F44747" },
+        DiagnosticError = { bg = bgColor, fg = "#E4676B" },
         FzfLuaBorder = { fg = "#444444" },
         FzfLuaHeaderText = { fg = "#343B41" },
         FzfLuaHeaderBind = { fg = "#343B41" },
