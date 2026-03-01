@@ -3,8 +3,8 @@ set -g mode-style "bg=#264F78"
 set -g message-style "fg=#AEAFAD,bg=#18191A"
 set -g message-command-style "fg=#AEAFAD,bg=#18191A"
 
-set -g pane-border-style "fg=#444444"
-set -g pane-active-border-style "fg=#569CD6"
+set -g pane-border-style "fg=#373737"
+set -g pane-active-border-style "fg=#636369"
 
 set -g popup-style "bg=#18191A,fg=#D4D4D4"
 set -g popup-border-style "bg=#18191A,fg=#D4D4D4"
