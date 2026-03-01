@@ -18,6 +18,7 @@ mason_lspconfig.setup({
     "lua_ls",
     "jsonls",
     "html",
+    "emmet_language_server",
     "cssls",
     "tailwindcss",
     "cssmodules_ls",

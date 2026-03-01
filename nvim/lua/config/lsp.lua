@@ -9,6 +9,7 @@ vim.lsp.enable({
   "docker_compose_language_service",
   "dockerls",
   "html",
+  "emmet_language_server",
   "jsonls",
   "lua_ls",
   "mdx_analyzer",
