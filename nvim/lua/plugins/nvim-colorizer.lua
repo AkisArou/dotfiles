@@ -4,7 +4,7 @@ require("colorizer").setup({
     "!notmuch-search",
     "!notmuch-show",
   },
-  user_default_options = {
+  options = {
     tailwind = true,
     mode = "background",
   },
