@@ -4,7 +4,7 @@ local util = require("conform.util")
 local root_file = util.root_file({ ".git" })
 local conform = require("conform")
 
-local prettierd = "prettierd"
+local prettierd = "oxfmt"
 local shfmt = "shfmt"
 local shellcheck = "shellcheck"
 
