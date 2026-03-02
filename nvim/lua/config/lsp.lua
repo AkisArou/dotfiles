@@ -19,7 +19,7 @@ vim.lsp.enable({
   "vtsls",
   "yamlls",
   "oxlint",
-  "oxfmt",
+  -- "oxfmt",
   "rust_analyzer",
   -- "tsgo",
 })
