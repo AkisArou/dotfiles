@@ -6,8 +6,6 @@
     "sway/scratchpad",
     "custom/media",
     "sway/window",
-    "ext/workspaces",
-    "dwl/window"
   ],
   "modules-right": [
     "sway/scratchpad",
@@ -147,14 +145,4 @@
     "system": true,
     "user": true,
   },
-  "ext/workspaces": {
-    "format": "{icon}",
-    "ignore-hidden": true,
-    "on-click": "activate",
-    "on-click-right": "deactivate",
-    "sort-by-id": true
-  },
-  "dwl/window": {
-    "format": "[{layout}] {title}"
-  }
 }
