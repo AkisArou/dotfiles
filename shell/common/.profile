@@ -32,6 +32,11 @@ run_sway() {
   exec dbus-run-session sway
 }
 
+run_mango() {
+  config_wayland
+  exec dbus-run-session mango
+}
+
 run_i3() {
   config_xorg
   exec startx
@@ -40,19 +45,22 @@ run_i3() {
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
-  echo "1) Sway (default)"
+  echo "1) mango (default)"
   echo "2) i3"
-  printf "Enter choice [1-2]: "
+  echo "3) Sway "
+  printf "Enter choice [1-3]: "
   read session_choice
 
   session_choice=${session_choice:-1}
 
   if [ "$session_choice" = "1" ]; then
-    run_sway
+    run_mango
   elif [ "$session_choice" = "2" ]; then
     run_i3
-  else
-    echo "Falling back to default (Sway)."
+  elif [ "$session_choice" = "3" ]; then
     run_sway
+  else
+    echo "Falling back to default (mango)."
+    run_mango
   fi
 fi

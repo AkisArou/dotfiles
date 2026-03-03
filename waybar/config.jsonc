@@ -6,6 +6,8 @@
     "sway/scratchpad",
     "custom/media",
     "sway/window",
+    "ext/workspaces",
+    "dwl/window"
   ],
   "modules-right": [
     "sway/scratchpad",
@@ -24,7 +26,10 @@
   "sway/scratchpad": {
     "format": "{icon} {count}",
     "show-empty": false,
-    "format-icons": ["", ""],
+    "format-icons": [
+      "",
+      ""
+    ],
     "tooltip": true,
     "tooltip-format": "{app}: {title}",
   },
@@ -43,7 +48,9 @@
       "phone": "",
       "portable": "",
       "car": "",
-      "default": ["VOL"],
+      "default": [
+        "VOL"
+      ],
     },
     "on-click": "pavucontrol",
   },
@@ -63,7 +70,13 @@
     "format-charging": "<span color='#569CD6'>BAT</span> {capacity}%",
     "format-plugged": "{capacity}%",
     "format-alt": "{time} {icon}",
-    "format-icons": ["", "", "", "", ""],
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
   },
   "keyboard-state": {
     "numlock": true,
@@ -76,7 +89,17 @@
   },
   "backlight": {
     "format": "<span color='#569CD6'>BRT</span> {percent}%",
-    "format-icons": ["", "", "", "", "", "", "", "", ""],
+    "format-icons": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
     "tooltip": false,
   },
   "clock": {
@@ -88,7 +111,10 @@
     "format": "<span color='#569CD6'>BT</span> {status}",
     "format-connected": "{device_alias}",
     "format-connected-battery": "{device_alias} {device_battery_percentage}%",
-    "format-device-preference": ["device1", "device2"], // preference list deciding the displayed device
+    "format-device-preference": [
+      "device1",
+      "device2"
+    ], // preference list deciding the displayed device
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
@@ -121,4 +147,14 @@
     "system": true,
     "user": true,
   },
+  "ext/workspaces": {
+    "format": "{icon}",
+    "ignore-hidden": true,
+    "on-click": "activate",
+    "on-click-right": "deactivate",
+    "sort-by-id": true
+  },
+  "dwl/window": {
+    "format": "[{layout}] {title}"
+  }
 }
