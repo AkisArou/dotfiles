@@ -41,22 +41,22 @@ FZF_NEVERMORE="\
 "
 
 FZF_VSCODE="\
-  --color=bg:#18191A \
-  --color=bg+:#1F1F1F \
+  --color=bg:#18191a \
+  --color=bg+:#1f1f1f \
   --color=border:#444444 \
   --color=fg:#808080 \
-  --color=gutter:#18191A \
+  --color=gutter:#18191a \
   --color=header:#636369 \
-  --color=hl:#4ec9b0 \
-  --color=hl+:#4ec9b0 \
+  --color=hl:#c586c0 \
+  --color=hl+:#c586c0 \
   --color=info:#636369 \
   --color=marker:#81b88b \
-  --color=pointer:#569CD6 \
-  --color=prompt:#D4D4D4 \
-  --color=query:#D4D4D4 \
+  --color=pointer:#569cd6 \
+  --color=prompt:#d4d4d4 \
+  --color=query:#d4d4d4 \
   --color=scrollbar:#424242 \
   --color=separator:#444444 \
-  --color=spinner:#C586C0 \
+  --color=spinner:#c586c0 \
 "
 
 FZF_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
