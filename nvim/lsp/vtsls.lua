@@ -13,6 +13,11 @@ return {
   cmd = { "vtsls", "--stdio" },
   root_dir = vim.fn.getcwd(),
   root_markers = { ".git", "tsconfig.json", "jsonconfig.json", "package.json" },
+  on_attach = function(client)
+    -- Disable formatting capability completely
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end,
   filetypes = {
     "javascript",
     "javascriptreact",
