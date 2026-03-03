@@ -41,37 +41,37 @@ require("blink-cmp").setup({
     },
 
     providers = {
-      -- lsp = {
-      --   name = "LSP",
-      --   module = "blink.cmp.sources.lsp",
-      --   transform_items = function(ctx, items)
-      --     if vim.bo[ctx.bufnr].filetype ~= "typescriptreact" then
-      --       return items
-      --     end
-      --
-      --     return vim.tbl_filter(function(item)
-      --       if item.client_name ~= "emmet_language_server" then
-      --         return true
-      --       end
-      --
-      --       local node = vim.treesitter.get_node()
-      --       while node do
-      --         local t = node:type()
-      --         if
-      --           t == "jsx_element"
-      --           or t == "jsx_self_closing_element"
-      --           or t == "jsx_opening_element"
-      --           or t == "jsx_fragment"
-      --           or t == "jsx_expression"
-      --         then
-      --           return true
-      --         end
-      --         node = node:parent()
-      --       end
-      --       return false
-      --     end, items)
-      --   end,
-      -- },
+      lsp = {
+        name = "LSP",
+        module = "blink.cmp.sources.lsp",
+        transform_items = function(ctx, items)
+          if vim.bo[ctx.bufnr].filetype ~= "typescriptreact" then
+            return items
+          end
+
+          return vim.tbl_filter(function(item)
+            if item.client_name ~= "emmet_language_server" then
+              return true
+            end
+
+            local node = vim.treesitter.get_node()
+            while node do
+              local t = node:type()
+              if
+                t == "jsx_element"
+                or t == "jsx_self_closing_element"
+                or t == "jsx_opening_element"
+                or t == "jsx_fragment"
+                or t == "jsx_expression"
+              then
+                return true
+              end
+              node = node:parent()
+            end
+            return false
+          end, items)
+        end,
+      },
 
       lazydev = {
         name = "LazyDev",
