@@ -37,12 +37,15 @@ window#waybar #window {
   background: @button-hover-background;
 }
 
-#workspaces button.focused {
+#workspaces button.focused,
+#tags button.focused,
+#workspaces button.active {
   background-color: @button-focused-background;
   color: @button-focused-color;
 }
 
-#workspaces button.urgent {
+#workspaces button.urgent,
+#tags button.urgent {
   background-color: @button-urgent-background;
   color: @button-urgent-color;
 }
