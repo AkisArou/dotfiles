@@ -9,18 +9,31 @@
     },
     "tsgo": {
       "disabled": false,
-      "command": ["tsgo", "--lsp", "--stdio"],
-      "extensions": [".cjs", ".mjs", ".js", ".jsx", ".ts", ".tsx", ".mts"]
+      "command": [
+        "tsgo",
+        "--lsp",
+        "--stdio"
+      ],
+      "extensions": [
+        ".cjs",
+        ".mjs",
+        ".js",
+        ".jsx",
+        ".ts",
+        ".tsx",
+        ".mts"
+      ]
     }
   },
   "mcp": {
     "chrome-devtools": {
       "type": "local",
-      "command": ["npx", "-y", "chrome-devtools-mcp@latest", "--autoConnect"]
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--autoConnect"
+      ]
     },
-    "tanstack": {
-      "type": "local",
-      "command": ["npx", "@tanstack/cli", "mcp"]
-    }
   }
 }
