@@ -70,3 +70,23 @@ map("n", "<leader>`", function()
 end)
 
 map("n", "<leader>cp", require("custom.pnpm").install)
+
+local util = require("custom.util")
+
+map("n", "<leader>gl", function()
+  Snacks.lazygit()
+end, { desc = "Lazygit" })
+
+map("n", "<leader>bd", function()
+  util.write_format()
+  Snacks.bufdelete()
+end, { desc = "Buffer delete current" })
+
+map("n", "<leader>bo", function()
+  Snacks.bufdelete.other()
+end, { desc = "Buffer delete others" })
+
+map("n", "<leader>ba", function()
+  util.write_format_all()
+  Snacks.bufdelete.all()
+end, { desc = "Buffer delete all" })
