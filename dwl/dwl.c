@@ -2448,6 +2448,12 @@ resize(Client *c, struct wlr_box geo, int interact)
 	if (!c->mon || !client_surface(c)->mapped)
 		return;
 
+	if (c->surface.xdg->toplevel->current.min_width==c->surface.xdg->toplevel->current.max_width)
+		geo.width = c->geom.width;
+
+	if (c->surface.xdg->toplevel->current.min_height==c->surface.xdg->toplevel->current.max_height)
+		geo.height = c->geom.height;
+
 	bbox = interact ? &sgeom : &c->mon->w;
 
 	client_set_bounds(c, geo.width, geo.height);
