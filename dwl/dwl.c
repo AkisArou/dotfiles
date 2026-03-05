@@ -2062,7 +2062,7 @@ unset_fullscreen:
 void
 mastercol(Monitor *m)
 {
-	unsigned int mw, mx, ty;
+	unsigned int h, w, r, e = m->gaps, mw, mx, ty;
 	int i, n = 0;
 	Client *c;
 
@@ -2071,23 +2071,30 @@ mastercol(Monitor *m)
 			n++;
 	if (n == 0)
 		return;
+	if (smartgaps == n)
+		e = 0;
 
 	if (n > m->nmaster)
-		mw = m->nmaster ? (int)roundf(m->w.width * m->mfact) : 0;
+		mw = m->nmaster ? (int)roundf((m->w.width + gappx*e) * m->mfact) : 0;
 	else
 		mw = m->w.width;
-	i = mx = ty = 0;
+	i = 0;
+	mx = ty = gappx*e;
 	wl_list_for_each(c, &clients, link) {
 		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
 			continue;
 		if (i < m->nmaster) {
-			resize(c, (struct wlr_box){.x = m->w.x + mx, .y = m->w.y,
-				.width = (mw - mx) / (MIN(n, m->nmaster) - i), .height = m->w.height}, 0);
-			mx += c->geom.width;
+			r = MIN(n, m->nmaster) - i;
+			w = (mw - mx - gappx*e - gappx*e * (r - 1)) / r;
+			resize(c, (struct wlr_box){.x = m->w.x + mx, .y = m->w.y + gappx*e,
+				.width = w, .height = m->w.height - 2*gappx*e}, 0);
+			mx += c->geom.width + gappx*e;
 		} else {
+			r = n - i;
+			h = (m->w.height - ty - gappx*e - gappx*e * (r - 1)) / r;
 			resize(c, (struct wlr_box){.x = m->w.x + mw, .y = m->w.y + ty,
-				.width = m->w.width - mw, .height = (m->w.height - ty) / (n - i)}, 0);
-			ty += c->geom.height;
+				.width = m->w.width - mw - gappx*e, .height = h}, 0);
+			ty += c->geom.height + gappx*e;
 		}
 		i++;
 	}
