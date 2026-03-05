@@ -9,12 +9,12 @@ XTerm.termName: xterm-256color
 XTerm*utf8: 2
 XTerm*locale: true
 XTerm*renderFont: true
-XTerm.*.faceName: HackNerdFont Mono:size=10:antialias=true
+XTerm.*.faceName: HasklugNerdFont Mono:size=10:antialias=true
 XTerm.*.metaSendsEscape: true
 XTerm.*.backarrowKey: false
 XTerm.ttyModes: erase ^?
 XTerm*savelines: 16384
 
-st.font: HackNerdFont Mono:size=11
+st.font: HasklugNerdFont Mono:size=11
 
 #include ".Xresources.d/theme"

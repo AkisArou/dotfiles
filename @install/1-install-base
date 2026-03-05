@@ -99,6 +99,7 @@ packages=(
   "opencode-bin"
   "openslide" # Needed by ueberzug
   "openssh"
+  "otf-hasklig-nerd"
   "pass"
   "pavucontrol"
   "pipewire"

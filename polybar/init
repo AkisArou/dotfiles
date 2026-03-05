@@ -2,7 +2,7 @@
 
 [[ "$XDG_SESSION_TYPE" == "x11" ]] || exit 0
 
-FONT_FAMILY="Hack Nerd Font Mono"
+FONT_FAMILY="Hasklug Nerd Font Mono"
 
 if [ "$ULTRAWIDE" ]; then
   POLY_FONT="$FONT_FAMILY":size=9

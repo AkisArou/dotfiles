@@ -9,19 +9,19 @@ y = 5
 size = 10.5
 
 [font.normal]
-family = "HackNerdFont"
+family = "HasklugNerdFont"
 style = "Regular"
 
 [font.bold]
-family = "HackNerdFont"
+family = "HasklugNerdFont"
 style = "Bold"
 
 [font.bold_italic]
-family = "HackNerdFont"
+family = "HasklugNerdFont"
 style = "Bold Italic"
 
 [font.italic]
-family = "HackNerdFont"
+family = "HasklugNerdFont"
 style = "Italic"
 
 [general]

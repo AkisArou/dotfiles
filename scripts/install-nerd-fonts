@@ -4,6 +4,7 @@ set -e
 
 fonts_list=(
   "Hack"
+  "Hasklug"
   "JetBrainsMono"
   "Meslo"
   "NerdFontsSymbolsOnly"
