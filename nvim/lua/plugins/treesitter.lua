@@ -30,6 +30,7 @@ require("nvim-treesitter").install({
   "vimdoc",
   "yaml",
   "rust",
+  "rasi",
 })
 
 require("treesitter-context").setup({ mode = "cursor", max_lines = 3 })
