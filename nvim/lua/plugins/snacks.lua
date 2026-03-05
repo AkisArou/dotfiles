@@ -3,23 +3,7 @@ local util = require("custom.util")
 require("snacks").setup({
   styles = {
     terminal = {},
-    input = {
-      width = 70,
-      border = false,
-      backdrop = true,
-      relative = "cursor",
-      b = {
-        completion = true,
-      },
-      keys = {
-        n_ctrlc = { "<C-c>", { "cancel" }, mode = "n", expr = true },
-      },
-    },
   },
-  -- input = {
-  --   icon_pos = false,
-  --   prompt_pos = "left",
-  -- },
   bigfile = {},
 })
 
