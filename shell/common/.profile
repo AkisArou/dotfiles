@@ -32,6 +32,14 @@ run_sway() {
   exec dbus-run-session sway
 }
 
+run_dwl() {
+  config_wayland
+  export XDG_CURRENT_DESKTOP=wlroots
+  export XDG_SESSION_DESKTOP=wlroots
+  exec dbus-run-session dwl
+  # >/home/akisarou/.cache/dwltags
+}
+
 run_i3() {
   config_xorg
   exec startx
@@ -42,7 +50,8 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "Select session type:"
   echo "1) Sway (default)"
   echo "2) i3"
-  printf "Enter choice [1-2]: "
+  echo "3) dwl"
+  printf "Enter choice [1-3]: "
   read session_choice
 
   session_choice=${session_choice:-1}
@@ -51,6 +60,8 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
     run_sway
   elif [ "$session_choice" = "2" ]; then
     run_i3
+  elif [ "$session_choice" = "3" ]; then
+    run_dwl
   else
     echo "Falling back to default (Sway)."
     run_sway
