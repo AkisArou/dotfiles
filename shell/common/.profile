@@ -44,7 +44,7 @@ run_spiders() {
   config_wayland
   export XDG_CURRENT_DESKTOP=spiders-wm
   export XDG_SESSION_DESKTOP=spiders-wm
-  exec dbus-run-session ~/projects/spiders-wm/target/release/spiders-wm
+  exec dbus-run-session "$HOME/projects/spiders-wm/target/release/spiders-wm" 2>/tmp/spiders-wm.log
 }
 
 run_i3() {
