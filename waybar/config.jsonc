@@ -2,13 +2,14 @@
   "height": 17, // Waybar height (to be removed for auto height)
   "spacing": 8, // Gaps between modules (4px)
   "modules-left": [
+    "ext/workspaces",
     "sway/workspaces",
     "sway/scratchpad",
     "custom/media",
     "sway/window",
+    "custom/media"
   ],
   "modules-right": [
-    "sway/scratchpad",
     "pulseaudio",
     "memory",
     "cpu",
@@ -145,4 +146,14 @@
     "system": true,
     "user": true,
   },
+  "ext/workspaces": {
+    "format": "{icon}",
+    "ignore-hidden": true,
+    "on-click": "activate",
+    "on-click-right": "deactivate",
+    "sort-by-id": true
+  },
+  "dwl/window": {
+    "format": "{title}"
+  }
 }
