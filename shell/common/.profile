@@ -40,6 +40,13 @@ run_dwl() {
   # >/home/akisarou/.cache/dwltags
 }
 
+run_spiders() {
+  config_wayland
+  export XDG_CURRENT_DESKTOP=spiders-wm
+  export XDG_SESSION_DESKTOP=spiders-wm
+  exec dbus-run-session ~/projects/spiders-wm/target/release/spiders-wm
+}
+
 run_i3() {
   config_xorg
   exec startx
@@ -50,7 +57,9 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "Select session type:"
   echo "1) Sway (default)"
   echo "2) i3"
-  printf "Enter choice [1-3]: "
+  echo "3) dwl"
+  echo "4) spiders-wm"
+  printf "Enter choice [1-4]: "
   read session_choice
 
   session_choice=${session_choice:-1}
@@ -61,6 +70,8 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
     run_i3
   elif [ "$session_choice" = "3" ]; then
     run_dwl
+  elif [ "$session_choice" = "4" ]; then
+    run_spiders
   else
     echo "Falling back to default (Sway)."
     run_sway
