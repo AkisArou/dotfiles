@@ -60,6 +60,7 @@ packages=(
   "flameshot"
   "fwupd"
   "fzf"
+  "gdb"
   "genymotion"
   "ghostscript"
   "git"
