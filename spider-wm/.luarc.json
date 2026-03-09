@@ -1,0 +1,5 @@
+{
+	"$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+	"workspace": { "library": ["/usr/local/share/spider-wm/types"] },
+	"runtime": { "version": "Lua 5.4" }
+}
