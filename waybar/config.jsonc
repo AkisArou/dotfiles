@@ -7,6 +7,7 @@
     "sway/scratchpad",
     "custom/media",
     "sway/window",
+    "custom/spider-title",
     "custom/media"
   ],
   "modules-right": [
@@ -155,5 +156,10 @@
   },
   "dwl/window": {
     "format": "{title}"
+  },
+  "custom/spider-title": {
+    "exec": "spider-title",
+    "return-type": "json",
+    "restart-interval": 0
   }
 }

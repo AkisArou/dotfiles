@@ -7,6 +7,9 @@ return {
 		layouts_dir = os.getenv("HOME") .. "/.config/spider-wm/layouts",
 		sloppyfocus = true,
 		decorations = "none",
+		border_width = 2,
+		border_color_focused = "#285577",
+		border_color_unfocused = "#222222",
 	},
 
 	outputs = {
