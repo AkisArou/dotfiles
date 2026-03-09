@@ -57,8 +57,8 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "Select session type:"
   echo "1) Sway (default)"
   echo "2) i3"
-  echo "3) dwl"
-  echo "4) spiders-wm-LEGACY"
+  echo "3) spider-legacy"
+  echo "4) spider-wm"
   printf "Enter choice [1-4]: "
   read session_choice
 
