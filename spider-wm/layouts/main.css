@@ -1,0 +1,20 @@
+workspace {
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+}
+
+window {
+  flex-grow: 1;
+  width: 40%;
+}
+
+window:first-child {
+  width: 60%;
+  height: 100%;
+}
+
+window:only-child {
+  width: 100%;
+}
