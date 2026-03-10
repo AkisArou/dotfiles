@@ -5,5 +5,5 @@ AVAILABLE_THREADS=$(nproc)
 llama-server \
   --host 0.0.0.0 \
   --port 5000 \
-  -m Qwen/Qwen2.5-Coder-32B-Instruct-GGUF.gguf \
+  -m "$XDG_CACHE_HOME/llama.cpp/Qwen_Qwen2.5-Coder-32B-Instruct-GGUF_qwen2.5-coder-32b-instruct-q4_k_m.gguf" \
   -t $AVAILABLE_THREADS
