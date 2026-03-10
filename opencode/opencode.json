@@ -35,8 +35,8 @@
         "qwen2.5-coder-32b-instruct": {
           "name": "Qwen2.5-Coder-32b-instruct (local)",
           "limit": {
-            "context": 16000,
-            "output": 4000
+            "context": 12000,
+            "output": 2000
           }
         }
       }
