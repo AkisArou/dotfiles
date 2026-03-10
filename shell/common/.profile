@@ -47,6 +47,11 @@ run_spider_wm() {
   exec dbus-run-session "$HOME/projects/spider-wm/spider-wm"
 }
 
+run_mango() {
+  config_wayland
+  exec dbus-run-session mango
+}
+
 run_i3() {
   config_xorg
   exec startx
@@ -59,6 +64,7 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "2) i3"
   echo "3) spider-legacy"
   echo "4) spider-wm"
+  echo "5) mango"
   printf "Enter choice [1-4]: "
   read session_choice
 
@@ -72,6 +78,8 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
     run_spider_legacy
   elif [ "$session_choice" = "4" ]; then
     run_spider_wm
+  elif [ "$session_choice" = "5" ]; then
+    run_mango
   else
     echo "Falling back to default (Sway)."
     run_sway
