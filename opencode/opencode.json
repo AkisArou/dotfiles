@@ -1,7 +1,46 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": {
-    "lsp": "allow"
+    "read": {
+      "*": "allow",
+      "*.env": "ask",
+      "*.env.*": "ask",
+      "*.env.local": "allow",
+      "*.env.local-dev": "allow"
+    },
+    "edit": "allow",
+    "grep": "allow",
+    "glob": "allow",
+    "list": "allow",
+    "bash": "allow",
+    "task": "allow",
+    "todoread": "allow",
+    "todowrite": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "codesearch": "allow",
+    "skill": "allow",
+    "lsp": "allow",
+    "external_directory": "allow",
+  },
+  "provider": {
+    "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server (local)",
+      "options": {
+        "baseURL": "http://192.168.1.2:5000/v1"
+      },
+      "models": {
+        "qwen2.5-coder-32b-instruct": {
+          "name": "Qwen2.5-Coder-32b-instruct (local)",
+          "limit": {
+            "context": 128000,
+            "output": 65536
+          }
+        }
+      }
+    }
   },
   "lsp": {
     "typescript": {
