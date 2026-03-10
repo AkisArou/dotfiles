@@ -1,0 +1,9 @@
+#!/usr/bin/zsh
+
+AVAILABLE_THREADS=$(nproc)
+
+llama-server \
+  --host 0.0.0.0 \
+  --port 5000 \
+  -m Qwen/Qwen2.5-Coder-32B-Instruct-GGUF.gguf \
+  -t $AVAILABLE_THREADS
