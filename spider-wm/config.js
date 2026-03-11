@@ -4,12 +4,13 @@ export default {
   tags: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
 
   options: {
-    layouts_dir: "/home/akisarou/.config/spider-wm/layouts",
     sloppyfocus: true,
     decorations: "none",
     border_width: 2,
     border_color_focused: "#285577",
     border_color_unfocused: "#222222",
+    layouts_dir: "/home/akisarou/.config/spider-wm/layouts",
+    effects_css: "/home/akisarou/.config/spider-wm/effects.css",
   },
 
   outputs: {
