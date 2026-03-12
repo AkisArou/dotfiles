@@ -1,3 +1,29 @@
+workspace {
+  transition-property: transform, opacity;
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.46, 1, 0.29, 0.99);
+}
+
+workspace:enter-from-right {
+  transform: translate(100%, 0%);
+  opacity: 0.98;
+}
+
+workspace:enter-from-left {
+  transform: translate(-100%, 0%);
+  opacity: 0.98;
+}
+
+workspace:exit-to-left {
+  transform: translate(-100%, 0%);
+  opacity: 0.98;
+}
+
+workspace:exit-to-right {
+  transform: translate(100%, 0%);
+  opacity: 0.98;
+}
+
 window {
   border-width: 2px;
   border-color: #222222;

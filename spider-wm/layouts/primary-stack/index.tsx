@@ -1,4 +1,8 @@
-export default function layout(ctx) {
+import { LayoutContext } from "spider-wm/layout";
+
+import "./index.css"
+
+export default function layout(ctx: LayoutContext) {
   return (
     <workspace id="root">
       <group id="frame">

@@ -1,3 +1,4 @@
+import type { SpiderWMConfig } from "spider-wm/config";
 import * as actions from "spider-wm/actions";
 
 export default {
@@ -6,11 +7,6 @@ export default {
   options: {
     sloppyfocus: true,
     decorations: "none",
-    border_width: 2,
-    border_color_focused: "#285577",
-    border_color_unfocused: "#222222",
-    layouts_dir: "/home/akisarou/.config/spider-wm/layouts",
-    effects_css: "/home/akisarou/.config/spider-wm/effects.css",
   },
 
   outputs: {
@@ -161,4 +157,4 @@ export default {
       { bind: ["mod", "ctrl", "shift", "9"], action: actions.toggle_tag(9) },
     ],
   },
-};
+} satisfies SpiderWMConfig;
