@@ -37,7 +37,7 @@ run_spider_wm() {
   export XDG_CURRENT_DESKTOP=spider-wm
   export XDG_SESSION_DESKTOP=spider-wm
   export XDG_SESSION_TYPE=wayland
-  exec dbus-run-session "$HOME/projects/spider-wm/build/spider-wm"
+  exec dbus-run-session spider-wm
 }
 
 run_mango() {
