@@ -32,19 +32,12 @@ run_sway() {
   exec dbus-run-session sway
 }
 
-run_spider_legacy() {
-  config_wayland
-  export XDG_CURRENT_DESKTOP=spiders-wm
-  export XDG_SESSION_DESKTOP=spiders-wm
-  exec dbus-run-session "$HOME/projects/spider-wm-dwl/target/release/spiders-wm" 2>/tmp/spiders-wm.log
-}
-
 run_spider_wm() {
   config_wayland
   export XDG_CURRENT_DESKTOP=spider-wm
   export XDG_SESSION_DESKTOP=spider-wm
   export XDG_SESSION_TYPE=wayland
-  exec dbus-run-session "$HOME/projects/spider-wm/spider-wm"
+  exec dbus-run-session "$HOME/projects/spider-wm/build/spider-wm"
 }
 
 run_mango() {
@@ -62,9 +55,8 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "Select session type:"
   echo "1) Sway (default)"
   echo "2) i3"
-  echo "3) spider-legacy"
+  echo "3) mango"
   echo "4) spider-wm"
-  echo "5) mango"
   printf "Enter choice [1-4]: "
   read session_choice
 
@@ -75,11 +67,9 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   elif [ "$session_choice" = "2" ]; then
     run_i3
   elif [ "$session_choice" = "3" ]; then
-    run_spider_legacy
+    run_mango
   elif [ "$session_choice" = "4" ]; then
     run_spider_wm
-  elif [ "$session_choice" = "5" ]; then
-    run_mango
   else
     echo "Falling back to default (Sway)."
     run_sway
