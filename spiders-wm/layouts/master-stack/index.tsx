@@ -1,4 +1,4 @@
-import { LayoutContext } from "spider-wm/layout";
+import { LayoutContext } from "spiders-wm/layout";
 
 export default function layout(ctx: LayoutContext) {
   return (

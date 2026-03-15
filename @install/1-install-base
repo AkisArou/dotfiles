@@ -78,6 +78,7 @@ packages=(
   "isync"
   "iwd"
   "jq"
+  "just"
   "kitty"
   "lazydocker"
   "lazygit"

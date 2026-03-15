@@ -1,5 +1,5 @@
-import type { SpiderWMConfig } from "spider-wm/config";
-import * as actions from "spider-wm/actions";
+import type { SpiderWMConfig } from "spiders-wm/config";
+import * as actions from "spiders-wm/actions";
 
 export default {
   tags: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
