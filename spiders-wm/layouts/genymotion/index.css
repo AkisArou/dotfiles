@@ -1,0 +1,15 @@
+workspace {
+  display: grid;
+  grid-template-columns: 1fr 500px;
+  gap: 8px;
+  padding: 4px;
+}
+
+window {
+  flex-grow: 1;
+}
+
+window[app_id="Genymotion Player"] {
+  grid-column-start: 2;
+  width: 500px;
+}

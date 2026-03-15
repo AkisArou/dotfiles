@@ -1,0 +1,29 @@
+#frame {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 6px;
+  width: 100%;
+  height: 100%;
+}
+
+#master {
+  flex-basis: 0;
+  flex-grow: 3;
+  min-width: 0;
+}
+
+#stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-basis: 0;
+  flex-grow: 2;
+  min-width: 0;
+}
+
+.stack-item {
+  flex-basis: 0;
+  flex-grow: 1;
+  min-height: 0;
+}

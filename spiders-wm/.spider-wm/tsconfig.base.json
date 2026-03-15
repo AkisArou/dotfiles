@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "jsxImportSource": "/home/akisarou/.config/spider-wm/.spider-wm/spwm-js",
+    "strict": false,
+    "paths": {
+      "spider-wm/*": [
+        "/home/akisarou/.config/spider-wm/.spider-wm/spwm-js/*"
+      ],
+      "*": [
+        "./*"
+      ]
+    },
+    "noEmit": true
+  },
+  "include": [
+    "${configDir}/**/*"
+  ]
+}
