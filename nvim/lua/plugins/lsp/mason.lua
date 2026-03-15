@@ -28,6 +28,7 @@ mason_lspconfig.setup({
     "mdx_analyzer",
     "taplo",
     "rust_analyzer",
+    "just",
   },
   automatic_installation = true,
 })
