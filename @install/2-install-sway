@@ -17,6 +17,7 @@ packages=(
   "swaydim"
   "swayidle"
   "waybar"
+  "wf-recorder"
   "wl-clipboard"
   "wl-clip-persist"
   "xdg-desktop-portal-wlr"

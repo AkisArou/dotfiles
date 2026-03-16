@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+
+set $recordings_dir ~/Videos
+
+bindsym $mod+Shift+v exec pkill -INT wf-recorder || wf-recorder -f $recordings_dir/recording_$(date +%F_%H-%M-%S).mp4
