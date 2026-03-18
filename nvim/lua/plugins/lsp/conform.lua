@@ -34,6 +34,7 @@ conform.setup({
     ["markdown.mdx"] = prettier_compatible_formatter,
     zsh = { "shfmt", "shellcheck" },
     sh = { "shfmt", "shellcheck" },
+    rust = { "rustfmt", lsp_format = "fallback" },
   },
   format_on_save = {
     lsp_format = "fallback",
