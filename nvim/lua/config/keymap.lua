@@ -1,7 +1,14 @@
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
-map("i", "<C-c>", "<Esc>")
+map("i", "<C-c>", function()
+  if vim.snippet and vim.snippet.active() then
+    vim.snippet.stop()
+  end
+
+  return "<Esc>"
+end, { expr = true, silent = true })
+
 map("n", "<leader>h", "<cmd>nohlsearch<CR>", opts)
 map({ "i", "x", "n", "s" }, "<C-s>", "<cmd>w<cr><esc>", { desc = "Save File" })
 map({ "n", "v" }, "<C-j>", "6j", opts)
