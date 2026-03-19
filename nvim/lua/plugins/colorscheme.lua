@@ -14,6 +14,8 @@ local themes = {
         Search = { fg = "NONE", bg = "#2a4856" },
         IncSearch = { fg = "NONE", bg = "#242526" },
         CurSearch = { fg = "NONE", bg = "#17262d" },
+        SnippetTabStop = { bg = "#17262d" },
+        SnippetTabStopActive = { bg = "#17262d" },
         MiniCursorword = { bg = "#1a2d38" },
         MiniCursorwordCurrent = { bg = "#17262d" },
         PmenuSel = { bg = "#343B41" },
