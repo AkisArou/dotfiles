@@ -103,12 +103,26 @@ local function on_attach(client, bufnr)
 
   map("n", "<leader>cl", "<cmd>LspRestart<CR>", "Restart LSP")
 
-  map("n", "<leader>cqi", function()
-    require("vtsls").commands.remove_unused_imports(bufnr, function()
+  if client.name == "vtsls" then
+    map("n", "<leader>cqi", function()
+      require("vtsls").commands.remove_unused_imports(bufnr, function()
+        require("conform").format({ bufnr = bufnr, async = false })
+        vim.cmd("silent! w")
+      end)
+    end, "Remove unused imports")
+  end
+
+  if client.name == "tsgo" then
+    map("n", "<leader>cqi", function()
+      vim.lsp.buf.code_action({
+        context = { only = { "source.removeUnusedImports" }, diagnostics = {} },
+        apply = true,
+      })
+
       require("conform").format({ bufnr = bufnr, async = false })
       vim.cmd("silent! w")
-    end)
-  end, "Remove unused imports")
+    end, "Remove unused imports")
+  end
 end
 
 -- Update mappings when registering dynamic capabilities.
