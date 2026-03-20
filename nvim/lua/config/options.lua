@@ -8,8 +8,7 @@ opt.autowrite = true
 opt.autowriteall = true
 opt.cursorline = true -- highlight the current line
 opt.backup = false -- creates a backup file
--- opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
-opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+opt.clipboard = vim.env.SSH_CONNECTION and "" or "unnamedplus" -- only set clipboard if not in ssh, to make sure the OSC 52
 opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
 opt.cmdwinheight = 20
 opt.completeopt = { "menuone", "noinsert", "popup", "fuzzy" } -- mostly just for cmp
