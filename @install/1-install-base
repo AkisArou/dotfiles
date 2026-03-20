@@ -91,7 +91,6 @@ packages=(
   "libva-utils"
   "libvdpau-va-gl"
   "linux-headers"
-  "llama.cpp"
   "mesa"
   "mpv"
   "msmtp"
