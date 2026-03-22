@@ -9,15 +9,6 @@ export default {
     decorations: "none",
   },
 
-  outputs: {
-    "Samsung Electric Company LC49G95T H4ZR303132": {
-      mode: "5120x1440@130Hz",
-    },
-    "eDP-1": {
-      scale: 1.5,
-    },
-  },
-
   inputs: {
     "type:keyboard": {
       xkb_layout: "us,gr",
