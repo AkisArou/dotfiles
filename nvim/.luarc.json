@@ -1,5 +1,6 @@
 {
-  "diagnostics.disable": ["incomplete-signature-doc", "trailing-space"],
+  "diagnostics.disable": ["incomplete-signature-doc", "trailing-space",
+        "duplicate-set-field"],
     "diagnostics.globals": [
         "vim",
         "Snacks"

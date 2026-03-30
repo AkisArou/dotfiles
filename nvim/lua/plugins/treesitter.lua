@@ -37,7 +37,13 @@ require("treesitter-context").setup({ mode = "cursor", max_lines = 3 })
 
 require("nvim-ts-autotag").setup()
 
-require("ts_context_commentstring").setup()
+require("ts_context_commentstring").setup({
+  enable_autocmd = false,
+  hook = function()
+    -- For mini.comment integration
+    require("ts_context_commentstring").update_commentstring()
+  end,
+})
 
 require("mini.comment").setup({
   options = {
