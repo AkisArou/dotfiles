@@ -144,7 +144,6 @@ vim.pack.add({
   gh("NeogitOrg/neogit"),
   gh("nvim-mini/mini-git"),
   gh("MeanderingProgrammer/render-markdown.nvim"),
-  gh("folke/sidekick.nvim"),
   gh("sudo-tee/opencode.nvim"),
 
   gh("carloscalla/notepad.nvim"),
