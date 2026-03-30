@@ -2,7 +2,7 @@
   "height": 17, // Waybar height (to be removed for auto height)
   "spacing": 8, // Gaps between modules (4px)
   "modules-left": [
-    "ext/workspaces",
+    // "ext/workspaces",
     "sway/workspaces",
     "sway/scratchpad",
     "custom/media",
