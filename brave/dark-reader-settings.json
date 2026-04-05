@@ -147,7 +147,9 @@
         "stackoverflow.com",
         "cppreference.com",
         "aur.archlinux.org",
-        "archlinux.org"
+        "archlinux.org",
+        "https://news.ycombinator.com/",
+        "https://translate.google.com/"
     ],
     "disabledFor": [],
     "changeBrowserTheme": false,
