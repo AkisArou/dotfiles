@@ -215,7 +215,10 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 
 vim.api.nvim_create_autocmd("FileType", {
   once = true,
-  pattern = { "markdown", "opencode_output" },
+  pattern = {
+    "markdown",
+    -- "opencode_output"
+  },
   callback = function()
     require("plugins.render-markdown")
   end,
