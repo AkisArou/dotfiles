@@ -2,12 +2,13 @@
   "height": 17, // Waybar height (to be removed for auto height)
   "spacing": 8, // Gaps between modules (4px)
   "modules-left": [
-    // "ext/workspaces",
     "sway/workspaces",
+    "sway/scratchpad",
+    "hyprland/workspaces",
+    "hyprland/window",
     "sway/scratchpad",
     "custom/media",
     "sway/window",
-    "custom/spider-title",
     "custom/media"
   ],
   "modules-right": [
@@ -147,19 +148,10 @@
     "system": true,
     "user": true,
   },
-  "ext/workspaces": {
+  "hyprland/workspaces": {
     "format": "{icon}",
-    "ignore-hidden": true,
-    "on-click": "activate",
-    "on-click-right": "deactivate",
-    "sort-by-id": true
+    "on-scroll-up": "hyprctl dispatch workspace e+1",
+    "on-scroll-down": "hyprctl dispatch workspace e-1"
   },
-  "dwl/window": {
-    "format": "{title}"
-  },
-  "custom/spider-title": {
-    "exec": "spider-title",
-    "return-type": "json",
-    "restart-interval": 0
-  }
+  "hyprland/window": {},
 }

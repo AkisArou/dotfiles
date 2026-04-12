@@ -1,0 +1,28 @@
+#!/usr/bin/zsh
+
+source "$HOME/dotfiles/scripts/library"
+
+clear
+echo "Installing wayland with sway wm..."
+echo "----------------------------------"
+echo ""
+
+packages=(
+  "foot"
+  "foot-terminfo"
+  "hypridle"
+  "hyprland"
+  "hyprpaper"
+  "hyprpicker"
+  "hyprpolkitagent"
+  "polkit"
+  "waybar"
+  "wf-recorder"
+  "wl-clipboard"
+  "wl-clip-persist"
+  "xdg-desktop-portal-hyprland"
+)
+
+install_packages "${packages[@]}"
+
+print_success "DONE!"

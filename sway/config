@@ -80,7 +80,6 @@ bindsym $mod+q kill
 bindsym $mod+Return exec $term
 bindsym $mod+Shift+Return exec --no-startup-id ~/dotfiles/scripts/ssh-desktop
 bindsym $mod+d exec $menu
-# bindsym $mod+d exec $menu
 bindsym $mod+b exec ~/dotfiles/brave/launch
 bindsym $mod+Shift+n exec ~/dotfiles/brave/launch --incognito
 bindsym $mod+Shift+t exec ~/dotfiles/brave/launch --incognito --tor
