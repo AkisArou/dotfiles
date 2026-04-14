@@ -33,9 +33,7 @@ run_sway() {
 }
 
 run_hypr() {
-  # config_wayland
-  # export XDG_CURRENT_DESKTOP=wlroots
-  # export XDG_SESSION_DESKTOP=wlroots
+  config_wayland
   start-hyprland
 }
 
@@ -52,23 +50,20 @@ run_i3() {
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
-  echo "1) Sway (default)"
-  echo "2) i3"
-  echo "3) mango"
-  echo "4) hyprland"
-  printf "Enter choice [1-4]: "
+  echo "1) hyprland (default)"
+  echo "2) Sway"
+  echo "3) i3"
+  printf "Enter choice [1-3]: "
   read session_choice
 
   session_choice=${session_choice:-1}
 
   if [ "$session_choice" = "1" ]; then
-    run_sway
-  elif [ "$session_choice" = "2" ]; then
-    run_i3
-  elif [ "$session_choice" = "3" ]; then
-    run_mango
-  elif [ "$session_choice" = "4" ]; then
     run_hypr
+  elif [ "$session_choice" = "2" ]; then
+    run_sway
+  elif [ "$session_choice" = "3" ]; then
+    run_i3
   else
     echo "Falling back to default (Sway)."
     run_sway
