@@ -1,12 +1,15 @@
 #!/usr/bin/zsh
 
+zstyle ':completion:*:make:*:targets' call-command true
+zstyle ':completion:*:*:make:*' tag-order 'targets'
+
 autoload -Uz zrecompile
 autoload -Uz compinit
 dump=$ZSH_COMPDUMP
 
 if [[ -s $dump(#qN.mh+24) && (! -s "$dump.zwc" || "$dump" -nt "$dump.zwc") ]]; then
-    compinit -i d $ZSH_COMPDUMP
-    zrecompile $ZSH_COMPDUMP
+  compinit -i d $ZSH_COMPDUMP
+  zrecompile $ZSH_COMPDUMP
 fi
 
 compinit -C
