@@ -24,6 +24,9 @@ mkdir -p "$HOME/.config/opencode"
 sudo mkdir -p /usr/share/chromium/extensions
 sudo mkdir -p /etc/brave/policies/managed
 
+# copying
+sudo cp "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
+
 # linking
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d

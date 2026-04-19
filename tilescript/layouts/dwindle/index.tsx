@@ -23,8 +23,8 @@ function DwindleBranch({ remaining, depth }: DwindleBranchProps) {
 
 export default function layout(ctx: LayoutContext) {
   return (
-    <workspace id="frame">
-      <slot id="master" take={1} class="dwindle-pane" />
+    <workspace>
+      <slot take={1} class="dwindle-pane" />
 
       {ctx.windows.length > 1 ? (
         <DwindleBranch remaining={ctx.windows.length - 1} depth={0} />
