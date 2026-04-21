@@ -50,8 +50,8 @@ run_i3() {
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
-  echo "1) hyprland (default)"
-  echo "2) Sway"
+  echo "1) Sway (default)"
+  echo "2) hyprland"
   echo "3) i3"
   printf "Enter choice [1-3]: "
   read session_choice
@@ -59,9 +59,9 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   session_choice=${session_choice:-1}
 
   if [ "$session_choice" = "1" ]; then
-    run_hypr
-  elif [ "$session_choice" = "2" ]; then
     run_sway
+  elif [ "$session_choice" = "2" ]; then
+    run_hypr
   elif [ "$session_choice" = "3" ]; then
     run_i3
   else
