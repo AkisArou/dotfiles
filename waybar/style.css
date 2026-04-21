@@ -25,6 +25,7 @@ window#waybar #window {
   margin-right: 10px;
 }
 
+#tags button,
 #workspaces button {
   padding: 0 8px;
   color: @bar-foreground;
@@ -33,11 +34,13 @@ window#waybar #window {
   transition: none;
 }
 
+#tags button:hover,
 #workspaces button:hover {
   background: @button-hover-background;
 }
 
 #workspaces button.focused,
+#tags button.active,
 #tags button.focused,
 #workspaces button.active {
   background-color: @button-focused-background;

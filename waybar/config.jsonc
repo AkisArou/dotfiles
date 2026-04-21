@@ -4,11 +4,13 @@
   "modules-left": [
     "sway/workspaces",
     "sway/scratchpad",
+    "dwl/tags",
     "hyprland/workspaces",
     "hyprland/window",
     "sway/scratchpad",
     "custom/media",
     "sway/window",
+    "dwl/window",
     "custom/media"
   ],
   "modules-right": [
