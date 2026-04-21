@@ -1,0 +1,29 @@
+From a622b4740ff533f0fc46923990d421bf7c0892d8 Mon Sep 17 00:00:00 2001
+From: pi66 <pixel2176@proton.me>
+Date: Sat, 20 Dec 2025 20:57:46 +0100
+Subject: [PATCH] fix: prevent resizing fixed-size xdg-toplevel clients
+
+---
+ dwl.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/dwl.c b/dwl.c
+index 12f441e..3a74a34 100644
+--- a/dwl.c
++++ b/dwl.c
+@@ -2210,6 +2210,12 @@ resize(Client *c, struct wlr_box geo, int interact)
+ 	if (!c->mon || !client_surface(c)->mapped)
+ 		return;
+ 
++	if (c->surface.xdg->toplevel->current.min_width==c->surface.xdg->toplevel->current.max_width)
++		geo.width = c->geom.width;
++
++	if (c->surface.xdg->toplevel->current.min_height==c->surface.xdg->toplevel->current.max_height)
++		geo.height = c->geom.height;
++
+ 	bbox = interact ? &sgeom : &c->mon->w;
+ 
+ 	client_set_bounds(c, geo.width, geo.height);
+-- 
+2.51.2
+

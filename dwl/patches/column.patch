@@ -1,0 +1,79 @@
+From d1eb2061c619d0bbd7a0ecda0fe77409f3a6c399 Mon Sep 17 00:00:00 2001
+From: Ben Collerson <benc@benc.cc>
+Date: Fri, 29 Dec 2023 19:02:11 +1000
+Subject: [PATCH] column layout
+
+---
+ config.def.h |  2 ++
+ dwl.c        | 28 ++++++++++++++++++++++++++++
+ 2 files changed, 30 insertions(+)
+
+diff --git a/config.def.h b/config.def.h
+index a8ed61d9..edb30cae 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -34,6 +34,7 @@ static const Layout layouts[] = {
+ 	{ "[]=",      tile },
+ 	{ "><>",      NULL },    /* no layout function means floating behavior */
+ 	{ "[M]",      monocle },
++	{ "||",       col },
+ };
+ 
+ /* monitors */
+@@ -134,6 +135,7 @@ static const Key keys[] = {
+ 	{ MODKEY,                    XKB_KEY_t,          setlayout,      {.v = &layouts[0]} },
+ 	{ MODKEY,                    XKB_KEY_f,          setlayout,      {.v = &layouts[1]} },
+ 	{ MODKEY,                    XKB_KEY_m,          setlayout,      {.v = &layouts[2]} },
++	{ MODKEY,                    XKB_KEY_c,          setlayout,      {.v = &layouts[3]} },
+ 	{ MODKEY,                    XKB_KEY_space,      setlayout,      {0} },
+ 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_space,      togglefloating, {0} },
+ 	{ MODKEY,                    XKB_KEY_e,         togglefullscreen, {0} },
+diff --git a/dwl.c b/dwl.c
+index 4d19357f..63d80da7 100644
+--- a/dwl.c
++++ b/dwl.c
+@@ -243,6 +243,7 @@ static void checkidleinhibitor(struct wlr_surface *exclude);
+ static void cleanup(void);
+ static void cleanupmon(struct wl_listener *listener, void *data);
+ static void closemon(Monitor *m);
++static void col(Monitor *m);
+ static void commitlayersurfacenotify(struct wl_listener *listener, void *data);
+ static void commitnotify(struct wl_listener *listener, void *data);
+ static void createdecoration(struct wl_listener *listener, void *data);
+@@ -704,6 +705,33 @@ closemon(Monitor *m)
+ 	printstatus();
+ }
+ 
++void
++col(Monitor *m)
++{
++	Client *c;
++	unsigned int n = 0, i = 0;
++
++	wl_list_for_each(c, &clients, link)
++		if (VISIBLEON(c, m) && !c->isfloating && !c->isfullscreen)
++			n++;
++
++	wl_list_for_each(c, &clients, link) {
++		if (!VISIBLEON(c, m) || c->isfloating || c->isfullscreen)
++			continue;
++		resize(
++			c,
++			(struct wlr_box){
++				.x = m->w.x + i * m->w.width / n,
++				.y = m->w.y,
++				.width = m->w.width / n,
++				.height = m->w.height
++			},
++			0
++		);
++		i++;
++	}
++}
++
+ void
+ commitlayersurfacenotify(struct wl_listener *listener, void *data)
+ {
+-- 
+2.43.0
+
