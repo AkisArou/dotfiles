@@ -53,6 +53,18 @@ window#waybar #window {
   color: @button-urgent-color;
 }
 
+#tags button.empty:not(.focused):not(.occupied):not(.urgent) {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  opacity: 0;
+}
+
+#tags button.empty:not(.focused):not(.occupied):not(.urgent) label {
+  font-size: 0;
+}
+
 label.module {
   margin-right: 10px;
 }

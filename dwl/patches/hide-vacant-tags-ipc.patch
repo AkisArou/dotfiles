@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: OpenCode <opencode@local>
+Date: Tue, 21 Apr 2026 00:00:00 +0000
+Subject: [PATCH] hide vacant tags for ipc bars
+
+Ignore clients on all tags when reporting per-tag occupancy over dwl IPC.
+This keeps bars that consume `dwl/tags` from marking every tag occupied
+when a sticky client is present.
+---
+ dwl.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/dwl.c b/dwl.c
+index 3c9cc09..ce37032 100644
+--- a/dwl.c
++++ b/dwl.c
+@@ -1721,7 +1721,8 @@ dwl_ipc_output_printstatus_to(DwlIpcOutput *ipc_output)
+ {
+ 	Monitor *monitor = ipc_output->mon;
+ 	Client *c, *focused;
+-	int tagmask, state, numclients, focused_client, tag;
++	uint32_t tagmask;
++	int state, numclients, focused_client, tag;
+ 	const char *title, *appid;
+ 	focused = focustop(monitor);
+ 	zdwl_ipc_output_v2_send_active(ipc_output->resource, monitor == selmon);
+@@ -1735,12 +1736,13 @@ dwl_ipc_output_printstatus_to(DwlIpcOutput *ipc_output)
+ 		wl_list_for_each(c, &clients, link) {
+ 			if (c->mon != monitor)
+ 				continue;
++			if (c->isurgent && (c->tags & tagmask))
++				state |= ZDWL_IPC_OUTPUT_V2_TAG_STATE_URGENT;
++			if (c->tags == TAGMASK)
++				continue;
+ 			if (!(c->tags & tagmask))
+ 				continue;
+ 			if (c == focused)
+ 				focused_client = 1;
+-			if (c->isurgent)
+-				state |= ZDWL_IPC_OUTPUT_V2_TAG_STATE_URGENT;
+ 
+ 			numclients++;
+ 		}
+-- 
+2.49.0

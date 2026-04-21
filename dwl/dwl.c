@@ -1721,7 +1721,8 @@ dwl_ipc_output_printstatus_to(DwlIpcOutput *ipc_output)
 {
 	Monitor *monitor = ipc_output->mon;
 	Client *c, *focused;
-	int tagmask, state, numclients, focused_client, tag;
+	uint32_t tagmask;
+	int state, numclients, focused_client, tag;
 	const char *title, *appid;
 	focused = focustop(monitor);
 	zdwl_ipc_output_v2_send_active(ipc_output->resource, monitor == selmon);
@@ -1735,12 +1736,14 @@ dwl_ipc_output_printstatus_to(DwlIpcOutput *ipc_output)
 		wl_list_for_each(c, &clients, link) {
 			if (c->mon != monitor)
 				continue;
+			if (c->isurgent && (c->tags & tagmask))
+				state |= ZDWL_IPC_OUTPUT_V2_TAG_STATE_URGENT;
+			if (c->tags == TAGMASK)
+				continue;
 			if (!(c->tags & tagmask))
 				continue;
 			if (c == focused)
 				focused_client = 1;
-			if (c->isurgent)
-				state |= ZDWL_IPC_OUTPUT_V2_TAG_STATE_URGENT;
 
 			numclients++;
 		}
