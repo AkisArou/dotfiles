@@ -348,6 +348,7 @@ static void motionnotify(uint32_t time, struct wlr_input_device *device, double 
 		double sy, double sx_unaccel, double sy_unaccel);
 static void motionrelative(struct wl_listener *listener, void *data);
 static void moveresize(const Arg *arg);
+static void nextlayout(const Arg *arg);
 static void outputmgrapply(struct wl_listener *listener, void *data);
 static void outputmgrapplyortest(struct wlr_output_configuration_v1 *config, int test);
 static void outputmgrtest(struct wl_listener *listener, void *data);
@@ -2599,6 +2600,24 @@ moveresize(const Arg *arg)
 		wlr_cursor_set_xcursor(cursor, cursor_mgr, "se-resize");
 		break;
 	}
+}
+
+void
+nextlayout(const Arg *arg)
+{
+	unsigned int i;
+
+	if (!selmon)
+		return;
+
+	for (i = 0; i < LENGTH(layouts); i++) {
+		if (&layouts[i] == selmon->lt[selmon->sellt]) {
+			setlayout(&((Arg){.v = &layouts[(i + 1) % LENGTH(layouts)]}));
+			return;
+		}
+	}
+
+	setlayout(&((Arg){.v = &layouts[0]}));
 }
 
 void
