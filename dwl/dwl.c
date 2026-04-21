@@ -568,9 +568,24 @@ void
 arrange(Monitor *m)
 {
 	Client *c;
+	int n = 0;
 
 	if (!m->wlr_output->enabled)
 		return;
+
+	if (smartborders) {
+		wl_list_for_each(c, &clients, link) {
+			if (VISIBLEON(c, m) && !c->isfloating && !c->isfullscreen)
+				n++;
+		}
+
+		wl_list_for_each(c, &clients, link) {
+			if (c->mon != m || client_is_unmanaged(c) || c->isfullscreen)
+				continue;
+
+			c->bw = (!c->isfloating && n == 1) ? 0 : borderpx;
+		}
+	}
 
 	wl_list_for_each(c, &clients, link) {
 		if (c->mon == m) {
