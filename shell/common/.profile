@@ -32,51 +32,27 @@ run_sway() {
   exec dbus-run-session sway
 }
 
-run_hypr() {
-  config_wayland
-  start-hyprland
-}
-
-run_mango() {
-  config_wayland
-  exec dbus-run-session mango
-}
-
 run_i3() {
   config_xorg
   exec startx
 }
 
-run_dwl() {
-  config_wayland
-  export XDG_CURRENT_DESKTOP=wlroots
-  export XDG_SESSION_DESKTOP=wlroots
-  exec dbus-run-session dwl
-  # >/home/akisarou/.cache/dwltags
-}
-
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
-  echo "1) dwl (default)"
-  echo "2) Sway"
-  echo "3) hyprland"
-  echo "4) i3"
-  printf "Enter choice [1-3]: "
+  echo "1) sway (default)"
+  echo "2) i3"
+  printf "Enter choice [1-2]: "
   read session_choice
 
   session_choice=${session_choice:-1}
 
   if [ "$session_choice" = "1" ]; then
-    run_dwl
-  elif [ "$session_choice" = "2" ]; then
     run_sway
-  elif [ "$session_choice" = "3" ]; then
-    run_hypr
-  elif [ "$session_choice" = "4" ]; then
+  elif [ "$session_choice" = "2" ]; then
     run_i3
   else
-    echo "Falling back to default (dwl)."
+    echo "Falling back to default (sway)."
     run_sway
   fi
 fi
