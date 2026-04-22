@@ -6,7 +6,10 @@ require("lazydev").setup({
 
 local select_count = 10
 
-require("blink-cmp").setup({
+local cmp = require("blink-cmp")
+cmp.build():wait(60000)
+
+cmp.setup({
   keymap = {
     preset = "default",
     ["<C-e>"] = { "select_and_accept" },

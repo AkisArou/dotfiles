@@ -1,17 +1,17 @@
----@param plugin_name string
----@param command string[]
-local function build_plugin(plugin_name, command)
-  local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/" .. plugin_name
-
-  vim.notify("\nBuilding " .. plugin_name .. " at " .. plugin_path, vim.log.levels.INFO)
-  local result = vim.system(command, { cwd = plugin_path }):wait()
-
-  if result.code == 0 then
-    vim.notify("\n" .. "Building " .. plugin_name .. " done", vim.log.levels.INFO)
-  else
-    vim.notify("\n" .. "Building " .. plugin_name .. " failed", vim.log.levels.ERROR)
-  end
-end
+-- ---@param plugin_name string
+-- ---@param command string[]
+-- local function build_plugin(plugin_name, command)
+--   local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/" .. plugin_name
+--
+--   vim.notify("\nBuilding " .. plugin_name .. " at " .. plugin_path, vim.log.levels.INFO)
+--   local result = vim.system(command, { cwd = plugin_path }):wait()
+--
+--   if result.code == 0 then
+--     vim.notify("\n" .. "Building " .. plugin_name .. " done", vim.log.levels.INFO)
+--   else
+--     vim.notify("\n" .. "Building " .. plugin_name .. " failed", vim.log.levels.ERROR)
+--   end
+-- end
 
 function Delete_unused_packs()
   vim.pack.del(vim
@@ -25,15 +25,11 @@ function Delete_unused_packs()
     :totable())
 end
 
-vim.api.nvim_create_autocmd("PackChanged", {
-  callback = function(event)
-    local name = event.data.spec.name
-
-    if name == "blink.cmp" then
-      build_plugin("blink.cmp", { "cargo", "build", "--release" })
-    end
-  end,
-})
+-- vim.api.nvim_create_autocmd("PackChanged", {
+--   callback = function(event)
+--     local name = event.data.spec.name
+--   end,
+-- })
 
 ---@param value string|vim.pack.Spec
 ---@param url string
@@ -128,6 +124,7 @@ vim.pack.add({
 
   gh("folke/lazydev.nvim"),
 
+  gh("saghen/blink.lib"),
   gh("saghen/blink.cmp"),
   gh("mayromr/blink-cmp-dap"),
 
