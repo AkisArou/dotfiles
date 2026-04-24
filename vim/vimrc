@@ -106,6 +106,7 @@ nmap <silent> <leader>e :Ex <bar> :sil! call search(expand("#:t"))<CR>
 "
 function! NetrwMapping()
   nmap <buffer> <C-c> :bw<CR>
+  nnoremap <buffer> <nowait> q :bwipeout<CR>
   nmap <buffer> H u
   nmap <buffer> <C-f> -^
   nmap <buffer> <C-e> <CR>
