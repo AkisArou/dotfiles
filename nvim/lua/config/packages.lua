@@ -140,7 +140,6 @@ vim.pack.add({
 
   gh("NeogitOrg/neogit"),
   gh("nvim-mini/mini-git"),
-  gh("MeanderingProgrammer/render-markdown.nvim"),
   gh("sudo-tee/opencode.nvim"),
 
   gh("carloscalla/notepad.nvim"),
@@ -205,16 +204,5 @@ vim.api.nvim_create_autocmd("InsertEnter", {
   callback = function()
     require("plugins.neotab")
     require("plugins.vim-visual-multi")
-  end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  once = true,
-  pattern = {
-    "markdown",
-    -- "opencode_output"
-  },
-  callback = function()
-    require("plugins.render-markdown")
   end,
 })
