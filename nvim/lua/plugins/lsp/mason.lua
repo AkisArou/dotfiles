@@ -29,7 +29,6 @@ mason_lspconfig.setup({
     "taplo",
     "rust_analyzer",
     "just",
-    "hyprls",
   },
   automatic_installation = true,
 })

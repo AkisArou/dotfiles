@@ -145,9 +145,5 @@
     "format-ok": "✓",
     "system": true,
     "user": true,
-  },
-  "hyprland/workspaces": {
-    "format": "{icon}",
-  },
-  "hyprland/window": {},
+  }
 }
