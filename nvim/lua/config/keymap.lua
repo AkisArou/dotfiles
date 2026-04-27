@@ -67,7 +67,12 @@ map("n", "]b", function()
   format_and_switch_buffer("bnext")
 end, opts)
 
-map("n", "<leader>uu", vim.cmd.Undotree)
+map("n", "<leader>uu", function()
+  vim.cmd([[
+    packadd nvim.undotree
+    vim.cmd.Undotree
+  ]])
+end)
 
 map("n", "<leader>`", function()
   vim.cmd.vnew()

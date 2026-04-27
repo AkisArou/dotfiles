@@ -180,8 +180,6 @@ vim.schedule(function()
   require("plugins.neogit")
   require("plugins.opencode")
   require("plugins.notepad")
-
-  vim.cmd("packadd nvim.undotree")
 end)
 
 -- Autocmd load
