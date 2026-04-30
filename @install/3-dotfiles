@@ -96,16 +96,4 @@ sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.j
 sudo chmod 644 /usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json
 sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
 
-# Librewolf
-LIBREWOLF_CONFIG="$HOME/.librewolf/librewolf.overrides.cfg"
-
-if [ ! -f "$LIBREWOLF_CONFIG" ]; then
-  mkdir -p "$(dirname "$LIBREWOLF_CONFIG")"
-  touch "$LIBREWOLF_CONFIG"
-fi
-
-create_symlink "$HOME/dotfiles/librewolf/librewolf.overrides.cfg" "$LIBREWOLF_CONFIG"
-
-sudo -E python3 ~/dotfiles/librewolf/merge-policies.py
-
 print_success "DONE!"
