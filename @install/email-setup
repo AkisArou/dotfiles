@@ -4,7 +4,7 @@ GPG - Create key:
 1. gpg --full-generate-key
 2. Select (1) RSA and RSA
 3. Finish setup
-4. Ensure gpg daemon is running
+4. Ensure gpg daemon is running (pgrep -a gpg-agent) (or else start with gpgconf --launch gpg-agent)
 
 
 
