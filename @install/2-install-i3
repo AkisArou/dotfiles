@@ -9,7 +9,6 @@ echo ""
 
 packages=(
   "i3-wm"
-  "nitrogen"
   "picom"
   "polybar"
   "xidlehook"
@@ -17,6 +16,7 @@ packages=(
   "xorg-xinit"
   "xorg-xinput"
   "xsel"
+  "xwallpaper"
 )
 
 install_packages "${packages[@]}"
