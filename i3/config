@@ -71,7 +71,6 @@ bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
 bindsym $mod+Shift+bracketleft exec ~/dotfiles/rofi/launch -modi emoji -show emoji
 
 bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
-bindsym $mod+m exec ~/dotfiles/i3/open-mail
 bindsym $mod+less exec dunstctl close-all
 
 # Move your focus around
