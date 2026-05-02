@@ -1,5 +1,5 @@
 #!/usr/bin/zsh
 
-THEME="${1:-nevermore}"
+THEME="${1:-vscode}"
 
 ln -sf "$HOME/dotfiles/eza/${THEME}.yml" "$HOME/dotfiles/eza/theme.yml"

@@ -21,25 +21,6 @@ FZF_TOKYONIGHT="\
   --color=spinner:#ff007c \
 "
 
-FZF_NEVERMORE="\
-  --color=bg:#1b1b1b \
-  --color=bg+:#121212 \
-  --color=border:#555555 \
-  --color=fg:#777777 \
-  --color=gutter:#121212 \
-  --color=header:#555555 \
-  --color=hl:#7aa2f7 \
-  --color=hl+:#7aa2f7 \
-  --color=info:#555555 \
-  --color=marker:#009966 \
-  --color=pointer:#222222 \
-  --color=prompt:#aaaaaa \
-  --color=query:#aaaaaa \
-  --color=scrollbar:#555555 \
-  --color=separator:#555555 \
-  --color=spinner:#9d7cd8 \
-"
-
 FZF_VSCODE="\
   --color=bg:#18191a \
   --color=bg+:#1f1f1f \
@@ -85,7 +66,6 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
 "
 
 FZF_TAB_TOKYONIGHT="--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55"
-FZF_TAB_NEVERMORE="--color=fg:#999999,bg:#000000,fg+:#999999,bg+:#121212"
 FZF_TAB_VSCODE="--color=fg:#808080,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F"
 
 FZF_TAB_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"
