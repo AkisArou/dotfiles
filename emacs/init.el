@@ -63,7 +63,6 @@
 (use-package init-format)
 (use-package init-vc)
 (use-package init-org)
-(use-package init-email)
 (use-package init-dap)
 (use-package init-evil)
 (use-package init-elfeed)

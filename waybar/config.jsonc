@@ -19,7 +19,6 @@
     "sway/language",
     "clock",
     "network",
-    "custom/mail",
     "systemd-failed-units",
   ],
   "sway/scratchpad": {
@@ -130,14 +129,6 @@
   },
   "tray": {
     "spacing": 10,
-  },
-  "custom/mail": {
-    "exec": "~/dotfiles/waybar/modules/notmuch-module",
-    "interval": 10,
-    "return-type": "json",
-    "format": "{}",
-    "tooltip": true,
-    "on-click": "~/dotfiles/sway/open-mail",
   },
   "systemd-failed-units": {
     "hide-on-ok": true,

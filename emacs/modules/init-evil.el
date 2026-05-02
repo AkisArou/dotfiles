@@ -135,9 +135,6 @@
   (evil-define-key 'normal 'global (kbd "gra") 'lsp-execute-code-action)
   (evil-define-key 'normal 'global (kbd "grn") 'lsp-rename)
 
-  ;; Notmuch
-  (evil-define-key 'normal 'global (kbd "<leader> m") 'notmuch)
-
   ;; Trigger completion at point in Evil insert mode
   (evil-define-key 'insert global-map (kbd "C-SPC") #'completion-at-point)
   (evil-define-key 'insert global-map (kbd "C-@")   #'completion-at-point)

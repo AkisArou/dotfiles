@@ -1,3 +1,0 @@
-#!/usr/bin/zsh
-
-~/dotfiles/foot/launch -e zsh -c "NO_TMUX_AUTO_ATTACH=true x -e '(notmuch)'"
