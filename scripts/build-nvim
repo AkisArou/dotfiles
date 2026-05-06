@@ -6,14 +6,12 @@ NAME="Neovim"
 BIN_DIR=bin
 
 build_neovim() {
-  local CFLAGS="-O2 -march=native -flto"
+  local CFLAGS="-O2 -march=native"
   local CXXFLAGS="$CFLAGS"
-  local LDFLAGS="-flto -fuse-ld=lld"
 
   CC=clang \
     CFLAGS="$CFLAGS" \
     CXXFLAGS="$CXXFLAGS" \
-    LDFLAGS="$LDFLAGS" \
     make CMAKE_BUILD_TYPE=Release \
     CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
 

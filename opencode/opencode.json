@@ -74,5 +74,9 @@
         "--browser-url=http://127.0.0.1:9222"
       ]
     },
+    "heroui-migration": {
+      "type": "remote",
+      "url": "https://migration-mcp.heroui.com"
+    }
   }
 }
