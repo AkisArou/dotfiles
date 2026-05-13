@@ -93,7 +93,9 @@ packages=(
   "mpv"
   "nautilus"
   "ninja"
+  "noto-fonts"
   "noto-fonts-emoji"
+  "noto-fonts-extra"
   "opencode-bin"
   "openslide" # Needed by ueberzug
   "openssh"
