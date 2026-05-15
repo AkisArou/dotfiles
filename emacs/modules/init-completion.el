@@ -35,7 +35,17 @@
   :config
   (setq fussy-filter-fn 'fussy-filter-orderless-flex)
   (setq fussy-use-cache t)
-  (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
+
+  (defun my/fussy-compare-same-score (c1 c2)
+    "Prefer minibuffer history when available, otherwise shorter matches."
+    (if (and (symbolp minibuffer-history-variable)
+             (boundp minibuffer-history-variable)
+             (symbol-value minibuffer-history-variable))
+        (fussy-histlen->strlen< c1 c2)
+      (fussy-strlen< c1 c2)))
+
+  (setq fussy-default-sort-fn #'my/fussy-compare-same-score)
+  (setq fussy-compare-same-score-fn #'my/fussy-compare-same-score)
 
   (with-eval-after-load 'corfu
     (advice-add 'corfu--capf-wrapper :before #'fussy-wipe-cache)
