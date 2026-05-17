@@ -77,6 +77,14 @@
     "heroui-migration": {
       "type": "remote",
       "url": "https://migration-mcp.heroui.com"
-    }
+    },
+    "React Aria": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@react-aria/mcp@latest",
+      ]
+    },
   }
 }

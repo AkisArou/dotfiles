@@ -85,7 +85,7 @@ set background=dark
 set wop+=fuzzy
 set noshowmode
 set formatoptions-=cro
-set guioptions-=e
+set guioptions=
 set wildoptions+=pum
 set nrformats="blank"
 
