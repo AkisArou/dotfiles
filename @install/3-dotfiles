@@ -36,6 +36,7 @@ sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 sudo ln -sf "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/policies.json"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
+create_symlink "$HOME/dotfiles/mimeapps.list" "$HOME/.config/mimeapps.list"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"
 create_symlink "$HOME/dotfiles/shell/zsh/.zprofile" "$HOME/.zprofile"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshrc" "$HOME/.zshrc"
