@@ -37,6 +37,7 @@ sudo ln -sf "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/po
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
 create_symlink "$HOME/dotfiles/mimeapps.list" "$HOME/.config/mimeapps.list"
+create_symlink "$HOME/dotfiles/applications/nvim.desktop" "$HOME/.local/share/applications/nvim.desktop"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"
 create_symlink "$HOME/dotfiles/shell/zsh/.zprofile" "$HOME/.zprofile"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshrc" "$HOME/.zshrc"

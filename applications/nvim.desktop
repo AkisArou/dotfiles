@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Neovim
+Exec=/home/akisarou/dotfiles/foot/launch nvim %F
+Type=Application
+Terminal=false
+MimeType=text/plain;text/x-c;text/x-python;text/x-shellscript;text/markdown;
