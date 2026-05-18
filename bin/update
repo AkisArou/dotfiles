@@ -30,10 +30,6 @@ print_info "tmux:"
 ~/.tmux/plugins/tpm/bin/update_plugins all
 echo
 
-print_info "yazi:"
-ya pkg upgrade
-echo
-
 print_info "rust:"
 rustup update
 echo

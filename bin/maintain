@@ -35,7 +35,3 @@ sudo journalctl --vacuum-time=7d
 echo
 print_info "Building bat cache..."
 bat cache --build
-
-echo
-print_info "Clearing yazi Trash..."
-rm -rf ~/.local/share/Trash/*

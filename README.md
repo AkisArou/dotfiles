@@ -25,7 +25,7 @@ Common
   vscode (configuration at .vscode)
 - Browsers: brave, librewolf
 - Terminal: alacritty, kitty
-- Filemanager: yazi, nautilus
+- Filemanager: nautilus
 - Notifications: dunst
 - Shell: zsh
 - Screenshot: flameshot

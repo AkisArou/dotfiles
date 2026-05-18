@@ -92,13 +92,6 @@ unset BROWSER
 xdg-settings set default-web-browser brave-browser.desktop
 export BROWSER=$ORIGINAL_BROWSER
 
-print_info "Installing yazi plugins..."
-ya pkg add yazi-rs/plugins:git
-ya pkg add yazi-rs/plugins:smart-enter
-ya pkg add yazi-rs/plugins:smart-paste
-ya pkg add aresler/path-from-root
-ya pkg add llanosrocas/githead
-
 print_info "Downloading tldr cache..."
 tldr --update
 
