@@ -1,14 +1,12 @@
 require("sidekick").setup({
-  {
-    cli = {
-      mux = {
-        backend = "tmux",
-        enabled = true,
-      },
-      tools = {
-        codex = {
-          cmd = { "codex", "resume", "--last" },
-        },
+  cli = {
+    mux = {
+      backend = "tmux",
+      enabled = true,
+    },
+    tools = {
+      codex = {
+        cmd = { "codex", "resume", "--last" },
       },
     },
   },
