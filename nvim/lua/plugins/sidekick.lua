@@ -5,6 +5,11 @@ require("sidekick").setup({
         backend = "tmux",
         enabled = true,
       },
+      tools = {
+        codex = {
+          cmd = { "codex", "resume", "--last" },
+        },
+      },
     },
   },
 })
