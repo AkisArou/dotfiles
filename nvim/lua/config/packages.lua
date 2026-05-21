@@ -140,7 +140,7 @@ vim.pack.add({
 
   gh("NeogitOrg/neogit"),
   gh("nvim-mini/mini-git"),
-  gh("sudo-tee/opencode.nvim"),
+  gh("folke/sidekick.nvim"),
 
   gh("carloscalla/notepad.nvim"),
 })
@@ -177,7 +177,7 @@ vim.schedule(function()
   require("plugins.octo")
   require("plugins.codediff")
   require("plugins.neogit")
-  require("plugins.opencode")
+  require("plugins.sidekick")
   require("plugins.notepad")
 end)
 

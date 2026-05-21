@@ -14,6 +14,9 @@ hide_full_access_warning = true
 [projects."/home/akisarou/dotfiles"]
 trust_level = "trusted"
 
+[projects."/home/akisarou/Projects/rust-mobile"]
+trust_level = "trusted"
+
 [mcp_servers.chrome-devtools]
 command = "npx"
 args = ["chrome-devtools-mcp@latest"]
