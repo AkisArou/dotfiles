@@ -84,7 +84,7 @@ corepack enable yarn
 asdf reshim nodejs
 
 print_info "Installing global npm packages..."
-npm i -g npm-workspaces-language-server corepack@latest
+npm i -g npm-workspaces-language-server corepack@latest @openai/codex
 
 print_info "Setting xdg default web browser..."
 ORIGINAL_BROWSER=$BROWSER
