@@ -5,6 +5,7 @@ require("sidekick").setup({
         cmd = { "codex", "resume", "--last" },
       },
     },
+    picker = "fzf-lua",
   },
 })
 
