@@ -1,6 +1,8 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
 approvals_reviewer = "user"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
 
 [tui]
 theme = "vscode"
@@ -22,4 +24,8 @@ trust_level = "trusted"
 
 [mcp_servers.chrome-devtools]
 command = "npx"
-args = ["chrome-devtools-mcp@latest"]
+args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
+
+[mcp_servers.react-aria]
+command = "npx"
+args = ["@react-aria/mcp@latest"]
