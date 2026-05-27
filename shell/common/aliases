@@ -14,6 +14,7 @@ alias ip="ip -color=auto"
 
 alias lg="lazygit"
 alias oc="opencode"
+alias c="nvim -c 'terminal codex resume --last'"
 
 alias cp="cp -i"
 alias mv="mv -i"
