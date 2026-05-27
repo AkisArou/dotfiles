@@ -140,7 +140,6 @@ packages=(
   "visual-studio-code-bin"
   "vulkan-tools"
   "w3m"
-  "watchman-bin"
   "wget"
   "wireplumber"
   "wireshark-qt"
