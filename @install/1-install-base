@@ -180,8 +180,6 @@ install_packages "${packages[@]}"
 
 ~/dotfiles/scripts/build-nvim
 ~/dotfiles/scripts/build-emacs
-~/dotfiles/scripts/build-bitlbee
-~/dotfiles/scripts/build-purple-teams
 
 cargo install emacs-lsp-booster
 
