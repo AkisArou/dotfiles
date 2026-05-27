@@ -5,7 +5,7 @@ x-scheme-handler/about=brave-browser.desktop
 x-scheme-handler/unknown=brave-browser.desktop
 
 text/plain=nvim.desktop
-text/html=nvim.desktop
+text/html=brave-browser.desktop
 text/x-c=nvim.desktop
 text/x-c++=nvim.desktop
 text/x-python=nvim.desktop
@@ -20,7 +20,6 @@ text/x-rust=nvim.desktop
 text/x-diff=nvim.desktop
 text/markdown=nvim.desktop
 text/css=nvim.desktop
-text/html=nvim.desktop
 text/csv=nvim.desktop
 text/x-sql=nvim.desktop
 text/x-toml=nvim.desktop
