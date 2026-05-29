@@ -29,3 +29,6 @@ args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
 [mcp_servers.react-aria]
 command = "npx"
 args = ["@react-aria/mcp@latest"]
+
+[mcp_servers.expo]
+url = "https://mcp.expo.dev/mcp"
