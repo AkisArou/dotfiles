@@ -11,6 +11,7 @@ local themes = {
         vscOrange = "#C48081",
       },
       group_overrides = {
+        Visual = { bg = "#292929" },
         Search = { fg = "NONE", bg = "#2a4856" },
         IncSearch = { fg = "NONE", bg = "#242526" },
         CurSearch = { fg = "NONE", bg = "#17262d" },
