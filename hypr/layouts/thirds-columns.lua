@@ -82,25 +82,26 @@ local function syncOrder(ctx)
 		insert_after = active_id
 	end
 
-	local old_order = thirdsColumns.order
-	thirdsColumns.order = {}
-	for _, id in ipairs(old_order) do
+	local order = visualOrder()
+	local kept_order = {}
+	for _, id in ipairs(order) do
 		if present[id] then
-			table.insert(thirdsColumns.order, id)
+			table.insert(kept_order, id)
 		else
 			thirdsColumns.widths[id] = nil
 		end
 	end
+	setOrderFromVisual(kept_order)
 
 	for _, target in ipairs(ctx.targets) do
 		local id = targetId(target)
-		if not indexOf(thirdsColumns.order, id) then
+		if not indexOf(kept_order, id) then
 			table.insert(missing, id)
 		end
 	end
 
 	if #missing > 0 then
-		local order = visualOrder()
+		order = visualOrder()
 		for _, id in ipairs(missing) do
 			local after = insert_after and indexOf(order, insert_after)
 			table.insert(order, after and (after + 1) or (#order + 1), id)
