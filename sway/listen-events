@@ -4,17 +4,25 @@
 resize-emulator() {
   change=$(echo "$1" | jq -r '.change')
 
-  if [[ "$change" == "new" || "$change" == "close" ]]; then
-    ~/dotfiles/sway/resize-emulator
+  if [[ "$change" == "new" || "$change" == "close" || "$change" == "move" || "$change" == "floating" || "$change" == "title" ]]; then
+    ~/dotfiles/sway/resize-emulator >/dev/null 2>&1
   fi
 
 }
 
 # Listen to events
 while true; do
+  while true; do
+    sleep 1
+    ~/dotfiles/sway/resize-emulator >/dev/null 2>&1
+  done &
+  poller_pid=$!
+
   swaymsg -t subscribe '[ "window" ]' | while read -r line; do
     resize-emulator "$line"
   done
+
+  kill "$poller_pid" 2>/dev/null
 done
 
 # If we get here, swaymsg exited

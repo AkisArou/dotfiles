@@ -1,4 +1,73 @@
 #!/usr/bin/zsh
 
-swaymsg -r "[title=\"Android Emulator - *\"] resize set width ${EMULATOR_WIDTH}px"
-swaymsg -r "[title=\"Google Pixel *\"] resize set width ${EMULATOR_WIDTH}px"
+emulator_width=${EMULATOR_WIDTH:-687}
+genymotion_fallback_chrome_width=${GENYMOTION_CHROME_WIDTH:-48}
+
+swaymsg -r "[title=\"Android Emulator - *\"] resize set width ${emulator_width}px"
+
+swaymsg -t get_tree | jq -r '
+  .. | objects
+  | select(
+      .window_properties.class? == "Genymotion Player"
+      and .window_properties.instance? == "player"
+      and .window_properties.window_type? == "normal"
+    )
+  | .name as $name
+  | ($name | try capture("\\((?<width>[0-9]+)x(?<height>[0-9]+),") catch empty) as $screen
+  | [
+      .id,
+      .window,
+      .window_rect.width,
+      .window_rect.height,
+      .current_border_width,
+      $screen.width,
+      $screen.height
+    ]
+  | @tsv
+' | while IFS=$'\t' read -r con_id x11_window window_width window_height border_width screen_width screen_height; do
+  child_geometry=$(
+    xwininfo -id "$(printf '0x%x' "$x11_window")" -tree 2>/dev/null |
+      sed -nE 's/^[[:space:]]+0x[0-9a-fA-F]+.*[[:space:]]([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+).*/\1\t\2\t\3\t\4/p' |
+      head -n 1
+  )
+
+  if [[ -n "$child_geometry" ]]; then
+    IFS=$'\t' read -r child_width child_height child_x child_y <<< "$child_geometry"
+    right_margin=$((window_width - child_x - child_width))
+
+    if (( child_x > 2 )); then
+      target_width=$((window_width + (border_width * 2) - (child_x * 2)))
+    else
+      screen_available_height=$((window_height - 1))
+
+      target_width=$(
+        awk \
+          -v screen_available_height="$screen_available_height" \
+          -v screen_width="$screen_width" \
+          -v screen_height="$screen_height" \
+          -v chrome_width="$((child_x + right_margin))" \
+          -v border_width="$border_width" \
+          'BEGIN { printf "%d", ((screen_available_height * screen_width / screen_height) + chrome_width + (border_width * 2)) }'
+      )
+    fi
+  else
+    screen_available_height=$((window_height - 1))
+    chrome_width=$genymotion_fallback_chrome_width
+
+    target_width=$(
+      awk \
+        -v screen_available_height="$screen_available_height" \
+        -v screen_width="$screen_width" \
+        -v screen_height="$screen_height" \
+        -v chrome_width="$chrome_width" \
+        -v border_width="$border_width" \
+        'BEGIN { printf "%d", ((screen_available_height * screen_width / screen_height) + chrome_width + (border_width * 2)) }'
+    )
+  fi
+
+  current_width=$((window_width + (border_width * 2)))
+
+  if (( current_width > target_width + 2 || current_width < target_width - 2 )); then
+    swaymsg -r "[con_id=${con_id}] resize set width ${target_width}px"
+  fi
+done
