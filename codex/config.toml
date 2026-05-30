@@ -20,6 +20,9 @@ trust_level = "trusted"
 [projects."/home/akisarou/nable-solutions"]
 trust_level = "trusted"
 
+[projects."/home/akisarou/Projects/tilescript"]
+trust_level = "trusted"
+
 [mcp_servers.chrome-devtools]
 command = "npx"
 args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
