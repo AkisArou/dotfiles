@@ -68,6 +68,7 @@ end
 local function syncOrder(ctx)
 	local present = {}
 	local targets = {}
+	local missing = {}
 
 	for _, target in ipairs(ctx.targets) do
 		local id = targetId(target)
@@ -94,10 +95,18 @@ local function syncOrder(ctx)
 	for _, target in ipairs(ctx.targets) do
 		local id = targetId(target)
 		if not indexOf(thirdsColumns.order, id) then
-			local after = insert_after and indexOf(thirdsColumns.order, insert_after)
-			table.insert(thirdsColumns.order, after and (after + 1) or (#thirdsColumns.order + 1), id)
+			table.insert(missing, id)
+		end
+	end
+
+	if #missing > 0 then
+		local order = visualOrder()
+		for _, id in ipairs(missing) do
+			local after = insert_after and indexOf(order, insert_after)
+			table.insert(order, after and (after + 1) or (#order + 1), id)
 			insert_after = id
 		end
+		setOrderFromVisual(order)
 	end
 
 	if active_id then
