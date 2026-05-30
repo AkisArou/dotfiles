@@ -15,8 +15,8 @@
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 hl.monitor({
-	output = "",
-	mode = "preferred",
+	output = "DP-4",
+	mode = "5120x1440@120,0x0,1",
 	position = "auto",
 	scale = "auto",
 })
@@ -100,7 +100,7 @@ hl.config({
 		gaps_in = 5,
 		gaps_out = 5,
 
-		border_size = 1,
+		border_size = 2,
 
 		col = {
 			active_border = { colors = { "rgba(4c7899ee)" } },
