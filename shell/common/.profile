@@ -37,18 +37,12 @@ run_i3() {
   exec startx
 }
 
-run_hypr() {
-  config_wayland
-  start-hyprland
-}
-
 # Only run session chooser on first virtual terminal (e.g., tty1)
 if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [ -z "$DISPLAY" ]; then
   echo "Select session type:"
   echo "1) sway (default)"
   echo "2) i3"
-  echo "3) hypr"
-  printf "Enter choice [1-3]: "
+  printf "Enter choice [1-2]: "
   read session_choice
 
   session_choice=${session_choice:-1}
@@ -57,8 +51,6 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
     run_sway
   elif [ "$session_choice" = "2" ]; then
     run_i3
-  elif [ "$session_choice" = "3" ]; then
-    run_hypr
   else
     echo "Falling back to default (sway)."
     run_sway
