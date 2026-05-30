@@ -9,7 +9,7 @@ FONT=HasklugNerdFontMono-Regular:size=
 if [ "$ULTRAWIDE" ]; then
   FONT="$FONT"11
 else
-  FONT="$FONT"10.5
+  FONT="$FONT"10
 fi
 
 foot --override include=~/dotfiles/foot/vscode.ini --font="$FONT" "$@"

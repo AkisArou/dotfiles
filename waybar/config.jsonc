@@ -5,6 +5,8 @@
     "sway/workspaces",
     "sway/scratchpad",
     "sway/scratchpad",
+    "hyprland/workspaces",
+    "hyprland/window",
     "custom/media",
     "sway/window",
     "custom/media"
@@ -136,5 +138,9 @@
     "format-ok": "✓",
     "system": true,
     "user": true,
-  }
+  },
+  "hyprland/workspaces": {
+    "format": "{icon}",
+  },
+  "hyprland/window": {},
 }
