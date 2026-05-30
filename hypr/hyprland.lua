@@ -238,6 +238,7 @@ hl.config({
 		repeat_delay = 220,
 		repeat_rate = 33,
 		follow_mouse = 1,
+		focus_on_close = ultrawide and 2 or 0,
 
 		sensitivity = 0, -- -1.0 - 1.0, 0 means no modification.
 
