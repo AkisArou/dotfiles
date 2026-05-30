@@ -19,11 +19,49 @@ local function indexOf(items, value)
 end
 
 local function activeTargetId(ctx)
+	local active_window = hl.get_active_window()
+	if active_window then
+		local active_id = tostring(active_window.stable_id)
+		for _, target in ipairs(ctx.targets) do
+			if targetId(target) == active_id then
+				return active_id
+			end
+		end
+
+		for _, target in ipairs(ctx.targets) do
+			local window = target.window
+			if window and window.address == active_window.address then
+				return targetId(target)
+			end
+		end
+	end
+
 	for _, target in ipairs(ctx.targets) do
 		local window = target.window
 		if window and window.active then
 			return targetId(target)
 		end
+	end
+end
+
+local function visualOrder()
+	if #thirdsColumns.order == 2 then
+		return { thirdsColumns.order[2], thirdsColumns.order[1] }
+	end
+
+	local order = {}
+	for i, id in ipairs(thirdsColumns.order) do
+		order[i] = id
+	end
+
+	return order
+end
+
+local function setOrderFromVisual(order)
+	if #order == 2 then
+		thirdsColumns.order = { order[2], order[1] }
+	else
+		thirdsColumns.order = order
 	end
 end
 
@@ -143,11 +181,9 @@ hl.layout.register("thirds_columns", {
 		local total_width
 		widths, total_width = fitWidths(widths)
 		local x = ctx.area.x + ((ctx.area.w * (1 - total_width)) / 2)
-		local visual_order = thirdsColumns.order
-
+		local visual_order = visualOrder()
 		if n == 2 then
 			x = ctx.area.x
-			visual_order = { thirdsColumns.order[2], thirdsColumns.order[1] }
 		end
 
 		for _, id in ipairs(visual_order) do
@@ -172,12 +208,14 @@ hl.layout.register("thirds_columns", {
 			resizeActive(ctx, tonumber(amount) or 0)
 		elseif command == "move" then
 			local active_id = activeTargetId(ctx)
-			local i = active_id and indexOf(thirdsColumns.order, active_id)
+			local order = visualOrder()
+			local i = active_id and indexOf(order, active_id)
 			local j = i and (i + (tonumber(amount) or 0))
-			if not i or j < 1 or j > #thirdsColumns.order then
+			if not i or j < 1 or j > #order then
 				return true
 			end
-			thirdsColumns.order[i], thirdsColumns.order[j] = thirdsColumns.order[j], thirdsColumns.order[i]
+			order[i], order[j] = order[j], order[i]
+			setOrderFromVisual(order)
 		else
 			return "thirds_columns: expected resize <pixels> or move <-1|1>"
 		end
