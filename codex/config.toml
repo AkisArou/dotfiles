@@ -14,13 +14,7 @@ hide_full_access_warning = true
 [projects."/home/akisarou/dotfiles"]
 trust_level = "trusted"
 
-[projects."/home/akisarou/Projects/rust-mobile"]
-trust_level = "trusted"
-
 [projects."/home/akisarou/nable-solutions"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/tilescript"]
 trust_level = "trusted"
 
 [mcp_servers.chrome-devtools]
