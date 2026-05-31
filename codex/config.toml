@@ -11,6 +11,9 @@ theme = "vscode"
 [notice]
 hide_full_access_warning = true
 
+[projects."/home/akisarou"]
+trust_level = "trusted"
+
 [projects."/home/akisarou/dotfiles"]
 trust_level = "trusted"
 

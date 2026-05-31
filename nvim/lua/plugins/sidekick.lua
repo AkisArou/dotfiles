@@ -2,7 +2,7 @@ require("sidekick").setup({
   cli = {
     tools = {
       codex = {
-        cmd = { "codex", "resume", "--last" },
+        cmd = { "python3", os.getenv("HOME") .. "/dotfiles/codex/codex.py", "resume", "--last" },
       },
     },
     picker = "fzf-lua",
