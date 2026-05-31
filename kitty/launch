@@ -4,13 +4,6 @@ if [ -f ~/.env ]; then
   source ~/.env
 fi
 
-if [ "$ULTRAWIDE" ]; then
-  FONT_SIZE=10
-else
-  FONT_SIZE=10.5
-fi
-
 kitty \
-  -o font_size="$FONT_SIZE" \
   -o "include ~/dotfiles/kitty/${THEME:-$DEFAULT_THEME}.conf" \
   "$@"

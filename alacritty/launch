@@ -4,13 +4,6 @@ if [ -f ~/.env ]; then
   source ~/.env
 fi
 
-if [ "$ULTRAWIDE" ]; then
-  FONT_SIZE=10
-else
-  FONT_SIZE=10.5
-fi
-
 alacritty \
-  -o "font.size=$FONT_SIZE" \
   -o "general.import=['~/dotfiles/alacritty/${THEME:-vscode}.toml']" \
   "$@"
