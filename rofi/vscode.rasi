@@ -1,7 +1,7 @@
 * {
     foreground: #D4D4D4;
     background-color: #121314;
-    active-background: #264F78;
+    active-background: #172F48;
     active-foreground: var(foreground); 
     urgent-background: #F44747;
     urgent-foreground: #121314;
