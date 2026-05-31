@@ -13,7 +13,7 @@ local themes = {
       group_overrides = {
         Visual = { bg = "#313131" },
         Search = { fg = "NONE", bg = "#2a4856" },
-        IncSearch = { fg = "NONE", bg = "#242526" },
+        IncSearch = { fg = "NONE", bg = "#444444" },
         CurSearch = { fg = "NONE", bg = "#17262d" },
         SnippetTabStop = { bg = "#17262d" },
         SnippetTabStopActive = { bg = "#17262d" },
