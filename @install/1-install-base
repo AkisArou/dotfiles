@@ -89,6 +89,7 @@ packages=(
   "libvdpau-va-gl"
   "linux-headers"
   "lld"
+  "man-pages"
   "mesa"
   "mpv"
   "nautilus"
