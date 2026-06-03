@@ -29,4 +29,6 @@ setw -g window-status-style "NONE,fg=#808080,bg=#18191A"
 setw -g window-status-format "#[fg=#18191A,bg=#18191A,nobold,nounderscore,noitalics]#[default]  #I:#W #F"
 setw -g window-status-current-format "#[fg=#AEAFAD,bg=#18191A,nobold,nounderscore,noitalics]  #I:#W #F"
 
+set -g copy-mode-selection-style "bg=#313131"
+
 set -g @prefix_highlight_output_prefix "#[fg=#C586C0]#[bg=#18191A]#[fg=#C586C0]#[bg=#18191A]"
