@@ -67,7 +67,6 @@ export SUDO_PROMPT="$(tput setaf 1 bold)Password:$(tput sgr0) "
 export EXPO_NO_TYPESCRIPT_SETUP=1
 export EAS_LOCAL_BUILD_WORKINGDIR="$HOME/.tmp"
 export LSP_USE_PLISTS=true
-export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 
 if [[ -n $WAYLAND_DISPLAY ]]; then
   export ELECTRON_OZONE_PLATFORM_HINT=wayland

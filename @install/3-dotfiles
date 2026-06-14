@@ -20,7 +20,6 @@ fi
 mkdir -p "$HOME/.ssh"
 mkdir -p "$HOME/.local/share/applications"
 mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
-mkdir -p "$HOME/.config/opencode"
 mkdir -p "$HOME/.codex"
 sudo mkdir -p /usr/share/chromium/extensions
 sudo mkdir -p /etc/brave/policies/managed
@@ -79,8 +78,6 @@ create_symlink "$HOME/dotfiles/gnupg" "$HOME/.config/gnupg"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/ripgrep" "$HOME/.config/ripgrep"
 create_symlink "$HOME/dotfiles/tealdeer" "$HOME/.config/tealdeer"
-create_symlink "$HOME/dotfiles/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"
-create_symlink "$HOME/dotfiles/opencode/commands" "$HOME/.config/opencode/commands"
 create_symlink "$HOME/dotfiles/codex/config.toml" "$HOME/.codex/config.toml"
 create_symlink "$HOME/dotfiles/codex/themes" "$HOME/.codex/themes"
 

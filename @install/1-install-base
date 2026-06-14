@@ -98,7 +98,6 @@ packages=(
   "noto-fonts-cjk"
   "noto-fonts-emoji"
   "noto-fonts-extra"
-  "opencode-bin"
   "openslide" # Needed by ueberzug
   "openssh"
   "otf-hasklig-nerd"

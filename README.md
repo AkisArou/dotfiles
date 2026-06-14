@@ -19,7 +19,7 @@ X11
 Common
 
 - Editor:
-  nvim (configured for web dev + opencode),
+  nvim,
   emacs,
   vim (minimal config),
   vscode (configuration at .vscode)
@@ -29,7 +29,6 @@ Common
 - Notifications: dunst
 - Shell: zsh
 - Screenshot: flameshot
-- AI: opencode
 
 Also:
 

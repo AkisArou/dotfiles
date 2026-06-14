@@ -118,7 +118,7 @@ vim.api.nvim_create_autocmd("FileType", {
 -- wrapping and better opts for filetypes
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("wrap"),
-  pattern = { "gitcommit", "markdown", "opencode_output" },
+  pattern = { "gitcommit", "markdown" },
   callback = function()
     vim.opt_local.wrap = true
 
