@@ -35,6 +35,10 @@ url = "https://mcp.expo.dev/mcp"
 command = "argent"
 args = ["mcp"]
 
+[mcp_servers.mdn]
+url = "https://mcp.mdn.mozilla.net/"
+http_headers = { "X-Moz-1st-Party-Data-Opt-Out" = "1" }
+
 [mcp_servers.argent.tools.list-devices]
 approval_mode = "approve"
 
