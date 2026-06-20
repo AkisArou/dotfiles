@@ -66,6 +66,7 @@
 (use-package init-dap)
 (use-package init-evil)
 (use-package init-elfeed)
+(use-package init-term)
 
 
 (defun ek/first-install ()

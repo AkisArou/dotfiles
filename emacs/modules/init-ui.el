@@ -116,11 +116,6 @@
   (global-colorful-mode t)
   (add-to-list 'global-colorful-modes 'helpful-mode))
 
-(use-package vterm
-  :ensure t
-  :defer t)
-
-
 ;;; shr
 (setq shr-use-colors nil)
 
