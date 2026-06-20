@@ -81,6 +81,12 @@ map("n", "<leader>`", function()
   vim.api.nvim_win_set_height(0, 15)
 end)
 
+map("n", "<C-w><C-e>", function()
+  vim.cmd.vnew()
+  vim.fn.jobstart(vim.o.shell, { term = true })
+  vim.cmd.startinsert()
+end, { desc = "Terminal in vertical new window" })
+
 map("n", "<leader>cp", require("custom.pnpm").install)
 
 local util = require("custom.util")
