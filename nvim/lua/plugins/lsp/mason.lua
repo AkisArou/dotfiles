@@ -14,7 +14,7 @@ mason.setup({
 
 mason_lspconfig.setup({
   ensure_installed = {
-    "vtsls",
+    "tsgo",
     "lua_ls",
     "jsonls",
     "html",

@@ -15,12 +15,11 @@ vim.lsp.enable({
   "npmls",
   "tailwindcss",
   "taplo",
-  "vtsls",
   "yamlls",
   "oxlint",
   "oxfmt",
   "rust_analyzer",
-  -- "tsgo",
+  "tsgo",
 })
 
 local fzf = require("fzf-lua")
@@ -102,15 +101,6 @@ local function on_attach(client, bufnr)
   map("n", "<C-w><C-f>", ":FzfLua lsp_document_diagnostics<CR>", "Show buffer diagnostics")
 
   map("n", "<leader>cl", "<cmd>LspRestart<CR>", "Restart LSP")
-
-  if client.name == "vtsls" then
-    map("n", "<leader>cqi", function()
-      require("vtsls").commands.remove_unused_imports(bufnr, function()
-        require("conform").format({ bufnr = bufnr, async = false })
-        vim.cmd("silent! w")
-      end)
-    end, "Remove unused imports")
-  end
 
   if client.name == "tsgo" then
     map("n", "<leader>cqi", function()

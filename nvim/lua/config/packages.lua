@@ -130,8 +130,6 @@ vim.pack.add({
 
   gh("stevearc/conform.nvim"),
 
-  gh("yioneko/nvim-vtsls"),
-
   gh("folke/persistence.nvim"),
 
   gh("MunifTanjim/nui.nvim"),
