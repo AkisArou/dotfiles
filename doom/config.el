@@ -44,6 +44,22 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
+;; Match common editor behavior: C-s saves the current buffer.
+(map! "C-s" #'save-buffer)
+
+(defun akisarou/save-buffers-kill-emacs-no-prompt ()
+  (interactive)
+  (save-some-buffers t)
+  (kill-emacs))
+
+(setq confirm-kill-emacs nil
+      confirm-kill-processes nil)
+
+(global-set-key [remap save-buffers-kill-emacs]
+                #'akisarou/save-buffers-kill-emacs-no-prompt)
+(global-set-key [remap save-buffers-kill-terminal]
+                #'akisarou/save-buffers-kill-emacs-no-prompt)
+
 ;; Keep point centered while scrolling, matching the behavior from the old config.
 (setq scroll-preserve-screen-position t
       scroll-conservatively 0
@@ -121,7 +137,83 @@
         lsp-completion-filter-on-incomplete nil
         lsp-completion-sort-initial-results nil))
 
+(defconst akisarou/oxfmt-languages
+  '("javascript" "javascriptreact" "typescript" "typescriptreact"
+    "toml" "json" "jsonc" "json5" "yaml" "html" "vue" "handlebars"
+    "css" "scss" "less" "graphql" "markdown"))
+
+(defconst akisarou/oxfmt-modes
+  '(js-mode js-ts-mode typescript-mode typescript-ts-mode tsx-ts-mode
+    json-mode json-ts-mode jsonc-mode yaml-mode yaml-ts-mode html-mode
+    web-mode css-mode css-ts-mode scss-mode less-css-mode graphql-mode
+    markdown-mode markdown-ts-mode gfm-mode conf-toml-mode toml-ts-mode))
+
+(defconst akisarou/oxlint-languages
+  '("javascript" "javascriptreact" "typescript" "typescriptreact"))
+
 (after! lsp-mode
+  (setq lsp-enable-file-watchers nil)
+
+  (defun akisarou/project-local-bin (name)
+    (when-let* ((root (or (when (fboundp 'doom-project-root)
+                            (doom-project-root))
+                          (locate-dominating-file default-directory "package.json")
+                          (locate-dominating-file default-directory ".git")))
+                (bin (expand-file-name (format "node_modules/.bin/%s" name) root)))
+      (when (file-executable-p bin)
+        bin)))
+
+  (defun akisarou/oxfmt-command ()
+    (list (or (akisarou/project-local-bin "oxfmt") "oxfmt") "--lsp"))
+
+  (defun akisarou/oxlint-command ()
+    (list (akisarou/project-local-bin "oxlint") "--lsp"))
+
+  (defun akisarou/oxlint-available-p ()
+    (and (akisarou/project-local-bin "oxlint") t))
+
+  (defun akisarou/lsp-activate-on-oxfmt-languages (file-name mode)
+    (and (buffer-file-name)
+         (funcall (apply #'lsp-activate-on akisarou/oxfmt-languages)
+                  file-name mode)))
+
+  (defun akisarou/lsp-activate-on-oxlint-languages (file-name mode)
+    (and (akisarou/oxlint-available-p)
+         (funcall (apply #'lsp-activate-on akisarou/oxlint-languages)
+                  file-name mode)))
+
+  (add-to-list 'lsp-language-id-configuration '("\\.json5\\'" . "json5"))
+  (add-to-list 'lsp-language-id-configuration '("\\.hbs\\'" . "handlebars"))
+  (add-to-list 'lsp-language-id-configuration '("\\.handlebars\\'" . "handlebars"))
+
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection #'akisarou/oxfmt-command)
+    :activation-fn #'akisarou/lsp-activate-on-oxfmt-languages
+    :priority -1
+    :add-on? t
+    :server-id 'oxfmt))
+
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection #'akisarou/oxlint-command
+                                           #'akisarou/oxlint-available-p)
+    :activation-fn #'akisarou/lsp-activate-on-oxlint-languages
+    :priority -1
+    :add-on? t
+    :server-id 'oxlint))
+
+  (defun akisarou/oxlint-fix-all ()
+    (interactive)
+    (unless (buffer-file-name)
+      (user-error "Current buffer is not visiting a file"))
+    (if-let ((workspace (lsp-find-workspace 'oxlint (buffer-file-name))))
+        (with-lsp-workspace workspace
+          (lsp-request "workspace/executeCommand"
+                       `(:command "oxc.fixAll"
+                         :arguments [(:uri ,(lsp--buffer-uri))])))
+      (user-error "No oxlint LSP workspace for this buffer")))
+
   ;; Compatibility with tsgo's strict JSON decoder:
   ;; https://github.com/emacs-lsp/lsp-mode/issues/5081
   (defun akisarou/lsp-tsgo-capabilities-a (capabilities)
@@ -167,6 +259,32 @@
               #'akisarou/lsp-omit-nil-request-params-a)
   (advice-add #'lsp-request-async :filter-args
               #'akisarou/lsp-omit-nil-initialize-options-args-a))
+
+(cl-defun akisarou/format-with-oxfmt-lsp (&key buffer scratch callback &allow-other-keys)
+  (with-current-buffer buffer
+    (if-let ((workspace (and buffer-file-name
+                             (lsp-find-workspace 'oxfmt buffer-file-name))))
+        (with-lsp-workspace workspace
+          (if (lsp-feature? "textDocument/formatting")
+              (let ((edits (lsp-request "textDocument/formatting"
+                                        (lsp--make-document-formatting-params))))
+                (unless (seq-empty-p edits)
+                  (with-current-buffer scratch
+                    (lsp--apply-text-edits edits 'format)))
+                (funcall callback))
+            (funcall callback "oxfmt LSP does not support document formatting")))
+      (funcall callback "oxfmt LSP is not running for this buffer"))))
+
+(set-formatter! 'oxfmt-lsp #'akisarou/format-with-oxfmt-lsp
+  :modes akisarou/oxfmt-modes)
+
+(add-hook! '(markdown-mode-local-vars-hook
+             markdown-ts-mode-local-vars-hook
+             gfm-mode-local-vars-hook
+             conf-toml-mode-local-vars-hook
+             toml-ts-mode-local-vars-hook
+             graphql-mode-local-vars-hook)
+           :append #'lsp!)
 
 (after! orderless
   ;; Make Vertico project-file matching fuzzy enough for inputs like
