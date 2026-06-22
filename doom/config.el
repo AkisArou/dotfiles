@@ -32,7 +32,53 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-dark+)
+;; (setq doom-theme 'doom-dark+)
+(setq doom-theme 'vscode-dark-plus)
+
+(defconst akisarou/editor-bg "#18191A")
+
+(defun akisarou/remap-command-line-bg-h ()
+  (face-remap-add-relative 'default :background akisarou/editor-bg)
+  (face-remap-add-relative 'fringe :background akisarou/editor-bg)
+  (face-remap-add-relative 'minibuffer-prompt :background akisarou/editor-bg))
+
+(defun akisarou/apply-vscode-theme-overrides-h ()
+  (let ((bg akisarou/editor-bg)
+        (subtle-bg "#1E2022")
+        (line-number-fg "#4A4D50")
+        (current-line-number-fg "#8A8D91"))
+    (custom-set-faces!
+      `(default :background ,bg)
+      `(fringe :background ,bg)
+      `(hl-line :background ,subtle-bg)
+      `(line-number :foreground ,line-number-fg :background ,bg)
+      `(line-number-current-line :foreground ,current-line-number-fg :background ,subtle-bg)
+      `(minibuffer-prompt :background ,bg)
+      `(vertical-border :background ,bg)
+      `(mode-line :background ,bg)
+      `(mode-line-inactive :background ,bg)
+      `(doom-modeline :background ,bg)
+      `(doom-modeline-inactive :background ,bg)
+      `(doom-modeline-bar :background ,bg)
+      `(doom-modeline-bar-inactive :background ,bg))))
+
+(defun akisarou/apply-command-line-bg-h ()
+  (dolist (name '(" *Minibuf-0*" " *Minibuf-1*"
+                  " *Echo Area 0*" " *Echo Area 1*"))
+    (when-let ((buffer (get-buffer name)))
+      (with-current-buffer buffer
+        (akisarou/remap-command-line-bg-h)))))
+
+(add-hook 'doom-load-theme-hook #'akisarou/apply-vscode-theme-overrides-h)
+(add-hook 'doom-load-theme-hook #'akisarou/apply-command-line-bg-h)
+(add-hook 'window-setup-hook #'akisarou/apply-command-line-bg-h)
+(add-hook 'minibuffer-inactive-mode-hook #'akisarou/remap-command-line-bg-h)
+(akisarou/apply-vscode-theme-overrides-h)
+(akisarou/apply-command-line-bg-h)
+
+(add-hook! '+dashboard-mode-hook
+  (face-remap-add-relative 'default :background akisarou/editor-bg)
+  (face-remap-add-relative 'fringe :background akisarou/editor-bg))
 
 ;; Free C-c for Evil escape and minibuffer quit. Doom's default config uses C-c
 ;; as an alternate leader key in `general-override-mode-map', which takes
@@ -74,7 +120,9 @@
           (lambda ()
             (let ((map (copy-keymap (current-local-map))))
               (define-key map (kbd "C-c") #'abort-minibuffers)
-              (setq-local overriding-local-map map))))
+              (setq-local overriding-local-map map))
+            (akisarou/remap-command-line-bg-h)
+            (face-remap-add-relative 'vertico-current :background akisarou/editor-bg)))
 
 (defun akisarou/vertico-backward-kill-word ()
   (interactive)
@@ -197,7 +245,7 @@
   (lsp-register-client
    (make-lsp-client
     :new-connection (lsp-stdio-connection #'akisarou/oxlint-command
-                                           #'akisarou/oxlint-available-p)
+                                          #'akisarou/oxlint-available-p)
     :activation-fn #'akisarou/lsp-activate-on-oxlint-languages
     :priority -1
     :add-on? t

@@ -16,6 +16,9 @@
 (package! codex
   :recipe (:host github :repo "benthamite/codex"))
 
+(package! vscode-dark-plus-theme
+  :recipe (:host github :repo "ianyepan/vscode-dark-plus-emacs-theme"))
+
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
 ;; https://github.com/radian-software/straight.el#the-recipe-format
