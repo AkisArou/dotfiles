@@ -231,8 +231,6 @@
                   file-name mode)))
 
   (add-to-list 'lsp-language-id-configuration '("\\.json5\\'" . "json5"))
-  (add-to-list 'lsp-language-id-configuration '("\\.hbs\\'" . "handlebars"))
-  (add-to-list 'lsp-language-id-configuration '("\\.handlebars\\'" . "handlebars"))
 
   (lsp-register-client
    (make-lsp-client
@@ -257,9 +255,9 @@
       (user-error "Current buffer is not visiting a file"))
     (if-let ((workspace (lsp-find-workspace 'oxlint (buffer-file-name))))
         (with-lsp-workspace workspace
-          (lsp-request "workspace/executeCommand"
-                       `(:command "oxc.fixAll"
-                         :arguments [(:uri ,(lsp--buffer-uri))])))
+                            (lsp-request "workspace/executeCommand"
+                                         `(:command "oxc.fixAll"
+                                           :arguments [(:uri ,(lsp--buffer-uri))])))
       (user-error "No oxlint LSP workspace for this buffer")))
 
   ;; Compatibility with tsgo's strict JSON decoder:
@@ -313,14 +311,14 @@
     (if-let ((workspace (and buffer-file-name
                              (lsp-find-workspace 'oxfmt buffer-file-name))))
         (with-lsp-workspace workspace
-          (if (lsp-feature? "textDocument/formatting")
-              (let ((edits (lsp-request "textDocument/formatting"
-                                        (lsp--make-document-formatting-params))))
-                (unless (seq-empty-p edits)
-                  (with-current-buffer scratch
-                    (lsp--apply-text-edits edits 'format)))
-                (funcall callback))
-            (funcall callback "oxfmt LSP does not support document formatting")))
+                            (if (lsp-feature? "textDocument/formatting")
+                                (let ((edits (lsp-request "textDocument/formatting"
+                                                          (lsp--make-document-formatting-params))))
+                                  (unless (seq-empty-p edits)
+                                    (with-current-buffer scratch
+                                      (lsp--apply-text-edits edits 'format)))
+                                  (funcall callback))
+                              (funcall callback "oxfmt LSP does not support document formatting")))
       (funcall callback "oxfmt LSP is not running for this buffer"))))
 
 (set-formatter! 'oxfmt-lsp #'akisarou/format-with-oxfmt-lsp
