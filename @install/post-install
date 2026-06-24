@@ -40,12 +40,6 @@ Performance
   RUSTFLAGS="-C force-frame-pointers=yes -C target-cpu=native"
 
 
-Applications
-------------
-* Android studio - Use WLToolkit on wayland 
-  modify Android studio desktop file:
-  Exec=sh -c 'set -- "$@"; [ "$XDG_SESSION_TYPE" = wayland ] && set -- "$@" -Dawt.toolkit.name=WLToolkit; exec android-studio "$@"' sh %f
-
 Various
 -------
 * set vconsole font:
