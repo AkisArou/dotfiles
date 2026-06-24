@@ -178,9 +178,6 @@ fi
 install_packages "${packages[@]}"
 
 ~/dotfiles/scripts/build-nvim
-~/dotfiles/scripts/build-emacs
-
-cargo install emacs-lsp-booster
 
 # Install custom issue (login prompt)
 echo ""

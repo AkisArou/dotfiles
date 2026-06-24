@@ -31,7 +31,6 @@ sudo cp "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
 sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
 sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
-sudo ln -sf "$HOME/dotfiles/systemd/user/emacs-preload.service" /etc/systemd/user/emacs-preload.service
 sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 sudo ln -sf "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/policies.json"
 
@@ -62,7 +61,6 @@ create_symlink "$HOME/dotfiles/tmux/.tmux.conf" "$HOME/.tmux.conf"
 create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
 create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
-# create_symlink "$HOME/dotfiles/emacs" "$HOME/.config/emacs"
 create_symlink "$HOME/dotfiles/doom" "$HOME/.config/doom"
 create_symlink "$HOME/dotfiles/sway" "$HOME/.config/sway"
 create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"

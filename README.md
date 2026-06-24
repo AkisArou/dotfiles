@@ -20,7 +20,6 @@ Common
 
 - Editor:
   nvim,
-  emacs,
   vim (minimal config),
   vscode (configuration at .vscode)
 - Browsers: brave, librewolf
@@ -39,6 +38,5 @@ Also:
 ## Screenshots
 
 ![nvim](./.screenshots/nvim.png)
-![emacs](./.screenshots/emacs.png)
 ![rofi](./.screenshots/rofi.png)
 ![ls](./.screenshots/ls.png)
