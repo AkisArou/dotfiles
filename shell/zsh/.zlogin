@@ -1,6 +1,6 @@
 # set Linux console colors
 if [ "$TERM" = "linux" ]; then
-  printf "\033]P0%s" "121314"
+  printf "\033]P0%s" "18191a"
   printf "\033]P1%s" "f44747"
   printf "\033]P2%s" "608b4e"
   printf "\033]P3%s" "dcdcaa"
