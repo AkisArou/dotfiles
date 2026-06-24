@@ -2,25 +2,6 @@
 
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
-FZF_TOKYONIGHT="\
-  --color=bg:#000000 \
-  --color=bg+:#16161e  \
-  --color=border:#27a1b9 \
-  --color=fg:#d4d4d4 \
-  --color=gutter:#16161e \
-  --color=header:#434a65 \
-  --color=hl+:#7dcfff \
-  --color=hl:#7dcfff \
-  --color=info:#545c7e \
-  --color=marker:#545c7e \
-  --color=pointer:#545c7e \
-  --color=prompt:#a9b7e8 \
-  --color=query:#a9b7e8 \
-  --color=scrollbar:#27a1b9 \
-  --color=separator:#292e42 \
-  --color=spinner:#ff007c \
-"
-
 FZF_VSCODE="\
   --color=bg:#18191a \
   --color=bg+:#1f1f1f \
@@ -65,7 +46,6 @@ export FZF_DEFAULT_OPTS="$FZF_DEFAULT_OPTS \
   $(eval echo \$"$FZF_THEME")
 "
 
-FZF_TAB_TOKYONIGHT="--color=fg:#c0caf5,bg:#16161e,fg+:#c0caf5,bg+:#343a55"
 FZF_TAB_VSCODE="--color=fg:#808080,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F"
 
 FZF_TAB_THEME="FZF_$(echo "$THEME" | tr "[:lower:]" "[:upper:]")"

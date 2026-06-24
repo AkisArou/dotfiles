@@ -51,7 +51,6 @@ end
 
 vim.pack.add({
   gh("j-hui/fidget.nvim"),
-  gh("folke/tokyonight.nvim"),
   gh("nvim-lua/plenary.nvim"),
   gh("nvim-lualine/lualine.nvim"),
   gh("arnamak/stay-centered.nvim"),

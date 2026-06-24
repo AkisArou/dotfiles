@@ -3,16 +3,12 @@
 set -eu
 
 # Color palette
-tokyonight="#7aa2f7"
 vscode="#569CD6"
 
 CONFIG_FILE="$HOME/dotfiles/waybar/config.jsonc"
 THEME="${1:-vscode}"
 
 case "$THEME" in
-tokyonight)
-  NEW_COLOR="$tokyonight"
-  ;;
 vscode)
   NEW_COLOR="$vscode"
   ;;

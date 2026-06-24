@@ -29,7 +29,6 @@ fi
 packages=(
   "7zip"
   "acpi"
-  "adw-gtk-theme"
   "alacritty"
   "android-studio"
   "asdf-vm"
@@ -70,7 +69,6 @@ packages=(
   "gnupg"
   "go"
   "grim"
-  "gtk-engine-murrine" # Needed by gtk tokyonight
   "gvim"
   "htop"
   "imagemagick"

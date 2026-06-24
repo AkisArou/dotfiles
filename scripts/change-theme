@@ -1,6 +1,6 @@
 #!/usr/bin/zsh
 
-VALID_THEMES=("tokyonight" "vscode")
+VALID_THEMES=("vscode")
 
 SELECTED_THEME=$1
 
