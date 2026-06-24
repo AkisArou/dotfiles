@@ -6,7 +6,7 @@ clear
 echo "Applying system config..."
 echo "-------------------------"
 
-sudo usermod -aG wheel,audio,video,docker,network,adm,input,storage "$USER"
+sudo usermod -aG wheel,audio,video,docker,network,adm,input,storage,wireshark "$USER"
 
 print_info "Enabling systemctl daemons..."
 loginctl enable-linger
