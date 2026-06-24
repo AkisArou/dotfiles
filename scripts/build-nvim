@@ -4,6 +4,7 @@ INSTALL_DIR="$HOME/neovim"
 REPO_URL="https://github.com/neovim/neovim"
 NAME="Neovim"
 BIN_DIR=bin
+GLOBAL_BIN="/usr/local/bin/nvim"
 
 build_neovim() {
   local CFLAGS="-O2 -march=native"
@@ -16,6 +17,8 @@ build_neovim() {
     CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
 
   make install
+
+  sudo ln -sfn "$INSTALL_DIR/bin/nvim" "$GLOBAL_BIN"
 }
 
 post_build_neovim() {
