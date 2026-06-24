@@ -185,8 +185,12 @@ nnoremap <silent> ]q :cnext<CR>
 
 
 if !empty($WAYLAND_DISPLAY)
-  autocmd TextYankPost * if (v:event.operator == 'y' || v:event.operator == 'd') | silent! execute 'call system("wl-copy", @")' | endif
-  nnoremap p :let @"=substitute(system("wl-paste --no-newline"), '<C-v><C-m>', '', 'g')<cr>p
+  augroup wayland_clipboard
+    autocmd!
+    autocmd TextYankPost * if v:event.operator ==# 'y' || v:event.operator ==# 'd' | silent! call system('wl-copy', @") | endif
+  augroup END
+
+  nnoremap <silent> p :let @" = system('wl-paste --no-newline')<CR>p
 endif
 
 
