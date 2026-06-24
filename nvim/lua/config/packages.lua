@@ -50,13 +50,13 @@ local function gh(value)
 end
 
 vim.pack.add({
+  gh("Mofiqul/vscode.nvim"),
   gh("j-hui/fidget.nvim"),
   gh("nvim-lua/plenary.nvim"),
   gh("nvim-lualine/lualine.nvim"),
   gh("arnamak/stay-centered.nvim"),
   gh("fei6409/log-highlight.nvim"),
   gh("3rd/image.nvim"),
-  gh("Mofiqul/vscode.nvim"),
 
   gh("Bilal2453/luvit-meta"),
 
