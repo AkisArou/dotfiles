@@ -95,7 +95,7 @@ vim.pack.add({
   gh("nvim-neotest/nvim-nio"),
   gh("antoinemadec/FixCursorHold.nvim"),
   gh("nvim-neotest/neotest"),
-  gh("markandrus/neotest-node-test-runner"),
+  gh("AkisArou/neotest-nodejs"),
 
   gh("catgoose/nvim-colorizer.lua"),
 

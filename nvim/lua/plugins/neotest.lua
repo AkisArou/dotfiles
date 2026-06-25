@@ -32,7 +32,11 @@ vim.keymap.set("n",  "<leader>tw", function() require("neotest").watch.toggle(vi
 require("neotest").setup({
   status = { virtual_text = true },
   output = { open_on_run = true },
-  adapters = { require("neotest-node-test-runner") },
+  adapters = {
+    require("neotest-nodejs")({
+      nodeCommand = "node",
+    }),
+  },
 })
 
 vim.keymap.set("n", "<leader>td", function()
