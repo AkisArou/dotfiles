@@ -99,8 +99,6 @@ vim.pack.add({
 
   gh("catgoose/nvim-colorizer.lua"),
 
-  gh("mfussenegger/nvim-lint"),
-
   gh("stevearc/overseer.nvim"),
 
   gh("b0o/SchemaStore.nvim"),
@@ -156,7 +154,6 @@ vim.schedule(function()
   require("plugins.lsp.conform")
   require("plugins.lsp.lsp")
   require("plugins.lsp.mason")
-  require("plugins.nvim-lint")
   require("plugins.lsp.blink")
   require("plugins.dap")
   require("plugins.overseer")
