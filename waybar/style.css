@@ -31,10 +31,11 @@ window#waybar #window {
   border-radius: 0;
   min-width: 0;
   transition: none;
+  box-shadow: none;
 }
 
 #workspaces button:hover {
-  background: @button-hover-background;
+  background: inherit;
 }
 
 #workspaces button.focused,
@@ -46,6 +47,10 @@ window#waybar #window {
 #workspaces button.urgent {
   background-color: @button-urgent-background;
   color: @button-urgent-color;
+}
+
+button:hover {
+  box-shadow: none;
 }
 
 label.module {
