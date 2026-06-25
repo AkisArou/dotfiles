@@ -13,6 +13,12 @@
 --   end
 -- end
 
+-- vim.api.nvim_create_autocmd("PackChanged", {
+--   callback = function(event)
+--     local name = event.data.spec.name
+--   end,
+-- })
+
 function Delete_unused_packs()
   vim.pack.del(vim
     .iter(vim.pack.get())
@@ -24,12 +30,6 @@ function Delete_unused_packs()
     end)
     :totable())
 end
-
--- vim.api.nvim_create_autocmd("PackChanged", {
---   callback = function(event)
---     local name = event.data.spec.name
---   end,
--- })
 
 ---@param value string|vim.pack.Spec
 ---@param url string

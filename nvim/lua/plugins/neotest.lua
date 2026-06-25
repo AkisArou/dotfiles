@@ -28,6 +28,8 @@ vim.keymap.set("n",  "<leader>tO", function() require("neotest").output_panel.to
 vim.keymap.set("n",  "<leader>tS", function() require("neotest").run.stop() end, {desc = "Stop (Neotest)" })
 -- stylua: ignore
 vim.keymap.set("n",  "<leader>tw", function() require("neotest").watch.toggle(vim.fn.expand("%")) end, {desc = "Toggle Watch (Neotest)" })
+-- stylua: ignore
+vim.keymap.set("n", "<leader>td", function() require("neotest").run.run({ strategy = "dap" }) end, { desc = "Debug Nearest" })
 
 require("neotest").setup({
   status = { virtual_text = true },
@@ -39,8 +41,7 @@ require("neotest").setup({
   },
 })
 
-vim.keymap.set("n", "<leader>td", function()
-  require("neotest").run.run({ strategy = "dap" })
-end, {
-  desc = "Debug Nearest",
+vim.api.nvim_exec_autocmds("User", {
+  pattern = "NeotestReady",
+  modeline = false,
 })
