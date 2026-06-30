@@ -18,6 +18,7 @@ fi
 
 # create dirs
 mkdir -p "$HOME/.ssh"
+mkdir -p "$HOME/.themes"
 mkdir -p "$HOME/.local/share/applications"
 mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
 mkdir -p "$HOME/.codex"
@@ -72,6 +73,7 @@ create_symlink "$HOME/dotfiles/paru" "$HOME/.config/paru"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/qt6ct" "$HOME/.config/qt6ct"
 create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
+create_symlink "$HOME/dotfiles/gtk/themes/VSCode-Dark" "$HOME/.themes/VSCode-Dark"
 create_symlink "$HOME/dotfiles/gnupg" "$HOME/.config/gnupg"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/ripgrep" "$HOME/.config/ripgrep"

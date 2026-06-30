@@ -1,0 +1,36 @@
+gtk-color-scheme = "fg_color:#d4d4d4\nbg_color:#18191a\nbase_color:#18191a\ntext_color:#d4d4d4\nselected_bg_color:#264f78\nselected_fg_color:#d4d4d4\ntooltip_bg_color:#202020\ntooltip_fg_color:#bbbbbb"
+gtk-icon-theme-name = "Adwaita"
+gtk-theme-name = "VSCode-Dark"
+
+style "vscode-dark-default" {
+  GtkWidget::focus-line-width = 1
+  GtkWidget::focus-padding = 1
+  GtkButton::default-border = { 0, 0, 0, 0 }
+  GtkButton::default-outside-border = { 0, 0, 0, 0 }
+
+  fg[NORMAL] = @fg_color
+  fg[PRELIGHT] = @fg_color
+  fg[ACTIVE] = @fg_color
+  fg[SELECTED] = @selected_fg_color
+  fg[INSENSITIVE] = "#808080"
+
+  bg[NORMAL] = @bg_color
+  bg[PRELIGHT] = "#373737"
+  bg[ACTIVE] = "#264f78"
+  bg[SELECTED] = @selected_bg_color
+  bg[INSENSITIVE] = "#202020"
+
+  base[NORMAL] = @base_color
+  base[PRELIGHT] = "#252526"
+  base[ACTIVE] = "#264f78"
+  base[SELECTED] = @selected_bg_color
+  base[INSENSITIVE] = "#202020"
+
+  text[NORMAL] = @text_color
+  text[PRELIGHT] = @text_color
+  text[ACTIVE] = @text_color
+  text[SELECTED] = @selected_fg_color
+  text[INSENSITIVE] = "#808080"
+}
+
+class "*" style "vscode-dark-default"

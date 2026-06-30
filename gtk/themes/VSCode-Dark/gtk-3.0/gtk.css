@@ -1,0 +1,320 @@
+@define-color vsc_front #d4d4d4;
+@define-color vsc_back #18191a;
+@define-color vsc_tab_current #18191a;
+@define-color vsc_tab_other #2d2d2d;
+@define-color vsc_tab_outside #252526;
+@define-color vsc_left_mid #373737;
+@define-color vsc_left_light #636369;
+@define-color vsc_popup_front #bbbbbb;
+@define-color vsc_popup_back #202020;
+@define-color vsc_popup_highlight_blue #04395e;
+@define-color vsc_popup_highlight_gray #343b41;
+@define-color vsc_split_light #898989;
+@define-color vsc_split_dark #444444;
+@define-color vsc_selection #264f78;
+@define-color vsc_blue #569cd6;
+@define-color vsc_accent_blue #4fc1ff;
+@define-color vsc_red #f44747;
+@define-color vsc_green #6a9955;
+@define-color vsc_yellow #dcdcaa;
+@define-color vsc_orange #f28b25;
+@define-color vsc_disabled #808080;
+
+* {
+  -gtk-icon-theme: "Adwaita";
+  -gtk-secondary-caret-color: @vsc_accent_blue;
+  background-clip: padding-box;
+  color: @vsc_front;
+  outline-color: alpha(@vsc_accent_blue, 0.55);
+  outline-style: solid;
+  outline-width: 0;
+  outline-offset: -3px;
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+
+window,
+dialog,
+messagedialog,
+.background {
+  background-color: @vsc_back;
+  color: @vsc_front;
+}
+
+.csd,
+.solid-csd {
+  border-radius: 0;
+  box-shadow: 0 0 0 1px @vsc_split_dark;
+}
+
+headerbar,
+titlebar,
+placessidebar,
+stacksidebar,
+paned > separator,
+notebook > header {
+  background-color: @vsc_tab_outside;
+  color: @vsc_front;
+  border-color: @vsc_split_dark;
+}
+
+headerbar,
+titlebar {
+  min-height: 34px;
+  padding: 0 8px;
+  border-bottom: 1px solid @vsc_split_dark;
+}
+
+headerbar:backdrop,
+titlebar:backdrop,
+window:backdrop {
+  color: @vsc_popup_front;
+  background-color: @vsc_popup_back;
+}
+
+label,
+text,
+entry,
+button,
+treeview,
+iconview,
+rubberband,
+calendar,
+popover,
+menu,
+menuitem,
+tooltip {
+  color: @vsc_front;
+}
+
+entry,
+spinbutton,
+combobox box,
+textview text,
+searchbar,
+toolbar,
+actionbar,
+infobar,
+viewport,
+list,
+row,
+treeview.view,
+iconview.view,
+.view {
+  background-color: @vsc_tab_current;
+  color: @vsc_front;
+}
+
+entry,
+spinbutton,
+combobox box,
+textview,
+treeview.view,
+iconview.view,
+.view {
+  border: 1px solid @vsc_split_dark;
+}
+
+entry,
+spinbutton {
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 3px;
+}
+
+entry:focus,
+spinbutton:focus,
+textview:focus,
+treeview.view:focus,
+iconview.view:focus {
+  border-color: @vsc_accent_blue;
+  box-shadow: inset 0 0 0 1px @vsc_accent_blue;
+}
+
+entry:disabled,
+spinbutton:disabled,
+button:disabled,
+label:disabled,
+.view:disabled {
+  color: @vsc_disabled;
+  background-color: @vsc_popup_back;
+}
+
+button {
+  min-height: 28px;
+  min-width: 28px;
+  padding: 4px 10px;
+  border: 1px solid @vsc_split_dark;
+  border-radius: 3px;
+  background-color: @vsc_tab_other;
+  color: @vsc_front;
+}
+
+button:hover {
+  background-color: @vsc_left_mid;
+  border-color: @vsc_left_light;
+}
+
+button:active,
+button:checked {
+  background-color: @vsc_selection;
+  border-color: @vsc_blue;
+}
+
+button.suggested-action,
+button.default {
+  background-color: @vsc_popup_highlight_blue;
+  border-color: @vsc_blue;
+  color: @vsc_front;
+}
+
+button.destructive-action {
+  background-color: @vsc_red;
+  border-color: @vsc_red;
+  color: @vsc_back;
+}
+
+selection,
+entry selection,
+textview text selection,
+treeview.view:selected,
+iconview.view:selected,
+row:selected,
+modelbutton:selected,
+menuitem:hover {
+  background-color: @vsc_selection;
+  color: @vsc_front;
+}
+
+row:hover,
+treeview.view:hover,
+iconview.view:hover,
+button.flat:hover {
+  background-color: @vsc_popup_highlight_gray;
+}
+
+notebook > header > tabs > tab {
+  min-height: 30px;
+  padding: 4px 10px;
+  background-color: @vsc_tab_other;
+  color: @vsc_popup_front;
+  border: 1px solid @vsc_split_dark;
+}
+
+notebook > header > tabs > tab:checked {
+  background-color: @vsc_tab_current;
+  color: @vsc_front;
+  border-bottom-color: @vsc_tab_current;
+}
+
+popover,
+menu,
+.menu,
+tooltip {
+  background-color: @vsc_popup_back;
+  border: 1px solid @vsc_split_dark;
+  color: @vsc_popup_front;
+}
+
+tooltip {
+  padding: 6px;
+  border-radius: 3px;
+}
+
+menubar,
+menubar > menuitem {
+  background-color: @vsc_tab_outside;
+  color: @vsc_front;
+}
+
+menubar > menuitem:hover,
+menuitem:hover {
+  background-color: @vsc_selection;
+  color: @vsc_front;
+}
+
+scrollbar {
+  background-color: @vsc_tab_outside;
+  border: none;
+}
+
+scrollbar slider {
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: 0;
+  background-color: @vsc_split_dark;
+}
+
+scrollbar slider:hover {
+  background-color: @vsc_split_light;
+}
+
+progressbar trough,
+scale trough,
+levelbar trough {
+  background-color: @vsc_popup_back;
+  border: 1px solid @vsc_split_dark;
+  border-radius: 3px;
+}
+
+progressbar progress,
+scale highlight,
+levelbar block.filled {
+  background-color: @vsc_blue;
+  border-color: @vsc_blue;
+}
+
+check,
+radio {
+  min-width: 16px;
+  min-height: 16px;
+  border: 1px solid @vsc_split_light;
+  background-color: @vsc_tab_current;
+  color: @vsc_front;
+}
+
+radio {
+  border-radius: 999px;
+}
+
+check:checked,
+radio:checked,
+switch:checked {
+  background-color: @vsc_blue;
+  border-color: @vsc_blue;
+}
+
+switch {
+  background-color: @vsc_split_dark;
+  border: 1px solid @vsc_split_dark;
+  border-radius: 999px;
+}
+
+switch slider {
+  background-color: @vsc_front;
+  border-radius: 999px;
+}
+
+separator {
+  background-color: @vsc_split_dark;
+  min-width: 1px;
+  min-height: 1px;
+}
+
+.error,
+entry.error {
+  color: @vsc_red;
+  border-color: @vsc_red;
+}
+
+.warning {
+  color: @vsc_orange;
+}
+
+.success {
+  color: @vsc_green;
+}
+
+.dim-label {
+  color: @vsc_disabled;
+}

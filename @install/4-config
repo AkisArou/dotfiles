@@ -18,7 +18,7 @@ sudo systemctl enable --now power-profiles-daemon
 
 print_info "Setting up gnome settings..."
 if command -v gsettings &>/dev/null; then
-  gsettings set org.gnome.desktop.interface gtk-theme Default-dark
+  "$HOME/dotfiles/gtk/set-theme" vscode
   gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
   gsettings set org.gnome.desktop.interface icon-theme Adwaita
   gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33

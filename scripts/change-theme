@@ -39,6 +39,9 @@ p10k reload
 # xResources
 "$HOME/dotfiles/xorg/set-theme" $THEME
 
+# GTK
+"$HOME/dotfiles/gtk/set-theme" $THEME
+
 # Polybar
 "$HOME/dotfiles/polybar/set-theme" $THEME
 "$HOME/dotfiles/polybar/init"

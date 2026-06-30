@@ -1,0 +1,39 @@
+@import url("../gtk-3.0/gtk.css");
+
+windowcontrols button {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+}
+
+popover contents,
+popover arrow {
+  background-color: @vsc_popup_back;
+  border-color: @vsc_split_dark;
+}
+
+listview,
+columnview,
+gridview {
+  background-color: @vsc_back;
+  color: @vsc_front;
+}
+
+listview row,
+columnview row,
+gridview child {
+  background-color: transparent;
+  color: @vsc_front;
+}
+
+listview row:selected,
+columnview row:selected,
+gridview child:selected {
+  background-color: @vsc_selection;
+  color: @vsc_front;
+}
+
+navigation-sidebar row:selected,
+navigation-sidebar row:hover {
+  background-color: @vsc_popup_highlight_gray;
+}
