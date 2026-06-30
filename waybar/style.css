@@ -32,6 +32,7 @@ window#waybar #window {
   min-width: 0;
   transition: none;
   box-shadow: none;
+  background: inherit;
 }
 
 #workspaces button:hover {
