@@ -2,10 +2,10 @@
 :root {
   /* Base colors */
   --vsc-front: #d4d4d4;
-  --vsc-back: #1f1f1f;
+  --vsc-back: #18191a;
 
   /* Tab colors */
-  --vsc-tab-current: #1f1f1f;
+  --vsc-tab-current: #18191a;
   --vsc-tab-other: #2d2d2d;
   --vsc-tab-outside: #252526;
 
