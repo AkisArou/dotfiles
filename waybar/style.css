@@ -58,6 +58,7 @@ label.module {
   margin-right: 10px;
 }
 
+#pulseaudio,
 #bluetooth,
 #network {
   opacity: 0.8;
