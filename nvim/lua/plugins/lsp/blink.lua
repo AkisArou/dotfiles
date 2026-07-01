@@ -1,3 +1,5 @@
+vim.g.disable_blink_treesitter = true
+
 require("lazydev").setup({
   library = {
     { path = "${3rd}/luv/library", words = { "vim%.uv" } },

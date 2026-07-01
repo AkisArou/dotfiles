@@ -1,7 +1,6 @@
 local bgColor = "#18191A"
 
 vim.o.background = "dark"
-vim.g.disable_blink_treesitter = true
 
 require("vscode").setup({
   color_overrides = {
