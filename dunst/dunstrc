@@ -16,7 +16,7 @@
     icon_corner_radius = 0
     indicate_hidden = yes
     separator_height = 2
-    padding = 1
+    padding = 4
     horizontal_padding = 8
     text_icon_padding = 8
     gap_size = 0
@@ -58,14 +58,14 @@
 [urgency_low]
     background = "#222222"
     foreground = "#d4d4d4"
-    frame_color = "#18191a"
+    frame_color = "#121212"
 
 [urgency_normal]
     background = "#222222"
     foreground = "#d4d4d4"
-    frame_color = "#18191a"
+    frame_color = "#121212"
 
 [urgency_critical]
     background = "#222222"
     foreground = "#d4d4d4"
-    frame_color = "#18191a"
+    frame_color = "#121212"
