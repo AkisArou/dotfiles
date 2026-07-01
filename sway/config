@@ -18,7 +18,7 @@ set $up k
 set $right l
 
 set $term ~/dotfiles/foot/launch
-set $menu ~/dotfiles/rofi/launch -show drun
+set $menu rofi -show drun
 
 #
 ### Output configuration
@@ -93,8 +93,7 @@ bindsym $mod+Shift+r reload
 bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
 bindsym $mod+Shift+e exec ~/dotfiles/rofi/emulator
 bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
-bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
-bindsym $mod+Shift+bracketleft exec ~/dotfiles/rofi/launch -modi emoji -show emoji
+bindsym $mod+Shift+bracketleft exec rofi -modi emoji -show emoji
 
 bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
 bindsym $mod+less exec dunstctl close-all

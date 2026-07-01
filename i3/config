@@ -25,7 +25,7 @@ set $up k
 set $right l
 
 set $term st
-set $menu ~/dotfiles/rofi/launch -show drun
+set $menu rofi -show drun
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
@@ -66,8 +66,7 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+b exec ~/dotfiles/rofi/bluetooth
 bindsym $mod+Shift+e exec ~/dotfiles/rofi/emulator
 bindsym $mod+Shift+q exec ~/dotfiles/rofi/powermenu
-bindsym $mod+Shift+Alt+t exec ~/dotfiles/rofi/theme
-bindsym $mod+Shift+bracketleft exec ~/dotfiles/rofi/launch -modi emoji -show emoji
+bindsym $mod+Shift+bracketleft exec rofi -modi emoji -show emoji
 
 bindsym $mod+Shift+g exec ~/dotfiles/scripts/start-genymotion-emulator
 bindsym $mod+less exec dunstctl close-all

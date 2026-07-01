@@ -1,7 +1,5 @@
 source ~/dotfiles/scripts/hw-info
 
-export DEFAULT_THEME=vscode
-
 [ "$HOST" = "arch-desktop" ] && export ULTRAWIDE=1
 
 if gpu_has_amd; then
@@ -16,12 +14,18 @@ config_wayland() {
   export XDG_SESSION_TYPE=wayland
   export SDL_VIDEODRIVER=wayland
   export _JAVA_AWT_WM_NONREPARENTING=1
+  export ROFI_DPI=-1
   # export QT_QPA_PLATFORM=wayland # Disable for android emulator for now
 }
 
 config_xorg() {
   export MOZ_USE_XINPUT2=1
   export MOZ_X11_EGL=1
+  if [ "$ULTRAWIDE" ]; then
+    export ROFI_DPI=-1
+  else
+    export ROFI_DPI=152
+  fi
 }
 
 # WM functions

@@ -3,7 +3,6 @@
 if [ ! -f "$HOME/.env" ]; then
   touch "$HOME/.env"
   echo 'DESKTOP_MAC=""' >>"$HOME/.env"
-  echo "THEME=vscode" >>"$HOME/.env"
   echo "EXPO_TOKEN=12345" >>"$HOME/.env"
   echo "SENTRY_AUTH_TOKEN=12345" >>"$HOME/.env"
   echo "Created ~/.env file."

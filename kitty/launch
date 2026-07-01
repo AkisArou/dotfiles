@@ -1,9 +1,0 @@
-#!/usr/bin/zsh
-
-if [ -f ~/.env ]; then
-  source ~/.env
-fi
-
-kitty \
-  -o "include ~/dotfiles/kitty/${THEME:-$DEFAULT_THEME}.conf" \
-  "$@"

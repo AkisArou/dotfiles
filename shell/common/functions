@@ -1,9 +1,5 @@
 #!/usr/bin/zsh
 
-lazygit() {
-  ~/dotfiles/lazygit/launch-lazygit "$@"
-}
-
 fv() {
   local file
   file="$(

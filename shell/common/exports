@@ -8,11 +8,8 @@ fi
 
 . ~/dotfiles/shell/common/fzf
 
-export THEME="${THEME:-$DEFAULT_THEME}"
 export QT_QPA_PLATFORMTHEME=qt6ct
-export BAT_THEME=$THEME
-export BAT_STYLE="changes,header-filename,numbers,snip"
-export JQ_COLORS="0;90:38;5;180:38;5;180:37:38;5;107:37:37:38;5;117" #vscode
+export JQ_COLORS="0;90:38;5;180:38;5;180:37:38;5;107:37:37:38;5;117"
 
 export TMPDIR=/tmp
 export ZSH_COMPDUMP="${ZDOTFILES}/.zcompdump"

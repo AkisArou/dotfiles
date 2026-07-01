@@ -17,8 +17,28 @@ sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
 
 print_info "Setting up gnome settings..."
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
+cat >"$HOME/.config/gtk-3.0/settings.ini" <<EOF
+[Settings]
+gtk-theme-name=VSCode-Dark
+gtk-application-prefer-dark-theme=true
+gtk-icon-theme-name=Adwaita
+gtk-cursor-theme-name=Adwaita
+EOF
+cat >"$HOME/.config/gtk-4.0/settings.ini" <<EOF
+[Settings]
+gtk-theme-name=VSCode-Dark
+gtk-application-prefer-dark-theme=true
+gtk-icon-theme-name=Adwaita
+gtk-cursor-theme-name=Adwaita
+EOF
+cat >"$HOME/.gtkrc-2.0" <<EOF
+gtk-theme-name="VSCode-Dark"
+gtk-icon-theme-name="Adwaita"
+gtk-cursor-theme-name="Adwaita"
+EOF
 if command -v gsettings &>/dev/null; then
-  "$HOME/dotfiles/gtk/set-theme" vscode
+  gsettings set org.gnome.desktop.interface gtk-theme VSCode-Dark
   gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
   gsettings set org.gnome.desktop.interface icon-theme Adwaita
   gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33

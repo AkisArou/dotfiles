@@ -17,4 +17,4 @@ source "$HOME/dotfiles/shell/common/functions"
 source "$HOME/dotfiles/shell/zsh/.p10k.zsh"
 [ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ] && . "$HOME/.asdf/plugins/java/set-java-home.zsh"
 
-fast-theme XDG:"${THEME:-vscode}" &>/dev/null
+fast-theme XDG:vscode &>/dev/null

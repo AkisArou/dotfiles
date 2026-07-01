@@ -1,5 +1,3 @@
-vim.g.os_theme = os.getenv("THEME") or "vscode"
-
 vim.g.is_difftool = vim.iter(vim.v.argv):any(function(a)
   return a:find("DiffTool")
 end)

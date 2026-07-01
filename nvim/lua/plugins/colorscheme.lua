@@ -60,10 +60,6 @@ local themes = {
   end,
 }
 
-local selectedTheme = vim.g.os_theme or "vscode"
+themes.vscode()
 
-if themes[selectedTheme] then
-  themes[selectedTheme]()
-end
-
-pcall(vim.cmd.colorscheme, selectedTheme)
+pcall(vim.cmd.colorscheme, "vscode")

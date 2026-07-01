@@ -1,5 +1,0 @@
-#!/usr/bin/zsh
-
-theme=$(echo -e "vscode" | ~/dotfiles/rofi/launch -dmenu -p "Theme")
-
-~/dotfiles/scripts/change-theme $theme

@@ -1,9 +1,0 @@
-#!/usr/bin/zsh
-
-if [ -f ~/.env ]; then
-  source ~/.env
-fi
-
-alacritty \
-  -o "general.import=['~/dotfiles/alacritty/${THEME:-vscode}.toml']" \
-  "$@"

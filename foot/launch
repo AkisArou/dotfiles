@@ -1,9 +1,5 @@
 #!/usr/bin/zsh
 
-if [ -f ~/.env ]; then
-  source ~/.env
-fi
-
 FONT=HasklugNerdFontMono-Regular:size=
 
 if [ "$ULTRAWIDE" ]; then
@@ -12,4 +8,4 @@ else
   FONT="$FONT"10
 fi
 
-foot --override include=~/dotfiles/foot/vscode.ini --font="$FONT" "$@"
+foot --font="$FONT" "$@"
