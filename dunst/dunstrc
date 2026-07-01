@@ -53,3 +53,19 @@
 
 [experimental]
     per_monitor_dpi = false
+
+
+[urgency_low]
+    background = "#222222"
+    foreground = "#d4d4d4"
+    frame_color = "#18191a"
+
+[urgency_normal]
+    background = "#222222"
+    foreground = "#d4d4d4"
+    frame_color = "#18191a"
+
+[urgency_critical]
+    background = "#222222"
+    foreground = "#d4d4d4"
+    frame_color = "#18191a"
