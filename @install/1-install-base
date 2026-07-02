@@ -114,7 +114,6 @@ packages=(
   "python-pipx"
   "qt6ct"
   "qt6-wayland"
-  "ripdrag-git"
   "ripgrep"
   "rofi"
   "rofi-emoji"
