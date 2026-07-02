@@ -16,6 +16,7 @@ _comp_options+=(globdots) # Include hidden files.
 unsetopt BEEP
 setopt AUTO_CD
 setopt GLOB_DOTS
+setopt NUMERIC_GLOB_SORT
 setopt NOMATCH
 setopt MENU_COMPLETE
 setopt EXTENDED_GLOB
