@@ -17,10 +17,10 @@
   min-height: 0;
   padding: 0;
   margin: 0;
+  color: @bar-foreground;
 }
 
 window#waybar {
-  color: @bar-foreground;
   background-color: @bar-background;
 }
 
