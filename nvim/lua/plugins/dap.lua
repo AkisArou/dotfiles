@@ -39,6 +39,7 @@ end
 
 local chrome_type = "pwa-chrome"
 local node_type = "pwa-node"
+local react_native_type = "reactnativedirect"
 local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
 
 local vscode = require("dap.ext.vscode")
@@ -78,6 +79,12 @@ require("dap-react-native").setup()
 for _, language in ipairs(js_filetypes) do
   if not dap.configurations[language] then
     dap.configurations[language] = {
+      {
+        type = react_native_type,
+        request = "attach",
+        name = "React Native: Attach Hermes",
+        cwd = "${workspaceFolder}",
+      },
       {
         type = chrome_type,
         name = "React: Attach",
