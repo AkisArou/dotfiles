@@ -39,16 +39,16 @@ end
 
 local chrome_type = "pwa-chrome"
 local node_type = "pwa-node"
+local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
 
-require("dap.ext.vscode").json_decode = function(str)
+local vscode = require("dap.ext.vscode")
+vscode.json_decode = function(str)
   local config = vim.json.decode(require("plenary.json").json_strip_comments(str))
 
-  for _, item in ipairs(config.configurations) do
+  for _, item in ipairs(config.configurations or {}) do
     if item.type == "chrome" then
       item.type = chrome_type
     elseif item.type == "node" then
-      item.type = node_type
-    elseif item.type == "reactnativedirect" then
       item.type = node_type
     end
   end
@@ -62,21 +62,18 @@ local js_debug_adapter_opts = {
   port = "${port}",
   executable = {
     command = "node",
-          -- stylua: ignore
-          args = {
-            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js", "${port}" , "localhost",
-          },
+    args = {
+      vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+      "${port}",
+      "localhost",
+    },
   },
 }
 
 dap.adapters[node_type] = js_debug_adapter_opts
 dap.adapters[chrome_type] = js_debug_adapter_opts
 
-local js_filetypes = { "typescript", "javascript", "typescriptreact", "javascriptreact" }
-
-local vscode = require("dap.ext.vscode")
-vscode.type_to_filetypes["node"] = js_filetypes
-vscode.type_to_filetypes["pwa-node"] = js_filetypes
+require("dap-react-native").setup()
 
 for _, language in ipairs(js_filetypes) do
   if not dap.configurations[language] then
@@ -113,28 +110,6 @@ for _, language in ipairs(js_filetypes) do
         processId = require("dap.utils").pick_process,
         cwd = "${workspaceFolder}",
       },
-      {
-        type = "pwa-node",
-        request = "attach",
-        name = "Debug React Native App (Advanced Setup)",
-        port = 8081,
-        address = "localhost",
-        localRoot = "${workspaceFolder}",
-        remoteRoot = "${workspaceFolder}",
-        sourceMaps = true,
-        skipFiles = {
-          "<node_internals>/**",
-          "node_modules/**",
-          "**/node_modules/undici/**",
-          "**/node_modules/typescript/**",
-          "**/node_modules/@expo/**",
-          "**/*.bundle.js",
-          "**/*.min.js",
-        },
-        -- Connect via WebSocket protocol used by React Native
-        protocol = "inspector",
-        timeout = 30000,
-      },
     }
   end
 end
@@ -159,7 +134,7 @@ local keys = {
   { "<leader>dt", function() require("dap").terminate() end, desc = "Terminate" },
   { "<leader>dd", function() require("dap").disconnect() end, desc = "Disconnect" },
   { "<leader>dw", function() require("dap.ui.widgets").hover() end, desc = "Widgets" },
-  { "<leader>dp", function() require("dap.ui.widgets").centered_float(require("dap.ui.widgets").frames) end, desc = "Scopes" },
+  { "<leader>dp", function() require("dap.ui.widgets").centered_float(require("dap.ui.widgets").scopes) end, desc = "Scopes" },
 }
 
 for _, keymap in pairs(keys) do

@@ -140,6 +140,8 @@ vim.pack.add({
   gh("carloscalla/notepad.nvim"),
 })
 
+vim.opt.runtimepath:prepend(vim.fn.expand("~/Projects/nvim-dap-react-native"))
+
 -- Instant load
 require("plugins.colorscheme")
 require("plugins.lualine")
