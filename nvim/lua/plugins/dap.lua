@@ -73,8 +73,7 @@ local js_debug_adapter_opts = {
 
 dap.adapters[node_type] = js_debug_adapter_opts
 dap.adapters[chrome_type] = js_debug_adapter_opts
-
-require("dap-react-native").setup()
+dap.adapters[react_native_type] = require("dap-react-native").create_adapter(js_debug_adapter_opts)
 
 for _, language in ipairs(js_filetypes) do
   if not dap.configurations[language] then
