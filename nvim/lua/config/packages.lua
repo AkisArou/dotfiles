@@ -1,23 +1,32 @@
--- ---@param plugin_name string
--- ---@param command string[]
--- local function build_plugin(plugin_name, command)
---   local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/" .. plugin_name
---
---   vim.notify("\nBuilding " .. plugin_name .. " at " .. plugin_path, vim.log.levels.INFO)
---   local result = vim.system(command, { cwd = plugin_path }):wait()
---
---   if result.code == 0 then
---     vim.notify("\n" .. "Building " .. plugin_name .. " done", vim.log.levels.INFO)
---   else
---     vim.notify("\n" .. "Building " .. plugin_name .. " failed", vim.log.levels.ERROR)
---   end
--- end
+---@param plugin_name string
+---@param command string[]
+local function build_plugin(plugin_name, command)
+  local plugin_path = vim.fn.stdpath("data") .. "/site/pack/core/opt/" .. plugin_name
 
--- vim.api.nvim_create_autocmd("PackChanged", {
---   callback = function(event)
---     local name = event.data.spec.name
---   end,
--- })
+  vim.notify("\nBuilding " .. plugin_name .. " at " .. plugin_path, vim.log.levels.INFO)
+  local result = vim.system(command, { cwd = plugin_path }):wait()
+
+  if result.code == 0 then
+    vim.notify("\n" .. "Building " .. plugin_name .. " done", vim.log.levels.INFO)
+  else
+    vim.notify("\n" .. "Building " .. plugin_name .. " failed", vim.log.levels.ERROR)
+  end
+end
+
+vim.api.nvim_create_autocmd("PackChanged", {
+  callback = function(event)
+    local name = event.data.spec.name
+    local should_build = (event.data.kind == "install" or event.data.kind == "update")
+
+    if not should_build then
+      return
+    end
+
+    if name == "nvim-dap-react-native" then
+      build_plugin(name, { "npm", "ci" })
+    end
+  end,
+})
 
 function Delete_unused_packs()
   vim.pack.del(vim
@@ -74,6 +83,7 @@ vim.pack.add({
   gh("rcarriga/nvim-dap-ui"),
   gh("nvim-neotest/nvim-nio"),
   gh("mfussenegger/nvim-dap"),
+  gh("AkisArou/nvim-dap-react-native"),
 
   gh("ibhagwan/fzf-lua"),
 
@@ -139,8 +149,6 @@ vim.pack.add({
 
   gh("carloscalla/notepad.nvim"),
 })
-
-vim.opt.runtimepath:prepend(vim.fn.expand("~/Projects/nvim-dap-react-native"))
 
 -- Instant load
 require("plugins.colorscheme")
