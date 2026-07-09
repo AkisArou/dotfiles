@@ -18,11 +18,13 @@ local opts = {
 ---@type vim.lsp.Config
 return {
   cmd = function(dispatchers, config)
-    local cmd = "tsgo"
+    local cmd
 
-    local local_cmd = vim.fs.joinpath(config.root_dir, "node_modules/.bin", cmd)
+    local local_cmd = vim.fs.joinpath(config.root_dir, "node_modules/.bin/tsc")
     if vim.fn.executable(local_cmd) == 1 then
       cmd = local_cmd
+    else
+      cmd = "tsgo"
     end
 
     return vim.lsp.rpc.start({ cmd, "--lsp", "--stdio" }, dispatchers)
