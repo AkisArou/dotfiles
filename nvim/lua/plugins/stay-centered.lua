@@ -1,1 +1,1 @@
-require("stay-centered").setup()
+require("stay-centered").setup({ allow_scroll_move = false })
