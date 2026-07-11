@@ -2,9 +2,7 @@ local M = {}
 
 local ok, conform = pcall(require, "conform")
 
----@alias WriteCommand "w"|"wall"
-
----@param cmd WriteCommand
+---@param cmd "w" | "wall"
 local function format_and_write(cmd)
   if not vim.bo.modifiable then
     return
