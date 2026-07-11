@@ -3,12 +3,99 @@
 " You can find a list of commands here: https://jb.gg/h38q75
 " Find more examples here: https://jb.gg/share-ideavimrc
 
-source ~/dotfiles/vim/vimrc
+" Standalone IdeaVim settings
+let mapleader = " "
+nnoremap <Space> <Nop>
 
+set clipboard+=unnamedplus
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+set number
+set relativenumber
+set scrolloff=25
+set sidescrolloff=8
+set nowrap
+set timeout
+set timeoutlen=300
+set ideajoin
+set ideawrite=all
+
+" IdeaVim plugins
 set surround
 set NERDTree
-
-map <Space-e> :NERDTreeToggle<CR>
-
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-commentary'
+
+" Core editing overrides
+nnoremap <leader>e :NERDTreeToggle<CR>
+nmap <leader>vr <Action>(IdeaVim.ReloadVimRc.reload)
+nnoremap <leader>h :nohlsearch<CR>
+nmap <C-s> <Action>(SaveAll)
+imap <C-s> <Esc><Action>(SaveAll)
+nnoremap x "_x
+xnoremap p P
+xnoremap < <gv
+xnoremap > >gv
+
+" Bracket navigation
+" IdeaVim exposes open IDE editors as Vim buffers. Prefer native buffer
+" commands here because Android Studio's NextTab action is context-sensitive.
+nnoremap <silent> [b :bprevious<CR>
+nnoremap <silent> ]b :bnext<CR>
+
+" JetBrains exposes one inspection-problem navigation stream rather than
+" separate diagnostic/error/warning streams. Keep both familiar aliases.
+nmap [d <Action>(GotoPreviousError)
+nmap ]d <Action>(GotoNextError)
+nmap [e <Action>(GotoPreviousError)
+nmap ]e <Action>(GotoNextError)
+
+nmap [h <Action>(VcsShowPrevChangeMarker)
+nmap ]h <Action>(VcsShowNextChangeMarker)
+nmap [q <Action>(PreviousOccurence)
+nmap ]q <Action>(NextOccurence)
+
+" There are no stable, editor-wide JetBrains actions for warning-only or
+" TODO-only navigation, so [w/]w and [t/]t are intentionally left unmapped.
+
+" Code navigation and actions
+nmap gd <Action>(GotoDeclaration)
+nmap gD <Action>(GotoDeclarationOnly)
+nmap grr <Action>(FindUsages)
+nmap gri <Action>(GotoImplementation)
+nmap grt <Action>(GotoTypeDeclaration)
+nmap gra <Action>(ShowIntentionActions)
+xmap gra <Action>(ShowIntentionActions)
+
+" Find and files
+nmap <leader>ff <Action>(GotoFile)
+nmap <leader>fr <Action>(RecentFiles)
+nmap <leader>fs <Action>(FindInPath)
+nmap <leader>fw <Action>(FindUsages)
+xmap <leader>fw <Action>(FindInPath)
+nmap <leader>fe <Action>(Switcher)
+nmap <leader>ft <Action>(FileStructurePopup)
+nmap <leader>fd <Action>(ActivateProblemsViewToolWindow)
+nmap <leader>sr <Action>(ReplaceInPath)
+
+" Editors (Neovim buffers)
+nmap <leader>bd <Action>(CloseEditor)
+nmap <leader>bo <Action>(CloseAllEditorsButActive)
+nmap <leader>ba <Action>(CloseAllEditors)
+
+" Editor splits
+nnoremap <silent> <C-w>q :action Unsplit<CR>
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+nmap <C-Up> <Action>(StretchSplitToTop)
+nmap <C-Down> <Action>(StretchSplitToBottom)
+nmap <C-Left> <Action>(StretchSplitToLeft)
+nmap <C-Right> <Action>(StretchSplitToRight)
+
+" Version control
+nmap <leader>gs <Action>(ActivateVersionControlToolWindow)
+nmap <leader>gd <Action>(Vcs.ShowDiffChangedLines)
