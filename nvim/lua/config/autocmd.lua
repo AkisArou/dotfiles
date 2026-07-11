@@ -14,11 +14,6 @@ vim.api.nvim_create_autocmd("FileType", {
   command = "wincmd L",
 })
 
--- Autoresize splits when terminal emulator window is resized
-vim.api.nvim_create_autocmd("VimResized", {
-  command = "wincmd =",
-})
-
 -- Enable treesitter
 vim.api.nvim_create_autocmd("FileType", {
   callback = function()
