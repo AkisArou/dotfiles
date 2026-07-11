@@ -231,7 +231,7 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "nvim-undotree",
   callback = function()
     vim.cmd.wincmd("H")
-    vim.api.nvim_win_set_width(0, 40)
+    vim.api.nvim_win_resize(0, 40, -1, {})
   end,
 })
 
