@@ -97,6 +97,7 @@ local disabled_builtins = {
   "netrwFileHandlers",
   "tutor",
   "tohtml",
+  "nvim_dir_plugin",
 }
 
 for _, plugin in ipairs(disabled_builtins) do
