@@ -110,23 +110,30 @@ local get_commit_hash = function(selected)
 end
 
 vim.keymap.set("n", "<leader>gc", function()
+  local git_diff_action = require("fzf-lua.config").globals.git.commits.actions["ctrl-d"]
+
   fzf_lua.git_commits({
     winopts = { preview = { layout = "flex" } },
     actions = {
-      ["ctrl-w"] = function(selected)
-        local commit_hash = get_commit_hash(selected)
+      ["ctrl-d"] = false,
+      ["ctrl-g"] = git_diff_action,
+      ["ctrl-w"] = {
+        fn = function(selected)
+          local commit_hash = get_commit_hash(selected)
 
-        if commit_hash == nil then
-          return
-        end
+          if commit_hash == nil then
+            return
+          end
 
-        local success, err = pcall(function()
-          require("custom.temp-worktree").open_git_worktree(commit_hash)
-        end)
-        if not success then
-          vim.notify("Failed to open worktree: " .. tostring(err), vim.log.levels.ERROR)
-        end
-      end,
+          local success, err = pcall(function()
+            require("custom.temp-worktree").open_git_worktree(commit_hash)
+          end)
+          if not success then
+            vim.notify("Failed to open worktree: " .. tostring(err), vim.log.levels.ERROR)
+          end
+        end,
+        header = "open worktree",
+      },
     },
   })
 end, { desc = "Git commits → GitView" })
