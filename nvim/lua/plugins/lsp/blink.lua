@@ -75,7 +75,7 @@ cmp.setup({
   },
 
   cmdline = {
-    keymap = { preset = "default", ["<C-e>"] = { "select_and_accept" } },
+    keymap = { preset = "cmdline", ["<C-e>"] = { "select_and_accept" } },
     completion = {
       menu = {
         auto_show = true,
