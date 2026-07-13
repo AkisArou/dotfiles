@@ -174,7 +174,8 @@
         corfu-quit-at-boundary nil)
   (define-key corfu-map (kbd "C-e") #'corfu-insert)
   (evil-define-key* '(insert replace) corfu-map
-    (kbd "C-e") #'corfu-insert))
+    (kbd "C-e") #'corfu-insert)
+  (require 'cape))
 
 (after! corfu-auto
   ;; Trigger immediately after the first character so lsp-mode can cache the
@@ -185,6 +186,45 @@
 
 (after! corfu-popupinfo
   (setq corfu-popupinfo-delay '(0.2 . 0.1)))
+
+(after! cape
+  ;; Present semantic, buffer-word, and snippet candidates together, then let
+  ;; Fussy/fzf rank the combined table.  Keep `cape-file' separate because
+  ;; multi-step file completion is not compatible with `cape-capf-super'.
+  (defalias 'akisarou/cape-dabbrev-yasnippet-capf
+    (cape-capf-sort
+     (cape-capf-super #'cape-dabbrev #'yasnippet-capf)))
+  (defalias 'akisarou/cape-lsp-dabbrev-yasnippet-capf
+    (cape-capf-sort
+     (cape-capf-super #'lsp-completion-at-point
+                      #'cape-dabbrev
+                      #'yasnippet-capf)))
+
+  (defun akisarou/merge-editor-capfs-h ()
+    (when (derived-mode-p 'prog-mode 'text-mode 'conf-mode)
+      (let* ((lsp-p (bound-and-true-p lsp-completion-mode))
+             (merged (if lsp-p
+                         #'akisarou/cape-lsp-dabbrev-yasnippet-capf
+                       #'akisarou/cape-dabbrev-yasnippet-capf))
+             (old-capfs '(lsp-completion-at-point
+                          cape-dabbrev
+                          yasnippet-capf
+                          akisarou/cape-dabbrev-yasnippet-capf
+                          akisarou/cape-lsp-dabbrev-yasnippet-capf))
+             (remaining
+              (seq-remove (lambda (capf) (memq capf old-capfs))
+                          completion-at-point-functions)))
+        (setq-local completion-at-point-functions
+                    (if lsp-p
+                        (cons merged remaining)
+                      (append remaining (list merged)))))))
+
+  (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook
+                  yas-minor-mode-hook lsp-completion-mode-hook))
+    (add-hook hook #'akisarou/merge-editor-capfs-h 90))
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (akisarou/merge-editor-capfs-h))))
 
 (after! lsp-completion
   ;; Let lsp-mode reuse broad server results and leave fuzzy narrowing to the
@@ -269,6 +309,79 @@
                                            :arguments [(:uri ,(lsp--buffer-uri))])))
       (user-error "No oxlint LSP workspace for this buffer"))))
 
+(defconst akisarou/tsgo-auto-import-specifier-exclude-regex
+  "^(assert|async_hooks|buffer|child_process|cluster|console|crypto|dgram|dns|domain|events|fs|fs/promises|http|http2|https|inspector|module|net|os|path|path/posix|perf_hooks|process|punycode|querystring|readline|repl|stream|string_decoder|timers|tls|trace_events|tty|url|util|v8|vm|worker_threads|zlib)$")
+
+(after! lsp-javascript
+  ;; Prefer each project's TypeScript 7 `tsc' (which contains tsgo), falling
+  ;; back to the same global tsgo executable used by the Neovim config.
+  (setq lsp-clients-tsgo-path
+        (expand-file-name "~/.local/share/nvim/mason/bin/tsgo")
+        lsp-clients-tsgo-args '("--lsp" "--stdio"))
+
+  ;; `ts-ls' has a higher built-in priority than tsgo, so disable it to make
+  ;; tsgo the primary JavaScript/TypeScript client.  oxfmt and oxlint remain
+  ;; active as add-on clients.
+  (add-to-list 'lsp-disabled-clients 'ts-ls)
+
+  (defun akisarou/tsgo-command ()
+    (cons (or (akisarou/project-local-bin "tsc")
+              (lsp-package-path 'tsgo))
+          lsp-clients-tsgo-args))
+
+  (defun akisarou/tsgo-language-settings ()
+    `(:format (:enable :json-false)
+      :preferences
+      (:includePackageJsonAutoImports "on"
+       :importModuleSpecifier "non-relative"
+       :importModuleSpecifierEnding "js"
+       :useAliasesForRenames :json-false
+       :autoImportSpecifierExcludeRegexes
+       [,akisarou/tsgo-auto-import-specifier-exclude-regex])))
+
+  (defun akisarou/tsgo-settings ()
+    (let ((options (akisarou/tsgo-language-settings)))
+      `(:typescript ,options :javascript ,options)))
+
+  (defun akisarou/tsgo-initialized-h (workspace)
+    (with-lsp-workspace workspace
+      (lsp--set-configuration (akisarou/tsgo-settings)))
+    (let ((caps (lsp--workspace-server-capabilities workspace)))
+      (lsp:set-server-capabilities-document-formatting-provider? caps nil)
+      (lsp:set-server-capabilities-document-range-formatting-provider? caps nil)))
+
+  (defun akisarou/tsgo-filter-client-capabilities-a (capabilities)
+    ;; lsp-mode currently serializes its empty inline-completion capability as
+    ;; JSON null.  TypeScript 7 rejects that value, so omit this unsupported
+    ;; capability for tsgo instead of preventing the whole LSP handshake.
+    (when (and (bound-and-true-p lsp--cur-workspace)
+               (eq (lsp--client-server-id
+                    (lsp--workspace-client lsp--cur-workspace))
+                   'tsgo))
+      (when-let ((text-document (assq 'textDocument capabilities)))
+        (setcdr text-document
+                (assq-delete-all 'inlineCompletion (cdr text-document)))))
+    capabilities)
+
+  (advice-remove #'lsp--client-capabilities
+                 #'akisarou/tsgo-filter-client-capabilities-a)
+  (advice-add #'lsp--client-capabilities :filter-return
+              #'akisarou/tsgo-filter-client-capabilities-a)
+
+  ;; Replace lsp-mode's default tsgo registration because it neither resolves
+  ;; a project-local TypeScript nor sends workspace configuration yet.
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection #'akisarou/tsgo-command)
+    :activation-fn #'lsp-typescript-javascript-tsx-jsx-activate-p
+    :priority -4
+    :completion-in-comments? t
+    :initialized-fn #'akisarou/tsgo-initialized-h
+    :server-id 'tsgo
+    :download-server-fn
+    (lambda (_client callback error-callback _update?)
+      (lsp-package-ensure 'tsgo callback error-callback)))))
+
 (cl-defun akisarou/format-with-oxfmt-lsp (&key buffer scratch callback &allow-other-keys)
   (with-current-buffer buffer
     (if-let ((workspace (and buffer-file-name
@@ -295,14 +408,25 @@
              graphql-mode-local-vars-hook)
            :append #'lsp!)
 
-(after! orderless
-  ;; Make Vertico project-file matching fuzzy enough for inputs like
-  ;; "packalua" to match "nvim/lua/config/packages.lua".
-  (setq orderless-matching-styles '(orderless-flex))
-  (setq completion-category-overrides
-        '((lsp-capf (styles orderless basic))
-          (file (styles orderless partial-completion))
-          (project-file (styles orderless)))))
+(use-package! fussy
+  ;; Doom's Vertico module configures Orderless on first input. Load Fussy
+  ;; afterwards so fzf remains the final matching and ranking layer.
+  :after orderless
+  :config
+  (fussy-setup-fzf)
+  (fussy-corfu-setup)
+  (setq completion-styles '(fussy basic)
+        completion-category-defaults nil
+        completion-category-overrides
+        '((lsp-capf (styles fussy basic))
+          (file (styles fussy basic partial-completion))
+          (project-file (styles fussy basic))
+          (buffer (styles fussy basic))
+          (consult-location (styles fussy basic))
+          (unicode-name (styles fussy basic))
+          (xref-location (styles fussy basic))
+          (info-menu (styles fussy basic))
+          (symbol-help (styles fussy basic)))))
 
 (use-package! codex
   :config
