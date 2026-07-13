@@ -2,5 +2,8 @@
 
 source ~/dotfiles/shell/common/exports
 
-tmux new-session -s default -d &
-tmux new-session -s work -d -c ~/nable-solutions &
+tmux has-session -t default 2>/dev/null ||
+  tmux new-session -s default -d
+
+tmux has-session -t work 2>/dev/null ||
+  tmux new-session -s work -d -c ~/nable-solutions
