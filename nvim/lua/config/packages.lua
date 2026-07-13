@@ -86,7 +86,6 @@ vim.pack.add({
   gh("AkisArou/nvim-dap-react-native"),
 
   gh("ibhagwan/fzf-lua"),
-  { src = "file://" .. vim.fn.expand("~/Projects/mx.nvim") },
 
   gh("lewis6991/gitsigns.nvim"),
 
@@ -155,7 +154,6 @@ vim.pack.add({
 require("plugins.colorscheme")
 require("plugins.lualine")
 require("plugins.fzf")
-vim.keymap.set("n", "<M-x>", "<cmd>Mx<cr>", { desc = "M-x command palette" })
 
 -- Deferred load
 vim.schedule(function()
