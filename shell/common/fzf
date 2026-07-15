@@ -16,6 +16,8 @@ export FZF_DEFAULT_OPTS="\
   --highlight-line \
   --no-bold \
   --info=inline-right \
+  --pointer='>' \
+  --marker='✓' \
   --ansi \
   --cycle \
   --layout=reverse \
