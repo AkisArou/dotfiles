@@ -15,7 +15,7 @@ XTerm.*.backarrowKey: false
 XTerm.ttyModes: erase ^?
 XTerm*savelines: 16384
 
-st.font: HasklugNerdFont Mono:size=11
+st.font: HasklugNerdFont Mono:size=10
 
 ! ----------
 ! VS Code Dark+
