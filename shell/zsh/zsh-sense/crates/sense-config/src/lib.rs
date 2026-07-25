@@ -223,6 +223,25 @@ impl Config {
         if self.popup.min_width > self.popup.max_width {
             issues.push("popup.min_width must not exceed popup.max_width".into());
         }
+        for (name, style) in self.styles.named_styles() {
+            if !valid_zle_highlight(style) {
+                issues.push(format!(
+                    "styles.{name} must be one non-empty ZLE highlight specification"
+                ));
+            }
+        }
+        for (kind, style) in &self.styles.kinds {
+            if !COMPLETION_STYLE_KINDS.contains(&kind.as_str()) {
+                issues.push(format!(
+                    "styles.kinds contains unknown completion kind {kind:?}"
+                ));
+            }
+            if !valid_zle_highlight(style) {
+                issues.push(format!(
+                    "styles.kinds.{kind} must be one non-empty ZLE highlight specification"
+                ));
+            }
+        }
         if self.matching.max_results == 0 {
             issues.push("matching.max_results must be at least 1".into());
         }
@@ -389,6 +408,7 @@ impl Default for ActivationConfig {
 pub enum KeyAction {
     Trigger,
     Accept,
+    Execute,
     Next,
     Previous,
     PageDown,
@@ -417,10 +437,12 @@ impl Default for KeybindingsConfig {
             closed: BTreeMap::from([
                 ("tab".into(), KeyAction::Trigger),
                 ("ctrl-space".into(), KeyAction::Trigger),
+                ("enter".into(), KeyAction::Execute),
             ]),
             popup: BTreeMap::from([
                 ("tab".into(), KeyAction::Accept),
                 ("ctrl-e".into(), KeyAction::Accept),
+                ("enter".into(), KeyAction::Execute),
                 ("ctrl-n".into(), KeyAction::Next),
                 ("ctrl-p".into(), KeyAction::Previous),
                 ("ctrl-d".into(), KeyAction::PageDown),
@@ -598,7 +620,7 @@ impl Default for PopupConfig {
             enabled: true,
             decorations: DecorationMode::Full,
             border: BorderStyle::Rounded,
-            title: true,
+            title: false,
             footer: true,
             scrollbar: true,
             group_headings: true,
@@ -1033,31 +1055,125 @@ impl Default for LoggingConfig {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(default, deny_unknown_fields)]
 pub struct StyleConfig {
+    pub menu: String,
     pub border: String,
     pub selected: String,
     pub label: String,
+    pub label_match: String,
     pub detail: String,
+    pub kind: String,
     pub group: String,
     pub footer: String,
+    pub scrollbar_thumb: String,
+    pub scrollbar_gutter: String,
     pub diagnostic_error: String,
     pub diagnostic_warning: String,
     pub ghost: String,
+    pub kinds: BTreeMap<String, String>,
 }
 
 impl Default for StyleConfig {
     fn default() -> Self {
         Self {
-            border: "fg=#569cd6".into(),
-            selected: "fg=#ffffff,bg=#264f78".into(),
-            label: "fg=#dcdcaa".into(),
-            detail: "fg=#9da5b4".into(),
+            menu: "fg=#bbbbbb,bg=#202020".into(),
+            border: "fg=#d4d4d4".into(),
+            // This is the user's PmenuSel override in colorscheme.lua. It
+            // deliberately specifies only a background so semantic label and
+            // kind foregrounds remain visible on the selected row.
+            selected: "bg=#343b41".into(),
+            label: "fg=#d4d4d4".into(),
+            label_match: "fg=#18a2fe,bold".into(),
+            detail: "fg=#bbbbbb".into(),
+            kind: "fg=#bbbbbb".into(),
             group: "fg=#4ec9b0".into(),
-            footer: "fg=#808080".into(),
+            footer: "fg=#bbbbbb".into(),
+            scrollbar_thumb: "bg=#bbbbbb".into(),
+            scrollbar_gutter: "bg=#343b41".into(),
             diagnostic_error: "fg=#f14c4c,underline".into(),
             diagnostic_warning: "fg=#cca700,underline".into(),
-            ghost: "fg=#606060".into(),
+            ghost: "fg=#707070".into(),
+            kinds: blink_kind_styles(),
         }
     }
+}
+
+impl StyleConfig {
+    fn named_styles(&self) -> [(&'static str, &str); 14] {
+        [
+            ("menu", &self.menu),
+            ("border", &self.border),
+            ("selected", &self.selected),
+            ("label", &self.label),
+            ("label_match", &self.label_match),
+            ("detail", &self.detail),
+            ("kind", &self.kind),
+            ("group", &self.group),
+            ("footer", &self.footer),
+            ("scrollbar_thumb", &self.scrollbar_thumb),
+            ("scrollbar_gutter", &self.scrollbar_gutter),
+            ("diagnostic_error", &self.diagnostic_error),
+            ("diagnostic_warning", &self.diagnostic_warning),
+            ("ghost", &self.ghost),
+        ]
+    }
+}
+
+const COMPLETION_STYLE_KINDS: &[&str] = &[
+    "text",
+    "command",
+    "alias",
+    "builtin",
+    "function",
+    "subcommand",
+    "option",
+    "option-value",
+    "variable",
+    "file",
+    "directory",
+    "symlink",
+    "user",
+    "host",
+    "process",
+    "job",
+    "git-branch",
+    "git-tag",
+    "git-commit",
+    "service",
+    "container",
+    "image",
+    "package",
+    "history",
+    "snippet",
+    "action",
+];
+
+fn blink_kind_styles() -> BTreeMap<String, String> {
+    [
+        ("text", "fg=#bbbbbb"),
+        ("command", "fg=#c586c0"),
+        ("alias", "fg=#c586c0"),
+        ("builtin", "fg=#c586c0"),
+        ("function", "fg=#c586c0"),
+        ("subcommand", "fg=#c586c0"),
+        ("option", "fg=#ffd602"),
+        ("option-value", "fg=#9cdcfe"),
+        ("variable", "fg=#9cdcfe"),
+        ("file", "fg=#d4d4d4"),
+        ("directory", "fg=#569cd6"),
+        ("symlink", "fg=#d4d4d4"),
+        ("snippet", "fg=#ffd602"),
+        ("action", "fg=#ffd602"),
+    ]
+    .into_iter()
+    .map(|(kind, style)| (kind.into(), style.into()))
+    .collect()
+}
+
+fn valid_zle_highlight(style: &str) -> bool {
+    !style.is_empty()
+        && !style
+            .chars()
+            .any(|character| character.is_whitespace() || character == '\0')
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

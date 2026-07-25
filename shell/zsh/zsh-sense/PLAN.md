@@ -481,10 +481,12 @@ after_accept = true
 [keybindings.closed]
 tab = "trigger"
 "ctrl-space" = "trigger"
+enter = "execute"
 
 [keybindings.popup]
 tab = "accept"
 "ctrl-e" = "accept"
+enter = "execute"
 "ctrl-n" = "next"
 "ctrl-p" = "previous"
 "ctrl-d" = "page-down"
@@ -514,7 +516,7 @@ explain_scores = false
 enabled = true
 decorations = "full"            # full | minimal | none
 border = "rounded"              # rounded | sharp | ascii | none
-title = true
+title = false
 footer = true
 scrollbar = true
 group_headings = true
@@ -630,15 +632,27 @@ file = "~/.local/state/zsh-sense/zsh-sense.log"
 include_command_lines = false
 
 [styles]
-border = "fg=#569cd6"
-selected = "fg=#ffffff,bg=#264f78"
-label = "fg=#dcdcaa"
-detail = "fg=#9da5b4"
+menu = "fg=#bbbbbb,bg=#202020"
+border = "fg=#d4d4d4"
+selected = "bg=#343b41"
+label = "fg=#d4d4d4"
+label_match = "fg=#18a2fe,bold"
+detail = "fg=#bbbbbb"
+kind = "fg=#bbbbbb"
 group = "fg=#4ec9b0"
-footer = "fg=#808080"
+footer = "fg=#bbbbbb"
+scrollbar_thumb = "bg=#bbbbbb"
+scrollbar_gutter = "bg=#343b41"
 diagnostic_error = "fg=#f14c4c,underline"
 diagnostic_warning = "fg=#cca700,underline"
-ghost = "fg=#606060"
+ghost = "fg=#707070"
+
+[styles.kinds]
+command = "fg=#c586c0"
+option = "fg=#ffd602"
+variable = "fg=#9cdcfe"
+file = "fg=#d4d4d4"
+directory = "fg=#569cd6"
 
 [[rules]]
 name = "manual completion for sensitive tools"
@@ -992,10 +1006,10 @@ The checkboxes below are implementation tracking, not optional brainstorming.
 - [x] VS Code-inspired bordered panel rendered by ZLE.
 - [ ] Full, minimal, and undecorated popup styles.
 - [ ] Responsive list-only, side-documentation, and below-documentation modes.
-- [ ] Selected row and matched-character highlighting.
+- [x] Selected row and matched-character highlighting.
 - [ ] Groups, descriptions, item kinds, optional icons, and ASCII fallbacks.
 - [ ] Correct Unicode/grapheme/cell-width layout.
-- [ ] Configurable rows, width, padding, title, footer, count, and scrollbar.
+- [x] Configurable rows, width, padding, title, footer, count, and scrollbar.
 - [ ] Item navigation, page navigation, and independent documentation scroll.
 - [ ] Loading, timeout, partial-result, and source-error states.
 - [ ] Immediate terminal-resize relayout.

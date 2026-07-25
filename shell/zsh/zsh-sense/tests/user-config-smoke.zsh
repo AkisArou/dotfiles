@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 emulate -L zsh
-setopt errexit nounset pipefail no_aliases
+setopt errexit nounset pipefail no_aliases extendedglob
 
 zmodload zsh/zpty zsh/zselect zsh/datetime
 typeset -gr project_root=${0:A:h:h}
@@ -23,12 +23,14 @@ read_until() {
   local pattern=$1
   local -i attempts=${2:-500}
   local -i attempt
+  local plain_output
   for (( attempt = 1; attempt <= attempts; attempt++ )); do
     while zpty -r -t sense-user chunk 2>/dev/null; do
       output+=$chunk
       chunk=
     done
-    [[ $output == ${~pattern} ]] && return 0
+    plain_output=${output//$'\e'\[[0-9;]#[[:alpha:]]/}
+    [[ $plain_output == ${~pattern} ]] && return 0
     zselect -t 1 >/dev/null 2>&1 || true
   done
   return 1
@@ -84,7 +86,7 @@ read_until '*.zsh-sense-key-ctrl-e*' || {
 typeset -F command_popup_started=$EPOCHREALTIME
 zpty -n -w sense-user c
 output=
-read_until '*completions*' 100 || {
+read_until '*╭─*' 100 || {
   print -u2 -- 'one-character command popup did not appear promptly'
   print -u2 -r -- "$output"
   return 1
@@ -102,9 +104,14 @@ typeset escaped_meta='\M-'
   print -u2 -r -- "$output"
   return 1
 }
-typeset popup_order_pattern='*╭ completions *│ *│ *╰* 1/*'
+typeset popup_order_pattern='*╭─*│*╰* 1/*'
 [[ $output == ${~popup_order_pattern} ]] || {
   print -u2 -- 'popup header, rows, and footer were not rendered in visual order'
+  print -u2 -r -- "$output"
+  return 1
+}
+[[ $output != *completions* ]] || {
+  print -u2 -- 'popup still contains the completions title'
   print -u2 -r -- "$output"
   return 1
 }
@@ -118,7 +125,7 @@ zselect -t 10 >/dev/null 2>&1 || true
 
 zpty -n -w sense-user 'ls -'
 output=
-read_until '*--all*list entries starting with .*' || {
+read_until '*list entries starting with .*' || {
   print -u2 -- 'the popup did not coexist with the real ZLE plugin stack'
   print -u2 -r -- "$output"
   return 1

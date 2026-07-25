@@ -32,10 +32,10 @@ type DaemonConnection = Framed<UnixStream, MessagePackCodec<ServerMessage, Clien
 type RequestKey = (RequestId, Generation);
 
 const MAX_CANCELLED_CAPTURE_TOMBSTONES: usize = 256;
-const VIEW_CHUNK_ITEM_FIELDS: usize = 9;
-// 3 envelope fields + (13 * 9) item fields = 120, below the default and
+const VIEW_CHUNK_ITEM_FIELDS: usize = 10;
+// 3 envelope fields + (12 * 10) item fields = 123, below the default and
 // shell-side 128-field wire limit.
-const VIEW_CHUNK_ITEMS: usize = 13;
+const VIEW_CHUNK_ITEMS: usize = 12;
 const SHELL_OUTPUT_BACKPRESSURE_BYTES: usize = 256 * 1024;
 
 #[derive(Debug, Clone)]
@@ -1151,9 +1151,46 @@ where
                 capture_backend_name(route.backend).into()
             }),
             acceptance.map_or_else(RawBytes::default, |route| route.backend_identity.clone()),
+            label_match_ranges(item).into(),
         ]);
     }
     feed_shell(shell, "view-chunk", fields).await
+}
+
+fn label_match_ranges(item: &CompletionItem) -> String {
+    let Some(result) = &item.match_result else {
+        return String::new();
+    };
+    let filter_text = item.filter_text.as_deref().unwrap_or(&item.label);
+    if filter_text != item.label || result.indices.is_empty() {
+        return String::new();
+    }
+
+    let mut ranges = Vec::<(usize, usize)>::new();
+    let mut characters = item.label.char_indices().peekable();
+    let mut character_index = 0;
+    while let Some((byte_start, _)) = characters.next() {
+        let byte_end = characters
+            .peek()
+            .map_or(item.label.len(), |(next_start, _)| *next_start);
+        let matched = result
+            .indices
+            .iter()
+            .any(|index| (*index as usize) >= byte_start && (*index as usize) < byte_end);
+        if matched {
+            match ranges.last_mut() {
+                Some((_, end)) if *end == character_index => *end += 1,
+                _ => ranges.push((character_index, character_index + 1)),
+            }
+        }
+        character_index += 1;
+    }
+
+    ranges
+        .into_iter()
+        .map(|(start, end)| format!("{start}:{end}"))
+        .collect::<Vec<_>>()
+        .join(",")
 }
 
 async fn send_acceptance<W>(
@@ -1723,7 +1760,7 @@ fn server_message_name(message: &ServerMessage) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use sense_model::{SourceId, TextEdit};
+    use sense_model::{MatchResult, SourceId, TextEdit};
 
     use super::*;
 
@@ -1747,6 +1784,24 @@ mod tests {
             is_final: true,
             is_incomplete: true,
         }
+    }
+
+    #[test]
+    fn label_match_ranges_convert_frizbee_byte_offsets_to_character_ranges() {
+        let mut item = CompletionItem::plain(
+            "unicode",
+            "zsh",
+            "aé😀z",
+            TextEdit::new(TextRange::new(0, 0), "aé😀z"),
+        );
+        item.match_result = Some(MatchResult {
+            score: 1,
+            indices: vec![1, 2, 7],
+            exact: false,
+            prefix: false,
+        });
+
+        assert_eq!(label_match_ranges(&item), "1:2,3:4");
     }
 
     #[test]

@@ -6,6 +6,9 @@ fn defaults_are_continuous_and_tab_is_manual_fallback() {
     assert_eq!(config.activation.mode, ActivationMode::Continuous);
     assert_eq!(config.keybindings.closed["tab"], KeyAction::Trigger);
     assert_eq!(config.keybindings.popup["tab"], KeyAction::Accept);
+    assert_eq!(config.styles.menu, "fg=#bbbbbb,bg=#202020");
+    assert_eq!(config.styles.selected, "bg=#343b41");
+    assert_eq!(config.styles.label_match, "fg=#18a2fe,bold");
     assert_eq!(config.sources.zsh.fuzzy_min_query_chars, 3);
     config.validate().unwrap();
 }
@@ -59,6 +62,30 @@ fn invalid_cross_field_values_are_reported() {
         debounce_ms = 100
         max_debounce_ms = 10
         ",
+    );
+    assert!(matches!(result, Err(ConfigError::Validation(_))));
+}
+
+#[test]
+fn popup_styles_must_be_single_zle_highlight_fields() {
+    let result = Config::from_toml(
+        r#"
+        version = 1
+        [styles]
+        detail = "fg=#bbbbbb bold"
+        "#,
+    );
+    assert!(matches!(result, Err(ConfigError::Validation(_))));
+}
+
+#[test]
+fn popup_kind_styles_reject_unknown_kinds() {
+    let result = Config::from_toml(
+        r#"
+        version = 1
+        [styles.kinds]
+        mystery = "fg=red"
+        "#,
     );
     assert!(matches!(result, Err(ConfigError::Validation(_))));
 }

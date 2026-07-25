@@ -47,13 +47,59 @@ typeset -gi _zsh_sense_min_width=24
 typeset -gi _zsh_sense_padding=1
 typeset -g _zsh_sense_decorations=full
 typeset -g _zsh_sense_border=rounded
-typeset -gi _zsh_sense_show_title=1
+typeset -gi _zsh_sense_show_title=0
 typeset -gi _zsh_sense_show_footer=1
 typeset -gi _zsh_sense_show_scrollbar=1
 typeset -gi _zsh_sense_show_groups=1
 typeset -gi _zsh_sense_show_descriptions=1
 typeset -g _zsh_sense_indicator_mode=icon
 typeset -g _zsh_sense_selected_marker='›'
+typeset -g _zsh_sense_style_menu_raw='fg=#bbbbbb,bg=#202020'
+typeset -g _zsh_sense_style_border_raw='fg=#d4d4d4'
+typeset -g _zsh_sense_style_selected_raw='bg=#343b41'
+typeset -g _zsh_sense_style_label_raw='fg=#d4d4d4'
+typeset -g _zsh_sense_style_label_match_raw='fg=#18a2fe,bold'
+typeset -g _zsh_sense_style_detail_raw='fg=#bbbbbb'
+typeset -g _zsh_sense_style_kind_raw='fg=#bbbbbb'
+typeset -g _zsh_sense_style_group_raw='fg=#4ec9b0'
+typeset -g _zsh_sense_style_footer_raw='fg=#bbbbbb'
+typeset -g _zsh_sense_style_scrollbar_thumb_raw='bg=#bbbbbb'
+typeset -g _zsh_sense_style_scrollbar_gutter_raw='bg=#343b41'
+typeset -g _zsh_sense_style_diagnostic_error_raw='fg=#f14c4c,underline'
+typeset -g _zsh_sense_style_diagnostic_warning_raw='fg=#cca700,underline'
+typeset -g _zsh_sense_style_ghost_raw='fg=#707070'
+typeset -g _zsh_sense_style_menu=
+typeset -g _zsh_sense_style_border=
+typeset -g _zsh_sense_style_selected=
+typeset -g _zsh_sense_style_label=
+typeset -g _zsh_sense_style_label_selected=
+typeset -g _zsh_sense_style_label_match=
+typeset -g _zsh_sense_style_label_match_selected=
+typeset -g _zsh_sense_style_detail=
+typeset -g _zsh_sense_style_detail_selected=
+typeset -g _zsh_sense_style_kind=
+typeset -g _zsh_sense_style_kind_selected=
+typeset -g _zsh_sense_style_footer=
+typeset -g _zsh_sense_style_scrollbar_thumb=
+typeset -g _zsh_sense_style_scrollbar_gutter=
+typeset -gA _zsh_sense_style_kinds_raw=(
+  text 'fg=#bbbbbb'
+  command 'fg=#c586c0'
+  alias 'fg=#c586c0'
+  builtin 'fg=#c586c0'
+  function 'fg=#c586c0'
+  subcommand 'fg=#c586c0'
+  option 'fg=#ffd602'
+  option-value 'fg=#9cdcfe'
+  variable 'fg=#9cdcfe'
+  file 'fg=#d4d4d4'
+  directory 'fg=#569cd6'
+  symlink 'fg=#d4d4d4'
+  snippet 'fg=#ffd602'
+  action 'fg=#ffd602'
+)
+typeset -gA _zsh_sense_style_kinds=()
+typeset -gA _zsh_sense_style_kinds_selected=()
 typeset -gi _zsh_sense_capture_fuzzy_min_chars=3
 typeset -ga _zsh_sense_trigger_characters=( / - = : ' ' )
 typeset -ga _zsh_sense_immediate_characters=( / - = )
@@ -65,6 +111,7 @@ typeset -gA _zsh_sense_key_sequences=(
   tab '^I'
   ctrl-space '^@'
   ctrl-e '^E'
+  enter '^M'
   ctrl-n '^N'
   ctrl-p '^P'
   ctrl-d '^D'
@@ -84,17 +131,22 @@ typeset -ga _zsh_sense_item_label_cells=()
 typeset -ga _zsh_sense_item_details=()
 typeset -ga _zsh_sense_item_detail_cells=()
 typeset -ga _zsh_sense_item_kinds=()
+typeset -ga _zsh_sense_item_match_ranges=()
 typeset -ga _zsh_sense_item_groups=()
 typeset -ga _zsh_sense_item_insertions=()
 typeset -ga _zsh_sense_item_acceptance_backends=()
 typeset -ga _zsh_sense_item_acceptance_identities=()
 typeset -ga _zsh_sense_render_lines=()
+typeset -ga _zsh_sense_render_highlight_starts=()
+typeset -ga _zsh_sense_render_highlight_ends=()
+typeset -ga _zsh_sense_render_highlight_styles=()
 typeset -ga _zsh_sense_temp_ids=()
 typeset -ga _zsh_sense_temp_labels=()
 typeset -ga _zsh_sense_temp_label_cells=()
 typeset -ga _zsh_sense_temp_details=()
 typeset -ga _zsh_sense_temp_detail_cells=()
 typeset -ga _zsh_sense_temp_kinds=()
+typeset -ga _zsh_sense_temp_match_ranges=()
 typeset -ga _zsh_sense_temp_groups=()
 typeset -ga _zsh_sense_temp_insertions=()
 typeset -ga _zsh_sense_temp_acceptance_backends=()
@@ -302,7 +354,14 @@ _zsh_sense_dispatch() {
         snippet) _zsh_sense_bindings_snippet[$fields[2]]=$fields[3] ;;
       esac
       ;;
+    style)
+      (( $#fields == 2 )) && _zsh_sense_apply_style "$fields[1]" "$fields[2]"
+      ;;
+    kind-style)
+      (( $#fields == 2 )) && _zsh_sense_style_kinds_raw[$fields[1]]=$fields[2]
+      ;;
     config-end)
+      _zsh_sense_rebuild_styles
       _zsh_sense_install_keybindings
       _zsh_sense_configured=1
       ;;
@@ -385,10 +444,120 @@ _zsh_sense_send_command_candidates() {
   _zsh_sense_write_messages "${(j::)wire_messages}"
 }
 
+_zsh_sense_merge_styles() {
+  emulate -L zsh
+  local -A values=() seen=()
+  local -a order=() tokens=() merged=()
+  local specification token key
+  for specification in "$@"; do
+    tokens=( "${(@s:,:)specification}" )
+    for token in "${tokens[@]}"; do
+      [[ -n $token ]] || continue
+      if [[ $token == none ]]; then
+        values=( none none )
+        seen=( none 1 )
+        order=( none )
+        continue
+      fi
+      if [[ -n ${seen[none]-} ]]; then
+        values=()
+        seen=()
+        order=()
+      fi
+      case $token in
+        fg=*) key=fg ;;
+        bg=*) key=bg ;;
+        *) key=$token ;;
+      esac
+      if [[ -z ${seen[$key]-} ]]; then
+        order+=( "$key" )
+        seen[$key]=1
+      fi
+      values[$key]=$token
+    done
+  done
+  for key in "${order[@]}"; do
+    merged+=( "$values[$key]" )
+  done
+  REPLY=${(j:,:)merged}
+}
+
+_zsh_sense_apply_style() {
+  emulate -L zsh
+  local name=$1 value=$2
+  case $name in
+    menu) _zsh_sense_style_menu_raw=$value ;;
+    border) _zsh_sense_style_border_raw=$value ;;
+    selected) _zsh_sense_style_selected_raw=$value ;;
+    label) _zsh_sense_style_label_raw=$value ;;
+    label-match) _zsh_sense_style_label_match_raw=$value ;;
+    detail) _zsh_sense_style_detail_raw=$value ;;
+    kind) _zsh_sense_style_kind_raw=$value ;;
+    group) _zsh_sense_style_group_raw=$value ;;
+    footer) _zsh_sense_style_footer_raw=$value ;;
+    scrollbar-thumb) _zsh_sense_style_scrollbar_thumb_raw=$value ;;
+    scrollbar-gutter) _zsh_sense_style_scrollbar_gutter_raw=$value ;;
+    diagnostic-error) _zsh_sense_style_diagnostic_error_raw=$value ;;
+    diagnostic-warning) _zsh_sense_style_diagnostic_warning_raw=$value ;;
+    ghost) _zsh_sense_style_ghost_raw=$value ;;
+  esac
+  _zsh_sense_render_dirty=1
+}
+
+_zsh_sense_rebuild_styles() {
+  emulate -L zsh
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw"
+  _zsh_sense_style_menu=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_border_raw"
+  _zsh_sense_style_border=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_selected_raw"
+  _zsh_sense_style_selected=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_label_raw"
+  _zsh_sense_style_label=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_label_raw" \
+    "$_zsh_sense_style_selected_raw"
+  _zsh_sense_style_label_selected=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_label_raw" \
+    "$_zsh_sense_style_label_match_raw"
+  _zsh_sense_style_label_match=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_label_raw" \
+    "$_zsh_sense_style_label_match_raw" "$_zsh_sense_style_selected_raw"
+  _zsh_sense_style_label_match_selected=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_detail_raw"
+  _zsh_sense_style_detail=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_detail_raw" \
+    "$_zsh_sense_style_selected_raw"
+  _zsh_sense_style_detail_selected=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_kind_raw"
+  _zsh_sense_style_kind=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_kind_raw" \
+    "$_zsh_sense_style_selected_raw"
+  _zsh_sense_style_kind_selected=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_footer_raw"
+  _zsh_sense_style_footer=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_scrollbar_thumb_raw"
+  _zsh_sense_style_scrollbar_thumb=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_scrollbar_gutter_raw"
+  _zsh_sense_style_scrollbar_gutter=$REPLY
+
+  _zsh_sense_style_kinds=()
+  _zsh_sense_style_kinds_selected=()
+  local kind
+  for kind in ${(k)_zsh_sense_style_kinds_raw}; do
+    _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_kind_raw" \
+      "$_zsh_sense_style_kinds_raw[$kind]"
+    _zsh_sense_style_kinds[$kind]=$REPLY
+    _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_kind_raw" \
+      "$_zsh_sense_style_kinds_raw[$kind]" "$_zsh_sense_style_selected_raw"
+    _zsh_sense_style_kinds_selected[$kind]=$REPLY
+  done
+  _zsh_sense_render_dirty=1
+}
+
 _zsh_sense_apply_config() {
   emulate -L zsh
   local -a fields=( "$@" )
-  (( $#fields >= 22 )) || return 1
+  (( $#fields >= 23 )) || return 1
   _zsh_sense_activation_mode=$fields[1]
   _zsh_sense_after_accept=$fields[3]
   _zsh_sense_popup_enabled=$fields[4]
@@ -403,12 +572,13 @@ _zsh_sense_apply_config() {
   _zsh_sense_show_scrollbar=$fields[13]
   _zsh_sense_show_groups=$fields[14]
   _zsh_sense_show_descriptions=$fields[15]
-  _zsh_sense_indicator_mode=$fields[16]
-  _zsh_sense_selected_marker=$fields[17]
-  _zsh_sense_capture_matcher=$fields[18]
-  _zsh_sense_capture_fuzzy_min_chars=$fields[19]
+  _zsh_sense_style_detail_raw=$fields[16]
+  _zsh_sense_indicator_mode=$fields[17]
+  _zsh_sense_selected_marker=$fields[18]
+  _zsh_sense_capture_matcher=$fields[19]
+  _zsh_sense_capture_fuzzy_min_chars=$fields[20]
   _zsh_sense_render_dirty=1
-  local -i offset=20 count=$fields[20]
+  local -i offset=21 count=$fields[21]
   (( offset++ ))
   if (( count )); then
     _zsh_sense_trigger_characters=( "${(@)fields[offset,$(( offset + count - 1 ))]}" )
@@ -566,6 +736,7 @@ _zsh_sense_view_begin() {
   _zsh_sense_temp_details=()
   _zsh_sense_temp_detail_cells=()
   _zsh_sense_temp_kinds=()
+  _zsh_sense_temp_match_ranges=()
   _zsh_sense_temp_groups=()
   _zsh_sense_temp_insertions=()
   _zsh_sense_temp_acceptance_backends=()
@@ -577,6 +748,7 @@ _zsh_sense_view_begin() {
     _zsh_sense_temp_details[_zsh_sense_temp_expected]=
     _zsh_sense_temp_detail_cells[_zsh_sense_temp_expected]=0
     _zsh_sense_temp_kinds[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_match_ranges[_zsh_sense_temp_expected]=
     _zsh_sense_temp_groups[_zsh_sense_temp_expected]=
     _zsh_sense_temp_insertions[_zsh_sense_temp_expected]=
     _zsh_sense_temp_acceptance_backends[_zsh_sense_temp_expected]=
@@ -595,6 +767,7 @@ _zsh_sense_view_item() {
   _zsh_sense_temp_labels[item]=$fields[5]
   _zsh_sense_temp_label_cells[item]=${#_zsh_sense_temp_labels[item]}
   _zsh_sense_temp_kinds[item]=$fields[8]
+  _zsh_sense_temp_match_ranges[item]=
   _zsh_sense_temp_details[item]=$fields[10]
   _zsh_sense_temp_detail_cells[item]=${#_zsh_sense_temp_details[item]}
   _zsh_sense_temp_groups[item]=$fields[11]
@@ -611,11 +784,11 @@ _zsh_sense_view_chunk() {
   [[ $fields[1] == $_zsh_sense_active_request && $fields[2] == $_zsh_sense_active_generation ]] || return 0
   [[ $fields[3] == <-> ]] || return 1
   local -i count=$fields[3]
-  (( $#fields == 3 + count * 9 )) || return 1
+  (( $#fields == 3 + count * 10 )) || return 1
   (( _zsh_sense_temp_received + count <= _zsh_sense_temp_expected )) || return 1
 
   local -i index item offset=4
-  for (( index = 1; index <= count; index++, offset += 9 )); do
+  for (( index = 1; index <= count; index++, offset += 10 )); do
     (( item = ++_zsh_sense_temp_received ))
     _zsh_sense_temp_ids[item]=$fields[offset]
     _zsh_sense_temp_labels[item]=$fields[$(( offset + 1 ))]
@@ -629,6 +802,7 @@ _zsh_sense_view_chunk() {
     _zsh_sense_temp_insertions[item]=
     _zsh_sense_temp_acceptance_backends[item]=$fields[$(( offset + 7 ))]
     _zsh_sense_temp_acceptance_identities[item]=$fields[$(( offset + 8 ))]
+    _zsh_sense_temp_match_ranges[item]=$fields[$(( offset + 9 ))]
   done
 }
 
@@ -643,6 +817,7 @@ _zsh_sense_view_end() {
   _zsh_sense_item_details=( "${_zsh_sense_temp_details[@]}" )
   _zsh_sense_item_detail_cells=( "${_zsh_sense_temp_detail_cells[@]}" )
   _zsh_sense_item_kinds=( "${_zsh_sense_temp_kinds[@]}" )
+  _zsh_sense_item_match_ranges=( "${_zsh_sense_temp_match_ranges[@]}" )
   _zsh_sense_item_groups=( "${_zsh_sense_temp_groups[@]}" )
   _zsh_sense_item_insertions=( "${_zsh_sense_temp_insertions[@]}" )
   _zsh_sense_item_acceptance_backends=( "${_zsh_sense_temp_acceptance_backends[@]}" )
@@ -780,13 +955,59 @@ _zsh_sense_line_init() {
   # ownership token before clearing plugin state so content installed by
   # another line-init hook is never mistaken for ours.
   _zsh_sense_owned_postdisplay=
-  _zsh_sense_clear_popup
+  _zsh_sense_clear_popup 0
   _zsh_sense_last_buffer=$BUFFER
   _zsh_sense_last_cursor=$CURSOR
 }
 
+_zsh_sense_line_finish() {
+  emulate -L zsh
+  # POSTDISPLAY is part of ZLE's editable display. Remove the panel before ZLE
+  # commits the accepted line to terminal scrollback. This is also a fallback
+  # for custom accept-line widgets that do not use the configured Enter key.
+  _zsh_sense_prepare_line_finish
+}
+
+_zsh_sense_prepare_line_finish() {
+  emulate -L zsh
+  if (( _zsh_sense_active_request )); then
+    _zsh_sense_send cancel \
+      "$_zsh_sense_active_request" "$_zsh_sense_active_generation"
+  fi
+  _zsh_sense_active_request=0
+  _zsh_sense_active_buffer=
+  _zsh_sense_clear_popup 0
+}
+
+_zsh_sense_erase_edit_display() {
+  emulate -L zsh
+  local -i panel_lines=$#_zsh_sense_render_lines
+  (( panel_lines )) || return 0
+  [[ -n ${terminfo[sc]-} && -n ${terminfo[cud]-} && -n ${terminfo[dl]-} &&
+     -n ${terminfo[rc]-} ]] || return 0
+  # Syntax highlighters/transient-prompt integrations redraw the accepted
+  # command during line-finish, so delete their editable row together with the
+  # panel. Plain ZLE preserves its existing editable row; delete only the panel
+  # below it. Both paths collapse rows rather than leaving a popup-sized gap.
+  echoti sc
+  if (( $+functions[_zsh_highlight] || $+functions[_p9k_on_widget_zle-line-finish] )); then
+    echoti dl $(( panel_lines + 1 ))
+  else
+    echoti cud 1
+    echoti dl $panel_lines
+  fi
+  echoti rc
+}
+
+_zsh_sense_remove_highlights() {
+  emulate -L zsh
+  (( ${+region_highlight} )) || return 0
+  region_highlight=( ${region_highlight:#*memo=zsh-sense} )
+}
+
 _zsh_sense_remove_postdisplay() {
   emulate -L zsh
+  _zsh_sense_remove_highlights
   [[ -n $_zsh_sense_owned_postdisplay ]] || return 0
   if [[ $POSTDISPLAY == *"$_zsh_sense_owned_postdisplay" ]]; then
     local -i base_length=$(( $#POSTDISPLAY - $#_zsh_sense_owned_postdisplay ))
@@ -805,11 +1026,21 @@ _zsh_sense_set_postdisplay() {
   _zsh_sense_remove_postdisplay
   [[ -n $panel ]] || return 0
   [[ -n $POSTDISPLAY && $POSTDISPLAY[-1] == $'\n' ]] && separator=
+  local -i highlight_base=$(( $#BUFFER + $#POSTDISPLAY + $#separator ))
   _zsh_sense_owned_postdisplay="$separator$panel"
   POSTDISPLAY+=$_zsh_sense_owned_postdisplay
+  local -i index start end
+  for (( index = 1; index <= $#_zsh_sense_render_highlight_starts; index++ )); do
+    start=$_zsh_sense_render_highlight_starts[index]
+    end=$_zsh_sense_render_highlight_ends[index]
+    region_highlight+=(
+      "$(( highlight_base + start )) $(( highlight_base + end )) $_zsh_sense_render_highlight_styles[index] memo=zsh-sense"
+    )
+  done
 }
 
 _zsh_sense_clear_popup() {
+  local -i request_redisplay=${1:-1}
   _zsh_sense_remove_postdisplay
   _zsh_sense_popup_visible=0
   _zsh_sense_popup_stale=0
@@ -825,6 +1056,7 @@ _zsh_sense_clear_popup() {
   _zsh_sense_item_details=()
   _zsh_sense_item_detail_cells=()
   _zsh_sense_item_kinds=()
+  _zsh_sense_item_match_ranges=()
   _zsh_sense_item_groups=()
   _zsh_sense_item_insertions=()
   _zsh_sense_item_acceptance_backends=()
@@ -832,7 +1064,10 @@ _zsh_sense_clear_popup() {
   _zsh_sense_render_dirty=1
   _zsh_sense_render_columns=0
   _zsh_sense_render_lines=()
-  if zle >/dev/null 2>&1; then
+  _zsh_sense_render_highlight_starts=()
+  _zsh_sense_render_highlight_ends=()
+  _zsh_sense_render_highlight_styles=()
+  if (( request_redisplay )) && zle >/dev/null 2>&1; then
     zle -R 2>/dev/null
   fi
 }
@@ -914,6 +1149,13 @@ _zsh_sense_render() {
     *) tl=╭ tr=╮ bl=╰ br=╯ horizontal=─ vertical=│ ;;
   esac
   local -i terminal_width=$(( COLUMNS > 0 ? COLUMNS : 80 ))
+  local -i rows=$#_zsh_sense_item_ids
+  (( rows > _zsh_sense_max_rows )) && rows=$_zsh_sense_max_rows
+  local -i scrollbar_active=0 scrollbar_cells=0
+  if (( _zsh_sense_show_scrollbar && _zsh_sense_view_total > rows )); then
+    scrollbar_active=1
+    scrollbar_cells=1
+  fi
   local -i marker_cells=$#_zsh_sense_selected_marker
   (( marker_cells < 1 )) && marker_cells=1
   # Reserve a stable indicator column for the configured presentation mode.
@@ -931,7 +1173,7 @@ _zsh_sense_render() {
   local -i candidate_cells=$_zsh_sense_max_label_cells
   (( _zsh_sense_show_descriptions )) &&
     candidate_cells=$_zsh_sense_max_described_cells
-  local -i content_width=$(( prefix_cells + candidate_cells ))
+  local -i content_width=$(( prefix_cells + candidate_cells + scrollbar_cells ))
   local -i border_width=2
   [[ $_zsh_sense_border == none ]] && border_width=0
   local -i width=$(( content_width + (2 * _zsh_sense_padding) + border_width ))
@@ -953,30 +1195,54 @@ _zsh_sense_render() {
   (( width < 8 )) && return 0
   local -i inner=$(( width - border_width ))
   (( content_width = inner - (2 * _zsh_sense_padding) ))
-  (( content_width < 1 )) && return 0
-  local -i rows=$#_zsh_sense_item_ids
-  (( rows > _zsh_sense_max_rows )) && rows=$_zsh_sense_max_rows
+  local -i row_content_width=$(( content_width - scrollbar_cells ))
+  (( row_content_width < 1 )) && return 0
   local -i first=1
   if (( _zsh_sense_selected > rows )); then
     first=$(( _zsh_sense_selected - rows + 1 ))
   fi
   (( first + rows - 1 > $#_zsh_sense_item_ids )) && first=$(( $#_zsh_sense_item_ids - rows + 1 ))
-  local -a lines=()
-  local fill row marker icon label detail left padding
-  local -i index available icon_cells label_cells detail_cells left_cells
+  local -a lines=() highlight_starts=() highlight_ends=() highlight_styles=()
+  local -a match_ranges=()
+  local fill row marker icon label detail left padding line line_prefix line_suffix
+  local kind match_ranges_text match_range label_style match_style kind_style detail_style
+  local -i index available icon_cells label_cells detail_cells left_cells indicator_delta
+  local -i panel_chars=0 detail_gap=0 detail_start=0 line_start=0
+  local -i interior_start=0 interior_end=0 icon_start=0 icon_end=0
+  local -i label_offset=0 label_start=0 label_visible=0 match_start=0 match_end=0
+  local -i is_selected=0 scrollbar_position=0
+  local -i thumb_rows=0 thumb_first=0 row_number=0
   padding=${(l:$_zsh_sense_padding:: :)}
+  if (( scrollbar_active )); then
+    (( thumb_rows = (rows * rows) / _zsh_sense_view_total ))
+    (( thumb_rows < 1 )) && thumb_rows=1
+    (( thumb_rows > rows )) && thumb_rows=$rows
+    if (( _zsh_sense_view_total > rows && rows > thumb_rows )); then
+      (( thumb_first = (_zsh_sense_view_window_start * (rows - thumb_rows)) /
+                         (_zsh_sense_view_total - rows) ))
+    fi
+  fi
   if [[ $_zsh_sense_border != none ]]; then
     if (( _zsh_sense_show_title )); then
       fill=${(pl:$(( inner - $#title ))::$horizontal:)}
-      lines+=( "$tl$title$fill$tr" )
+      line="$tl$title$fill$tr"
     else
-      lines+=( "$tl${(pl:$inner::$horizontal:)}$tr" )
+      line="$tl${(pl:$inner::$horizontal:)}$tr"
     fi
+    lines+=( "$line" )
+    highlight_starts+=( $panel_chars )
+    highlight_ends+=( $(( panel_chars + ${#line} )) )
+    highlight_styles+=( "$_zsh_sense_style_border" )
+    (( panel_chars += ${#line} + 1 ))
   fi
   for (( index = first; index < first + rows; index++ )); do
+    line_start=$panel_chars
+    (( row_number++ ))
+    (( is_selected = index == _zsh_sense_selected ))
     marker=' '
-    (( index == _zsh_sense_selected )) && marker=$_zsh_sense_selected_marker
-    _zsh_sense_kind_indicator "$_zsh_sense_item_kinds[index]"
+    (( is_selected )) && marker=$_zsh_sense_selected_marker
+    kind=$_zsh_sense_item_kinds[index]
+    _zsh_sense_kind_indicator "$kind"
     icon=$REPLY
     icon_cells=$_zsh_sense_indicator_cells
     label=$_zsh_sense_item_labels[index]
@@ -991,7 +1257,7 @@ _zsh_sense_render() {
       left="$marker $label"
       left_cells=$(( marker_cells + 1 + label_cells ))
     fi
-    available=$content_width
+    available=$row_content_width
     if [[ -n $detail ]]; then
       if (( left_cells + 2 + detail_cells > available )); then
         local -i detail_width=$(( available / 2 ))
@@ -1001,16 +1267,17 @@ _zsh_sense_render() {
         # The icon's terminal-cell width can exceed its Zsh character count.
         # Remove that delta from the character budget passed to the fallback
         # truncator so a clamped row still keeps its right border aligned.
-        local -i indicator_delta=$(( icon_cells - $#icon ))
+        indicator_delta=$(( icon_cells - $#icon ))
         (( indicator_delta < 0 )) && indicator_delta=0
         _zsh_sense_truncate "$left" $(( available - detail_cells - 1 - indicator_delta ))
         left=$REPLY
         left_cells=$(( $#left + indicator_delta ))
       fi
-      row="$left${(l:$(( available - left_cells - detail_cells )):: :)}$detail"
+      detail_gap=$(( available - left_cells - detail_cells ))
+      row="$left${(l:$detail_gap:: :)}$detail"
     else
       if (( left_cells > available )); then
-        local -i indicator_delta=$(( icon_cells - $#icon ))
+        indicator_delta=$(( icon_cells - $#icon ))
         (( indicator_delta < 0 )) && indicator_delta=0
         _zsh_sense_truncate "$left" $(( available - indicator_delta ))
         left=$REPLY
@@ -1018,24 +1285,125 @@ _zsh_sense_render() {
       fi
       row="$left${(l:$(( available - left_cells )):: :)}"
     fi
-    if [[ $_zsh_sense_border == none ]]; then
-      lines+=( "$padding$row$padding" )
-    else
-      lines+=( "$vertical$padding$row$padding$vertical" )
+    if (( scrollbar_active )); then
+      row+=" "
     fi
+    if [[ $_zsh_sense_border == none ]]; then
+      line_prefix=$padding
+      line_suffix=$padding
+    else
+      line_prefix="$vertical$padding"
+      line_suffix="$padding$vertical"
+    fi
+    line="$line_prefix$row$line_suffix"
+
+    if [[ $_zsh_sense_border == none ]]; then
+      interior_start=$line_start
+      interior_end=$(( line_start + ${#line} ))
+    else
+      interior_start=$(( line_start + 1 ))
+      interior_end=$(( line_start + ${#line} - 1 ))
+    fi
+    if (( is_selected )); then
+      highlight_starts+=( $interior_start )
+      highlight_ends+=( $interior_end )
+      highlight_styles+=( "$_zsh_sense_style_selected" )
+      label_style=$_zsh_sense_style_label_selected
+      match_style=$_zsh_sense_style_label_match_selected
+      kind_style=${_zsh_sense_style_kinds_selected[$kind]:-$_zsh_sense_style_kind_selected}
+      detail_style=$_zsh_sense_style_detail_selected
+    else
+      label_style=$_zsh_sense_style_label
+      match_style=$_zsh_sense_style_label_match
+      kind_style=${_zsh_sense_style_kinds[$kind]:-$_zsh_sense_style_kind}
+      detail_style=$_zsh_sense_style_detail
+    fi
+
+    if [[ -n $icon ]]; then
+      icon_start=$(( line_start + ${#line_prefix} + ${#marker} + 1 ))
+      icon_end=$(( icon_start + ${#icon} ))
+      (( icon_end > line_start + ${#line_prefix} + ${#left} )) &&
+        icon_end=$(( line_start + ${#line_prefix} + ${#left} ))
+      if (( icon_end > icon_start )); then
+        highlight_starts+=( $icon_start )
+        highlight_ends+=( $icon_end )
+        highlight_styles+=( "$kind_style" )
+      fi
+      label_offset=$(( ${#marker} + 1 + ${#icon} + 1 ))
+    else
+      label_offset=$(( ${#marker} + 1 ))
+    fi
+    label_visible=$(( ${#left} - label_offset ))
+    (( label_visible > ${#label} )) && label_visible=${#label}
+    if (( label_visible > 0 )); then
+      label_start=$(( line_start + ${#line_prefix} + label_offset ))
+      highlight_starts+=( $label_start )
+      highlight_ends+=( $(( label_start + label_visible )) )
+      highlight_styles+=( "$label_style" )
+
+      match_ranges_text=$_zsh_sense_item_match_ranges[index]
+      match_ranges=( "${(@s:,:)match_ranges_text}" )
+      for match_range in "${match_ranges[@]}"; do
+        [[ $match_range == <->:<-> ]] || continue
+        match_start=${match_range%%:*}
+        match_end=${match_range#*:}
+        (( match_start < label_visible )) || continue
+        (( match_end > label_visible )) && match_end=$label_visible
+        (( match_end > match_start )) || continue
+        highlight_starts+=( $(( label_start + match_start )) )
+        highlight_ends+=( $(( label_start + match_end )) )
+        highlight_styles+=( "$match_style" )
+      done
+    fi
+    if [[ -n $detail ]]; then
+      detail_start=$(( panel_chars + ${#line_prefix} + ${#left} + detail_gap ))
+      highlight_starts+=( $detail_start )
+      highlight_ends+=( $(( detail_start + ${#detail} )) )
+      highlight_styles+=( "$detail_style" )
+    fi
+    if [[ $_zsh_sense_border != none ]]; then
+      highlight_starts+=( $line_start $(( line_start + ${#line} - 1 )) )
+      highlight_ends+=( $(( line_start + 1 )) $(( line_start + ${#line} )) )
+      highlight_styles+=( "$_zsh_sense_style_border" "$_zsh_sense_style_border" )
+    fi
+    if (( scrollbar_active )); then
+      scrollbar_position=$(( line_start + ${#line_prefix} + ${#row} - 1 ))
+      highlight_starts+=( $scrollbar_position )
+      highlight_ends+=( $(( scrollbar_position + 1 )) )
+      highlight_styles+=( "$_zsh_sense_style_scrollbar_gutter" )
+      if (( row_number > thumb_first && row_number <= thumb_first + thumb_rows )); then
+        highlight_starts+=( $scrollbar_position )
+        highlight_ends+=( $(( scrollbar_position + 1 )) )
+        highlight_styles+=( "$_zsh_sense_style_scrollbar_thumb" )
+      fi
+    fi
+    lines+=( "$line" )
+    (( panel_chars += ${#line} + 1 ))
   done
   if [[ $_zsh_sense_border != none ]]; then
+    line_start=$panel_chars
     if (( _zsh_sense_show_footer )); then
       fill=${(pl:$(( inner - $#footer ))::$horizontal:)}
-      lines+=( "$bl$fill$footer$br" )
+      line="$bl$fill$footer$br"
+      highlight_starts+=( $line_start $(( line_start + ${#bl} + ${#fill} )) )
+      highlight_ends+=( $(( line_start + ${#line} )) $(( line_start + ${#bl} + ${#fill} + ${#footer} )) )
+      highlight_styles+=( "$_zsh_sense_style_border" "$_zsh_sense_style_footer" )
     else
-      lines+=( "$bl${(pl:$inner::$horizontal:)}$br" )
+      line="$bl${(pl:$inner::$horizontal:)}$br"
+      highlight_starts+=( $line_start )
+      highlight_ends+=( $(( line_start + ${#line} )) )
+      highlight_styles+=( "$_zsh_sense_style_border" )
     fi
+    lines+=( "$line" )
   fi
+  local panel="${(F)lines}"
   _zsh_sense_render_lines=( "${lines[@]}" )
+  _zsh_sense_render_highlight_starts=( 0 "${highlight_starts[@]}" )
+  _zsh_sense_render_highlight_ends=( ${#panel} "${highlight_ends[@]}" )
+  _zsh_sense_render_highlight_styles=( "$_zsh_sense_style_menu" "${highlight_styles[@]}" )
   _zsh_sense_render_columns=$COLUMNS
   _zsh_sense_render_dirty=0
-  _zsh_sense_set_postdisplay "${(F)_zsh_sense_render_lines}"
+  _zsh_sense_set_postdisplay "$panel"
   zle -R
 }
 
@@ -1089,6 +1457,20 @@ _zsh_sense_key_dispatch() {
   case $action in
     trigger) _zsh_sense_request manual ;;
     accept) _zsh_sense_accept_selected || _zsh_sense_call_original "$logical" ;;
+    execute)
+      if [[ -n $_zsh_sense_owned_postdisplay ]]; then
+        # Return once with an empty POSTDISPLAY so ZLE performs its ordinary
+        # differential redraw and erases the panel. Requeue the exact bytes
+        # that invoked this widget; their second dispatch sees no panel and
+        # delegates to the original accept-line widget.
+        local execute_keys=$KEYS
+        _zsh_sense_erase_edit_display
+        _zsh_sense_prepare_line_finish
+        zle -U "$execute_keys"
+      else
+        _zsh_sense_call_original "$logical"
+      fi
+      ;;
     next)
       if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
         if (( _zsh_sense_selected < $#_zsh_sense_item_ids &&
@@ -1152,7 +1534,12 @@ _zsh_sense_install_keybindings() {
   local -a definition_words maps keys
   main_definition=$(bindkey -lL main 2>/dev/null)
   definition_words=( ${(z)main_definition} )
-  _zsh_sense_main_keymap=${definition_words[2]:-viins}
+  if [[ $definition_words[1] == bindkey && $definition_words[2] == -A &&
+        -n $definition_words[3] ]]; then
+    _zsh_sense_main_keymap=$definition_words[3]
+  else
+    _zsh_sense_main_keymap=viins
+  fi
   maps=( emacs viins "$_zsh_sense_main_keymap" )
   maps=( ${(u)maps} )
   keys=( ${(k)_zsh_sense_bindings_closed} ${(k)_zsh_sense_bindings_popup} )
@@ -1204,6 +1591,7 @@ _zsh_sense_cleanup() {
   autoload -Uz add-zle-hook-widget add-zsh-hook
   add-zle-hook-widget -d line-pre-redraw _zsh_sense_line_pre_redraw 2>/dev/null
   add-zle-hook-widget -d line-init _zsh_sense_line_init 2>/dev/null
+  add-zle-hook-widget -d line-finish _zsh_sense_line_finish 2>/dev/null
   add-zsh-hook -d zshexit _zsh_sense_cleanup 2>/dev/null
   local key map logical sequence original
   for key in ${(k)_zsh_sense_bound_sequences}; do
@@ -1282,11 +1670,13 @@ _zsh_sense_start_worker() {
 _zsh_sense_init() {
   emulate -L zsh
   [[ -o interactive ]] || return 0
-  zmodload zsh/system zsh/zselect 2>/dev/null || return 1
+  zmodload zsh/system zsh/zselect zsh/terminfo 2>/dev/null || return 1
   autoload -Uz add-zle-hook-widget add-zsh-hook
+  _zsh_sense_rebuild_styles
   _zsh_sense_portable_init || return 1
   add-zle-hook-widget line-pre-redraw _zsh_sense_line_pre_redraw
   add-zle-hook-widget line-init _zsh_sense_line_init
+  add-zle-hook-widget line-finish _zsh_sense_line_finish
   add-zsh-hook zshexit _zsh_sense_cleanup
   _zsh_sense_last_buffer=
   _zsh_sense_last_cursor=-1

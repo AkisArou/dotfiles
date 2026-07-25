@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 emulate -L zsh
-setopt errexit nounset pipefail no_aliases
+setopt errexit nounset pipefail no_aliases extendedglob
 
 zmodload zsh/zpty zsh/zselect zsh/datetime
 typeset -gx SENSE_ZSH_TEST_ROOT=${0:A:h:h}
@@ -24,12 +24,14 @@ read_until() {
   local pattern=$1
   local -i attempts=${2:-500}
   local -i attempt
+  local plain_output
   for (( attempt = 1; attempt <= attempts; attempt++ )); do
     while zpty -r -t sense-live chunk 2>/dev/null; do
       output+=$chunk
       chunk=
     done
-    [[ $output == ${~pattern} ]] && return 0
+    plain_output=${output//$'\e'\[[0-9;]#[[:alpha:]]/}
+    [[ $plain_output == ${~pattern} ]] && return 0
     zselect -t 1 >/dev/null 2>&1 || true
   done
   return 1
@@ -121,13 +123,31 @@ read_until '*replace the previous commit*' || {
   return 1
 }
 
-for expected in 'completions' '--all' '--amend' 'stage modified and deleted files'; do
-  [[ $output == *$expected* ]] || {
+typeset plain_output
+plain_output=$(print -rn -- "$output" | sed $'s/\033\\[[0-9;]*[[:alpha:]]//g')
+for expected in '--all' '--amend' 'stage modified and deleted files'; do
+  [[ $plain_output == *$expected* ]] || {
     print -u2 -- "popup is missing: $expected"
     print -u2 -r -- "$output"
     return 1
   }
 done
+for expected in \
+    $'\e[48;2;32;32;32m' \
+    $'\e[48;2;52;59;65m' \
+    $'\e[38;2;24;162;254m' \
+    $'\e[38;2;255;214;2m'; do
+  [[ $output == *$expected* ]] || {
+    print -u2 -- 'popup is missing a configured BlinkCmp highlight'
+    print -u2 -r -- "$output"
+    return 1
+  }
+done
+[[ $output != *completions* ]] || {
+  print -u2 -- 'popup still contains the completions title'
+  print -u2 -r -- "$output"
+  return 1
+}
 [[ $output != *'^[[38;'* ]] || {
   print -u2 -- 'popup contains literal ANSI escape text'
   return 1
@@ -142,8 +162,28 @@ typeset escaped_meta='\M-'
 # Ctrl-N selects --amend; Ctrl-E accepts through the captured compadd record.
 zpty -n -w sense-live $'\x0e\x05\r'
 output=
-read_until '*<EXEC>--amend</EXEC>*<SENSE-PROMPT>*' || {
+read_until '*<EXEC>--amend</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' || {
   print -u2 -- 'navigation and Zsh-owned acceptance did not complete'
+  print -u2 -r -- "$output"
+  zpty -n -w sense-live $'\x18\x07'
+  output=
+  read_until '*<STATE>*</STATE>*<SENSE-PROMPT>*' 100 || true
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# Enter can execute the buffer without first accepting a candidate. The popup
+# must still be removed during line-finish rather than becoming scrollback.
+zpty -n -w sense-live 'sense-test --a'
+output=
+read_until '*replace the previous commit*' || {
+  print -u2 -- 'line-finish cleanup setup did not open the popup'
+  return 1
+}
+zpty -n -w sense-live $'\r'
+output=
+read_until '*<EXEC>--a</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'line-finish did not clear POSTDISPLAY before execution'
   print -u2 -r -- "$output"
   return 1
 }
@@ -165,7 +205,7 @@ read_until '*<VERB>restart</VERB>*<SENSE-PROMPT>*' || return 1
 # insertion replay are intentionally separate from generic compadd capture.
 zpty -n -w sense-live 'sense-ver'
 output=
-read_until '*sense-verb*shell function*' || {
+read_until '*shell function*' || {
   print -u2 -- 'fast command completion did not open'
   return 1
 }
@@ -257,15 +297,17 @@ read_until '*replace the previous commit*' || {
   return 1
 }
 zpty -n -w sense-live $'\x7f\x7f'
+# Highlight-range updates can legitimately interleave terminal SGR sequences
+# between unchanged characters during a differential redraw. Inspect the
+# completion state instead of treating the raw PTY byte stream as plain text.
+zselect -t 20 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x18\x07'
 output=
-read_until '*stage modified and deleted files*' || {
+read_until '*captured=--all\|--amend*buffer="sense-test --"*</STATE>*<SENSE-PROMPT>*' || {
   print -u2 -- 'Backspace did not regenerate completions'
   print -u2 -r -- "$output"
   return 1
 }
-zpty -n -w sense-live $'\x03'
-output=
-read_until '*<SENSE-PROMPT>*' || return 1
 
 # Fuzzy path completion must retain Zsh's directory semantics. Accepting the
 # first directory inserts '/', triggers the nested context, and remains fuzzy.

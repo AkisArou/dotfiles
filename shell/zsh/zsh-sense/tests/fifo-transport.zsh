@@ -95,6 +95,13 @@ done
 }
 
 source "$project_root/shell/client.zsh"
+_zsh_sense_rebuild_styles
+[[ $_zsh_sense_style_label == 'fg=#d4d4d4,bg=#202020' &&
+   $_zsh_sense_style_label_selected == 'fg=#d4d4d4,bg=#343b41' &&
+   $_zsh_sense_style_label_match_selected == 'fg=#18a2fe,bg=#343b41,bold' ]] || {
+  print -u2 -- 'BlinkCmp component styles did not compose with menu and selection backgrounds'
+  return 1
+}
 typeset -ga parsed_commands=()
 _zsh_sense_dispatch() {
   parsed_commands+=( "$1" )

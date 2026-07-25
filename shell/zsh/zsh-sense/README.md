@@ -83,6 +83,7 @@ Defaults are built in. To customize them, copy `config.example.toml` to
 - Ctrl-N/Ctrl-P select the next/previous item;
 - Ctrl-D/Ctrl-U page down/up;
 - Ctrl-E accepts the selected item;
+- Enter executes the current command and removes the popup first;
 - Escape dismisses the popup.
 
 Set `activation.mode = "manual"` for Tab-only completion, or use `"hybrid"`
@@ -91,6 +92,11 @@ event/character triggers, popup dimensions/decorations, descriptions,
 indicator mode, and all state-specific keybindings are typed configuration.
 The popup grows to its contents between `popup.min_width` and
 `popup.max_width`; set both values to the same number for a fixed-width panel.
+The default popup palette resolves the BlinkCmp highlights and PmenuSel
+override from this dotfiles repository's `vscode.nvim` configuration. Menu,
+border, selection, label, fuzzy-match, detail, kind, footer, scrollbar, and
+per-kind colors can all be changed under `[styles]`; each value is one ZLE
+highlight specification.
 `sources.zsh.fuzzy_min_query_chars` controls when the portable source broadens
 the candidate universe (default `3`); this is separate from Rust's final fuzzy
 ranking and typo policy.

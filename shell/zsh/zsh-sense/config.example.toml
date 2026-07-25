@@ -25,10 +25,12 @@ after_accept = true
 [keybindings.closed]
 tab = "trigger"
 "ctrl-space" = "trigger"
+enter = "execute"
 
 [keybindings.popup]
 tab = "accept"
 "ctrl-e" = "accept"
+enter = "execute"
 "ctrl-n" = "next"
 "ctrl-p" = "previous"
 "ctrl-d" = "page-down"
@@ -58,7 +60,7 @@ explain_scores = false
 enabled = true
 decorations = "full"
 border = "rounded"
-title = true
+title = false
 footer = true
 scrollbar = true
 group_headings = true
@@ -187,15 +189,39 @@ file = "~/.local/state/zsh-sense/zsh-sense.log"
 include_command_lines = false
 
 [styles]
-border = "fg=#569cd6"
-selected = "fg=#ffffff,bg=#264f78"
-label = "fg=#dcdcaa"
-detail = "fg=#9da5b4"
+# Resolved from this dotfiles repository's vscode.nvim BlinkCmp highlights.
+# Component styles inherit unspecified attributes from menu; selected is
+# background-only so label, fuzzy-match, and kind foregrounds remain visible.
+menu = "fg=#bbbbbb,bg=#202020"
+border = "fg=#d4d4d4"
+selected = "bg=#343b41"
+label = "fg=#d4d4d4"
+label_match = "fg=#18a2fe,bold"
+detail = "fg=#bbbbbb"
+kind = "fg=#bbbbbb"
 group = "fg=#4ec9b0"
-footer = "fg=#808080"
+footer = "fg=#bbbbbb"
+scrollbar_thumb = "bg=#bbbbbb"
+scrollbar_gutter = "bg=#343b41"
 diagnostic_error = "fg=#f14c4c,underline"
 diagnostic_warning = "fg=#cca700,underline"
-ghost = "fg=#606060"
+ghost = "fg=#707070"
+
+[styles.kinds]
+text = "fg=#bbbbbb"
+command = "fg=#c586c0"
+alias = "fg=#c586c0"
+builtin = "fg=#c586c0"
+function = "fg=#c586c0"
+subcommand = "fg=#c586c0"
+option = "fg=#ffd602"
+option-value = "fg=#9cdcfe"
+variable = "fg=#9cdcfe"
+file = "fg=#d4d4d4"
+directory = "fg=#569cd6"
+symlink = "fg=#d4d4d4"
+snippet = "fg=#ffd602"
+action = "fg=#ffd602"
 
 [[rules]]
 name = "manual completion for sensitive tools"

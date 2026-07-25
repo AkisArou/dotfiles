@@ -256,6 +256,7 @@ fn shell_startup_messages(config: &Config) -> Result<Vec<ShellWireMessage>> {
         bool_bytes(popup.scrollbar),
         bool_bytes(popup.group_headings),
         bool_bytes(popup.descriptions),
+        config.styles.detail.as_str().into(),
         enum_name(indicators.kinds)?.into(),
         indicators.selected_marker.as_str().into(),
         zsh_candidate_matcher(config.sources.zsh.candidate_filter).into(),
@@ -281,6 +282,33 @@ fn shell_startup_messages(config: &Config) -> Result<Vec<ShellWireMessage>> {
     }
 
     let mut messages = vec![ShellWireMessage::new("config", fields)];
+    for (name, value) in [
+        ("menu", &config.styles.menu),
+        ("border", &config.styles.border),
+        ("selected", &config.styles.selected),
+        ("label", &config.styles.label),
+        ("label-match", &config.styles.label_match),
+        ("detail", &config.styles.detail),
+        ("kind", &config.styles.kind),
+        ("group", &config.styles.group),
+        ("footer", &config.styles.footer),
+        ("scrollbar-thumb", &config.styles.scrollbar_thumb),
+        ("scrollbar-gutter", &config.styles.scrollbar_gutter),
+        ("diagnostic-error", &config.styles.diagnostic_error),
+        ("diagnostic-warning", &config.styles.diagnostic_warning),
+        ("ghost", &config.styles.ghost),
+    ] {
+        messages.push(ShellWireMessage::new(
+            "style",
+            vec![name.into(), value.as_str().into()],
+        ));
+    }
+    for (kind, value) in &config.styles.kinds {
+        messages.push(ShellWireMessage::new(
+            "kind-style",
+            vec![kind.as_str().into(), value.as_str().into()],
+        ));
+    }
     for (state, bindings) in [
         ("closed", &config.keybindings.closed),
         ("popup", &config.keybindings.popup),

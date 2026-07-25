@@ -35,6 +35,7 @@ compdef _zsh_sense_live_many_completion sense-many
 
 sense-test() {
   print -r -- "<EXEC>$*</EXEC>"
+  print -r -- "<FINISH-POST>${#_zsh_sense_test_finish_postdisplay}</FINISH-POST>"
 }
 
 sense-verb() {
@@ -46,6 +47,16 @@ sense-many() {
 }
 
 source "$SENSE_ZSH_TEST_ROOT/shell/zsh-sense.plugin.zsh"
+
+# Observe line-finish after zsh-sense. This verifies lifecycle state directly;
+# raw PTY transcripts retain bytes that were subsequently erased and therefore
+# cannot by themselves distinguish live screen content from scrollback.
+typeset -g _zsh_sense_test_finish_postdisplay=unobserved
+_zsh_sense_test_line_finish_observer() {
+  _zsh_sense_test_finish_postdisplay=$POSTDISPLAY
+}
+autoload -Uz add-zle-hook-widget
+add-zle-hook-widget line-finish _zsh_sense_test_line_finish_observer
 
 _zsh_sense_test_state() {
   local handler=
