@@ -44,6 +44,7 @@ pub struct BridgeConfig {
     pub shell_wire_limits: ShellWireLimits,
     pub capture_limits: CaptureLimits,
     pub debounce: Duration,
+    pub viewport_rows: usize,
     pub startup_messages: Vec<ShellWireMessage>,
     pub client_version: String,
     pub zsh: Option<ZshIdentity>,
@@ -57,7 +58,8 @@ impl BridgeConfig {
             daemon_frame_bytes: sense_protocol::DEFAULT_MAX_FRAME_BYTES,
             shell_wire_limits: ShellWireLimits::default(),
             capture_limits: CaptureLimits::default(),
-            debounce: Duration::from_millis(35),
+            debounce: Duration::from_millis(15),
+            viewport_rows: 20,
             startup_messages: Vec::new(),
             client_version: env!("CARGO_PKG_VERSION").into(),
             zsh: None,
@@ -139,11 +141,35 @@ enum ShellInput {
     Complete(CompletionRequest),
     Cancel(RequestId, Generation),
     Select(RequestId, Generation, ItemId),
+    Navigate(RequestId, Generation, Navigation),
     CaptureBegin(RequestId, Generation, CaptureBackend),
     Candidate(RequestId, Generation, Box<CapturedMatch>),
+    CandidateChunk(RequestId, Generation, Vec<CapturedMatch>),
     CaptureEnd(RequestId, Generation),
     Ping(u64),
     Goodbye,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Navigation {
+    Next,
+    Previous,
+    PageDown,
+    PageUp,
+}
+
+#[derive(Debug)]
+struct CachedView {
+    view: CandidateView,
+    selected: usize,
+}
+
+#[derive(Debug)]
+struct WindowedView {
+    view: CandidateView,
+    total: usize,
+    start: usize,
+    selected_absolute: usize,
 }
 
 #[derive(Debug)]
@@ -158,6 +184,8 @@ struct BridgeState {
     cancelled_captures: HashSet<RequestKey>,
     cancelled_capture_order: VecDeque<RequestKey>,
     highest_generation: u64,
+    viewport_rows: usize,
+    current_view: Option<CachedView>,
 }
 
 impl BridgeState {
@@ -165,6 +193,7 @@ impl BridgeState {
         session_id: SessionId,
         daemon_frame_bytes: usize,
         capture_limits: CaptureLimits,
+        viewport_rows: usize,
     ) -> Result<Self, CaptureError> {
         Ok(Self {
             session_id,
@@ -177,15 +206,71 @@ impl BridgeState {
             cancelled_captures: HashSet::new(),
             cancelled_capture_order: VecDeque::new(),
             highest_generation: 0,
+            viewport_rows: viewport_rows.max(1),
+            current_view: None,
         })
     }
 
-    async fn handle_shell(
+    fn install_view(&mut self, view: CandidateView) {
+        let selected = view
+            .selected_index
+            .map_or(0, |index| index as usize)
+            .min(view.items.len().saturating_sub(1));
+        self.current_view = Some(CachedView { view, selected });
+    }
+
+    fn navigate(&mut self, request_id: RequestId, generation: Generation, action: Navigation) {
+        let Some(cached) = self.current_view.as_mut() else {
+            return;
+        };
+        if cached.view.request_id != request_id || cached.view.generation != generation {
+            return;
+        }
+        let last = cached.view.items.len().saturating_sub(1);
+        cached.selected = match action {
+            Navigation::Next => cached.selected.saturating_add(1).min(last),
+            Navigation::Previous => cached.selected.saturating_sub(1),
+            Navigation::PageDown => cached
+                .selected
+                .saturating_add((self.viewport_rows / 2).max(1))
+                .min(last),
+            Navigation::PageUp => cached
+                .selected
+                .saturating_sub((self.viewport_rows / 2).max(1)),
+        };
+    }
+
+    fn current_window(&self) -> Option<WindowedView> {
+        let cached = self.current_view.as_ref()?;
+        let total = cached.view.items.len();
+        let selected = cached.selected.min(total.saturating_sub(1));
+        let rows = self.viewport_rows.min(total);
+        let mut start = selected.saturating_add(1).saturating_sub(rows);
+        start = start.min(total.saturating_sub(rows));
+        let end = start.saturating_add(rows);
+        let mut view = cached.view.clone();
+        view.items = cached.view.items[start..end].to_vec();
+        view.selected_index = (!view.items.is_empty()).then_some(
+            u32::try_from(selected - start).expect("viewport selection index fits in u32"),
+        );
+        Some(WindowedView {
+            view,
+            total,
+            start,
+            selected_absolute: selected,
+        })
+    }
+
+    async fn handle_shell<W>(
         &mut self,
         input: ShellInput,
         zle: &mut DaemonConnection,
         worker: &mut DaemonConnection,
-    ) -> Result<bool, BridgeError> {
+        shell: &mut FramedWrite<W, ShellWireCodec>,
+    ) -> Result<bool, BridgeError>
+    where
+        W: AsyncWrite + Unpin,
+    {
         match input {
             ShellInput::Complete(request) => {
                 self.send_completion(request, zle).await?;
@@ -217,11 +302,22 @@ impl BridgeState {
                 }))
                 .await?;
             }
+            ShellInput::Navigate(request_id, generation, action) => {
+                self.navigate(request_id, generation, action);
+                if let Some(window) = self.current_window() {
+                    send_candidate_view(shell, window, &self.capture_store).await?;
+                }
+            }
             ShellInput::CaptureBegin(request_id, generation, backend) => {
                 self.begin_capture(request_id, generation, backend)?;
             }
             ShellInput::Candidate(request_id, generation, candidate) => {
                 self.push_candidate(request_id, generation, *candidate)?;
+            }
+            ShellInput::CandidateChunk(request_id, generation, candidates) => {
+                for candidate in candidates {
+                    self.push_candidate(request_id, generation, candidate)?;
+                }
             }
             ShellInput::CaptureEnd(request_id, generation) => {
                 for batch in self.end_capture(request_id, generation)? {
@@ -482,6 +578,19 @@ fn candidate_frame_size(batch: &CandidateBatch) -> Result<usize, rmp_serde::enco
         .map(|encoded| encoded.len())
 }
 
+fn bridge_state(
+    config: &BridgeConfig,
+    session_id: SessionId,
+    daemon_frame_bytes: usize,
+) -> Result<BridgeState, CaptureError> {
+    BridgeState::new(
+        session_id,
+        daemon_frame_bytes,
+        config.capture_limits,
+        config.viewport_rows,
+    )
+}
+
 /// Run a bridge over arbitrary asynchronous shell streams.
 ///
 /// The bridge creates two authenticated daemon peers: the ZLE client owns the
@@ -525,7 +634,7 @@ where
         .daemon_frame_bytes
         .min(zle_welcome.max_frame_bytes as usize)
         .min(worker_welcome.max_frame_bytes as usize);
-    let mut state = BridgeState::new(session_id, daemon_frame_bytes, config.capture_limits)?;
+    let mut state = bridge_state(&config, session_id, daemon_frame_bytes)?;
     let mut debounce_timer = Box::pin(tokio::time::sleep(Duration::from_hours(24)));
     let mut debounce_armed = false;
 
@@ -567,7 +676,10 @@ where
                         debounce_armed = true;
                     }
                     input => {
-                        if state.handle_shell(input, &mut zle, &mut worker).await? {
+                        if state
+                            .handle_shell(input, &mut zle, &mut worker, &mut shell_writer)
+                            .await?
+                        {
                             send_goodbye(&mut zle, &mut worker).await;
                             return Ok(());
                         }
@@ -705,7 +817,10 @@ where
 {
     match message {
         ServerMessage::CandidateView(view) => {
-            send_candidate_view(shell, view, &state.capture_store).await?;
+            state.install_view(view);
+            if let Some(window) = state.current_window() {
+                send_candidate_view(shell, window, &state.capture_store).await?;
+            }
         }
         ServerMessage::RequestStarted {
             request_id,
@@ -898,8 +1013,10 @@ fn shell_input_name(input: &ShellInput) -> &'static str {
         ShellInput::Complete(_) => "complete",
         ShellInput::Cancel(_, _) => "cancel",
         ShellInput::Select(_, _, _) => "select",
+        ShellInput::Navigate(_, _, _) => "navigate",
         ShellInput::CaptureBegin(_, _, _) => "capture-begin",
         ShellInput::Candidate(_, _, _) => "candidate",
+        ShellInput::CandidateChunk(_, _, _) => "command-candidates",
         ShellInput::CaptureEnd(_, _) => "capture-end",
         ShellInput::Ping(_) => "ping",
         ShellInput::Goodbye => "goodbye",
@@ -908,12 +1025,13 @@ fn shell_input_name(input: &ShellInput) -> &'static str {
 
 async fn send_candidate_view<W>(
     shell: &mut FramedWrite<W, ShellWireCodec>,
-    view: CandidateView,
+    window: WindowedView,
     capture_store: &CaptureStore,
 ) -> Result<(), ShellWireError>
 where
     W: AsyncWrite + Unpin,
 {
+    let view = window.view;
     let mut begin_fields = vec![
         view.session_id.0.to_string().into(),
         view.request_id.0.to_string().into(),
@@ -925,6 +1043,9 @@ where
         bool_field(view.is_final),
         bool_field(view.is_incomplete),
         view.items.len().to_string().into(),
+        window.total.to_string().into(),
+        window.start.to_string().into(),
+        window.selected_absolute.to_string().into(),
         view.sources_pending.len().to_string().into(),
     ];
     begin_fields.extend(
@@ -1054,6 +1175,22 @@ fn parse_shell_message(
                 ItemId(parse_utf8(&message.fields[2], "item identifier").map_err(invalid)?),
             ))
         }
+        "navigate" => {
+            expect_fields(&message.fields, 3).map_err(invalid)?;
+            let action =
+                match parse_utf8_ref(&message.fields[2], "navigation action").map_err(invalid)? {
+                    "next" => Navigation::Next,
+                    "previous" => Navigation::Previous,
+                    "page-down" => Navigation::PageDown,
+                    "page-up" => Navigation::PageUp,
+                    value => return Err(invalid(format!("unknown navigation action: {value}"))),
+                };
+            Ok(ShellInput::Navigate(
+                parse_request_id(&message.fields[0]).map_err(invalid)?,
+                parse_generation(&message.fields[1]).map_err(invalid)?,
+                action,
+            ))
+        }
         "capture-begin" => {
             expect_fields(&message.fields, 3).map_err(invalid)?;
             Ok(ShellInput::CaptureBegin(
@@ -1065,6 +1202,11 @@ fn parse_shell_message(
         "candidate" => parse_candidate(&message.fields)
             .map(|(request_id, generation, candidate)| {
                 ShellInput::Candidate(request_id, generation, Box::new(candidate))
+            })
+            .map_err(invalid),
+        "command-candidates" => parse_command_candidates(&message.fields)
+            .map(|(request_id, generation, candidates)| {
+                ShellInput::CandidateChunk(request_id, generation, candidates)
             })
             .map_err(invalid),
         "capture-end" => {
@@ -1195,6 +1337,89 @@ fn parse_candidate(fields: &[RawBytes]) -> Result<(RequestId, Generation, Captur
             },
         },
     ))
+}
+
+// Command-name capture is the hottest continuous-completion path. Its Zsh
+// insertion metadata is uniform across a chunk, so repeating the full generic
+// 27-field representation for every command only burns time in the live shell.
+// Decoding still produces the exact same CapturedMatch and acceptance route.
+fn parse_command_candidates(
+    fields: &[RawBytes],
+) -> Result<(RequestId, Generation, Vec<CapturedMatch>), String> {
+    const HEADER_FIELDS: usize = 10;
+    const ITEM_FIELDS: usize = 2;
+    if fields.len() < HEADER_FIELDS {
+        return Err("command-candidates requires at least 10 fields".into());
+    }
+    let first_ordinal = parse_usize(&fields[8], "first candidate ordinal")?;
+    if first_ordinal == 0 {
+        return Err("first candidate ordinal must be one-based".into());
+    }
+    let count = parse_usize(&fields[9], "candidate count")?;
+    let expected = HEADER_FIELDS
+        .checked_add(
+            count
+                .checked_mul(ITEM_FIELDS)
+                .ok_or("candidate count overflow")?,
+        )
+        .ok_or("candidate count overflow")?;
+    expect_fields(fields, expected)?;
+
+    let request_id = parse_request_id(&fields[0])?;
+    let generation = parse_generation(&fields[1])?;
+    let replace_range = TextRange::new(
+        parse_u32(&fields[2], "replacement start")?,
+        parse_u32(&fields[3], "replacement end")?,
+    );
+    let insertion_metadata = ZshInsertionMetadata {
+        prefix: fields[4].clone(),
+        suffix: fields[5].clone(),
+        hidden_prefix: fields[6].clone(),
+        hidden_suffix: fields[7].clone(),
+        ..ZshInsertionMetadata::default()
+    };
+
+    let mut candidates = Vec::with_capacity(count);
+    for (offset, item) in fields[HEADER_FIELDS..]
+        .chunks_exact(ITEM_FIELDS)
+        .enumerate()
+    {
+        let kind = parse_completion_kind(&item[1])?;
+        let (description, group_name, explanation) = command_metadata(kind);
+        let ordinal = first_ordinal
+            .checked_add(offset)
+            .ok_or("candidate ordinal overflow")?;
+        let original_order =
+            u32::try_from(ordinal - 1).map_err(|_| "candidate ordinal exceeds u32".to_string())?;
+        candidates.push(CapturedMatch {
+            insertion: item[0].clone(),
+            display: optional_lossy(&item[0]),
+            description: Some(description.into()),
+            explanation: Some(explanation.into()),
+            group: Some(CapturedGroup {
+                name: group_name.into(),
+                description: Some(explanation.into()),
+                order: 0,
+            }),
+            replace_range,
+            kind,
+            flags: ZshMatchFlags::empty(),
+            insertion_metadata: insertion_metadata.clone(),
+            backend_identity: ordinal.to_string().into(),
+            original_order,
+        });
+    }
+    Ok((request_id, generation, candidates))
+}
+
+fn command_metadata(kind: CompletionKind) -> (&'static str, &'static str, &'static str) {
+    match kind {
+        CompletionKind::Alias => ("shell alias", "aliases", "shell aliases"),
+        CompletionKind::Function => ("shell function", "functions", "shell functions"),
+        CompletionKind::Builtin => ("builtin command", "builtins", "builtin commands"),
+        CompletionKind::Command => ("external command", "external-commands", "external commands"),
+        _ => ("reserved word", "reserved-words", "reserved words"),
+    }
 }
 
 async fn send_shell<W, I>(
@@ -1514,6 +1739,7 @@ mod tests {
             SessionId::new(),
             sense_protocol::DEFAULT_MAX_FRAME_BYTES,
             CaptureLimits::default(),
+            10,
         )
         .unwrap();
         state.highest_generation = 400;
@@ -1535,5 +1761,27 @@ mod tests {
             state.begin_capture(future.0, future.1, CaptureBackend::Portable),
             Err(BridgeError::UnknownRequest { .. })
         ));
+    }
+
+    #[test]
+    fn compact_command_chunk_preserves_capture_and_acceptance_fields() {
+        let fields: Vec<RawBytes> = [
+            "7", "11", "0", "1", "c", "", "", "", "4", "1", "cargo", "command",
+        ]
+        .into_iter()
+        .map(Into::into)
+        .collect();
+        let (request, generation, candidates) = parse_command_candidates(&fields).unwrap();
+        assert_eq!(request, RequestId(7));
+        assert_eq!(generation, Generation(11));
+        assert_eq!(candidates.len(), 1);
+        let candidate = &candidates[0];
+        assert_eq!(candidate.insertion.as_slice(), b"cargo");
+        assert_eq!(candidate.description.as_deref(), Some("external command"));
+        assert_eq!(candidate.kind, CompletionKind::Command);
+        assert_eq!(candidate.replace_range, TextRange::new(0, 1));
+        assert_eq!(candidate.insertion_metadata.prefix.as_slice(), b"c");
+        assert_eq!(candidate.backend_identity.as_slice(), b"4");
+        assert_eq!(candidate.original_order, 3);
     }
 }

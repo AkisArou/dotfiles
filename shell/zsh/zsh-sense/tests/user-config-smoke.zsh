@@ -83,9 +83,17 @@ typeset -F command_popup_elapsed=$(( EPOCHREALTIME - command_popup_started ))
   print -u2 -- "one-character command popup took ${command_popup_elapsed}s"
   return 1
 }
+[[ ${SENSE_ZSH_REPORT_TIMINGS:-0} == 1 ]] &&
+  print -r -- "user-command-popup-ms=$(( command_popup_elapsed * 1000.0 ))"
 typeset escaped_meta='\M-'
 [[ $output != *$escaped_meta* ]] || {
   print -u2 -- 'one-character popup contains locale-escaped UTF-8 bytes'
+  print -u2 -r -- "$output"
+  return 1
+}
+typeset popup_order_pattern='*╭ completions *│ *│ *╰* 1/*'
+[[ $output == ${~popup_order_pattern} ]] || {
+  print -u2 -- 'popup header, rows, and footer were not rendered in visual order'
   print -u2 -r -- "$output"
   return 1
 }

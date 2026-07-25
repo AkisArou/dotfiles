@@ -76,24 +76,32 @@ zselect -t 20 >/dev/null 2>&1 || true
 # A one-character command query can expose thousands of executable names.
 # Continuous completion must never monopolize ZLE long enough to delay the
 # next ordinary key, and Space/Backspace must retain their editor semantics.
-typeset -F responsiveness_started=$EPOCHREALTIME
 zpty -n -w sense-live c
-zselect -t 5 >/dev/null 2>&1 || true
-zpty -n -w sense-live d
-zselect -t 5 >/dev/null 2>&1 || true
-zpty -n -w sense-live ' '
-zselect -t 5 >/dev/null 2>&1 || true
-zpty -n -w sense-live x
-zpty -n -w sense-live $'\x7f\x18\x07'
+# Cross the configured 15 ms debounce boundary so this specifically probes a
+# key arriving while the one-character command capture is active.
+zselect -t 4 >/dev/null 2>&1 || true
+typeset -F responsiveness_started=$EPOCHREALTIME
+zpty -n -w sense-live $'d\x18\x07'
 output=
-read_until '*buffer="cd "*</STATE>*<SENSE-PROMPT>*' 200 || {
-  print -u2 -- 'ordinary Space/Backspace editing stalled or produced the wrong buffer'
+read_until '*buffer="cd"*</STATE>*<SENSE-PROMPT>*' 200 || {
+  print -u2 -- 'the next typed character stalled behind command completion'
   print -u2 -r -- "$output"
   return 1
 }
 typeset -F responsiveness_elapsed=$(( EPOCHREALTIME - responsiveness_started ))
-(( responsiveness_elapsed < 0.75 )) || {
-  print -u2 -- "ordinary editing took ${responsiveness_elapsed}s; completion blocked ZLE"
+(( responsiveness_elapsed < 0.10 )) || {
+  print -u2 -- "the next key took ${responsiveness_elapsed}s; completion blocked ZLE"
+  return 1
+}
+[[ ${SENSE_ZSH_REPORT_TIMINGS:-0} == 1 ]] &&
+  print -r -- "command-preemption-ms=$(( responsiveness_elapsed * 1000.0 ))"
+
+# Space and Backspace retain their ordinary editor semantics too.
+zpty -n -w sense-live $'cd x\x7f\x18\x07'
+output=
+read_until '*buffer="cd "*</STATE>*<SENSE-PROMPT>*' 200 || {
+  print -u2 -- 'ordinary Space/Backspace editing stalled or produced the wrong buffer'
+  print -u2 -r -- "$output"
   return 1
 }
 
@@ -193,6 +201,37 @@ zpty -n -w sense-live $'\x04\x05\r'
 output=
 read_until '*<MANY>--option-11</MANY>*<SENSE-PROMPT>*' || {
   print -u2 -- 'page-down did not select the eleventh candidate'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# Moving down and then back up must restore the first visible/ranked item.
+# Acceptance proves that the selected marker and the worker's absolute
+# selection did not diverge in either direction.
+zpty -n -w sense-live $'sense-many --option\t'
+output=
+read_until '*candidate number 10*' || {
+  print -u2 -- 'navigation round-trip popup did not open'
+  return 1
+}
+zpty -n -w sense-live $'\x0e'
+output=
+read_until '*│ › *--option-02*' || {
+  print -u2 -- 'Ctrl-N marker did not move to the second visible row'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x10'
+output=
+read_until '*│ › *--option-01*' || {
+  print -u2 -- 'Ctrl-P marker did not return to the first visible row'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x05\r'
+output=
+read_until '*<MANY>--option-01</MANY>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Ctrl-N/Ctrl-P did not restore the first selected row'
   print -u2 -r -- "$output"
   return 1
 }

@@ -463,7 +463,7 @@ profile = "default"
 
 [activation]
 mode = "continuous"             # continuous | manual | hybrid | disabled
-debounce_ms = 35
+debounce_ms = 15
 max_debounce_ms = 75
 min_query_chars = 1
 trigger_on_empty = ["options", "paths", "subcommands"]
@@ -1219,7 +1219,7 @@ Initial budgets, to be revised only with measurements:
 ZLE edit/enqueue overhead                    p95 < 1 ms
 cached refilter + rank + layout round trip   p95 < 8 ms
 first cheap-source update                    p95 < 20 ms after dispatch
-default debounce                             35 ms
+default debounce                             15 ms
 popup redraw preparation                     p95 < 2 ms
 Zsh source soft deadline                     100 ms
 Zsh source default hard deadline             1000 ms

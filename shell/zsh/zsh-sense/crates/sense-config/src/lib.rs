@@ -359,7 +359,7 @@ impl Default for ActivationConfig {
     fn default() -> Self {
         Self {
             mode: ActivationMode::Continuous,
-            debounce_ms: 35,
+            debounce_ms: 15,
             max_debounce_ms: 75,
             min_query_chars: 1,
             trigger_on_empty: vec![

@@ -179,6 +179,10 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
         ..CaptureLimits::default()
     };
     bridge.debounce = Duration::from_millis(config.activation.debounce_ms);
+    // Keep one look-ahead page in the per-shell worker. Normal next/previous
+    // and a full page-down remain synchronous in ZLE, while hundreds of
+    // off-screen candidates never cross the latency-sensitive shell boundary.
+    bridge.viewport_rows = (config.popup.max_rows as usize).saturating_mul(2);
     bridge.startup_messages = shell_startup_messages(&config)?;
     match (arguments.shell_input_fifo, arguments.shell_output_fifo) {
         (Some(input), Some(output)) => {

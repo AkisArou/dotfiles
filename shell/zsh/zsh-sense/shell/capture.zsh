@@ -24,6 +24,11 @@ typeset -ga _zsh_sense_capture_kinds=()
 typeset -ga _zsh_sense_capture_calls=()
 typeset -ga _zsh_sense_capture_positions=()
 typeset -gi _zsh_sense_fast_command_handled=0
+typeset -gi _zsh_sense_capture_is_fast_command=0
+typeset -g _zsh_sense_fast_command_prefix=
+typeset -g _zsh_sense_fast_command_suffix=
+typeset -g _zsh_sense_fast_command_iprefix=
+typeset -g _zsh_sense_fast_command_isuffix=
 typeset -g _zsh_sense_apply_serial=
 typeset -gi _zsh_sense_apply_index=0
 typeset -gA _zsh_sense_describe_details=()
@@ -59,6 +64,11 @@ _zsh_sense_capture_reset() {
   _zsh_sense_capture_kinds=()
   _zsh_sense_capture_calls=()
   _zsh_sense_capture_positions=()
+  _zsh_sense_capture_is_fast_command=0
+  _zsh_sense_fast_command_prefix=
+  _zsh_sense_fast_command_suffix=
+  _zsh_sense_fast_command_iprefix=
+  _zsh_sense_fast_command_isuffix=
 }
 
 # Command names are an indexed completion source. Dispatching the universal
@@ -89,54 +99,59 @@ _zsh_sense_fast_command_capture() {
 
   _zsh_sense_capture_reset
   _zsh_sense_fast_command_handled=1
+  _zsh_sense_capture_is_fast_command=1
+  _zsh_sense_fast_command_prefix=$PREFIX
+  _zsh_sense_fast_command_suffix=$SUFFIX
+  _zsh_sense_fast_command_iprefix=$IPREFIX
+  _zsh_sense_fast_command_isuffix=$ISUFFIX
   _zsh_sense_capture_call_count=1
   typeset -ga _zsh_sense_capture_args_1
   _zsh_sense_capture_args_1=()
 
   local -A seen=()
   local -a category_hits
-  local category word kind description group explanation
+  local category word kind
   local -i position=0
   for category in alias function builtin reserved external; do
     case $category in
       alias)
         category_hits=( "${alias_hits[@]}" )
-        kind=alias description='shell alias' group=aliases explanation='shell aliases'
+        kind=alias
         ;;
       function)
         category_hits=( "${function_hits[@]}" )
-        kind=function description='shell function' group=functions explanation='shell functions'
+        kind=function
         ;;
       builtin)
         category_hits=( "${builtin_hits[@]}" )
-        kind=builtin description='builtin command' group=builtins explanation='builtin commands'
+        kind=builtin
         ;;
       reserved)
         category_hits=( "${reserved_hits[@]}" )
-        kind=text description='reserved word' group=reserved-words explanation='reserved words'
+        kind=text
         ;;
       external)
         category_hits=( "${external_hits[@]}" )
-        kind=command description='external command' group=external-commands explanation='external commands'
+        kind=command
         ;;
     esac
     for word in "${category_hits[@]}"; do
+      # This widget shares ZLE's event loop. Treat queued terminal input as a
+      # cancellation token and return a deliberately partial (therefore
+      # stale) capture; the edit waiting in ZLE will request the next
+      # generation. Check at a small fixed cadence so a large command hash
+      # cannot delay a fast typist.
+      if (( position > 0 && position % 16 == 0 &&
+            ( PENDING > 0 || KEYS_QUEUED_COUNT > 0 ) )); then
+        compstate[insert]=
+        compstate[list]=
+        return 0
+      fi
       (( $+seen[$word] )) && continue
       seen[$word]=1
       (( position++ ))
       _zsh_sense_capture_words+=( "$word" )
-      _zsh_sense_capture_displays+=( "$word" )
-      _zsh_sense_capture_descriptions+=( "$description" )
-      _zsh_sense_capture_groups+=( "$group" )
-      _zsh_sense_capture_explanations+=( "$explanation" )
-      _zsh_sense_capture_prefixes+=( "$PREFIX" )
-      _zsh_sense_capture_suffixes+=( "$SUFFIX" )
-      _zsh_sense_capture_iprefixes+=( "$IPREFIX" )
-      _zsh_sense_capture_isuffixes+=( "$ISUFFIX" )
-      _zsh_sense_capture_flags+=( '' )
       _zsh_sense_capture_kinds+=( "$kind" )
-      _zsh_sense_capture_calls+=( 1 )
-      _zsh_sense_capture_positions+=( "$position" )
     done
   done
 
@@ -404,6 +419,17 @@ _zsh_sense_portable_apply() {
   (( _zsh_sense_apply_index >= 1 && _zsh_sense_apply_index <= $#_zsh_sense_capture_words )) || return 1
 
   local word=$_zsh_sense_capture_words[_zsh_sense_apply_index]
+  if (( _zsh_sense_capture_is_fast_command )); then
+    PREFIX=$_zsh_sense_fast_command_prefix
+    SUFFIX=$_zsh_sense_fast_command_suffix
+    IPREFIX=$_zsh_sense_fast_command_iprefix
+    ISUFFIX=$_zsh_sense_fast_command_isuffix
+    builtin compadd -- "$word" || return 1
+    compstate[list]=
+    compstate[insert]='1'
+    [[ $RBUFFER == ' '* ]] || compstate[insert]+=' '
+    return 0
+  fi
   local call=$_zsh_sense_capture_calls[_zsh_sense_apply_index]
   local args_name="_zsh_sense_capture_args_$call"
   local -a replay=( "${(@P)args_name}" )
