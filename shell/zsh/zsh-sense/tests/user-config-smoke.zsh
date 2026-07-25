@@ -68,6 +68,17 @@ while zpty -r -t sense-user chunk 2>/dev/null; do
   chunk=
 done
 
+# zsh-autosuggestions owns Ctrl-E before zsh-sense loads. The state-aware
+# dispatcher must replace that binding in vi insert mode while retaining the
+# original widget as the closed-popup fallback.
+zpty -w sense-user "bindkey -M viins '^E'"
+output=
+read_until '*.zsh-sense-key-ctrl-e*' || {
+  print -u2 -- 'Ctrl-E was not bound to the zsh-sense dispatcher'
+  print -u2 -r -- "$output"
+  return 1
+}
+
 # A first-character command popup is the largest routine command-name
 # universe. It must render once, with the user's UTF-8 locale restored.
 typeset -F command_popup_started=$EPOCHREALTIME
@@ -94,6 +105,11 @@ typeset escaped_meta='\M-'
 typeset popup_order_pattern='*╭ completions *│ *│ *╰* 1/*'
 [[ $output == ${~popup_order_pattern} ]] || {
   print -u2 -- 'popup header, rows, and footer were not rendered in visual order'
+  print -u2 -r -- "$output"
+  return 1
+}
+[[ $output != *' · '* ]] || {
+  print -u2 -- 'popup still contains the generic dot indicator'
   print -u2 -r -- "$output"
   return 1
 }

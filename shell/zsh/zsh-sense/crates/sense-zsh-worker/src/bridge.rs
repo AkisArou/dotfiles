@@ -20,6 +20,7 @@ use thiserror::Error;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::net::UnixStream;
 use tokio_util::codec::{Framed, FramedRead, FramedWrite};
+use unicode_width::UnicodeWidthStr;
 
 use crate::{
     CaptureBackend, CaptureError, CaptureLimits, CaptureStore, CapturedGroup, CapturedMatch,
@@ -31,10 +32,10 @@ type DaemonConnection = Framed<UnixStream, MessagePackCodec<ServerMessage, Clien
 type RequestKey = (RequestId, Generation);
 
 const MAX_CANCELLED_CAPTURE_TOMBSTONES: usize = 256;
-const VIEW_CHUNK_ITEM_FIELDS: usize = 7;
-// 3 envelope fields + (16 * 7) item fields = 115, below the default and
+const VIEW_CHUNK_ITEM_FIELDS: usize = 9;
+// 3 envelope fields + (13 * 9) item fields = 120, below the default and
 // shell-side 128-field wire limit.
-const VIEW_CHUNK_ITEMS: usize = 16;
+const VIEW_CHUNK_ITEMS: usize = 13;
 const SHELL_OUTPUT_BACKPRESSURE_BYTES: usize = 256 * 1024;
 
 #[derive(Debug, Clone)]
@@ -162,6 +163,8 @@ enum Navigation {
 struct CachedView {
     view: CandidateView,
     selected: usize,
+    max_label_cells: usize,
+    max_described_cells: usize,
 }
 
 #[derive(Debug)]
@@ -170,6 +173,8 @@ struct WindowedView {
     total: usize,
     start: usize,
     selected_absolute: usize,
+    max_label_cells: usize,
+    max_described_cells: usize,
 }
 
 #[derive(Debug)]
@@ -216,7 +221,32 @@ impl BridgeState {
             .selected_index
             .map_or(0, |index| index as usize)
             .min(view.items.len().saturating_sub(1));
-        self.current_view = Some(CachedView { view, selected });
+        let max_label_cells = view
+            .items
+            .iter()
+            .map(|item| UnicodeWidthStr::width(item.label.as_str()))
+            .max()
+            .unwrap_or(0);
+        let max_described_cells = view
+            .items
+            .iter()
+            .map(|item| {
+                let label_cells = UnicodeWidthStr::width(item.label.as_str());
+                item.detail
+                    .as_deref()
+                    .filter(|detail| !detail.is_empty())
+                    .map_or(label_cells, |detail| {
+                        label_cells + 2 + UnicodeWidthStr::width(detail)
+                    })
+            })
+            .max()
+            .unwrap_or(0);
+        self.current_view = Some(CachedView {
+            view,
+            selected,
+            max_label_cells,
+            max_described_cells,
+        });
     }
 
     fn navigate(&mut self, request_id: RequestId, generation: Generation, action: Navigation) {
@@ -258,6 +288,8 @@ impl BridgeState {
             total,
             start,
             selected_absolute: selected,
+            max_label_cells: cached.max_label_cells,
+            max_described_cells: cached.max_described_cells,
         })
     }
 
@@ -1046,6 +1078,8 @@ where
         window.total.to_string().into(),
         window.start.to_string().into(),
         window.selected_absolute.to_string().into(),
+        window.max_label_cells.to_string().into(),
+        window.max_described_cells.to_string().into(),
         view.sources_pending.len().to_string().into(),
     ];
     begin_fields.extend(
@@ -1100,8 +1134,16 @@ where
         fields.extend([
             item.id.0.as_str().into(),
             item.label.as_str().into(),
+            UnicodeWidthStr::width(item.label.as_str())
+                .to_string()
+                .into(),
             completion_kind_name(item.kind).into(),
             optional_text(item.detail.as_deref()),
+            item.detail
+                .as_deref()
+                .map_or(0, UnicodeWidthStr::width)
+                .to_string()
+                .into(),
             item.group
                 .as_ref()
                 .map_or_else(RawBytes::default, |group| group.0.as_str().into()),
@@ -1783,5 +1825,44 @@ mod tests {
         assert_eq!(candidate.insertion_metadata.prefix.as_slice(), b"c");
         assert_eq!(candidate.backend_identity.as_slice(), b"4");
         assert_eq!(candidate.original_order, 3);
+    }
+
+    #[test]
+    fn popup_width_metadata_is_unicode_aware_and_stable_across_navigation() {
+        let mut state = BridgeState::new(
+            SessionId::new(),
+            sense_protocol::DEFAULT_MAX_FRAME_BYTES,
+            CaptureLimits::default(),
+            2,
+        )
+        .unwrap();
+        let source = batch(3);
+        let mut items = source.items;
+        items[0].label = "short".into();
+        items[0].detail = Some("plain".into());
+        items[1].label = "界界界".into();
+        items[1].detail = Some("documentation".into());
+        items[2].label = "mid".into();
+        let view = CandidateView {
+            session_id: source.session_id,
+            request_id: source.request_id,
+            generation: source.generation,
+            revision: 1,
+            items,
+            selected_index: Some(0),
+            matched_before_limit: 3,
+            sources_pending: Vec::new(),
+            is_final: true,
+            is_incomplete: false,
+        };
+        state.install_view(view);
+        let first = state.current_window().unwrap();
+        assert_eq!(first.max_label_cells, 6);
+        assert_eq!(first.max_described_cells, 21);
+
+        state.navigate(RequestId(1), Generation(2), Navigation::PageDown);
+        let navigated = state.current_window().unwrap();
+        assert_eq!(navigated.max_label_cells, first.max_label_cells);
+        assert_eq!(navigated.max_described_cells, first.max_described_cells);
     }
 }

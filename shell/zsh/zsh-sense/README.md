@@ -44,8 +44,9 @@ includes:
 - a live ZLE client using private, close-on-exec FIFOs watched by `zle -F`;
 - continuous completion by default, plus manual Tab activation and configurable
   state-specific keybindings;
-- a VS Code-inspired bordered list with descriptions, kind indicators,
-  selection, item navigation, and page navigation;
+- a persistent, ZLE-owned VS Code-inspired panel with descriptions, optional
+  kind indicators, selection, item navigation, page navigation, and a
+  terminal-clamped width derived from the full ranked result set;
 - fuzzy candidate generation and Frizbee ranking, including typo matches such
   as `systemctl rstart` -> `restart` and path matches such as `cd dfil` ->
   `dotfiles/`;
@@ -88,6 +89,8 @@ Set `activation.mode = "manual"` for Tab-only completion, or use `"hybrid"`
 and `"disabled"` for the other supported policies. `activation.debounce_ms`,
 event/character triggers, popup dimensions/decorations, descriptions,
 indicator mode, and all state-specific keybindings are typed configuration.
+The popup grows to its contents between `popup.min_width` and
+`popup.max_width`; set both values to the same number for a fixed-width panel.
 `sources.zsh.fuzzy_min_query_chars` controls when the portable source broadens
 the candidate universe (default `3`); this is separate from Rust's final fuzzy
 ranking and typo policy.

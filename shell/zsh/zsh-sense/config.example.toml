@@ -64,6 +64,8 @@ scrollbar = true
 group_headings = true
 descriptions = true
 max_rows = 10
+# Width follows the complete ranked result set within these bounds. Use the
+# same value for min_width and max_width to request a fixed-width popup.
 max_width = 140
 min_width = 24
 padding = 1

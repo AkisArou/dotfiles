@@ -173,6 +173,9 @@ The Zsh layer is intentionally small. It will:
 - ignore stale generations;
 - render plain text and style spans through `POSTDISPLAY` and
   `region_highlight`;
+- retain popup content in `POSTDISPLAY` so ordinary edits and navigation use
+  ZLE's differential redisplay instead of erasing and recreating a completion
+  list;
 - apply typed edits, Zsh completion selections, ghost-text acceptance, and
   snippet placeholder navigation;
 - degrade cleanly to normal ZLE behavior if the daemon is unavailable.

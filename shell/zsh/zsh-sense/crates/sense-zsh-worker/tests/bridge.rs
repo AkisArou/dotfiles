@@ -150,9 +150,10 @@ async fn bridge_streams_ranked_candidates_and_routes_selection() {
     let first = next_command(&mut reader, "view-chunk").await;
     assert_eq!(first.fields[2].as_slice(), b"1");
     assert_eq!(first.fields[4].as_slice(), b"restart");
-    assert_eq!(first.fields[6].as_slice(), b"Restart one or more units");
-    assert_eq!(first.fields[8].as_slice(), b"portable");
-    assert_eq!(first.fields[9].as_slice(), b"replay-1");
+    assert_eq!(first.fields[5].as_slice(), b"7");
+    assert_eq!(first.fields[7].as_slice(), b"Restart one or more units");
+    assert_eq!(first.fields[10].as_slice(), b"portable");
+    assert_eq!(first.fields[11].as_slice(), b"replay-1");
     let selected_item_id = first.fields[3].clone();
     next_command(&mut reader, "view-end").await;
 

@@ -14,6 +14,7 @@ typeset -gx SENSE_ZSH_CONFIG="$SENSE_ZSH_TEST_ROOT/config.example.toml"
 typeset -gx SENSE_ZSH_COMMAND="$SENSE_ZSH_TEST_ROOT/target/debug/zsh-sense"
 typeset -gx SENSE_ZSH_NO_DAEMON_AUTOSTART=1
 typeset -gx SENSE_ZSH_TEST_WORK="$SENSE_ZSH_TEST_TEMP/work"
+typeset -gx TERM=xterm-256color
 command mkdir -m 700 -- "$XDG_RUNTIME_DIR" "$XDG_STATE_HOME"
 command mkdir -p -- "$SENSE_ZSH_TEST_WORK/dotfiles/nvim"
 
@@ -156,18 +157,25 @@ read_until '*restart one or more units*' || {
   print -u2 -r -- "$output"
   return 1
 }
-zpty -n -w sense-live $'\x05'
+zpty -n -w sense-live $'\x05\r'
 output=
-read_until '*sense-verb restart*' 100 || {
-  zpty -n -w sense-live $'\x18\x07'
-  read_until '*<STATE>*</STATE>*' 100 || true
-  print -u2 -- 'fuzzy completion was not inserted correctly'
+read_until '*<VERB>restart</VERB>*<SENSE-PROMPT>*' || return 1
+
+# Ctrl-E also accepts the command-name fast path, whose compact transport and
+# insertion replay are intentionally separate from generic compadd capture.
+zpty -n -w sense-live 'sense-ver'
+output=
+read_until '*sense-verb*shell function*' || {
+  print -u2 -- 'fast command completion did not open'
+  return 1
+}
+zpty -n -w sense-live $'\x05\r'
+output=
+read_until '*<VERB></VERB>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Ctrl-E did not accept the fast command candidate'
   print -u2 -r -- "$output"
   return 1
 }
-zpty -n -w sense-live $'\r'
-output=
-read_until '*<VERB>restart</VERB>*<SENSE-PROMPT>*' || return 1
 
 # Manual mode remains first-class: Tab opens a closed popup, then Ctrl-E
 # accepts it. This mutation is confined to the PTY fixture.
@@ -205,30 +213,30 @@ read_until '*<MANY>--option-11</MANY>*<SENSE-PROMPT>*' || {
   return 1
 }
 
-# Moving down and then back up must restore the first visible/ranked item.
-# Acceptance proves that the selected marker and the worker's absolute
-# selection did not diverge in either direction.
+# Navigation state and Zsh-owned acceptance must stay aligned. First inspect
+# the state after one Ctrl-N, then use a fresh popup to round-trip through
+# Ctrl-N/Ctrl-P and accept the first item.
 zpty -n -w sense-live $'sense-many --option\t'
 output=
 read_until '*candidate number 10*' || {
   print -u2 -- 'navigation round-trip popup did not open'
   return 1
 }
-zpty -n -w sense-live $'\x0e'
+zpty -n -w sense-live $'\x0e\x18\x07'
 output=
-read_until '*│ › *--option-02*' || {
-  print -u2 -- 'Ctrl-N marker did not move to the second visible row'
+read_until '*selected=2*identity=2*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Ctrl-N did not select the second visible row'
   print -u2 -r -- "$output"
   return 1
 }
-zpty -n -w sense-live $'\x10'
+
+zpty -n -w sense-live $'sense-many --option\t'
 output=
-read_until '*│ › *--option-01*' || {
-  print -u2 -- 'Ctrl-P marker did not return to the first visible row'
-  print -u2 -r -- "$output"
+read_until '*candidate number 10*' || {
+  print -u2 -- 'navigation acceptance popup did not open'
   return 1
 }
-zpty -n -w sense-live $'\x05\r'
+zpty -n -w sense-live $'\x0e\x10\x05\r'
 output=
 read_until '*<MANY>--option-01</MANY>*<SENSE-PROMPT>*' || {
   print -u2 -- 'Ctrl-N/Ctrl-P did not restore the first selected row'
@@ -283,28 +291,11 @@ read_until '*nvim*' || {
   return 1
 }
 zpty -n -w sense-live 'nv'
-output=
-read_until '*nvim*' || {
-  print -u2 -- 'nested path edit did not regenerate its fuzzy completion'
-  print -u2 -r -- "$output"
-  return 1
-}
 # The worker deliberately debounces ordinary typing. Let the newest `nv`
 # generation replace the immediately rendered previous-directory view before
 # exercising acceptance.
 zselect -t 20 >/dev/null 2>&1 || true
-zpty -n -w sense-live $'\x05'
-output=
-read_until '*cd dotfiles/nvim*' || {
-  print -u2 -- 'nested fuzzy directory completion was not inserted correctly'
-  print -u2 -r -- "$output"
-  zpty -n -w sense-live $'\x18\x07'
-  output=
-  read_until '*<STATE>*</STATE>*<SENSE-PROMPT>*' 100 || true
-  print -u2 -r -- "$output"
-  return 1
-}
-zpty -n -w sense-live $'\r'
+zpty -n -w sense-live $'\x05\r'
 output=
 read_until '*<SENSE-PROMPT>*' || return 1
 zpty -w sense-live 'print -r -- "<PWD>$PWD</PWD>"'
