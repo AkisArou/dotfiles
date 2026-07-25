@@ -1,0 +1,1063 @@
+# Live ZLE client for zsh-sense.
+
+typeset -gi _zsh_sense_read_fd=-1
+typeset -gi _zsh_sense_write_fd=-1
+typeset -gi _zsh_sense_worker_pid=0
+typeset -gi _zsh_sense_ready=0
+typeset -gi _zsh_sense_configured=0
+typeset -gi _zsh_sense_request_serial=0
+typeset -gi _zsh_sense_generation=0
+typeset -gi _zsh_sense_active_request=0
+typeset -gi _zsh_sense_active_generation=0
+typeset -gi _zsh_sense_active_cursor_byte=0
+typeset -gi _zsh_sense_popup_visible=0
+typeset -gi _zsh_sense_popup_stale=0
+typeset -gi _zsh_sense_render_dirty=1
+typeset -gi _zsh_sense_render_columns=0
+typeset -gi _zsh_sense_selected=0
+typeset -gi _zsh_sense_view_revision=0
+typeset -gi _zsh_sense_temp_selected=0
+typeset -gi _zsh_sense_temp_expected=0
+typeset -gi _zsh_sense_temp_received=0
+typeset -gi _zsh_sense_last_apply_status=0
+typeset -gi _zsh_sense_parse_offset=1
+typeset -g _zsh_sense_rx_buffer=
+typeset -g _zsh_sense_parse_value=
+typeset -g _zsh_sense_active_buffer=
+typeset -g _zsh_sense_last_buffer=
+typeset -gi _zsh_sense_last_cursor=-1
+typeset -g _zsh_sense_activation_mode=continuous
+typeset -gi _zsh_sense_after_accept=1
+typeset -gi _zsh_sense_popup_enabled=1
+typeset -gi _zsh_sense_max_rows=10
+typeset -gi _zsh_sense_max_width=140
+typeset -gi _zsh_sense_min_width=24
+typeset -gi _zsh_sense_padding=1
+typeset -g _zsh_sense_decorations=full
+typeset -g _zsh_sense_border=rounded
+typeset -gi _zsh_sense_show_title=1
+typeset -gi _zsh_sense_show_footer=1
+typeset -gi _zsh_sense_show_scrollbar=1
+typeset -gi _zsh_sense_show_groups=1
+typeset -gi _zsh_sense_show_descriptions=1
+typeset -g _zsh_sense_indicator_mode=icon
+typeset -g _zsh_sense_selected_marker='›'
+typeset -gi _zsh_sense_capture_fuzzy_min_chars=3
+typeset -ga _zsh_sense_trigger_characters=( / - = : ' ' )
+typeset -ga _zsh_sense_immediate_characters=( / - = )
+typeset -ga _zsh_sense_events=( insert backspace delete word-delete paste history cursor accept )
+typeset -gA _zsh_sense_bindings_closed=()
+typeset -gA _zsh_sense_bindings_popup=()
+typeset -gA _zsh_sense_bindings_snippet=()
+typeset -gA _zsh_sense_key_sequences=(
+  tab '^I'
+  ctrl-space '^@'
+  ctrl-e '^E'
+  ctrl-n '^N'
+  ctrl-p '^P'
+  ctrl-d '^D'
+  ctrl-u '^U'
+  escape '^['
+  right '^[[C'
+  end '^[[F'
+  shift-tab '^[[Z'
+)
+typeset -gA _zsh_sense_original_widgets=()
+typeset -gA _zsh_sense_original_names=()
+typeset -gA _zsh_sense_bound_sequences=()
+typeset -gA _zsh_sense_widget_keys=()
+typeset -ga _zsh_sense_item_ids=()
+typeset -ga _zsh_sense_item_labels=()
+typeset -ga _zsh_sense_item_details=()
+typeset -ga _zsh_sense_item_kinds=()
+typeset -ga _zsh_sense_item_groups=()
+typeset -ga _zsh_sense_item_insertions=()
+typeset -ga _zsh_sense_item_acceptance_backends=()
+typeset -ga _zsh_sense_item_acceptance_identities=()
+typeset -ga _zsh_sense_render_lines=()
+typeset -ga _zsh_sense_temp_ids=()
+typeset -ga _zsh_sense_temp_labels=()
+typeset -ga _zsh_sense_temp_details=()
+typeset -ga _zsh_sense_temp_kinds=()
+typeset -ga _zsh_sense_temp_groups=()
+typeset -ga _zsh_sense_temp_insertions=()
+typeset -ga _zsh_sense_temp_acceptance_backends=()
+typeset -ga _zsh_sense_temp_acceptance_identities=()
+typeset -g _zsh_sense_fifo_in=
+typeset -g _zsh_sense_fifo_out=
+typeset -g _zsh_sense_log_file=
+typeset -g _zsh_sense_ui_locale=${LC_ALL:-${LC_CTYPE:-${LANG:-C.UTF-8}}}
+
+_zsh_sense_byte_length() {
+  emulate -L zsh
+  local LC_ALL=C
+  REPLY=${#1}
+}
+
+_zsh_sense_cursor_byte() {
+  emulate -L zsh
+  local left=
+  (( CURSOR > 0 )) && left=$BUFFER[1,CURSOR]
+  _zsh_sense_byte_length "$left"
+}
+
+_zsh_sense_netstring() {
+  emulate -L zsh
+  local LC_ALL=C value=$1
+  REPLY="${#value}:$value,"
+}
+
+_zsh_sense_encode_message() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+
+  local command=$1 field data=
+  shift
+  _zsh_sense_netstring "$command"
+  data=$REPLY
+  _zsh_sense_netstring "$#"
+  data+=$REPLY
+  for field in "$@"; do
+    _zsh_sense_netstring "$field"
+    data+=$REPLY
+  done
+  REPLY=$data
+}
+
+_zsh_sense_write_messages() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  (( _zsh_sense_write_fd >= 0 )) || return 1
+
+  local data=$1 chunk=
+
+  local LC_ALL=C
+  local -i offset=1 written=0 write_status=0
+  local errno_name=
+  while (( offset <= $#data )); do
+    chunk=$data[offset,-1]
+    syswrite -c written -o $_zsh_sense_write_fd "$chunk" 2>/dev/null
+    write_status=$?
+    if (( written > 0 )); then
+      (( offset += written ))
+      continue
+    fi
+    if (( write_status == 2 )); then
+      errno_name=${errnos[${ERRNO:-0}]-}
+      if [[ $errno_name == (EAGAIN|EWOULDBLOCK) ]]; then
+        zselect -w $_zsh_sense_write_fd -t 5 >/dev/null 2>&1
+        continue
+      fi
+    fi
+    _zsh_sense_disconnect
+    return 1
+  done
+}
+
+_zsh_sense_send() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  _zsh_sense_encode_message "$@" || return 1
+  local data=$REPLY
+  _zsh_sense_write_messages "$data"
+}
+
+_zsh_sense_take_netstring() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  local LC_ALL=C
+  local -i total=$#_zsh_sense_rx_buffer start=$_zsh_sense_parse_offset
+  (( start <= total )) || return 1
+  local tail=$_zsh_sense_rx_buffer[start,-1]
+  local -i relative_colon=${tail[(i):]}
+  (( relative_colon <= $#tail )) || return 1
+  (( relative_colon > 1 && relative_colon <= 21 )) || return 2
+  local length_text=$tail[1,relative_colon-1]
+  [[ $length_text == <-> && ( $length_text == 0 || $length_text != 0* ) ]] || return 2
+  local -i payload_length=$(( 10#$length_text ))
+  local -i colon=$(( start + relative_colon - 1 ))
+  local -i payload_start=$(( colon + 1 ))
+  local -i payload_end=$(( payload_start + payload_length - 1 ))
+  local -i comma=$(( payload_end + 1 ))
+  (( comma <= total )) || return 1
+  [[ $_zsh_sense_rx_buffer[comma] == ',' ]] || return 2
+  if (( payload_length )); then
+    _zsh_sense_parse_value=$_zsh_sense_rx_buffer[payload_start,payload_end]
+  else
+    _zsh_sense_parse_value=
+  fi
+  _zsh_sense_parse_offset=$(( comma + 1 ))
+}
+
+_zsh_sense_parse_messages() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  local LC_ALL=C
+  local command count_text
+  local -a fields
+  local -i parse_status count index consumed
+
+  while [[ -n $_zsh_sense_rx_buffer ]]; do
+    _zsh_sense_parse_offset=1
+    _zsh_sense_take_netstring
+    parse_status=$?
+    (( parse_status == 1 )) && return 0
+    (( parse_status == 0 )) || { _zsh_sense_disconnect; return 1; }
+    command=$_zsh_sense_parse_value
+
+    _zsh_sense_take_netstring
+    parse_status=$?
+    (( parse_status == 1 )) && return 0
+    (( parse_status == 0 )) || { _zsh_sense_disconnect; return 1; }
+    count_text=$_zsh_sense_parse_value
+    [[ $count_text == <-> && ( $count_text == 0 || $count_text != 0* ) ]] || {
+      _zsh_sense_disconnect
+      return 1
+    }
+    count=$(( 10#$count_text ))
+    (( count <= 128 )) || { _zsh_sense_disconnect; return 1; }
+    fields=()
+    for (( index = 1; index <= count; index++ )); do
+      _zsh_sense_take_netstring
+      parse_status=$?
+      (( parse_status == 1 )) && return 0
+      (( parse_status == 0 )) || { _zsh_sense_disconnect; return 1; }
+      fields+=( "$_zsh_sense_parse_value" )
+    done
+    consumed=$_zsh_sense_parse_offset
+    if (( consumed > $#_zsh_sense_rx_buffer )); then
+      _zsh_sense_rx_buffer=
+    else
+      _zsh_sense_rx_buffer=$_zsh_sense_rx_buffer[consumed,-1]
+    fi
+    _zsh_sense_dispatch "$command" "${fields[@]}"
+  done
+}
+
+_zsh_sense_fd_callback() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  _zsh_sense_ui_locale=${LC_ALL:-${LC_CTYPE:-${LANG:-C.UTF-8}}}
+  local -i fd=$1 count=0 read_status=0
+  local chunk=
+  [[ $fd == $_zsh_sense_read_fd ]] || return 0
+
+  while true; do
+    chunk=
+    sysread -c count -i $fd -s 65536 -t 0 chunk 2>/dev/null
+    read_status=$?
+    if (( read_status == 0 )); then
+      _zsh_sense_rx_buffer+=$chunk
+      continue
+    fi
+    if (( read_status == 5 )); then
+      if (( ! _zsh_sense_ready && _zsh_sense_worker_pid > 0 )) &&
+          kill -0 $_zsh_sense_worker_pid 2>/dev/null; then
+        return 0
+      fi
+      _zsh_sense_disconnect
+      return 0
+    fi
+    break
+  done
+  _zsh_sense_parse_messages
+  return 0
+}
+
+_zsh_sense_dispatch() {
+  emulate -L zsh
+  # Netstring parsing is byte-oriented and runs under LC_ALL=C. Do not leak
+  # that dynamic locale into completion functions or popup construction.
+  local LC_ALL=$_zsh_sense_ui_locale
+  local command=$1
+  shift
+  local -a fields=( "$@" )
+  case $command in
+    ready)
+      _zsh_sense_ready=1
+      ;;
+    config)
+      _zsh_sense_apply_config "${fields[@]}"
+      ;;
+    keybinding)
+      (( $#fields == 3 )) && case $fields[1] in
+        closed) _zsh_sense_bindings_closed[$fields[2]]=$fields[3] ;;
+        popup) _zsh_sense_bindings_popup[$fields[2]]=$fields[3] ;;
+        snippet) _zsh_sense_bindings_snippet[$fields[2]]=$fields[3] ;;
+      esac
+      ;;
+    config-end)
+      _zsh_sense_install_keybindings
+      _zsh_sense_configured=1
+      ;;
+    capture-request)
+      _zsh_sense_capture_request "${fields[@]}"
+      ;;
+    view-begin)
+      _zsh_sense_view_begin "${fields[@]}"
+      ;;
+    view-item)
+      _zsh_sense_view_item "${fields[@]}"
+      ;;
+    view-chunk)
+      _zsh_sense_view_chunk "${fields[@]}"
+      ;;
+    view-end)
+      _zsh_sense_view_end "${fields[@]}"
+      ;;
+    accept-zsh)
+      _zsh_sense_accept_zsh "${fields[@]}"
+      ;;
+    request-cancelled)
+      if [[ $fields[1] == $_zsh_sense_active_request && $fields[2] == $_zsh_sense_active_generation ]]; then
+        _zsh_sense_clear_popup
+      fi
+      ;;
+    error)
+      typeset -g _zsh_sense_last_error="${fields[1]-}: ${fields[2]-}"
+      ;;
+  esac
+}
+
+_zsh_sense_apply_config() {
+  emulate -L zsh
+  local -a fields=( "$@" )
+  (( $#fields >= 22 )) || return 1
+  _zsh_sense_activation_mode=$fields[1]
+  _zsh_sense_after_accept=$fields[3]
+  _zsh_sense_popup_enabled=$fields[4]
+  _zsh_sense_max_rows=$fields[5]
+  _zsh_sense_max_width=$fields[6]
+  _zsh_sense_min_width=$fields[7]
+  _zsh_sense_padding=$fields[8]
+  _zsh_sense_decorations=$fields[9]
+  _zsh_sense_border=$fields[10]
+  _zsh_sense_show_title=$fields[11]
+  _zsh_sense_show_footer=$fields[12]
+  _zsh_sense_show_scrollbar=$fields[13]
+  _zsh_sense_show_groups=$fields[14]
+  _zsh_sense_show_descriptions=$fields[15]
+  _zsh_sense_indicator_mode=$fields[16]
+  _zsh_sense_selected_marker=$fields[17]
+  _zsh_sense_capture_matcher=$fields[18]
+  _zsh_sense_capture_fuzzy_min_chars=$fields[19]
+  _zsh_sense_render_dirty=1
+  local -i offset=20 count=$fields[20]
+  (( offset++ ))
+  if (( count )); then
+    _zsh_sense_trigger_characters=( "${(@)fields[offset,$(( offset + count - 1 ))]}" )
+  else
+    _zsh_sense_trigger_characters=()
+  fi
+  (( offset += count ))
+  (( offset <= $#fields )) || return 1
+  count=$fields[offset]
+  (( offset++ ))
+  if (( count )); then
+    _zsh_sense_immediate_characters=( "${(@)fields[offset,$(( offset + count - 1 ))]}" )
+  else
+    _zsh_sense_immediate_characters=()
+  fi
+  (( offset += count ))
+  (( offset <= $#fields )) || return 1
+  count=$fields[offset]
+  (( offset++ ))
+  if (( count )); then
+    _zsh_sense_events=( "${(@)fields[offset,$(( offset + count - 1 ))]}" )
+  else
+    _zsh_sense_events=()
+  fi
+}
+
+_zsh_sense_capture_request() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  (( $# >= 4 )) || return 1
+  local request=$1 generation=$2 request_buffer=$3
+  local -i request_cursor=$4
+  _zsh_sense_cursor_byte
+  if [[ $request != $_zsh_sense_active_request ||
+        $generation != $_zsh_sense_active_generation ||
+        $request_buffer != "$BUFFER" || $request_cursor != $REPLY ]]; then
+    _zsh_sense_send capture-begin "$request" "$generation" portable
+    _zsh_sense_send capture-end "$request" "$generation"
+    return 0
+  fi
+
+  # A capture widget runs synchronously in the portable backend. Never start
+  # it while ZLE already has user input waiting; the next edit will issue a
+  # newer generation after those bytes have been processed.
+  if (( PENDING > 0 || KEYS_QUEUED_COUNT > 0 )); then
+    _zsh_sense_send capture-begin "$request" "$generation" portable
+    _zsh_sense_send capture-end "$request" "$generation"
+    return 0
+  fi
+
+  local original_buffer=$BUFFER
+  local -i original_cursor=$CURSOR
+  _zsh_sense_fast_command_handled=0
+  zle .zsh-sense-fast-command-capture || true
+  if (( ! _zsh_sense_fast_command_handled )); then
+    BUFFER=$original_buffer
+    CURSOR=$original_cursor
+    zle .zsh-sense-portable-capture
+  fi
+  BUFFER=$original_buffer
+  CURSOR=$original_cursor
+
+  # A command-name request can contain hundreds of candidates. Encode a
+  # bounded group and write it as one stream chunk instead of blocking ZLE on
+  # one syscall per candidate. The wire format remains a sequence of ordinary
+  # messages, so batching is transparent to the worker and bounded in memory.
+  local -a wire_messages=()
+  local -i wire_batch_size=64
+  _zsh_sense_encode_message capture-begin "$request" "$generation" portable
+  wire_messages+=( "$REPLY" )
+  local -i index prefix_bytes suffix_bytes start end flags
+  local word display description group explanation kind identity
+  for (( index = 1; index <= $#_zsh_sense_capture_words; index++ )); do
+    word=$_zsh_sense_capture_words[index]
+    display=$_zsh_sense_capture_displays[index]
+    description=$_zsh_sense_capture_descriptions[index]
+    group=$_zsh_sense_capture_groups[index]
+    explanation=$_zsh_sense_capture_explanations[index]
+    identity=$index
+    flags=0
+    [[ $_zsh_sense_capture_flags[index] == *f* ]] && (( flags |= 1 ))
+    kind=${_zsh_sense_capture_kinds[index]:-}
+    if [[ -n $kind ]]; then
+      :
+    elif [[ $word == */ ]]; then
+      kind=directory
+      (( flags |= 2 ))
+    elif [[ $word == -* ]]; then
+      kind=option
+    elif (( flags & 1 )) || [[ $_zsh_sense_capture_prefixes[index] == */* ]]; then
+      kind=file
+    else
+      kind=text
+    fi
+    _zsh_sense_byte_length "$_zsh_sense_capture_prefixes[index]"
+    prefix_bytes=$REPLY
+    _zsh_sense_byte_length "$_zsh_sense_capture_suffixes[index]"
+    suffix_bytes=$REPLY
+    (( start = request_cursor - prefix_bytes, start < 0 )) && start=0
+    (( end = request_cursor + suffix_bytes ))
+    _zsh_sense_encode_message candidate \
+      "$request" "$generation" "$word" "$display" "$description" "$explanation" \
+      "$group" "" "$_zsh_sense_capture_calls[index]" "$start" "$end" "$kind" \
+      "$flags" "$identity" "$(( index - 1 ))" \
+      "$_zsh_sense_capture_prefixes[index]" "$_zsh_sense_capture_suffixes[index]" \
+      "$_zsh_sense_capture_iprefixes[index]" "$_zsh_sense_capture_isuffixes[index]" \
+      "" "" "" "" "" "" "" 0 || return 1
+    wire_messages+=( "$REPLY" )
+    if (( $#wire_messages >= wire_batch_size )); then
+      _zsh_sense_write_messages "${(j::)wire_messages}" || return 1
+      wire_messages=()
+    fi
+  done
+  _zsh_sense_encode_message capture-end "$request" "$generation"
+  wire_messages+=( "$REPLY" )
+  _zsh_sense_write_messages "${(j::)wire_messages}"
+}
+
+_zsh_sense_view_begin() {
+  emulate -L zsh
+  (( $# >= 10 )) || return 1
+  [[ $2 == $_zsh_sense_active_request && $3 == $_zsh_sense_active_generation ]] || return 0
+  _zsh_sense_view_revision=$4
+  _zsh_sense_temp_selected=${5:-0}
+  (( _zsh_sense_temp_selected++ ))
+  [[ $9 == <-> ]] || return 1
+  _zsh_sense_temp_expected=$9
+  _zsh_sense_temp_received=0
+  _zsh_sense_temp_ids=()
+  _zsh_sense_temp_labels=()
+  _zsh_sense_temp_details=()
+  _zsh_sense_temp_kinds=()
+  _zsh_sense_temp_groups=()
+  _zsh_sense_temp_insertions=()
+  _zsh_sense_temp_acceptance_backends=()
+  _zsh_sense_temp_acceptance_identities=()
+  if (( _zsh_sense_temp_expected )); then
+    _zsh_sense_temp_ids[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_labels[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_details[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_kinds[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_groups[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_insertions[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_acceptance_backends[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_acceptance_identities[_zsh_sense_temp_expected]=
+  fi
+}
+
+_zsh_sense_view_item() {
+  emulate -L zsh
+  local -a fields=( "$@" )
+  (( $#fields >= 19 )) || return 1
+  [[ $fields[1] == $_zsh_sense_active_request && $fields[2] == $_zsh_sense_active_generation ]] || return 0
+  (( ++_zsh_sense_temp_received <= _zsh_sense_temp_expected )) || return 1
+  local -i item=$_zsh_sense_temp_received
+  _zsh_sense_temp_ids[item]=$fields[3]
+  _zsh_sense_temp_labels[item]=$fields[5]
+  _zsh_sense_temp_kinds[item]=$fields[8]
+  _zsh_sense_temp_details[item]=$fields[10]
+  _zsh_sense_temp_groups[item]=$fields[11]
+  _zsh_sense_temp_insertions[item]=$fields[14]
+  local -i acceptance_offset=$(( 20 + fields[19] ))
+  _zsh_sense_temp_acceptance_backends[item]=${fields[acceptance_offset]-}
+  _zsh_sense_temp_acceptance_identities[item]=${fields[$(( acceptance_offset + 1 ))]-}
+}
+
+_zsh_sense_view_chunk() {
+  emulate -L zsh
+  local -a fields=( "$@" )
+  (( $#fields >= 3 )) || return 1
+  [[ $fields[1] == $_zsh_sense_active_request && $fields[2] == $_zsh_sense_active_generation ]] || return 0
+  [[ $fields[3] == <-> ]] || return 1
+  local -i count=$fields[3]
+  (( $#fields == 3 + count * 7 )) || return 1
+  (( _zsh_sense_temp_received + count <= _zsh_sense_temp_expected )) || return 1
+
+  local -i index item offset=4
+  for (( index = 1; index <= count; index++, offset += 7 )); do
+    (( item = ++_zsh_sense_temp_received ))
+    _zsh_sense_temp_ids[item]=$fields[offset]
+    _zsh_sense_temp_labels[item]=$fields[$(( offset + 1 ))]
+    _zsh_sense_temp_kinds[item]=$fields[$(( offset + 2 ))]
+    _zsh_sense_temp_details[item]=$fields[$(( offset + 3 ))]
+    _zsh_sense_temp_groups[item]=$fields[$(( offset + 4 ))]
+    _zsh_sense_temp_insertions[item]=
+    _zsh_sense_temp_acceptance_backends[item]=$fields[$(( offset + 5 ))]
+    _zsh_sense_temp_acceptance_identities[item]=$fields[$(( offset + 6 ))]
+  done
+}
+
+_zsh_sense_view_end() {
+  emulate -L zsh
+  (( $# >= 3 )) || return 1
+  [[ $1 == $_zsh_sense_active_request && $2 == $_zsh_sense_active_generation ]] || return 0
+  (( _zsh_sense_temp_received == _zsh_sense_temp_expected )) || return 1
+  _zsh_sense_item_ids=( "${_zsh_sense_temp_ids[@]}" )
+  _zsh_sense_item_labels=( "${_zsh_sense_temp_labels[@]}" )
+  _zsh_sense_item_details=( "${_zsh_sense_temp_details[@]}" )
+  _zsh_sense_item_kinds=( "${_zsh_sense_temp_kinds[@]}" )
+  _zsh_sense_item_groups=( "${_zsh_sense_temp_groups[@]}" )
+  _zsh_sense_item_insertions=( "${_zsh_sense_temp_insertions[@]}" )
+  _zsh_sense_item_acceptance_backends=( "${_zsh_sense_temp_acceptance_backends[@]}" )
+  _zsh_sense_item_acceptance_identities=( "${_zsh_sense_temp_acceptance_identities[@]}" )
+  _zsh_sense_render_dirty=1
+  _zsh_sense_popup_stale=0
+  _zsh_sense_selected=$_zsh_sense_temp_selected
+  (( _zsh_sense_selected < 1 )) && _zsh_sense_selected=1
+  (( _zsh_sense_selected > $#_zsh_sense_item_ids )) && _zsh_sense_selected=$#_zsh_sense_item_ids
+  if (( $#_zsh_sense_item_ids && _zsh_sense_popup_enabled )); then
+    _zsh_sense_popup_visible=1
+  else
+    _zsh_sense_clear_popup
+  fi
+  _zsh_sense_render
+}
+
+_zsh_sense_accept_zsh() {
+  emulate -L zsh
+  (( $# >= 19 )) || return 1
+  [[ $1 == $_zsh_sense_active_request && $2 == $_zsh_sense_active_generation ]] || return 0
+  [[ $3 == portable ]] || return 0
+  local identity=$5
+  [[ $identity == <-> ]] || return 1
+  _zsh_sense_apply_serial=$_zsh_sense_capture_serial
+  _zsh_sense_apply_index=$identity
+  zle .zsh-sense-portable-apply
+  _zsh_sense_clear_popup
+  _zsh_sense_last_buffer=$BUFFER
+  _zsh_sense_last_cursor=$CURSOR
+  if (( _zsh_sense_after_accept )); then
+    _zsh_sense_request after-accept
+  fi
+}
+
+_zsh_sense_request() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  (( _zsh_sense_ready && _zsh_sense_configured )) || return 1
+  [[ $_zsh_sense_activation_mode != disabled ]] || return 1
+  [[ -n $BUFFER ]] || { _zsh_sense_clear_popup; return 0; }
+  local trigger=${1:-automatic}
+  if (( _zsh_sense_active_request )); then
+    _zsh_sense_send cancel "$_zsh_sense_active_request" "$_zsh_sense_active_generation"
+  fi
+  (( _zsh_sense_request_serial++, _zsh_sense_generation++ ))
+  _zsh_sense_active_request=$_zsh_sense_request_serial
+  _zsh_sense_active_generation=$_zsh_sense_generation
+  _zsh_sense_active_buffer=$BUFFER
+  _zsh_sense_cursor_byte
+  _zsh_sense_active_cursor_byte=$REPLY
+  _zsh_sense_last_buffer=$BUFFER
+  _zsh_sense_last_cursor=$CURSOR
+  # Keep the last complete frame on-screen while the next generation is
+  # debounced, captured, and ranked. Clearing it here made every ordinary edit
+  # produce a blank frame followed by a populated frame (visible flashing).
+  # Mark it stale instead: it remains useful visual continuity, but it cannot
+  # be navigated or accepted against the newly edited buffer.
+  (( _zsh_sense_popup_visible )) && _zsh_sense_popup_stale=1
+  _zsh_sense_send complete \
+    "$_zsh_sense_active_request" "$_zsh_sense_active_generation" "" "$BUFFER" \
+    "$_zsh_sense_active_cursor_byte" "$PWD" "${KEYMAP:-main}" \
+    "${COLUMNS:-80}" "${LINES:-24}" "$trigger" 0 || _zsh_sense_clear_popup
+}
+
+_zsh_sense_event_for_widget() {
+  emulate -L zsh
+  case ${LASTWIDGET:-} in
+    *backward-delete*) REPLY=backspace ;;
+    *kill-word*|*delete-word*) REPLY=word-delete ;;
+    *delete*) REPLY=delete ;;
+    *paste*) REPLY=paste ;;
+    *history*|up-line-or-history|down-line-or-history) REPLY=history ;;
+    *forward-char*|*backward-char*|*beginning-of-line*|*end-of-line*) REPLY=cursor ;;
+    *)
+      if [[ $BUFFER != $_zsh_sense_last_buffer ]]; then REPLY=insert; else REPLY=cursor; fi
+      ;;
+  esac
+}
+
+_zsh_sense_line_pre_redraw() {
+  emulate -L zsh
+  (( _zsh_sense_configured )) || return 0
+  local -i changed=0
+  [[ $BUFFER != $_zsh_sense_last_buffer || $CURSOR != $_zsh_sense_last_cursor ]] && changed=1
+  local event=
+  if (( changed )); then
+    # Determine the event before rendering: the renderer invokes a nested
+    # completion widget, which intentionally becomes LASTWIDGET.
+    _zsh_sense_event_for_widget
+    event=$REPLY
+  fi
+  (( _zsh_sense_popup_visible )) && _zsh_sense_render
+  (( changed )) || return 0
+  _zsh_sense_last_buffer=$BUFFER
+  _zsh_sense_last_cursor=$CURSOR
+  (( ${_zsh_sense_events[(Ie)$event]} )) || return 0
+  case $_zsh_sense_activation_mode in
+    continuous)
+      local char=${LBUFFER[-1]-}
+      if [[ -n $char ]] && (( ${_zsh_sense_immediate_characters[(Ie)$char]} )); then
+        _zsh_sense_request trigger-character
+      else
+        _zsh_sense_request automatic
+      fi
+      ;;
+    hybrid)
+      local char=${LBUFFER[-1]-}
+      if [[ -n $char ]] && (( ${_zsh_sense_trigger_characters[(Ie)$char]} )); then
+        _zsh_sense_request trigger-character
+      else
+        _zsh_sense_clear_popup
+      fi
+      ;;
+    manual|disabled)
+      _zsh_sense_clear_popup
+      ;;
+  esac
+}
+
+_zsh_sense_clear_popup() {
+  _zsh_sense_popup_visible=0
+  _zsh_sense_popup_stale=0
+  _zsh_sense_selected=0
+  _zsh_sense_item_ids=()
+  _zsh_sense_item_labels=()
+  _zsh_sense_item_details=()
+  _zsh_sense_item_kinds=()
+  _zsh_sense_item_groups=()
+  _zsh_sense_item_insertions=()
+  _zsh_sense_item_acceptance_backends=()
+  _zsh_sense_item_acceptance_identities=()
+  _zsh_sense_render_dirty=1
+  _zsh_sense_render_columns=0
+  _zsh_sense_render_lines=()
+  if zle >/dev/null 2>&1; then
+    zle -Rc "" 2>/dev/null
+  fi
+}
+
+_zsh_sense_kind_indicator() {
+  emulate -L zsh
+  if [[ $_zsh_sense_indicator_mode == none ]]; then
+    REPLY=
+    return
+  fi
+  case $1 in
+    directory) REPLY='󰉋' ;;
+    file|symlink) REPLY='󰈔' ;;
+    option|option-value) REPLY='󰘵' ;;
+    command|subcommand) REPLY='󰆍' ;;
+    variable) REPLY='󰫧' ;;
+    service) REPLY='󰒍' ;;
+    git-branch) REPLY='' ;;
+    snippet) REPLY='󰩫' ;;
+    *) REPLY='·' ;;
+  esac
+  [[ $_zsh_sense_indicator_mode == text ]] && REPLY="[${1[1]}]"
+  [[ $_zsh_sense_indicator_mode == both ]] && REPLY="$REPLY [$1]"
+}
+
+_zsh_sense_truncate() {
+  emulate -L zsh
+  local text=$1
+  local -i width=$2
+  if (( $#text <= width )); then
+    REPLY=$text
+  elif (( width <= 1 )); then
+    REPLY=${text[1,width]}
+  else
+    REPLY="${text[1,$(( width - 1 ))]}…"
+  fi
+}
+
+_zsh_sense_render() {
+  emulate -L zsh
+  # Netstring parsing is byte-oriented and dynamically scopes LC_ALL=C into
+  # dispatch handlers. Render in the interactive locale so ZLE receives real
+  # multibyte characters instead of displaying them as `\M-...` byte escapes.
+  local LC_ALL=$_zsh_sense_ui_locale
+  (( _zsh_sense_popup_visible && $#_zsh_sense_item_ids )) || return 0
+  if (( ! _zsh_sense_render_dirty &&
+        _zsh_sense_render_columns == COLUMNS &&
+        $#_zsh_sense_render_lines )); then
+    zle .zsh-sense-panel-list
+    zle -R
+    return 0
+  fi
+  local tl tr bl br horizontal vertical
+  case $_zsh_sense_border in
+    sharp) tl=┌ tr=┐ bl=└ br=┘ horizontal=─ vertical=│ ;;
+    ascii) tl=+ tr=+ bl=+ br=+ horizontal=- vertical='|' ;;
+    none) tl= tr= bl= br= horizontal= vertical= ;;
+    *) tl=╭ tr=╮ bl=╰ br=╯ horizontal=─ vertical=│ ;;
+  esac
+  # Zsh's `${#value}` is a character count, while terminals render several
+  # configured kind icons as two cells. Keep two cells of right-edge slack so
+  # a wide glyph never reaches the terminal's auto-wrap column and corrupts
+  # ZLE's completion-list cursor accounting.
+  local -i terminal_width=$(( COLUMNS > 0 ? COLUMNS : 80 ))
+  local -i width=$(( terminal_width - 3 ))
+  (( width > _zsh_sense_max_width )) && width=$_zsh_sense_max_width
+  (( width < _zsh_sense_min_width )) && width=$_zsh_sense_min_width
+  (( width > terminal_width - 3 )) && width=$(( terminal_width - 3 ))
+  (( width < 8 )) && return 0
+  local -i border_width=2
+  [[ $_zsh_sense_border == none ]] && border_width=0
+  local -i inner=$(( width - border_width ))
+  local -i rows=$#_zsh_sense_item_ids
+  (( rows > _zsh_sense_max_rows )) && rows=$_zsh_sense_max_rows
+  local -i first=1
+  if (( _zsh_sense_selected > rows )); then
+    first=$(( _zsh_sense_selected - rows + 1 ))
+  fi
+  (( first + rows - 1 > $#_zsh_sense_item_ids )) && first=$(( $#_zsh_sense_item_ids - rows + 1 ))
+  local -a lines=()
+  local fill row marker icon label detail left
+  local -i index available
+  if [[ $_zsh_sense_border != none ]]; then
+    if (( _zsh_sense_show_title )); then
+      local title=' completions '
+      fill=${(pl:$(( inner - $#title ))::$horizontal:)}
+      lines+=( "$tl$title$fill$tr" )
+    else
+      lines+=( "$tl${(pl:$inner::$horizontal:)}$tr" )
+    fi
+  fi
+  for (( index = first; index < first + rows; index++ )); do
+    marker=' '
+    (( index == _zsh_sense_selected )) && marker=$_zsh_sense_selected_marker
+    _zsh_sense_kind_indicator "$_zsh_sense_item_kinds[index]"
+    icon=$REPLY
+    label=$_zsh_sense_item_labels[index]
+    detail=$_zsh_sense_item_details[index]
+    (( _zsh_sense_show_descriptions )) || detail=
+    left="$marker $icon $label"
+    available=$(( inner - 2 ))
+    if [[ -n $detail ]]; then
+      local -i detail_width=$(( available / 2 ))
+      _zsh_sense_truncate "$detail" $detail_width
+      detail=$REPLY
+      _zsh_sense_truncate "$left" $(( available - $#detail - 1 ))
+      left=$REPLY
+      row="$left${(l:$(( available - $#left - $#detail )):: :)}$detail"
+    else
+      _zsh_sense_truncate "$left" $available
+      row="$REPLY${(l:$(( available - $#REPLY )):: :)}"
+    fi
+    if [[ $_zsh_sense_border == none ]]; then
+      lines+=( "$row" )
+    else
+      lines+=( "$vertical $row $vertical" )
+    fi
+  done
+  if [[ $_zsh_sense_border != none ]]; then
+    if (( _zsh_sense_show_footer )); then
+      local footer=" $_zsh_sense_selected/$#_zsh_sense_item_ids "
+      fill=${(pl:$(( inner - $#footer ))::$horizontal:)}
+      lines+=( "$bl$fill$footer$br" )
+    else
+      lines+=( "$bl${(pl:$inner::$horizontal:)}$br" )
+    fi
+  fi
+  _zsh_sense_render_lines=( "${lines[@]}" )
+  _zsh_sense_render_columns=$COLUMNS
+  _zsh_sense_render_dirty=0
+  zle .zsh-sense-panel-list
+  zle -R
+}
+
+# Render through a real completion widget rather than `zle -R`'s temporary
+# string list. `-V` is an unsorted group and therefore preserves the Rust
+# ranker's order; `-l` forces each display string onto its own row. ZLE owns
+# the resulting list lifecycle and keeps navigation markers aligned with the
+# rows the user actually sees.
+_zsh_sense_panel_list() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  (( $#_zsh_sense_render_lines )) || return 1
+
+  local -a identities=()
+  local -i index
+  for (( index = 1; index <= $#_zsh_sense_render_lines; index++ )); do
+    identities+=( "zsh-sense-panel-$index" )
+  done
+  builtin compadd -Q -U -V zsh-sense-panel -l \
+    -d _zsh_sense_render_lines -- "${identities[@]}"
+  compstate[insert]=
+  compstate[list]=list
+}
+
+_zsh_sense_accept_selected() {
+  (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale &&
+     _zsh_sense_selected >= 1 &&
+     _zsh_sense_selected <= $#_zsh_sense_item_ids )) || return 1
+  local backend=$_zsh_sense_item_acceptance_backends[_zsh_sense_selected]
+  local identity=$_zsh_sense_item_acceptance_identities[_zsh_sense_selected]
+  if [[ $backend == portable && $identity == <-> ]]; then
+    _zsh_sense_apply_serial=$_zsh_sense_capture_serial
+    _zsh_sense_apply_index=$identity
+    zle .zsh-sense-portable-apply
+    typeset -gi _zsh_sense_last_apply_status=$?
+    (( _zsh_sense_last_apply_status == 0 )) || return 1
+    _zsh_sense_clear_popup
+    _zsh_sense_last_buffer=$BUFFER
+    _zsh_sense_last_cursor=$CURSOR
+    (( _zsh_sense_after_accept )) && _zsh_sense_request after-accept
+    return 0
+  fi
+  _zsh_sense_send select "$_zsh_sense_active_request" "$_zsh_sense_active_generation" \
+    "$_zsh_sense_item_ids[_zsh_sense_selected]"
+}
+
+_zsh_sense_call_original() {
+  emulate -L zsh
+  local logical=$1 map=${KEYMAP:-main}
+  [[ $map == main ]] && map=${_zsh_sense_main_keymap:-viins}
+  local widget=${_zsh_sense_original_widgets[$map:$logical]-}
+  [[ -n $widget ]] && zle "$widget"
+}
+
+_zsh_sense_key_dispatch() {
+  emulate -L zsh
+  local logical=${_zsh_sense_widget_keys[$WIDGET]-}
+  local action=
+  if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
+    action=${_zsh_sense_bindings_popup[$logical]-}
+  else
+    action=${_zsh_sense_bindings_closed[$logical]-}
+  fi
+  case $action in
+    trigger) _zsh_sense_request manual ;;
+    accept) _zsh_sense_accept_selected || _zsh_sense_call_original "$logical" ;;
+    next)
+      if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
+        if (( _zsh_sense_selected < $#_zsh_sense_item_ids )); then
+          (( _zsh_sense_selected++ ))
+          _zsh_sense_render_dirty=1
+        fi
+        _zsh_sense_render
+      else _zsh_sense_call_original "$logical"; fi
+      ;;
+    previous)
+      if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
+        if (( _zsh_sense_selected > 1 )); then
+          (( _zsh_sense_selected-- ))
+          _zsh_sense_render_dirty=1
+        fi
+        _zsh_sense_render
+      else _zsh_sense_call_original "$logical"; fi
+      ;;
+    page-down)
+      if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
+        (( _zsh_sense_selected += _zsh_sense_max_rows ))
+        (( _zsh_sense_selected > $#_zsh_sense_item_ids )) && _zsh_sense_selected=$#_zsh_sense_item_ids
+        _zsh_sense_render_dirty=1
+        _zsh_sense_render
+      else _zsh_sense_call_original "$logical"; fi
+      ;;
+    page-up)
+      if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
+        (( _zsh_sense_selected -= _zsh_sense_max_rows ))
+        (( _zsh_sense_selected < 1 )) && _zsh_sense_selected=1
+        _zsh_sense_render_dirty=1
+        _zsh_sense_render
+      else _zsh_sense_call_original "$logical"; fi
+      ;;
+    dismiss)
+      (( _zsh_sense_active_request )) && _zsh_sense_send cancel \
+        "$_zsh_sense_active_request" "$_zsh_sense_active_generation"
+      _zsh_sense_clear_popup
+      ;;
+    none) ;;
+    *) _zsh_sense_call_original "$logical" ;;
+  esac
+}
+
+_zsh_sense_install_keybindings() {
+  emulate -L zsh
+  local main_definition
+  local -a definition_words maps keys
+  main_definition=$(bindkey -lL main 2>/dev/null)
+  definition_words=( ${(z)main_definition} )
+  _zsh_sense_main_keymap=${definition_words[2]:-viins}
+  maps=( emacs viins "$_zsh_sense_main_keymap" )
+  maps=( ${(u)maps} )
+  keys=( ${(k)_zsh_sense_bindings_closed} ${(k)_zsh_sense_bindings_popup} )
+  keys=( ${(u)keys} )
+  local map logical sequence line original alias widget safe
+  for logical in "${keys[@]}"; do
+    sequence=${_zsh_sense_key_sequences[$logical]-}
+    [[ -n $sequence ]] || continue
+    safe=${logical//[^A-Za-z0-9_-]/-}
+    widget=".zsh-sense-key-$safe"
+    _zsh_sense_widget_keys[$widget]=$logical
+    zle -N "$widget" _zsh_sense_key_dispatch
+    for map in "${maps[@]}"; do
+      line=$(bindkey -M "$map" "$sequence" 2>/dev/null) || continue
+      definition_words=( ${(z)line} )
+      original=${definition_words[2]-}
+      [[ -n $original && $original != "$widget" ]] || continue
+      alias=".zsh-sense-original-$map-$safe"
+      zle -A "$original" "$alias" 2>/dev/null || continue
+      _zsh_sense_original_widgets[$map:$logical]=$alias
+      _zsh_sense_original_names[$map:$logical]=$original
+      _zsh_sense_bound_sequences[$map:$logical]=$sequence
+      bindkey -M "$map" "$sequence" "$widget"
+    done
+  done
+}
+
+_zsh_sense_disconnect() {
+  emulate -L zsh
+  if (( _zsh_sense_read_fd >= 0 )); then
+    zle -F $_zsh_sense_read_fd 2>/dev/null
+    exec {_zsh_sense_read_fd}<&- 2>/dev/null
+  fi
+  if (( _zsh_sense_write_fd >= 0 )); then
+    exec {_zsh_sense_write_fd}>&- 2>/dev/null
+  fi
+  _zsh_sense_read_fd=-1
+  _zsh_sense_write_fd=-1
+  _zsh_sense_ready=0
+  _zsh_sense_configured=0
+  _zsh_sense_clear_popup
+}
+
+_zsh_sense_cleanup() {
+  emulate -L zsh
+  autoload -Uz add-zle-hook-widget add-zsh-hook
+  add-zle-hook-widget -d line-pre-redraw _zsh_sense_line_pre_redraw 2>/dev/null
+  add-zsh-hook -d zshexit _zsh_sense_cleanup 2>/dev/null
+  local key map logical sequence original
+  for key in ${(k)_zsh_sense_bound_sequences}; do
+    map=${key%%:*}
+    logical=${key#*:}
+    sequence=$_zsh_sense_bound_sequences[$key]
+    original=$_zsh_sense_original_names[$key]
+    [[ -n $sequence && -n $original ]] && bindkey -M "$map" "$sequence" "$original" 2>/dev/null
+  done
+  (( _zsh_sense_ready )) && _zsh_sense_send goodbye
+  _zsh_sense_disconnect
+  [[ -n $_zsh_sense_fifo_in ]] && command unlink -- "$_zsh_sense_fifo_in" 2>/dev/null
+  [[ -n $_zsh_sense_fifo_out ]] && command unlink -- "$_zsh_sense_fifo_out" 2>/dev/null
+}
+
+_zsh_sense_start_worker() {
+  emulate -L zsh
+  setopt localoptions no_aliases
+  local root=${_zsh_sense_plugin_dir:h}
+  local -a command_line worker_args
+  if [[ -n ${SENSE_ZSH_COMMAND:-} ]]; then
+    command_line=( ${(z)SENSE_ZSH_COMMAND} )
+  elif (( $+commands[zsh-sense] )); then
+    command_line=( "$commands[zsh-sense]" )
+  elif [[ -x $root/target/release/zsh-sense ]]; then
+    command_line=( "$root/target/release/zsh-sense" )
+  elif [[ -x $root/target/debug/zsh-sense ]]; then
+    command_line=( "$root/target/debug/zsh-sense" )
+  else
+    return 1
+  fi
+
+  local runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}/zsh-sense-$UID}
+  local runtime_dir=$runtime_base/zsh-sense
+  command mkdir -p -m 700 -- "$runtime_dir" 2>/dev/null || return 1
+  command chmod 700 -- "$runtime_dir" 2>/dev/null || return 1
+  [[ -d $runtime_dir && -O $runtime_dir && ! -L $runtime_dir ]] || return 1
+  local token="${sysparams[pid]}-${RANDOM}-${RANDOM}"
+  _zsh_sense_fifo_in="$runtime_dir/shell-$token.in"
+  _zsh_sense_fifo_out="$runtime_dir/shell-$token.out"
+  command mkfifo -m 600 -- "$_zsh_sense_fifo_in" "$_zsh_sense_fifo_out" || return 1
+
+  local state_base=${XDG_STATE_HOME:-$HOME/.local/state}
+  command mkdir -p -m 700 -- "$state_base/zsh-sense" 2>/dev/null
+  _zsh_sense_log_file="$state_base/zsh-sense/worker-${sysparams[pid]}.log"
+  worker_args=( worker --shell-input-fifo "$_zsh_sense_fifo_in" \
+    --shell-output-fifo "$_zsh_sense_fifo_out" \
+    --zsh-executable "${commands[zsh]:-$SHELL}" --zsh-version "$ZSH_VERSION" \
+    --zsh-patchlevel "$ZSH_PATCHLEVEL" )
+  [[ -n ${SENSE_ZSH_SOCKET:-} ]] && worker_args+=( --socket "$SENSE_ZSH_SOCKET" )
+  [[ -n ${SENSE_ZSH_CONFIG:-} ]] && worker_args+=( --config "$SENSE_ZSH_CONFIG" )
+  [[ -n ${ZSH_SENSE_PROFILE:-} ]] && worker_args+=( --profile "$ZSH_SENSE_PROFILE" )
+  [[ ${SENSE_ZSH_NO_DAEMON_AUTOSTART:-0} == 1 ]] && worker_args+=( --no-daemon-autostart )
+  "${command_line[@]}" "${worker_args[@]}" </dev/null >>"$_zsh_sense_log_file" 2>&1 &!
+  _zsh_sense_worker_pid=$!
+
+  local -i attempt
+  for (( attempt = 1; attempt <= 200; attempt++ )); do
+    sysopen -w -o cloexec,nonblock -u _zsh_sense_write_fd "$_zsh_sense_fifo_in" 2>/dev/null && break
+    kill -0 $_zsh_sense_worker_pid 2>/dev/null || break
+    zselect -t 1 >/dev/null 2>&1
+  done
+  (( _zsh_sense_write_fd >= 0 )) || { _zsh_sense_cleanup; return 1; }
+  sysopen -r -o cloexec,nonblock -u _zsh_sense_read_fd "$_zsh_sense_fifo_out" 2>/dev/null || {
+    _zsh_sense_cleanup
+    return 1
+  }
+  command unlink -- "$_zsh_sense_fifo_in" 2>/dev/null
+  command unlink -- "$_zsh_sense_fifo_out" 2>/dev/null
+  _zsh_sense_fifo_in=
+  _zsh_sense_fifo_out=
+  zle -N .zsh-sense-fd-callback _zsh_sense_fd_callback
+  zle -Fw $_zsh_sense_read_fd .zsh-sense-fd-callback
+}
+
+_zsh_sense_init() {
+  emulate -L zsh
+  [[ -o interactive ]] || return 0
+  zmodload zsh/system zsh/zselect 2>/dev/null || return 1
+  autoload -Uz add-zle-hook-widget add-zsh-hook
+  _zsh_sense_portable_init || return 1
+  zle -C .zsh-sense-panel-list list-choices _zsh_sense_panel_list
+  add-zle-hook-widget line-pre-redraw _zsh_sense_line_pre_redraw
+  add-zsh-hook zshexit _zsh_sense_cleanup
+  _zsh_sense_last_buffer=
+  _zsh_sense_last_cursor=-1
+  _zsh_sense_start_worker
+}

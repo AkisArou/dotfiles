@@ -1,0 +1,65 @@
+autoload -Uz compinit
+compinit -u
+
+_zsh_sense_live_completion() {
+  local -a descriptions=(
+    '--all — stage modified and deleted files'
+    '--amend — replace the previous commit'
+  )
+  compadd -J options -X 'command options' -d descriptions -- --all --amend
+}
+compdef _zsh_sense_live_completion sense-test
+
+_zsh_sense_live_fuzzy_completion() {
+  local -a descriptions=(
+    'reload — reload unit configuration'
+    'reset-failed — reset failed unit state'
+    'restart — restart one or more units'
+  )
+  compadd -J subcommands -X 'service actions' -d descriptions -- reload reset-failed restart
+}
+compdef _zsh_sense_live_fuzzy_completion sense-verb
+
+_zsh_sense_live_many_completion() {
+  local -a words=() descriptions=()
+  local option
+  local -i index
+  for (( index = 1; index <= 15; index++ )); do
+    printf -v option '%02d' $index
+    words+=( "--option-$option" )
+    descriptions+=( "--option-$option — candidate number $option" )
+  done
+  compadd -J options -X 'many options' -d descriptions -- "${words[@]}"
+}
+compdef _zsh_sense_live_many_completion sense-many
+
+sense-test() {
+  print -r -- "<EXEC>$*</EXEC>"
+}
+
+sense-verb() {
+  print -r -- "<VERB>$*</VERB>"
+}
+
+sense-many() {
+  print -r -- "<MANY>$*</MANY>"
+}
+
+source "$SENSE_ZSH_TEST_ROOT/shell/zsh-sense.plugin.zsh"
+
+_zsh_sense_test_state() {
+  local handler=
+  (( _zsh_sense_read_fd >= 0 )) && {
+    handler=$(zle -F -L $_zsh_sense_read_fd 2>/dev/null)
+    _zsh_sense_fd_callback $_zsh_sense_read_fd
+  }
+  zle -I
+  print -r -- "<STATE>ready=$_zsh_sense_ready configured=$_zsh_sense_configured read=$_zsh_sense_read_fd write=$_zsh_sense_write_fd worker=$_zsh_sense_worker_pid fifo=$_zsh_sense_fifo_in log=$_zsh_sense_log_file request=$_zsh_sense_active_request items=$#_zsh_sense_item_ids captured=${(j:|:)_zsh_sense_capture_words} flags=${(j:|:)_zsh_sense_capture_flags} prefixes=${(j:|:)_zsh_sense_capture_prefixes} selected=$_zsh_sense_selected backend=${_zsh_sense_item_acceptance_backends[_zsh_sense_selected]-} identity=${_zsh_sense_item_acceptance_identities[_zsh_sense_selected]-} serial=$_zsh_sense_capture_serial apply=${_zsh_sense_last_apply_status-unset} buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_zsh_sense_last_error-}</STATE>"
+  BUFFER=
+  CURSOR=0
+  zle accept-line
+}
+zle -N _zsh_sense_test_state
+bindkey '^X^G' _zsh_sense_test_state
+
+PS1='<SENSE-PROMPT>'

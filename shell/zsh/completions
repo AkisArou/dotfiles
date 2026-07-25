@@ -2,6 +2,12 @@
 
 zstyle ':completion:*:make:*:targets' call-command true
 zstyle ':completion:*:*:make:*' tag-order 'targets'
+zstyle ':completion:*:git-checkout:*' sort false
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' menu no
+zstyle ':completion:*:descriptions' format '%d'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' verbose yes
 
 autoload -Uz zrecompile
 autoload -Uz compinit

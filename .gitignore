@@ -28,3 +28,4 @@ emacs/*
 !emacs/preload/
 /yazi/package.toml
 spider-wm/.spider-wm/
+/shell/zsh/zsh-sense/target/

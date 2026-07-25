@@ -10,12 +10,9 @@ zinit light romkatv/powerlevel10k
 
 zinit light zdharma-continuum/fast-syntax-highlighting
 
-zinit light Aloxaf/fzf-tab
-zstyle ':fzf-tab:*' fzf-command 'ftb-tmux-popup'
-zstyle ':completion:*:git-checkout:*' sort false
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' menu no
-zstyle ':fzf-tab:*' use-fzf-default-opts yes
+# zinit light Aloxaf/fzf-tab
+# zstyle ':fzf-tab:*' fzf-command 'ftb-tmux-popup'
+# zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
 zinit light kutsan/zsh-system-clipboard
 

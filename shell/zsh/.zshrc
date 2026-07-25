@@ -17,3 +17,7 @@ source "$HOME/dotfiles/shell/zsh/.p10k.zsh"
 [ -f "$HOME/.asdf/plugins/java/set-java-home.zsh" ] && . "$HOME/.asdf/plugins/java/set-java-home.zsh"
 
 fast-theme XDG:vscode &>/dev/null
+
+# Load after compinit and every other ZLE plugin so zsh-sense can preserve and
+# delegate the user's existing keybindings when its completion popup is closed.
+source "$HOME/dotfiles/shell/zsh/zsh-sense/shell/zsh-sense.plugin.zsh"
