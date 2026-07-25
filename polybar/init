@@ -1,7 +1,5 @@
 #!/usr/bin/zsh
 
-[[ "$XDG_SESSION_TYPE" == "x11" ]] || exit 0
-
 FONT_FAMILY="Hasklug Nerd Font Mono"
 
 if [ "$ULTRAWIDE" ]; then
@@ -9,7 +7,7 @@ if [ "$ULTRAWIDE" ]; then
   POLY_BAR_HEIGHT="16pt"
 else
   POLY_FONT="$FONT_FAMILY":size=14\;3
-  POLY_BAR_HEIGHT="18pt"
+  POLY_BAR_HEIGHT="20pt"
 fi
 
 export POLY_FONT
