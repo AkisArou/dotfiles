@@ -165,6 +165,11 @@ fi
 # Install required packages
 install_packages "${packages[@]}"
 
+# Cargo packages
+cargo install cargo-update
+cargo install --git https://github.com/yuys13/zshcs.git
+
+# Source builds
 ~/dotfiles/scripts/build-nvim
 
 # Install custom issue (login prompt)

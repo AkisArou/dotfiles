@@ -20,6 +20,7 @@ vim.lsp.enable({
   "oxfmt",
   "rust_analyzer",
   "tsgo",
+  "zshcs",
 })
 
 local fzf = require("fzf-lua")

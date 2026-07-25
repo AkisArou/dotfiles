@@ -34,6 +34,10 @@ print_info "rust:"
 rustup update
 echo
 
+print_info "cargo:"
+cargo install-update -a
+echo
+
 print_info "asdf:"
 asdf plugin update --all
 echo
