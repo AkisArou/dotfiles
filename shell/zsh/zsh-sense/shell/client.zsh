@@ -46,14 +46,15 @@ typeset -gi _zsh_sense_max_width=140
 typeset -gi _zsh_sense_min_width=24
 typeset -gi _zsh_sense_padding=1
 typeset -g _zsh_sense_decorations=full
-typeset -g _zsh_sense_border=rounded
+typeset -g _zsh_sense_border=none
 typeset -gi _zsh_sense_show_title=0
 typeset -gi _zsh_sense_show_footer=1
 typeset -gi _zsh_sense_show_scrollbar=1
+typeset -g _zsh_sense_scrollbar_character='▐'
 typeset -gi _zsh_sense_show_groups=1
 typeset -gi _zsh_sense_show_descriptions=1
 typeset -g _zsh_sense_indicator_mode=icon
-typeset -g _zsh_sense_selected_marker='›'
+typeset -g _zsh_sense_selected_marker=
 typeset -g _zsh_sense_style_menu_raw='fg=#bbbbbb,bg=#202020'
 typeset -g _zsh_sense_style_border_raw='fg=#d4d4d4'
 typeset -g _zsh_sense_style_selected_raw='bg=#343b41'
@@ -63,8 +64,8 @@ typeset -g _zsh_sense_style_detail_raw='fg=#bbbbbb'
 typeset -g _zsh_sense_style_kind_raw='fg=#bbbbbb'
 typeset -g _zsh_sense_style_group_raw='fg=#4ec9b0'
 typeset -g _zsh_sense_style_footer_raw='fg=#bbbbbb'
-typeset -g _zsh_sense_style_scrollbar_thumb_raw='bg=#bbbbbb'
-typeset -g _zsh_sense_style_scrollbar_gutter_raw='bg=#343b41'
+typeset -g _zsh_sense_style_scrollbar_thumb_raw='fg=#bbbbbb'
+typeset -g _zsh_sense_style_scrollbar_gutter_raw='fg=#343b41'
 typeset -g _zsh_sense_style_diagnostic_error_raw='fg=#f14c4c,underline'
 typeset -g _zsh_sense_style_diagnostic_warning_raw='fg=#cca700,underline'
 typeset -g _zsh_sense_style_ghost_raw='fg=#707070'
@@ -356,6 +357,14 @@ _zsh_sense_dispatch() {
       ;;
     style)
       (( $#fields == 2 )) && _zsh_sense_apply_style "$fields[1]" "$fields[2]"
+      ;;
+    popup-option)
+      if (( $#fields == 2 )); then
+        case $fields[1] in
+          scrollbar-character) _zsh_sense_scrollbar_character=$fields[2] ;;
+        esac
+        _zsh_sense_render_dirty=1
+      fi
       ;;
     kind-style)
       (( $#fields == 2 )) && _zsh_sense_style_kinds_raw[$fields[1]]=$fields[2]
@@ -1093,7 +1102,7 @@ _zsh_sense_kind_indicator() {
   case $_zsh_sense_indicator_mode in
     icon)
       REPLY=$icon
-      [[ -n $icon ]] && _zsh_sense_indicator_cells=2
+      [[ -n $icon ]] && _zsh_sense_indicator_cells=1
       ;;
     text)
       REPLY="[${1[1]}]"
@@ -1102,7 +1111,7 @@ _zsh_sense_kind_indicator() {
     both)
       if [[ -n $icon ]]; then
         REPLY="$icon [$1]"
-        _zsh_sense_indicator_cells=$(( 2 + 1 + ${#1} + 2 ))
+        _zsh_sense_indicator_cells=$(( 1 + 1 + ${#1} + 2 ))
       else
         REPLY="[$1]"
         _zsh_sense_indicator_cells=$(( ${#1} + 2 ))
@@ -1125,6 +1134,27 @@ _zsh_sense_truncate() {
   else
     REPLY="${text[1,$(( width - 1 ))]}…"
   fi
+}
+
+_zsh_sense_scrollbar_geometry() {
+  emulate -L zsh
+  local -i rows=$1 total=$2 selected=$3
+  local -i thumb_rows=0 thumb_first=0 track=0
+  if (( rows > 0 && total > rows )); then
+    (( thumb_rows = (rows * rows) / total ))
+    (( thumb_rows < 1 )) && thumb_rows=1
+    (( thumb_rows > rows )) && thumb_rows=$rows
+    (( selected < 0 )) && selected=0
+    (( selected >= total )) && selected=$(( total - 1 ))
+    (( track = rows - thumb_rows ))
+    if (( track > 0 && total > 1 )); then
+      # Map the selected item over the complete track rather than deriving the
+      # thumb from the asynchronously updated viewport. This makes both
+      # endpoints exact and keeps local navigation visually synchronous.
+      (( thumb_first = (selected * track + (total - 1) / 2) / (total - 1) ))
+    fi
+  fi
+  REPLY="$thumb_rows:$thumb_first"
 }
 
 _zsh_sense_render() {
@@ -1156,19 +1186,20 @@ _zsh_sense_render() {
     scrollbar_active=1
     scrollbar_cells=1
   fi
-  local -i marker_cells=$#_zsh_sense_selected_marker
-  (( marker_cells < 1 )) && marker_cells=1
+  local -i marker_cells=$#_zsh_sense_selected_marker marker_prefix_cells=0
+  (( marker_cells )) && marker_prefix_cells=$(( marker_cells + 1 ))
   # Reserve a stable indicator column for the configured presentation mode.
   # It must not depend on the current viewport, or the panel width would jump
-  # when navigation reveals a different candidate kind. Nerd Font glyphs can
-  # occupy two terminal cells even though Zsh counts one character.
+  # when navigation reveals a different candidate kind. The private-use Nerd
+  # Font glyphs used here advance one ZLE cell; treating them as double-width
+  # shifted every custom right border one column to the right.
   local -i indicator_cells=0
   case $_zsh_sense_indicator_mode in
-    icon) indicator_cells=2 ;;
+    icon) indicator_cells=1 ;;
     text) indicator_cells=3 ;;
-    both) indicator_cells=17 ;;
+    both) indicator_cells=16 ;;
   esac
-  local -i prefix_cells=$(( marker_cells + 1 ))
+  local -i prefix_cells=$marker_prefix_cells
   (( indicator_cells )) && (( prefix_cells += indicator_cells + 1 ))
   local -i candidate_cells=$_zsh_sense_max_label_cells
   (( _zsh_sense_show_descriptions )) &&
@@ -1182,7 +1213,7 @@ _zsh_sense_render() {
     local -i title_width=$(( $#title + border_width ))
     (( width < title_width )) && width=$title_width
   fi
-  if (( _zsh_sense_show_footer )); then
+  if (( _zsh_sense_show_footer )) && [[ $_zsh_sense_border != none ]]; then
     local footer=" $(( _zsh_sense_selected_absolute + 1 ))/$_zsh_sense_view_total "
     local -i footer_width=$(( $#footer + border_width ))
     (( width < footer_width )) && width=$footer_width
@@ -1204,7 +1235,7 @@ _zsh_sense_render() {
   (( first + rows - 1 > $#_zsh_sense_item_ids )) && first=$(( $#_zsh_sense_item_ids - rows + 1 ))
   local -a lines=() highlight_starts=() highlight_ends=() highlight_styles=()
   local -a match_ranges=()
-  local fill row marker icon label detail left padding line line_prefix line_suffix
+  local fill row marker marker_prefix icon label detail left padding line line_prefix line_suffix
   local kind match_ranges_text match_range label_style match_style kind_style detail_style
   local -i index available icon_cells label_cells detail_cells left_cells indicator_delta
   local -i panel_chars=0 detail_gap=0 detail_start=0 line_start=0
@@ -1214,13 +1245,10 @@ _zsh_sense_render() {
   local -i thumb_rows=0 thumb_first=0 row_number=0
   padding=${(l:$_zsh_sense_padding:: :)}
   if (( scrollbar_active )); then
-    (( thumb_rows = (rows * rows) / _zsh_sense_view_total ))
-    (( thumb_rows < 1 )) && thumb_rows=1
-    (( thumb_rows > rows )) && thumb_rows=$rows
-    if (( _zsh_sense_view_total > rows && rows > thumb_rows )); then
-      (( thumb_first = (_zsh_sense_view_window_start * (rows - thumb_rows)) /
-                         (_zsh_sense_view_total - rows) ))
-    fi
+    _zsh_sense_scrollbar_geometry "$rows" "$_zsh_sense_view_total" \
+      "$_zsh_sense_selected_absolute"
+    thumb_rows=${REPLY%:*}
+    thumb_first=${REPLY#*:}
   fi
   if [[ $_zsh_sense_border != none ]]; then
     if (( _zsh_sense_show_title )); then
@@ -1239,8 +1267,13 @@ _zsh_sense_render() {
     line_start=$panel_chars
     (( row_number++ ))
     (( is_selected = index == _zsh_sense_selected ))
-    marker=' '
-    (( is_selected )) && marker=$_zsh_sense_selected_marker
+    marker=
+    marker_prefix=
+    if (( marker_cells )); then
+      marker=${(l:$marker_cells:: :)}
+      (( is_selected )) && marker=$_zsh_sense_selected_marker
+      marker_prefix="$marker "
+    fi
     kind=$_zsh_sense_item_kinds[index]
     _zsh_sense_kind_indicator "$kind"
     icon=$REPLY
@@ -1251,11 +1284,11 @@ _zsh_sense_render() {
     detail_cells=${_zsh_sense_item_detail_cells[index]:-${#detail}}
     (( _zsh_sense_show_descriptions )) || detail=
     if [[ -n $icon ]]; then
-      left="$marker $icon $label"
-      left_cells=$(( marker_cells + 1 + icon_cells + 1 + label_cells ))
+      left="$marker_prefix$icon $label"
+      left_cells=$(( marker_prefix_cells + icon_cells + 1 + label_cells ))
     else
-      left="$marker $label"
-      left_cells=$(( marker_cells + 1 + label_cells ))
+      left="$marker_prefix$label"
+      left_cells=$(( marker_prefix_cells + label_cells ))
     fi
     available=$row_content_width
     if [[ -n $detail ]]; then
@@ -1286,7 +1319,7 @@ _zsh_sense_render() {
       row="$left${(l:$(( available - left_cells )):: :)}"
     fi
     if (( scrollbar_active )); then
-      row+=" "
+      row+="$_zsh_sense_scrollbar_character"
     fi
     if [[ $_zsh_sense_border == none ]]; then
       line_prefix=$padding
@@ -1320,7 +1353,7 @@ _zsh_sense_render() {
     fi
 
     if [[ -n $icon ]]; then
-      icon_start=$(( line_start + ${#line_prefix} + ${#marker} + 1 ))
+      icon_start=$(( line_start + ${#line_prefix} + ${#marker_prefix} ))
       icon_end=$(( icon_start + ${#icon} ))
       (( icon_end > line_start + ${#line_prefix} + ${#left} )) &&
         icon_end=$(( line_start + ${#line_prefix} + ${#left} ))
@@ -1329,9 +1362,9 @@ _zsh_sense_render() {
         highlight_ends+=( $icon_end )
         highlight_styles+=( "$kind_style" )
       fi
-      label_offset=$(( ${#marker} + 1 + ${#icon} + 1 ))
+      label_offset=$(( ${#marker_prefix} + ${#icon} + 1 ))
     else
-      label_offset=$(( ${#marker} + 1 ))
+      label_offset=${#marker_prefix}
     fi
     label_visible=$(( ${#left} - label_offset ))
     (( label_visible > ${#label} )) && label_visible=${#label}

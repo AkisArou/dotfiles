@@ -9,6 +9,7 @@ use figment::providers::{Env, Format, Serialized, Toml};
 use schemars::{JsonSchema, schema_for};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use unicode_width::UnicodeWidthStr;
 
 pub const CONFIG_VERSION: u32 = 1;
 
@@ -222,6 +223,13 @@ impl Config {
         }
         if self.popup.min_width > self.popup.max_width {
             issues.push("popup.min_width must not exceed popup.max_width".into());
+        }
+        if UnicodeWidthStr::width(self.popup.scrollbar_character.as_str()) != 1
+            || self.popup.scrollbar_character.chars().any(char::is_control)
+        {
+            issues.push(
+                "popup.scrollbar_character must be exactly one printable terminal cell".into(),
+            );
         }
         for (name, style) in self.styles.named_styles() {
             if !valid_zle_highlight(style) {
@@ -606,6 +614,7 @@ pub struct PopupConfig {
     pub title: bool,
     pub footer: bool,
     pub scrollbar: bool,
+    pub scrollbar_character: String,
     pub group_headings: bool,
     pub descriptions: bool,
     pub max_rows: u16,
@@ -619,10 +628,11 @@ impl Default for PopupConfig {
         Self {
             enabled: true,
             decorations: DecorationMode::Full,
-            border: BorderStyle::Rounded,
+            border: BorderStyle::None,
             title: false,
             footer: true,
             scrollbar: true,
+            scrollbar_character: "▐".into(),
             group_headings: true,
             descriptions: true,
             max_rows: 10,
@@ -648,7 +658,7 @@ impl Default for IndicatorConfig {
             kinds: IndicatorMode::Icon,
             icon_theme: IconTheme::NerdFont,
             file_icons: FileIconMode::Devicons,
-            selected_marker: "›".into(),
+            selected_marker: String::new(),
         }
     }
 }
@@ -1087,8 +1097,8 @@ impl Default for StyleConfig {
             kind: "fg=#bbbbbb".into(),
             group: "fg=#4ec9b0".into(),
             footer: "fg=#bbbbbb".into(),
-            scrollbar_thumb: "bg=#bbbbbb".into(),
-            scrollbar_gutter: "bg=#343b41".into(),
+            scrollbar_thumb: "fg=#bbbbbb".into(),
+            scrollbar_gutter: "fg=#343b41".into(),
             diagnostic_error: "fg=#f14c4c,underline".into(),
             diagnostic_warning: "fg=#cca700,underline".into(),
             ghost: "fg=#707070".into(),

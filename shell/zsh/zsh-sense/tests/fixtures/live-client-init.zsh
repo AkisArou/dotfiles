@@ -60,12 +60,20 @@ add-zle-hook-widget line-finish _zsh_sense_test_line_finish_observer
 
 _zsh_sense_test_state() {
   local handler=
+  local -i render_aligned=1 render_width=0
+  local render_line
+  if (( $#_zsh_sense_render_lines )); then
+    render_width=${#_zsh_sense_render_lines[1]}
+    for render_line in "${_zsh_sense_render_lines[@]}"; do
+      (( ${#render_line} == render_width )) || render_aligned=0
+    done
+  fi
   (( _zsh_sense_read_fd >= 0 )) && {
     handler=$(zle -F -L $_zsh_sense_read_fd 2>/dev/null)
     _zsh_sense_fd_callback $_zsh_sense_read_fd
   }
   zle -I
-  print -r -- "<STATE>ready=$_zsh_sense_ready configured=$_zsh_sense_configured read=$_zsh_sense_read_fd write=$_zsh_sense_write_fd worker=$_zsh_sense_worker_pid fifo=$_zsh_sense_fifo_in log=$_zsh_sense_log_file request=$_zsh_sense_active_request items=$#_zsh_sense_item_ids captured=${(j:|:)_zsh_sense_capture_words} flags=${(j:|:)_zsh_sense_capture_flags} prefixes=${(j:|:)_zsh_sense_capture_prefixes} selected=$_zsh_sense_selected backend=${_zsh_sense_item_acceptance_backends[_zsh_sense_selected]-} identity=${_zsh_sense_item_acceptance_identities[_zsh_sense_selected]-} serial=$_zsh_sense_capture_serial apply=${_zsh_sense_last_apply_status-unset} buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_zsh_sense_last_error-}</STATE>"
+  print -r -- "<STATE>ready=$_zsh_sense_ready configured=$_zsh_sense_configured read=$_zsh_sense_read_fd write=$_zsh_sense_write_fd worker=$_zsh_sense_worker_pid fifo=$_zsh_sense_fifo_in log=$_zsh_sense_log_file request=$_zsh_sense_active_request items=$#_zsh_sense_item_ids captured=${(j:|:)_zsh_sense_capture_words} kinds=${(j:|:)_zsh_sense_item_kinds} flags=${(j:|:)_zsh_sense_capture_flags} prefixes=${(j:|:)_zsh_sense_capture_prefixes} selected=$_zsh_sense_selected backend=${_zsh_sense_item_acceptance_backends[_zsh_sense_selected]-} identity=${_zsh_sense_item_acceptance_identities[_zsh_sense_selected]-} serial=$_zsh_sense_capture_serial apply=${_zsh_sense_last_apply_status-unset} aligned=$render_aligned width=$render_width buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_zsh_sense_last_error-}</STATE>"
   BUFFER=
   CURSOR=0
   zle accept-line

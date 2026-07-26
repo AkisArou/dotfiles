@@ -167,7 +167,7 @@ _zsh_sense_portable_compadd() {
   local -A output_options display_option
   local -a groups explanations messages file_option replay
   local -a hits displays source_displays capture_matcher
-  local group explanation flags= description separator
+  local group explanation flags= description separator kind candidate_path path_prefix
   local return_status index word display call args_name
 
   zparseopts -E O:=output_options A:=output_options D:=output_options \
@@ -194,6 +194,7 @@ _zsh_sense_portable_compadd() {
   # the selected word has already passed those operations.
   zparseopts -a replay P: p: i: I: S: s: W: M+: r: R: f q e Q n U C l o:: 1 2
   replay=( "${(@)replay:#--}" )
+  (( ${replay[(I)-f]} )) && flags=f
   if _zsh_sense_portable_fuzzy_matcher_active; then
     capture_matcher=( -M "$_zsh_sense_capture_matcher" )
     replay+=( "${capture_matcher[@]}" )
@@ -232,6 +233,20 @@ _zsh_sense_portable_compadd() {
       display=$word
     fi
     [[ -n $description ]] || description=${_zsh_sense_describe_details[$word]-}
+    candidate_path=$word
+    if [[ $PREFIX == */* && $word != /* ]]; then
+      path_prefix=${PREFIX%/*}/
+      [[ $word == "$path_prefix"* ]] || candidate_path="$path_prefix$word"
+    fi
+    kind=
+    if [[ ${description:l} == *directory* || -d $candidate_path ]]; then
+      kind=directory
+    elif [[ $flags == *f* ]]; then
+      # `_path_files` can add files and directories through the same `-f`
+      # compadd call. Per-match metadata and the filesystem check above take
+      # precedence; a remaining file-marked candidate is an ordinary file.
+      kind=file
+    fi
     _zsh_sense_capture_words+=( "$word" )
     _zsh_sense_capture_displays+=( "$display" )
     _zsh_sense_capture_descriptions+=( "$description" )
@@ -242,7 +257,7 @@ _zsh_sense_portable_compadd() {
     _zsh_sense_capture_iprefixes+=( "$IPREFIX" )
     _zsh_sense_capture_isuffixes+=( "$ISUFFIX" )
     _zsh_sense_capture_flags+=( "$flags" )
-    _zsh_sense_capture_kinds+=( '' )
+    _zsh_sense_capture_kinds+=( "$kind" )
     _zsh_sense_capture_calls+=( "$call" )
     _zsh_sense_capture_positions+=( "$index" )
   done
@@ -433,12 +448,24 @@ _zsh_sense_portable_apply() {
   local call=$_zsh_sense_capture_calls[_zsh_sense_apply_index]
   local args_name="_zsh_sense_capture_args_$call"
   local -a replay=( "${(@P)args_name}" )
+  local apply_word=$word
 
   PREFIX=$_zsh_sense_capture_prefixes[_zsh_sense_apply_index]
   SUFFIX=$_zsh_sense_capture_suffixes[_zsh_sense_apply_index]
   IPREFIX=$_zsh_sense_capture_iprefixes[_zsh_sense_apply_index]
   ISUFFIX=$_zsh_sense_capture_isuffixes[_zsh_sense_apply_index]
-  builtin compadd "${replay[@]}" -- "$word" || return 1
+  if [[ $_zsh_sense_capture_flags[_zsh_sense_apply_index] == *f* && $PREFIX == */* &&
+        ${replay[(I)-p]} == 0 && ${replay[(I)-P]} == 0 ]]; then
+    # `_path_files` exposes a basename match while PREFIX still contains the
+    # already typed parent path. Replaying only the basename makes compadd try
+    # to match `dotfiles/` against `alacritty`, which it correctly rejects.
+    # Reconstitute the candidate exactly as it appeared in the command word
+    # when the original call did not already carry an explicit prefix option;
+    # compadd still owns quoting, suffix handling, and directory slash logic.
+    local path_prefix=${PREFIX%/*}/
+    [[ $word == "$path_prefix"* ]] || apply_word="$path_prefix$word"
+  fi
+  builtin compadd "${replay[@]}" -- "$apply_word" || return 1
   compstate[list]=
   compstate[insert]='1'
   [[ $RBUFFER == ' '* ]] || compstate[insert]+=' '

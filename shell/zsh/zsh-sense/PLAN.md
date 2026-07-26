@@ -57,8 +57,8 @@ Implemented now:
 - a live ZLE client over private, immediately unlinked, close-on-exec FIFOs,
   including continuous/manual activation, original-widget delegation,
   configurable Tab/Ctrl keybindings, cancellation, stale-generation defense,
-  descriptions, item kinds, a bordered list, item/page navigation, and
-  Zsh-owned acceptance;
+  descriptions, item kinds, a configurable completion list, item/page
+  navigation, and Zsh-owned acceptance;
 - fuzzy Zsh candidate generation through `_main_complete`'s documented
   `matcher-list` policy, adaptive short-fragment candidate bounding, Frizbee
   ranking, path-component-aware filtering, and post-accept path chaining
@@ -515,10 +515,11 @@ explain_scores = false
 [popup]
 enabled = true
 decorations = "full"            # full | minimal | none
-border = "rounded"              # rounded | sharp | ascii | none
+border = "none"                 # rounded | sharp | ascii | none
 title = false
 footer = true
 scrollbar = true
+scrollbar_character = "▐"
 group_headings = true
 descriptions = true
 max_rows = 10
@@ -530,7 +531,7 @@ padding = 1
 kinds = "icon"                  # icon | text | both | none
 icon_theme = "nerd-font"        # nerd-font | unicode | ascii
 file_icons = "devicons"         # devicons | generic | none
-selected_marker = "›"
+selected_marker = ""
 
 [documentation]
 mode = "auto"                   # auto | side | below | manual | off
@@ -641,8 +642,8 @@ detail = "fg=#bbbbbb"
 kind = "fg=#bbbbbb"
 group = "fg=#4ec9b0"
 footer = "fg=#bbbbbb"
-scrollbar_thumb = "bg=#bbbbbb"
-scrollbar_gutter = "bg=#343b41"
+scrollbar_thumb = "fg=#bbbbbb"
+scrollbar_gutter = "fg=#343b41"
 diagnostic_error = "fg=#f14c4c,underline"
 diagnostic_warning = "fg=#cca700,underline"
 ghost = "fg=#707070"
@@ -1003,7 +1004,7 @@ The checkboxes below are implementation tracking, not optional brainstorming.
 
 ### 13.4 Popup and navigation
 
-- [x] VS Code-inspired bordered panel rendered by ZLE.
+- [x] VS Code-inspired panel rendered by ZLE, with optional borders.
 - [ ] Full, minimal, and undecorated popup styles.
 - [ ] Responsive list-only, side-documentation, and below-documentation modes.
 - [x] Selected row and matched-character highlighting.

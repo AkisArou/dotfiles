@@ -98,8 +98,25 @@ source "$project_root/shell/client.zsh"
 _zsh_sense_rebuild_styles
 [[ $_zsh_sense_style_label == 'fg=#d4d4d4,bg=#202020' &&
    $_zsh_sense_style_label_selected == 'fg=#d4d4d4,bg=#343b41' &&
-   $_zsh_sense_style_label_match_selected == 'fg=#18a2fe,bg=#343b41,bold' ]] || {
+   $_zsh_sense_style_label_match_selected == 'fg=#18a2fe,bg=#343b41,bold' &&
+   $_zsh_sense_style_scrollbar_thumb == 'fg=#bbbbbb,bg=#202020' &&
+   $_zsh_sense_style_scrollbar_gutter == 'fg=#343b41,bg=#202020' ]] || {
   print -u2 -- 'BlinkCmp component styles did not compose with menu and selection backgrounds'
+  return 1
+}
+[[ $_zsh_sense_border == none && -z $_zsh_sense_selected_marker &&
+   $_zsh_sense_scrollbar_character == '▐' ]] || {
+  print -u2 -- 'borderless, markerless popup defaults were not initialized'
+  return 1
+}
+_zsh_sense_scrollbar_geometry 10 46 0
+[[ $REPLY == 2:0 ]] || {
+  print -u2 -- "scrollbar did not start at the top: $REPLY"
+  return 1
+}
+_zsh_sense_scrollbar_geometry 10 46 45
+[[ $REPLY == 2:8 ]] || {
+  print -u2 -- "scrollbar did not end at the bottom: $REPLY"
   return 1
 }
 typeset -ga parsed_commands=()
@@ -109,7 +126,9 @@ _zsh_sense_dispatch() {
 _zsh_sense_rx_buffer=$stream
 typeset -gi parse_status=0
 _zsh_sense_parse_messages || parse_status=$?
-[[ -z $_zsh_sense_rx_buffer && $parsed_commands[1] == ready && $parsed_commands[-1] == config-end ]] || {
+[[ -z $_zsh_sense_rx_buffer && $parsed_commands[1] == ready &&
+   ${parsed_commands[(Ie)popup-option]} -gt 0 &&
+   $parsed_commands[-1] == config-end ]] || {
   print -u2 -- "Zsh could not parse the startup stream (status $parse_status, parsed ${(j:,:)parsed_commands}): ${(qqq)_zsh_sense_rx_buffer}"
   return 1
 }

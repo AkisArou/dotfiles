@@ -86,7 +86,7 @@ read_until '*.zsh-sense-key-ctrl-e*' || {
 typeset -F command_popup_started=$EPOCHREALTIME
 zpty -n -w sense-user c
 output=
-read_until '*╭─*' 100 || {
+read_until '*shell alias*' 100 || {
   print -u2 -- 'one-character command popup did not appear promptly'
   print -u2 -r -- "$output"
   return 1
@@ -104,14 +104,20 @@ typeset escaped_meta='\M-'
   print -u2 -r -- "$output"
   return 1
 }
-typeset popup_order_pattern='*╭─*│*╰* 1/*'
-[[ $output == ${~popup_order_pattern} ]] || {
-  print -u2 -- 'popup header, rows, and footer were not rendered in visual order'
+[[ $output != *completions* ]] || {
+  print -u2 -- 'popup still contains the completions title'
   print -u2 -r -- "$output"
   return 1
 }
-[[ $output != *completions* ]] || {
-  print -u2 -- 'popup still contains the completions title'
+for decoration in '╭' '╰' '│' '›'; do
+  [[ $output != *$decoration* ]] || {
+    print -u2 -- "default popup still contains disabled decoration: $decoration"
+    print -u2 -r -- "$output"
+    return 1
+  }
+done
+[[ $output == *'▐'* ]] || {
+  print -u2 -- 'default popup did not render the narrow scrollbar glyph'
   print -u2 -r -- "$output"
   return 1
 }
@@ -154,6 +160,37 @@ read_until '*<EDIT-STATUS>0</EDIT-STATUS>*' 300 || {
 typeset -F responsiveness_elapsed=$(( EPOCHREALTIME - responsiveness_started ))
 (( responsiveness_elapsed < 0.75 )) || {
   print -u2 -- "real-shell editing took ${responsiveness_elapsed}s; completion blocked ZLE"
+  return 1
+}
+
+# Reproduce the real home-directory path chain. The second acceptance used to
+# fail only under the full user completion stack because this `_path_files`
+# call omitted an explicit `-p dotfiles/` replay option.
+zpty -w sense-user 'cd "$HOME"'
+output=
+read_until '*❯*' || return 1
+zpty -n -w sense-user 'cd dotfil'
+output=
+read_until '*dotfiles*local directory*' || {
+  print -u2 -- 'real-shell fuzzy directory completion did not open'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-user $'\x05'
+output=
+read_until '*alacritty*local directory*' || {
+  print -u2 -- 'real-shell path chaining did not open the child directory list'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-user $'\x05\r'
+output=
+read_until '*❯*' || return 1
+zpty -w sense-user 'print -r -- "<CHAIN-PWD>$PWD</CHAIN-PWD>"'
+output=
+read_until "*<CHAIN-PWD>$HOME/dotfiles/*</CHAIN-PWD>*" || {
+  print -u2 -- 'real-shell second path acceptance failed'
+  print -u2 -r -- "$output"
   return 1
 }
 

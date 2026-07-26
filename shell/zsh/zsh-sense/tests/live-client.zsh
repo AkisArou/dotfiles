@@ -310,8 +310,25 @@ read_until '*captured=--all\|--amend*buffer="sense-test --"*</STATE>*<SENSE-PROM
 }
 
 # Fuzzy path completion must retain Zsh's directory semantics. Accepting the
-# first directory inserts '/', triggers the nested context, and remains fuzzy.
+# first directory inserts '/', triggers the nested context, and classifies the
+# child with the directory icon rather than the generic file icon.
 zpty -w sense-live "cd ${(q)SENSE_ZSH_TEST_WORK}"
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+zpty -w sense-live '_zsh_sense_border=rounded'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+zpty -n -w sense-live 'cd dfil'
+output=
+read_until '*dotfiles*' || return 1
+zpty -n -w sense-live $'\x18\x07'
+output=
+read_until '*kinds=directory*aligned=1*buffer="cd dfil"*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'custom bordered directory rows were not cell-aligned'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -w sense-live '_zsh_sense_border=none'
 output=
 read_until '*<SENSE-PROMPT>*' || return 1
 zpty -n -w sense-live 'cd dfil'
@@ -332,6 +349,34 @@ read_until '*nvim*' || {
   print -u2 -r -- "$output"
   return 1
 }
+[[ $output == *'󰉋'* ]] || {
+  print -u2 -- 'a Zsh local-directory candidate used the file icon'
+  print -u2 -r -- "$output"
+  return 1
+}
+# Accept the empty path component immediately. `_path_files` returns the
+# basename `nvim` while PREFIX is still `dotfiles/`; replay must reconstruct
+# the full candidate so compadd can accept it and append the directory slash.
+zpty -n -w sense-live $'\x05'
+zselect -t 20 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x18\x07'
+output=
+read_until '*buffer="cd dotfiles/nvim/"*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'accepting an empty nested path component failed'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# The same chain remains fuzzy after the parent path has been accepted.
+zpty -w sense-live "cd ${(q)SENSE_ZSH_TEST_WORK}"
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+zpty -n -w sense-live 'cd dfil'
+output=
+read_until '*dotfiles*' || return 1
+zpty -n -w sense-live $'\x05'
+output=
+read_until '*nvim*' || return 1
 zpty -n -w sense-live 'nv'
 # The worker deliberately debounces ordinary typing. Let the newest `nv`
 # generation replace the immediately rendered previous-directory view before

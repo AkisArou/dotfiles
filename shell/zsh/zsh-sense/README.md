@@ -92,11 +92,12 @@ event/character triggers, popup dimensions/decorations, descriptions,
 indicator mode, and all state-specific keybindings are typed configuration.
 The popup grows to its contents between `popup.min_width` and
 `popup.max_width`; set both values to the same number for a fixed-width panel.
-The default popup palette resolves the BlinkCmp highlights and PmenuSel
-override from this dotfiles repository's `vscode.nvim` configuration. Menu,
-border, selection, label, fuzzy-match, detail, kind, footer, scrollbar, and
-per-kind colors can all be changed under `[styles]`; each value is one ZLE
-highlight specification.
+The default popup is borderless and markerless like this repository's BlinkCmp
+configuration; both decorations remain configurable. Its palette resolves the
+BlinkCmp highlights and PmenuSel override from this dotfiles repository's
+`vscode.nvim` configuration. Menu, border, selection, label, fuzzy-match,
+detail, kind, footer, scrollbar, and per-kind colors can all be changed under
+`[styles]`; each value is one ZLE highlight specification.
 `sources.zsh.fuzzy_min_query_chars` controls when the portable source broadens
 the candidate universe (default `3`); this is separate from Rust's final fuzzy
 ranking and typo policy.

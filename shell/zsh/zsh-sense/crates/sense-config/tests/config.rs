@@ -1,4 +1,4 @@
-use sense_config::{ActivationMode, Config, ConfigError, KeyAction};
+use sense_config::{ActivationMode, BorderStyle, Config, ConfigError, KeyAction};
 
 #[test]
 fn defaults_are_continuous_and_tab_is_manual_fallback() {
@@ -9,8 +9,23 @@ fn defaults_are_continuous_and_tab_is_manual_fallback() {
     assert_eq!(config.styles.menu, "fg=#bbbbbb,bg=#202020");
     assert_eq!(config.styles.selected, "bg=#343b41");
     assert_eq!(config.styles.label_match, "fg=#18a2fe,bold");
+    assert_eq!(config.popup.border, BorderStyle::None);
+    assert_eq!(config.popup.scrollbar_character, "▐");
+    assert!(config.indicators.selected_marker.is_empty());
     assert_eq!(config.sources.zsh.fuzzy_min_query_chars, 3);
     config.validate().unwrap();
+}
+
+#[test]
+fn scrollbar_character_must_be_one_printable_cell() {
+    for value in ["", "wide", "界", "\n"] {
+        let source = format!("version = 1\n[popup]\nscrollbar_character = {value:?}\n");
+        assert!(matches!(
+            Config::from_toml(&source),
+            Err(ConfigError::Validation(_))
+        ));
+    }
+    Config::from_toml("version = 1\n[popup]\nscrollbar_character = \"▕\"\n").unwrap();
 }
 
 #[test]

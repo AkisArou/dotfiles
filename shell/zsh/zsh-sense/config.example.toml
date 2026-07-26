@@ -59,10 +59,11 @@ explain_scores = false
 [popup]
 enabled = true
 decorations = "full"
-border = "rounded"
+border = "none"
 title = false
 footer = true
 scrollbar = true
+scrollbar_character = "▐"
 group_headings = true
 descriptions = true
 max_rows = 10
@@ -76,7 +77,7 @@ padding = 1
 kinds = "icon"
 icon_theme = "nerd-font"
 file_icons = "devicons"
-selected_marker = "›"
+selected_marker = ""
 
 [documentation]
 mode = "auto"
@@ -201,8 +202,8 @@ detail = "fg=#bbbbbb"
 kind = "fg=#bbbbbb"
 group = "fg=#4ec9b0"
 footer = "fg=#bbbbbb"
-scrollbar_thumb = "bg=#bbbbbb"
-scrollbar_gutter = "bg=#343b41"
+scrollbar_thumb = "fg=#bbbbbb"
+scrollbar_gutter = "fg=#343b41"
 diagnostic_error = "fg=#f14c4c,underline"
 diagnostic_warning = "fg=#cca700,underline"
 ghost = "fg=#707070"

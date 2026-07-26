@@ -281,7 +281,16 @@ fn shell_startup_messages(config: &Config) -> Result<Vec<ShellWireMessage>> {
         fields.push(enum_name(event)?.into());
     }
 
-    let mut messages = vec![ShellWireMessage::new("config", fields)];
+    let mut messages = vec![
+        ShellWireMessage::new("config", fields),
+        ShellWireMessage::new(
+            "popup-option",
+            vec![
+                "scrollbar-character".into(),
+                popup.scrollbar_character.as_str().into(),
+            ],
+        ),
+    ];
     for (name, value) in [
         ("menu", &config.styles.menu),
         ("border", &config.styles.border),
