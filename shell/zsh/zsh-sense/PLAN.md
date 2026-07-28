@@ -481,12 +481,14 @@ after_accept = true
 [keybindings.closed]
 tab = "trigger"
 "ctrl-space" = "trigger"
+"ctrl-c" = "interrupt"
 enter = "execute"
 
 [keybindings.popup]
 tab = "accept"
 "ctrl-e" = "accept"
 enter = "execute"
+"ctrl-c" = "interrupt"
 "ctrl-n" = "next"
 "ctrl-p" = "previous"
 "ctrl-d" = "page-down"

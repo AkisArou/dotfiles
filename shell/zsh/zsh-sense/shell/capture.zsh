@@ -42,6 +42,25 @@ _zsh_sense_portable_fuzzy_matcher_active() {
   (( $#query >= _zsh_sense_capture_fuzzy_min_chars ))
 }
 
+_zsh_sense_display_without_description() {
+  emulate -L zsh
+  setopt localoptions extended_glob
+
+  local display=$1 description=$2 label separator
+  REPLY=$display
+  [[ -n $description && $display == *"$description" ]] || return 0
+  label=${display%"$description"}
+  label=${label%%[[:space:]]#}
+  separator=${label##*[[:space:]]}
+  case $separator in
+    --|—|–|-|:)
+      label=${label%$separator}
+      label=${label%%[[:space:]]#}
+      ;;
+  esac
+  [[ -n $label ]] && REPLY=$label
+}
+
 _zsh_sense_capture_reset() {
   emulate -L zsh
 
@@ -233,19 +252,31 @@ _zsh_sense_portable_compadd() {
       display=$word
     fi
     [[ -n $description ]] || description=${_zsh_sense_describe_details[$word]-}
+    # Zsh may expose a transformed insertion and a presentation-only display.
+    # For `ls -l`, for example, the insertion is `-la` while the display is
+    # `-a -- list entries…`. Use the structured description as an exact suffix
+    # boundary instead of assuming that display starts with insertion.
+    _zsh_sense_display_without_description "$display" "$description"
+    display=$REPLY
     candidate_path=$word
     if [[ $PREFIX == */* && $word != /* ]]; then
       path_prefix=${PREFIX%/*}/
       [[ $word == "$path_prefix"* ]] || candidate_path="$path_prefix$word"
     fi
     kind=
-    if [[ ${description:l} == *directory* || -d $candidate_path ]]; then
-      kind=directory
-    elif [[ $flags == *f* ]]; then
+    if [[ $flags == *f* ]]; then
       # `_path_files` can add files and directories through the same `-f`
-      # compadd call. Per-match metadata and the filesystem check above take
-      # precedence; a remaining file-marked candidate is an ordinary file.
-      kind=file
+      # compadd call. Check each candidate rather than inferring its kind from
+      # prose in the description; a remaining file-marked match is a file.
+      if [[ -d $candidate_path ]]; then kind=directory; else kind=file; fi
+    elif [[ $word == -* ]]; then
+      kind=option
+    elif [[ -d $candidate_path ]]; then
+      kind=directory
+    elif [[ ${description:l} == 'local directory' ||
+            ${description:l} == 'remote directory' ||
+            ${description:l} == directory ]]; then
+      kind=directory
     fi
     _zsh_sense_capture_words+=( "$word" )
     _zsh_sense_capture_displays+=( "$display" )

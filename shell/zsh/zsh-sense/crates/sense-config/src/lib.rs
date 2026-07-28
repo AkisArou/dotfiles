@@ -417,6 +417,7 @@ pub enum KeyAction {
     Trigger,
     Accept,
     Execute,
+    Interrupt,
     Next,
     Previous,
     PageDown,
@@ -445,12 +446,14 @@ impl Default for KeybindingsConfig {
             closed: BTreeMap::from([
                 ("tab".into(), KeyAction::Trigger),
                 ("ctrl-space".into(), KeyAction::Trigger),
+                ("ctrl-c".into(), KeyAction::Interrupt),
                 ("enter".into(), KeyAction::Execute),
             ]),
             popup: BTreeMap::from([
                 ("tab".into(), KeyAction::Accept),
                 ("ctrl-e".into(), KeyAction::Accept),
                 ("enter".into(), KeyAction::Execute),
+                ("ctrl-c".into(), KeyAction::Interrupt),
                 ("ctrl-n".into(), KeyAction::Next),
                 ("ctrl-p".into(), KeyAction::Previous),
                 ("ctrl-d".into(), KeyAction::PageDown),

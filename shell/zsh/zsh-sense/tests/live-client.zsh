@@ -172,6 +172,25 @@ read_until '*<EXEC>--amend</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' 
   return 1
 }
 
+# Zsh represents a short-option continuation with distinct insertion and
+# presentation values (`-la` versus `-a`). The popup must show the structured
+# description once, classify every flag as an option, and put the scrollbar
+# at the actual outer edge rather than leaving padding after it.
+zpty -n -w sense-live 'ls -l'
+output=
+read_until '*list entries starting with .*' || {
+  print -u2 -- 'standard ls option metadata did not reach the popup'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x18\x07'
+output=
+read_until '*kinds=option*duplicates=0*flush=1*buffer="ls -l"*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'option labels, descriptions, kinds, or scrollbar geometry regressed'
+  print -u2 -r -- "$output"
+  return 1
+}
+
 # Enter can execute the buffer without first accepting a candidate. The popup
 # must still be removed during line-finish rather than becoming scrollback.
 zpty -n -w sense-live 'sense-test --a'
@@ -184,6 +203,40 @@ zpty -n -w sense-live $'\r'
 output=
 read_until '*<EXEC>--a</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' || {
   print -u2 -- 'line-finish did not clear POSTDISPLAY before execution'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# Ctrl-C has the same two-phase terminal cleanup requirement as Enter, but it
+# ultimately delegates to the original send-break widget and starts a clean
+# prompt instead of executing the buffer.
+zpty -w sense-live '_zsh_sense_test_interrupt_erase_count=0; _zsh_sense_test_key_dispatch_count=0'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+zpty -n -w sense-live 'sense-many --option'
+output=
+read_until '*candidate number 10*' || {
+  print -u2 -- 'Ctrl-C cleanup setup did not open the popup'
+  return 1
+}
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Ctrl-C did not return to a fresh prompt'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x18\x07'
+output=
+read_until '*terminal-interrupt=1*dispatches=1*erase=1*buffer=""*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Ctrl-C bypassed physical popup cleanup'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -w sense-live 'sense-tty'
+output=
+read_until '*<TTY-INT>enabled</TTY-INT>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'the terminal interrupt character was not restored before execution'
   print -u2 -r -- "$output"
   return 1
 }

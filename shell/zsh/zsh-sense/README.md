@@ -84,7 +84,12 @@ Defaults are built in. To customize them, copy `config.example.toml` to
 - Ctrl-D/Ctrl-U page down/up;
 - Ctrl-E accepts the selected item;
 - Enter executes the current command and removes the popup first;
+- Ctrl-C removes the popup before interrupting the current command line;
 - Escape dismisses the popup.
+
+For the Ctrl-C action, zsh-sense temporarily routes `^C` through ZLE only
+while the prompt is active and restores the terminal's ordinary SIGINT
+character before executing a command.
 
 Set `activation.mode = "manual"` for Tab-only completion, or use `"hybrid"`
 and `"disabled"` for the other supported policies. `activation.debounce_ms`,

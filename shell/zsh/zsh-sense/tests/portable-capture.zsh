@@ -53,12 +53,16 @@ for expected in '<FUZZY-COUNT>1</FUZZY-COUNT>' '<FUZZY-BUFFER>sense-verb restart
   }
 done
 
-zpty -n -w sense-worker $'ls -\t'
+zpty -n -w sense-worker $'ls -l\t'
 zpty -r -m sense-worker output '*<LS-DESC>*</LS-DESC>*<SENSE-PROMPT>*' || {
   print -u2 -- 'portable standard option-description capture did not finish'
   return 1
 }
-for expected in '<LS-WORD>--all</LS-WORD>' '<LS-DESC>list entries starting with .</LS-DESC>'; do
+for expected in \
+  '<LS-WORD>-la</LS-WORD>' \
+  '<LS-DISPLAY>-a</LS-DISPLAY>' \
+  '<LS-DESC>list entries starting with .</LS-DESC>' \
+  '<LS-BUFFER>ls -la</LS-BUFFER>'; do
   [[ $output == *$expected* ]] || {
     print -u2 -- "missing expected standard option metadata: $expected"
     print -u2 -r -- "$output"

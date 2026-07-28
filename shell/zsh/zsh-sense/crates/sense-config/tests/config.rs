@@ -5,7 +5,9 @@ fn defaults_are_continuous_and_tab_is_manual_fallback() {
     let config = Config::default();
     assert_eq!(config.activation.mode, ActivationMode::Continuous);
     assert_eq!(config.keybindings.closed["tab"], KeyAction::Trigger);
+    assert_eq!(config.keybindings.closed["ctrl-c"], KeyAction::Interrupt);
     assert_eq!(config.keybindings.popup["tab"], KeyAction::Accept);
+    assert_eq!(config.keybindings.popup["ctrl-c"], KeyAction::Interrupt);
     assert_eq!(config.styles.menu, "fg=#bbbbbb,bg=#202020");
     assert_eq!(config.styles.selected, "bg=#343b41");
     assert_eq!(config.styles.label_match, "fg=#18a2fe,bold");

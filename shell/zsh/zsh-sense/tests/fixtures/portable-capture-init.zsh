@@ -37,9 +37,14 @@ _zsh_sense_test_widget() {
   fi
 
   if [[ $BUFFER == ls* ]]; then
-    local -i option_index=${_zsh_sense_capture_words[(I)--all]}
+    local -i option_index=${_zsh_sense_capture_displays[(I)-a]}
     print -r -- "<LS-WORD>$_zsh_sense_capture_words[option_index]</LS-WORD>"
+    print -r -- "<LS-DISPLAY>$_zsh_sense_capture_displays[option_index]</LS-DISPLAY>"
     print -r -- "<LS-DESC>$_zsh_sense_capture_descriptions[option_index]</LS-DESC>"
+    _zsh_sense_apply_serial=$_zsh_sense_capture_serial
+    _zsh_sense_apply_index=$option_index
+    zle .zsh-sense-portable-apply
+    print -r -- "<LS-BUFFER>$BUFFER</LS-BUFFER>"
     zle kill-whole-line
     zle accept-line
     return

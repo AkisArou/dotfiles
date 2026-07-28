@@ -32,6 +32,8 @@ typeset -gi _zsh_sense_max_label_cells=0
 typeset -gi _zsh_sense_max_described_cells=0
 typeset -gi _zsh_sense_last_apply_status=0
 typeset -gi _zsh_sense_parse_offset=1
+typeset -gi _zsh_sense_interrupt_key_enabled=1
+typeset -gi _zsh_sense_terminal_interrupt_disabled=0
 typeset -g _zsh_sense_rx_buffer=
 typeset -g _zsh_sense_parse_value=
 typeset -g _zsh_sense_active_buffer=
@@ -111,6 +113,7 @@ typeset -gA _zsh_sense_bindings_snippet=()
 typeset -gA _zsh_sense_key_sequences=(
   tab '^I'
   ctrl-space '^@'
+  ctrl-c '^C'
   ctrl-e '^E'
   enter '^M'
   ctrl-n '^N'
@@ -372,6 +375,7 @@ _zsh_sense_dispatch() {
     config-end)
       _zsh_sense_rebuild_styles
       _zsh_sense_install_keybindings
+      _zsh_sense_configure_interrupt_key
       _zsh_sense_configured=1
       ;;
     capture-request)
@@ -1318,15 +1322,24 @@ _zsh_sense_render() {
       fi
       row="$left${(l:$(( available - left_cells )):: :)}"
     fi
-    if (( scrollbar_active )); then
-      row+="$_zsh_sense_scrollbar_character"
-    fi
     if [[ $_zsh_sense_border == none ]]; then
       line_prefix=$padding
-      line_suffix=$padding
+      if (( scrollbar_active )); then
+        # Keep the normal right-side breathing room inside the content area,
+        # then place the scrollbar at the physical edge of the popup.
+        row+="$padding$_zsh_sense_scrollbar_character"
+        line_suffix=
+      else
+        line_suffix=$padding
+      fi
     else
       line_prefix="$vertical$padding"
-      line_suffix="$padding$vertical"
+      if (( scrollbar_active )); then
+        row+="$padding$_zsh_sense_scrollbar_character"
+        line_suffix=$vertical
+      else
+        line_suffix="$padding$vertical"
+      fi
     fi
     line="$line_prefix$row$line_suffix"
 
@@ -1478,11 +1491,63 @@ _zsh_sense_call_original() {
   [[ -n $widget ]] && zle "$widget"
 }
 
+_zsh_sense_cleanup_then_replay_key() {
+  emulate -L zsh
+  local keys=$1
+  # ZLE commits Enter immediately. Give it one widget return with the
+  # popup physically deleted and POSTDISPLAY empty, then replay the exact key
+  # so the ordinary widget runs against a clean editing display.
+  _zsh_sense_erase_edit_display
+  _zsh_sense_prepare_line_finish
+  zle -U "$keys"
+}
+
+_zsh_sense_restore_terminal_interrupt() {
+  emulate -L zsh
+  (( _zsh_sense_terminal_interrupt_disabled )) || return 0
+  command stty intr '^C' </dev/tty 2>/dev/null
+  _zsh_sense_terminal_interrupt_disabled=0
+}
+
+_zsh_sense_arm_interrupt_key() {
+  emulate -L zsh
+  (( _zsh_sense_interrupt_key_enabled )) || return 0
+  if (( _zsh_sense_terminal_interrupt_disabled )); then
+    # A blank line or an interrupted edit can start another prompt without a
+    # preexec restoration. Keep the already-owned setting disabled.
+    command stty intr undef </dev/tty 2>/dev/null
+    return 0
+  fi
+  local settings
+  settings=$(command stty -a </dev/tty 2>/dev/null) || return 0
+  # If VINTR is already custom or disabled, Ctrl-C is an ordinary byte and
+  # needs no terminal mutation. Manage only the conventional ^C setting.
+  [[ $settings =~ '(^|[[:space:];])intr[[:space:]]*=[[:space:]]*\^C([;[:space:]]|$)' ]] || return 0
+  command stty intr undef </dev/tty 2>/dev/null || return 0
+  _zsh_sense_terminal_interrupt_disabled=1
+}
+
+_zsh_sense_configure_interrupt_key() {
+  emulate -L zsh
+  if [[ ${_zsh_sense_bindings_closed[ctrl-c]-} == interrupt ||
+        ${_zsh_sense_bindings_popup[ctrl-c]-} == interrupt ]]; then
+    _zsh_sense_interrupt_key_enabled=1
+  else
+    _zsh_sense_interrupt_key_enabled=0
+    _zsh_sense_restore_terminal_interrupt
+  fi
+}
+
 _zsh_sense_key_dispatch() {
   emulate -L zsh
   local logical=${_zsh_sense_widget_keys[$WIDGET]-}
   local action=
-  if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
+  if [[ -n $_zsh_sense_owned_postdisplay &&
+        ${_zsh_sense_bindings_popup[$logical]-} == interrupt ]]; then
+    # An edit can make a still-rendered panel stale. Ctrl-C must nevertheless
+    # use popup cleanup rather than the closed-state binding table.
+    action=interrupt
+  elif (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
     action=${_zsh_sense_bindings_popup[$logical]-}
   else
     action=${_zsh_sense_bindings_closed[$logical]-}
@@ -1492,17 +1557,20 @@ _zsh_sense_key_dispatch() {
     accept) _zsh_sense_accept_selected || _zsh_sense_call_original "$logical" ;;
     execute)
       if [[ -n $_zsh_sense_owned_postdisplay ]]; then
-        # Return once with an empty POSTDISPLAY so ZLE performs its ordinary
-        # differential redraw and erases the panel. Requeue the exact bytes
-        # that invoked this widget; their second dispatch sees no panel and
-        # delegates to the original accept-line widget.
-        local execute_keys=$KEYS
-        _zsh_sense_erase_edit_display
-        _zsh_sense_prepare_line_finish
-        zle -U "$execute_keys"
+        _zsh_sense_cleanup_then_replay_key "$KEYS"
       else
         _zsh_sense_call_original "$logical"
       fi
+      ;;
+    interrupt)
+      if [[ -n $_zsh_sense_owned_postdisplay ]]; then
+        _zsh_sense_erase_edit_display
+        _zsh_sense_prepare_line_finish
+      fi
+      # `interrupt` has explicit send-break semantics regardless of what the
+      # same key did before zsh-sense. It aborts ZLE immediately and starts a
+      # fresh line without reintroducing the cleared POSTDISPLAY.
+      zle send-break
       ;;
     next)
       if (( _zsh_sense_popup_visible && ! _zsh_sense_popup_stale )); then
@@ -1625,7 +1693,10 @@ _zsh_sense_cleanup() {
   add-zle-hook-widget -d line-pre-redraw _zsh_sense_line_pre_redraw 2>/dev/null
   add-zle-hook-widget -d line-init _zsh_sense_line_init 2>/dev/null
   add-zle-hook-widget -d line-finish _zsh_sense_line_finish 2>/dev/null
+  add-zsh-hook -d precmd _zsh_sense_arm_interrupt_key 2>/dev/null
+  add-zsh-hook -d preexec _zsh_sense_restore_terminal_interrupt 2>/dev/null
   add-zsh-hook -d zshexit _zsh_sense_cleanup 2>/dev/null
+  _zsh_sense_restore_terminal_interrupt
   local key map logical sequence original
   for key in ${(k)_zsh_sense_bound_sequences}; do
     map=${key%%:*}
@@ -1710,6 +1781,11 @@ _zsh_sense_init() {
   add-zle-hook-widget line-pre-redraw _zsh_sense_line_pre_redraw
   add-zle-hook-widget line-init _zsh_sense_line_init
   add-zle-hook-widget line-finish _zsh_sense_line_finish
+  # Change VINTR before ZLE snapshots terminal state, then restore it after
+  # ZLE exits and before the accepted command starts. This keeps Ctrl-C a ZLE
+  # key at the prompt without changing signal delivery for external programs.
+  add-zsh-hook precmd _zsh_sense_arm_interrupt_key
+  add-zsh-hook preexec _zsh_sense_restore_terminal_interrupt
   add-zsh-hook zshexit _zsh_sense_cleanup
   _zsh_sense_last_buffer=
   _zsh_sense_last_cursor=-1

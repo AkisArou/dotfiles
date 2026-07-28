@@ -136,8 +136,23 @@ read_until '*list entries starting with .*' || {
   print -u2 -r -- "$output"
   return 1
 }
-zpty -n -w sense-user $'\x1b\x15'
-zselect -t 10 >/dev/null 2>&1 || true
+zpty -n -w sense-user $'\x03'
+output=
+read_until '*❯*' || {
+  print -u2 -- 'Ctrl-C did not interrupt a popup under the real plugin stack'
+  print -u2 -r -- "$output"
+  return 1
+}
+[[ $output != *'read-only variable'* ]] || {
+  print -u2 -- 'Ctrl-C touched ZLE state that is immutable during SIGINT'
+  print -u2 -r -- "$output"
+  return 1
+}
+[[ $output != *'list entries starting with .'* ]] || {
+  print -u2 -- 'the prompt stack redrew the popup while handling Ctrl-C'
+  print -u2 -r -- "$output"
+  return 1
+}
 
 # Verify ordinary editing through the complete user configuration. `cd .`
 # succeeds only when `c`, `d`, Space, and Backspace all reached ZLE in order.
