@@ -1,7 +1,7 @@
 # zsh-sense: Product and Implementation Plan
 
 Status: accepted architecture; implementation active  
-Last updated: 2026-07-25
+Last updated: 2026-07-28
 
 ## Implementation status
 
@@ -63,6 +63,10 @@ Implemented now:
   `matcher-list` policy, adaptive short-fragment candidate bounding, Frizbee
   ranking, path-component-aware filtering, and post-accept path chaining
   (`cd dfil` -> `dotfiles/` -> nested candidates);
+- completion-derived end-of-line ghost text for complete, uniquely identified
+  authoritative prefix matches, with configurable confidence/source policy,
+  BlinkCmp-style highlighting, ambiguity/incomplete-result suppression,
+  token/word/path-segment acceptance, and Zsh-owned full-token acceptance;
 - interactive PTY coverage for continuous completion, manual Tab, Backspace,
   ordinary Space/Backspace input responsiveness, flag descriptions, fuzzy typo
   matching, scrolling, path semantics, FIFO framing, and the complete real
@@ -73,7 +77,8 @@ Implemented now:
 Still to build: real native `compadd` interception, an isolated/asynchronous
 Zsh capture path, live config reload, full provider scheduling, syntax parsing,
 cached local refiltering, snippets, rich style-span/layout support,
-documentation panes, history, ghost text, and semantic adapter
+documentation panes, history-backed multi-token continuations, and semantic
+adapter
 implementations. The current portable backend invokes `_main_complete`
 synchronously in the live ZLE process. It bounds short-query matching and
 declines to start when input is already pending, but a slow third-party
@@ -548,7 +553,6 @@ sources = ["completion", "schema", "man", "adapter", "help"]
 enabled = true
 source = "best"                 # best | history | completion
 minimum_confidence = 0.82
-at_end_only = true
 partial_accept = "token"        # token | word | path-segment | off
 
 [sources.zsh]
@@ -1059,10 +1063,12 @@ The checkboxes below are implementation tracking, not optional brainstorming.
 
 ### 13.8 Ghost text and history
 
-- [ ] End-of-buffer ghost text.
-- [ ] Token/word/path-segment partial acceptance.
+- [x] End-of-buffer completion-derived ghost text.
+- [x] Token/word/path-segment partial acceptance for literal-safe completion
+      suffixes, with Zsh-owned full-token acceptance.
 - [ ] History and completion-derived continuations.
-- [ ] Confidence suppression for ambiguous suggestions.
+- [x] Confidence suppression for ambiguous, incomplete, and truncated
+      completion suggestions.
 - [ ] Structured history segmentation rather than blind whole-line insertion.
 - [ ] Local contextual frecency database.
 - [ ] Successful-execution learning, sensitive filtering, and incognito mode.

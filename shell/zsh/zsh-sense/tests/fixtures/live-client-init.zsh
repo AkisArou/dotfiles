@@ -20,6 +20,14 @@ _zsh_sense_live_fuzzy_completion() {
 }
 compdef _zsh_sense_live_fuzzy_completion sense-verb
 
+_zsh_sense_live_single_completion() {
+  local -a descriptions=(
+    '--force-with-lease — update only if the remote ref is unchanged'
+  )
+  compadd -J options -X 'single option' -d descriptions -- --force-with-lease
+}
+compdef _zsh_sense_live_single_completion sense-single
+
 _zsh_sense_live_many_completion() {
   local -a words=() descriptions=()
   local option
@@ -44,6 +52,10 @@ sense-verb() {
 
 sense-many() {
   print -r -- "<MANY>$*</MANY>"
+}
+
+sense-single() {
+  print -r -- "<SINGLE>$*</SINGLE>"
 }
 
 sense-tty() {

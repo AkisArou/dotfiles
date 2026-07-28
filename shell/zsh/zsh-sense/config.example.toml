@@ -94,7 +94,6 @@ sources = ["completion", "schema", "man", "adapter", "help"]
 enabled = true
 source = "best"
 minimum_confidence = 0.82
-at_end_only = true
 partial_accept = "token"
 
 [sources.zsh]

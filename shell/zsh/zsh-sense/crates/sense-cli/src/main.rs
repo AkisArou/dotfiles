@@ -4,11 +4,11 @@ use std::time::Duration;
 
 use anyhow::{Context, Result};
 use clap::{Args, Parser, Subcommand};
-use sense_config::{Config, ConfigPaths, ZshCandidateFilter};
+use sense_config::{Config, ConfigPaths, GhostSource, ZshCandidateFilter};
 use sense_daemon::{Server, ServerConfig};
 use sense_model::RawBytes;
 use sense_protocol::ZshIdentity;
-use sense_zsh_worker::{BridgeConfig, CaptureLimits, ShellWireMessage};
+use sense_zsh_worker::{BridgeConfig, CaptureLimits, GhostTextPolicy, ShellWireMessage};
 use serde::Serialize;
 use tokio::net::UnixStream;
 use tracing_subscriber::EnvFilter;
@@ -183,6 +183,12 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
     // and a full page-down remain synchronous in ZLE, while hundreds of
     // off-screen candidates never cross the latency-sensitive shell boundary.
     bridge.viewport_rows = (config.popup.max_rows as usize).saturating_mul(2);
+    bridge.ghost_text = GhostTextPolicy {
+        enabled: config.ghost_text.enabled,
+        allow_completion: !matches!(config.ghost_text.source, GhostSource::History),
+        allow_history: !matches!(config.ghost_text.source, GhostSource::Completion),
+        minimum_confidence: config.ghost_text.minimum_confidence,
+    };
     bridge.startup_messages = shell_startup_messages(&config)?;
     match (arguments.shell_input_fifo, arguments.shell_output_fifo) {
         (Some(input), Some(output)) => {
@@ -290,6 +296,7 @@ fn shell_startup_messages(config: &Config) -> Result<Vec<ShellWireMessage>> {
                 popup.scrollbar_character.as_str().into(),
             ],
         ),
+        ghost_startup_message(config)?,
     ];
     for (name, value) in [
         ("menu", &config.styles.menu),
@@ -332,6 +339,16 @@ fn shell_startup_messages(config: &Config) -> Result<Vec<ShellWireMessage>> {
     }
     messages.push(ShellWireMessage::new("config-end", Vec::new()));
     Ok(messages)
+}
+
+fn ghost_startup_message(config: &Config) -> Result<ShellWireMessage> {
+    Ok(ShellWireMessage::new(
+        "ghost-config",
+        vec![
+            bool_bytes(config.ghost_text.enabled),
+            enum_name(config.ghost_text.partial_accept)?.into(),
+        ],
+    ))
 }
 
 fn enum_name(value: impl Serialize) -> Result<String> {

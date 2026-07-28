@@ -47,6 +47,9 @@ includes:
 - a persistent, ZLE-owned VS Code-inspired panel with descriptions, optional
   kind indicators, selection, item navigation, page navigation, and a
   terminal-clamped width derived from the full ranked result set;
+- styled end-of-line ghost text for complete, unique authoritative prefix
+  matches, with ambiguity suppression and configurable token/word/path-segment
+  acceptance; full completion tokens are still accepted through Zsh;
 - fuzzy candidate generation and Frizbee ranking, including typo matches such
   as `systemctl rstart` -> `restart` and path matches such as `cd dfil` ->
   `dotfiles/`;
@@ -66,8 +69,8 @@ is preferred over a debug binary.
 
 This is not the whole product described in `PLAN.md` yet. Native `compadd`
 interception, isolated completion capture, cached refiltering, documentation
-panes, snippets, semantic adapters, history/ghost text, and diagnostics remain
-on the roadmap. Portable capture currently calls `_main_complete`
+panes, snippets, semantic adapters, history-backed continuations, and
+diagnostics remain on the roadmap. Portable capture currently calls `_main_complete`
 synchronously in the live shell, so an intrinsically slow third-party
 completion function can still pause a capture once it has started. It will not
 start while ZLE already has input queued, so ordinary pending edits win.
@@ -95,6 +98,11 @@ Set `activation.mode = "manual"` for Tab-only completion, or use `"hybrid"`
 and `"disabled"` for the other supported policies. `activation.debounce_ms`,
 event/character triggers, popup dimensions/decorations, descriptions,
 indicator mode, and all state-specific keybindings are typed configuration.
+`ghost_text.enabled`, `ghost_text.source`, `ghost_text.minimum_confidence`, and
+`ghost_text.partial_accept` control completion-derived inline suggestions.
+Ghost text is deliberately limited to end-of-line, where ZLE can render it
+without mutating the editable buffer; ambiguous, incomplete, fuzzy-only, and
+truncated candidate sets do not produce it.
 The popup grows to its contents between `popup.min_width` and
 `popup.max_width`; set both values to the same number for a fixed-width panel.
 The default popup is borderless and markerless like this repository's BlinkCmp

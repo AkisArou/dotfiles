@@ -154,6 +154,7 @@ async fn bridge_streams_ranked_candidates_and_routes_selection() {
     assert_eq!(first.fields[7].as_slice(), b"Restart one or more units");
     assert_eq!(first.fields[10].as_slice(), b"portable");
     assert_eq!(first.fields[11].as_slice(), b"replay-1");
+    assert!(first.fields[13].is_empty());
     let selected_item_id = first.fields[3].clone();
     next_command(&mut reader, "view-end").await;
 

@@ -700,7 +700,6 @@ pub struct GhostTextConfig {
     pub enabled: bool,
     pub source: GhostSource,
     pub minimum_confidence: f32,
-    pub at_end_only: bool,
     pub partial_accept: PartialAcceptMode,
 }
 
@@ -710,7 +709,6 @@ impl Default for GhostTextConfig {
             enabled: true,
             source: GhostSource::Best,
             minimum_confidence: 0.82,
-            at_end_only: true,
             partial_accept: PartialAcceptMode::Token,
         }
     }

@@ -85,6 +85,9 @@ typeset -g _zsh_sense_style_kind_selected=
 typeset -g _zsh_sense_style_footer=
 typeset -g _zsh_sense_style_scrollbar_thumb=
 typeset -g _zsh_sense_style_scrollbar_gutter=
+typeset -g _zsh_sense_style_ghost=
+typeset -gi _zsh_sense_ghost_enabled=1
+typeset -g _zsh_sense_ghost_partial_accept=token
 typeset -gA _zsh_sense_style_kinds_raw=(
   text 'fg=#bbbbbb'
   command 'fg=#c586c0'
@@ -140,6 +143,7 @@ typeset -ga _zsh_sense_item_groups=()
 typeset -ga _zsh_sense_item_insertions=()
 typeset -ga _zsh_sense_item_acceptance_backends=()
 typeset -ga _zsh_sense_item_acceptance_identities=()
+typeset -ga _zsh_sense_item_ghosts=()
 typeset -ga _zsh_sense_render_lines=()
 typeset -ga _zsh_sense_render_highlight_starts=()
 typeset -ga _zsh_sense_render_highlight_ends=()
@@ -155,6 +159,7 @@ typeset -ga _zsh_sense_temp_groups=()
 typeset -ga _zsh_sense_temp_insertions=()
 typeset -ga _zsh_sense_temp_acceptance_backends=()
 typeset -ga _zsh_sense_temp_acceptance_identities=()
+typeset -ga _zsh_sense_temp_ghosts=()
 typeset -g _zsh_sense_fifo_in=
 typeset -g _zsh_sense_fifo_out=
 typeset -g _zsh_sense_log_file=
@@ -369,6 +374,13 @@ _zsh_sense_dispatch() {
         _zsh_sense_render_dirty=1
       fi
       ;;
+    ghost-config)
+      if (( $#fields == 2 )); then
+        _zsh_sense_ghost_enabled=$fields[1]
+        _zsh_sense_ghost_partial_accept=$fields[2]
+        _zsh_sense_render_dirty=1
+      fi
+      ;;
     kind-style)
       (( $#fields == 2 )) && _zsh_sense_style_kinds_raw[$fields[1]]=$fields[2]
       ;;
@@ -552,6 +564,8 @@ _zsh_sense_rebuild_styles() {
   _zsh_sense_style_scrollbar_thumb=$REPLY
   _zsh_sense_merge_styles "$_zsh_sense_style_menu_raw" "$_zsh_sense_style_scrollbar_gutter_raw"
   _zsh_sense_style_scrollbar_gutter=$REPLY
+  _zsh_sense_merge_styles "$_zsh_sense_style_ghost_raw"
+  _zsh_sense_style_ghost=$REPLY
 
   _zsh_sense_style_kinds=()
   _zsh_sense_style_kinds_selected=()
@@ -754,6 +768,7 @@ _zsh_sense_view_begin() {
   _zsh_sense_temp_insertions=()
   _zsh_sense_temp_acceptance_backends=()
   _zsh_sense_temp_acceptance_identities=()
+  _zsh_sense_temp_ghosts=()
   if (( _zsh_sense_temp_expected )); then
     _zsh_sense_temp_ids[_zsh_sense_temp_expected]=
     _zsh_sense_temp_labels[_zsh_sense_temp_expected]=
@@ -766,6 +781,7 @@ _zsh_sense_view_begin() {
     _zsh_sense_temp_insertions[_zsh_sense_temp_expected]=
     _zsh_sense_temp_acceptance_backends[_zsh_sense_temp_expected]=
     _zsh_sense_temp_acceptance_identities[_zsh_sense_temp_expected]=
+    _zsh_sense_temp_ghosts[_zsh_sense_temp_expected]=
   fi
 }
 
@@ -788,6 +804,7 @@ _zsh_sense_view_item() {
   local -i acceptance_offset=$(( 20 + fields[19] ))
   _zsh_sense_temp_acceptance_backends[item]=${fields[acceptance_offset]-}
   _zsh_sense_temp_acceptance_identities[item]=${fields[$(( acceptance_offset + 1 ))]-}
+  _zsh_sense_temp_ghosts[item]=
 }
 
 _zsh_sense_view_chunk() {
@@ -797,11 +814,11 @@ _zsh_sense_view_chunk() {
   [[ $fields[1] == $_zsh_sense_active_request && $fields[2] == $_zsh_sense_active_generation ]] || return 0
   [[ $fields[3] == <-> ]] || return 1
   local -i count=$fields[3]
-  (( $#fields == 3 + count * 10 )) || return 1
+  (( $#fields == 3 + count * 11 )) || return 1
   (( _zsh_sense_temp_received + count <= _zsh_sense_temp_expected )) || return 1
 
   local -i index item offset=4
-  for (( index = 1; index <= count; index++, offset += 10 )); do
+  for (( index = 1; index <= count; index++, offset += 11 )); do
     (( item = ++_zsh_sense_temp_received ))
     _zsh_sense_temp_ids[item]=$fields[offset]
     _zsh_sense_temp_labels[item]=$fields[$(( offset + 1 ))]
@@ -816,6 +833,7 @@ _zsh_sense_view_chunk() {
     _zsh_sense_temp_acceptance_backends[item]=$fields[$(( offset + 7 ))]
     _zsh_sense_temp_acceptance_identities[item]=$fields[$(( offset + 8 ))]
     _zsh_sense_temp_match_ranges[item]=$fields[$(( offset + 9 ))]
+    _zsh_sense_temp_ghosts[item]=$fields[$(( offset + 10 ))]
   done
 }
 
@@ -835,6 +853,7 @@ _zsh_sense_view_end() {
   _zsh_sense_item_insertions=( "${_zsh_sense_temp_insertions[@]}" )
   _zsh_sense_item_acceptance_backends=( "${_zsh_sense_temp_acceptance_backends[@]}" )
   _zsh_sense_item_acceptance_identities=( "${_zsh_sense_temp_acceptance_identities[@]}" )
+  _zsh_sense_item_ghosts=( "${_zsh_sense_temp_ghosts[@]}" )
   _zsh_sense_view_total=$_zsh_sense_temp_total
   _zsh_sense_view_window_start=$_zsh_sense_temp_window_start
   _zsh_sense_selected_absolute=$_zsh_sense_temp_selected_absolute
@@ -1035,14 +1054,24 @@ _zsh_sense_remove_postdisplay() {
 
 _zsh_sense_set_postdisplay() {
   emulate -L zsh
-  local panel=$1 separator=$'\n'
+  local panel=$1 ghost=${2-} separator=$'\n'
   _zsh_sense_remove_postdisplay
   [[ -n $panel ]] || return 0
-  [[ -n $POSTDISPLAY && $POSTDISPLAY[-1] == $'\n' ]] && separator=
-  local -i highlight_base=$(( $#BUFFER + $#POSTDISPLAY + $#separator ))
-  _zsh_sense_owned_postdisplay="$separator$panel"
+  # Respect an existing display-only continuation (for example an explicitly
+  # enabled zsh-autosuggestions instance). The popup composes below it, but two
+  # competing inline continuations must never be concatenated.
+  [[ -n $POSTDISPLAY ]] && ghost=
+  [[ -z $ghost && -n $POSTDISPLAY && $POSTDISPLAY[-1] == $'\n' ]] && separator=
+  local -i ghost_start=$(( $#BUFFER + $#POSTDISPLAY ))
+  local -i highlight_base=$(( ghost_start + $#ghost + $#separator ))
+  _zsh_sense_owned_postdisplay="$ghost$separator$panel"
   POSTDISPLAY+=$_zsh_sense_owned_postdisplay
   local -i index start end
+  if [[ -n $ghost ]]; then
+    region_highlight+=(
+      "$ghost_start $(( ghost_start + $#ghost )) $_zsh_sense_style_ghost memo=zsh-sense"
+    )
+  fi
   for (( index = 1; index <= $#_zsh_sense_render_highlight_starts; index++ )); do
     start=$_zsh_sense_render_highlight_starts[index]
     end=$_zsh_sense_render_highlight_ends[index]
@@ -1074,6 +1103,7 @@ _zsh_sense_clear_popup() {
   _zsh_sense_item_insertions=()
   _zsh_sense_item_acceptance_backends=()
   _zsh_sense_item_acceptance_identities=()
+  _zsh_sense_item_ghosts=()
   _zsh_sense_render_dirty=1
   _zsh_sense_render_columns=0
   _zsh_sense_render_lines=()
@@ -1161,6 +1191,66 @@ _zsh_sense_scrollbar_geometry() {
   REPLY="$thumb_rows:$thumb_first"
 }
 
+_zsh_sense_current_ghost() {
+  emulate -L zsh
+  REPLY=
+  (( _zsh_sense_ghost_enabled && _zsh_sense_popup_visible &&
+     ! _zsh_sense_popup_stale && _zsh_sense_selected >= 1 &&
+     _zsh_sense_selected <= $#_zsh_sense_item_ghosts )) || return 0
+  # POSTDISPLAY follows the complete editable buffer. Rendering a suffix in
+  # the middle of BUFFER would require mutating ZLE state, so the portable UI
+  # intentionally limits completion-derived ghost text to end-of-line.
+  (( CURSOR == $#BUFFER )) || return 0
+  REPLY=$_zsh_sense_item_ghosts[_zsh_sense_selected]
+}
+
+_zsh_sense_ghost_chunk() {
+  emulate -L zsh
+  setopt localoptions extendedglob
+  local ghost=$1 mode=$2 chunk=
+
+  case $mode in
+    token) chunk=$ghost ;;
+    word)
+      chunk=${ghost%%[^[:alnum:]_]*}
+      # Crossing one punctuation boundary at a time is more useful than doing
+      # nothing for kebab-case and dotted candidates.
+      [[ -n $chunk ]] || chunk=$ghost[1]
+      ;;
+    path-segment)
+      if [[ $ghost == */* ]]; then
+        chunk="${ghost%%/*}/"
+      else
+        chunk=$ghost
+      fi
+      ;;
+    off|*) return 1 ;;
+  esac
+
+  [[ -n $chunk && $chunk == [[:alnum:]_.~+@%:=,/-]## ]] || return 1
+  REPLY=$chunk
+}
+
+_zsh_sense_accept_ghost_part() {
+  emulate -L zsh
+  local mode=$1 ghost chunk=
+  _zsh_sense_current_ghost
+  ghost=$REPLY
+  [[ -n $ghost ]] || return 1
+  _zsh_sense_ghost_chunk "$ghost" "$mode" || return 1
+  chunk=$REPLY
+
+  # If the whole suffix is accepted, delegate to Zsh so quoting and suffix
+  # behavior remain authoritative. Direct edits are restricted by
+  # `_zsh_sense_ghost_chunk` to literal-safe characters.
+  if [[ $chunk == $ghost ]]; then
+    _zsh_sense_accept_selected
+    return
+  fi
+  LBUFFER+=$chunk
+  _zsh_sense_clear_popup
+}
+
 _zsh_sense_render() {
   emulate -L zsh
   # Netstring parsing is byte-oriented and dynamically scopes LC_ALL=C into
@@ -1171,7 +1261,8 @@ _zsh_sense_render() {
   if (( ! _zsh_sense_render_dirty &&
         _zsh_sense_render_columns == COLUMNS &&
         $#_zsh_sense_render_lines )); then
-    _zsh_sense_set_postdisplay "${(F)_zsh_sense_render_lines}"
+    _zsh_sense_current_ghost
+    _zsh_sense_set_postdisplay "${(F)_zsh_sense_render_lines}" "$REPLY"
     zle -R
     return 0
   fi
@@ -1449,7 +1540,8 @@ _zsh_sense_render() {
   _zsh_sense_render_highlight_styles=( "$_zsh_sense_style_menu" "${highlight_styles[@]}" )
   _zsh_sense_render_columns=$COLUMNS
   _zsh_sense_render_dirty=0
-  _zsh_sense_set_postdisplay "$panel"
+  _zsh_sense_current_ghost
+  _zsh_sense_set_postdisplay "$panel" "$REPLY"
   zle -R
 }
 
@@ -1618,6 +1710,18 @@ _zsh_sense_key_dispatch() {
         _zsh_sense_send navigate "$_zsh_sense_active_request" \
           "$_zsh_sense_active_generation" page-up
       else _zsh_sense_call_original "$logical"; fi
+      ;;
+    accept-next-token)
+      _zsh_sense_accept_ghost_part "$_zsh_sense_ghost_partial_accept" ||
+        _zsh_sense_call_original "$logical"
+      ;;
+    accept-ghost)
+      _zsh_sense_current_ghost
+      if [[ -n $REPLY ]]; then
+        _zsh_sense_accept_selected || _zsh_sense_call_original "$logical"
+      else
+        _zsh_sense_call_original "$logical"
+      fi
       ;;
     dismiss)
       (( _zsh_sense_active_request )) && _zsh_sense_send cancel \

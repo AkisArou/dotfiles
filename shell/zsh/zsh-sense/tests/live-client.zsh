@@ -172,6 +172,44 @@ read_until '*<EXEC>--amend</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' 
   return 1
 }
 
+# A unique authoritative prefix contributes end-of-line ghost text. Right
+# accepts that completion token through Zsh rather than splicing display text
+# into BUFFER, preserving all ordinary completion semantics.
+zpty -n -w sense-live 'sense-test --al'
+output=
+read_until '*stage modified and deleted files*' || return 1
+[[ $output == *$'\e[38;2;112;112;112m'* ]] || {
+  print -u2 -- 'completion ghost text is missing its configured highlight'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\e[C\r'
+output=
+read_until '*<EXEC>--all</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'completion-derived ghost text was not accepted with Right'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# Word-mode partial acceptance inserts only the next literal-safe component,
+# then lets the ordinary edit lifecycle request a fresh authoritative view.
+zpty -w sense-live '_zsh_sense_ghost_partial_accept=word'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+zpty -n -w sense-live 'sense-single --f'
+output=
+read_until '*update only if the remote ref is unchanged*' || return 1
+zpty -n -w sense-live $'\e[C\x18\x07'
+output=
+read_until '*buffer="sense-single --force"*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'word-mode ghost acceptance did not stop at the next word boundary'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -w sense-live '_zsh_sense_ghost_partial_accept=token'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+
 # Zsh represents a short-option continuation with distinct insertion and
 # presentation values (`-la` versus `-a`). The popup must show the structured
 # description once, classify every flag as an option, and put the scrollbar

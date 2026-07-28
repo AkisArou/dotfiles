@@ -9,8 +9,9 @@ use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
 use sense_model::{
-    ByteOffset, CompletionItem, CompletionKind, CompletionRequest, ContextEpoch, Generation,
-    ItemId, RawBytes, RequestId, SessionId, TerminalDimensions, TextRange, TriggerKind,
+    ByteOffset, CompletionItem, CompletionKind, CompletionRequest, Confidence, ContextEpoch,
+    Generation, GhostText, ItemId, RawBytes, RequestId, SessionId, TerminalDimensions, TextEdit,
+    TextRange, TriggerKind,
 };
 use sense_protocol::{
     CandidateBatch, CandidateView, ClientHello, ClientMessage, MessagePackCodec, PeerRole,
@@ -32,10 +33,10 @@ type DaemonConnection = Framed<UnixStream, MessagePackCodec<ServerMessage, Clien
 type RequestKey = (RequestId, Generation);
 
 const MAX_CANCELLED_CAPTURE_TOMBSTONES: usize = 256;
-const VIEW_CHUNK_ITEM_FIELDS: usize = 10;
-// 3 envelope fields + (12 * 10) item fields = 123, below the default and
+const VIEW_CHUNK_ITEM_FIELDS: usize = 11;
+// 3 envelope fields + (11 * 11) item fields = 124, below the default and
 // shell-side 128-field wire limit.
-const VIEW_CHUNK_ITEMS: usize = 12;
+const VIEW_CHUNK_ITEMS: usize = 11;
 const SHELL_OUTPUT_BACKPRESSURE_BYTES: usize = 256 * 1024;
 
 #[derive(Debug, Clone)]
@@ -46,6 +47,7 @@ pub struct BridgeConfig {
     pub capture_limits: CaptureLimits,
     pub debounce: Duration,
     pub viewport_rows: usize,
+    pub ghost_text: GhostTextPolicy,
     pub startup_messages: Vec<ShellWireMessage>,
     pub client_version: String,
     pub zsh: Option<ZshIdentity>,
@@ -61,9 +63,33 @@ impl BridgeConfig {
             capture_limits: CaptureLimits::default(),
             debounce: Duration::from_millis(15),
             viewport_rows: 20,
+            ghost_text: GhostTextPolicy::default(),
             startup_messages: Vec::new(),
             client_version: env!("CARGO_PKG_VERSION").into(),
             zsh: None,
+        }
+    }
+}
+
+/// Presentation policy for completion-derived ghost text.
+///
+/// The worker derives only a display-only suffix from an authoritative ranked
+/// completion. Acceptance still follows the candidate's normal Zsh route.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct GhostTextPolicy {
+    pub enabled: bool,
+    pub allow_completion: bool,
+    pub allow_history: bool,
+    pub minimum_confidence: f32,
+}
+
+impl Default for GhostTextPolicy {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            allow_completion: true,
+            allow_history: true,
+            minimum_confidence: 0.82,
         }
     }
 }
@@ -165,6 +191,7 @@ struct CachedView {
     selected: usize,
     max_label_cells: usize,
     max_described_cells: usize,
+    ghost_texts: Vec<Option<GhostText>>,
 }
 
 #[derive(Debug)]
@@ -175,6 +202,7 @@ struct WindowedView {
     selected_absolute: usize,
     max_label_cells: usize,
     max_described_cells: usize,
+    ghost_texts: Vec<Option<GhostText>>,
 }
 
 #[derive(Debug)]
@@ -190,6 +218,7 @@ struct BridgeState {
     cancelled_capture_order: VecDeque<RequestKey>,
     highest_generation: u64,
     viewport_rows: usize,
+    ghost_text: GhostTextPolicy,
     current_view: Option<CachedView>,
 }
 
@@ -199,6 +228,7 @@ impl BridgeState {
         daemon_frame_bytes: usize,
         capture_limits: CaptureLimits,
         viewport_rows: usize,
+        ghost_text: GhostTextPolicy,
     ) -> Result<Self, CaptureError> {
         Ok(Self {
             session_id,
@@ -212,11 +242,40 @@ impl BridgeState {
             cancelled_capture_order: VecDeque::new(),
             highest_generation: 0,
             viewport_rows: viewport_rows.max(1),
+            ghost_text,
             current_view: None,
         })
     }
 
     fn install_view(&mut self, view: CandidateView) {
+        let request = self.requests.get(&(view.request_id, view.generation));
+        let prefix_matches = view
+            .items
+            .iter()
+            .filter(|item| {
+                item.match_result
+                    .as_ref()
+                    .is_some_and(|matched| matched.prefix)
+            })
+            .count();
+        let ghost_view_is_complete = view.is_final
+            && !view.is_incomplete
+            && usize::try_from(view.matched_before_limit)
+                .is_ok_and(|matched| matched == view.items.len());
+        let ghost_texts = view
+            .items
+            .iter()
+            .map(|item| {
+                request.and_then(|request| {
+                    completion_ghost_text(
+                        request,
+                        item,
+                        self.ghost_text,
+                        ghost_view_is_complete && prefix_matches == 1,
+                    )
+                })
+            })
+            .collect();
         let selected = view
             .selected_index
             .map_or(0, |index| index as usize)
@@ -246,6 +305,7 @@ impl BridgeState {
             selected,
             max_label_cells,
             max_described_cells,
+            ghost_texts,
         });
     }
 
@@ -290,6 +350,7 @@ impl BridgeState {
             selected_absolute: selected,
             max_label_cells: cached.max_label_cells,
             max_described_cells: cached.max_described_cells,
+            ghost_texts: cached.ghost_texts[start..end].to_vec(),
         })
     }
 
@@ -620,6 +681,7 @@ fn bridge_state(
         daemon_frame_bytes,
         config.capture_limits,
         config.viewport_rows,
+        config.ghost_text,
     )
 }
 
@@ -1088,12 +1150,17 @@ where
             .map(|source| RawBytes::from(source.0.as_str())),
     );
     feed_shell(shell, "view-begin", begin_fields).await?;
-    for items in view.items.chunks(VIEW_CHUNK_ITEMS) {
+    for (items, ghost_texts) in view
+        .items
+        .chunks(VIEW_CHUNK_ITEMS)
+        .zip(window.ghost_texts.chunks(VIEW_CHUNK_ITEMS))
+    {
         feed_view_chunk(
             shell,
             view.request_id,
             view.generation,
             items,
+            ghost_texts,
             capture_store,
         )
         .await?;
@@ -1116,18 +1183,20 @@ async fn feed_view_chunk<W>(
     request_id: RequestId,
     generation: Generation,
     items: &[CompletionItem],
+    ghost_texts: &[Option<GhostText>],
     capture_store: &CaptureStore,
 ) -> Result<(), ShellWireError>
 where
     W: AsyncWrite + Unpin,
 {
+    debug_assert_eq!(items.len(), ghost_texts.len());
     let mut fields = Vec::with_capacity(3 + items.len() * VIEW_CHUNK_ITEM_FIELDS);
     fields.extend([
         request_id.0.to_string().into(),
         generation.0.to_string().into(),
         items.len().to_string().into(),
     ]);
-    for item in items {
+    for (item, ghost_text) in items.iter().zip(ghost_texts) {
         let acceptance = capture_store
             .acceptance_by_item(request_id, generation, &item.id)
             .ok();
@@ -1152,9 +1221,80 @@ where
             }),
             acceptance.map_or_else(RawBytes::default, |route| route.backend_identity.clone()),
             label_match_ranges(item).into(),
+            ghost_text
+                .as_ref()
+                .map_or_else(RawBytes::default, |ghost| ghost.edit.new_text.clone()),
         ]);
     }
     feed_shell(shell, "view-chunk", fields).await
+}
+
+fn completion_ghost_text(
+    request: &CompletionRequest,
+    item: &CompletionItem,
+    policy: GhostTextPolicy,
+    is_unique_prefix: bool,
+) -> Option<GhostText> {
+    // ZLE's display-only POSTDISPLAY begins after the editable buffer. It can
+    // represent an inline suffix without mutating BUFFER only at end-of-line.
+    if !policy.enabled || !is_unique_prefix || request.cursor.as_usize() != request.buffer.len() {
+        return None;
+    }
+    let is_history = item.source.0 == "history";
+    if (is_history && !policy.allow_history) || (!is_history && !policy.allow_completion) {
+        return None;
+    }
+    let confidence = completion_confidence(item.confidence);
+    if confidence < policy.minimum_confidence {
+        return None;
+    }
+    let matched = item.match_result.as_ref()?;
+    if !matched.prefix || matched.indices.is_empty() {
+        return None;
+    }
+    let filter_text = item.filter_text.as_deref().unwrap_or(&item.label);
+    let insertion = std::str::from_utf8(item.edit.new_text.as_slice()).ok()?;
+    // A presentation label can differ from what Zsh inserts. Deriving a
+    // suffix across that boundary would display text that acceptance does not
+    // produce, so only identical filter/insertion text is eligible.
+    if filter_text != insertion {
+        return None;
+    }
+    let prefix_end = contiguous_prefix_end(filter_text, &matched.indices)?;
+    let suffix = insertion.get(prefix_end..)?;
+    if suffix.is_empty() || suffix.chars().any(char::is_control) {
+        return None;
+    }
+    Some(GhostText {
+        edit: TextEdit::new(
+            TextRange::new(request.cursor.0, request.cursor.0),
+            RawBytes::from(suffix),
+        ),
+        source: item.source.clone(),
+        confidence,
+    })
+}
+
+fn contiguous_prefix_end(text: &str, indices: &[u32]) -> Option<usize> {
+    let starts: Vec<_> = text.char_indices().map(|(offset, _)| offset).collect();
+    if indices.len() > starts.len() {
+        return None;
+    }
+    for (expected, actual) in starts.iter().zip(indices) {
+        if u32::try_from(*expected).ok()? != *actual {
+            return None;
+        }
+    }
+    starts.get(indices.len()).copied().or(Some(text.len()))
+}
+
+const fn completion_confidence(confidence: Confidence) -> f32 {
+    match confidence {
+        Confidence::Advisory => 0.25,
+        Confidence::Inferred => 0.5,
+        Confidence::Partial => 0.75,
+        Confidence::Authoritative => 1.0,
+    }
 }
 
 fn label_match_ranges(item: &CompletionItem) -> String {
@@ -1760,6 +1900,8 @@ fn server_message_name(message: &ServerMessage) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
+
     use sense_model::{MatchResult, SourceId, TextEdit};
 
     use super::*;
@@ -1784,6 +1926,77 @@ mod tests {
             is_final: true,
             is_incomplete: true,
         }
+    }
+
+    fn request(buffer: &str) -> CompletionRequest {
+        CompletionRequest {
+            session_id: SessionId::new(),
+            request_id: RequestId(1),
+            generation: Generation(2),
+            context_epoch: ContextEpoch::default(),
+            buffer: RawBytes::from(buffer),
+            cursor: ByteOffset(u32::try_from(buffer.len()).unwrap()),
+            cwd: RawBytes::from("/tmp"),
+            keymap: "emacs".into(),
+            terminal: TerminalDimensions::default(),
+            trigger: TriggerKind::Automatic,
+            environment: BTreeMap::new(),
+        }
+    }
+
+    #[test]
+    fn ghost_text_is_only_the_unique_prefix_suffix() {
+        let request = request("systemctl res");
+        let mut item = CompletionItem::plain(
+            "restart",
+            "zsh",
+            "restart",
+            TextEdit::new(TextRange::new(10, 13), "restart"),
+        );
+        item.filter_text = Some("restart".into());
+        item.match_result = Some(MatchResult {
+            score: 1,
+            indices: vec![0, 1, 2],
+            exact: false,
+            prefix: true,
+        });
+
+        let ghost =
+            completion_ghost_text(&request, &item, GhostTextPolicy::default(), true).unwrap();
+        assert_eq!(ghost.edit.range, TextRange::new(13, 13));
+        assert_eq!(ghost.edit.new_text.as_slice(), b"tart");
+        assert_eq!(ghost.source, SourceId("zsh".into()));
+        assert!((ghost.confidence - 1.0).abs() < f32::EPSILON);
+
+        item.match_result.as_mut().unwrap().prefix = false;
+        assert!(completion_ghost_text(&request, &item, GhostTextPolicy::default(), true).is_none());
+        item.match_result.as_mut().unwrap().prefix = true;
+        assert!(
+            completion_ghost_text(&request, &item, GhostTextPolicy::default(), false).is_none()
+        );
+    }
+
+    #[test]
+    fn ghost_text_rejects_non_contiguous_and_presentation_only_matches() {
+        let request = request("command ab");
+        let mut item = CompletionItem::plain(
+            "candidate",
+            "zsh",
+            "alpha-beta",
+            TextEdit::new(TextRange::new(8, 10), "alpha-beta"),
+        );
+        item.filter_text = Some("alpha-beta".into());
+        item.match_result = Some(MatchResult {
+            score: 1,
+            indices: vec![0, 6],
+            exact: false,
+            prefix: true,
+        });
+        assert!(completion_ghost_text(&request, &item, GhostTextPolicy::default(), true).is_none());
+
+        item.match_result.as_mut().unwrap().indices = vec![0, 1];
+        item.filter_text = Some("display-only".into());
+        assert!(completion_ghost_text(&request, &item, GhostTextPolicy::default(), true).is_none());
     }
 
     #[test]
@@ -1837,6 +2050,7 @@ mod tests {
             sense_protocol::DEFAULT_MAX_FRAME_BYTES,
             CaptureLimits::default(),
             10,
+            GhostTextPolicy::default(),
         )
         .unwrap();
         state.highest_generation = 400;
@@ -1889,6 +2103,7 @@ mod tests {
             sense_protocol::DEFAULT_MAX_FRAME_BYTES,
             CaptureLimits::default(),
             2,
+            GhostTextPolicy::default(),
         )
         .unwrap();
         let source = batch(3);
