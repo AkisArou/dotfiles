@@ -24,8 +24,10 @@ pub struct PresentationRequest {
     pub side_min_columns: u16,
     pub documentation_width_ratio: f32,
     pub documentation_max_rows: u16,
+    pub side_viewport_rows: u16,
     pub documentation_offset: usize,
     pub documentation_padding: u16,
+    pub documentation_scrollbar: bool,
     pub bordered: bool,
     pub render_markdown: bool,
 }
@@ -58,8 +60,10 @@ pub struct DocumentationPanel {
     pub placement: DocumentationPlacement,
     pub width: u16,
     pub lines: Vec<DocumentationLine>,
+    pub viewport_rows: usize,
     pub offset: usize,
     pub total_lines: usize,
+    pub scrollbar: bool,
     pub has_previous: bool,
     pub has_next: bool,
 }
@@ -103,26 +107,43 @@ pub fn layout(
         .documentation_padding
         .saturating_mul(2)
         .saturating_add(u16::from(request.bordered).saturating_mul(2));
-    let content_width = documentation_width.saturating_sub(decoration_cells).max(1);
+    let undecorated_width = documentation_width.saturating_sub(decoration_cells).max(1);
     let blocks = document_blocks(documentation, request.render_markdown);
-    let all_lines = wrap_blocks(&blocks, usize::from(content_width));
-    let maximum_rows = usize::from(request.documentation_max_rows.max(1));
+    let maximum_rows = usize::from(
+        match placement {
+            DocumentationPlacement::Side => request.side_viewport_rows,
+            DocumentationPlacement::Below => request.documentation_max_rows,
+        }
+        .max(1),
+    );
+    let mut all_lines = wrap_blocks(&blocks, usize::from(undecorated_width));
+    let scrollbar =
+        request.documentation_scrollbar && all_lines.len() > maximum_rows && undecorated_width > 1;
+    if scrollbar {
+        all_lines = wrap_blocks(&blocks, usize::from(undecorated_width - 1));
+    }
     let total_lines = all_lines.len();
     let maximum_offset = total_lines.saturating_sub(maximum_rows);
     let offset = request.documentation_offset.min(maximum_offset);
-    let lines = all_lines
+    let lines: Vec<_> = all_lines
         .into_iter()
         .skip(offset)
         .take(maximum_rows)
         .collect();
+    let viewport_rows = match placement {
+        DocumentationPlacement::Side => maximum_rows,
+        DocumentationPlacement::Below => lines.len(),
+    };
     PresentationLayout {
         menu_width,
         documentation: Some(DocumentationPanel {
             placement,
             width: documentation_width,
             lines,
+            viewport_rows,
             offset,
             total_lines,
+            scrollbar,
             has_previous: offset > 0,
             has_next: offset < maximum_offset,
         }),

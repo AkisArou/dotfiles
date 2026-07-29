@@ -114,7 +114,7 @@ pub enum DocumentationActivation {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DocumentationPolicy {
     pub activation: DocumentationActivation,
-    pub resolve_delay: Duration,
+    pub update_delay: Duration,
     pub layout: DocumentationLayoutPolicy,
     pub menu: MenuLayoutPolicy,
 }
@@ -127,6 +127,7 @@ pub struct DocumentationLayoutPolicy {
     pub max_rows: u16,
     pub render_markdown: bool,
     pub padding: u16,
+    pub scrollbar: bool,
     pub bordered: bool,
 }
 
@@ -135,6 +136,8 @@ pub struct MenuLayoutPolicy {
     pub menu_min_width: u16,
     pub menu_max_width: u16,
     pub menu_max_rows: u16,
+    pub scrolloff: u16,
+    pub cycle: bool,
     pub menu_chrome_cells: u16,
     pub scrollbar: bool,
     pub descriptions: bool,
@@ -154,7 +157,7 @@ impl Default for DocumentationPolicy {
     fn default() -> Self {
         Self {
             activation: DocumentationActivation::Automatic,
-            resolve_delay: Duration::from_millis(80),
+            update_delay: Duration::from_millis(80),
             layout: DocumentationLayoutPolicy {
                 placement: DocumentationPlacementPreference::Auto,
                 side_min_columns: 100,
@@ -162,12 +165,15 @@ impl Default for DocumentationPolicy {
                 max_rows: 14,
                 render_markdown: true,
                 padding: 1,
+                scrollbar: true,
                 bordered: false,
             },
             menu: MenuLayoutPolicy {
                 menu_min_width: 24,
                 menu_max_width: 140,
                 menu_max_rows: 10,
+                scrolloff: 2,
+                cycle: true,
                 menu_chrome_cells: 4,
                 scrollbar: true,
                 descriptions: true,
@@ -291,7 +297,7 @@ enum ShellInput {
     Cancel(RequestId, Generation),
     Select(RequestId, Generation, ItemId),
     SelectionFinished(RequestId, Generation, ItemId, bool),
-    Navigate(RequestId, Generation, Navigation),
+    Navigate(RequestId, Generation, u64, Navigation),
     ZshCaptureBegin(RequestId, Generation),
     ZshCandidate(RequestId, Generation, Box<CapturedMatch>),
     ZshCandidateChunk(RequestId, Generation, Vec<CapturedMatch>),
@@ -318,6 +324,19 @@ enum Navigation {
     ToggleDocumentation,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum NavigationUpdate {
+    Unchanged,
+    SelectionChanged,
+    WindowChanged,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum DocumentationTransfer {
+    Replace,
+    Preserve,
+}
+
 #[derive(Debug, Clone)]
 enum Acceptance {
     Zsh(Box<crate::AcceptanceRoute>),
@@ -328,11 +347,24 @@ enum Acceptance {
 struct CachedView {
     view: CandidateView,
     selected: usize,
+    navigation_serial: u64,
+    window_start: usize,
     max_label_cells: usize,
     max_described_cells: usize,
     ghost_texts: Vec<Option<GhostText>>,
     terminal: TerminalDimensions,
     documentation_visible: bool,
+    documentation_item: Option<ItemId>,
+    documentation_offset: usize,
+}
+
+#[derive(Debug)]
+struct RetainedViewState {
+    selected_item: Option<ItemId>,
+    navigation_serial: u64,
+    window_start: usize,
+    documentation_visible: bool,
+    documentation_item: Option<ItemId>,
     documentation_offset: usize,
 }
 
@@ -342,12 +374,38 @@ struct WindowedView {
     total: usize,
     start: usize,
     selected_absolute: usize,
+    navigation_serial: u64,
     max_label_cells: usize,
     max_described_cells: usize,
     ghost_texts: Vec<Option<GhostText>>,
     terminal: TerminalDimensions,
     documentation_visible: bool,
+    documentation_item: Option<CompletionItem>,
     documentation_offset: usize,
+}
+
+fn view_widths(view: &CandidateView) -> (usize, usize) {
+    let max_label_cells = view
+        .items
+        .iter()
+        .map(|item| UnicodeWidthStr::width(item.label.as_str()))
+        .max()
+        .unwrap_or(0);
+    let max_described_cells = view
+        .items
+        .iter()
+        .map(|item| {
+            let label_cells = UnicodeWidthStr::width(item.label.as_str());
+            item.detail
+                .as_deref()
+                .filter(|detail| !detail.is_empty())
+                .map_or(label_cells, |detail| {
+                    label_cells + 2 + UnicodeWidthStr::width(detail)
+                })
+        })
+        .max()
+        .unwrap_or(0);
+    (max_label_cells, max_described_cells)
 }
 
 #[derive(Debug)]
@@ -420,18 +478,95 @@ impl BridgeState {
             );
             return false;
         }
-        let retained_documentation = self.current_view.as_ref().and_then(|cached| {
-            let item = cached.view.items.get(cached.selected)?;
-            Some((
-                cached.view.request_id,
-                cached.view.generation,
-                item.id.clone(),
-                cached.documentation_visible,
-                cached.documentation_offset,
-            ))
-        });
+        let retained = self.retained_view_state(&view);
         let request = self.requests.get(&(view.request_id, view.generation));
         let terminal = request.map_or_else(TerminalDimensions::default, |request| request.terminal);
+        let ghost_texts = self.ghost_texts_for_view(&view, request);
+        let selected = retained
+            .as_ref()
+            .and_then(|state| state.selected_item.as_ref())
+            .and_then(|selected_id| view.items.iter().position(|item| &item.id == selected_id))
+            .unwrap_or_else(|| {
+                view.selected_index
+                    .map_or(0, |index| index as usize)
+                    .min(view.items.len().saturating_sub(1))
+            });
+        let (max_label_cells, max_described_cells) = view_widths(&view);
+        let total = view.items.len();
+        let window_rows = self.viewport_rows.min(total);
+        let maximum_start = total.saturating_sub(window_rows);
+        let retained_start = retained
+            .as_ref()
+            .map_or(0, |state| state.window_start.min(maximum_start));
+        let retained_end = retained_start.saturating_add(window_rows);
+        let scrolloff = usize::from(self.documentation.menu.scrolloff);
+        let window_start =
+            if selected >= retained_start && selected.saturating_add(scrolloff) < retained_end {
+                retained_start
+            } else {
+                self.window_start_for_selection(selected, total)
+            };
+        let documentation_visible = retained.as_ref().map_or_else(
+            || self.documentation.initially_visible(),
+            |state| state.documentation_visible,
+        );
+        let retained_documentation_item = retained
+            .as_ref()
+            .and_then(|state| state.documentation_item.as_ref())
+            .filter(|item_id| view.items.iter().any(|item| &item.id == *item_id))
+            .cloned();
+        let documentation_item = retained_documentation_item.or_else(|| {
+            documentation_visible
+                .then(|| view.items.get(selected).map(|item| item.id.clone()))
+                .flatten()
+        });
+        let documentation_offset = retained
+            .as_ref()
+            .filter(|state| state.documentation_item.as_ref() == documentation_item.as_ref())
+            .map_or(0, |state| state.documentation_offset);
+        self.current_view = Some(CachedView {
+            view,
+            selected,
+            navigation_serial: retained.as_ref().map_or(0, |state| state.navigation_serial),
+            window_start,
+            max_label_cells,
+            max_described_cells,
+            ghost_texts,
+            terminal,
+            documentation_visible,
+            documentation_item,
+            documentation_offset,
+        });
+        self.trace_current_view();
+        true
+    }
+
+    fn retained_view_state(&self, view: &CandidateView) -> Option<RetainedViewState> {
+        self.current_view
+            .as_ref()
+            .filter(|cached| {
+                cached.view.request_id == view.request_id
+                    && cached.view.generation == view.generation
+            })
+            .map(|cached| RetainedViewState {
+                selected_item: cached
+                    .view
+                    .items
+                    .get(cached.selected)
+                    .map(|item| item.id.clone()),
+                navigation_serial: cached.navigation_serial,
+                window_start: cached.window_start,
+                documentation_visible: cached.documentation_visible,
+                documentation_item: cached.documentation_item.clone(),
+                documentation_offset: cached.documentation_offset,
+            })
+    }
+
+    fn ghost_texts_for_view(
+        &self,
+        view: &CandidateView,
+        request: Option<&CompletionRequest>,
+    ) -> Vec<Option<GhostText>> {
         let prefix_matches = view
             .items
             .iter()
@@ -441,12 +576,11 @@ impl BridgeState {
                     .is_some_and(|matched| matched.prefix)
             })
             .count();
-        let ghost_view_is_complete = view.is_final
+        let view_is_complete = view.is_final
             && !view.is_incomplete
             && usize::try_from(view.matched_before_limit)
                 .is_ok_and(|matched| matched == view.items.len());
-        let ghost_texts = view
-            .items
+        view.items
             .iter()
             .map(|item| {
                 request.and_then(|request| {
@@ -454,58 +588,11 @@ impl BridgeState {
                         request,
                         item,
                         self.ghost_text,
-                        ghost_view_is_complete && prefix_matches == 1,
+                        view_is_complete && prefix_matches == 1,
                     )
                 })
             })
-            .collect();
-        let selected = view
-            .selected_index
-            .map_or(0, |index| index as usize)
-            .min(view.items.len().saturating_sub(1));
-        let max_label_cells = view
-            .items
-            .iter()
-            .map(|item| UnicodeWidthStr::width(item.label.as_str()))
-            .max()
-            .unwrap_or(0);
-        let max_described_cells = view
-            .items
-            .iter()
-            .map(|item| {
-                let label_cells = UnicodeWidthStr::width(item.label.as_str());
-                item.detail
-                    .as_deref()
-                    .filter(|detail| !detail.is_empty())
-                    .map_or(label_cells, |detail| {
-                        label_cells + 2 + UnicodeWidthStr::width(detail)
-                    })
-            })
-            .max()
-            .unwrap_or(0);
-        let selected_item = view.items.get(selected).map(|item| &item.id);
-        let retained_documentation =
-            retained_documentation.filter(|(request_id, generation, item_id, _, _)| {
-                *request_id == view.request_id
-                    && *generation == view.generation
-                    && selected_item == Some(item_id)
-            });
-        let documentation_visible = retained_documentation
-            .as_ref()
-            .map_or_else(|| self.documentation.initially_visible(), |entry| entry.3);
-        let documentation_offset = retained_documentation.map_or(0, |entry| entry.4);
-        self.current_view = Some(CachedView {
-            view,
-            selected,
-            max_label_cells,
-            max_described_cells,
-            ghost_texts,
-            terminal,
-            documentation_visible,
-            documentation_offset,
-        });
-        self.trace_current_view();
-        true
+            .collect()
     }
 
     fn trace_current_view(&self) {
@@ -531,33 +618,78 @@ impl BridgeState {
         );
     }
 
-    fn navigate(&mut self, request_id: RequestId, generation: Generation, action: Navigation) {
+    fn window_start_for_selection(&self, selected: usize, total: usize) -> usize {
+        let window_rows = self.viewport_rows.min(total);
+        let preceding_rows =
+            usize::from(self.documentation.menu.menu_max_rows).min(window_rows.saturating_sub(1));
+        selected
+            .saturating_sub(preceding_rows)
+            .min(total.saturating_sub(window_rows))
+    }
+
+    fn navigate(
+        &mut self,
+        request_id: RequestId,
+        generation: Generation,
+        navigation_serial: u64,
+        action: Navigation,
+    ) -> NavigationUpdate {
+        let viewport_rows = self.viewport_rows;
+        let scrolloff = usize::from(self.documentation.menu.scrolloff);
+        let menu_rows = usize::from(self.documentation.menu.menu_max_rows);
+        let page_rows = (viewport_rows / 2).max(1);
+        let cycle = self.documentation.menu.cycle;
         let Some(cached) = self.current_view.as_mut() else {
-            return;
+            return NavigationUpdate::Unchanged;
         };
-        if cached.view.request_id != request_id || cached.view.generation != generation {
-            return;
+        if cached.view.request_id != request_id
+            || cached.view.generation != generation
+            || navigation_serial <= cached.navigation_serial
+        {
+            return NavigationUpdate::Unchanged;
         }
+        cached.navigation_serial = navigation_serial;
         let last = cached.view.items.len().saturating_sub(1);
         let selected = match action {
+            Navigation::Next if cycle && cached.selected == last => 0,
             Navigation::Next => cached.selected.saturating_add(1).min(last),
+            Navigation::Previous if cycle && cached.selected == 0 => last,
             Navigation::Previous => cached.selected.saturating_sub(1),
-            Navigation::PageDown => cached
-                .selected
-                .saturating_add((self.viewport_rows / 2).max(1))
-                .min(last),
-            Navigation::PageUp => cached
-                .selected
-                .saturating_sub((self.viewport_rows / 2).max(1)),
+            Navigation::PageDown => cached.selected.saturating_add(page_rows).min(last),
+            Navigation::PageUp => cached.selected.saturating_sub(page_rows),
             Navigation::DocumentationDown
             | Navigation::DocumentationUp
             | Navigation::DocumentationPageDown
             | Navigation::DocumentationPageUp
-            | Navigation::ToggleDocumentation => return,
+            | Navigation::ToggleDocumentation => return NavigationUpdate::Unchanged,
         };
         if selected != cached.selected {
             cached.selected = selected;
             cached.documentation_offset = 0;
+        }
+        let window_rows = viewport_rows.min(cached.view.items.len());
+        let window_end = cached.window_start.saturating_add(window_rows);
+        // Rotate the transport prefetch window one navigation before the menu
+        // viewport can reach either edge. The shell can then preserve its
+        // absolute viewport and update the selection locally without first
+        // clamping to an incomplete slice. The extra row is intentional: the
+        // current frame remains unchanged while the next candidates arrive.
+        let prefetch_margin = scrolloff.saturating_add(1);
+        if selected < cached.window_start.saturating_add(prefetch_margin)
+            || selected.saturating_add(prefetch_margin) >= window_end
+        {
+            let preceding_rows = menu_rows.min(window_rows.saturating_sub(1));
+            let window_start = selected
+                .saturating_sub(preceding_rows)
+                .min(cached.view.items.len().saturating_sub(window_rows));
+            if window_start == cached.window_start {
+                NavigationUpdate::SelectionChanged
+            } else {
+                cached.window_start = window_start;
+                NavigationUpdate::WindowChanged
+            }
+        } else {
+            NavigationUpdate::SelectionChanged
         }
     }
 
@@ -570,6 +702,13 @@ impl BridgeState {
         if !self.documentation.available() {
             return;
         }
+        let page_rows = self
+            .current_window()
+            .and_then(|window| view_presentation(&window, self.documentation).documentation)
+            .map_or_else(
+                || usize::from(self.documentation.layout.max_rows.max(1)),
+                |(_, panel)| panel.viewport_rows.max(1),
+            );
         let Some(cached) = self.current_view.as_mut() else {
             return;
         };
@@ -586,12 +725,12 @@ impl BridgeState {
         cached.documentation_offset = match action {
             Navigation::DocumentationDown => cached.documentation_offset.saturating_add(1),
             Navigation::DocumentationUp => cached.documentation_offset.saturating_sub(1),
-            Navigation::DocumentationPageDown => cached
-                .documentation_offset
-                .saturating_add(usize::from(self.documentation.layout.max_rows.max(1))),
-            Navigation::DocumentationPageUp => cached
-                .documentation_offset
-                .saturating_sub(usize::from(self.documentation.layout.max_rows.max(1))),
+            Navigation::DocumentationPageDown => {
+                cached.documentation_offset.saturating_add(page_rows)
+            }
+            Navigation::DocumentationPageUp => {
+                cached.documentation_offset.saturating_sub(page_rows)
+            }
             Navigation::Next
             | Navigation::Previous
             | Navigation::PageDown
@@ -615,8 +754,7 @@ impl BridgeState {
         let total = cached.view.items.len();
         let selected = cached.selected.min(total.saturating_sub(1));
         let rows = self.viewport_rows.min(total);
-        let mut start = selected.saturating_add(1).saturating_sub(rows);
-        start = start.min(total.saturating_sub(rows));
+        let start = cached.window_start.min(total.saturating_sub(rows));
         let end = start.saturating_add(rows);
         let mut view = cached.view.clone();
         view.items = cached.view.items[start..end].to_vec();
@@ -628,16 +766,25 @@ impl BridgeState {
             total,
             start,
             selected_absolute: selected,
+            navigation_serial: cached.navigation_serial,
             max_label_cells: cached.max_label_cells,
             max_described_cells: cached.max_described_cells,
             ghost_texts: cached.ghost_texts[start..end].to_vec(),
             terminal: cached.terminal,
             documentation_visible: cached.documentation_visible,
+            documentation_item: cached.documentation_item.as_ref().and_then(|item_id| {
+                cached
+                    .view
+                    .items
+                    .iter()
+                    .find(|item| &item.id == item_id)
+                    .cloned()
+            }),
             documentation_offset: cached.documentation_offset,
         })
     }
 
-    fn documentation_resolve_target(&self) -> Option<ResolveRequest> {
+    fn documentation_update_target(&self) -> Option<ResolveRequest> {
         if !self.documentation.available() {
             return None;
         }
@@ -649,13 +796,65 @@ impl BridgeState {
             return None;
         }
         let item = cached.view.items.get(cached.selected)?;
-        (matches!(
+        let requires_resolution = matches!(
             item.documentation,
             sense_model::DocumentationState::Unresolved
         ) || item
             .capabilities
-            .contains(sense_model::ItemCapabilities::RESOLVE_DOCUMENTATION))
-        .then(|| ResolveRequest {
+            .contains(sense_model::ItemCapabilities::RESOLVE_DOCUMENTATION);
+        (cached.documentation_item.as_ref() != Some(&item.id) || requires_resolution).then(|| {
+            ResolveRequest {
+                session_id: self.session_id,
+                request_id: cached.view.request_id,
+                generation: cached.view.generation,
+                item_id: item.id.clone(),
+            }
+        })
+    }
+
+    fn documentation_requires_resolution(&self, target: &ResolveRequest) -> bool {
+        let Some(cached) = self.current_view.as_ref().filter(|cached| {
+            cached.view.request_id == target.request_id
+                && cached.view.generation == target.generation
+                && cached.documentation_visible
+        }) else {
+            return false;
+        };
+        let Some(item) = cached.view.items.get(cached.selected) else {
+            return false;
+        };
+        item.id == target.item_id
+            && (matches!(
+                item.documentation,
+                sense_model::DocumentationState::Unresolved
+            ) || item
+                .capabilities
+                .contains(sense_model::ItemCapabilities::RESOLVE_DOCUMENTATION))
+    }
+
+    fn commit_documentation_target(&mut self, target: &ResolveRequest) -> bool {
+        let Some(cached) = self.current_view.as_mut().filter(|cached| {
+            cached.view.request_id == target.request_id
+                && cached.view.generation == target.generation
+                && cached.documentation_visible
+        }) else {
+            return false;
+        };
+        let Some(item) = cached.view.items.get(cached.selected) else {
+            return false;
+        };
+        if item.id != target.item_id {
+            return false;
+        }
+        cached.documentation_item = Some(target.item_id.clone());
+        cached.documentation_offset = 0;
+        true
+    }
+
+    fn selected_documentation_target(&self) -> Option<ResolveRequest> {
+        let cached = self.current_view.as_ref()?;
+        let item = cached.view.items.get(cached.selected)?;
+        Some(ResolveRequest {
             session_id: self.session_id,
             request_id: cached.view.request_id,
             generation: cached.view.generation,
@@ -694,15 +893,16 @@ impl BridgeState {
         &mut self,
         request_id: RequestId,
         generation: Generation,
+        navigation_serial: u64,
         action: Navigation,
         shell: &mut FramedWrite<W, ShellWireCodec>,
     ) -> Result<(), ShellWireError>
     where
         W: AsyncWrite + Unpin,
     {
-        match action {
+        let update = match action {
             Navigation::Next | Navigation::Previous | Navigation::PageDown | Navigation::PageUp => {
-                self.navigate(request_id, generation, action);
+                self.navigate(request_id, generation, navigation_serial, action)
             }
             Navigation::DocumentationDown
             | Navigation::DocumentationUp
@@ -710,17 +910,38 @@ impl BridgeState {
             | Navigation::DocumentationPageUp
             | Navigation::ToggleDocumentation => {
                 self.navigate_documentation(request_id, generation, action);
+                if let Some(window) = self.current_window() {
+                    send_view_presentation(
+                        shell,
+                        window.view.request_id,
+                        window.view.generation,
+                        window.view.revision,
+                        &view_presentation(&window, self.documentation),
+                    )
+                    .await?;
+                    shell.flush().await?;
+                }
+                return Ok(());
             }
-        }
+        };
         if let Some(window) = self.current_window() {
-            send_candidate_view(
-                shell,
-                window,
-                &self.capture_store,
-                self.shell_capture_store.as_ref(),
-                self.documentation,
-            )
-            .await?;
+            match update {
+                NavigationUpdate::Unchanged => {}
+                NavigationUpdate::SelectionChanged => {
+                    send_selection_changed(shell, &window).await?;
+                }
+                NavigationUpdate::WindowChanged => {
+                    send_candidate_view(
+                        shell,
+                        window,
+                        &self.capture_store,
+                        self.shell_capture_store.as_ref(),
+                        self.documentation,
+                        DocumentationTransfer::Preserve,
+                    )
+                    .await?;
+                }
+            }
         }
         Ok(())
     }
@@ -770,8 +991,8 @@ impl BridgeState {
                     ))
                     .await?;
             }
-            ShellInput::Navigate(request_id, generation, action) => {
-                self.handle_navigation(request_id, generation, action, shell)
+            ShellInput::Navigate(request_id, generation, navigation_serial, action) => {
+                self.handle_navigation(request_id, generation, navigation_serial, action, shell)
                     .await?;
             }
             ShellInput::ZshCaptureBegin(request_id, generation) => {
@@ -1290,6 +1511,31 @@ fn bridge_state(
     )
 }
 
+async fn update_documentation_after_delay<W>(
+    target: Option<&ResolveRequest>,
+    state: &mut BridgeState,
+    client: &mut DaemonConnection,
+    shell: &mut FramedWrite<W, ShellWireCodec>,
+) -> Result<(), BridgeError>
+where
+    W: AsyncWrite + Unpin,
+{
+    let Some(target) = target else {
+        return Ok(());
+    };
+    if state.documentation_requires_resolution(target) {
+        tracing::trace!(
+            request_id = target.request_id.0,
+            generation = target.generation.0,
+            "requesting selected-item documentation"
+        );
+        client.send(ClientMessage::Resolve(target.clone())).await?;
+    } else if state.commit_documentation_target(target) {
+        publish_current_documentation(shell, state).await?;
+    }
+    Ok(())
+}
+
 /// Run a bridge over arbitrary asynchronous shell streams.
 ///
 /// The bridge creates two authenticated daemon peers: the shell client owns the
@@ -1337,14 +1583,12 @@ where
             }
             () = &mut documentation_timer, if documentation_armed => {
                 documentation_armed = false;
-                if let Some(resolve) = documentation_target.clone() {
-                    tracing::trace!(
-                        request_id = resolve.request_id.0,
-                        generation = resolve.generation.0,
-                        "requesting selected-item documentation"
-                    );
-                    client.send(ClientMessage::Resolve(resolve)).await?;
-                }
+                update_documentation_after_delay(
+                    documentation_target.as_ref(),
+                    &mut state,
+                    &mut client,
+                    &mut shell_writer,
+                ).await?;
             }
             shell_message = shell_reader.next() => {
                 let Some(shell_message) = shell_message else {
@@ -1373,11 +1617,11 @@ where
                     }
                 }
                 synchronize_documentation_timer(
-                    state.documentation_resolve_target(),
+                    state.documentation_update_target(),
                     &mut documentation_target,
                     &mut documentation_armed,
                     documentation_timer.as_mut(),
-                    config.documentation.resolve_delay,
+                    config.documentation.update_delay,
                 );
             }
             client_message = client.next() => {
@@ -1390,11 +1634,11 @@ where
                     &mut state,
                 ).await?;
                 synchronize_documentation_timer(
-                    state.documentation_resolve_target(),
+                    state.documentation_update_target(),
                     &mut documentation_target,
                     &mut documentation_armed,
                     documentation_timer.as_mut(),
-                    config.documentation.resolve_delay,
+                    config.documentation.update_delay,
                 );
             }
             worker_message = worker.next() => {
@@ -1733,6 +1977,7 @@ where
                     &state.capture_store,
                     state.shell_capture_store.as_ref(),
                     state.documentation,
+                    DocumentationTransfer::Replace,
                 )
                 .await?;
             }
@@ -1816,28 +2061,42 @@ where
         selected,
         "installed selected-item documentation"
     );
-    if selected && state.documentation.available() {
-        let Some(window) = state.current_window() else {
-            return Ok(());
-        };
-        let presentation = view_presentation(&window, state.documentation);
+    if selected
+        && state.documentation.available()
+        && let Some(target) = state.selected_documentation_target()
+        && target.item_id == item_id
+        && state.commit_documentation_target(&target)
+    {
         tracing::trace!(
             request_id = request_id.0,
             generation = generation.0,
-            visible = presentation.documentation.is_some(),
             "publishing selected-item documentation presentation"
         );
-        send_view_presentation(
-            shell,
-            request_id,
-            generation,
-            window.view.revision,
-            &presentation,
-        )
-        .await?;
-        shell.flush().await?;
+        publish_current_documentation(shell, state).await?;
     }
     Ok(())
+}
+
+async fn publish_current_documentation<W>(
+    shell: &mut FramedWrite<W, ShellWireCodec>,
+    state: &BridgeState,
+) -> Result<(), ShellWireError>
+where
+    W: AsyncWrite + Unpin,
+{
+    let Some(window) = state.current_window() else {
+        return Ok(());
+    };
+    let presentation = view_presentation(&window, state.documentation);
+    send_view_presentation(
+        shell,
+        window.view.request_id,
+        window.view.generation,
+        window.view.revision,
+        &presentation,
+    )
+    .await?;
+    shell.flush().await
 }
 
 async fn handle_worker_message<W>(
@@ -1975,7 +2234,7 @@ fn shell_input_name(input: &ShellInput) -> &'static str {
         ShellInput::Cancel(_, _) => "cancel",
         ShellInput::Select(_, _, _) => "select",
         ShellInput::SelectionFinished(_, _, _, _) => "selection-finished",
-        ShellInput::Navigate(_, _, _) => "navigate",
+        ShellInput::Navigate(_, _, _, _) => "navigate",
         ShellInput::ZshCaptureBegin(_, _) => "zsh-capture-begin",
         ShellInput::ZshCandidate(_, _, _) => "zsh-candidate",
         ShellInput::ZshCandidateChunk(_, _, _) => "zsh-command-candidates",
@@ -1996,6 +2255,7 @@ async fn send_candidate_view<W>(
     capture_store: &CaptureStore,
     shell_capture_store: Option<&ShellCaptureStore>,
     documentation: DocumentationPolicy,
+    documentation_transfer: DocumentationTransfer,
 ) -> Result<(), ShellWireError>
 where
     W: AsyncWrite + Unpin,
@@ -2018,6 +2278,11 @@ where
         window.selected_absolute.to_string().into(),
         window.max_label_cells.to_string().into(),
         window.max_described_cells.to_string().into(),
+        window.navigation_serial.to_string().into(),
+        match documentation_transfer {
+            DocumentationTransfer::Replace => "replace".into(),
+            DocumentationTransfer::Preserve => "preserve".into(),
+        },
         view.sources_pending.len().to_string().into(),
     ];
     begin_fields.extend(
@@ -2042,14 +2307,28 @@ where
         )
         .await?;
     }
-    send_view_presentation(
-        shell,
-        view.request_id,
-        view.generation,
-        view.revision,
-        &presentation,
-    )
-    .await?;
+    match documentation_transfer {
+        DocumentationTransfer::Replace => {
+            send_view_presentation(
+                shell,
+                view.request_id,
+                view.generation,
+                view.revision,
+                &presentation,
+            )
+            .await?;
+        }
+        DocumentationTransfer::Preserve => {
+            send_view_layout(
+                shell,
+                view.request_id,
+                view.generation,
+                view.revision,
+                presentation.menu_width,
+            )
+            .await?;
+        }
+    }
     feed_shell(
         shell,
         "view-end",
@@ -2063,6 +2342,29 @@ where
     shell.flush().await
 }
 
+async fn send_selection_changed<W>(
+    shell: &mut FramedWrite<W, ShellWireCodec>,
+    window: &WindowedView,
+) -> Result<(), ShellWireError>
+where
+    W: AsyncWrite + Unpin,
+{
+    let selected = window.view.selected_index.unwrap_or(0);
+    send_shell(
+        shell,
+        "selection-changed",
+        [
+            window.view.request_id.0.to_string().into(),
+            window.view.generation.0.to_string().into(),
+            window.view.revision.to_string().into(),
+            window.navigation_serial.to_string().into(),
+            selected.to_string().into(),
+            window.selected_absolute.to_string().into(),
+        ],
+    )
+    .await
+}
+
 #[derive(Debug)]
 struct ViewPresentation {
     menu_width: u16,
@@ -2070,13 +2372,9 @@ struct ViewPresentation {
 }
 
 fn view_presentation(window: &WindowedView, policy: DocumentationPolicy) -> ViewPresentation {
-    let selected = window
-        .view
-        .selected_index
-        .and_then(|index| window.view.items.get(index as usize));
     let documentation = window
         .documentation_visible
-        .then_some(selected)
+        .then_some(window.documentation_item.as_ref())
         .flatten()
         .and_then(|item| {
             let sense_model::DocumentationState::Resolved(content) = &item.documentation else {
@@ -2108,15 +2406,23 @@ fn view_presentation(window: &WindowedView, policy: DocumentationPolicy) -> View
             side_min_columns: policy.layout.side_min_columns,
             documentation_width_ratio: policy.layout.width_ratio,
             documentation_max_rows: policy.layout.max_rows,
+            // A side pane uses the configured menu height, not the current
+            // candidate count. This keeps documentation useful for a single
+            // selected item and makes both Blink-style surfaces align.
+            side_viewport_rows: policy.menu.menu_max_rows.max(1),
             documentation_offset: window.documentation_offset,
             documentation_padding: policy.layout.padding,
+            documentation_scrollbar: policy.layout.scrollbar,
             bordered: policy.layout.bordered,
             render_markdown: policy.layout.render_markdown,
         },
     );
     ViewPresentation {
         menu_width: layout.menu_width,
-        documentation: selected
+        documentation: window
+            .documentation_item
+            .as_ref()
+            .filter(|_| window.documentation_visible)
             .map(|item| item.id.clone())
             .zip(layout.documentation),
     }
@@ -2132,15 +2438,12 @@ async fn send_view_presentation<W>(
 where
     W: AsyncWrite + Unpin,
 {
-    feed_shell(
+    send_view_layout(
         shell,
-        "view-layout",
-        [
-            request_id.0.to_string().into(),
-            generation.0.to_string().into(),
-            revision.to_string().into(),
-            presentation.menu_width.to_string().into(),
-        ],
+        request_id,
+        generation,
+        revision,
+        presentation.menu_width,
     )
     .await?;
     let Some((item_id, panel)) = &presentation.documentation else {
@@ -2164,8 +2467,10 @@ where
             documentation_placement_name(panel.placement).into(),
             panel.width.to_string().into(),
             panel.lines.len().to_string().into(),
+            panel.viewport_rows.to_string().into(),
             panel.offset.to_string().into(),
             panel.total_lines.to_string().into(),
+            u8::from(panel.scrollbar).to_string().into(),
         ],
     )
     .await?;
@@ -2179,6 +2484,29 @@ where
             request_id.0.to_string().into(),
             generation.0.to_string().into(),
             item_id.0.as_str().into(),
+        ],
+    )
+    .await
+}
+
+async fn send_view_layout<W>(
+    shell: &mut FramedWrite<W, ShellWireCodec>,
+    request_id: RequestId,
+    generation: Generation,
+    revision: u64,
+    menu_width: u16,
+) -> Result<(), ShellWireError>
+where
+    W: AsyncWrite + Unpin,
+{
+    feed_shell(
+        shell,
+        "view-layout",
+        [
+            request_id.0.to_string().into(),
+            generation.0.to_string().into(),
+            revision.to_string().into(),
+            menu_width.to_string().into(),
         ],
     )
     .await
@@ -2501,9 +2829,9 @@ fn parse_shell_message(
         }
         "selection-finished" => parse_selection_finished(&message.fields).map_err(invalid),
         "navigate" => {
-            expect_fields(&message.fields, 3).map_err(invalid)?;
+            expect_fields(&message.fields, 4).map_err(invalid)?;
             let action =
-                match parse_utf8_ref(&message.fields[2], "navigation action").map_err(invalid)? {
+                match parse_utf8_ref(&message.fields[3], "navigation action").map_err(invalid)? {
                     "next" => Navigation::Next,
                     "previous" => Navigation::Previous,
                     "page-down" => Navigation::PageDown,
@@ -2518,6 +2846,7 @@ fn parse_shell_message(
             Ok(ShellInput::Navigate(
                 parse_request_id(&message.fields[0]).map_err(invalid)?,
                 parse_generation(&message.fields[1]).map_err(invalid)?,
+                parse_u64(&message.fields[2], "navigation serial").map_err(invalid)?,
                 action,
             ))
         }
@@ -3314,7 +3643,7 @@ mod tests {
             is_settled: true,
         };
         assert!(!state.install_view(delayed_view));
-        state.navigate(RequestId(9), Generation(1), Navigation::Next);
+        state.navigate(RequestId(9), Generation(1), 1, Navigation::Next);
         let cached = state.current_view.as_ref().unwrap();
         assert_eq!(cached.view.generation, Generation(2));
         assert_eq!(cached.view.revision, 1);
@@ -3322,6 +3651,186 @@ mod tests {
 
         state.invalidate_request(RequestId(1), Generation(2));
         assert!(state.current_view.is_none());
+    }
+
+    #[test]
+    fn candidate_navigation_cycles_and_rejects_stale_serials() {
+        let session_id = SessionId::new();
+        let mut state = BridgeState::new(
+            NativeShell::Zsh,
+            session_id,
+            sense_protocol::DEFAULT_MAX_FRAME_BYTES,
+            CaptureLimits::default(),
+            20,
+            GhostTextPolicy::default(),
+            DocumentationPolicy::default(),
+        )
+        .unwrap();
+        register_default_request(&mut state);
+        state.install_view(CandidateView {
+            session_id,
+            request_id: RequestId(1),
+            generation: Generation(2),
+            revision: 1,
+            items: batch(15).items,
+            selected_index: Some(0),
+            matched_before_limit: 15,
+            sources_pending: Vec::new(),
+            is_final: true,
+            is_incomplete: false,
+            is_settled: true,
+        });
+
+        assert_eq!(
+            state.navigate(RequestId(1), Generation(2), 1, Navigation::Previous),
+            NavigationUpdate::SelectionChanged
+        );
+        assert_eq!(state.current_view.as_ref().unwrap().selected, 14);
+        assert_eq!(
+            state.navigate(RequestId(1), Generation(2), 2, Navigation::Next),
+            NavigationUpdate::SelectionChanged
+        );
+        assert_eq!(state.current_view.as_ref().unwrap().selected, 0);
+        assert_eq!(
+            state.navigate(RequestId(1), Generation(2), 2, Navigation::Next),
+            NavigationUpdate::Unchanged
+        );
+        assert_eq!(state.current_view.as_ref().unwrap().selected, 0);
+
+        state.documentation.menu.cycle = false;
+        assert_eq!(
+            state.navigate(RequestId(1), Generation(2), 3, Navigation::Previous),
+            NavigationUpdate::SelectionChanged
+        );
+        assert_eq!(state.current_view.as_ref().unwrap().selected, 0);
+    }
+
+    #[test]
+    fn candidate_navigation_prefetches_before_either_menu_edge() {
+        let session_id = SessionId::new();
+        let mut state = BridgeState::new(
+            NativeShell::Zsh,
+            session_id,
+            sense_protocol::DEFAULT_MAX_FRAME_BYTES,
+            CaptureLimits::default(),
+            20,
+            GhostTextPolicy::default(),
+            DocumentationPolicy::default(),
+        )
+        .unwrap();
+        register_default_request(&mut state);
+        state.install_view(CandidateView {
+            session_id,
+            request_id: RequestId(1),
+            generation: Generation(2),
+            revision: 1,
+            items: batch(46).items,
+            selected_index: Some(0),
+            matched_before_limit: 46,
+            sources_pending: Vec::new(),
+            is_final: true,
+            is_incomplete: false,
+            is_settled: true,
+        });
+
+        {
+            let cached = state.current_view.as_mut().unwrap();
+            cached.selected = 16;
+            cached.window_start = 0;
+        }
+        assert_eq!(
+            state.navigate(RequestId(1), Generation(2), 1, Navigation::Next),
+            NavigationUpdate::WindowChanged
+        );
+        let cached = state.current_view.as_ref().unwrap();
+        assert_eq!(cached.selected, 17);
+        assert_eq!(cached.window_start, 7);
+
+        {
+            let cached = state.current_view.as_mut().unwrap();
+            cached.selected = 19;
+            cached.window_start = 16;
+        }
+        assert_eq!(
+            state.navigate(RequestId(1), Generation(2), 2, Navigation::Previous),
+            NavigationUpdate::WindowChanged
+        );
+        let cached = state.current_view.as_ref().unwrap();
+        assert_eq!(cached.selected, 18);
+        assert_eq!(cached.window_start, 8);
+    }
+
+    #[test]
+    fn documentation_stays_visible_until_the_new_selection_is_ready() {
+        let session_id = SessionId::new();
+        let policy = DocumentationPolicy::default();
+        let mut state = BridgeState::new(
+            NativeShell::Zsh,
+            session_id,
+            sense_protocol::DEFAULT_MAX_FRAME_BYTES,
+            CaptureLimits::default(),
+            20,
+            GhostTextPolicy::default(),
+            policy,
+        )
+        .unwrap();
+        register_default_request(&mut state);
+        let mut items = batch(2).items;
+        for (index, item) in items.iter_mut().enumerate() {
+            item.documentation =
+                sense_model::DocumentationState::Resolved(sense_model::MarkupContent {
+                    kind: sense_model::MarkupKind::PlainText,
+                    value: format!("documentation-{index}"),
+                });
+        }
+        let revised_items = items.clone();
+        state.install_view(CandidateView {
+            session_id,
+            request_id: RequestId(1),
+            generation: Generation(2),
+            revision: 1,
+            items,
+            selected_index: Some(0),
+            matched_before_limit: 2,
+            sources_pending: Vec::new(),
+            is_final: true,
+            is_incomplete: false,
+            is_settled: true,
+        });
+
+        state.navigate(RequestId(1), Generation(2), 1, Navigation::Next);
+        let pending = state.documentation_update_target().unwrap();
+        assert_eq!(pending.item_id, ItemId("item-1".into()));
+        let visible = view_presentation(&state.current_window().unwrap(), policy)
+            .documentation
+            .unwrap();
+        assert_eq!(visible.0, ItemId("item-0".into()));
+        assert_eq!(visible.1.lines[0].text, "documentation-0");
+
+        state.install_view(CandidateView {
+            session_id,
+            request_id: RequestId(1),
+            generation: Generation(2),
+            revision: 2,
+            items: revised_items,
+            selected_index: Some(0),
+            matched_before_limit: 2,
+            sources_pending: Vec::new(),
+            is_final: true,
+            is_incomplete: false,
+            is_settled: true,
+        });
+        let cached = state.current_view.as_ref().unwrap();
+        assert_eq!(cached.selected, 1);
+        assert_eq!(cached.navigation_serial, 1);
+        assert_eq!(cached.documentation_item, Some(ItemId("item-0".into())));
+
+        assert!(state.commit_documentation_target(&pending));
+        let visible = view_presentation(&state.current_window().unwrap(), policy)
+            .documentation
+            .unwrap();
+        assert_eq!(visible.0, ItemId("item-1".into()));
+        assert_eq!(visible.1.lines[0].text, "documentation-1");
     }
 
     #[test]
@@ -3475,7 +3984,7 @@ mod tests {
         assert_eq!(first.max_label_cells, 6);
         assert_eq!(first.max_described_cells, 21);
 
-        state.navigate(RequestId(1), Generation(2), Navigation::PageDown);
+        state.navigate(RequestId(1), Generation(2), 1, Navigation::PageDown);
         let navigated = state.current_window().unwrap();
         assert_eq!(navigated.max_label_cells, first.max_label_cells);
         assert_eq!(navigated.max_described_cells, first.max_described_cells);
@@ -3511,7 +4020,7 @@ mod tests {
             is_settled: true,
         });
 
-        let target = state.documentation_resolve_target().unwrap();
+        let target = state.documentation_update_target().unwrap();
         assert_eq!(target.item_id, ItemId("item-0".into()));
         assert!(state.install_documentation(
             RequestId(1),
@@ -3522,7 +4031,7 @@ mod tests {
                 value: "Native documentation".into(),
             }),
         ));
-        assert!(state.documentation_resolve_target().is_none());
+        assert!(state.documentation_update_target().is_none());
 
         assert!(state.install_documentation(
             RequestId(1),
@@ -3531,7 +4040,7 @@ mod tests {
             sense_model::DocumentationState::Unresolved,
         ));
         state.highest_generation = 3;
-        assert!(state.documentation_resolve_target().is_none());
+        assert!(state.documentation_update_target().is_none());
     }
 
     #[test]
@@ -3612,7 +4121,7 @@ mod tests {
         state.navigate_documentation(RequestId(1), Generation(2), Navigation::DocumentationUp);
         assert_eq!(state.current_view.as_ref().unwrap().documentation_offset, 6);
 
-        state.navigate(RequestId(1), Generation(2), Navigation::Next);
+        state.navigate(RequestId(1), Generation(2), 1, Navigation::Next);
         assert_eq!(state.current_view.as_ref().unwrap().documentation_offset, 0);
     }
 
@@ -3650,7 +4159,7 @@ mod tests {
             is_settled: true,
         });
 
-        assert!(state.documentation_resolve_target().is_none());
+        assert!(state.documentation_update_target().is_none());
         assert!(
             view_presentation(&state.current_window().unwrap(), policy)
                 .documentation
@@ -3658,7 +4167,7 @@ mod tests {
         );
         state.navigate_documentation(RequestId(1), Generation(2), Navigation::ToggleDocumentation);
         assert_eq!(
-            state.documentation_resolve_target().unwrap().item_id,
+            state.documentation_update_target().unwrap().item_id,
             ItemId("item-0".into())
         );
     }
@@ -3700,7 +4209,7 @@ mod tests {
             is_settled: true,
         });
 
-        let target = state.documentation_resolve_target().unwrap();
+        let target = state.documentation_update_target().unwrap();
         assert!(state.install_documentation(
             RequestId(1),
             Generation(2),
@@ -3710,6 +4219,6 @@ mod tests {
                 value: "Adapter documentation".into(),
             }),
         ));
-        assert!(state.documentation_resolve_target().is_none());
+        assert!(state.documentation_update_target().is_none());
     }
 }

@@ -500,6 +500,7 @@ const fn message_name(message: &ServerMessage) -> &'static str {
 #[cfg(test)]
 mod tests {
     use sense_model::{NativeShell, RawBytes, TextEdit, TextRange};
+    use sense_protocol::{SelectionRequest, SelectionResult};
 
     use super::*;
 
@@ -541,6 +542,82 @@ mod tests {
                 r#"{"type":"resolve","request_id":1,"generation":2,"item_id":"x","extra":true}"#,
             )
             .is_err()
+        );
+    }
+
+    #[test]
+    fn documentation_events_preserve_resolution_state() {
+        let resolved = presentation_event(ServerMessage::Documentation {
+            request_id: RequestId(7),
+            generation: Generation(11),
+            item_id: ItemId("candidate".into()),
+            documentation: DocumentationState::Resolved(MarkupContent {
+                kind: MarkupKind::PlainText,
+                value: "Native documentation".into(),
+            }),
+        });
+        assert_eq!(
+            resolved,
+            Some(EditorEvent::Documentation {
+                request_id: 7,
+                generation: 11,
+                item_id: "candidate".into(),
+                documentation: Some(PresentationMarkup {
+                    kind: MarkupKind::PlainText,
+                    value: "Native documentation".into(),
+                }),
+                unresolved: false,
+            })
+        );
+
+        let unresolved = presentation_event(ServerMessage::Documentation {
+            request_id: RequestId(7),
+            generation: Generation(11),
+            item_id: ItemId("candidate".into()),
+            documentation: DocumentationState::Unresolved,
+        });
+        assert_eq!(
+            unresolved,
+            Some(EditorEvent::Documentation {
+                request_id: 7,
+                generation: 11,
+                item_id: "candidate".into(),
+                documentation: None,
+                unresolved: true,
+            })
+        );
+    }
+
+    #[test]
+    fn request_and_selection_lifecycle_remains_generation_scoped() {
+        assert_eq!(
+            presentation_event(ServerMessage::RequestCancelled {
+                request_id: RequestId(5),
+                generation: Generation(8),
+            }),
+            Some(EditorEvent::RequestCancelled {
+                request_id: 5,
+                generation: 8,
+            })
+        );
+
+        let selection = SelectionRequest {
+            session_id: SessionId::new(),
+            request_id: RequestId(5),
+            generation: Generation(8),
+            item_id: ItemId("native-item".into()),
+        };
+        assert_eq!(
+            presentation_event(ServerMessage::SelectionFinished(SelectionResult {
+                selection,
+                applied: true,
+            })),
+            Some(EditorEvent::SelectionFinished {
+                request_id: 5,
+                generation: 8,
+                item_id: "native-item".into(),
+                applied: true,
+            })
         );
     }
 }

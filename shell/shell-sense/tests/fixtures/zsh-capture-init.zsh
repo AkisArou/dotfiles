@@ -28,6 +28,21 @@ _shell_sense_conformance_completion() {
 }
 compdef _shell_sense_conformance_completion shell-sense-conformance
 
+_shell_sense_short_completion() {
+  compadd -- -a -b
+}
+compdef _shell_sense_short_completion shell-sense-short
+
+_shell_sense_combined_completion() {
+  compadd -- -ab
+}
+compdef _shell_sense_combined_completion shell-sense-combined
+
+_shell_sense_user_completion() {
+  compadd -- custom-native
+}
+compdef _shell_sense_user_completion shell-sense-user
+
 _shell_sense_value_completion() {
   _arguments '--color=[output color]:color:(auto always never)'
 }
@@ -41,8 +56,9 @@ _shell_sense_test_widget() {
   BUFFER=$original_buffer
   CURSOR=$original_cursor
 
-  if [[ $BUFFER == shell-sense-conformance* || $BUFFER == shell-sense-value* ||
-        $BUFFER == shell-sense-path* ]]; then
+  if [[ $BUFFER == shell-sense-conformance* || $BUFFER == shell-sense-short* ||
+        $BUFFER == shell-sense-combined* || $BUFFER == shell-sense-user* ||
+        $BUFFER == shell-sense-value* || $BUFFER == shell-sense-path* ]]; then
     local -i index
     for (( index = 1; index <= $#_shell_sense_capture_words; index++ )); do
       print -r -- "<CONFORMANCE>$_shell_sense_capture_words[index]|${_shell_sense_capture_kinds[index]:-text}|$_shell_sense_capture_resource_paths[index]</CONFORMANCE>"

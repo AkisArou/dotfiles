@@ -53,6 +53,9 @@ _shell_sense_conformance_completion() {
   fi
 }
 complete -F _shell_sense_conformance_completion shell-sense-conformance
+complete -W '-a -b' shell-sense-short
+complete -W '-ab' shell-sense-combined
+complete -W 'custom-native' shell-sense-user
 
 _shell_sense_value_completion() {
   COMPREPLY=(auto always never)

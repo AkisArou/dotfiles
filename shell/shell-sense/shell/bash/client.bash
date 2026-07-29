@@ -13,6 +13,8 @@ declare -gi _shell_sense_bash_after_accept=1
 declare -g _shell_sense_bash_activation_mode=continuous
 declare -gi _shell_sense_bash_fuzzy_min_chars=3
 declare -gi _shell_sense_bash_max_rows=10
+declare -gi _shell_sense_bash_scrolloff=2
+declare -gi _shell_sense_bash_cycle=1
 declare -gi _shell_sense_bash_max_width=140
 declare -gi _shell_sense_bash_min_width=24
 declare -gi _shell_sense_bash_popup_enabled=1
@@ -20,12 +22,16 @@ declare -gi _shell_sense_bash_padding=1
 declare -gi _shell_sense_bash_show_descriptions=1
 declare -gi _shell_sense_bash_show_scrollbar=1
 declare -g _shell_sense_bash_scrollbar_character='▐'
+declare -gi _shell_sense_bash_documentation_padding=0
+declare -gi _shell_sense_bash_show_documentation_scrollbar=1
 declare -g _shell_sense_bash_indicator_mode=icon
 declare -g _shell_sense_bash_selected_marker=
 declare -gi _shell_sense_bash_popup_lines=0
 declare -gi _shell_sense_bash_popup_visible=0
 declare -gi _shell_sense_bash_external_presentation=0
 declare -gi _shell_sense_bash_selected=1
+declare -gi _shell_sense_bash_selected_absolute=0
+declare -gi _shell_sense_bash_navigation_serial=0
 declare -gi _shell_sense_bash_total=0
 declare -gi _shell_sense_bash_window_start=0
 declare -gi _shell_sense_bash_view_ready=0
@@ -39,8 +45,10 @@ declare -g _shell_sense_bash_documentation_item=
 declare -g _shell_sense_bash_documentation_placement=
 declare -gi _shell_sense_bash_documentation_width=0
 declare -gi _shell_sense_bash_documentation_expected=0
+declare -gi _shell_sense_bash_documentation_viewport_rows=0
 declare -gi _shell_sense_bash_documentation_offset=0
 declare -gi _shell_sense_bash_documentation_total=0
+declare -gi _shell_sense_bash_documentation_scrollbar=0
 declare -ga _shell_sense_bash_documentation_kinds=()
 declare -ga _shell_sense_bash_documentation_cells=()
 declare -ga _shell_sense_bash_documentation_lines=()
@@ -84,8 +92,10 @@ _shell_sense_bash_reset_documentation() {
   _shell_sense_bash_documentation_placement=
   _shell_sense_bash_documentation_width=0
   _shell_sense_bash_documentation_expected=0
+  _shell_sense_bash_documentation_viewport_rows=0
   _shell_sense_bash_documentation_offset=0
   _shell_sense_bash_documentation_total=0
+  _shell_sense_bash_documentation_scrollbar=0
   _shell_sense_bash_documentation_kinds=()
   _shell_sense_bash_documentation_cells=()
   _shell_sense_bash_documentation_lines=()
@@ -195,7 +205,7 @@ _shell_sense_bash_kind_icon() {
   case $kind in
     directory) icon='󰉋' ;;
     file|symlink) icon='󰈔' ;;
-    option) icon='󰘳' ;;
+    option|option-value) icon='󰌋' ;;
     command|builtin|function|alias|subcommand) icon='󰆍' ;;
     variable) icon='󰫧' ;;
     user) icon='󰀄' ;;
@@ -236,7 +246,7 @@ _shell_sense_bash_render_label() {
 }
 
 _shell_sense_bash_documentation_row_count() {
-  _shell_sense_bash_documentation_row_count=${#_shell_sense_bash_documentation_lines[@]}
+  _shell_sense_bash_documentation_row_count=$_shell_sense_bash_documentation_viewport_rows
   if ((_shell_sense_bash_documentation_row_count > 0)) && [[ $_shell_sense_bash_border != none ]]; then
     ((_shell_sense_bash_documentation_row_count += 2))
   fi
@@ -264,10 +274,12 @@ _shell_sense_bash_render_documentation_row() {
     fi
     ((row -= 1))
   fi
-  local text=${_shell_sense_bash_documentation_lines[row-1]}
-  local kind=${_shell_sense_bash_documentation_kinds[row-1]}
-  local -i cells=${_shell_sense_bash_documentation_cells[row-1]}
-  local -i content_width=$((width - border_cells - 2 * _shell_sense_bash_padding))
+  local text=${_shell_sense_bash_documentation_lines[row-1]-}
+  local kind=${_shell_sense_bash_documentation_kinds[row-1]-}
+  local -i cells=${_shell_sense_bash_documentation_cells[row-1]:-0}
+  local -i scrollbar_cells=0
+  ((_shell_sense_bash_show_documentation_scrollbar && _shell_sense_bash_documentation_scrollbar)) && scrollbar_cells=1
+  local -i content_width=$((width - border_cells - 2 * _shell_sense_bash_documentation_padding - scrollbar_cells))
   local -i fill=$((content_width - cells))
   ((fill >= 0)) || fill=0
   local text_style=$_shell_sense_bash_style_documentation
@@ -276,10 +288,26 @@ _shell_sense_bash_render_documentation_row() {
     code) text_style=$_shell_sense_bash_style_documentation_code ;;
     quote|separator) text_style=$_shell_sense_bash_style_documentation_quote ;;
   esac
-  printf '%s%s%*s%s%s%s%*s%*s%s%s' \
-    "$_shell_sense_bash_style_documentation" "$vertical" "$_shell_sense_bash_padding" '' \
+  printf '%s%s%*s%s%s%s%*s%*s' \
+    "$_shell_sense_bash_style_documentation" "$vertical" "$_shell_sense_bash_documentation_padding" '' \
     "$text_style" "$text" "$_shell_sense_bash_style_documentation" "$fill" '' \
-    "$_shell_sense_bash_padding" '' "$vertical" "$_shell_sense_bash_style_reset"
+    "$_shell_sense_bash_documentation_padding" ''
+  if ((scrollbar_cells)); then
+    local -i rows=$_shell_sense_bash_documentation_viewport_rows
+    local -i total=$_shell_sense_bash_documentation_total
+    local -i thumb_rows=$((rows * rows / total))
+    ((thumb_rows >= 1)) || thumb_rows=1
+    local -i track=$((rows - thumb_rows))
+    local -i maximum_offset=$((total - rows))
+    local -i thumb_first=0
+    ((track == 0)) || thumb_first=$((_shell_sense_bash_documentation_offset * track + maximum_offset / 2) / maximum_offset)
+    if ((row > thumb_first && row <= thumb_first + thumb_rows)); then
+      printf '%s%s' "$_shell_sense_bash_style_scrollbar_thumb" "$_shell_sense_bash_scrollbar_character"
+    else
+      printf '%s%s' "$_shell_sense_bash_style_scrollbar_gutter" "$_shell_sense_bash_scrollbar_character"
+    fi
+  fi
+  printf '%s%s%s' "$_shell_sense_bash_style_documentation" "$vertical" "$_shell_sense_bash_style_reset"
 }
 
 _shell_sense_bash_render_popup() {
@@ -292,7 +320,8 @@ _shell_sense_bash_render_popup() {
   fi
   local -i row_count=$item_count first=0 last
   ((row_count > _shell_sense_bash_max_rows)) && row_count=$_shell_sense_bash_max_rows
-  ((_shell_sense_bash_selected > row_count)) && first=$((_shell_sense_bash_selected - row_count))
+  ((_shell_sense_bash_selected + _shell_sense_bash_scrolloff > row_count)) &&
+    first=$((_shell_sense_bash_selected + _shell_sense_bash_scrolloff - row_count))
   ((first + row_count <= item_count)) || first=$((item_count - row_count))
   last=$((first + row_count - 1))
 
@@ -445,7 +474,13 @@ _shell_sense_bash_dispatch() {
       for ((index = 0; index < count; index++, cursor++)); do _shell_sense_bash_activation_events+=("${!cursor}"); done
       ;;
     popup-option)
-      [[ $1 != scrollbar-character ]] || _shell_sense_bash_scrollbar_character=$2
+      case $1 in
+        scrollbar-character) _shell_sense_bash_scrollbar_character=$2 ;;
+        scrolloff) _shell_sense_bash_scrolloff=$2 ;;
+        cycle) _shell_sense_bash_cycle=$2 ;;
+        documentation-padding) _shell_sense_bash_documentation_padding=$2 ;;
+        documentation-scrollbar) _shell_sense_bash_show_documentation_scrollbar=$2 ;;
+      esac
       ;;
     style) _shell_sense_bash_apply_style "$1" "$2" ;;
     kind-style)
@@ -471,12 +506,20 @@ _shell_sense_bash_dispatch() {
       ;;
     capture-request) _shell_sense_bash_capture "$1" "$2" "$3" "$4" ;;
     view-begin)
+      (($# >= 17)) || return
       [[ $2 == "$_shell_sense_bash_active_request" && $3 == "$_shell_sense_bash_active_generation" ]] || return
+      [[ ${15} =~ ^[0-9]+$ && (${16} == replace || ${16} == preserve) && ${17} =~ ^[0-9]+$ ]] || return
+      if ((10#${15} < _shell_sense_bash_navigation_serial)); then
+        _shell_sense_bash_view_building=0
+        return
+      fi
       _shell_sense_bash_view_building=1
       _shell_sense_bash_view_revision=$4
+      _shell_sense_bash_navigation_serial=${15}
       _shell_sense_bash_menu_width=0
-      _shell_sense_bash_reset_documentation
+      [[ ${16} == preserve ]] || _shell_sense_bash_reset_documentation
       _shell_sense_bash_selected=$(($5 + 1))
+      _shell_sense_bash_selected_absolute=${12}
       _shell_sense_bash_total=${10}
       _shell_sense_bash_window_start=${11}
       _shell_sense_bash_view_max_label_cells=${13}
@@ -511,8 +554,22 @@ _shell_sense_bash_dispatch() {
          $3 == "$_shell_sense_bash_view_revision" ]] || return
       _shell_sense_bash_menu_width=$4
       ;;
+    selection-changed)
+      [[ $# == 6 && $1 == "$_shell_sense_bash_active_request" &&
+         $2 == "$_shell_sense_bash_active_generation" &&
+         $3 == "$_shell_sense_bash_view_revision" &&
+         $4 =~ ^[0-9]+$ && $5 =~ ^[0-9]+$ && $6 =~ ^[0-9]+$ ]] || return
+      ((10#$4 >= _shell_sense_bash_navigation_serial)) || return
+      local -i selected=$((10#$5 + 1))
+      ((selected >= 1 && selected <= ${#_shell_sense_bash_view_ids[@]})) || return
+      _shell_sense_bash_navigation_serial=$4
+      _shell_sense_bash_selected=$selected
+      _shell_sense_bash_selected_absolute=$6
+      _shell_sense_bash_view_ready=1
+      _shell_sense_bash_render_popup
+      ;;
     documentation-begin)
-      [[ $# == 8 && $1 == "$_shell_sense_bash_active_request" &&
+      [[ $# == 10 && $1 == "$_shell_sense_bash_active_request" &&
          $2 == "$_shell_sense_bash_active_generation" &&
          ($4 == side || $4 == below) ]] || return
       _shell_sense_bash_reset_documentation
@@ -520,8 +577,10 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_documentation_placement=$4
       _shell_sense_bash_documentation_width=$5
       _shell_sense_bash_documentation_expected=$6
-      _shell_sense_bash_documentation_offset=$7
-      _shell_sense_bash_documentation_total=$8
+      _shell_sense_bash_documentation_viewport_rows=$7
+      _shell_sense_bash_documentation_offset=$8
+      _shell_sense_bash_documentation_total=$9
+      _shell_sense_bash_documentation_scrollbar=${10}
       ;;
     documentation-chunk)
       [[ $# -ge 4 && $1 == "$_shell_sense_bash_active_request" &&
@@ -541,18 +600,15 @@ _shell_sense_bash_dispatch() {
          $2 == "$_shell_sense_bash_active_generation" &&
          $3 == "$_shell_sense_bash_documentation_item" &&
          ${#_shell_sense_bash_documentation_lines[@]} -eq $_shell_sense_bash_documentation_expected ]] || return
-      local selected_id=${_shell_sense_bash_view_ids[_shell_sense_bash_selected-1]-}
-      if [[ $selected_id != "$_shell_sense_bash_documentation_item" ]]; then
-        _shell_sense_bash_reset_documentation
-        return
-      fi
       ((_shell_sense_bash_view_building)) || _shell_sense_bash_render_popup
+      _shell_sense_bash_view_ready=1
       ;;
     documentation-clear)
       [[ $# == 2 && $1 == "$_shell_sense_bash_active_request" &&
          $2 == "$_shell_sense_bash_active_generation" ]] || return
       _shell_sense_bash_reset_documentation
       ((_shell_sense_bash_view_building)) || _shell_sense_bash_render_popup
+      _shell_sense_bash_view_ready=1
       ;;
     view-end)
       [[ $# == 3 && $_shell_sense_bash_view_building == 1 &&
@@ -675,6 +731,7 @@ _shell_sense_bash_request_completion() {
   ((_shell_sense_bash_generation += 1))
   _shell_sense_bash_active_request=$_shell_sense_bash_request
   _shell_sense_bash_active_generation=$_shell_sense_bash_generation
+  _shell_sense_bash_navigation_serial=0
   _shell_sense_bash_active_buffer=$READLINE_LINE
   _shell_sense_bash_active_point=$READLINE_POINT
   _shell_sense_bash_view_building=0
@@ -829,12 +886,52 @@ _shell_sense_bash_key() {
       fi
       ;;
     next|previous|page-down|page-up|documentation-down|documentation-up|documentation-page-down|documentation-page-up|toggle-documentation)
-      _shell_sense_bash_view_ready=0
-      _shell_sense_bash_send navigate "$_shell_sense_bash_active_request" "$_shell_sense_bash_active_generation" "$_shell_sense_bash_resolved_action"
-      _shell_sense_bash_wait_for '_shell_sense_bash_view_ready == 1' || true
+      _shell_sense_bash_navigate "$_shell_sense_bash_resolved_action"
       ;;
     dismiss) _shell_sense_bash_clear_popup; _shell_sense_bash_install_keymap closed ;;
   esac
+}
+
+_shell_sense_bash_navigate() {
+  local action=$1
+  if [[ $action =~ ^(next|previous|page-down|page-up)$ ]]; then
+    local -i desired=$_shell_sense_bash_selected_absolute
+    case $action in
+      next)
+        if ((desired + 1 < _shell_sense_bash_total)); then
+          ((desired += 1))
+        elif ((_shell_sense_bash_cycle)); then
+          desired=0
+        fi
+        ;;
+      previous)
+        if ((desired > 0)); then
+          ((desired -= 1))
+        elif ((_shell_sense_bash_cycle)); then
+          desired=$((_shell_sense_bash_total - 1))
+        fi
+        ;;
+      page-down)
+        ((desired += _shell_sense_bash_max_rows))
+        ((desired < _shell_sense_bash_total)) || desired=$((_shell_sense_bash_total - 1))
+        ;;
+      page-up)
+        ((desired -= _shell_sense_bash_max_rows))
+        ((desired >= 0)) || desired=0
+        ;;
+    esac
+    ((_shell_sense_bash_navigation_serial += 1))
+    local -i relative=$((desired - _shell_sense_bash_window_start + 1))
+    if ((relative >= 1 && relative <= ${#_shell_sense_bash_view_ids[@]})); then
+      _shell_sense_bash_selected=$relative
+      _shell_sense_bash_selected_absolute=$desired
+      _shell_sense_bash_render_popup
+    fi
+  fi
+  _shell_sense_bash_view_ready=0
+  _shell_sense_bash_send navigate "$_shell_sense_bash_active_request" \
+    "$_shell_sense_bash_active_generation" "$_shell_sense_bash_navigation_serial" "$action"
+  _shell_sense_bash_wait_for '_shell_sense_bash_view_ready == 1' || true
 }
 
 _shell_sense_bash_close_popup() {

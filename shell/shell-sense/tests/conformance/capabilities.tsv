@@ -6,3 +6,4 @@ continuous-arbitrary-line	required	required	limited	Bash has no public arbitrary
 ghost-text	required	unsupported	unsupported	Current Fish and Bash line-editor APIs do not support the same faithful display and partial-accept contract
 symlink-kind	limited	limited	limited	Native directory completion commonly classifies a symlink to a directory as a directory; Shell Sense retains its lexical resource without inventing a symlink kind
 idle-documentation-refresh	required	required	limited	Bash cannot safely execute the mailbox decoder from a signal trap while Readline owns the stack; documentation is consumed by the next Shell Sense action
+native-provider-preemption	limited	limited	limited	Native completion functions execute synchronously in the owning shell; superseded results are rejected, but arbitrary shell completion code cannot be safely interrupted mid-call

@@ -207,6 +207,15 @@ impl Config {
         if self.popup.enabled && self.popup.max_rows == 0 {
             issues.push("popup.max_rows must be at least 1 when the popup is enabled".into());
         }
+        if self.popup.enabled && self.popup.padding == 0 {
+            issues.push(
+                "popup.padding must be at least 1 when the popup is enabled so ZLE can refresh scrolling rows atomically"
+                    .into(),
+            );
+        }
+        if self.popup.enabled && self.popup.scrolloff >= self.popup.max_rows {
+            issues.push("popup.scrolloff must be less than popup.max_rows".into());
+        }
         if self.popup.min_width > self.popup.max_width {
             issues.push("popup.min_width must not exceed popup.max_width".into());
         }
@@ -597,6 +606,8 @@ pub struct PopupConfig {
     pub group_headings: bool,
     pub descriptions: bool,
     pub max_rows: u16,
+    pub scrolloff: u16,
+    pub cycle: bool,
     pub max_width: u16,
     pub min_width: u16,
     pub padding: u16,
@@ -615,6 +626,8 @@ impl Default for PopupConfig {
             group_headings: true,
             descriptions: true,
             max_rows: 10,
+            scrolloff: 2,
+            cycle: true,
             max_width: 140,
             min_width: 24,
             padding: 1,
@@ -642,10 +655,12 @@ impl Default for IndicatorConfig {
 #[serde(default, deny_unknown_fields)]
 pub struct DocumentationConfig {
     pub mode: DocumentationMode,
-    pub resolve_delay_ms: u64,
+    pub update_delay_ms: u64,
     pub side_min_columns: u16,
     pub width_ratio: f32,
     pub max_rows: u16,
+    pub padding: u16,
+    pub scrollbar: bool,
     pub render_markdown: bool,
 }
 
@@ -653,10 +668,12 @@ impl Default for DocumentationConfig {
     fn default() -> Self {
         Self {
             mode: DocumentationMode::Side,
-            resolve_delay_ms: 80,
+            update_delay_ms: 80,
             side_min_columns: 100,
             width_ratio: 0.45,
             max_rows: 14,
+            padding: 0,
+            scrollbar: true,
             render_markdown: true,
         }
     }

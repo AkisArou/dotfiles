@@ -40,6 +40,38 @@ read_until() {
   return 1
 }
 
+assert_synchronized_frames() {
+  local stream=$1 context=$2 prefix remainder=$1
+  [[ -n $remainder ]] || {
+    print -u2 -- "$context produced no terminal frame"
+    return 1
+  }
+  while [[ $remainder == *$'\e[?2026h'* ]]; do
+    prefix=${remainder%%$'\e[?2026h'*}
+    [[ -z $prefix ]] || {
+      print -u2 -- "$context emitted terminal output before synchronization began"
+      print -u2 -r -- "$stream"
+      return 1
+    }
+    remainder=${remainder#*$'\e[?2026h'}
+    [[ $remainder == *$'\e[?2026l'* ]] || {
+      print -u2 -- "$context left a synchronized-output transaction open"
+      return 1
+    }
+    remainder=${remainder#*$'\e[?2026l'}
+  done
+  [[ -z $remainder ]] || {
+    print -u2 -- "$context was not composed exclusively from complete synchronized frames"
+    print -u2 -r -- "$stream"
+    return 1
+  }
+  [[ $stream != *$'\e[M'* && $stream != *$'\e[L'* ]] || {
+    print -u2 -- "$context used ZLE insert/delete-line and exposed a partial popup frame"
+    print -u2 -r -- "$stream"
+    return 1
+  }
+}
+
 cleanup() {
   zpty -d sense-live 2>/dev/null || true
   if (( daemon_pid )); then
@@ -146,6 +178,11 @@ for expected in \
     return 1
   }
 done
+[[ $output == *$'\e[?2026h'*$'\e[?2026l'* ]] || {
+  print -u2 -- 'popup redisplay was not enclosed by synchronized-output markers'
+  print -u2 -r -- "$output"
+  return 1
+}
 [[ $output != *completions* ]] || {
   print -u2 -- 'popup still contains the completions title'
   print -u2 -r -- "$output"
@@ -200,6 +237,32 @@ read_until '*<EXEC>--all</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' ||
   return 1
 }
 
+# A normal edit starts a new completion generation, but must not blank the
+# existing frame while that generation is debounced. Rebase the old predicted
+# line immediately, exactly as Blink redraws its current item against the new
+# buffer, then replace it when the authoritative view arrives.
+zpty -n -w sense-live 'sense-single --f'
+output=
+read_until '*update only if the remote ref is unchanged*' || return 1
+zpty -n -w sense-live $'o\x18\x08'
+output=
+read_until '*<GHOST>value="rce-with-lease" stored="orce-with-lease" stale=1 visible=1 *' 100 || {
+  print -u2 -- 'an edit cleared the popup or ghost while its replacement was pending'
+  print -u2 -r -- "$output"
+  return 1
+}
+zselect -t 20 >/dev/null 2>&1 || true
+output=
+zpty -n -w sense-live $'\x18\x08'
+read_until '*<GHOST>value="rce-with-lease" stored="rce-with-lease" stale=0 visible=1 *' || {
+  print -u2 -- 'the rebased ghost was not replaced by the authoritative generation'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+
 # Word-mode partial acceptance inserts only the next literal-safe component,
 # then lets the ordinary edit lifecycle request a fresh authoritative view.
 zpty -w sense-live '_shell_sense_ghost_partial_accept=word'
@@ -230,9 +293,14 @@ read_until '*list entries starting with .*' || {
   print -u2 -r -- "$output"
   return 1
 }
+[[ $output == *'󰌋'* && $output != *'󰘵'* ]] || {
+  print -u2 -- 'ls options did not use the keyword-style option icon'
+  print -u2 -r -- "$output"
+  return 1
+}
 zselect -t 50 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
-read_until '*<DOC>placement=side offset=0 total=<-> text=*-a, --all*do not ignore entries starting with .*</DOC>*' || {
+read_until '*<DOC>placement=side offset=0 total=<-> *text=*-a, --all*do not ignore entries starting with .*</DOC>*' || {
   print -u2 -- 'selected ls option did not resolve focused man-page documentation'
   print -u2 -r -- "$output"
   return 1
@@ -261,7 +329,7 @@ read_until '*entry-01*' || {
 }
 zselect -t 50 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
-read_until '*<DOC>placement=side offset=0 total=<-> text=*entry-01*</DOC>*' || {
+read_until '*<DOC>placement=side offset=0 total=<-> viewport=10 lines=10 scrollbar=1 render-rows=10 text=*entry-01*</DOC>*' || {
   print -u2 -- 'configured directory documentation did not resolve the typed path'
   print -u2 -r -- "$output"
   return 1
@@ -274,7 +342,7 @@ output=
 zpty -n -w sense-live $'\x06'
 zselect -t 10 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
-read_until '*<DOC>placement=side offset=[1-9]* total=<-> text=*</DOC>*' || {
+read_until '*<DOC>placement=side offset=[1-9]* total=<-> *text=*</DOC>*' || {
   print -u2 -- 'documentation page-down did not move its independent viewport'
   print -u2 -r -- "$output"
   return 1
@@ -283,7 +351,7 @@ output=
 zpty -n -w sense-live $'\x02'
 zselect -t 10 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
-read_until '*<DOC>placement=side offset=0 total=<-> text=*</DOC>*' || {
+read_until '*<DOC>placement=side offset=0 total=<-> *text=*</DOC>*' || {
   print -u2 -- 'documentation page-up did not return to its first row'
   print -u2 -r -- "$output"
   return 1
@@ -295,6 +363,170 @@ read_until '*doc-place=side*buffer="cd dotfil"*</STATE>*<SENSE-PROMPT>*' || {
   print -u2 -r -- "$output"
   return 1
 }
+
+# Scrolloff keeps two candidates visible after the selection. With ten popup
+# rows, selecting the ninth item moves the viewport start to the second item
+# instead of pinning the selection to the final row.
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+zpty -n -w sense-live $'sense-many --option\t'
+output=
+read_until '*candidate number 10*' || return 1
+# Settle on the last selection before the viewport starts moving, then isolate
+# the one key that advances both the selection and the viewport. Every byte of
+# that transition must stay inside synchronized-output transactions, and ZLE
+# must not express the update as a terminal insert/delete-line operation.
+zpty -n -w sense-live $'\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
+zselect -t 20 >/dev/null 2>&1 || true
+while zpty -r -t sense-live chunk 2>/dev/null; do chunk=; done
+output=
+zpty -n -w sense-live $'\x0e'
+zselect -t 20 >/dev/null 2>&1 || true
+while zpty -r -t sense-live chunk 2>/dev/null; do
+  output+=$chunk
+  chunk=
+done
+typeset viewport_output=$output
+assert_synchronized_frames "$viewport_output" 'viewport navigation' || return 1
+zpty -n -w sense-live $'\x18\x07'
+output=
+read_until '*selected=9 *menu-start=1 render-first=2 render-rows=10 *buffer="sense-many --option"*</STATE>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'popup scrolloff did not retain two following candidates'
+  print -u2 -r -- "$output"
+  return 1
+}
+[[ $output == *'sync-fd='[0-9]##' sync-active=0 '* ]] || {
+  print -u2 -- 'native navigation redraw did not settle its event-loop transaction'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# A Blink-style viewport is stateful. After scrolling down, reversing direction
+# moves the selection through the existing viewport; it must not immediately
+# scroll the list backward or move the same selected item to another row.
+zpty -n -w sense-live 'sense-many --option'
+output=
+read_until '*candidate number 10*' || return 1
+zpty -n -w sense-live $'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
+zselect -t 20 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x10\x18\x0e'
+output=
+read_until '*<NAV>selected=10 selected-absolute=9 serial=11 window-start=0 menu-start=3 render-first=4 *' || {
+  print -u2 -- 'reverse navigation recomputed the viewport instead of preserving it'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+
+# Crossing the worker's larger prefetch boundary must not alter the visible
+# menu viewport. The worker rotates from candidates 1..20 to 8..27 before the
+# next item is needed; reversing afterward moves only the highlight until the
+# upper scrolloff margin is reached.
+zpty -n -w sense-live 'sense-window --window'
+output=
+read_until '*viewport candidate 10*' || return 1
+typeset seventeen_next=$'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
+zpty -n -w sense-live "$seventeen_next"
+zselect -t 20 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x18\x0e'
+output=
+read_until '*<NAV>selected=11 selected-absolute=17 serial=17 window-start=7 menu-start=10 render-first=4 *' || {
+  print -u2 -- 'candidate prefetch changed the visible menu viewport'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x0e\x10'
+zselect -t 20 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x18\x0e'
+output=
+read_until '*<NAV>selected=11 selected-absolute=17 serial=19 window-start=7 menu-start=11 render-first=5 *' || {
+  print -u2 -- 'reverse navigation moved the prefetched viewport instead of only the highlight'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+
+# Candidate selection is locally immediate and navigation acknowledgements are
+# serialised. Forty key presses cross the end of this 15-item list twice; stale
+# worker acknowledgements must never move the highlight backwards afterward.
+zpty -n -w sense-live 'sense-many --option'
+output=
+read_until '*candidate number 10*' || return 1
+typeset rapid_navigation=$'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
+rapid_navigation+=$rapid_navigation$rapid_navigation$rapid_navigation
+typeset -F navigation_started=$EPOCHREALTIME
+zpty -n -w sense-live "$rapid_navigation"$'\x18\x0e'
+output=
+read_until '*<NAV>selected=11 selected-absolute=10 serial=40 *documentation-current=<-></NAV>*' 200 || {
+  print -u2 -- 'rapid cyclic navigation did not reach the expected item immediately'
+  print -u2 -r -- "$output"
+  return 1
+}
+typeset -F navigation_elapsed=$(( EPOCHREALTIME - navigation_started ))
+(( navigation_elapsed < 0.20 )) || {
+  print -u2 -- "rapid navigation took ${navigation_elapsed}s"
+  return 1
+}
+zselect -t 20 >/dev/null 2>&1 || true
+output=
+zpty -n -w sense-live $'\x18\x0e'
+read_until '*<NAV>selected=11 selected-absolute=10 serial=40 *documentation-current=<-></NAV>*' || {
+  print -u2 -- 'a stale navigation acknowledgement moved the selected item backwards'
+  print -u2 -r -- "$output"
+  return 1
+}
+[[ $output == *'render-dirty=0 redraw-pending=0 '* ]] || {
+  print -u2 -- 'coalesced navigation redraw did not settle on the latest selection'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# A second rapid burst observes the display stream independently of the state
+# probe above. Coalescing may skip intermediate selections, but every frame it
+# does publish must remain atomic across cycling, viewport and scrollbar moves.
+while zpty -r -t sense-live chunk 2>/dev/null; do chunk=; done
+output=
+zpty -n -w sense-live "$rapid_navigation"
+zselect -t 20 >/dev/null 2>&1 || true
+while zpty -r -t sense-live chunk 2>/dev/null; do
+  output+=$chunk
+  chunk=
+done
+assert_synchronized_frames "$output" 'rapid navigation' || return 1
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
+
+# Match Blink's stable-document behavior: changing the selected item keeps the
+# old document visible during the update delay, then swaps atomically to the
+# newly resolved document. It must never clear and reopen between those states.
+zpty -n -w sense-live 'ls -l'
+output=
+read_until '*list entries starting with .*' || return 1
+zselect -t 50 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x0e\x18\x0e'
+output=
+read_until '*<NAV>*documentation-id=?*documentation-current=0</NAV>*' 100 || {
+  print -u2 -- 'documentation was cleared instead of being retained during navigation'
+  print -u2 -r -- "$output"
+  return 1
+}
+zselect -t 20 >/dev/null 2>&1 || true
+output=
+zpty -n -w sense-live $'\x18\x0e'
+read_until '*<NAV>*documentation-current=1</NAV>*' || {
+  print -u2 -- 'documentation did not settle on the final selected item'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x03'
+output=
+read_until '*<SENSE-PROMPT>*' || return 1
 
 # Enter can execute the buffer without first accepting a candidate. The popup
 # must still be removed during line-finish rather than becoming scrollback.

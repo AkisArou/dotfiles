@@ -107,18 +107,37 @@ _shell_sense_rebuild_styles
   return 1
 }
 [[ $_shell_sense_border == none && -z $_shell_sense_selected_marker &&
-   $_shell_sense_scrollbar_character == '▐' ]] || {
+   $_shell_sense_scrollbar_character == '▐' &&
+   $_shell_sense_scrolloff == 2 &&
+   $_shell_sense_documentation_padding == 0 &&
+   $_shell_sense_show_documentation_scrollbar == 1 ]] || {
   print -u2 -- 'borderless, markerless popup defaults were not initialized'
   return 1
 }
-_shell_sense_scrollbar_geometry 10 46 0
+_shell_sense_viewport_scrollbar_geometry 10 46 0
 [[ $REPLY == 2:0 ]] || {
-  print -u2 -- "scrollbar did not start at the top: $REPLY"
+  print -u2 -- "documentation scrollbar did not start at the top: $REPLY"
   return 1
 }
-_shell_sense_scrollbar_geometry 10 46 45
+_shell_sense_viewport_scrollbar_geometry 10 46 36
 [[ $REPLY == 2:8 ]] || {
-  print -u2 -- "scrollbar did not end at the bottom: $REPLY"
+  print -u2 -- "documentation scrollbar did not end at the bottom: $REPLY"
+  return 1
+}
+_shell_sense_view_total=46
+_shell_sense_menu_viewport_start_for 8 0
+[[ $REPLY == 1 ]] || {
+  print -u2 -- "menu viewport did not begin scrolling at its lower margin: $REPLY"
+  return 1
+}
+_shell_sense_menu_viewport_start_for 9 1
+[[ $REPLY == 2 ]] || {
+  print -u2 -- "menu viewport did not advance with downward navigation: $REPLY"
+  return 1
+}
+_shell_sense_menu_viewport_start_for 8 2
+[[ $REPLY == 2 ]] || {
+  print -u2 -- "menu viewport moved before reverse navigation reached its upper margin: $REPLY"
   return 1
 }
 _shell_sense_ghost_chunk 'orce-with-lease' word

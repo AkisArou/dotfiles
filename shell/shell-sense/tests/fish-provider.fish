@@ -31,6 +31,10 @@ test "$_shell_sense_fish_query_mode" = broad; or fail 'broad query mode'
 
 complete -c shell-sense-conformance -a restart -d 'restart services'
 complete -c shell-sense-conformance -l recursive -d 'list subdirectories recursively'
+complete -c shell-sense-short -s a
+complete -c shell-sense-short -s b
+complete -c shell-sense-combined -a '\-ab'
+complete -c shell-sense-user -a custom-native
 complete -c shell-sense-value -l color -a 'auto always never' -d 'color value'
 complete -c shell-sense-path -a '(__fish_complete_directories)'
 

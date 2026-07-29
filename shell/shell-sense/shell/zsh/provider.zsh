@@ -283,6 +283,12 @@ _shell_sense_zsh_compadd() {
             ${description:l} == directory ]]; then
       kind=directory
     fi
+    # Some native file groups describe every entry as "file" even though
+    # `_path_files` returned a directory. Keep the native candidate and edit,
+    # but present the more specific kind we just established from that path.
+    if [[ $kind == directory && ${description:l} == file ]]; then
+      description=directory
+    fi
     resource_path=
     if [[ $kind == file || $kind == directory || $kind == symlink ]]; then
       resource_path=$candidate_path

@@ -103,9 +103,7 @@ function __shell_sense_fish_collect --argument-names line_prefix fuzzy_min_chars
         set -l label (string unescape -- "$insertion")
         set -a _shell_sense_fish_insertions "$insertion"
         set -a _shell_sense_fish_labels "$label"
-        set -a _shell_sense_fish_descriptions "$description"
         __shell_sense_fish_kind "$insertion" "$description"
-        set -a _shell_sense_fish_kinds "$_shell_sense_fish_candidate_kind"
         set -l resource_path
         if contains -- "$_shell_sense_fish_candidate_kind" file directory symlink
             set resource_path "$label"
@@ -120,7 +118,15 @@ function __shell_sense_fish_collect --argument-names line_prefix fuzzy_min_chars
             else if not string match -q -- '/*' "$resource_path"
                 set resource_path "$PWD/$resource_path"
             end
+            if test "$_shell_sense_fish_candidate_kind" = file; and test -d "$resource_path"
+                set -g _shell_sense_fish_candidate_kind directory
+            end
         end
+        if test "$_shell_sense_fish_candidate_kind" = directory; and test (string lower -- "$description") = file
+            set description directory
+        end
+        set -a _shell_sense_fish_descriptions "$description"
+        set -a _shell_sense_fish_kinds "$_shell_sense_fish_candidate_kind"
         set -a _shell_sense_fish_resource_paths "$resource_path"
     end
 end

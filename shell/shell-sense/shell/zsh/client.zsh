@@ -2,6 +2,9 @@
 
 typeset -gi _shell_sense_read_fd=-1
 typeset -gi _shell_sense_write_fd=-1
+typeset -gi _shell_sense_sync_fd=-1
+typeset -gi _shell_sense_sync_active=0
+typeset -gi _shell_sense_redraw_pending=0
 typeset -gi _shell_sense_worker_pid=0
 typeset -gi _shell_sense_ready=0
 typeset -gi _shell_sense_configured=0
@@ -10,12 +13,19 @@ typeset -gi _shell_sense_generation=0
 typeset -gi _shell_sense_active_request=0
 typeset -gi _shell_sense_active_generation=0
 typeset -gi _shell_sense_active_cursor_byte=0
+typeset -gi _shell_sense_active_cursor=0
 typeset -gi _shell_sense_popup_visible=0
 typeset -gi _shell_sense_external_presentation=0
 typeset -gi _shell_sense_popup_stale=0
 typeset -gi _shell_sense_render_dirty=1
 typeset -gi _shell_sense_render_columns=0
 typeset -gi _shell_sense_render_menu_lines=0
+typeset -gi _shell_sense_render_first=1
+typeset -gi _shell_sense_menu_view_start=0
+typeset -gi _shell_sense_menu_view_request=0
+typeset -gi _shell_sense_menu_view_generation=0
+typeset -gi _shell_sense_navigation_serial=0
+typeset -gi _shell_sense_temp_navigation_serial=0
 typeset -gi _shell_sense_indicator_cells=0
 typeset -gi _shell_sense_selected=0
 typeset -gi _shell_sense_view_revision=0
@@ -43,6 +53,7 @@ typeset -gi _shell_sense_terminal_interrupt_disabled=0
 typeset -g _shell_sense_rx_buffer=
 typeset -g _shell_sense_parse_value=
 typeset -g _shell_sense_active_buffer=
+typeset -g _shell_sense_continuity_ghost=
 typeset -g _shell_sense_last_buffer=
 typeset -g _shell_sense_owned_postdisplay=
 typeset -gi _shell_sense_last_cursor=-1
@@ -50,6 +61,8 @@ typeset -g _shell_sense_activation_mode=continuous
 typeset -gi _shell_sense_after_accept=1
 typeset -gi _shell_sense_popup_enabled=1
 typeset -gi _shell_sense_max_rows=10
+typeset -gi _shell_sense_scrolloff=2
+typeset -gi _shell_sense_cycle=1
 typeset -gi _shell_sense_max_width=140
 typeset -gi _shell_sense_min_width=24
 typeset -gi _shell_sense_padding=1
@@ -59,6 +72,8 @@ typeset -gi _shell_sense_show_title=0
 typeset -gi _shell_sense_show_footer=1
 typeset -gi _shell_sense_show_scrollbar=1
 typeset -g _shell_sense_scrollbar_character='▐'
+typeset -gi _shell_sense_documentation_padding=0
+typeset -gi _shell_sense_show_documentation_scrollbar=1
 typeset -gi _shell_sense_show_groups=1
 typeset -gi _shell_sense_show_descriptions=1
 typeset -g _shell_sense_indicator_mode=icon
@@ -178,8 +193,10 @@ typeset -ga _shell_sense_temp_ghosts=()
 typeset -g _shell_sense_documentation_item=
 typeset -g _shell_sense_documentation_placement=
 typeset -gi _shell_sense_documentation_width=0
+typeset -gi _shell_sense_documentation_viewport_rows=0
 typeset -gi _shell_sense_documentation_offset=0
 typeset -gi _shell_sense_documentation_total=0
+typeset -gi _shell_sense_documentation_scrollbar=0
 typeset -ga _shell_sense_documentation_kinds=()
 typeset -ga _shell_sense_documentation_cells=()
 typeset -ga _shell_sense_documentation_lines=()
@@ -188,13 +205,16 @@ typeset -g _shell_sense_temp_documentation_placement=
 typeset -gi _shell_sense_temp_documentation_width=0
 typeset -gi _shell_sense_temp_documentation_expected=0
 typeset -gi _shell_sense_temp_documentation_received=0
+typeset -gi _shell_sense_temp_documentation_viewport_rows=0
 typeset -gi _shell_sense_temp_documentation_offset=0
 typeset -gi _shell_sense_temp_documentation_total=0
+typeset -gi _shell_sense_temp_documentation_scrollbar=0
 typeset -ga _shell_sense_temp_documentation_kinds=()
 typeset -ga _shell_sense_temp_documentation_cells=()
 typeset -ga _shell_sense_temp_documentation_lines=()
 typeset -g _shell_sense_fifo_in=
 typeset -g _shell_sense_fifo_out=
+typeset -g _shell_sense_sync_fifo=
 typeset -g _shell_sense_log_file=
 typeset -g _shell_sense_ui_locale=${LC_ALL:-${LC_CTYPE:-${LANG:-C.UTF-8}}}
 
@@ -402,6 +422,10 @@ _shell_sense_dispatch() {
       if (( $#fields == 2 )); then
         case $fields[1] in
           scrollbar-character) _shell_sense_scrollbar_character=$fields[2] ;;
+          scrolloff) _shell_sense_scrolloff=$fields[2] ;;
+          cycle) _shell_sense_cycle=$fields[2] ;;
+          documentation-padding) _shell_sense_documentation_padding=$fields[2] ;;
+          documentation-scrollbar) _shell_sense_show_documentation_scrollbar=$fields[2] ;;
         esac
         _shell_sense_render_dirty=1
       fi
@@ -431,7 +455,6 @@ _shell_sense_dispatch() {
           _shell_sense_popup_visible=1
           _shell_sense_render_dirty=1
           _shell_sense_render
-          zle -R 2>/dev/null
         fi
       fi
       ;;
@@ -446,6 +469,9 @@ _shell_sense_dispatch() {
       ;;
     view-layout)
       _shell_sense_view_layout "${fields[@]}"
+      ;;
+    selection-changed)
+      _shell_sense_selection_changed "${fields[@]}"
       ;;
     documentation-begin)
       _shell_sense_documentation_begin "${fields[@]}"
@@ -844,10 +870,16 @@ _shell_sense_capture_request() {
 
 _shell_sense_view_begin() {
   emulate -L zsh
-  (( $# >= 15 )) || return 1
+  (( $# >= 17 )) || return 1
   [[ $2 == $_shell_sense_active_request && $3 == $_shell_sense_active_generation ]] || return 0
+  [[ $15 == <-> && ( $16 == replace || $16 == preserve ) && $17 == <-> ]] || return 1
+  if (( $15 < _shell_sense_navigation_serial )); then
+    _shell_sense_view_building=0
+    return 0
+  fi
   _shell_sense_view_building=1
   _shell_sense_temp_view_revision=$4
+  _shell_sense_temp_navigation_serial=$15
   _shell_sense_temp_menu_width=0
   _shell_sense_temp_selected=${5:-0}
   (( _shell_sense_temp_selected++ ))
@@ -873,7 +905,11 @@ _shell_sense_view_begin() {
   _shell_sense_temp_acceptance_sources=()
   _shell_sense_temp_acceptance_identities=()
   _shell_sense_temp_ghosts=()
-  _shell_sense_reset_temp_documentation
+  if [[ $16 == preserve ]]; then
+    _shell_sense_preserve_temp_documentation
+  else
+    _shell_sense_reset_temp_documentation
+  fi
   if (( _shell_sense_temp_expected )); then
     _shell_sense_temp_ids[_shell_sense_temp_expected]=
     _shell_sense_temp_labels[_shell_sense_temp_expected]=
@@ -894,6 +930,7 @@ _shell_sense_view_chunk() {
   emulate -L zsh
   local -a fields=( "$@" )
   (( $#fields >= 3 )) || return 1
+  (( _shell_sense_view_building )) || return 0
   [[ $fields[1] == $_shell_sense_active_request && $fields[2] == $_shell_sense_active_generation ]] || return 0
   [[ $fields[3] == <-> ]] || return 1
   local -i count=$fields[3]
@@ -923,8 +960,10 @@ _shell_sense_view_chunk() {
 _shell_sense_view_end() {
   emulate -L zsh
   (( $# >= 3 )) || return 1
+  (( _shell_sense_view_building )) || return 0
   [[ $1 == $_shell_sense_active_request && $2 == $_shell_sense_active_generation ]] || return 0
   [[ $3 == $_shell_sense_temp_view_revision ]] || return 0
+  (( _shell_sense_temp_navigation_serial >= _shell_sense_navigation_serial )) || return 0
   (( _shell_sense_temp_received == _shell_sense_temp_expected )) || return 1
   _shell_sense_item_ids=( "${_shell_sense_temp_ids[@]}" )
   _shell_sense_item_labels=( "${_shell_sense_temp_labels[@]}" )
@@ -944,14 +983,23 @@ _shell_sense_view_end() {
   _shell_sense_max_label_cells=$_shell_sense_temp_max_label_cells
   _shell_sense_max_described_cells=$_shell_sense_temp_max_described_cells
   _shell_sense_view_revision=$_shell_sense_temp_view_revision
+  _shell_sense_navigation_serial=$_shell_sense_temp_navigation_serial
   _shell_sense_menu_width=$_shell_sense_temp_menu_width
   _shell_sense_commit_documentation
   _shell_sense_view_building=0
   _shell_sense_render_dirty=1
   _shell_sense_popup_stale=0
+  _shell_sense_continuity_ghost=
   _shell_sense_selected=$_shell_sense_temp_selected
   (( _shell_sense_selected < 1 )) && _shell_sense_selected=1
   (( _shell_sense_selected > $#_shell_sense_item_ids )) && _shell_sense_selected=$#_shell_sense_item_ids
+  if (( _shell_sense_menu_view_request != $1 ||
+        _shell_sense_menu_view_generation != $2 )); then
+    _shell_sense_menu_view_start=0
+    _shell_sense_menu_view_request=$1
+    _shell_sense_menu_view_generation=$2
+  fi
+  _shell_sense_update_menu_viewport $_shell_sense_selected_absolute
   if (( $#_shell_sense_item_ids && _shell_sense_popup_enabled &&
         ! _shell_sense_external_presentation )); then
     _shell_sense_popup_visible=1
@@ -961,25 +1009,65 @@ _shell_sense_view_end() {
   _shell_sense_render
 }
 
+_shell_sense_selection_changed() {
+  emulate -L zsh
+  (( $# == 6 )) || return 1
+  [[ $1 == $_shell_sense_active_request && $2 == $_shell_sense_active_generation &&
+     $3 == $_shell_sense_view_revision && $4 == <-> && $5 == <-> && $6 == <-> ]] || return 0
+  (( $4 >= _shell_sense_navigation_serial )) || return 0
+  local -i selected=$(( $5 + 1 ))
+  (( selected >= 1 && selected <= $#_shell_sense_item_ids )) || return 0
+  if (( $4 == _shell_sense_navigation_serial &&
+        selected == _shell_sense_selected &&
+        $6 == _shell_sense_selected_absolute )); then
+    return 0
+  fi
+  _shell_sense_navigation_serial=$4
+  _shell_sense_selected=$selected
+  _shell_sense_selected_absolute=$6
+  _shell_sense_update_menu_viewport $_shell_sense_selected_absolute
+  _shell_sense_render_dirty=1
+  _shell_sense_render
+}
+
 _shell_sense_reset_temp_documentation() {
   _shell_sense_temp_documentation_item=
   _shell_sense_temp_documentation_placement=
   _shell_sense_temp_documentation_width=0
   _shell_sense_temp_documentation_expected=0
   _shell_sense_temp_documentation_received=0
+  _shell_sense_temp_documentation_viewport_rows=0
   _shell_sense_temp_documentation_offset=0
   _shell_sense_temp_documentation_total=0
+  _shell_sense_temp_documentation_scrollbar=0
   _shell_sense_temp_documentation_kinds=()
   _shell_sense_temp_documentation_cells=()
   _shell_sense_temp_documentation_lines=()
+}
+
+_shell_sense_preserve_temp_documentation() {
+  _shell_sense_temp_documentation_item=$_shell_sense_documentation_item
+  _shell_sense_temp_documentation_placement=$_shell_sense_documentation_placement
+  _shell_sense_temp_documentation_width=$_shell_sense_documentation_width
+  _shell_sense_temp_documentation_expected=$#_shell_sense_documentation_lines
+  _shell_sense_temp_documentation_received=$#_shell_sense_documentation_lines
+  _shell_sense_temp_documentation_viewport_rows=$_shell_sense_documentation_viewport_rows
+  _shell_sense_temp_documentation_offset=$_shell_sense_documentation_offset
+  _shell_sense_temp_documentation_total=$_shell_sense_documentation_total
+  _shell_sense_temp_documentation_scrollbar=$_shell_sense_documentation_scrollbar
+  _shell_sense_temp_documentation_kinds=( "${_shell_sense_documentation_kinds[@]}" )
+  _shell_sense_temp_documentation_cells=( "${_shell_sense_documentation_cells[@]}" )
+  _shell_sense_temp_documentation_lines=( "${_shell_sense_documentation_lines[@]}" )
 }
 
 _shell_sense_commit_documentation() {
   _shell_sense_documentation_item=$_shell_sense_temp_documentation_item
   _shell_sense_documentation_placement=$_shell_sense_temp_documentation_placement
   _shell_sense_documentation_width=$_shell_sense_temp_documentation_width
+  _shell_sense_documentation_viewport_rows=$_shell_sense_temp_documentation_viewport_rows
   _shell_sense_documentation_offset=$_shell_sense_temp_documentation_offset
   _shell_sense_documentation_total=$_shell_sense_temp_documentation_total
+  _shell_sense_documentation_scrollbar=$_shell_sense_temp_documentation_scrollbar
   _shell_sense_documentation_kinds=( "${_shell_sense_temp_documentation_kinds[@]}" )
   _shell_sense_documentation_cells=( "${_shell_sense_temp_documentation_cells[@]}" )
   _shell_sense_documentation_lines=( "${_shell_sense_temp_documentation_lines[@]}" )
@@ -999,17 +1087,20 @@ _shell_sense_view_layout() {
 
 _shell_sense_documentation_begin() {
   emulate -L zsh
-  (( $# == 8 )) || return 1
+  (( $# == 10 )) || return 1
   [[ $1 == $_shell_sense_active_request && $2 == $_shell_sense_active_generation ]] || return 0
   [[ $4 == side || $4 == below ]] || return 1
-  [[ $5 == <-> && $6 == <-> && $7 == <-> && $8 == <-> ]] || return 1
+  [[ $5 == <-> && $6 == <-> && $7 == <-> && $8 == <-> &&
+     $9 == <-> && ${10} == [01] ]] || return 1
   _shell_sense_reset_temp_documentation
   _shell_sense_temp_documentation_item=$3
   _shell_sense_temp_documentation_placement=$4
   _shell_sense_temp_documentation_width=$5
   _shell_sense_temp_documentation_expected=$6
-  _shell_sense_temp_documentation_offset=$7
-  _shell_sense_temp_documentation_total=$8
+  _shell_sense_temp_documentation_viewport_rows=$7
+  _shell_sense_temp_documentation_offset=$8
+  _shell_sense_temp_documentation_total=$9
+  _shell_sense_temp_documentation_scrollbar=${10}
 }
 
 _shell_sense_documentation_chunk() {
@@ -1093,19 +1184,23 @@ _shell_sense_request() {
   if (( _shell_sense_active_request )); then
     _shell_sense_send cancel "$_shell_sense_active_request" "$_shell_sense_active_generation"
   fi
+  _shell_sense_rebase_continuity_ghost
   (( _shell_sense_request_serial++, _shell_sense_generation++ ))
   _shell_sense_active_request=$_shell_sense_request_serial
   _shell_sense_active_generation=$_shell_sense_generation
+  _shell_sense_navigation_serial=0
+  _shell_sense_temp_navigation_serial=0
   _shell_sense_active_buffer=$BUFFER
+  _shell_sense_active_cursor=$CURSOR
   _shell_sense_cursor_byte
   _shell_sense_active_cursor_byte=$REPLY
   _shell_sense_last_buffer=$BUFFER
   _shell_sense_last_cursor=$CURSOR
   # Keep the last complete frame on-screen while the next generation is
-  # debounced, captured, and ranked. Clearing it here made every ordinary edit
-  # produce a blank frame followed by a populated frame (visible flashing).
-  # Mark it stale instead: it remains useful visual continuity, but it cannot
-  # be navigated or accepted against the newly edited buffer.
+  # debounced, captured, and ranked. Its ghost is locally rebased against the
+  # edit above, following Blink's behavior of redrawing the current preview
+  # against the new line instead of clearing it before sources answer. The
+  # stale frame remains presentation-only: it cannot be navigated or accepted.
   (( _shell_sense_popup_visible )) && _shell_sense_popup_stale=1
   _shell_sense_send complete \
     "$_shell_sense_active_request" "$_shell_sense_active_generation" "" "$BUFFER" \
@@ -1171,11 +1266,40 @@ _shell_sense_line_pre_redraw() {
       esac
     fi
   fi
-  (( _shell_sense_popup_visible )) && _shell_sense_render
+  if (( _shell_sense_popup_visible )); then
+    if (( (_shell_sense_render_dirty || changed) &&
+          (${PENDING:-0} != 0 || ${KEYS_QUEUED_COUNT:-0} != 0) )); then
+      # Key-repeat may keep input queued across many widgets. Defer expensive
+      # panel construction to one event-loop callback, but retain the complete
+      # cached frame on every native redraw. Other line-pre-redraw integrations
+      # rebuild `region_highlight`; failing to reinstall our cached highlights
+      # would briefly expose an unselected frame before the coalesced update.
+      if _shell_sense_schedule_redraw; then
+        _shell_sense_retain_rendered_frame || _shell_sense_render 0
+        _shell_sense_begin_synchronized_redraw || true
+      else
+        _shell_sense_render 0
+        _shell_sense_begin_synchronized_redraw || true
+      fi
+      return 0
+    fi
+    if (( _shell_sense_render_dirty || changed )); then
+      _shell_sense_redraw_pending=0
+      # Build the new POSTDISPLAY before ZLE performs the redraw that already
+      # follows this hook. A self-pipe callback releases synchronized output
+      # only after that native redraw has returned to ZLE's event loop. Calling
+      # `zle -R` here would create a second, transient popup frame.
+      _shell_sense_render 0
+      _shell_sense_begin_synchronized_redraw || true
+    else
+      _shell_sense_render 0
+    fi
+  fi
 }
 
 _shell_sense_line_init() {
   emulate -L zsh
+  _shell_sense_setup_synchronized_redraw
   _shell_sense_ensure_worker
   # ZLE resets POSTDISPLAY for every new editing session. Forget the previous
   # ownership token before clearing plugin state so content installed by
@@ -1203,6 +1327,9 @@ _shell_sense_prepare_line_finish() {
   _shell_sense_active_request=0
   _shell_sense_active_buffer=
   _shell_sense_clear_popup 0
+  # Never leave a terminal buffering synchronized output when ZLE exits before
+  # the self-pipe callback gets another event-loop turn.
+  _shell_sense_end_synchronized_redraw
 }
 
 _shell_sense_erase_edit_display() {
@@ -1229,6 +1356,141 @@ _shell_sense_remove_highlights() {
   emulate -L zsh
   (( ${+region_highlight} )) || return 0
   region_highlight=( ${region_highlight:#*memo=shell-sense} )
+}
+
+_shell_sense_end_synchronized_redraw() {
+  emulate -L zsh
+  (( _shell_sense_sync_active )) || return 0
+  print -rn -- $'\e[?2026l'
+  _shell_sense_sync_active=0
+}
+
+_shell_sense_synchronized_redraw_callback() {
+  emulate -L zsh
+  local -i fd=${1:--1}
+  (( fd >= 0 && fd == _shell_sense_sync_fd )) || return 0
+
+  # Coalesce every wakeup. State lives in the client; bytes merely return
+  # control to ZLE's event loop after a native redraw or a burst of input.
+  local chunk=
+  while sysread -i $fd -s 64 -t 0 chunk 2>/dev/null; do
+    [[ -n $chunk ]] || break
+    chunk=
+  done
+  if (( _shell_sense_redraw_pending )); then
+    _shell_sense_redraw_pending=0
+    if (( _shell_sense_popup_visible && _shell_sense_render_dirty )); then
+      # If a preceding native redraw is still inside the same transaction,
+      # include this newest frame before releasing it. A render can itself be
+      # followed by ZLE's normal post-callback refresh, so a fresh wakeup—not
+      # this callback—must release the completed event-loop turn.
+      _shell_sense_render
+      _shell_sense_defer_synchronized_redraw_end || true
+      return 0
+    fi
+  fi
+  _shell_sense_end_synchronized_redraw
+}
+
+_shell_sense_defer_synchronized_redraw_end() {
+  emulate -L zsh
+  (( _shell_sense_sync_active && _shell_sense_sync_fd >= 0 )) || return 1
+  if ! syswrite -o $_shell_sense_sync_fd x 2>/dev/null; then
+    _shell_sense_end_synchronized_redraw
+    return 1
+  fi
+}
+
+_shell_sense_schedule_redraw() {
+  emulate -L zsh
+  (( _shell_sense_sync_fd >= 0 )) || return 1
+  (( _shell_sense_redraw_pending )) && return 0
+  _shell_sense_redraw_pending=1
+  if ! syswrite -o $_shell_sense_sync_fd r 2>/dev/null; then
+    _shell_sense_redraw_pending=0
+    return 1
+  fi
+}
+
+_shell_sense_begin_synchronized_redraw() {
+  emulate -L zsh
+  (( _shell_sense_sync_fd >= 0 )) || return 1
+  (( _shell_sense_sync_active )) && return 0
+
+  print -rn -- $'\e[?2026h'
+  _shell_sense_sync_active=1
+  _shell_sense_defer_synchronized_redraw_end
+}
+
+_shell_sense_runtime_directory() {
+  emulate -L zsh
+  local runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}/shell-sense-$UID}
+  local runtime_dir=$runtime_base/shell-sense
+  command mkdir -p -m 700 -- "$runtime_dir" 2>/dev/null || return 1
+  command chmod 700 -- "$runtime_dir" 2>/dev/null || return 1
+  [[ -d $runtime_dir && -O $runtime_dir && ! -L $runtime_dir ]] || return 1
+  REPLY=$runtime_dir
+}
+
+_shell_sense_setup_synchronized_redraw() {
+  emulate -L zsh
+  (( _shell_sense_sync_fd >= 0 )) && return 0
+
+  _shell_sense_runtime_directory || return 1
+  local runtime_dir=$REPLY
+  _shell_sense_sync_fifo="$runtime_dir/sync-${sysparams[pid]}-${RANDOM}-${RANDOM}"
+  command mkfifo -m 600 -- "$_shell_sense_sync_fifo" 2>/dev/null || {
+    _shell_sense_sync_fifo=
+    return 1
+  }
+  if ! sysopen -rw -o cloexec,nonblock -u _shell_sense_sync_fd \
+      "$_shell_sense_sync_fifo" 2>/dev/null; then
+    command unlink -- "$_shell_sense_sync_fifo" 2>/dev/null
+    _shell_sense_sync_fifo=
+    _shell_sense_sync_fd=-1
+    return 1
+  fi
+  command unlink -- "$_shell_sense_sync_fifo" 2>/dev/null
+  _shell_sense_sync_fifo=
+
+  zle -N .shell-sense-sync-callback _shell_sense_synchronized_redraw_callback
+  if ! zle -Fw $_shell_sense_sync_fd .shell-sense-sync-callback 2>/dev/null; then
+    exec {_shell_sense_sync_fd}>&- 2>/dev/null
+    _shell_sense_sync_fd=-1
+    return 1
+  fi
+}
+
+_shell_sense_teardown_synchronized_redraw() {
+  emulate -L zsh
+  _shell_sense_redraw_pending=0
+  _shell_sense_end_synchronized_redraw
+  if (( _shell_sense_sync_fd >= 0 )); then
+    zle -F $_shell_sense_sync_fd 2>/dev/null
+    exec {_shell_sense_sync_fd}>&- 2>/dev/null
+  fi
+  _shell_sense_sync_fd=-1
+  [[ -z $_shell_sense_sync_fifo ]] ||
+    command unlink -- "$_shell_sense_sync_fifo" 2>/dev/null
+  _shell_sense_sync_fifo=
+}
+
+_shell_sense_redisplay() {
+  emulate -L zsh
+  # DEC private mode 2026 is ignored by terminals that do not implement
+  # synchronized output. Supporting terminals buffer every redraw in this ZLE
+  # event-loop turn until the self-pipe callback releases the transaction.
+  # `zle -R` can be followed by ZLE's normal post-callback refresh; closing the
+  # transaction here would expose those two passes as separate visual frames.
+  if (( ! _shell_sense_sync_active )); then
+    _shell_sense_begin_synchronized_redraw || true
+  fi
+  zle -R
+  local -i redisplay_status=$?
+  # A failed refresh may occur while ZLE is leaving. There may be no further
+  # event-loop turn in which the callback can run, so release the terminal now.
+  (( redisplay_status == 0 )) || _shell_sense_end_synchronized_redraw
+  return $redisplay_status
 }
 
 _shell_sense_remove_postdisplay() {
@@ -1275,15 +1537,27 @@ _shell_sense_set_postdisplay() {
   done
 }
 
+_shell_sense_retain_rendered_frame() {
+  emulate -L zsh
+  (( _shell_sense_popup_visible && $#_shell_sense_render_lines )) || return 1
+  _shell_sense_current_ghost
+  _shell_sense_set_postdisplay "${(F)_shell_sense_render_lines}" "$REPLY"
+}
+
 _shell_sense_clear_popup() {
   local -i request_redisplay=${1:-1}
+  _shell_sense_redraw_pending=0
   _shell_sense_remove_postdisplay
   _shell_sense_popup_visible=0
   _shell_sense_popup_stale=0
+  _shell_sense_continuity_ghost=
   _shell_sense_selected=0
   _shell_sense_view_total=0
   _shell_sense_view_window_start=0
   _shell_sense_selected_absolute=0
+  _shell_sense_menu_view_start=0
+  _shell_sense_menu_view_request=0
+  _shell_sense_menu_view_generation=0
   _shell_sense_max_label_cells=0
   _shell_sense_max_described_cells=0
   _shell_sense_menu_width=0
@@ -1303,8 +1577,10 @@ _shell_sense_clear_popup() {
   _shell_sense_documentation_item=
   _shell_sense_documentation_placement=
   _shell_sense_documentation_width=0
+  _shell_sense_documentation_viewport_rows=0
   _shell_sense_documentation_offset=0
   _shell_sense_documentation_total=0
+  _shell_sense_documentation_scrollbar=0
   _shell_sense_documentation_kinds=()
   _shell_sense_documentation_cells=()
   _shell_sense_documentation_lines=()
@@ -1312,12 +1588,13 @@ _shell_sense_clear_popup() {
   _shell_sense_render_dirty=1
   _shell_sense_render_columns=0
   _shell_sense_render_menu_lines=0
+  _shell_sense_render_first=1
   _shell_sense_render_lines=()
   _shell_sense_render_highlight_starts=()
   _shell_sense_render_highlight_ends=()
   _shell_sense_render_highlight_styles=()
   if (( request_redisplay )) && zle >/dev/null 2>&1; then
-    zle -R 2>/dev/null
+    _shell_sense_redisplay 2>/dev/null
   fi
 }
 
@@ -1326,7 +1603,7 @@ _shell_sense_hide_popup() {
   _shell_sense_remove_postdisplay
   _shell_sense_popup_visible=0
   if zle >/dev/null 2>&1; then
-    zle -R 2>/dev/null
+    _shell_sense_redisplay 2>/dev/null
   fi
 }
 
@@ -1341,7 +1618,7 @@ _shell_sense_kind_indicator() {
   case $1 in
     directory) icon='󰉋' ;;
     file|symlink) icon='󰈔' ;;
-    option|option-value) icon='󰘵' ;;
+    option|option-value) icon='󰌋' ;;
     command|subcommand) icon='󰆍' ;;
     variable) icon='󰫧' ;;
     service) icon='󰒍' ;;
@@ -1384,22 +1661,63 @@ _shell_sense_truncate() {
   fi
 }
 
-_shell_sense_scrollbar_geometry() {
+_shell_sense_menu_viewport_start_for() {
   emulate -L zsh
-  local -i rows=$1 total=$2 selected=$3
-  local -i thumb_rows=0 thumb_first=0 track=0
+  local -i selected=$1 start=$2 total=$_shell_sense_view_total
+  local -i rows=$_shell_sense_max_rows scrolloff=$_shell_sense_scrolloff maximum_start=0
+  (( rows > total )) && rows=$total
+  if (( rows <= 0 )); then
+    REPLY=0
+    return 0
+  fi
+  (( scrolloff >= rows )) && scrolloff=$(( rows - 1 ))
+  (( maximum_start = total - rows ))
+  (( start < 0 )) && start=0
+  (( start > maximum_start )) && start=$maximum_start
+  (( selected < 0 )) && selected=0
+  (( selected >= total )) && selected=$(( total - 1 ))
+
+  # Match an editor window's persistent `scrolloff` behavior. The viewport
+  # stays fixed while the selection moves inside its margins; it advances only
+  # when the selection would cross one of them. Recomputing the start solely
+  # from the selected index made reverse navigation scroll on every key.
+  if (( selected < start + scrolloff )); then
+    start=$(( selected - scrolloff ))
+  elif (( selected >= start + rows - scrolloff )); then
+    start=$(( selected - rows + scrolloff + 1 ))
+  fi
+  (( start < 0 )) && start=0
+  (( start > maximum_start )) && start=$maximum_start
+  REPLY=$start
+}
+
+_shell_sense_update_menu_viewport() {
+  _shell_sense_menu_viewport_start_for "$1" "$_shell_sense_menu_view_start"
+  _shell_sense_menu_view_start=$REPLY
+}
+
+_shell_sense_cached_menu_viewport_contains() {
+  emulate -L zsh
+  local -i start=$1 rows=$_shell_sense_max_rows
+  (( rows > _shell_sense_view_total )) && rows=$_shell_sense_view_total
+  local -i cached_end=$(( _shell_sense_view_window_start + $#_shell_sense_item_ids ))
+  (( start >= _shell_sense_view_window_start && start + rows <= cached_end ))
+}
+
+_shell_sense_viewport_scrollbar_geometry() {
+  emulate -L zsh
+  local -i rows=$1 total=$2 offset=$3
+  local -i thumb_rows=0 thumb_first=0 track=0 maximum_offset=0
   if (( rows > 0 && total > rows )); then
     (( thumb_rows = (rows * rows) / total ))
     (( thumb_rows < 1 )) && thumb_rows=1
     (( thumb_rows > rows )) && thumb_rows=$rows
-    (( selected < 0 )) && selected=0
-    (( selected >= total )) && selected=$(( total - 1 ))
+    (( maximum_offset = total - rows ))
+    (( offset < 0 )) && offset=0
+    (( offset > maximum_offset )) && offset=$maximum_offset
     (( track = rows - thumb_rows ))
-    if (( track > 0 && total > 1 )); then
-      # Map the selected item over the complete track rather than deriving the
-      # thumb from the asynchronously updated viewport. This makes both
-      # endpoints exact and keeps local navigation visually synchronous.
-      (( thumb_first = (selected * track + (total - 1) / 2) / (total - 1) ))
+    if (( track > 0 && maximum_offset > 0 )); then
+      (( thumb_first = (offset * track + maximum_offset / 2) / maximum_offset ))
     fi
   fi
   REPLY="$thumb_rows:$thumb_first"
@@ -1409,13 +1727,35 @@ _shell_sense_current_ghost() {
   emulate -L zsh
   REPLY=
   (( _shell_sense_ghost_enabled && _shell_sense_popup_visible &&
-     ! _shell_sense_popup_stale && _shell_sense_selected >= 1 &&
+     _shell_sense_selected >= 1 &&
      _shell_sense_selected <= $#_shell_sense_item_ghosts )) || return 0
   # POSTDISPLAY follows the complete editable buffer. Rendering a suffix in
   # the middle of BUFFER would require mutating ZLE state, so the ZLE UI
   # intentionally limits completion-derived ghost text to end-of-line.
   (( CURSOR == $#BUFFER )) || return 0
+  if (( _shell_sense_popup_stale )); then
+    REPLY=$_shell_sense_continuity_ghost
+    return 0
+  fi
   REPLY=$_shell_sense_item_ghosts[_shell_sense_selected]
+}
+
+_shell_sense_rebase_continuity_ghost() {
+  emulate -L zsh
+  local ghost prediction
+  _shell_sense_continuity_ghost=
+  (( _shell_sense_popup_visible && _shell_sense_selected >= 1 &&
+     _shell_sense_active_cursor == $#_shell_sense_active_buffer &&
+     CURSOR == $#BUFFER )) || return 0
+  _shell_sense_current_ghost
+  ghost=$REPLY
+  [[ -n $ghost ]] || return 0
+  prediction="$_shell_sense_active_buffer$ghost"
+  (( $#BUFFER <= $#prediction )) || return 0
+  [[ ${prediction[1,$#BUFFER]} == "$BUFFER" ]] || return 0
+  if (( $#BUFFER < $#prediction )); then
+    _shell_sense_continuity_ghost=${prediction[$(( $#BUFFER + 1 )),-1]}
+  fi
 }
 
 _shell_sense_ghost_chunk() {
@@ -1467,6 +1807,7 @@ _shell_sense_accept_ghost_part() {
 
 _shell_sense_render() {
   emulate -L zsh
+  local -i request_redisplay=${1:-1}
   # Netstring parsing is byte-oriented and dynamically scopes LC_ALL=C into
   # dispatch handlers. Render in the interactive locale so ZLE receives real
   # multibyte characters instead of displaying them as `\M-...` byte escapes.
@@ -1477,7 +1818,7 @@ _shell_sense_render() {
         $#_shell_sense_render_lines )); then
     _shell_sense_current_ghost
     _shell_sense_set_postdisplay "${(F)_shell_sense_render_lines}" "$REPLY"
-    zle -R
+    (( request_redisplay )) && _shell_sense_redisplay
     return 0
   fi
   local tl tr bl br horizontal vertical
@@ -1541,25 +1882,30 @@ _shell_sense_render() {
   (( content_width = inner - (2 * _shell_sense_padding) ))
   local -i row_content_width=$(( content_width - scrollbar_cells ))
   (( row_content_width < 1 )) && return 0
-  local -i first=1
-  if (( _shell_sense_selected > rows )); then
-    first=$(( _shell_sense_selected - rows + 1 ))
-  fi
-  (( first + rows - 1 > $#_shell_sense_item_ids )) && first=$(( $#_shell_sense_item_ids - rows + 1 ))
+  local -i first=$(( _shell_sense_menu_view_start - _shell_sense_view_window_start + 1 ))
+  # The worker keeps a larger prefetch window around this absolute menu
+  # viewport. Refuse to manufacture a different viewport from an incomplete
+  # slice: doing so would display the selected item at one row and then move it
+  # when the authoritative prefetch window arrived.
+  (( first >= 1 && first + rows - 1 <= $#_shell_sense_item_ids )) || return 1
+  _shell_sense_render_first=$first
   local -a lines=() highlight_starts=() highlight_ends=() highlight_styles=()
   local -a match_ranges=()
   local fill row marker marker_prefix icon label detail left padding line line_prefix line_suffix
   local kind match_ranges_text match_range label_style match_style kind_style detail_style
   local -i index available icon_cells label_cells detail_cells left_cells indicator_delta
-  local -i panel_chars=0 detail_gap=0 detail_start=0 line_start=0
+  local -i panel_chars=0 detail_gap=0 detail_start=0 line_start=0 row_identity_position=0
   local -i interior_start=0 interior_end=0 icon_start=0 icon_end=0
   local -i label_offset=0 label_start=0 label_visible=0 match_start=0 match_end=0
   local -i is_selected=0 scrollbar_position=0
   local -i thumb_rows=0 thumb_first=0 row_number=0
   padding=${(l:$_shell_sense_padding:: :)}
   if (( scrollbar_active )); then
-    _shell_sense_scrollbar_geometry "$rows" "$_shell_sense_view_total" \
-      "$_shell_sense_selected_absolute"
+    # Like Blink's scrollbar, represent the visible viewport rather than the
+    # selected candidate. Selection changes within a stable viewport must not
+    # move the thumb.
+    _shell_sense_viewport_scrollbar_geometry "$rows" "$_shell_sense_view_total" \
+      "$_shell_sense_menu_view_start"
     thumb_rows=${REPLY%:*}
     thumb_first=${REPLY#*:}
   fi
@@ -1732,6 +2078,16 @@ _shell_sense_render() {
         highlight_styles+=( "$_shell_sense_style_scrollbar_thumb" )
       fi
     fi
+    if (( _shell_sense_padding > 0 && row_number % 2 == 0 )); then
+      # Give adjacent physical rows distinct terminal attributes without
+      # changing their appearance. This prevents ZLE from representing a
+      # viewport update as a visible insert/delete-line transition.
+      row_identity_position=$line_start
+      [[ $_shell_sense_border == none ]] || (( row_identity_position++ ))
+      highlight_starts+=( $row_identity_position )
+      highlight_ends+=( $(( row_identity_position + 1 )) )
+      highlight_styles+=( bold )
+    fi
     lines+=( "$line" )
     (( panel_chars += ${#line} + 1 ))
   done
@@ -1752,33 +2108,66 @@ _shell_sense_render() {
     lines+=( "$line" )
   fi
   _shell_sense_render_menu_lines=$#lines
-  if (( _shell_sense_documentation_width > 0 && $#_shell_sense_documentation_lines )); then
+  if (( _shell_sense_documentation_width > 0 &&
+        _shell_sense_documentation_viewport_rows > 0 )); then
     local -a menu_lines=( "${lines[@]}" ) documentation_lines=()
     local -a documentation_text_starts=() documentation_text_ends=()
     local -a documentation_text_styles=()
+    local -a documentation_scrollbar_offsets=() documentation_scrollbar_styles=()
     local -i documentation_width=$_shell_sense_documentation_width
     local -i documentation_border_width=2 documentation_inner documentation_content
     local -i source_index source_cells source_fill documentation_line_start
-    local documentation_text documentation_line documentation_style
+    local -i documentation_scrollbar_cells=0 documentation_scrollbar_offset=0
+    local -i documentation_thumb_rows=0 documentation_thumb_first=0
+    local documentation_text documentation_line documentation_style documentation_padding
     [[ $_shell_sense_border == none ]] && documentation_border_width=0
+    if (( _shell_sense_show_documentation_scrollbar &&
+          _shell_sense_documentation_scrollbar )); then
+      documentation_scrollbar_cells=1
+      _shell_sense_viewport_scrollbar_geometry \
+        "$_shell_sense_documentation_viewport_rows" \
+        "$_shell_sense_documentation_total" \
+        "$_shell_sense_documentation_offset"
+      documentation_thumb_rows=${REPLY%:*}
+      documentation_thumb_first=${REPLY#*:}
+    fi
     documentation_inner=$(( documentation_width - documentation_border_width ))
-    documentation_content=$(( documentation_inner - 2 * _shell_sense_padding ))
+    documentation_content=$(( documentation_inner -
+      2 * _shell_sense_documentation_padding - documentation_scrollbar_cells ))
     (( documentation_content > 0 )) || return 0
+    documentation_padding=${(l:$_shell_sense_documentation_padding:: :)}
     if [[ $_shell_sense_border != none ]]; then
       documentation_lines+=( "$tl${(pl:$documentation_inner::$horizontal:)}$tr" )
     fi
     for (( source_index = 1;
-           source_index <= $#_shell_sense_documentation_lines;
+           source_index <= _shell_sense_documentation_viewport_rows;
            source_index++ )); do
-      documentation_text=$_shell_sense_documentation_lines[source_index]
-      source_cells=$_shell_sense_documentation_cells[source_index]
+      documentation_text=${_shell_sense_documentation_lines[source_index]-}
+      source_cells=${_shell_sense_documentation_cells[source_index]:-0}
       (( source_fill = documentation_content - source_cells, source_fill < 0 )) && source_fill=0
       if [[ $_shell_sense_border == none ]]; then
-        documentation_line="$padding$documentation_text${(l:$source_fill:: :)}$padding"
-        documentation_line_start=${#padding}
+        documentation_line="$documentation_padding$documentation_text${(l:$source_fill:: :)}$documentation_padding"
+        documentation_line_start=${#documentation_padding}
       else
-        documentation_line="$vertical$padding$documentation_text${(l:$source_fill:: :)}$padding$vertical"
-        documentation_line_start=$(( ${#vertical} + ${#padding} ))
+        documentation_line="$vertical$documentation_padding$documentation_text${(l:$source_fill:: :)}$documentation_padding"
+        documentation_line_start=$(( ${#vertical} + ${#documentation_padding} ))
+      fi
+      if (( documentation_scrollbar_cells )); then
+        documentation_scrollbar_offset=${#documentation_line}
+        documentation_line+=$_shell_sense_scrollbar_character
+        if (( source_index > documentation_thumb_first &&
+              source_index <= documentation_thumb_first + documentation_thumb_rows )); then
+          documentation_scrollbar_styles+=( "$_shell_sense_style_scrollbar_thumb" )
+        else
+          documentation_scrollbar_styles+=( "$_shell_sense_style_scrollbar_gutter" )
+        fi
+        documentation_scrollbar_offsets+=( $documentation_scrollbar_offset )
+      else
+        documentation_scrollbar_offsets+=( -1 )
+        documentation_scrollbar_styles+=( "" )
+      fi
+      if [[ $_shell_sense_border != none ]]; then
+        documentation_line+=$vertical
       fi
       case $_shell_sense_documentation_kinds[source_index] in
         heading) documentation_style=$_shell_sense_style_documentation_heading ;;
@@ -1848,6 +2237,11 @@ _shell_sense_render() {
           highlight_starts+=( $(( doc_base + documentation_text_starts[text_index] )) )
           highlight_ends+=( $(( doc_base + documentation_text_ends[text_index] )) )
           highlight_styles+=( "$documentation_text_styles[text_index]" )
+          if (( documentation_scrollbar_offsets[text_index] >= 0 )); then
+            highlight_starts+=( $(( doc_base + documentation_scrollbar_offsets[text_index] )) )
+            highlight_ends+=( $(( doc_base + documentation_scrollbar_offsets[text_index] + 1 )) )
+            highlight_styles+=( "$documentation_scrollbar_styles[text_index]" )
+          fi
         fi
       done
       lines=( "${combined_lines[@]}" )
@@ -1868,6 +2262,11 @@ _shell_sense_render() {
           highlight_starts+=( $(( below_cursor + documentation_text_starts[text_index] )) )
           highlight_ends+=( $(( below_cursor + documentation_text_ends[text_index] )) )
           highlight_styles+=( "$documentation_text_styles[text_index]" )
+          if (( documentation_scrollbar_offsets[text_index] >= 0 )); then
+            highlight_starts+=( $(( below_cursor + documentation_scrollbar_offsets[text_index] )) )
+            highlight_ends+=( $(( below_cursor + documentation_scrollbar_offsets[text_index] + 1 )) )
+            highlight_styles+=( "$documentation_scrollbar_styles[text_index]" )
+          fi
         fi
         (( below_cursor += ${#documentation_lines[below_index]} + 1 ))
       done
@@ -1883,7 +2282,7 @@ _shell_sense_render() {
   _shell_sense_render_dirty=0
   _shell_sense_current_ghost
   _shell_sense_set_postdisplay "$panel" "$REPLY"
-  zle -R
+  (( request_redisplay )) && _shell_sense_redisplay
 }
 
 _shell_sense_accept_selected() {
@@ -2005,57 +2404,13 @@ _shell_sense_key_dispatch() {
       # fresh line without reintroducing the cleared POSTDISPLAY.
       zle send-break
       ;;
-    next)
-      if (( _shell_sense_popup_visible && ! _shell_sense_popup_stale )); then
-        if (( _shell_sense_selected < $#_shell_sense_item_ids &&
-              _shell_sense_selected_absolute + 1 < _shell_sense_view_total )); then
-          (( _shell_sense_selected++, _shell_sense_selected_absolute++ ))
-          _shell_sense_render_dirty=1
-          _shell_sense_render
-        fi
-        _shell_sense_send navigate "$_shell_sense_active_request" \
-          "$_shell_sense_active_generation" next
-      else _shell_sense_call_original "$logical"; fi
-      ;;
-    previous)
-      if (( _shell_sense_popup_visible && ! _shell_sense_popup_stale )); then
-        if (( _shell_sense_selected > 1 && _shell_sense_selected_absolute > 0 )); then
-          (( _shell_sense_selected--, _shell_sense_selected_absolute-- ))
-          _shell_sense_render_dirty=1
-          _shell_sense_render
-        fi
-        _shell_sense_send navigate "$_shell_sense_active_request" \
-          "$_shell_sense_active_generation" previous
-      else _shell_sense_call_original "$logical"; fi
-      ;;
-    page-down)
-      if (( _shell_sense_popup_visible && ! _shell_sense_popup_stale )); then
-        if (( _shell_sense_selected + _shell_sense_max_rows <= $#_shell_sense_item_ids )); then
-          (( _shell_sense_selected += _shell_sense_max_rows,
-             _shell_sense_selected_absolute += _shell_sense_max_rows ))
-          _shell_sense_render_dirty=1
-          _shell_sense_render
-        fi
-        _shell_sense_send navigate "$_shell_sense_active_request" \
-          "$_shell_sense_active_generation" page-down
-      else _shell_sense_call_original "$logical"; fi
-      ;;
-    page-up)
-      if (( _shell_sense_popup_visible && ! _shell_sense_popup_stale )); then
-        if (( _shell_sense_selected > _shell_sense_max_rows )); then
-          (( _shell_sense_selected -= _shell_sense_max_rows,
-             _shell_sense_selected_absolute -= _shell_sense_max_rows ))
-          _shell_sense_render_dirty=1
-          _shell_sense_render
-        fi
-        _shell_sense_send navigate "$_shell_sense_active_request" \
-          "$_shell_sense_active_generation" page-up
-      else _shell_sense_call_original "$logical"; fi
+    next|previous|page-down|page-up)
+      _shell_sense_navigate_candidate "$action" || _shell_sense_call_original "$logical"
       ;;
     documentation-down|documentation-up|documentation-page-down|documentation-page-up|toggle-documentation)
       if (( _shell_sense_popup_visible && ! _shell_sense_popup_stale )); then
         _shell_sense_send navigate "$_shell_sense_active_request" \
-          "$_shell_sense_active_generation" "$action"
+          "$_shell_sense_active_generation" "$_shell_sense_navigation_serial" "$action"
       else
         _shell_sense_call_original "$logical"
       fi
@@ -2080,6 +2435,52 @@ _shell_sense_key_dispatch() {
     none) ;;
     *) _shell_sense_call_original "$logical" ;;
   esac
+}
+
+_shell_sense_navigate_candidate() {
+  emulate -L zsh
+  (( _shell_sense_popup_visible && ! _shell_sense_popup_stale &&
+     _shell_sense_view_total > 0 )) || return 1
+  local action=$1
+  local -i desired=$_shell_sense_selected_absolute
+  case $action in
+    next)
+      if (( desired + 1 < _shell_sense_view_total )); then
+        (( desired++ ))
+      elif (( _shell_sense_cycle )); then
+        desired=0
+      fi
+      ;;
+    previous)
+      if (( desired > 0 )); then
+        (( desired-- ))
+      elif (( _shell_sense_cycle )); then
+        desired=$(( _shell_sense_view_total - 1 ))
+      fi
+      ;;
+    page-down)
+      (( desired += _shell_sense_max_rows ))
+      (( desired >= _shell_sense_view_total )) && desired=$(( _shell_sense_view_total - 1 ))
+      ;;
+    page-up)
+      (( desired -= _shell_sense_max_rows ))
+      (( desired < 0 )) && desired=0
+      ;;
+    *) return 1 ;;
+  esac
+  (( _shell_sense_navigation_serial++ ))
+  local -i relative=$(( desired - _shell_sense_view_window_start + 1 ))
+  _shell_sense_menu_viewport_start_for "$desired" "$_shell_sense_menu_view_start"
+  local -i desired_view_start=$REPLY
+  if (( relative >= 1 && relative <= $#_shell_sense_item_ids )) &&
+      _shell_sense_cached_menu_viewport_contains "$desired_view_start"; then
+    _shell_sense_selected=$relative
+    _shell_sense_selected_absolute=$desired
+    _shell_sense_menu_view_start=$desired_view_start
+    _shell_sense_render_dirty=1
+  fi
+  _shell_sense_send navigate "$_shell_sense_active_request" \
+    "$_shell_sense_active_generation" "$_shell_sense_navigation_serial" "$action"
 }
 
 _shell_sense_install_keybindings() {
@@ -2172,6 +2573,7 @@ _shell_sense_cleanup() {
   add-zsh-hook -d preexec _shell_sense_restore_terminal_interrupt 2>/dev/null
   add-zsh-hook -d zshexit _shell_sense_cleanup 2>/dev/null
   _shell_sense_restore_terminal_interrupt
+  _shell_sense_teardown_synchronized_redraw
   local key map logical sequence original
   for key in ${(k)_shell_sense_bound_sequences}; do
     map=${key%%:*}
@@ -2203,11 +2605,8 @@ _shell_sense_start_worker() {
     return 1
   fi
 
-  local runtime_base=${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}/shell-sense-$UID}
-  local runtime_dir=$runtime_base/shell-sense
-  command mkdir -p -m 700 -- "$runtime_dir" 2>/dev/null || return 1
-  command chmod 700 -- "$runtime_dir" 2>/dev/null || return 1
-  [[ -d $runtime_dir && -O $runtime_dir && ! -L $runtime_dir ]] || return 1
+  _shell_sense_runtime_directory || return 1
+  local runtime_dir=$REPLY
   local token="${sysparams[pid]}-${RANDOM}-${RANDOM}"
   _shell_sense_fifo_in="$runtime_dir/shell-$token.in"
   _shell_sense_fifo_out="$runtime_dir/shell-$token.out"
@@ -2265,5 +2664,6 @@ _shell_sense_init() {
   add-zsh-hook zshexit _shell_sense_cleanup
   _shell_sense_last_buffer=
   _shell_sense_last_cursor=-1
+  _shell_sense_setup_synchronized_redraw
   _shell_sense_start_worker
 }

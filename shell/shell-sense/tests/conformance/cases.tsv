@@ -1,6 +1,9 @@
 # id<TAB>line<TAB>Zsh label<TAB>Fish label<TAB>Bash label<TAB>Zsh kind<TAB>Fish kind<TAB>Bash kind<TAB>resource suffix or -
 fuzzy-subcommand	shell-sense-conformance rstart	restart	restart	restart	text	service	text	-
 long-option	shell-sense-conformance --recurs	--recursive	--recursive	--recursive	option	option	option	-
+short-option	shell-sense-short -	-a	-a	-a	option	option	option	-
+combined-short-option	shell-sense-combined -a	-ab	-ab	-ab	option	option	option	-
+user-completion	shell-sense-user cust	custom-native	custom-native	custom-native	text	text	text	-
 option-value	shell-sense-value --color=au	auto	--color=auto	auto	text	option	text	-
 directory-prefix	shell-sense-path dotfil	dotfiles	dotfiles/	dotfiles/	directory	directory	directory	dotfiles
 nested-directory	shell-sense-path dotfiles/nv	nvim	dotfiles/nvim/	dotfiles/nvim/	directory	directory	directory	dotfiles/nvim

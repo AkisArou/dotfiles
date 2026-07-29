@@ -25,11 +25,38 @@ fn defaults_are_continuous_and_tab_is_manual_fallback() {
     assert_eq!(config.styles.label_match, "fg=#18a2fe,bold");
     assert_eq!(config.popup.border, BorderStyle::None);
     assert_eq!(config.popup.scrollbar_character, "▐");
+    assert_eq!(config.popup.scrolloff, 2);
+    assert!(config.popup.cycle);
+    assert_eq!(config.documentation.padding, 0);
+    assert!(config.documentation.scrollbar);
     assert!(config.indicators.selected_marker.is_empty());
     assert_eq!(config.sources.zsh.fuzzy_min_query_chars, 3);
     assert_eq!(config.sources.fish.fuzzy_min_query_chars, 3);
     assert_eq!(config.sources.bash.fuzzy_min_query_chars, 3);
     config.validate().unwrap();
+}
+
+#[test]
+fn popup_scrolloff_must_fit_inside_the_viewport() {
+    let result = Config::from_toml("version = 4\n[popup]\nmax_rows = 4\nscrolloff = 4\n");
+    assert!(matches!(result, Err(ConfigError::Validation(_))));
+
+    let config = Config::from_toml("version = 4\n[popup]\nmax_rows = 4\nscrolloff = 2\n").unwrap();
+    assert_eq!(config.popup.scrolloff, 2);
+}
+
+#[test]
+fn popup_reserves_a_refresh_gutter() {
+    let result = Config::from_toml("version = 4\n[popup]\npadding = 0\n");
+    assert!(matches!(result, Err(ConfigError::Validation(_))));
+
+    Config::from_toml("version = 4\n[popup]\npadding = 1\n").unwrap();
+}
+
+#[test]
+fn popup_cycling_can_be_disabled() {
+    let config = Config::from_toml("version = 4\n[popup]\ncycle = false\n").unwrap();
+    assert!(!config.popup.cycle);
 }
 
 #[test]

@@ -41,6 +41,19 @@ _shell_sense_live_many_completion() {
 }
 compdef _shell_sense_live_many_completion sense-many
 
+_shell_sense_live_window_completion() {
+  local -a words=() descriptions=()
+  local option
+  local -i index
+  for (( index = 1; index <= 46; index++ )); do
+    printf -v option '%02d' $index
+    words+=( "--window-$option" )
+    descriptions+=( "--window-$option — viewport candidate $option" )
+  done
+  compadd -J options -X 'viewport options' -d descriptions -- "${words[@]}"
+}
+compdef _shell_sense_live_window_completion sense-window
+
 sense-test() {
   print -r -- "<EXEC>$*</EXEC>"
   print -r -- "<FINISH-POST>${#_shell_sense_test_finish_postdisplay}</FINISH-POST>"
@@ -52,6 +65,10 @@ sense-verb() {
 
 sense-many() {
   print -r -- "<MANY>$*</MANY>"
+}
+
+sense-window() {
+  print -r -- "<WINDOW>$*</WINDOW>"
 }
 
 sense-single() {
@@ -67,6 +84,15 @@ sense-tty() {
     print -r -- '<TTY-INT>unexpected</TTY-INT>'
   fi
 }
+
+# Syntax highlighters rebuild this special array during line-pre-redraw. Run a
+# minimal equivalent before shell-sense's hook so the live test proves cached
+# popup highlights survive redraw coalescing as they must in a real setup.
+_shell_sense_test_highlight_reset() {
+  region_highlight=()
+}
+autoload -Uz add-zle-hook-widget
+add-zle-hook-widget line-pre-redraw _shell_sense_test_highlight_reset
 
 source "$SHELL_SENSE_TEST_ROOT/shell/zsh/shell-sense.plugin.zsh"
 
@@ -139,7 +165,7 @@ _shell_sense_test_state() {
     _shell_sense_fd_callback $_shell_sense_read_fd
   }
   zle -I
-  print -r -- "<STATE>ready=$_shell_sense_ready configured=$_shell_sense_configured read=$_shell_sense_read_fd write=$_shell_sense_write_fd worker=$_shell_sense_worker_pid fifo=$_shell_sense_fifo_in log=$_shell_sense_log_file request=$_shell_sense_active_request items=$#_shell_sense_item_ids captured=${(j:|:)_shell_sense_capture_words} kinds=${(j:|:)_shell_sense_item_kinds} flags=${(j:|:)_shell_sense_capture_flags} prefixes=${(j:|:)_shell_sense_capture_prefixes} selected=$_shell_sense_selected source=${_shell_sense_item_acceptance_sources[_shell_sense_selected]-} identity=${_shell_sense_item_acceptance_identities[_shell_sense_selected]-} serial=$_shell_sense_capture_serial apply=${_shell_sense_last_apply_status-unset} aligned=$render_aligned width=$render_width duplicates=$detail_duplicates flush=$scrollbar_flush doc-place=${_shell_sense_documentation_placement:-none} interrupt-key=$_shell_sense_interrupt_key_enabled terminal-interrupt=$_shell_sense_terminal_interrupt_disabled dispatches=$_shell_sense_test_key_dispatch_count erase=$_shell_sense_test_interrupt_erase_count buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_shell_sense_last_error-}</STATE>"
+  print -r -- "<STATE>ready=$_shell_sense_ready configured=$_shell_sense_configured read=$_shell_sense_read_fd write=$_shell_sense_write_fd sync-fd=$_shell_sense_sync_fd sync-active=$_shell_sense_sync_active redraw-pending=$_shell_sense_redraw_pending worker=$_shell_sense_worker_pid fifo=$_shell_sense_fifo_in log=$_shell_sense_log_file request=$_shell_sense_active_request items=$#_shell_sense_item_ids captured=${(j:|:)_shell_sense_capture_words} kinds=${(j:|:)_shell_sense_item_kinds} flags=${(j:|:)_shell_sense_capture_flags} prefixes=${(j:|:)_shell_sense_capture_prefixes} selected=$_shell_sense_selected selected-absolute=$_shell_sense_selected_absolute navigation-serial=$_shell_sense_navigation_serial menu-start=$_shell_sense_menu_view_start render-first=$_shell_sense_render_first render-rows=$_shell_sense_render_menu_lines source=${_shell_sense_item_acceptance_sources[_shell_sense_selected]-} identity=${_shell_sense_item_acceptance_identities[_shell_sense_selected]-} serial=$_shell_sense_capture_serial apply=${_shell_sense_last_apply_status-unset} aligned=$render_aligned width=$render_width duplicates=$detail_duplicates flush=$scrollbar_flush doc-place=${_shell_sense_documentation_placement:-none} interrupt-key=$_shell_sense_interrupt_key_enabled terminal-interrupt=$_shell_sense_terminal_interrupt_disabled dispatches=$_shell_sense_test_key_dispatch_count erase=$_shell_sense_test_interrupt_erase_count buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_shell_sense_last_error-}</STATE>"
   BUFFER=
   CURSOR=0
   zle accept-line
@@ -158,10 +184,21 @@ bindkey '^X^H' _shell_sense_test_ghost_state
 
 _shell_sense_test_documentation_state() {
   local text=${(j: :)_shell_sense_documentation_lines}
-  print -r -- "<DOC>placement=${_shell_sense_documentation_placement:-none} offset=$_shell_sense_documentation_offset total=$_shell_sense_documentation_total text=${(qqq)text}</DOC>"
+  print -r -- "<DOC>placement=${_shell_sense_documentation_placement:-none} offset=$_shell_sense_documentation_offset total=$_shell_sense_documentation_total viewport=$_shell_sense_documentation_viewport_rows lines=$#_shell_sense_documentation_lines scrollbar=$_shell_sense_documentation_scrollbar render-rows=$#_shell_sense_render_lines text=${(qqq)text}</DOC>"
   zle -R
 }
 zle -N _shell_sense_test_documentation_state
 bindkey '^X^D' _shell_sense_test_documentation_state
+
+_shell_sense_test_navigation_state() {
+  local selected_id=${_shell_sense_item_ids[_shell_sense_selected]-}
+  local -i documentation_is_current=0
+  [[ -n $selected_id && $selected_id == $_shell_sense_documentation_item ]] &&
+    documentation_is_current=1
+  print -r -- "<NAV>selected=$_shell_sense_selected selected-absolute=$_shell_sense_selected_absolute serial=$_shell_sense_navigation_serial window-start=$_shell_sense_view_window_start menu-start=$_shell_sense_menu_view_start render-first=$_shell_sense_render_first render-dirty=$_shell_sense_render_dirty redraw-pending=$_shell_sense_redraw_pending selected-id=${(qqq)selected_id} documentation-id=${(qqq)_shell_sense_documentation_item} documentation-current=$documentation_is_current</NAV>"
+  zle -R
+}
+zle -N _shell_sense_test_navigation_state
+bindkey '^X^N' _shell_sense_test_navigation_state
 
 PS1='<SENSE-PROMPT>'

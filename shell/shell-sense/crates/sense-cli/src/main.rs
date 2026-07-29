@@ -288,7 +288,7 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
                 DocumentationActivation::Automatic
             }
         },
-        resolve_delay: Duration::from_millis(config.documentation.resolve_delay_ms),
+        update_delay: Duration::from_millis(config.documentation.update_delay_ms),
         layout: DocumentationLayoutPolicy {
             placement: match config.documentation.mode {
                 DocumentationMode::Side => DocumentationPlacementPreference::Side,
@@ -301,13 +301,16 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
             width_ratio: config.documentation.width_ratio,
             max_rows: config.documentation.max_rows,
             render_markdown: config.documentation.render_markdown,
-            padding: config.popup.padding,
+            padding: config.documentation.padding,
+            scrollbar: config.documentation.scrollbar,
             bordered: config.popup.border != BorderStyle::None,
         },
         menu: MenuLayoutPolicy {
             menu_min_width: config.popup.min_width,
             menu_max_width: config.popup.max_width,
             menu_max_rows: config.popup.max_rows,
+            scrolloff: config.popup.scrolloff,
+            cycle: config.popup.cycle,
             menu_chrome_cells: menu_chrome_cells(&config),
             scrollbar: config.popup.scrollbar,
             descriptions: config.popup.descriptions,
@@ -367,6 +370,28 @@ fn shell_startup_messages(config: &Config, shell: NativeShell) -> Result<Vec<She
             vec![
                 "scrollbar-character".into(),
                 popup.scrollbar_character.as_str().into(),
+            ],
+        ),
+        ShellWireMessage::new(
+            "popup-option",
+            vec!["scrolloff".into(), popup.scrolloff.to_string().into()],
+        ),
+        ShellWireMessage::new(
+            "popup-option",
+            vec!["cycle".into(), bool_bytes(popup.cycle)],
+        ),
+        ShellWireMessage::new(
+            "popup-option",
+            vec![
+                "documentation-padding".into(),
+                config.documentation.padding.to_string().into(),
+            ],
+        ),
+        ShellWireMessage::new(
+            "popup-option",
+            vec![
+                "documentation-scrollbar".into(),
+                bool_bytes(config.documentation.scrollbar),
             ],
         ),
         ghost_startup_message(config)?,

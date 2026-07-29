@@ -602,10 +602,12 @@ navigable IntelliSense surface.
 - build a reusable native-completion conformance harness with identical
   scenarios and assertions for Zsh, Fish, and Bash wherever their public
   completion APIs provide equivalent behavior (implemented; the shared TSV
-  covers fuzzy subcommands, long options, option values, and parent, nested,
-  quoted, and symlinked directory resources);
-- expand coverage to short/combined options, user completions, large or slow
-  providers, and further destructive-edit/cancellation cases; native
+  covers fuzzy subcommands, short, combined and long options, option values,
+  user completions, and parent, nested, quoted, and symlinked directory
+  resources);
+- expand coverage to large providers and further destructive-edit/cancellation
+  cases; arbitrary slow native completion code is explicitly recorded as
+  non-preemptible through supported shell APIs, while native
   descriptions/groups and shell-owned acceptance already have capability and
   live-client coverage;
 - record explicitly unsupported shell capabilities instead of weakening a
@@ -619,6 +621,28 @@ navigable IntelliSense surface.
   position metadata for terminal presenters (implemented);
 - make all documentation actions configurable and keep candidate navigation
   behavior unchanged (implemented);
+- make next/previous endpoint cycling configurable, preserve explicit
+  selections across later same-generation daemon revisions, and serialise
+  navigation updates so stale acknowledgements cannot move the highlight
+  backward (implemented);
+- follow Blink's stable-document lifecycle: keep the current pane visible,
+  debounce selection-specific resolution, then replace the pane atomically;
+  coalesce key repeat through an explicitly scheduled event-loop redraw and a
+  terminal synchronized-output transaction, never by assuming queued input
+  will cause a later redraw hook (implemented);
+- follow Blink's preview continuity model across edits: retain the current menu,
+  locally rebase a compatible end-of-line ghost against the new buffer, and
+  atomically replace both when the authoritative generation arrives
+  (implemented in ZLE, the only terminal client that presents ghost text);
+- enclose ZLE popup redisplays in DEC synchronized-output transactions, with a
+  self-pipe event-loop callback releasing the frame after ZLE's single native
+  redraw, so neither a nested redraw nor the direction-dependent intermediate
+  selection frame can reach the terminal (implemented);
+- add configurable popup scrolloff with two following candidates by default,
+  align side documentation to the configured menu height, give documentation
+  independent padding and a proportional scrollbar, and refine a generic
+  native `file` detail to `directory` only when the native item is already a
+  verified directory (implemented across all three terminal clients);
 - reject a stale or unregistered generation centrally before it can replace or
   navigate the worker's active view, and cover delayed documentation navigation
   in the live Zsh, Fish, and Bash clients (implemented; Bash uses its documented
@@ -627,7 +651,10 @@ navigable IntelliSense surface.
   first/last page, selection changes, cancellation, and unresolved/empty
   documentation in layout, bridge, and live-shell tests;
 - complete the Blink source contract tests for resolve, cancellation, stale
-  generations, native acceptance acknowledgement, and terminal lifecycle;
+  generations, native acceptance acknowledgement, and terminal lifecycle
+  (bridge-level resolved/unresolved documentation, cancellation, and
+  generation-scoped native acceptance acknowledgement are implemented; the
+  live Neovim lifecycle gate remains);
 - add release-mode end-to-end latency measurements and request-scoped
   observability for native capture, ranking, enrichment, layout, and render
   delivery;
@@ -641,7 +668,8 @@ Implementation order:
 2. scrollable documentation model, worker state, actions, and presenters
    (implemented);
 3. expanded conformance and adversarial lifecycle cases (in progress);
-4. Blink integration contract;
+4. Blink integration contract (bridge mapping implemented; live Neovim gate
+   remains);
 5. latency/observability and packaging gates.
 
 ## 15. Acceptance matrix

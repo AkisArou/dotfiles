@@ -60,10 +60,15 @@ scrollbar_character = "▐"
 group_headings = true
 descriptions = true
 max_rows = 10
+# Keep this many candidates visible beyond the selection while navigating.
+scrolloff = 2
+# Wrap next/previous navigation across the end and start of the list.
+cycle = true
 # Width follows the complete ranked result set within these bounds. Use the
 # same value for min_width and max_width to request a fixed-width popup.
 max_width = 140
 min_width = 24
+# At least one cell is required for ZLE's stable physical-row refresh anchor.
 padding = 1
 
 [indicators]
@@ -72,10 +77,15 @@ selected_marker = ""
 
 [documentation]
 mode = "side"
-resolve_delay_ms = 80
+# Keep the current document visible until selection settles for this long.
+update_delay_ms = 80
 side_min_columns = 100
 width_ratio = 0.45
+# Below-mode maximum. A side pane follows popup.max_rows so both surfaces
+# remain aligned and useful even when the current menu has only one item.
 max_rows = 14
+padding = 0
+scrollbar = true
 render_markdown = true
 
 [ghost_text]

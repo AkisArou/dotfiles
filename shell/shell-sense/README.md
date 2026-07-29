@@ -175,14 +175,40 @@ selected candidate, and Ctrl-G hides or shows it. The line actions
 `documentation-down` and `documentation-up` are also available for custom
 bindings.
 
+`popup.scrolloff` controls the minimum number of following candidates kept in
+view during navigation and defaults to 2. Near the beginning or end of the
+result set, the viewport naturally uses the available rows instead.
+`popup.cycle = true` wraps `next` from the last candidate to the first and
+`previous` from the first candidate to the last; set it to `false` to clamp at
+the endpoints. Selection changes are applied in the shell immediately, while
+serial-numbered worker updates cannot overwrite a newer local selection.
+While an edit's replacement generation is pending, ZLE keeps the current menu
+visible and locally rebases its ghost text when the old predicted line still
+matches the new buffer. The new authoritative menu and ghost replace that
+continuity frame atomically; incompatible edits simply omit the stale ghost.
+ZLE popup redisplays use terminal synchronized-output transactions. Every
+ordinary `line-pre-redraw` receives the frame for its current logical
+selection. During key repeat, one explicit event-loop redraw is retained and
+updated to the latest selection; it cannot depend on ZLE happening to issue a
+final redraw after queued input drains. The terminal transaction releases the
+result only after ZLE's native redraw.
+
 The popup uses the VS Code/Blink-inspired colors in `config.example.toml`, a
 responsive width, no border or selected marker, dimmed detail text, kind icons,
 a proportional scrollbar, and a right-side documentation pane. `auto` and
 `below` remain available; an explicit `side` falls back below only when the
 terminal cannot fit the minimum menu and documentation widths at all.
+Side documentation uses `popup.max_rows` so the two surfaces have one aligned
+height. Below documentation uses `documentation.max_rows`. Documentation has
+its own configurable zero-cell default padding and proportional scrollbar;
+its existing line/page actions move that scrollbar without changing the
+selected completion.
 `documentation.mode = "manual"` starts with the pane hidden and resolves
 documentation only after the toggle action opens it; `off` disables the pane
-and its actions entirely.
+and its actions entirely. `documentation.update_delay_ms` delays only the
+replacement document after selection changes: the previous document remains
+visible until the selected item's content is ready, so the pane does not flash
+closed and open while navigating.
 
 ## Configuration
 
@@ -286,5 +312,6 @@ zsh tests/live-bash.zsh
 ```
 
 The PTY tests verify real line-editor behavior and native candidate acceptance;
-the provider tests cover fuzzy paths, programmable completions, and context
-reconstruction.
+the shared 10-case provider contract covers fuzzy subcommands, short, combined,
+long and value options, user completions, path forms, programmable completions,
+and context reconstruction.

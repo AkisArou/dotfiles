@@ -13,8 +13,10 @@ fn request(columns: u16) -> PresentationRequest {
         side_min_columns: 100,
         documentation_width_ratio: 0.45,
         documentation_max_rows: 8,
+        side_viewport_rows: 6,
         documentation_offset: 0,
         documentation_padding: 1,
+        documentation_scrollbar: true,
         bordered: false,
         render_markdown: true,
     }
@@ -105,6 +107,8 @@ fn documentation_is_a_bounded_scrollable_viewport() {
     assert!(!panel.has_previous);
     assert!(panel.has_next);
     assert_eq!(panel.lines.last().unwrap().text, "line 2");
+    assert_eq!(panel.viewport_rows, 3);
+    assert!(panel.scrollbar);
 
     configuration.documentation_offset = 19;
     let panel = layout(Some(&content), configuration).documentation.unwrap();
@@ -113,4 +117,26 @@ fn documentation_is_a_bounded_scrollable_viewport() {
     assert!(!panel.has_next);
     assert_eq!(panel.lines.first().unwrap().text, "line 17");
     assert_eq!(panel.lines.last().unwrap().text, "line 19");
+}
+
+#[test]
+fn side_documentation_matches_the_menu_height_and_reserves_its_scrollbar() {
+    let content = MarkupContent {
+        kind: MarkupKind::PlainText,
+        value: (0..20)
+            .map(|line| format!("line {line}"))
+            .collect::<Vec<_>>()
+            .join("\n"),
+    };
+    let mut configuration = request(140);
+    configuration.documentation_max_rows = 14;
+    configuration.side_viewport_rows = 10;
+    configuration.documentation_padding = 0;
+    let panel = layout(Some(&content), configuration).documentation.unwrap();
+
+    assert_eq!(panel.placement, DocumentationPlacement::Side);
+    assert_eq!(panel.viewport_rows, 10);
+    assert_eq!(panel.lines.len(), 10);
+    assert!(panel.scrollbar);
+    assert!(panel.lines.iter().all(|line| line.cells < panel.width));
 }
