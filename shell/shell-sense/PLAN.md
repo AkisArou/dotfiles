@@ -570,12 +570,16 @@ actions their line editors cannot faithfully implement.
 - settled-view semantics so Blink receives zero-I/O context enrichment without
   duplicate streamed items;
 - lazy documentation resolution and multiline/current-row range translation;
+- generation-aware resolve/execute handoff: cancel obsolete documentation,
+  rebase only one unambiguous equivalent onto the newest settled native view,
+  and queue acceptance until that view is available;
 - native selection routing with explicit applied/rejected acknowledgment from
   ZLE, Fish, or Readline;
 - proactive Neovim `TermOpen` attachment, cancellation-safe callbacks, and
   terminal-buffer lifecycle cleanup;
 - daemon attachment/selection tests, presentation mapping tests, Blink config
-  validation, and the shared live Zsh/Fish/Bash regression suite.
+  validation, a real terminal Ctrl-E generation-race test, and the shared live
+  Zsh/Fish/Bash regression suite.
 
 ### Phase G — hardening and release (implemented)
 

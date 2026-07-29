@@ -59,6 +59,24 @@ local function item_key(request_id, generation, item_id)
   return completion_key(request_id, generation) .. ":" .. item_id
 end
 
+local function candidate_signature(candidate)
+  return {
+    label = candidate.label,
+    kind = candidate.kind,
+    source = candidate.source,
+    group = optional(candidate.group),
+  }
+end
+
+local function same_signature(left, right)
+  return left ~= nil
+    and right ~= nil
+    and left.label == right.label
+    and left.kind == right.kind
+    and left.source == right.source
+    and left.group == right.group
+end
+
 local function request_line(request)
   local command = optional(request.command)
   if command == nil then
@@ -124,6 +142,7 @@ local function blink_item(candidate, list, waiter, request, client)
       item_id = candidate.id,
       documentation_unresolved = candidate.documentation_unresolved,
       matched = optional(candidate.matched),
+      signature = candidate_signature(candidate),
     },
   }
   return {
@@ -159,6 +178,7 @@ function Client.new(shell_process_id, opts)
     completion_waiters = {},
     documentation_waiters = {},
     selection_waiters = {},
+    selection_sequence = 0,
     active_key = nil,
     read_buffer = "",
     stderr = "",
@@ -264,6 +284,7 @@ function Client:on_event(event)
       self.settled[key] = event
     end
     self:dispatch_completions(key)
+    self:dispatch_pending_selections()
     return
   end
   if event.type == "request-cancelled" then
@@ -283,20 +304,41 @@ function Client:on_event(event)
     return
   end
   if event.type == "selection-finished" then
-    local key = item_key(event.request_id, event.generation, event.item_id)
     local failure_message = nil
     if not event.applied then
       failure_message = "the native shell rejected the selected completion"
     end
-    self:finish_selection(key, failure_message)
+    for _, waiter in ipairs(vim.tbl_values(self.selection_waiters)) do
+      if
+        waiter.request_id == event.request_id
+        and waiter.generation == event.generation
+        and waiter.item_id == event.item_id
+      then
+        self:finish_selection(waiter, failure_message)
+      end
+    end
     return
   end
   if event.type == "error" then
     local request_id = optional(event.request_id)
-    if request_id then
-      for key, waiter in pairs(self.selection_waiters) do
+    if event.code == "stale-request" then
+      self:finish_documentation_waiters(request_id)
+      for _, waiter in ipairs(vim.tbl_values(self.selection_waiters)) do
         if waiter.request_id == request_id then
-          self:finish_selection(key, nil)
+          waiter.stale_key = completion_key(waiter.request_id, waiter.generation)
+          waiter.sent = false
+          waiter.request_id = nil
+          waiter.generation = nil
+          waiter.item_id = nil
+        end
+      end
+      self:dispatch_pending_selections()
+      return
+    end
+    if request_id then
+      for _, waiter in ipairs(vim.tbl_values(self.selection_waiters)) do
+        if waiter.request_id == request_id then
+          self:finish_selection(waiter, nil)
         end
       end
     end
@@ -304,16 +346,16 @@ function Client:on_event(event)
   end
 end
 
-function Client:finish_selection(key, failure_message)
-  local waiter = self.selection_waiters[key]
-  self.selection_waiters[key] = nil
-  if waiter and not waiter.done then
-    waiter.done = true
-    if failure_message then
-      notify_error(failure_message)
-    end
-    waiter.callback()
+function Client:finish_selection(waiter, failure_message)
+  if waiter.done then
+    return
   end
+  waiter.done = true
+  self.selection_waiters[waiter.id] = nil
+  if failure_message then
+    notify_error(failure_message)
+  end
+  waiter.callback()
 end
 
 function Client:finish_documentation(key, event)
@@ -331,11 +373,57 @@ function Client:finish_documentation(key, event)
   end
 end
 
-function Client:finish_documentation_waiters()
+function Client:finish_documentation_waiters(request_id)
   local keys = vim.tbl_keys(self.documentation_waiters)
   for _, key in ipairs(keys) do
-    self:finish_documentation(key, nil)
+    local waiters = self.documentation_waiters[key]
+    if request_id == nil or (waiters[1] and waiters[1].request_id == request_id) then
+      self:finish_documentation(key, nil)
+    end
   end
+end
+
+function Client:rebase_item(item)
+  local data = item.data and item.data.shell_sense
+  if data == nil or self.active_key == nil then
+    return nil, "invalid"
+  end
+  if completion_key(data.request_id, data.generation) == self.active_key then
+    return item, "ready"
+  end
+
+  local list = self.settled[self.active_key]
+  if list == nil then
+    return nil, "pending"
+  end
+  local exact = nil
+  local semantic = nil
+  local semantic_count = 0
+  for _, candidate in ipairs(list.items) do
+    if candidate.id == data.item_id then
+      exact = candidate
+      break
+    end
+    if same_signature(data.signature, candidate_signature(candidate)) then
+      semantic = candidate
+      semantic_count = semantic_count + 1
+    end
+  end
+  local candidate = exact or (semantic_count == 1 and semantic or nil)
+  if candidate == nil then
+    return nil, "invalid"
+  end
+
+  local rebased = vim.deepcopy(item)
+  local rebased_data = rebased.data.shell_sense
+  rebased_data.request_id = list.request_id
+  rebased_data.generation = list.generation
+  rebased_data.item_id = candidate.id
+  rebased_data.documentation_unresolved = candidate.documentation_unresolved
+  rebased_data.matched = optional(candidate.matched)
+  rebased_data.signature = candidate_signature(candidate)
+  rebased.documentation = markup(candidate.documentation)
+  return rebased, "ready"
 end
 
 function Client:dispatch_completions(key)
@@ -390,13 +478,24 @@ function Client:send(command)
 end
 
 function Client:resolve(item, callback)
-  local data = item.data and item.data.shell_sense
-  if data == nil or (item.documentation ~= nil and not data.documentation_unresolved) then
+  local rebased, state = self:rebase_item(item)
+  if state ~= "ready" then
+    callback(item)
+    return
+  end
+  item = rebased
+  local data = item.data.shell_sense
+  if item.documentation ~= nil and not data.documentation_unresolved then
     callback(item)
     return
   end
   local key = item_key(data.request_id, data.generation, data.item_id)
-  local waiter = { item = vim.deepcopy(item), callback = callback, done = false }
+  local waiter = {
+    item = vim.deepcopy(item),
+    callback = callback,
+    done = false,
+    request_id = data.request_id,
+  }
   self.documentation_waiters[key] = self.documentation_waiters[key] or {}
   table.insert(self.documentation_waiters[key], waiter)
   if
@@ -418,15 +517,28 @@ function Client:resolve(item, callback)
   end, self.opts.resolve_timeout_ms)
 end
 
-function Client:select(item, callback)
-  local data = item.data and item.data.shell_sense
-  if data == nil then
-    callback()
+function Client:dispatch_selection(waiter)
+  if waiter.done or waiter.sent then
     return
   end
-  local key = item_key(data.request_id, data.generation, data.item_id)
-  local waiter = { callback = callback, done = false, request_id = data.request_id }
-  self.selection_waiters[key] = waiter
+  if waiter.stale_key == self.active_key then
+    return
+  end
+  local item, state = self:rebase_item(waiter.item)
+  if state == "pending" then
+    return
+  end
+  if state ~= "ready" then
+    self:finish_selection(waiter, "the selected native completion is no longer available")
+    return
+  end
+  waiter.item = item
+  local data = item.data.shell_sense
+  waiter.request_id = data.request_id
+  waiter.generation = data.generation
+  waiter.item_id = data.item_id
+  waiter.stale_key = nil
+  waiter.sent = true
   if
     not self:send({
       type = "select",
@@ -435,17 +547,33 @@ function Client:select(item, callback)
       item_id = data.item_id,
     })
   then
-    waiter.done = true
-    self.selection_waiters[key] = nil
-    callback()
-    return
+    self:finish_selection(waiter, nil)
   end
+end
+
+function Client:dispatch_pending_selections()
+  for _, waiter in ipairs(vim.tbl_values(self.selection_waiters)) do
+    self:dispatch_selection(waiter)
+  end
+end
+
+function Client:select(item, callback)
+  self.selection_sequence = self.selection_sequence + 1
+  local waiter = {
+    id = self.selection_sequence,
+    item = vim.deepcopy(item),
+    callback = callback,
+    done = false,
+    sent = false,
+  }
+  self.selection_waiters[waiter.id] = waiter
+  self:dispatch_selection(waiter)
   vim.defer_fn(function()
     if waiter.done then
       return
     end
     notify_error("native completion acceptance timed out")
-    self:finish_selection(key, nil)
+    self:finish_selection(waiter, nil)
   end, self.opts.accept_timeout_ms)
 end
 
@@ -455,12 +583,9 @@ function Client:finish_waiters()
     waiter.callback({ items = {}, is_incomplete_forward = true, is_incomplete_backward = true })
   end
   self:finish_documentation_waiters()
-  for key, waiter in pairs(self.selection_waiters) do
-    self.selection_waiters[key] = nil
-    if not waiter.done then
-      waiter.done = true
-      waiter.callback()
-    end
+  local selection_waiters = vim.tbl_values(self.selection_waiters)
+  for _, waiter in ipairs(selection_waiters) do
+    self:finish_selection(waiter, nil)
   end
 end
 

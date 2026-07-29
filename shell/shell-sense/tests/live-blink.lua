@@ -64,9 +64,22 @@ local function find_item(items, label)
   end
 end
 
+local function terminal_mapping(bufnr, lhs)
+  local expected = vim.keycode(lhs)
+  for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(bufnr, "t")) do
+    if vim.keycode(mapping.lhs) == expected then
+      return mapping
+    end
+  end
+end
+
 local cmp = require("blink.cmp")
 cmp.setup({
   fuzzy = { implementation = "lua" },
+  keymap = {
+    preset = "default",
+    ["<C-e>"] = { "select_and_accept" },
+  },
   -- The synchronous `-l` harness pins Blink's mode probe after setup, so keep
   -- the terminal selection policy identical in the base configuration too.
   completion = {
@@ -137,118 +150,191 @@ local terminal_mode = function()
 end
 vim.api.nvim_get_mode = terminal_mode
 require("blink.lib.nvim").get_mode = terminal_mode
+require("blink.cmp.keymap").ensure_mappings()
 
 vim.wait(150)
 local ok, failure = xpcall(function()
-    assert(vim.bo[terminal_buffer].buftype == "terminal", "Neovim did not create a terminal buffer")
-    wait_for(function()
-      return terminal_text(terminal_buffer):find("<BLINK%-SHELL%-READY/>") ~= nil
-    end, "the terminal Zsh did not initialize")
-    local provider = require("blink.cmp.sources.lib").get_provider_by_id("shell_sense")
-    local bridge = provider.module:client(terminal_buffer)
-    wait_for(function()
-      return bridge.ready and not bridge.closed
-    end, "the Blink presentation bridge did not attach to the live shell")
+  assert(vim.bo[terminal_buffer].buftype == "terminal", "Neovim did not create a terminal buffer")
+  wait_for(function()
+    return terminal_text(terminal_buffer):find("<BLINK%-SHELL%-READY/>") ~= nil
+  end, "the terminal Zsh did not initialize")
+  local provider = require("blink.cmp.sources.lib").get_provider_by_id("shell_sense")
+  local bridge = provider.module:client(terminal_buffer)
+  wait_for(function()
+    return bridge.ready and not bridge.closed
+  end, "the Blink presentation bridge did not attach to the live shell")
 
-    -- The editor bridge attaches to the exact live shell process. Once attached,
-    -- native ZLE presentation is suppressed and Blink is the sole presenter.
-    vim.fn.chansend(terminal_job, "blink-test --a")
-    wait_for(function()
-      return terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-a") ~= nil
-    end, "the option query did not reach ZLE")
-    local first_request = current_request(bridge, "blink-test --a")
-    follow_terminal_cursor(terminal_buffer, first_request.command, first_request.cursor)
+  -- The editor bridge attaches to the exact live shell process. Once attached,
+  -- native ZLE presentation is suppressed and Blink is the sole presenter.
+  vim.fn.chansend(terminal_job, "blink-test --a")
+  wait_for(function()
+    return terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-a") ~= nil
+  end, "the option query did not reach ZLE")
+  local first_request = current_request(bridge, "blink-test --a")
+  follow_terminal_cursor(terminal_buffer, first_request.command, first_request.cursor)
 
-    assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = 1 }))
-    local menu_ready = vim.wait(5000, function()
-      return cmp.is_menu_visible() and #cmp.get_items() == 2
-    end, 10)
-    assert(menu_ready, "Blink did not show the two native option candidates\nitems="
-      .. vim.inspect(cmp.get_items()) .. "\ncontext=" .. vim.inspect(cmp.get_context())
-      .. "\nnotifications=" .. vim.inspect(notifications)
-      .. "\nterminal=" .. terminal_text(terminal_buffer))
+  assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = 1 }))
+  local menu_ready = vim.wait(5000, function()
+    return cmp.is_menu_visible() and #cmp.get_items() == 2
+  end, 10)
+  assert(
+    menu_ready,
+    "Blink did not show the two native option candidates\nitems="
+      .. vim.inspect(cmp.get_items())
+      .. "\ncontext="
+      .. vim.inspect(cmp.get_context())
+      .. "\nnotifications="
+      .. vim.inspect(notifications)
+      .. "\nterminal="
+      .. terminal_text(terminal_buffer)
+  )
 
-    local first_items = cmp.get_items()
-    local first_labels = labels(first_items)
-    table.sort(first_labels)
-    assert(vim.deep_equal(first_labels, { "--all", "--amend" }), "Blink received the wrong native candidates")
-    local amend_index, amend = find_item(first_items, "--amend")
-    assert(amend_index and amend, "the --amend candidate is missing")
-    assert(amend.kind == vim.lsp.protocol.CompletionItemKind.Keyword, "the option LSP kind is wrong")
-    assert(amend.labelDetails.description == "replace the previous commit", "the native description was lost")
-    local first_generation = amend.data.shell_sense.generation
-    assert(not terminal_text(terminal_buffer):find("replace the previous commit", 1, true),
-      "the shell popup remained visible after Blink attached")
+  local first_items = cmp.get_items()
+  local first_labels = labels(first_items)
+  table.sort(first_labels)
+  assert(vim.deep_equal(first_labels, { "--all", "--amend" }), "Blink received the wrong native candidates")
+  local amend_index, amend = find_item(first_items, "--amend")
+  assert(amend_index and amend, "the --amend candidate is missing")
+  assert(amend.kind == vim.lsp.protocol.CompletionItemKind.Keyword, "the option LSP kind is wrong")
+  assert(amend.labelDetails.description == "replace the previous commit", "the native description was lost")
+  local first_generation = amend.data.shell_sense.generation
+  assert(
+    not terminal_text(terminal_buffer):find("replace the previous commit", 1, true),
+    "the shell popup remained visible after Blink attached"
+  )
 
-    -- An edit creates a new native generation. A hidden stale Blink request may
-    -- not republish its old two-item result over the new one.
-    cmp.cancel()
-    vim.fn.chansend(terminal_job, "\21blink-test --am")
-    local second_query_ready = vim.wait(5000, function()
-      return terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-am") ~= nil
-    end, 10)
-    assert(second_query_ready, "the second option query did not reach ZLE\nterminal="
-      .. terminal_text(terminal_buffer))
-    local second_request = current_request(bridge, "blink-test --am")
-    follow_terminal_cursor(terminal_buffer, second_request.command, second_request.cursor)
-    assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = 1 }))
-    local second_menu_ready = vim.wait(5000, function()
-      local items = cmp.get_items()
-      return cmp.is_menu_visible() and #items == 1 and items[1].label == "--amend"
-        and items[1].data.shell_sense.generation > first_generation
-    end, 10)
-    assert(second_menu_ready, "Blink did not replace the stale generation atomically\nitems="
-      .. vim.inspect(cmp.get_items()) .. "\ncontext=" .. vim.inspect(cmp.get_context())
-      .. "\nterminal=" .. terminal_text(terminal_buffer))
+  -- An edit creates a new native generation. A hidden stale Blink request may
+  -- not republish its old two-item result over the new one.
+  cmp.cancel()
+  vim.fn.chansend(terminal_job, "\21blink-test --am")
+  local second_query_ready = vim.wait(5000, function()
+    return terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-am") ~= nil
+  end, 10)
+  assert(second_query_ready, "the second option query did not reach ZLE\nterminal=" .. terminal_text(terminal_buffer))
+  local second_request = current_request(bridge, "blink-test --am")
+  follow_terminal_cursor(terminal_buffer, second_request.command, second_request.cursor)
+  assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = 1 }))
+  local second_menu_ready = vim.wait(5000, function()
+    local items = cmp.get_items()
+    return cmp.is_menu_visible()
+      and #items == 1
+      and items[1].label == "--amend"
+      and items[1].data.shell_sense.generation > first_generation
+  end, 10)
+  assert(
+    second_menu_ready,
+    "Blink did not replace the stale generation atomically\nitems="
+      .. vim.inspect(cmp.get_items())
+      .. "\ncontext="
+      .. vim.inspect(cmp.get_context())
+      .. "\nterminal="
+      .. terminal_text(terminal_buffer)
+  )
 
-    local accepted = false
-    assert(cmp.accept({ index = 1, callback = function()
-      accepted = true
-    end }), "Blink refused the native completion")
-    local acceptance_finished = vim.wait(5000, function()
-      return accepted and terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-amend ") ~= nil
-    end, 10)
-    assert(acceptance_finished, "native completion acceptance did not finish\naccepted="
-      .. tostring(accepted) .. "\nselection-waiters=" .. vim.inspect(bridge.selection_waiters)
-      .. "\nnotifications=" .. vim.inspect(notifications)
-      .. "\nterminal=" .. terminal_text(terminal_buffer))
-    assert(not terminal_text(terminal_buffer):find("%-%-amendamend"),
-      "Blink applied its display edit in addition to native shell acceptance")
+  -- Blink resolves before execute. Move ZLE to a newer generation while its
+  -- prior item is still selected, then exercise the real inherited terminal
+  -- mapping. The source must rebase the unambiguous native candidate instead
+  -- of resolving or selecting the stale generation.
+  local stale_item = cmp.get_items()[1]
+  vim.fn.chansend(terminal_job, "\21blink-test --ame")
+  wait_for(function()
+    return terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-ame") ~= nil
+  end, "the acceptance-race query did not reach ZLE")
+  local acceptance_request = current_request(bridge, "blink-test --ame")
+  assert(
+    acceptance_request.generation > stale_item.data.shell_sense.generation,
+    "the acceptance test did not cross a native generation boundary"
+  )
+  follow_terminal_cursor(terminal_buffer, acceptance_request.command, acceptance_request.cursor)
 
-    -- Path documentation remains lazy. Blink resolves it through the daemon and
-    -- renders the configured directory resolver in its documentation window.
-    vim.fn.chansend(terminal_job, "\21cd dotf")
-    wait_for(function()
-      return terminal_text(terminal_buffer):find("BLINK> cd dotf") ~= nil
-    end, "the directory query did not reach ZLE")
-    local path_request = current_request(bridge, "cd dotf")
-    follow_terminal_cursor(terminal_buffer, path_request.command, path_request.cursor)
-    assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = 1 }))
-    wait_for(function()
-      local items = cmp.get_items()
-      return cmp.is_menu_visible() and find_item(items, "dotfiles") ~= nil
-    end, "Blink did not receive the native directory candidate")
-    local path_items = cmp.get_items()
-    local path_index, path_item = find_item(path_items, "dotfiles")
-    assert(path_item.kind == vim.lsp.protocol.CompletionItemKind.Folder, "the directory LSP kind is wrong")
-    assert(path_item.data.shell_sense.documentation_unresolved,
-      "capability-backed path documentation was not exposed as unresolved\nitem=" .. vim.inspect(path_item))
+  local stale_resolved = false
+  provider.module:resolve(stale_item, function()
+    stale_resolved = true
+  end)
+  wait_for(function()
+    return stale_resolved
+  end, "the stale documentation callback did not finish as a cancellation")
 
-    cmp.cancel()
-    assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = path_index }))
-    wait_for(function()
-      return cmp.is_menu_visible() and cmp.get_selected_item_idx() == path_index
-    end, "Blink did not restore the directory selection")
-    assert(cmp.show_documentation(), "Blink refused to resolve path documentation")
-    wait_for(function()
-      if not cmp.is_documentation_visible() then
-        return false
-      end
-      local docs = require("blink.cmp.completion.windows.documentation")
-      local text = table.concat(vim.api.nvim_buf_get_lines(docs.win:get_buf(), 0, -1, false), "\n")
-      return text:find("nvim", 1, true) ~= nil
-    end, "Blink did not render resolved directory documentation")
+  local stale_errors = 0
+  local on_event = bridge.on_event
+  bridge.on_event = function(client, event)
+    if event.type == "error" and event.code == "stale-request" then
+      stale_errors = stale_errors + 1
+    end
+    on_event(client, event)
+  end
+  assert(
+    bridge:send({
+      type = "resolve",
+      request_id = stale_item.data.shell_sense.request_id,
+      generation = stale_item.data.shell_sense.generation,
+      item_id = stale_item.data.shell_sense.item_id,
+    }),
+    "the stale documentation regression request was not sent"
+  )
+  wait_for(function()
+    return stale_errors == 1
+  end, "the daemon did not reject the stale documentation regression request")
 
-    vim.api.nvim_buf_delete(terminal_buffer, { force = true })
+  local control_e = terminal_mapping(terminal_buffer, "<C-e>")
+  assert(control_e and type(control_e.callback) == "function", "Blink did not install the terminal <C-e> mapping")
+  control_e.callback()
+  local acceptance_finished = vim.wait(5000, function()
+    return terminal_text(terminal_buffer):find("BLINK> blink%-test %-%-amend ") ~= nil
+  end, 10)
+  assert(
+    acceptance_finished,
+    "native completion acceptance did not finish\nselection-waiters="
+      .. vim.inspect(bridge.selection_waiters)
+      .. "\nnotifications="
+      .. vim.inspect(notifications)
+      .. "\nterminal="
+      .. terminal_text(terminal_buffer)
+  )
+  assert(
+    not terminal_text(terminal_buffer):find("%-%-amendamend"),
+    "Blink applied its display edit in addition to native shell acceptance"
+  )
+  assert(not vim.iter(notifications):any(function(notification)
+    return notification.message:find("stale%-request") ~= nil
+  end), "Blink exposed an expected stale documentation cancellation")
+
+  -- Path documentation remains lazy. Blink resolves it through the daemon and
+  -- renders the configured directory resolver in its documentation window.
+  vim.fn.chansend(terminal_job, "\21cd dotf")
+  wait_for(function()
+    return terminal_text(terminal_buffer):find("BLINK> cd dotf") ~= nil
+  end, "the directory query did not reach ZLE")
+  local path_request = current_request(bridge, "cd dotf")
+  follow_terminal_cursor(terminal_buffer, path_request.command, path_request.cursor)
+  assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = 1 }))
+  wait_for(function()
+    local items = cmp.get_items()
+    return cmp.is_menu_visible() and find_item(items, "dotfiles") ~= nil
+  end, "Blink did not receive the native directory candidate")
+  local path_items = cmp.get_items()
+  local path_index, path_item = find_item(path_items, "dotfiles")
+  assert(path_item.kind == vim.lsp.protocol.CompletionItemKind.Folder, "the directory LSP kind is wrong")
+  assert(
+    path_item.data.shell_sense.documentation_unresolved,
+    "capability-backed path documentation was not exposed as unresolved\nitem=" .. vim.inspect(path_item)
+  )
+
+  cmp.cancel()
+  assert(cmp.show({ providers = { "shell_sense" }, initial_selected_item_idx = path_index }))
+  wait_for(function()
+    return cmp.is_menu_visible() and cmp.get_selected_item_idx() == path_index
+  end, "Blink did not restore the directory selection")
+  assert(cmp.show_documentation(), "Blink refused to resolve path documentation")
+  wait_for(function()
+    if not cmp.is_documentation_visible() then
+      return false
+    end
+    local docs = require("blink.cmp.completion.windows.documentation")
+    local text = table.concat(vim.api.nvim_buf_get_lines(docs.win:get_buf(), 0, -1, false), "\n")
+    return text:find("nvim", 1, true) ~= nil
+  end, "Blink did not render resolved directory documentation")
+
+  vim.api.nvim_buf_delete(terminal_buffer, { force = true })
 end, debug.traceback)
 finish(ok, failure or "")

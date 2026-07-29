@@ -137,6 +137,10 @@ runtime path, register the provider, and select it for terminal mode:
 vim.opt.runtimepath:prepend(vim.fn.expand("~/dotfiles/shell/shell-sense"))
 
 require("blink.cmp").setup({
+  keymap = {
+    preset = "default",
+    ["<C-e>"] = { "select_and_accept" },
+  },
   sources = {
     providers = {
       shell_sense = {
@@ -162,7 +166,11 @@ The Lua source starts `shell-sense blink` for the terminal job's shell PID.
 The bridge waits briefly for a newly opened shell session, sends only
 presentation-safe JSON to Neovim, and never applies its LSP-shaped text edit.
 The terminal job must be the supported shell process that owns the Shell Sense
-session.
+session. Blink resolves an item before executing it, so the source tracks the
+native generation through both steps. If the shell advances while a selected
+item is still visible, an unambiguous equivalent is rebased onto the newest
+settled native item; stale documentation work is cancelled silently. The shell
+still performs and acknowledges the final edit.
 
 ## Defaults
 
