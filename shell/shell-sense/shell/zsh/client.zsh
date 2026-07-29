@@ -168,6 +168,7 @@ typeset -ga _shell_sense_item_label_cells=()
 typeset -ga _shell_sense_item_details=()
 typeset -ga _shell_sense_item_detail_cells=()
 typeset -ga _shell_sense_item_kinds=()
+typeset -ga _shell_sense_item_icons=()
 typeset -ga _shell_sense_item_match_ranges=()
 typeset -ga _shell_sense_item_groups=()
 typeset -ga _shell_sense_item_insertions=()
@@ -184,6 +185,7 @@ typeset -ga _shell_sense_temp_label_cells=()
 typeset -ga _shell_sense_temp_details=()
 typeset -ga _shell_sense_temp_detail_cells=()
 typeset -ga _shell_sense_temp_kinds=()
+typeset -ga _shell_sense_temp_icons=()
 typeset -ga _shell_sense_temp_match_ranges=()
 typeset -ga _shell_sense_temp_groups=()
 typeset -ga _shell_sense_temp_insertions=()
@@ -899,6 +901,7 @@ _shell_sense_view_begin() {
   _shell_sense_temp_details=()
   _shell_sense_temp_detail_cells=()
   _shell_sense_temp_kinds=()
+  _shell_sense_temp_icons=()
   _shell_sense_temp_match_ranges=()
   _shell_sense_temp_groups=()
   _shell_sense_temp_insertions=()
@@ -917,6 +920,7 @@ _shell_sense_view_begin() {
     _shell_sense_temp_details[_shell_sense_temp_expected]=
     _shell_sense_temp_detail_cells[_shell_sense_temp_expected]=0
     _shell_sense_temp_kinds[_shell_sense_temp_expected]=
+    _shell_sense_temp_icons[_shell_sense_temp_expected]=
     _shell_sense_temp_match_ranges[_shell_sense_temp_expected]=
     _shell_sense_temp_groups[_shell_sense_temp_expected]=
     _shell_sense_temp_insertions[_shell_sense_temp_expected]=
@@ -934,26 +938,27 @@ _shell_sense_view_chunk() {
   [[ $fields[1] == $_shell_sense_active_request && $fields[2] == $_shell_sense_active_generation ]] || return 0
   [[ $fields[3] == <-> ]] || return 1
   local -i count=$fields[3]
-  (( $#fields == 3 + count * 11 )) || return 1
+  (( $#fields == 3 + count * 12 )) || return 1
   (( _shell_sense_temp_received + count <= _shell_sense_temp_expected )) || return 1
 
   local -i index item offset=4
-  for (( index = 1; index <= count; index++, offset += 11 )); do
+  for (( index = 1; index <= count; index++, offset += 12 )); do
     (( item = ++_shell_sense_temp_received ))
     _shell_sense_temp_ids[item]=$fields[offset]
     _shell_sense_temp_labels[item]=$fields[$(( offset + 1 ))]
     [[ $fields[$(( offset + 2 ))] == <-> ]] || return 1
     _shell_sense_temp_label_cells[item]=$fields[$(( offset + 2 ))]
     _shell_sense_temp_kinds[item]=$fields[$(( offset + 3 ))]
-    _shell_sense_temp_details[item]=$fields[$(( offset + 4 ))]
-    [[ $fields[$(( offset + 5 ))] == <-> ]] || return 1
-    _shell_sense_temp_detail_cells[item]=$fields[$(( offset + 5 ))]
-    _shell_sense_temp_groups[item]=$fields[$(( offset + 6 ))]
+    _shell_sense_temp_icons[item]=$fields[$(( offset + 4 ))]
+    _shell_sense_temp_details[item]=$fields[$(( offset + 5 ))]
+    [[ $fields[$(( offset + 6 ))] == <-> ]] || return 1
+    _shell_sense_temp_detail_cells[item]=$fields[$(( offset + 6 ))]
+    _shell_sense_temp_groups[item]=$fields[$(( offset + 7 ))]
     _shell_sense_temp_insertions[item]=
-    _shell_sense_temp_acceptance_sources[item]=$fields[$(( offset + 7 ))]
-    _shell_sense_temp_acceptance_identities[item]=$fields[$(( offset + 8 ))]
-    _shell_sense_temp_match_ranges[item]=$fields[$(( offset + 9 ))]
-    _shell_sense_temp_ghosts[item]=$fields[$(( offset + 10 ))]
+    _shell_sense_temp_acceptance_sources[item]=$fields[$(( offset + 8 ))]
+    _shell_sense_temp_acceptance_identities[item]=$fields[$(( offset + 9 ))]
+    _shell_sense_temp_match_ranges[item]=$fields[$(( offset + 10 ))]
+    _shell_sense_temp_ghosts[item]=$fields[$(( offset + 11 ))]
   done
 }
 
@@ -971,6 +976,7 @@ _shell_sense_view_end() {
   _shell_sense_item_details=( "${_shell_sense_temp_details[@]}" )
   _shell_sense_item_detail_cells=( "${_shell_sense_temp_detail_cells[@]}" )
   _shell_sense_item_kinds=( "${_shell_sense_temp_kinds[@]}" )
+  _shell_sense_item_icons=( "${_shell_sense_temp_icons[@]}" )
   _shell_sense_item_match_ranges=( "${_shell_sense_temp_match_ranges[@]}" )
   _shell_sense_item_groups=( "${_shell_sense_temp_groups[@]}" )
   _shell_sense_item_insertions=( "${_shell_sense_temp_insertions[@]}" )
@@ -1568,6 +1574,7 @@ _shell_sense_clear_popup() {
   _shell_sense_item_details=()
   _shell_sense_item_detail_cells=()
   _shell_sense_item_kinds=()
+  _shell_sense_item_icons=()
   _shell_sense_item_match_ranges=()
   _shell_sense_item_groups=()
   _shell_sense_item_insertions=()
@@ -1609,38 +1616,24 @@ _shell_sense_hide_popup() {
 
 _shell_sense_kind_indicator() {
   emulate -L zsh
-  local icon=
+  local kind=$1 icon=$2
   _shell_sense_indicator_cells=0
   if [[ $_shell_sense_indicator_mode == none ]]; then
     REPLY=
     return
   fi
-  case $1 in
-    directory) icon='󰉋' ;;
-    file|symlink) icon='󰈔' ;;
-    option|option-value) icon='󰌋' ;;
-    command|subcommand) icon='󰆍' ;;
-    variable) icon='󰫧' ;;
-    service) icon='󰒍' ;;
-    git-branch) icon='' ;;
-  esac
   case $_shell_sense_indicator_mode in
     icon)
       REPLY=$icon
       [[ -n $icon ]] && _shell_sense_indicator_cells=1
       ;;
     text)
-      REPLY="[${1[1]}]"
+      REPLY="[${kind[1]}]"
       _shell_sense_indicator_cells=3
       ;;
     both)
-      if [[ -n $icon ]]; then
-        REPLY="$icon [$1]"
-        _shell_sense_indicator_cells=$(( 1 + 1 + ${#1} + 2 ))
-      else
-        REPLY="[$1]"
-        _shell_sense_indicator_cells=$(( ${#1} + 2 ))
-      fi
+      REPLY="$icon [${kind[1]}]"
+      _shell_sense_indicator_cells=5
       ;;
     *)
       REPLY=
@@ -1847,7 +1840,7 @@ _shell_sense_render() {
   case $_shell_sense_indicator_mode in
     icon) indicator_cells=1 ;;
     text) indicator_cells=3 ;;
-    both) indicator_cells=16 ;;
+    both) indicator_cells=5 ;;
   esac
   local -i prefix_cells=$marker_prefix_cells
   (( indicator_cells )) && (( prefix_cells += indicator_cells + 1 ))
@@ -1934,7 +1927,7 @@ _shell_sense_render() {
       marker_prefix="$marker "
     fi
     kind=$_shell_sense_item_kinds[index]
-    _shell_sense_kind_indicator "$kind"
+    _shell_sense_kind_indicator "$kind" "$_shell_sense_item_icons[index]"
     icon=$REPLY
     icon_cells=$_shell_sense_indicator_cells
     label=$_shell_sense_item_labels[index]

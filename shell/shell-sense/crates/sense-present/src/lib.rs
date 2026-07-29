@@ -1,12 +1,66 @@
-//! Terminal-independent layout for Shell Sense completion documentation.
+//! Terminal-independent presentation for Shell Sense completions.
 
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
+
+use devicons::FileIcon;
 use pulldown_cmark::{Event, Parser, Tag, TagEnd};
-use sense_model::{MarkupContent, MarkupKind};
+use sense_model::{CompletionItem, CompletionKind, CompletionResource, MarkupContent, MarkupKind};
 use textwrap::Options;
 use unicode_width::UnicodeWidthStr;
 
 const MINIMUM_PANEL_WIDTH: u16 = 24;
 const PANEL_GAP: u16 = 1;
+const GENERIC_FILE_ICON: char = '󰈔';
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FileIconPolicy {
+    Filetype,
+    Generic,
+}
+
+/// Returns the terminal icon for a completion without probing the filesystem.
+///
+/// Native completion remains authoritative for resource kinds. Filetype icons
+/// are resolved only from explicit path resources with an extension, which
+/// keeps presentation deterministic and avoids `stat(2)` on the input path.
+#[must_use]
+pub fn completion_icon(item: &CompletionItem, file_icons: FileIconPolicy) -> char {
+    match item.kind {
+        CompletionKind::Text => '󰦨',
+        CompletionKind::Command
+        | CompletionKind::Alias
+        | CompletionKind::Builtin
+        | CompletionKind::Function
+        | CompletionKind::Subcommand => '󰆍',
+        CompletionKind::Option | CompletionKind::OptionValue => '󰌋',
+        CompletionKind::Variable => '󰫧',
+        CompletionKind::File | CompletionKind::Symlink
+            if file_icons == FileIconPolicy::Filetype =>
+        {
+            filetype_icon(item).unwrap_or(GENERIC_FILE_ICON)
+        }
+        CompletionKind::File | CompletionKind::Symlink => GENERIC_FILE_ICON,
+        CompletionKind::Directory => '󰉋',
+        CompletionKind::User => '󰀄',
+        CompletionKind::Host => '󰒋',
+        CompletionKind::Process | CompletionKind::Job => '󰐊',
+        CompletionKind::GitBranch | CompletionKind::GitTag | CompletionKind::GitCommit => '',
+        CompletionKind::Service => '󰒍',
+        CompletionKind::Container => '󰡨',
+        CompletionKind::Image => '󰋩',
+        CompletionKind::Package => '󰏓',
+    }
+}
+
+fn filetype_icon(item: &CompletionItem) -> Option<char> {
+    let CompletionResource::FileSystemPath { path } = item.resource.as_ref()?;
+    let path = Path::new(OsStr::from_bytes(path.as_slice()));
+    path.extension()?;
+    let icon = FileIcon::from(path);
+    (icon != FileIcon::default()).then_some(icon.icon)
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DocumentationPlacementPreference {

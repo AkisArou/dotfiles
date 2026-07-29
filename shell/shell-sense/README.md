@@ -210,6 +210,14 @@ replacement document after selection changes: the previous document remains
 visible until the selected item's content is ready, so the pane does not flash
 closed and open while navigating.
 
+`indicators.file_icons = "filetype"` gives typed file resources a Nerd Font
+icon based on their extension. Set it to `"generic"` for one stable file icon.
+Directories always use the native completion kind and the folder icon; icon
+resolution never probes the filesystem or changes candidate generation.
+`indicators.kinds` independently selects `"icon"`, `"text"`, `"both"`, or
+`"none"`. Blink continues to render its own kind icons from the semantic item
+kind, so this setting applies only to terminal popups.
+
 ## Configuration
 
 The default user file is `~/.config/shell-sense/config.toml`. See

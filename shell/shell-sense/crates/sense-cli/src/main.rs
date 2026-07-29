@@ -5,12 +5,12 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use clap::{ArgGroup, Args, Parser, Subcommand};
 use sense_config::{
-    BorderStyle, Config, ConfigPaths, DocumentationMode, IndicatorMode, KeyAction,
+    BorderStyle, Config, ConfigPaths, DocumentationMode, FileIconMode, IndicatorMode, KeyAction,
     ZshCandidateFilter,
 };
 use sense_daemon::{Server, ServerConfig};
 use sense_model::{NativeShell, RawBytes};
-use sense_present::DocumentationPlacementPreference;
+use sense_present::{DocumentationPlacementPreference, FileIconPolicy};
 use sense_protocol::ShellIdentity;
 use sense_shell_worker::{
     BridgeConfig, CaptureLimits, DocumentationActivation, DocumentationLayoutPolicy,
@@ -280,7 +280,33 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
         enabled: config.ghost_text.enabled,
         minimum_confidence: config.ghost_text.minimum_confidence,
     };
-    bridge.documentation = DocumentationPolicy {
+    bridge.documentation = documentation_policy(&config);
+    bridge.startup_messages = shell_startup_messages(&config, bridge.shell.shell)?;
+    match (
+        arguments.shell_input_fifo,
+        arguments.shell_output_fifo,
+        arguments.shell_output_mailbox,
+    ) {
+        (Some(input), Some(output), None) => {
+            sense_shell_worker::run_fifo_bridge(bridge, input, output).await?;
+        }
+        (Some(input), None, Some(output)) => {
+            sense_shell_worker::run_signal_bridge(
+                bridge,
+                input,
+                output,
+                arguments.shell_process_id,
+            )
+            .await?;
+        }
+        (None, None, None) => sense_shell_worker::run_stdio_bridge(bridge).await?,
+        _ => unreachable!("clap validates complete, exclusive transports"),
+    }
+    Ok(())
+}
+
+fn documentation_policy(config: &Config) -> DocumentationPolicy {
+    DocumentationPolicy {
         activation: match config.documentation.mode {
             DocumentationMode::Off => DocumentationActivation::Disabled,
             DocumentationMode::Manual => DocumentationActivation::Manual,
@@ -311,33 +337,12 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
             menu_max_rows: config.popup.max_rows,
             scrolloff: config.popup.scrolloff,
             cycle: config.popup.cycle,
-            menu_chrome_cells: menu_chrome_cells(&config),
+            file_icons: file_icon_policy(config),
+            menu_chrome_cells: menu_chrome_cells(config),
             scrollbar: config.popup.scrollbar,
             descriptions: config.popup.descriptions,
         },
-    };
-    bridge.startup_messages = shell_startup_messages(&config, bridge.shell.shell)?;
-    match (
-        arguments.shell_input_fifo,
-        arguments.shell_output_fifo,
-        arguments.shell_output_mailbox,
-    ) {
-        (Some(input), Some(output), None) => {
-            sense_shell_worker::run_fifo_bridge(bridge, input, output).await?;
-        }
-        (Some(input), None, Some(output)) => {
-            sense_shell_worker::run_signal_bridge(
-                bridge,
-                input,
-                output,
-                arguments.shell_process_id,
-            )
-            .await?;
-        }
-        (None, None, None) => sense_shell_worker::run_stdio_bridge(bridge).await?,
-        _ => unreachable!("clap validates complete, exclusive transports"),
     }
-    Ok(())
 }
 
 fn menu_chrome_cells(config: &Config) -> u16 {
@@ -349,7 +354,7 @@ fn menu_chrome_cells(config: &Config) -> u16 {
     let indicator = match config.indicators.kinds {
         IndicatorMode::Icon => 2,
         IndicatorMode::Text => 4,
-        IndicatorMode::Both => 17,
+        IndicatorMode::Both => 6,
         IndicatorMode::None => 0,
     };
     config
@@ -359,6 +364,13 @@ fn menu_chrome_cells(config: &Config) -> u16 {
         .saturating_add(u16::from(config.popup.border != BorderStyle::None).saturating_mul(2))
         .saturating_add(marker)
         .saturating_add(indicator)
+}
+
+const fn file_icon_policy(config: &Config) -> FileIconPolicy {
+    match config.indicators.file_icons {
+        FileIconMode::Filetype => FileIconPolicy::Filetype,
+        FileIconMode::Generic => FileIconPolicy::Generic,
+    }
 }
 
 fn shell_startup_messages(config: &Config, shell: NativeShell) -> Result<Vec<ShellWireMessage>> {

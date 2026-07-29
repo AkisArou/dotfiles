@@ -318,7 +318,8 @@ The terminal UI provides:
 - a responsive-width completion menu;
 - selected-row highlighting;
 - fuzzy match highlighting;
-- kind icons, text labels, or no indicators;
+- centrally resolved semantic/filetype icons, text labels, both, or no
+  indicators;
 - dimmed kind/detail/source columns;
 - optional descriptions and group headings;
 - a correctly proportional scrollbar;
@@ -372,7 +373,8 @@ Configurable areas include:
 - activation mode, debounce, trigger characters, after-accept behavior;
 - shell-specific broad-query threshold and candidate bounds;
 - closed/open popup keymaps;
-- kind indicators: icons, text, or none;
+- kind indicators: icons, text, both, or none, with filetype or generic file
+  icons;
 - popup size, padding, border, decorations, scrollbar, descriptions, groups;
 - all UI styles and per-kind styles;
 - documentation mode, delay, size, and Markdown rendering;
@@ -451,8 +453,9 @@ Chosen libraries and responsibilities:
   incompatible-daemon replacement;
 - `tempfile`: same-filesystem installation transactions and atomic executable
   publication;
-- `devicons`: evaluate for file icons only after native file-kind fidelity is
-  established; it never participates in candidate generation;
+- `devicons`: extension-based terminal file icons for typed native file
+  resources only; it never participates in candidate generation and Shell
+  Sense avoids its filesystem-probing fallback on the presentation hot path;
 
 Carapace, fzf, LSP servers, and snippet crates are not dependencies of the
 native-only product scope.
@@ -645,8 +648,9 @@ navigable IntelliSense surface.
   verified directory (implemented across all three terminal clients);
 - reject a stale or unregistered generation centrally before it can replace or
   navigate the worker's active view, and cover delayed documentation navigation
-  in the live Zsh, Fish, and Bash clients (implemented; Bash uses its documented
-  action-driven delivery path);
+  in the live Zsh, Fish, and Bash clients (implemented; Bash uses serial-matched
+  navigation acknowledgements and signal-safe FIFO writes so a later action
+  cannot observe a partially committed candidate or documentation view);
 - cover side/below, bordered/borderless, narrow/wide, long Markdown, Unicode,
   first/last page, selection changes, cancellation, and unresolved/empty
   documentation in layout, bridge, and live-shell tests (implemented);
@@ -657,9 +661,9 @@ navigable IntelliSense surface.
 - add release-mode end-to-end latency measurements and request-scoped
   observability for native capture, ranking, enrichment, layout, and render
   delivery (implemented; a 25-sample release run on the development machine
-  measured 26.8 ms p95 from worker request receipt through flushed view
-  delivery and 51.6 ms p95 for external terminal observation, against 30 ms
-  and 75 ms gates respectively; 10,000-candidate ranking measured 3.56 ms);
+  measured 25.9 ms p95 from worker request receipt through flushed view
+  delivery and 53.4 ms p95 for external terminal observation, against 30 ms
+  and 75 ms gates respectively; 10,000-candidate ranking measured 3.79 ms);
 - finish packaging and release checks only after the conformance and UX gates
   are green on all supported shells (implemented; the gate validates the exact
   release executable and embedded assets, atomic replacement, user-config
@@ -675,6 +679,23 @@ Implementation order:
 3. expanded conformance and adversarial lifecycle cases (implemented);
 4. Blink integration contract (implemented);
 5. latency/observability and packaging gates (implemented).
+
+### Phase I — resource-aware terminal icons (implemented)
+
+- resolve every semantic kind icon once in the Rust presentation layer and
+  remove the divergent Zsh, Fish, and Bash icon tables;
+- attach the resolved glyph to the bounded worker view protocol while keeping
+  Blink's semantic `CompletionKind` mapping independent;
+- use `devicons` only for typed native file resources with an extension, never
+  for candidate discovery, directory classification, or a filesystem probe;
+- preserve native directory authority and use deterministic generic fallbacks
+  for extensionless or unknown file types;
+- expose `indicators.file_icons = "filetype" | "generic"`, defaulting to
+  filetype icons, while keeping `indicators.kinds` responsible for icon, text,
+  combined, or hidden presentation;
+- keep indicator-column widths identical across all terminal clients and cover
+  icon resolution, view transport, configuration, shell syntax, and live native
+  clients in the release gates.
 
 ## 15. Acceptance matrix
 

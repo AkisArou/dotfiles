@@ -19,7 +19,7 @@ use sense_model::{
 };
 use sense_present::{
     DocumentationLine, DocumentationPanel, DocumentationPlacement,
-    DocumentationPlacementPreference, PresentationRequest,
+    DocumentationPlacementPreference, FileIconPolicy, PresentationRequest, completion_icon,
 };
 use sense_protocol::{
     CandidateBatch, CandidateView, ClientHello, ClientMessage, MessagePackCodec, PeerRole,
@@ -43,10 +43,10 @@ type RequestKey = (RequestId, Generation);
 const MAX_CANCELLED_CAPTURE_TOMBSTONES: usize = 256;
 const MAX_NATIVE_CONTEXT_WORDS: usize = 4096;
 const MAX_NATIVE_CONTEXT_BYTES: usize = 1024 * 1024;
-const VIEW_CHUNK_ITEM_FIELDS: usize = 11;
-// 3 envelope fields + (11 * 11) item fields = 124, below the default and
+const VIEW_CHUNK_ITEM_FIELDS: usize = 12;
+// 3 envelope fields + (10 * 12) item fields = 123, below the default and
 // shell-side 128-field wire limit.
-const VIEW_CHUNK_ITEMS: usize = 11;
+const VIEW_CHUNK_ITEMS: usize = 10;
 const SHELL_OUTPUT_BACKPRESSURE_BYTES: usize = 256 * 1024;
 
 #[derive(Debug, Clone)]
@@ -138,6 +138,7 @@ pub struct MenuLayoutPolicy {
     pub menu_max_rows: u16,
     pub scrolloff: u16,
     pub cycle: bool,
+    pub file_icons: FileIconPolicy,
     pub menu_chrome_cells: u16,
     pub scrollbar: bool,
     pub descriptions: bool,
@@ -174,6 +175,7 @@ impl Default for DocumentationPolicy {
                 menu_max_rows: 10,
                 scrolloff: 2,
                 cycle: true,
+                file_icons: FileIconPolicy::Filetype,
                 menu_chrome_cells: 4,
                 scrollbar: true,
                 descriptions: true,
@@ -919,9 +921,28 @@ impl BridgeState {
     where
         W: AsyncWrite + Unpin,
     {
-        let update = match action {
+        match action {
             Navigation::Next | Navigation::Previous | Navigation::PageDown | Navigation::PageUp => {
-                self.navigate(request_id, generation, navigation_serial, action)
+                let update = self.navigate(request_id, generation, navigation_serial, action);
+                if let Some(window) = self.current_window() {
+                    match update {
+                        NavigationUpdate::Unchanged => {}
+                        NavigationUpdate::SelectionChanged => {
+                            send_selection_changed(shell, &window).await?;
+                        }
+                        NavigationUpdate::WindowChanged => {
+                            send_candidate_view(
+                                shell,
+                                window,
+                                &self.capture_store,
+                                self.shell_capture_store.as_ref(),
+                                self.documentation,
+                                DocumentationTransfer::Preserve,
+                            )
+                            .await?;
+                        }
+                    }
+                }
             }
             Navigation::DocumentationDown
             | Navigation::DocumentationUp
@@ -938,30 +959,20 @@ impl BridgeState {
                         &view_presentation(&window, self.documentation),
                     )
                     .await?;
-                    shell.flush().await?;
-                }
-                return Ok(());
-            }
-        };
-        if let Some(window) = self.current_window() {
-            match update {
-                NavigationUpdate::Unchanged => {}
-                NavigationUpdate::SelectionChanged => {
-                    send_selection_changed(shell, &window).await?;
-                }
-                NavigationUpdate::WindowChanged => {
-                    send_candidate_view(
-                        shell,
-                        window,
-                        &self.capture_store,
-                        self.shell_capture_store.as_ref(),
-                        self.documentation,
-                        DocumentationTransfer::Preserve,
-                    )
-                    .await?;
                 }
             }
         }
+        send_shell(
+            shell,
+            "navigation-applied",
+            vec![
+                RawBytes::from(request_id.0.to_string()),
+                RawBytes::from(generation.0.to_string()),
+                RawBytes::from(navigation_serial.to_string()),
+            ],
+        )
+        .await?;
+        shell.flush().await?;
         Ok(())
     }
 
@@ -2402,12 +2413,12 @@ where
     {
         feed_view_chunk(
             shell,
-            view.request_id,
-            view.generation,
+            (view.request_id, view.generation),
             items,
             ghost_texts,
             capture_store,
             shell_capture_store,
+            documentation.menu.file_icons,
         )
         .await?;
     }
@@ -2686,17 +2697,18 @@ const fn documentation_line_kind_name(kind: sense_present::DocumentationLineKind
 
 async fn feed_view_chunk<W>(
     shell: &mut FramedWrite<W, ShellWireCodec>,
-    request_id: RequestId,
-    generation: Generation,
+    request: RequestKey,
     items: &[CompletionItem],
     ghost_texts: &[Option<GhostText>],
     capture_store: &CaptureStore,
     shell_capture_store: Option<&ShellCaptureStore>,
+    file_icons: FileIconPolicy,
 ) -> Result<(), ShellWireError>
 where
     W: AsyncWrite + Unpin,
 {
     debug_assert_eq!(items.len(), ghost_texts.len());
+    let (request_id, generation) = request;
     let mut fields = Vec::with_capacity(3 + items.len() * VIEW_CHUNK_ITEM_FIELDS);
     fields.extend([
         request_id.0.to_string().into(),
@@ -2718,6 +2730,7 @@ where
                 .to_string()
                 .into(),
             completion_kind_name(item.kind).into(),
+            completion_icon(item, file_icons).to_string().into(),
             optional_text(item.detail.as_deref()),
             item.detail
                 .as_deref()

@@ -32,6 +32,7 @@ declare -gi _shell_sense_bash_external_presentation=0
 declare -gi _shell_sense_bash_selected=1
 declare -gi _shell_sense_bash_selected_absolute=0
 declare -gi _shell_sense_bash_navigation_serial=0
+declare -gi _shell_sense_bash_navigation_applied_serial=0
 declare -gi _shell_sense_bash_total=0
 declare -gi _shell_sense_bash_window_start=0
 declare -gi _shell_sense_bash_menu_view_start=0
@@ -69,6 +70,7 @@ declare -ga _shell_sense_bash_view_ids=()
 declare -ga _shell_sense_bash_view_labels=()
 declare -ga _shell_sense_bash_view_label_cells=()
 declare -ga _shell_sense_bash_view_kinds=()
+declare -ga _shell_sense_bash_view_icons=()
 declare -ga _shell_sense_bash_view_details=()
 declare -ga _shell_sense_bash_view_detail_cells=()
 declare -ga _shell_sense_bash_view_matches=()
@@ -129,7 +131,21 @@ _shell_sense_bash_send() {
   ((_shell_sense_bash_worker_pid > 0)) || return 1
   kill -0 "$_shell_sense_bash_worker_pid" 2>/dev/null || return 1
   _shell_sense_bash_encode_message "$@"
-  printf '%s' "$_shell_sense_bash_encoded" >"$_shell_sense_bash_input_fifo"
+  _shell_sense_bash_write "$_shell_sense_bash_encoded"
+}
+
+_shell_sense_bash_write() {
+  local payload=$1
+  local -i status
+  # The worker uses USR1 only to wake Readline. While Bash is writing a framed
+  # request, that notification must not interrupt the builtin write and leave a
+  # partial netstring in the FIFO. The following synchronous mailbox wait will
+  # observe and acknowledge a notification that arrives in this short section.
+  trap '' USR1
+  printf '%s' "$payload" >"$_shell_sense_bash_input_fifo"
+  status=$?
+  trap ':' USR1
+  return "$status"
 }
 
 _shell_sense_bash_ansi_style() {
@@ -197,6 +213,7 @@ _shell_sense_bash_clear_popup() {
 
 _shell_sense_bash_kind_icon() {
   local kind=$1
+  local icon=$2
   _shell_sense_bash_icon=
   if [[ $_shell_sense_bash_indicator_mode == text ]]; then
     _shell_sense_bash_icon="[${kind:0:1}]"
@@ -204,18 +221,6 @@ _shell_sense_bash_kind_icon() {
   elif [[ $_shell_sense_bash_indicator_mode == none ]]; then
     return
   fi
-  local icon
-  case $kind in
-    directory) icon='󰉋' ;;
-    file|symlink) icon='󰈔' ;;
-    option|option-value) icon='󰌋' ;;
-    command|builtin|function|alias|subcommand) icon='󰆍' ;;
-    variable) icon='󰫧' ;;
-    user) icon='󰀄' ;;
-    host) icon='󰒋' ;;
-    process|job|service) icon='󰐊' ;;
-    *) icon='󰦨' ;;
-  esac
   if [[ $_shell_sense_bash_indicator_mode == both ]]; then
     _shell_sense_bash_icon="$icon [${kind:0:1}]"
   else
@@ -428,7 +433,8 @@ _shell_sense_bash_render_popup() {
       selected_style=$_shell_sense_bash_style_selected
       marker=$_shell_sense_bash_selected_marker
     fi
-    _shell_sense_bash_kind_icon "${_shell_sense_bash_view_kinds[index]}"
+    _shell_sense_bash_kind_icon "${_shell_sense_bash_view_kinds[index]}" \
+      "${_shell_sense_bash_view_icons[index]}"
     icon=$_shell_sense_bash_icon
     kind_style=${_shell_sense_bash_style_kinds[${_shell_sense_bash_view_kinds[index]}]-$_shell_sense_bash_style_kind}
     detail=
@@ -581,6 +587,7 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_view_labels=()
       _shell_sense_bash_view_label_cells=()
       _shell_sense_bash_view_kinds=()
+      _shell_sense_bash_view_icons=()
       _shell_sense_bash_view_details=()
       _shell_sense_bash_view_detail_cells=()
       _shell_sense_bash_view_matches=()
@@ -590,12 +597,14 @@ _shell_sense_bash_dispatch() {
          $1 == "$_shell_sense_bash_active_request" &&
          $2 == "$_shell_sense_bash_active_generation" ]] || return
       local -i item_count=$3 offset=4 item
-      for ((item = 0; item < item_count; item++, offset += 11)); do
+      (($# == 3 + item_count * 12)) || return
+      for ((item = 0; item < item_count; item++, offset += 12)); do
         local -i position=$offset
         _shell_sense_bash_view_ids+=("${!position}")
         ((position += 1)); _shell_sense_bash_view_labels+=("${!position}")
         ((position += 1)); _shell_sense_bash_view_label_cells+=("${!position}")
         ((position += 1)); _shell_sense_bash_view_kinds+=("${!position}")
+        ((position += 1)); _shell_sense_bash_view_icons+=("${!position}")
         ((position += 1)); _shell_sense_bash_view_details+=("${!position}")
         ((position += 1)); _shell_sense_bash_view_detail_cells+=("${!position}")
         ((position += 4)); _shell_sense_bash_view_matches+=("${!position}")
@@ -679,6 +688,12 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_update_menu_viewport "$_shell_sense_bash_selected_absolute"
       _shell_sense_bash_render_popup
       _shell_sense_bash_view_ready=1
+      ;;
+    navigation-applied)
+      [[ $# == 3 && $1 == "$_shell_sense_bash_active_request" &&
+         $2 == "$_shell_sense_bash_active_generation" && $3 =~ ^[0-9]+$ ]] || return
+      ((10#$3 >= _shell_sense_bash_navigation_applied_serial)) || return
+      _shell_sense_bash_navigation_applied_serial=$3
       ;;
     accept-bash) _shell_sense_bash_apply_acceptance "$@" ;;
     request-cancelled)
@@ -775,14 +790,14 @@ _shell_sense_bash_capture() {
     batch+=$_shell_sense_bash_encoded
     ((batch_count += 1))
     if ((batch_count >= 64)); then
-      printf '%s' "$batch" >"$_shell_sense_bash_input_fifo"
+      _shell_sense_bash_write "$batch"
       batch=
       batch_count=0
     fi
   done
   _shell_sense_bash_encode_message capture-end "$request" "$generation"
   batch+=$_shell_sense_bash_encoded
-  printf '%s' "$batch" >"$_shell_sense_bash_input_fifo"
+  _shell_sense_bash_write "$batch"
 }
 
 _shell_sense_bash_request_completion() {
@@ -793,6 +808,7 @@ _shell_sense_bash_request_completion() {
   _shell_sense_bash_active_request=$_shell_sense_bash_request
   _shell_sense_bash_active_generation=$_shell_sense_bash_generation
   _shell_sense_bash_navigation_serial=0
+  _shell_sense_bash_navigation_applied_serial=0
   _shell_sense_bash_active_buffer=$READLINE_LINE
   _shell_sense_bash_active_point=$READLINE_POINT
   _shell_sense_bash_view_building=0
@@ -955,6 +971,8 @@ _shell_sense_bash_key() {
 
 _shell_sense_bash_navigate() {
   local action=$1
+  ((_shell_sense_bash_navigation_serial += 1))
+  local -i requested_serial=$_shell_sense_bash_navigation_serial
   if [[ $action =~ ^(next|previous|page-down|page-up)$ ]]; then
     local -i desired=$_shell_sense_bash_selected_absolute
     case $action in
@@ -981,7 +999,6 @@ _shell_sense_bash_navigate() {
         ((desired >= 0)) || desired=0
         ;;
     esac
-    ((_shell_sense_bash_navigation_serial += 1))
     local -i relative=$((desired - _shell_sense_bash_window_start + 1))
     _shell_sense_bash_menu_viewport_start_for "$desired" "$_shell_sense_bash_menu_view_start"
     local -i desired_view_start=$_shell_sense_bash_menu_viewport_start
@@ -996,7 +1013,7 @@ _shell_sense_bash_navigate() {
   _shell_sense_bash_view_ready=0
   _shell_sense_bash_send navigate "$_shell_sense_bash_active_request" \
     "$_shell_sense_bash_active_generation" "$_shell_sense_bash_navigation_serial" "$action"
-  _shell_sense_bash_wait_for '_shell_sense_bash_view_ready == 1' || true
+  _shell_sense_bash_wait_for '_shell_sense_bash_navigation_applied_serial >= requested_serial' || true
 }
 
 _shell_sense_bash_close_popup() {

@@ -1,4 +1,4 @@
-use sense_config::{ActivationMode, BorderStyle, Config, ConfigError, KeyAction};
+use sense_config::{ActivationMode, BorderStyle, Config, ConfigError, FileIconMode, KeyAction};
 
 #[test]
 fn defaults_are_continuous_and_tab_is_manual_fallback() {
@@ -29,6 +29,7 @@ fn defaults_are_continuous_and_tab_is_manual_fallback() {
     assert!(config.popup.cycle);
     assert_eq!(config.documentation.padding, 0);
     assert!(config.documentation.scrollbar);
+    assert_eq!(config.indicators.file_icons, FileIconMode::Filetype);
     assert!(config.indicators.selected_marker.is_empty());
     assert_eq!(config.sources.zsh.fuzzy_min_query_chars, 3);
     assert_eq!(config.sources.fish.fuzzy_min_query_chars, 3);

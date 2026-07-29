@@ -73,6 +73,7 @@ padding = 1
 
 [indicators]
 kinds = "icon"
+file_icons = "filetype"
 selected_marker = ""
 
 [documentation]

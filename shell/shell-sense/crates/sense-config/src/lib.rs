@@ -574,6 +574,7 @@ string_enum!(IndicatorMode {
     Both,
     None
 });
+string_enum!(FileIconMode { Filetype, Generic });
 string_enum!(DocumentationMode {
     Auto,
     Side,
@@ -639,6 +640,7 @@ impl Default for PopupConfig {
 #[serde(default, deny_unknown_fields)]
 pub struct IndicatorConfig {
     pub kinds: IndicatorMode,
+    pub file_icons: FileIconMode,
     pub selected_marker: String,
 }
 
@@ -646,6 +648,7 @@ impl Default for IndicatorConfig {
     fn default() -> Self {
         Self {
             kinds: IndicatorMode::Icon,
+            file_icons: FileIconMode::Filetype,
             selected_marker: String::new(),
         }
     }

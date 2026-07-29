@@ -129,10 +129,11 @@ fn assert_ranked_zsh_view(view_begin: &ShellWireMessage, first: &ShellWireMessag
     assert_eq!(first.fields[2].as_slice(), b"1");
     assert_eq!(first.fields[4].as_slice(), b"restart");
     assert_eq!(first.fields[5].as_slice(), b"7");
-    assert_eq!(first.fields[7].as_slice(), b"Restart one or more units");
-    assert_eq!(first.fields[10].as_slice(), b"zsh");
-    assert_eq!(first.fields[11].as_slice(), b"replay-1");
-    assert!(first.fields[13].is_empty());
+    assert_eq!(first.fields[7].as_slice(), "󰆍".as_bytes());
+    assert_eq!(first.fields[8].as_slice(), b"Restart one or more units");
+    assert_eq!(first.fields[11].as_slice(), b"zsh");
+    assert_eq!(first.fields[12].as_slice(), b"replay-1");
+    assert!(first.fields[14].is_empty());
     first.fields[3].clone()
 }
 
@@ -203,6 +204,21 @@ async fn bridge_streams_ranked_candidates_and_routes_selection() {
     let layout = next_command(&mut reader, "view-layout").await;
     assert_eq!(layout.fields[0].as_slice(), b"7");
     next_command(&mut reader, "view-end").await;
+
+    writer
+        .send(ShellWireMessage::new(
+            "navigate",
+            vec![raw("7"), raw("11"), raw("1"), raw("next")],
+        ))
+        .await
+        .unwrap();
+    let selection = next_command(&mut reader, "selection-changed").await;
+    assert_eq!(selection.fields[3].as_slice(), b"1");
+    let navigation_applied = next_command(&mut reader, "navigation-applied").await;
+    assert_eq!(
+        navigation_applied.fields,
+        vec![raw("7"), raw("11"), raw("1")]
+    );
 
     writer
         .send(ShellWireMessage::new(
@@ -279,7 +295,7 @@ async fn fish_native_candidates_use_the_same_rank_and_selection_pipeline() {
     next_command(&mut reader, "view-begin").await;
     let view = next_command(&mut reader, "view-chunk").await;
     assert_eq!(view.fields[4].as_slice(), b"restart");
-    assert_eq!(view.fields[10].as_slice(), b"fish");
+    assert_eq!(view.fields[11].as_slice(), b"fish");
     let item_id = view.fields[3].clone();
     next_command(&mut reader, "view-end").await;
 

@@ -31,6 +31,7 @@ clap = { version = "4.6.4", features = ["derive"] }
 criterion = { version = "0.8.2", default-features = false, features = [
   "cargo_bench_support",
 ] }
+devicons = "=0.6.12"
 etcetera = "0.11.0"
 figment = { version = "0.10.19", features = ["env", "toml"] }
 frizbee = { version = "=0.11.0", default-features = false, features = [

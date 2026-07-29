@@ -63,6 +63,7 @@ set -g _shell_sense_fish_view_ids
 set -g _shell_sense_fish_view_labels
 set -g _shell_sense_fish_view_label_cells
 set -g _shell_sense_fish_view_kinds
+set -g _shell_sense_fish_view_icons
 set -g _shell_sense_fish_view_details
 set -g _shell_sense_fish_view_detail_cells
 set -g _shell_sense_fish_view_matches
@@ -237,34 +238,13 @@ function __shell_sense_fish_clear_popup
     set -g _shell_sense_fish_popup_visible 0
 end
 
-function __shell_sense_fish_kind_icon --argument-names kind
+function __shell_sense_fish_kind_icon --argument-names kind icon
     set -g _shell_sense_fish_icon ''
     if test "$_shell_sense_fish_indicator_mode" = text
         set -g _shell_sense_fish_icon '['(string sub -s 1 -l 1 -- "$kind")']'
         return
     else if test "$_shell_sense_fish_indicator_mode" = none
         return
-    end
-    set -l icon
-    switch $kind
-        case directory
-            set icon '󰉋'
-        case file symlink
-            set icon '󰈔'
-        case option option-value
-            set icon '󰌋'
-        case command builtin function alias subcommand
-            set icon '󰆍'
-        case variable
-            set icon '󰫧'
-        case user
-            set icon '󰀄'
-        case host
-            set icon '󰒋'
-        case process job service
-            set icon '󰐊'
-        case '*'
-            set icon '󰦨'
     end
     if test "$_shell_sense_fish_indicator_mode" = both
         set -g _shell_sense_fish_icon "$icon ["(string sub -s 1 -l 1 -- "$kind")']'
@@ -489,7 +469,7 @@ function __shell_sense_fish_render_popup
             set selected_style $_shell_sense_fish_style_selected
             set marker $_shell_sense_fish_selected_marker
         end
-        __shell_sense_fish_kind_icon $_shell_sense_fish_view_kinds[$index]
+        __shell_sense_fish_kind_icon $_shell_sense_fish_view_kinds[$index] $_shell_sense_fish_view_icons[$index]
         set -l icon "$_shell_sense_fish_icon"
         __shell_sense_fish_kind_style $_shell_sense_fish_view_kinds[$index]
         set -l kind_style "$_shell_sense_fish_resolved_kind_style"
@@ -715,22 +695,25 @@ function __shell_sense_fish_dispatch --argument-names command
             set -g _shell_sense_fish_view_labels
             set -g _shell_sense_fish_view_label_cells
             set -g _shell_sense_fish_view_kinds
+            set -g _shell_sense_fish_view_icons
             set -g _shell_sense_fish_view_details
             set -g _shell_sense_fish_view_detail_cells
             set -g _shell_sense_fish_view_matches
         case view-chunk
             test $_shell_sense_fish_view_building -eq 1; and test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; or return
             set -l item_count $argv[3]
+            test (count $argv) -eq (math 3 + 12 \* $item_count); or return
             set -l offset 4
             for index in (seq $item_count)
                 set -a _shell_sense_fish_view_ids $argv[$offset]
                 set -a _shell_sense_fish_view_labels $argv[(math $offset + 1)]
                 set -a _shell_sense_fish_view_label_cells $argv[(math $offset + 2)]
                 set -a _shell_sense_fish_view_kinds $argv[(math $offset + 3)]
-                set -a _shell_sense_fish_view_details $argv[(math $offset + 4)]
-                set -a _shell_sense_fish_view_detail_cells $argv[(math $offset + 5)]
-                set -a _shell_sense_fish_view_matches $argv[(math $offset + 9)]
-                set offset (math $offset + 11)
+                set -a _shell_sense_fish_view_icons $argv[(math $offset + 4)]
+                set -a _shell_sense_fish_view_details $argv[(math $offset + 5)]
+                set -a _shell_sense_fish_view_detail_cells $argv[(math $offset + 6)]
+                set -a _shell_sense_fish_view_matches $argv[(math $offset + 10)]
+                set offset (math $offset + 12)
             end
         case view-layout
             test (count $argv) -eq 4; or return
