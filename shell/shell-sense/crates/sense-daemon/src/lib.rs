@@ -425,6 +425,7 @@ impl Session {
         item_id: ItemId,
         events: Vec<AdapterEvent>,
     ) {
+        let event_count = events.len();
         let mut current = self.request.lock().await;
         let Some(request) = current.as_mut().filter(|request| request.key() == key) else {
             return;
@@ -450,6 +451,13 @@ impl Session {
                 messages.push(message);
             }
         }
+        trace!(
+            request_id = key.0.0,
+            generation = key.1.0,
+            event_count,
+            resolved,
+            "finished selected-item documentation resolution"
+        );
         if !resolved && let Some(item) = request.items.iter_mut().find(|item| item.id == item_id) {
             item.capabilities
                 .remove(ItemCapabilities::RESOLVE_DOCUMENTATION);

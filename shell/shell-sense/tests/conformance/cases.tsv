@@ -1,0 +1,8 @@
+# id<TAB>line<TAB>Zsh label<TAB>Fish label<TAB>Bash label<TAB>Zsh kind<TAB>Fish kind<TAB>Bash kind<TAB>resource suffix or -
+fuzzy-subcommand	shell-sense-conformance rstart	restart	restart	restart	text	service	text	-
+long-option	shell-sense-conformance --recurs	--recursive	--recursive	--recursive	option	option	option	-
+option-value	shell-sense-value --color=au	auto	--color=auto	auto	text	option	text	-
+directory-prefix	shell-sense-path dotfil	dotfiles	dotfiles/	dotfiles/	directory	directory	directory	dotfiles
+nested-directory	shell-sense-path dotfiles/nv	nvim	dotfiles/nvim/	dotfiles/nvim/	directory	directory	directory	dotfiles/nvim
+quoted-directory	shell-sense-path "space d	space directory	space directory/	space directory/	directory	directory	directory	space directory
+symlinked-directory	shell-sense-path linked-	linked-dir	linked-dir/	linked-dir/	directory	directory	directory	linked-dir

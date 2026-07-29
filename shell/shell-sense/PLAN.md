@@ -236,6 +236,12 @@ Manual Tab completion can use the exact Readline context and is the strongest
 fidelity path. Continuous Bash support must never be advertised as identical
 to Zsh/Fish where Bash's public API cannot provide that guarantee.
 
+Bash also lacks a safe public callback for applying delayed documentation while
+Readline is idle. Its signal handler may interrupt Readline, but it must not run
+the array-heavy mailbox decoder on Readline's signal stack. Bash therefore
+consumes delayed documentation on the next Shell Sense action. ZLE and Fish can
+apply the same update immediately from their supported editor callbacks.
+
 ## 7. Context adapters and documentation
 
 `ContextAdapter` supports only:
@@ -267,7 +273,9 @@ byte-preserving resource path supplied by the native shell adapter. Configured
 resolvers consume a single `$value` placeholder as a complete argv entry. It
 is the native typed resource for filesystem items and the semantic label for
 other kinds. Shell Sense never evaluates a command string or reconstructs a
-path from UI text.
+path from UI text. Resolver executables are looked up directly through the
+daemon environment's `PATH`; interactive-shell aliases and functions are not
+consulted. Resolver output is normalized to plain text before presentation.
 
 Generic option documentation uses the local man page only as a fallback when
 no command-specific adapter matches. Manual output is de-overstruck in Rust,
@@ -583,6 +591,58 @@ actions their line editors cannot faithfully implement.
 - supported-interface audit for Zsh native capture, followed by removal of the
   empty module/ABI scaffold and its obsolete protocol fields (implemented);
 - user documentation and compatibility matrix (implemented).
+
+### Phase H — native conformance and documentation UX (in progress)
+
+This phase is a stabilization gate, not a new candidate source. It turns the
+acceptance matrix below into a shared, data-driven contract exercised against
+each live shell and completes the documentation pane as an independently
+navigable IntelliSense surface.
+
+- build a reusable native-completion conformance harness with identical
+  scenarios and assertions for Zsh, Fish, and Bash wherever their public
+  completion APIs provide equivalent behavior (implemented; the shared TSV
+  covers fuzzy subcommands, long options, option values, and parent, nested,
+  quoted, and symlinked directory resources);
+- expand coverage to short/combined options, user completions, large or slow
+  providers, and further destructive-edit/cancellation cases; native
+  descriptions/groups and shell-owned acceptance already have capability and
+  live-client coverage;
+- record explicitly unsupported shell capabilities instead of weakening a
+  shared assertion or silently manufacturing parity (implemented as a
+  validated capability matrix);
+- retain the complete wrapped documentation model and expose a bounded
+  viewport, rather than irreversibly truncating documentation during layout
+  (implemented);
+- add independent documentation line/page navigation, a manual visibility
+  toggle, stable reset rules when selection or generation changes, and
+  position metadata for terminal presenters (implemented);
+- make all documentation actions configurable and keep candidate navigation
+  behavior unchanged (implemented);
+- reject a stale or unregistered generation centrally before it can replace or
+  navigate the worker's active view, and cover delayed documentation navigation
+  in the live Zsh, Fish, and Bash clients (implemented; Bash uses its documented
+  action-driven delivery path);
+- cover side/below, bordered/borderless, narrow/wide, long Markdown, Unicode,
+  first/last page, selection changes, cancellation, and unresolved/empty
+  documentation in layout, bridge, and live-shell tests;
+- complete the Blink source contract tests for resolve, cancellation, stale
+  generations, native acceptance acknowledgement, and terminal lifecycle;
+- add release-mode end-to-end latency measurements and request-scoped
+  observability for native capture, ranking, enrichment, layout, and render
+  delivery;
+- finish packaging and release checks only after the conformance and UX gates
+  are green on all supported shells.
+
+Implementation order:
+
+1. shared conformance fixture vocabulary and baseline native-shell cases
+   (implemented);
+2. scrollable documentation model, worker state, actions, and presenters
+   (implemented);
+3. expanded conformance and adversarial lifecycle cases (in progress);
+4. Blink integration contract;
+5. latency/observability and packaging gates.
 
 ## 15. Acceptance matrix
 

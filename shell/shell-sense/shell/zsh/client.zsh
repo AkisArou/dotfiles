@@ -135,6 +135,9 @@ typeset -gA _shell_sense_key_sequences=(
   ctrl-p '^P'
   ctrl-d '^D'
   ctrl-u '^U'
+  ctrl-f '^F'
+  ctrl-b '^B'
+  ctrl-g '^G'
   escape '^['
   right '^[[C'
   end '^[[F'
@@ -175,7 +178,8 @@ typeset -ga _shell_sense_temp_ghosts=()
 typeset -g _shell_sense_documentation_item=
 typeset -g _shell_sense_documentation_placement=
 typeset -gi _shell_sense_documentation_width=0
-typeset -gi _shell_sense_documentation_truncated=0
+typeset -gi _shell_sense_documentation_offset=0
+typeset -gi _shell_sense_documentation_total=0
 typeset -ga _shell_sense_documentation_kinds=()
 typeset -ga _shell_sense_documentation_cells=()
 typeset -ga _shell_sense_documentation_lines=()
@@ -184,7 +188,8 @@ typeset -g _shell_sense_temp_documentation_placement=
 typeset -gi _shell_sense_temp_documentation_width=0
 typeset -gi _shell_sense_temp_documentation_expected=0
 typeset -gi _shell_sense_temp_documentation_received=0
-typeset -gi _shell_sense_temp_documentation_truncated=0
+typeset -gi _shell_sense_temp_documentation_offset=0
+typeset -gi _shell_sense_temp_documentation_total=0
 typeset -ga _shell_sense_temp_documentation_kinds=()
 typeset -ga _shell_sense_temp_documentation_cells=()
 typeset -ga _shell_sense_temp_documentation_lines=()
@@ -962,7 +967,8 @@ _shell_sense_reset_temp_documentation() {
   _shell_sense_temp_documentation_width=0
   _shell_sense_temp_documentation_expected=0
   _shell_sense_temp_documentation_received=0
-  _shell_sense_temp_documentation_truncated=0
+  _shell_sense_temp_documentation_offset=0
+  _shell_sense_temp_documentation_total=0
   _shell_sense_temp_documentation_kinds=()
   _shell_sense_temp_documentation_cells=()
   _shell_sense_temp_documentation_lines=()
@@ -972,7 +978,8 @@ _shell_sense_commit_documentation() {
   _shell_sense_documentation_item=$_shell_sense_temp_documentation_item
   _shell_sense_documentation_placement=$_shell_sense_temp_documentation_placement
   _shell_sense_documentation_width=$_shell_sense_temp_documentation_width
-  _shell_sense_documentation_truncated=$_shell_sense_temp_documentation_truncated
+  _shell_sense_documentation_offset=$_shell_sense_temp_documentation_offset
+  _shell_sense_documentation_total=$_shell_sense_temp_documentation_total
   _shell_sense_documentation_kinds=( "${_shell_sense_temp_documentation_kinds[@]}" )
   _shell_sense_documentation_cells=( "${_shell_sense_temp_documentation_cells[@]}" )
   _shell_sense_documentation_lines=( "${_shell_sense_temp_documentation_lines[@]}" )
@@ -992,16 +999,17 @@ _shell_sense_view_layout() {
 
 _shell_sense_documentation_begin() {
   emulate -L zsh
-  (( $# == 7 )) || return 1
+  (( $# == 8 )) || return 1
   [[ $1 == $_shell_sense_active_request && $2 == $_shell_sense_active_generation ]] || return 0
   [[ $4 == side || $4 == below ]] || return 1
-  [[ $5 == <-> && $6 == <-> && ( $7 == 0 || $7 == 1 ) ]] || return 1
+  [[ $5 == <-> && $6 == <-> && $7 == <-> && $8 == <-> ]] || return 1
   _shell_sense_reset_temp_documentation
   _shell_sense_temp_documentation_item=$3
   _shell_sense_temp_documentation_placement=$4
   _shell_sense_temp_documentation_width=$5
   _shell_sense_temp_documentation_expected=$6
-  _shell_sense_temp_documentation_truncated=$7
+  _shell_sense_temp_documentation_offset=$7
+  _shell_sense_temp_documentation_total=$8
 }
 
 _shell_sense_documentation_chunk() {
@@ -1295,7 +1303,8 @@ _shell_sense_clear_popup() {
   _shell_sense_documentation_item=
   _shell_sense_documentation_placement=
   _shell_sense_documentation_width=0
-  _shell_sense_documentation_truncated=0
+  _shell_sense_documentation_offset=0
+  _shell_sense_documentation_total=0
   _shell_sense_documentation_kinds=()
   _shell_sense_documentation_cells=()
   _shell_sense_documentation_lines=()
@@ -2042,6 +2051,14 @@ _shell_sense_key_dispatch() {
         _shell_sense_send navigate "$_shell_sense_active_request" \
           "$_shell_sense_active_generation" page-up
       else _shell_sense_call_original "$logical"; fi
+      ;;
+    documentation-down|documentation-up|documentation-page-down|documentation-page-up|toggle-documentation)
+      if (( _shell_sense_popup_visible && ! _shell_sense_popup_stale )); then
+        _shell_sense_send navigate "$_shell_sense_active_request" \
+          "$_shell_sense_active_generation" "$action"
+      else
+        _shell_sense_call_original "$logical"
+      fi
       ;;
     accept-next-token)
       _shell_sense_accept_ghost_part "$_shell_sense_ghost_partial_accept" ||

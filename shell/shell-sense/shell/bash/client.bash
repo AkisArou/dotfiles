@@ -39,11 +39,11 @@ declare -g _shell_sense_bash_documentation_item=
 declare -g _shell_sense_bash_documentation_placement=
 declare -gi _shell_sense_bash_documentation_width=0
 declare -gi _shell_sense_bash_documentation_expected=0
-declare -gi _shell_sense_bash_documentation_truncated=0
+declare -gi _shell_sense_bash_documentation_offset=0
+declare -gi _shell_sense_bash_documentation_total=0
 declare -ga _shell_sense_bash_documentation_kinds=()
 declare -ga _shell_sense_bash_documentation_cells=()
 declare -ga _shell_sense_bash_documentation_lines=()
-declare -gi _shell_sense_bash_output_ready=0
 declare -gi _shell_sense_bash_pending_after_accept=0
 declare -gi _shell_sense_bash_wait_fd=-1
 declare -gi _shell_sense_bash_bindings_captured=0
@@ -84,7 +84,8 @@ _shell_sense_bash_reset_documentation() {
   _shell_sense_bash_documentation_placement=
   _shell_sense_bash_documentation_width=0
   _shell_sense_bash_documentation_expected=0
-  _shell_sense_bash_documentation_truncated=0
+  _shell_sense_bash_documentation_offset=0
+  _shell_sense_bash_documentation_total=0
   _shell_sense_bash_documentation_kinds=()
   _shell_sense_bash_documentation_cells=()
   _shell_sense_bash_documentation_lines=()
@@ -489,6 +490,9 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_view_matches=()
       ;;
     view-chunk)
+      [[ $_shell_sense_bash_view_building == 1 &&
+         $1 == "$_shell_sense_bash_active_request" &&
+         $2 == "$_shell_sense_bash_active_generation" ]] || return
       local -i item_count=$3 offset=4 item
       for ((item = 0; item < item_count; item++, offset += 11)); do
         local -i position=$offset
@@ -508,7 +512,7 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_menu_width=$4
       ;;
     documentation-begin)
-      [[ $# == 7 && $1 == "$_shell_sense_bash_active_request" &&
+      [[ $# == 8 && $1 == "$_shell_sense_bash_active_request" &&
          $2 == "$_shell_sense_bash_active_generation" &&
          ($4 == side || $4 == below) ]] || return
       _shell_sense_bash_reset_documentation
@@ -516,7 +520,8 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_documentation_placement=$4
       _shell_sense_bash_documentation_width=$5
       _shell_sense_bash_documentation_expected=$6
-      _shell_sense_bash_documentation_truncated=$7
+      _shell_sense_bash_documentation_offset=$7
+      _shell_sense_bash_documentation_total=$8
       ;;
     documentation-chunk)
       [[ $# -ge 4 && $1 == "$_shell_sense_bash_active_request" &&
@@ -550,12 +555,20 @@ _shell_sense_bash_dispatch() {
       ((_shell_sense_bash_view_building)) || _shell_sense_bash_render_popup
       ;;
     view-end)
+      [[ $# == 3 && $_shell_sense_bash_view_building == 1 &&
+         $1 == "$_shell_sense_bash_active_request" &&
+         $2 == "$_shell_sense_bash_active_generation" &&
+         $3 == "$_shell_sense_bash_view_revision" ]] || return
       _shell_sense_bash_view_building=0
       _shell_sense_bash_render_popup
       _shell_sense_bash_view_ready=1
       ;;
     accept-bash) _shell_sense_bash_apply_acceptance "$@" ;;
-    request-cancelled) _shell_sense_bash_close_popup ;;
+    request-cancelled)
+      [[ $1 == "$_shell_sense_bash_active_request" &&
+         $2 == "$_shell_sense_bash_active_generation" ]] || return
+      _shell_sense_bash_close_popup
+      ;;
     error) _shell_sense_bash_last_error="$1: $2" ;;
   esac
 }
@@ -566,7 +579,6 @@ _shell_sense_bash_drain() {
   mapfile -t records <"$_shell_sense_bash_output_mailbox"
   ((${#records[@]})) || return
   kill -USR2 "$_shell_sense_bash_worker_pid" 2>/dev/null || true
-  _shell_sense_bash_output_ready=0
   local record encoded field
   local -a decoded=()
   for record in "${records[@]}"; do
@@ -665,6 +677,7 @@ _shell_sense_bash_request_completion() {
   _shell_sense_bash_active_generation=$_shell_sense_bash_generation
   _shell_sense_bash_active_buffer=$READLINE_LINE
   _shell_sense_bash_active_point=$READLINE_POINT
+  _shell_sense_bash_view_building=0
   local cursor
   _shell_sense_bash_byte_length "${READLINE_LINE:0:READLINE_POINT}"
   cursor=$_shell_sense_bash_byte_count
@@ -756,6 +769,9 @@ _shell_sense_bash_key_sequence() {
     ctrl-p) printf '\\C-p' ;;
     ctrl-d) printf '\\C-d' ;;
     ctrl-u) printf '\\C-u' ;;
+    ctrl-f) printf '\\C-f' ;;
+    ctrl-b) printf '\\C-b' ;;
+    ctrl-g) printf '\\C-g' ;;
     escape) printf '\\e' ;;
     right) printf '\\e[C' ;;
     end) printf '\\e[F' ;;
@@ -812,7 +828,7 @@ _shell_sense_bash_key() {
         _shell_sense_bash_request_completion after-accept
       fi
       ;;
-    next|previous|page-down|page-up)
+    next|previous|page-down|page-up|documentation-down|documentation-up|documentation-page-down|documentation-page-up|toggle-documentation)
       _shell_sense_bash_view_ready=0
       _shell_sense_bash_send navigate "$_shell_sense_bash_active_request" "$_shell_sense_bash_active_generation" "$_shell_sense_bash_resolved_action"
       _shell_sense_bash_wait_for '_shell_sense_bash_view_ready == 1' || true
@@ -986,7 +1002,10 @@ _shell_sense_bash_start() {
   [[ -z ${SHELL_SENSE_SOCKET-} ]] || arguments+=(--socket "$SHELL_SENSE_SOCKET")
   [[ -z ${SHELL_SENSE_CONFIG-} ]] || arguments+=(--config "$SHELL_SENSE_CONFIG")
   [[ -z ${SHELL_SENSE_PROFILE-} ]] || arguments+=(--profile "$SHELL_SENSE_PROFILE")
-  trap '_shell_sense_bash_output_ready=1' USR1
+  # Bash cannot safely run the array-heavy mailbox decoder from a signal trap
+  # while Readline owns the stack. The signal only interrupts Readline; the
+  # next Shell Sense action drains and acknowledges the mailbox synchronously.
+  trap ':' USR1
   "$command_path" "${arguments[@]}" </dev/null >>"$_shell_sense_bash_log" 2>&1 &
   _shell_sense_bash_worker_pid=$!
   _shell_sense_bash_wait_for '_shell_sense_bash_ready == 1 && _shell_sense_bash_configured == 1' || return 1

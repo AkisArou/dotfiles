@@ -51,6 +51,10 @@ trap cleanup EXIT
 
 [[ -x $binary ]] || fail "build $binary before running this test"
 command mkdir -m 700 -- "$runtime_dir/state"
+command mkdir -p -- "$runtime_dir/work/dotfiles/nvim"
+for index in {01..24}; do
+  command touch -- "$runtime_dir/work/dotfiles/entry-$index"
+done
 "$binary" daemon --socket "$runtime_dir/daemon.sock" >"$runtime_dir/daemon.log" 2>&1 &
 daemon_pid=$!
 for _ in {1..200}; do
@@ -84,8 +88,9 @@ shell_sense_pty_write_line 'function x; printf "<FISH-ACCEPT>%s</FISH-ACCEPT>\n"
 shell_sense_pty_write_line "complete -c x -a 'restart reset-failed rescue reload' -d 'native action'"
 shell_sense_pty_write_line 'function __shell_sense_test_prompt --on-event fish_prompt; printf "<FISH-PROMPT-PWD>%s</FISH-PROMPT-PWD>\n" "$PWD"; end'
 shell_sense_pty_write_line 'function __shell_sense_test_state; printf "<FISH-STATE>line=%s,active=%s,ready=%s,visible=%s</FISH-STATE>\n" (commandline -b) "$_shell_sense_fish_active_buffer" "$_shell_sense_fish_view_ready" "$_shell_sense_fish_popup_visible"; end'
+shell_sense_pty_write_line 'function __shell_sense_test_documentation_state; set -l selected $_shell_sense_fish_view_labels[$_shell_sense_fish_selected]; printf "<FISH-DOC>offset=%s,total=%s,lines=%s,item=%s,selected=%s</FISH-DOC>\n" "$_shell_sense_fish_documentation_offset" "$_shell_sense_fish_documentation_total" (count $_shell_sense_fish_documentation_lines) "$_shell_sense_fish_documentation_item" "$selected"; end'
 shell_sense_pty_write_line 'function __shell_sense_test_worker_state; set -l changed 0; test $__sense_test_old_worker -ne $_shell_sense_fish_worker_pid; and set changed 1; printf "<FISH-WORKER-RECOVERED>%s:%s:%s</FISH-WORKER-RECOVERED>\n" $changed $_shell_sense_fish_ready $_shell_sense_fish_configured; end'
-shell_sense_pty_write_line "source ${(q)entry}; bind \\cx\\cg __shell_sense_test_state; bind \\cx\\cw __shell_sense_test_worker_state; printf '<FISH-READY>ready</FISH-READY>\\n'"
+shell_sense_pty_write_line "source ${(q)entry}; bind \\cx\\cg __shell_sense_test_state; bind \\cx\\cd __shell_sense_test_documentation_state; bind \\cx\\cw __shell_sense_test_worker_state; printf '<FISH-READY>ready</FISH-READY>\\n'"
 shell_sense_pty_reset
 shell_sense_pty_read_until '*<FISH-READY>ready</FISH-READY>*' 1000 ||
   fail 'Fish client initialization did not finish'
@@ -135,6 +140,48 @@ shell_sense_pty_read_until '*<FISH-ACCEPT>restart</FISH-ACCEPT>*' ||
   fail 'Fish executed a different custom candidate after completion acceptance'
 shell_sense_pty_read_until '*<FISH-PROMPT-PWD>*' ||
   fail 'Fish did not settle before the worker recovery test'
+
+# Documentation navigation is independent of candidate navigation in Fish.
+# The configured directory resolver supplies enough rows to exercise both
+# page boundaries, and toggling the pane must preserve the native selection.
+shell_sense_pty_write_line "cd ${(q)runtime_dir}/work"
+shell_sense_pty_reset
+shell_sense_pty_read_until "*<FISH-PROMPT-PWD>$runtime_dir/work</FISH-PROMPT-PWD>*" ||
+  fail 'Fish documentation fixture directory was not entered'
+shell_sense_pty_reset
+shell_sense_pty_write_raw 'cd dotfil'
+shell_sense_pty_read_until '*entry-01*' || fail 'Fish directory documentation did not resolve'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x18\x04'
+shell_sense_pty_read_until '*<FISH-DOC>offset=0,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</FISH-DOC>*' ||
+  fail 'Fish documentation did not begin at its first row'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x06'
+zselect -t 10 >/dev/null 2>&1 || true
+shell_sense_pty_write_raw $'\x18\x04'
+shell_sense_pty_read_until '*<FISH-DOC>offset=[1-9]<->,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</FISH-DOC>*' ||
+  fail 'Fish documentation page-down changed no viewport or candidate'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x02'
+zselect -t 10 >/dev/null 2>&1 || true
+shell_sense_pty_write_raw $'\x18\x04'
+shell_sense_pty_read_until '*<FISH-DOC>offset=0,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</FISH-DOC>*' ||
+  fail 'Fish documentation page-up did not return to the first row'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x07'
+zselect -t 10 >/dev/null 2>&1 || true
+shell_sense_pty_write_raw $'\x18\x04'
+shell_sense_pty_read_until '*<FISH-DOC>offset=0,total=0,lines=0,item=,selected=dotfiles/</FISH-DOC>*' ||
+  fail 'Fish documentation toggle did not hide the pane'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x07'
+zselect -t 10 >/dev/null 2>&1 || true
+shell_sense_pty_write_raw $'\x18\x04'
+shell_sense_pty_read_until '*<FISH-DOC>offset=0,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</FISH-DOC>*' ||
+  fail 'Fish documentation toggle did not restore the pane'
+shell_sense_pty_write_raw $'\x03'
+shell_sense_pty_reset
+shell_sense_pty_read_until '*> *' || fail 'Fish did not clear the documentation probe'
 
 # fish_prompt owns recovery after a bridge crash; no re-sourcing or synthetic
 # candidates are involved.

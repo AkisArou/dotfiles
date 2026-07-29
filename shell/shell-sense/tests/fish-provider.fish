@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-set -l project_root (path dirname (path dirname (status filename)))
+set -l project_root (path resolve (path dirname (path dirname (status filename))))
 source "$project_root/shell/fish/provider.fish"
 source "$project_root/shell/fish/client.fish"
 
@@ -29,12 +29,40 @@ __shell_sense_fish_collect 'shell-sense-flags --recusr' 3
 contains -- --recursive $_shell_sense_fish_labels; or fail 'broadened native option'
 test "$_shell_sense_fish_query_mode" = broad; or fail 'broad query mode'
 
+complete -c shell-sense-conformance -a restart -d 'restart services'
+complete -c shell-sense-conformance -l recursive -d 'list subdirectories recursively'
+complete -c shell-sense-value -l color -a 'auto always never' -d 'color value'
+complete -c shell-sense-path -a '(__fish_complete_directories)'
+
 set -l fixture_root (mktemp -d /tmp/shell-sense-fish-provider.XXXXXX); or fail 'temporary directory'
 function cleanup --on-event fish_exit
     command rm -rf -- "$fixture_root"
 end
-command mkdir -- "$fixture_root/dotfiles" "$fixture_root/dotfiles/nvim"
+command mkdir -- "$fixture_root/dotfiles" "$fixture_root/dotfiles/nvim" "$fixture_root/space directory"
+command ln -s dotfiles/nvim "$fixture_root/linked-dir"
 pushd "$fixture_root" >/dev/null
+
+while read -l record
+    set -l fields (string split \t -- "$record")
+    set -l case_id $fields[1]
+    string match -qr '^#|^$' -- "$case_id"; and continue
+    test (count $fields) -eq 9; or fail 'malformed shared conformance row'
+    set -l line $fields[2]
+    set -l expected_label $fields[4]
+    set -l expected_kind $fields[7]
+    set -l resource $fields[9]
+    __shell_sense_fish_collect "$line" 3
+    contains -- "$expected_label" $_shell_sense_fish_labels; or fail "conformance candidate: $case_id"
+    set -l candidate_index (contains -i -- "$expected_label" $_shell_sense_fish_labels)
+    test "$_shell_sense_fish_kinds[$candidate_index]" = "$expected_kind"; or fail "conformance kind: $case_id"
+    set -l actual_resource (string replace -r '/$' '' -- "$_shell_sense_fish_resource_paths[$candidate_index]")
+    if test "$resource" = '-'
+        test -z "$actual_resource"; or fail "unexpected conformance resource: $case_id"
+    else
+        test "$actual_resource" = "$fixture_root/$resource"; or fail "conformance resource: $case_id"
+    end
+end < "$project_root/tests/conformance/cases.tsv"
+
 __shell_sense_fish_collect 'cd dotfil' 3
 contains -- dotfiles/ $_shell_sense_fish_labels; or fail 'native directory candidate'
 set -l dotfiles_index (contains -i -- dotfiles/ $_shell_sense_fish_labels)

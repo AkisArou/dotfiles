@@ -1,0 +1,8 @@
+# capability<TAB>zsh<TAB>fish<TAB>bash<TAB>reason
+descriptions	required	required	unsupported	Bash programmable completion exposes COMPREPLY but no public per-candidate description channel
+groups	required	unsupported	unsupported	Only Zsh exposes native completion groups through the supported provider path
+shell-owned-acceptance	required	required	required	Every line editor can apply an item produced by its own native provider
+continuous-arbitrary-line	required	required	limited	Bash has no public arbitrary-line equivalent of Zsh _main_complete or Fish complete -C
+ghost-text	required	unsupported	unsupported	Current Fish and Bash line-editor APIs do not support the same faithful display and partial-accept contract
+symlink-kind	limited	limited	limited	Native directory completion commonly classifies a symlink to a directory as a directory; Shell Sense retains its lexical resource without inventing a symlink kind
+idle-documentation-refresh	required	required	limited	Bash cannot safely execute the mailbox decoder from a signal trap while Readline owns the stack; documentation is consumed by the next Shell Sense action

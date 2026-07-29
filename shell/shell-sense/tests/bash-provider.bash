@@ -45,6 +45,21 @@ _shell_sense_bash_collect 'shell-sense-test rstart' 23 3
 [[ $_shell_sense_bash_query_mode == broad ]] || fail 'broad query mode'
 [[ " ${_shell_sense_bash_candidates[*]} " == *' restart '* ]] || fail 'fuzzy native candidate'
 
+_shell_sense_conformance_completion() {
+  if [[ $2 == --* ]]; then
+    COMPREPLY=(--recursive)
+  else
+    COMPREPLY=(restart)
+  fi
+}
+complete -F _shell_sense_conformance_completion shell-sense-conformance
+
+_shell_sense_value_completion() {
+  COMPREPLY=(auto always never)
+}
+complete -F _shell_sense_value_completion shell-sense-value
+complete -o filenames -d shell-sense-path
+
 _shell_sense_test_broad_context() {
   if [[ $COMP_LINE == 'shell-sense-context ' && $COMP_POINT == 20 &&
         $COMP_CWORD == 1 && ${COMP_WORDS[1]} == '' ]]; then
@@ -109,8 +124,28 @@ cleanup() {
 }
 trap cleanup EXIT
 mkdir -- "$fixture_root/dotfiles" "$fixture_root/dotfiles/nvim" "$fixture_root/space directory"
+ln -s dotfiles/nvim "$fixture_root/linked-dir"
 touch -- "$fixture_root/space file"
 pushd "$fixture_root" >/dev/null
+
+while IFS=$'\t' read -r case_id line zsh_label fish_label expected_label zsh_kind fish_kind expected_kind resource; do
+  [[ -n $case_id && $case_id != \#* ]] || continue
+  _shell_sense_bash_collect "$line" "${#line}" 3
+  found=0
+  for index in "${!_shell_sense_bash_candidates[@]}"; do
+    if [[ ${_shell_sense_bash_candidates[index]} == "$expected_label" ]]; then
+      found=1
+      [[ ${_shell_sense_bash_kinds[index]} == "$expected_kind" ]] || fail "conformance kind: $case_id"
+      if [[ $resource == - ]]; then
+        [[ -z ${_shell_sense_bash_resource_paths[index]} ]] || fail "unexpected conformance resource: $case_id"
+      else
+        [[ ${_shell_sense_bash_resource_paths[index]%/} == "$fixture_root/$resource" ]] || fail "conformance resource: $case_id"
+      fi
+    fi
+  done
+  ((found)) || fail "conformance candidate: $case_id"
+done < "$project_root/tests/conformance/cases.tsv"
+
 line='cd dotfil'
 _shell_sense_bash_collect "$line" "${#line}" 3
 [[ " ${_shell_sense_bash_candidates[*]} " == *' dotfiles/ '* ]] || fail 'directory candidate'

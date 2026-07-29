@@ -19,9 +19,24 @@ fail() {
   [[ ! -f $runtime_dir/daemon.log ]] || command sed -n '1,240p' "$runtime_dir/daemon.log" >&2
   local worker_log
   for worker_log in "$runtime_dir"/state/shell-sense/worker-*.log(N); do
-    command sed -n '1,240p' "$worker_log" >&2
+    command tail -n 240 -- "$worker_log" >&2
   done
   return 1
+}
+
+wait_for_bash_documentation() {
+  local pattern=$1 message=$2
+  local -i attempt
+  for (( attempt = 1; attempt <= 50; attempt++ )); do
+    shell_sense_pty_reset
+    shell_sense_pty_write_raw $'\x18\x04'
+    if shell_sense_pty_read_until '*<BASH-DOC>*' 50 &&
+       [[ $SHELL_SENSE_PTY_OUTPUT == ${~pattern} ]]; then
+      return 0
+    fi
+    zselect -t 2 >/dev/null 2>&1 || true
+  done
+  fail "$message"
 }
 
 cleanup() {
@@ -36,6 +51,10 @@ trap cleanup EXIT
 
 [[ -x $binary ]] || fail "build $binary before running this test"
 command mkdir -m 700 -- "$runtime_dir/state"
+command mkdir -p -- "$runtime_dir/work/dotfiles/nvim"
+for index in {01..24}; do
+  command touch -- "$runtime_dir/work/dotfiles/entry-$index"
+done
 "$binary" daemon --socket "$runtime_dir/daemon.sock" >"$runtime_dir/daemon.log" 2>&1 &
 daemon_pid=$!
 for _ in {1..200}; do
@@ -54,6 +73,7 @@ shell_sense_pty_start sense-bash env -i \
   XDG_STATE_HOME="$runtime_dir/state" \
   SHELL_SENSE_COMMAND="$binary" \
   SHELL_SENSE_CONFIG="$project_root/config.example.toml" \
+  SHELL_SENSE_CONFIG__LOGGING__LEVEL="${SHELL_SENSE_TEST_LOG_LEVEL:-warn}" \
   SHELL_SENSE_SOCKET="$runtime_dir/daemon.sock" \
   bash --noprofile --norc -i
 
@@ -69,6 +89,8 @@ shell_sense_pty_write_line 'x() { printf "<BASH-ACCEPT>%s</BASH-ACCEPT>\n" "$1";
 shell_sense_pty_write_line "complete -W 'restart reset-failed rescue reload' x"
 shell_sense_pty_write_line '_shell_sense_test_state() { printf "<BASH-STATE>line=%s,active=%s,visible=%s</BASH-STATE>\n" "$READLINE_LINE" "$_shell_sense_bash_active_buffer" "$_shell_sense_bash_popup_visible"; }'
 shell_sense_pty_write_line 'bind -x '\''"\C-x\C-g":_shell_sense_test_state'\'''
+shell_sense_pty_write_line '_shell_sense_test_documentation_state() { [[ ! -s $_shell_sense_bash_output_mailbox ]] || _shell_sense_bash_drain; local selected=${_shell_sense_bash_view_labels[_shell_sense_bash_selected-1]-}; printf "<BASH-DOC>offset=%s,total=%s,lines=%s,item=%s,selected=%s</BASH-DOC>\n" "$_shell_sense_bash_documentation_offset" "$_shell_sense_bash_documentation_total" "${#_shell_sense_bash_documentation_lines[@]}" "$_shell_sense_bash_documentation_item" "$selected"; }'
+shell_sense_pty_write_line 'bind -x '\''"\C-x\C-d":_shell_sense_test_documentation_state'\'''
 shell_sense_pty_write_line '_shell_sense_test_worker_state() { local changed=0; ((__sense_test_old_worker != _shell_sense_bash_worker_pid)) && changed=1; printf "<BASH-WORKER-RECOVERED>%s:%s:%s</BASH-WORKER-RECOVERED>\n" "$changed" "$_shell_sense_bash_ready" "$_shell_sense_bash_configured"; }'
 shell_sense_pty_write_line 'bind -x '\''"\C-x\C-w":_shell_sense_test_worker_state'\'''
 shell_sense_pty_write_line '_shell_sense_test_kill_worker() { __sense_test_old_worker=$_shell_sense_bash_worker_pid; kill -KILL "$__sense_test_old_worker"; sleep 0.05; printf "<BASH-WORKER-KILLED>1</BASH-WORKER-KILLED>\n"; }'
@@ -130,6 +152,37 @@ shell_sense_pty_read_until '*<BASH-ACCEPT>restart</BASH-ACCEPT>*' ||
   fail 'Bash rejected the refreshed candidate after Readline-owned Backspace'
 shell_sense_pty_read_until '*<BASH-PROMPT-PWD>*' ||
   fail 'Bash did not settle before the worker recovery test'
+
+# Readline receives the same independent documentation viewport and toggle
+# actions. None of them may change the selected native completion.
+shell_sense_pty_write_line "cd ${(q)runtime_dir}/work"
+shell_sense_pty_reset
+shell_sense_pty_read_until "*<BASH-PROMPT-PWD>$runtime_dir/work</BASH-PROMPT-PWD>*" ||
+  fail 'Bash documentation fixture directory was not entered'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'cd dotfil\x18\x07'
+shell_sense_pty_read_until '*<BASH-STATE>line=cd dotfil,active=cd dotfil,visible=1</BASH-STATE>*' ||
+  fail 'Bash directory completion did not settle for documentation'
+zselect -t 20 >/dev/null 2>&1 || true
+shell_sense_pty_write_raw $'\x06'
+wait_for_bash_documentation \
+  '*<BASH-DOC>offset=[1-9]<->,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</BASH-DOC>*' \
+  'Bash documentation page-down changed no viewport or candidate'
+shell_sense_pty_write_raw $'\x02'
+wait_for_bash_documentation \
+  '*<BASH-DOC>offset=0,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</BASH-DOC>*' \
+  'Bash documentation page-up did not return to the first row'
+shell_sense_pty_write_raw $'\x07'
+wait_for_bash_documentation \
+  '*<BASH-DOC>offset=0,total=0,lines=0,item=,selected=dotfiles/</BASH-DOC>*' \
+  'Bash documentation toggle did not hide the pane'
+shell_sense_pty_write_raw $'\x07'
+wait_for_bash_documentation \
+  '*<BASH-DOC>offset=0,total=[1-9]<->,lines=<->,item=*,selected=dotfiles/</BASH-DOC>*' \
+  'Bash documentation toggle did not restore the pane'
+shell_sense_pty_write_raw $'\x03'
+shell_sense_pty_reset
+shell_sense_pty_read_until '*<BASH-PROMPT-PWD>*' || fail 'Bash did not clear the documentation probe'
 
 # PROMPT_COMMAND owns worker recovery without replacing the user's existing
 # prompt command or recapturing Shell Sense's own Readline bindings.

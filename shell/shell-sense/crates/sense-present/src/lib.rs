@@ -3,7 +3,7 @@
 use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use sense_model::{MarkupContent, MarkupKind};
 use textwrap::Options;
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use unicode_width::UnicodeWidthStr;
 
 const MINIMUM_PANEL_WIDTH: u16 = 24;
 const PANEL_GAP: u16 = 1;
@@ -24,6 +24,7 @@ pub struct PresentationRequest {
     pub side_min_columns: u16,
     pub documentation_width_ratio: f32,
     pub documentation_max_rows: u16,
+    pub documentation_offset: usize,
     pub documentation_padding: u16,
     pub bordered: bool,
     pub render_markdown: bool,
@@ -57,7 +58,10 @@ pub struct DocumentationPanel {
     pub placement: DocumentationPlacement,
     pub width: u16,
     pub lines: Vec<DocumentationLine>,
-    pub truncated: bool,
+    pub offset: usize,
+    pub total_lines: usize,
+    pub has_previous: bool,
+    pub has_next: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -101,18 +105,26 @@ pub fn layout(
         .saturating_add(u16::from(request.bordered).saturating_mul(2));
     let content_width = documentation_width.saturating_sub(decoration_cells).max(1);
     let blocks = document_blocks(documentation, request.render_markdown);
-    let (lines, truncated) = wrap_blocks(
-        &blocks,
-        usize::from(content_width),
-        usize::from(request.documentation_max_rows.max(1)),
-    );
+    let all_lines = wrap_blocks(&blocks, usize::from(content_width));
+    let maximum_rows = usize::from(request.documentation_max_rows.max(1));
+    let total_lines = all_lines.len();
+    let maximum_offset = total_lines.saturating_sub(maximum_rows);
+    let offset = request.documentation_offset.min(maximum_offset);
+    let lines = all_lines
+        .into_iter()
+        .skip(offset)
+        .take(maximum_rows)
+        .collect();
     PresentationLayout {
         menu_width,
         documentation: Some(DocumentationPanel {
             placement,
             width: documentation_width,
             lines,
-            truncated,
+            offset,
+            total_lines,
+            has_previous: offset > 0,
+            has_next: offset < maximum_offset,
         }),
     }
 }
@@ -276,11 +288,7 @@ fn flush_block(
     });
 }
 
-fn wrap_blocks(
-    blocks: &[DocumentationBlock],
-    width: usize,
-    maximum_rows: usize,
-) -> (Vec<DocumentationLine>, bool) {
+fn wrap_blocks(blocks: &[DocumentationBlock], width: usize) -> Vec<DocumentationLine> {
     let mut lines = Vec::new();
     for block in blocks {
         if block.kind == DocumentationLineKind::Separator {
@@ -304,29 +312,7 @@ fn wrap_blocks(
             );
         }
     }
-    let truncated = lines.len() > maximum_rows;
-    lines.truncate(maximum_rows);
-    if truncated {
-        mark_truncated(&mut lines, width);
-    }
-    (lines, truncated)
-}
-
-fn mark_truncated(lines: &mut [DocumentationLine], width: usize) {
-    let Some(last) = lines.last_mut() else {
-        return;
-    };
-    let content_width = width.saturating_sub(1);
-    while usize::from(last.cells) > content_width {
-        let Some(character) = last.text.pop() else {
-            break;
-        };
-        last.cells = last
-            .cells
-            .saturating_sub(u16::try_from(character.width().unwrap_or(0)).unwrap_or(u16::MAX));
-    }
-    last.text.push('…');
-    last.cells = last.cells.saturating_add(1);
+    lines
 }
 
 fn documentation_line(text: String, kind: DocumentationLineKind) -> DocumentationLine {

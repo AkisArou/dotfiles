@@ -13,6 +13,7 @@ fn request(columns: u16) -> PresentationRequest {
         side_min_columns: 100,
         documentation_width_ratio: 0.45,
         documentation_max_rows: 8,
+        documentation_offset: 0,
         documentation_padding: 1,
         bordered: false,
         render_markdown: true,
@@ -87,7 +88,7 @@ fn untrusted_controls_are_rendered_as_visible_text() {
 }
 
 #[test]
-fn documentation_is_bounded_and_reports_truncation() {
+fn documentation_is_a_bounded_scrollable_viewport() {
     let content = MarkupContent {
         kind: MarkupKind::PlainText,
         value: (0..20)
@@ -99,6 +100,17 @@ fn documentation_is_bounded_and_reports_truncation() {
     configuration.documentation_max_rows = 3;
     let panel = layout(Some(&content), configuration).documentation.unwrap();
     assert_eq!(panel.lines.len(), 3);
-    assert!(panel.truncated);
-    assert!(panel.lines.last().unwrap().text.ends_with('…'));
+    assert_eq!(panel.offset, 0);
+    assert_eq!(panel.total_lines, 20);
+    assert!(!panel.has_previous);
+    assert!(panel.has_next);
+    assert_eq!(panel.lines.last().unwrap().text, "line 2");
+
+    configuration.documentation_offset = 19;
+    let panel = layout(Some(&content), configuration).documentation.unwrap();
+    assert_eq!(panel.offset, 17);
+    assert!(panel.has_previous);
+    assert!(!panel.has_next);
+    assert_eq!(panel.lines.first().unwrap().text, "line 17");
+    assert_eq!(panel.lines.last().unwrap().text, "line 19");
 }

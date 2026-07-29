@@ -68,7 +68,8 @@ set -g _shell_sense_fish_documentation_item ''
 set -g _shell_sense_fish_documentation_placement ''
 set -g _shell_sense_fish_documentation_width 0
 set -g _shell_sense_fish_documentation_expected 0
-set -g _shell_sense_fish_documentation_truncated 0
+set -g _shell_sense_fish_documentation_offset 0
+set -g _shell_sense_fish_documentation_total 0
 set -g _shell_sense_fish_documentation_kinds
 set -g _shell_sense_fish_documentation_cells
 set -g _shell_sense_fish_documentation_lines
@@ -78,7 +79,8 @@ function __shell_sense_fish_reset_documentation
     set -g _shell_sense_fish_documentation_placement ''
     set -g _shell_sense_fish_documentation_width 0
     set -g _shell_sense_fish_documentation_expected 0
-    set -g _shell_sense_fish_documentation_truncated 0
+    set -g _shell_sense_fish_documentation_offset 0
+    set -g _shell_sense_fish_documentation_total 0
     set -g _shell_sense_fish_documentation_kinds
     set -g _shell_sense_fish_documentation_cells
     set -g _shell_sense_fish_documentation_lines
@@ -616,6 +618,7 @@ function __shell_sense_fish_dispatch --argument-names command
             set -g _shell_sense_fish_view_detail_cells
             set -g _shell_sense_fish_view_matches
         case view-chunk
+            test $_shell_sense_fish_view_building -eq 1; and test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; or return
             set -l item_count $argv[3]
             set -l offset 4
             for index in (seq $item_count)
@@ -633,7 +636,7 @@ function __shell_sense_fish_dispatch --argument-names command
             test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; and test "$argv[3]" = "$_shell_sense_fish_view_revision"; or return
             set -g _shell_sense_fish_menu_width $argv[4]
         case documentation-begin
-            test (count $argv) -eq 7; or return
+            test (count $argv) -eq 8; or return
             test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; or return
             contains -- "$argv[4]" side below; or return
             __shell_sense_fish_reset_documentation
@@ -641,7 +644,8 @@ function __shell_sense_fish_dispatch --argument-names command
             set -g _shell_sense_fish_documentation_placement $argv[4]
             set -g _shell_sense_fish_documentation_width $argv[5]
             set -g _shell_sense_fish_documentation_expected $argv[6]
-            set -g _shell_sense_fish_documentation_truncated $argv[7]
+            set -g _shell_sense_fish_documentation_offset $argv[7]
+            set -g _shell_sense_fish_documentation_total $argv[8]
         case documentation-chunk
             test (count $argv) -ge 4; or return
             test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; and test "$argv[3]" = "$_shell_sense_fish_documentation_item"; or return
@@ -674,6 +678,8 @@ function __shell_sense_fish_dispatch --argument-names command
                 __shell_sense_fish_render_popup
             end
         case view-end
+            test (count $argv) -eq 3; or return
+            test $_shell_sense_fish_view_building -eq 1; and test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; and test "$argv[3]" = "$_shell_sense_fish_view_revision"; or return
             set -g _shell_sense_fish_view_building 0
             __shell_sense_fish_render_popup
             set -g _shell_sense_fish_view_ready 1
@@ -754,6 +760,7 @@ function __shell_sense_fish_request --argument-names trigger
     set -l cursor $_shell_sense_fish_byte_count
     set -g _shell_sense_fish_active_buffer "$buffer"
     set -g _shell_sense_fish_active_cursor $cursor
+    set -g _shell_sense_fish_view_building 0
     set -g _shell_sense_fish_view_ready 0
     set -l columns $COLUMNS
     test -n "$columns"; or set columns 80
@@ -845,6 +852,12 @@ function __shell_sense_fish_fallback --argument-names key
             commandline -f delete-or-exit
         case ctrl-u
             commandline -f backward-kill-line
+        case ctrl-f
+            commandline -f forward-char
+        case ctrl-b
+            commandline -f backward-char
+        case ctrl-g
+            commandline -f cancel
         case right
             commandline -f forward-char
         case escape
@@ -875,6 +888,8 @@ function __shell_sense_fish_key --argument-names key
             __shell_sense_fish_navigate page-down delete-or-exit
         case page-up
             __shell_sense_fish_navigate page-up backward-kill-line
+        case documentation-down documentation-up documentation-page-down documentation-page-up toggle-documentation
+            __shell_sense_fish_navigate $_shell_sense_fish_resolved_action cancel
         case dismiss
             __shell_sense_fish_cancel
         case '*'

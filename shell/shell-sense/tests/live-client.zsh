@@ -17,6 +17,9 @@ typeset -gx SHELL_SENSE_TEST_WORK="$SHELL_SENSE_TEST_TEMP/work"
 typeset -gx TERM=xterm-256color
 command mkdir -m 700 -- "$XDG_RUNTIME_DIR" "$XDG_STATE_HOME"
 command mkdir -p -- "$SHELL_SENSE_TEST_WORK/dotfiles/nvim"
+for index in {01..24}; do
+  command touch -- "$SHELL_SENSE_TEST_WORK/dotfiles/entry-$index"
+done
 
 typeset -gi daemon_pid=0
 typeset output= chunk=
@@ -229,7 +232,7 @@ read_until '*list entries starting with .*' || {
 }
 zselect -t 50 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
-read_until '*<DOC>placement=side text=*-a, --all*do not ignore entries starting with .*</DOC>*' || {
+read_until '*<DOC>placement=side offset=0 total=<-> text=*-a, --all*do not ignore entries starting with .*</DOC>*' || {
   print -u2 -- 'selected ls option did not resolve focused man-page documentation'
   print -u2 -r -- "$output"
   return 1
@@ -251,15 +254,37 @@ output=
 read_until '*<SENSE-PROMPT>*' || return 1
 zpty -n -w sense-live 'cd dotfil'
 output=
-read_until '*nvim*' || {
+read_until '*entry-01*' || {
   print -u2 -- 'directory documentation did not reach the popup'
   print -u2 -r -- "$output"
   return 1
 }
 zselect -t 50 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
-read_until '*<DOC>placement=side text=*nvim*</DOC>*' || {
+read_until '*<DOC>placement=side offset=0 total=<-> text=*entry-01*</DOC>*' || {
   print -u2 -- 'configured directory documentation did not resolve the typed path'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# Documentation has its own viewport and bindings. A page movement must not
+# change the selected completion, and the viewport clamps back to the first
+# row independently of candidate navigation.
+output=
+zpty -n -w sense-live $'\x06'
+zselect -t 10 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x18\x04'
+read_until '*<DOC>placement=side offset=[1-9]* total=<-> text=*</DOC>*' || {
+  print -u2 -- 'documentation page-down did not move its independent viewport'
+  print -u2 -r -- "$output"
+  return 1
+}
+output=
+zpty -n -w sense-live $'\x02'
+zselect -t 10 >/dev/null 2>&1 || true
+zpty -n -w sense-live $'\x18\x04'
+read_until '*<DOC>placement=side offset=0 total=<-> text=*</DOC>*' || {
+  print -u2 -- 'documentation page-up did not return to its first row'
   print -u2 -r -- "$output"
   return 1
 }

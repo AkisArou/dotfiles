@@ -158,7 +158,7 @@ bindkey '^X^H' _shell_sense_test_ghost_state
 
 _shell_sense_test_documentation_state() {
   local text=${(j: :)_shell_sense_documentation_lines}
-  print -r -- "<DOC>placement=${_shell_sense_documentation_placement:-none} text=${(qqq)text}</DOC>"
+  print -r -- "<DOC>placement=${_shell_sense_documentation_placement:-none} offset=$_shell_sense_documentation_offset total=$_shell_sense_documentation_total text=${(qqq)text}</DOC>"
   zle -R
 }
 zle -N _shell_sense_test_documentation_state

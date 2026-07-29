@@ -19,11 +19,38 @@ _shell_sense_fuzzy_test_completion() {
 }
 compdef _shell_sense_fuzzy_test_completion sense-verb
 
+_shell_sense_conformance_completion() {
+  local -a descriptions=(
+    'restart:restart services'
+    '--recursive:list subdirectories recursively'
+  )
+  _describe -t values 'conformance values' descriptions
+}
+compdef _shell_sense_conformance_completion shell-sense-conformance
+
+_shell_sense_value_completion() {
+  _arguments '--color=[output color]:color:(auto always never)'
+}
+compdef _shell_sense_value_completion shell-sense-value
+
+compdef _directories shell-sense-path
+
 _shell_sense_test_widget() {
   local original_buffer=$BUFFER original_cursor=$CURSOR
   zle .shell-sense-zsh-capture
   BUFFER=$original_buffer
   CURSOR=$original_cursor
+
+  if [[ $BUFFER == shell-sense-conformance* || $BUFFER == shell-sense-value* ||
+        $BUFFER == shell-sense-path* ]]; then
+    local -i index
+    for (( index = 1; index <= $#_shell_sense_capture_words; index++ )); do
+      print -r -- "<CONFORMANCE>$_shell_sense_capture_words[index]|${_shell_sense_capture_kinds[index]:-text}|$_shell_sense_capture_resource_paths[index]</CONFORMANCE>"
+    done
+    zle kill-whole-line
+    zle accept-line
+    return
+  fi
 
   if [[ $BUFFER == sense-verb* ]]; then
     print -r -- "<FUZZY-COUNT>$#_shell_sense_capture_words</FUZZY-COUNT>"

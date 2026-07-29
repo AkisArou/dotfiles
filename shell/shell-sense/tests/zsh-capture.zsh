@@ -6,6 +6,20 @@ setopt errexit nounset pipefail
 zmodload zsh/zpty
 typeset -gx SHELL_SENSE_TEST_ROOT=${0:A:h:h}
 typeset output
+typeset conformance_root
+conformance_root=$(mktemp -d /tmp/shell-sense-zsh-conformance.XXXXXX)
+command mkdir -- "$conformance_root/dotfiles" "$conformance_root/dotfiles/nvim" \
+  "$conformance_root/space directory"
+command ln -s dotfiles/nvim "$conformance_root/linked-dir"
+
+cleanup() {
+  zpty -d sense-worker 2>/dev/null || true
+  command unlink -- "$conformance_root/linked-dir" 2>/dev/null || true
+  command rmdir -- "$conformance_root/dotfiles/nvim" \
+    "$conformance_root/dotfiles" "$conformance_root/space directory" \
+    "$conformance_root" 2>/dev/null || true
+}
+trap cleanup EXIT
 
 zpty sense-worker zsh -f
 zpty -r sense-worker output '*%*' || {
@@ -68,6 +82,41 @@ for expected in '<FUZZY-COUNT>1</FUZZY-COUNT>' '<FUZZY-BUFFER>sense-verb restart
   }
 done
 
+zpty -w sense-worker "cd -- ${(q)conformance_root}"
+zpty -r -m sense-worker output '*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Zsh conformance fixture directory was not entered'
+  return 1
+}
+
+local case_id line expected_label fish_label bash_label expected_kind fish_kind bash_kind resource
+while IFS=$'\t' read -r case_id line expected_label fish_label bash_label expected_kind fish_kind bash_kind resource; do
+  [[ -n $case_id && $case_id != \#* ]] || continue
+  zpty -n -w sense-worker "${line}"$'\t'
+  zpty -r -m sense-worker output '*<SENSE-PROMPT>*' || {
+    print -u2 -- "Zsh conformance case did not finish: $case_id"
+    return 1
+  }
+  local expected_record="<CONFORMANCE>${expected_label}|${expected_kind}|"
+  [[ $output == *$expected_record* ]] || {
+    print -u2 -- "Zsh conformance case failed: $case_id"
+    print -u2 -r -- "$output"
+    return 1
+  }
+  if [[ $resource != - ]]; then
+    [[ $output == *"|${conformance_root}/${resource}</CONFORMANCE>"* ]] || {
+      print -u2 -- "Zsh conformance resource failed: $case_id"
+      print -u2 -r -- "$output"
+      return 1
+    }
+  else
+    [[ $output == *"<CONFORMANCE>${expected_label}|${expected_kind}|</CONFORMANCE>"* ]] || {
+      print -u2 -- "Zsh conformance emitted an unexpected resource: $case_id"
+      print -u2 -r -- "$output"
+      return 1
+    }
+  fi
+done < "$SHELL_SENSE_TEST_ROOT/tests/conformance/cases.tsv"
+
 zpty -n -w sense-worker $'ls -l\t'
 zpty -r -m sense-worker output '*<LS-DESC>*</LS-DESC>*<SENSE-PROMPT>*' || {
   print -u2 -- 'Zsh standard option-description capture did not finish'
@@ -85,5 +134,4 @@ for expected in \
   }
 done
 
-zpty -d sense-worker
 print -r -- 'zsh-capture-ok'

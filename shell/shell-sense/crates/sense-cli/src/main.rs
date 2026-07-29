@@ -281,13 +281,12 @@ async fn run_worker(arguments: WorkerArgs) -> Result<()> {
         minimum_confidence: config.ghost_text.minimum_confidence,
     };
     bridge.documentation = DocumentationPolicy {
-        activation: if matches!(
-            config.documentation.mode,
-            DocumentationMode::Off | DocumentationMode::Manual
-        ) {
-            DocumentationActivation::Disabled
-        } else {
-            DocumentationActivation::Automatic
+        activation: match config.documentation.mode {
+            DocumentationMode::Off => DocumentationActivation::Disabled,
+            DocumentationMode::Manual => DocumentationActivation::Manual,
+            DocumentationMode::Auto | DocumentationMode::Side | DocumentationMode::Below => {
+                DocumentationActivation::Automatic
+            }
         },
         resolve_delay: Duration::from_millis(config.documentation.resolve_delay_ms),
         layout: DocumentationLayoutPolicy {

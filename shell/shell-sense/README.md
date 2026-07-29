@@ -22,8 +22,8 @@ The design and delivery gates are documented in [PLAN.md](PLAN.md).
 - Native descriptions remain concise menu details; they are not repeated in
   the documentation pane. Independently resolved documentation renders in a
   responsive side/below pane in all three clients. Markdown parsing, Unicode
-  wrapping, truncation, delayed resolve, and stale-generation rejection are
-  shared Rust behavior.
+  wrapping, a scrollable viewport, delayed resolve, and stale-generation
+  rejection are shared Rust behavior.
 - Built-in Git and systemd adapters tag only existing native items. Their
   normal enrichment path performs no I/O; after the documentation delay, a
   bounded and cancellable resolver focuses `git`/`systemctl` help or runtime
@@ -112,6 +112,12 @@ outside a Shell Sense binding, the next popup action detects the changed
 buffer and regenerates native candidates before it can navigate or accept.
 Manual Tab remains the exact native fallback on every shell.
 
+ZLE and Fish can safely repaint delayed documentation while their line editor
+is otherwise idle. Bash's public Readline API has no equivalent idle callback;
+decoding the mailbox from a signal trap can corrupt Readline's stack. Bash
+therefore receives delayed documentation on the next Shell Sense action, such
+as candidate navigation, documentation scrolling, or documentation toggling.
+
 The CLI prints an initialization line for the discovered XDG data directory:
 
 ```sh
@@ -163,13 +169,20 @@ session.
 Completion is continuous by default. Closed Tab and Ctrl-Space trigger it
 manually. With the popup open, Tab or Ctrl-E accepts, Ctrl-N/Ctrl-P moves one
 item, Ctrl-D/Ctrl-U moves one page, and Escape dismisses it. Enter and Ctrl-C
-retain the active shell's execution and interrupt semantics.
+retain the active shell's execution and interrupt semantics. Documentation has
+an independent viewport: Ctrl-F/Ctrl-B moves it one page without changing the
+selected candidate, and Ctrl-G hides or shows it. The line actions
+`documentation-down` and `documentation-up` are also available for custom
+bindings.
 
 The popup uses the VS Code/Blink-inspired colors in `config.example.toml`, a
 responsive width, no border or selected marker, dimmed detail text, kind icons,
 a proportional scrollbar, and a right-side documentation pane. `auto` and
 `below` remain available; an explicit `side` falls back below only when the
 terminal cannot fit the minimum menu and documentation widths at all.
+`documentation.mode = "manual"` starts with the pane hidden and resolves
+documentation only after the toggle action opens it; `off` disables the pane
+and its actions entirely.
 
 ## Configuration
 
@@ -200,12 +213,24 @@ command = ["ls", "-la", "--", "$value"]
 directory, and symlink items; for other kinds it is the candidate's semantic
 label. It must occupy one complete array entry. The first array element is the
 executable and every remaining element is passed as one argv entry, so no shell
-evaluation or word splitting occurs. Rules are ordered: the first matching
-configured rule wins. Built-in command-specific Git/systemd documentation has
-higher precedence; the generic man-page option resolver has lower precedence.
-Resolver output is bounded, cancellable, and requested only after the
-documentation delay. The default rules shown above can be replaced with any
-read-only command arrays.
+evaluation, alias/function lookup, or word splitting occurs. The executable is
+resolved from the daemon's `PATH`. Resolver output is normalized to plain text;
+raw terminal escape sequences are not preserved. For example, an `ls` alias
+that expands to `eza` does not affect the rule above. Configure `eza` directly
+when that is the desired resolver:
+
+```toml
+command = [
+  "eza", "--group-directories-first", "--icons=never",
+  "--color=never", "-la", "--", "$value",
+]
+```
+
+Rules are ordered: the first matching configured rule wins. Built-in
+command-specific Git/systemd documentation has higher precedence; the generic
+man-page option resolver has lower precedence. Resolver output is bounded,
+cancellable, and requested only after the documentation delay. The default
+rules shown above can be replaced with any read-only command arrays.
 
 For Git refs, the documentation pane intentionally shows the selected ref's
 target decoration, short commit and subject, author, and relative date. That
@@ -253,12 +278,10 @@ query succeed.
 cargo test --workspace --all-targets
 cargo clippy --workspace --all-targets -- -D warnings
 cargo bench -p sense-rank --bench rank
-zsh tests/zsh-capture.zsh
+zsh tests/native-conformance.zsh
 zsh tests/fifo-transport.zsh
 zsh tests/live-client.zsh
-fish --no-config tests/fish-provider.fish
 zsh tests/live-fish.zsh
-tests/bash-provider.bash
 zsh tests/live-bash.zsh
 ```
 
