@@ -18,6 +18,6 @@ source "$HOME/dotfiles/shell/zsh/.p10k.zsh"
 
 fast-theme XDG:vscode &>/dev/null
 
-# Load after compinit and every other ZLE plugin so zsh-sense can preserve and
+# Load after compinit and every other ZLE plugin so shell-sense can preserve and
 # delegate the user's existing keybindings when its completion popup is closed.
-source "$HOME/dotfiles/shell/zsh/zsh-sense/shell/zsh-sense.plugin.zsh"
+source "$HOME/dotfiles/shell/shell-sense/shell/zsh/shell-sense.plugin.zsh"
