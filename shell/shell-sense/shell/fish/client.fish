@@ -25,6 +25,9 @@ set -g _shell_sense_fish_selected_absolute 0
 set -g _shell_sense_fish_navigation_serial 0
 set -g _shell_sense_fish_total 0
 set -g _shell_sense_fish_window_start 0
+set -g _shell_sense_fish_menu_view_start 0
+set -g _shell_sense_fish_menu_view_request 0
+set -g _shell_sense_fish_menu_view_generation 0
 set -g _shell_sense_fish_fuzzy_min_chars 3
 set -g _shell_sense_fish_max_rows 10
 set -g _shell_sense_fish_scrolloff 2
@@ -302,6 +305,60 @@ function __shell_sense_fish_documentation_row_count
     end
 end
 
+function __shell_sense_fish_menu_viewport_start_for --argument-names selected start
+    set -l total $_shell_sense_fish_total
+    set -l rows $_shell_sense_fish_max_rows
+    set -l scrolloff $_shell_sense_fish_scrolloff
+    test $rows -le $total; or set rows $total
+    if test $rows -le 0
+        set -g _shell_sense_fish_menu_viewport_start 0
+        return
+    end
+    test $scrolloff -lt $rows; or set scrolloff (math $rows - 1)
+    set -l maximum_start (math $total - $rows)
+    test $start -ge 0; or set start 0
+    test $start -le $maximum_start; or set start $maximum_start
+    test $selected -ge 0; or set selected 0
+    test $selected -lt $total; or set selected (math $total - 1)
+
+    if test $selected -lt (math $start + $scrolloff)
+        set start (math $selected - $scrolloff)
+    else if test $selected -ge (math $start + $rows - $scrolloff)
+        set start (math $selected - $rows + $scrolloff + 1)
+    end
+    test $start -ge 0; or set start 0
+    test $start -le $maximum_start; or set start $maximum_start
+    set -g _shell_sense_fish_menu_viewport_start $start
+end
+
+function __shell_sense_fish_update_menu_viewport --argument-names selected
+    __shell_sense_fish_menu_viewport_start_for $selected $_shell_sense_fish_menu_view_start
+    set -g _shell_sense_fish_menu_view_start $_shell_sense_fish_menu_viewport_start
+end
+
+function __shell_sense_fish_cached_menu_viewport_contains --argument-names start
+    set -l rows $_shell_sense_fish_max_rows
+    test $rows -le $_shell_sense_fish_total; or set rows $_shell_sense_fish_total
+    set -l cached_end (math $_shell_sense_fish_window_start + (count $_shell_sense_fish_view_ids))
+    test $start -ge $_shell_sense_fish_window_start; and test (math $start + $rows) -le $cached_end
+end
+
+function __shell_sense_fish_menu_scrollbar_geometry --argument-names rows total offset
+    set -g _shell_sense_fish_scrollbar_thumb_rows 0
+    set -g _shell_sense_fish_scrollbar_thumb_first 0
+    test $rows -gt 0; and test $total -gt $rows; or return
+    set -g _shell_sense_fish_scrollbar_thumb_rows (math "floor($rows * $rows / $total)")
+    test $_shell_sense_fish_scrollbar_thumb_rows -ge 1; or set -g _shell_sense_fish_scrollbar_thumb_rows 1
+    set -l maximum_offset (math $total - $rows)
+    test $offset -ge 0; or set offset 0
+    test $offset -le $maximum_offset; or set offset $maximum_offset
+    set -l track (math $rows - $_shell_sense_fish_scrollbar_thumb_rows)
+    if test $track -gt 0
+        set -g _shell_sense_fish_scrollbar_thumb_first \
+            (math "floor(($offset * $track + $maximum_offset / 2) / $maximum_offset)")
+    end
+end
+
 function __shell_sense_fish_render_documentation_row --argument-names row
     set -l width $_shell_sense_fish_documentation_width
     set -l border_cells 0
@@ -374,13 +431,8 @@ function __shell_sense_fish_render_popup
     end
     set -l row_count $item_count
     test $row_count -gt $_shell_sense_fish_max_rows; and set row_count $_shell_sense_fish_max_rows
-    set -l first 1
-    if test (math $_shell_sense_fish_selected + $_shell_sense_fish_scrolloff) -gt $row_count
-        set first (math $_shell_sense_fish_selected + $_shell_sense_fish_scrolloff - $row_count + 1)
-    end
-    if test (math $first + $row_count - 1) -gt $item_count
-        set first (math $item_count - $row_count + 1)
-    end
+    set -l first (math $_shell_sense_fish_menu_view_start - $_shell_sense_fish_window_start + 1)
+    test $first -ge 1; and test (math $first + $row_count - 1) -le $item_count; or return 1
     set -l last (math $first + $row_count - 1)
 
     set -l columns $COLUMNS
@@ -413,13 +465,12 @@ function __shell_sense_fish_render_popup
     __shell_sense_fish_documentation_row_count
     set -l documentation_rows $_shell_sense_fish_documentation_row_count
 
-    set -l thumb 0
+    set -l thumb_first 0
+    set -l thumb_rows 0
     if test $_shell_sense_fish_show_scrollbar -eq 1; and test $_shell_sense_fish_total -gt $row_count
-        if test $_shell_sense_fish_total -le 1
-            set thumb 1
-        else
-            set thumb (math "round(($_shell_sense_fish_window_start + $_shell_sense_fish_selected - 1) * ($row_count - 1) / ($_shell_sense_fish_total - 1)) + 1")
-        end
+        __shell_sense_fish_menu_scrollbar_geometry $row_count $_shell_sense_fish_total $_shell_sense_fish_menu_view_start
+        set thumb_first $_shell_sense_fish_scrollbar_thumb_first
+        set thumb_rows $_shell_sense_fish_scrollbar_thumb_rows
     end
 
     printf '\e[?2026h\e7'
@@ -429,7 +480,7 @@ function __shell_sense_fish_render_popup
     printf '\e8'
     set -l row 0
     set -l scrollbar_cells 0
-    test $thumb -eq 0; or set scrollbar_cells 1
+    test $thumb_rows -eq 0; or set scrollbar_cells 1
     for index in (seq $first $last)
         set row (math $row + 1)
         set -l selected_style
@@ -460,8 +511,8 @@ function __shell_sense_fish_render_popup
             printf '%s%s%s%s' "$row_style" "$_shell_sense_fish_style_detail" "$detail" "$_shell_sense_fish_style_reset"
         end
         printf '%s%*s' "$row_style" $_shell_sense_fish_padding ''
-        if test $thumb -gt 0
-            if test $row -eq $thumb
+        if test $thumb_rows -gt 0
+            if test $row -gt $thumb_first; and test $row -le (math $thumb_first + $thumb_rows)
                 printf '%s%s' "$_shell_sense_fish_style_scrollbar_thumb" "$_shell_sense_fish_scrollbar_character"
             else
                 printf '%s ' "$_shell_sense_fish_style_scrollbar_gutter"
@@ -695,6 +746,7 @@ function __shell_sense_fish_dispatch --argument-names command
             set -g _shell_sense_fish_navigation_serial $argv[4]
             set -g _shell_sense_fish_selected $selected
             set -g _shell_sense_fish_selected_absolute $argv[6]
+            __shell_sense_fish_update_menu_viewport $_shell_sense_fish_selected_absolute
             set -g _shell_sense_fish_view_ready 1
             __shell_sense_fish_render_popup
         case documentation-begin
@@ -740,6 +792,12 @@ function __shell_sense_fish_dispatch --argument-names command
             test (count $argv) -eq 3; or return
             test $_shell_sense_fish_view_building -eq 1; and test "$argv[1]" = "$_shell_sense_fish_active_request"; and test "$argv[2]" = "$_shell_sense_fish_active_generation"; and test "$argv[3]" = "$_shell_sense_fish_view_revision"; or return
             set -g _shell_sense_fish_view_building 0
+            if test $_shell_sense_fish_menu_view_request -ne $argv[1]; or test $_shell_sense_fish_menu_view_generation -ne $argv[2]
+                set -g _shell_sense_fish_menu_view_start 0
+                set -g _shell_sense_fish_menu_view_request $argv[1]
+                set -g _shell_sense_fish_menu_view_generation $argv[2]
+            end
+            __shell_sense_fish_update_menu_viewport $_shell_sense_fish_selected_absolute
             __shell_sense_fish_render_popup
             set -g _shell_sense_fish_view_ready 1
         case accept-fish
@@ -984,9 +1042,13 @@ function __shell_sense_fish_navigate --argument-names action fallback
         end
         set -g _shell_sense_fish_navigation_serial (math $_shell_sense_fish_navigation_serial + 1)
         set -l relative (math $desired - $_shell_sense_fish_window_start + 1)
-        if test $relative -ge 1; and test $relative -le (count $_shell_sense_fish_view_ids)
+        __shell_sense_fish_menu_viewport_start_for $desired $_shell_sense_fish_menu_view_start
+        set -l desired_view_start $_shell_sense_fish_menu_viewport_start
+        if test $relative -ge 1; and test $relative -le (count $_shell_sense_fish_view_ids); and \
+                __shell_sense_fish_cached_menu_viewport_contains $desired_view_start
             set -g _shell_sense_fish_selected $relative
             set -g _shell_sense_fish_selected_absolute $desired
+            set -g _shell_sense_fish_menu_view_start $desired_view_start
             __shell_sense_fish_render_popup
         end
     end

@@ -37,6 +37,11 @@ complete -c shell-sense-combined -a '\-ab'
 complete -c shell-sense-user -a custom-native
 complete -c shell-sense-value -l color -a 'auto always never' -d 'color value'
 complete -c shell-sense-path -a '(__fish_complete_directories)'
+complete -c shell-sense-large -f -a '(for index in (seq 1 4096); printf "candidate-%04d\n" $index; end)'
+
+__shell_sense_fish_collect 'shell-sense-large ' 3
+test (count $_shell_sense_fish_labels) -eq 4096; or fail 'large-provider candidate count'
+contains -- candidate-4096 $_shell_sense_fish_labels; or fail 'large-provider final candidate'
 
 set -l fixture_root (mktemp -d /tmp/shell-sense-fish-provider.XXXXXX); or fail 'temporary directory'
 function cleanup --on-event fish_exit

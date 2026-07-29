@@ -50,11 +50,29 @@ compdef _shell_sense_value_completion shell-sense-value
 
 compdef _directories shell-sense-path
 
+_shell_sense_large_completion() {
+  local -a words=()
+  local -i index
+  for (( index = 1; index <= 4096; index++ )); do
+    words+=( "candidate-${(l:4::0:)index}" )
+  done
+  compadd -- "${words[@]}"
+}
+compdef _shell_sense_large_completion shell-sense-large
+
 _shell_sense_test_widget() {
   local original_buffer=$BUFFER original_cursor=$CURSOR
   zle .shell-sense-zsh-capture
   BUFFER=$original_buffer
   CURSOR=$original_cursor
+
+  if [[ $BUFFER == shell-sense-large* ]]; then
+    print -r -- "<LARGE-COUNT>$#_shell_sense_capture_words</LARGE-COUNT>"
+    print -r -- "<LARGE-LAST>${_shell_sense_capture_words[(I)candidate-4096]}</LARGE-LAST>"
+    zle kill-whole-line
+    zle accept-line
+    return
+  fi
 
   if [[ $BUFFER == shell-sense-conformance* || $BUFFER == shell-sense-short* ||
         $BUFFER == shell-sense-combined* || $BUFFER == shell-sense-user* ||

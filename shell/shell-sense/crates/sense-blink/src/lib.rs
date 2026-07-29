@@ -9,8 +9,8 @@ use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
 use sense_model::{
-    CompletionItem, CompletionKind, DocumentationState, Generation, ItemId, ItemTags,
-    MarkupContent, MarkupKind, RequestId, SessionId, TriggerKind,
+    CompletionItem, CompletionKind, DocumentationState, Generation, ItemCapabilities, ItemId,
+    ItemTags, MarkupContent, MarkupKind, RequestId, SessionId, TriggerKind,
 };
 use sense_protocol::{
     CandidateView, ClientHello, ClientMessage, MessagePackCodec, PeerRole, ProtocolError,
@@ -414,7 +414,12 @@ fn presentation_list(view: CandidateView) -> PresentationList {
 }
 
 fn presentation_item(item: CompletionItem, index: usize) -> PresentationItem {
-    let (documentation, documentation_unresolved) = presentation_documentation(item.documentation);
+    let documentation_resolvable = item
+        .capabilities
+        .contains(ItemCapabilities::RESOLVE_DOCUMENTATION);
+    let (documentation, state_unresolved) = presentation_documentation(item.documentation);
+    let documentation_unresolved =
+        state_unresolved || (documentation.is_none() && documentation_resolvable);
     let matched = item.match_result.map(|matched| PresentationMatch {
         score: matched.score,
         indices: matched.indices,
@@ -586,6 +591,24 @@ mod tests {
                 unresolved: true,
             })
         );
+    }
+
+    #[test]
+    fn capability_backed_documentation_is_exposed_as_unresolved() {
+        let mut item = CompletionItem::native(
+            "directory",
+            NativeShell::Zsh,
+            "dotfiles",
+            TextEdit::new(TextRange::new(3, 7), RawBytes::from("dotfiles")),
+            "native-directory",
+        );
+        item.kind = CompletionKind::Directory;
+        item.capabilities
+            .insert(ItemCapabilities::RESOLVE_DOCUMENTATION);
+
+        let mapped = presentation_item(item, 0);
+        assert!(mapped.documentation.is_none());
+        assert!(mapped.documentation_unresolved);
     }
 
     #[test]

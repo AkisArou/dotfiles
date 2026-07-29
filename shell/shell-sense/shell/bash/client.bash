@@ -34,6 +34,9 @@ declare -gi _shell_sense_bash_selected_absolute=0
 declare -gi _shell_sense_bash_navigation_serial=0
 declare -gi _shell_sense_bash_total=0
 declare -gi _shell_sense_bash_window_start=0
+declare -gi _shell_sense_bash_menu_view_start=0
+declare -gi _shell_sense_bash_menu_view_request=0
+declare -gi _shell_sense_bash_menu_view_generation=0
 declare -gi _shell_sense_bash_view_ready=0
 declare -gi _shell_sense_bash_view_max_label_cells=0
 declare -gi _shell_sense_bash_view_max_described_cells=0
@@ -252,6 +255,58 @@ _shell_sense_bash_documentation_row_count() {
   fi
 }
 
+_shell_sense_bash_menu_viewport_start_for() {
+  local -i selected=$1 start=$2 total=$_shell_sense_bash_total
+  local -i rows=$_shell_sense_bash_max_rows scrolloff=$_shell_sense_bash_scrolloff maximum_start=0
+  ((rows > total)) && rows=$total
+  if ((rows <= 0)); then
+    _shell_sense_bash_menu_viewport_start=0
+    return
+  fi
+  ((scrolloff >= rows)) && scrolloff=$((rows - 1))
+  maximum_start=$((total - rows))
+  ((start < 0)) && start=0
+  ((start > maximum_start)) && start=$maximum_start
+  ((selected < 0)) && selected=0
+  ((selected >= total)) && selected=$((total - 1))
+
+  if ((selected < start + scrolloff)); then
+    start=$((selected - scrolloff))
+  elif ((selected >= start + rows - scrolloff)); then
+    start=$((selected - rows + scrolloff + 1))
+  fi
+  ((start < 0)) && start=0
+  ((start > maximum_start)) && start=$maximum_start
+  _shell_sense_bash_menu_viewport_start=$start
+}
+
+_shell_sense_bash_update_menu_viewport() {
+  _shell_sense_bash_menu_viewport_start_for "$1" "$_shell_sense_bash_menu_view_start"
+  _shell_sense_bash_menu_view_start=$_shell_sense_bash_menu_viewport_start
+}
+
+_shell_sense_bash_cached_menu_viewport_contains() {
+  local -i start=$1 rows=$_shell_sense_bash_max_rows
+  ((rows > _shell_sense_bash_total)) && rows=$_shell_sense_bash_total
+  local -i cached_end=$((_shell_sense_bash_window_start + ${#_shell_sense_bash_view_ids[@]}))
+  ((start >= _shell_sense_bash_window_start && start + rows <= cached_end))
+}
+
+_shell_sense_bash_menu_scrollbar_geometry() {
+  local -i rows=$1 total=$2 offset=$3 maximum_offset track
+  _shell_sense_bash_scrollbar_thumb_rows=0
+  _shell_sense_bash_scrollbar_thumb_first=0
+  ((rows > 0 && total > rows)) || return
+  _shell_sense_bash_scrollbar_thumb_rows=$((rows * rows / total))
+  ((_shell_sense_bash_scrollbar_thumb_rows >= 1)) || _shell_sense_bash_scrollbar_thumb_rows=1
+  maximum_offset=$((total - rows))
+  ((offset < 0)) && offset=0
+  ((offset > maximum_offset)) && offset=$maximum_offset
+  track=$((rows - _shell_sense_bash_scrollbar_thumb_rows))
+  ((track == 0)) ||
+    _shell_sense_bash_scrollbar_thumb_first=$(((offset * track + maximum_offset / 2) / maximum_offset))
+}
+
 _shell_sense_bash_render_documentation_row() {
   local -i row=$1 width=$_shell_sense_bash_documentation_width border_cells=0
   local top_left=╭ top_right=╮ bottom_left=╰ bottom_right=╯ horizontal=─ vertical=│
@@ -300,7 +355,8 @@ _shell_sense_bash_render_documentation_row() {
     local -i track=$((rows - thumb_rows))
     local -i maximum_offset=$((total - rows))
     local -i thumb_first=0
-    ((track == 0)) || thumb_first=$((_shell_sense_bash_documentation_offset * track + maximum_offset / 2) / maximum_offset)
+    ((track == 0)) ||
+      thumb_first=$(((_shell_sense_bash_documentation_offset * track + maximum_offset / 2) / maximum_offset))
     if ((row > thumb_first && row <= thumb_first + thumb_rows)); then
       printf '%s%s' "$_shell_sense_bash_style_scrollbar_thumb" "$_shell_sense_bash_scrollbar_character"
     else
@@ -318,11 +374,10 @@ _shell_sense_bash_render_popup() {
     _shell_sense_bash_install_keymap closed
     return
   fi
-  local -i row_count=$item_count first=0 last
+  local -i row_count=$item_count first last
   ((row_count > _shell_sense_bash_max_rows)) && row_count=$_shell_sense_bash_max_rows
-  ((_shell_sense_bash_selected + _shell_sense_bash_scrolloff > row_count)) &&
-    first=$((_shell_sense_bash_selected + _shell_sense_bash_scrolloff - row_count))
-  ((first + row_count <= item_count)) || first=$((item_count - row_count))
+  first=$((_shell_sense_bash_menu_view_start - _shell_sense_bash_window_start))
+  ((first >= 0 && first + row_count <= item_count)) || return 1
   last=$((first + row_count - 1))
 
   local -i columns=${COLUMNS:-80} index
@@ -348,14 +403,12 @@ _shell_sense_bash_render_popup() {
   _shell_sense_bash_documentation_row_count
   local -i documentation_rows=$_shell_sense_bash_documentation_row_count
 
-  local -i thumb=0 selected_absolute
+  local -i thumb_first=0 thumb_rows=0
   if ((_shell_sense_bash_show_scrollbar && _shell_sense_bash_total > row_count)); then
-    selected_absolute=$((_shell_sense_bash_window_start + _shell_sense_bash_selected - 1))
-    if ((_shell_sense_bash_total <= 1)); then
-      thumb=1
-    else
-      thumb=$(((selected_absolute * (row_count - 1) + (_shell_sense_bash_total - 1) / 2) / (_shell_sense_bash_total - 1) + 1))
-    fi
+    _shell_sense_bash_menu_scrollbar_geometry "$row_count" "$_shell_sense_bash_total" \
+      "$_shell_sense_bash_menu_view_start"
+    thumb_first=$_shell_sense_bash_scrollbar_thumb_first
+    thumb_rows=$_shell_sense_bash_scrollbar_thumb_rows
   fi
 
   printf '\e[?2026h\e7'
@@ -366,7 +419,7 @@ _shell_sense_bash_render_popup() {
   printf '\e8'
   local selected_style row_style marker icon detail kind_style scrollbar_style
   local -i spaces row=0 scrollbar_cells=0
-  ((thumb == 0)) || scrollbar_cells=1
+  ((thumb_rows == 0)) || scrollbar_cells=1
   for ((index = first; index <= last; index++)); do
     ((row += 1))
     selected_style=
@@ -392,10 +445,10 @@ _shell_sense_bash_render_popup() {
     printf '%s%*s' "$row_style" "$spaces" ''
     [[ -z $detail ]] || printf '%s%s%s%s' "$row_style" "$_shell_sense_bash_style_detail" "$detail" "$_shell_sense_bash_style_reset"
     printf '%s%*s' "$row_style" "$_shell_sense_bash_padding" ''
-    if ((thumb > 0)); then
+    if ((thumb_rows > 0)); then
       scrollbar_style=$_shell_sense_bash_style_scrollbar_gutter
-      ((row != thumb)) || scrollbar_style=$_shell_sense_bash_style_scrollbar_thumb
-      if ((row == thumb)); then
+      if ((row > thumb_first && row <= thumb_first + thumb_rows)); then
+        scrollbar_style=$_shell_sense_bash_style_scrollbar_thumb
         printf '%s%s' "$scrollbar_style" "$_shell_sense_bash_scrollbar_character"
       else
         printf '%s ' "$scrollbar_style"
@@ -565,6 +618,7 @@ _shell_sense_bash_dispatch() {
       _shell_sense_bash_navigation_serial=$4
       _shell_sense_bash_selected=$selected
       _shell_sense_bash_selected_absolute=$6
+      _shell_sense_bash_update_menu_viewport "$_shell_sense_bash_selected_absolute"
       _shell_sense_bash_view_ready=1
       _shell_sense_bash_render_popup
       ;;
@@ -616,6 +670,13 @@ _shell_sense_bash_dispatch() {
          $2 == "$_shell_sense_bash_active_generation" &&
          $3 == "$_shell_sense_bash_view_revision" ]] || return
       _shell_sense_bash_view_building=0
+      if ((_shell_sense_bash_menu_view_request != 10#$1 ||
+           _shell_sense_bash_menu_view_generation != 10#$2)); then
+        _shell_sense_bash_menu_view_start=0
+        _shell_sense_bash_menu_view_request=$1
+        _shell_sense_bash_menu_view_generation=$2
+      fi
+      _shell_sense_bash_update_menu_viewport "$_shell_sense_bash_selected_absolute"
       _shell_sense_bash_render_popup
       _shell_sense_bash_view_ready=1
       ;;
@@ -922,9 +983,13 @@ _shell_sense_bash_navigate() {
     esac
     ((_shell_sense_bash_navigation_serial += 1))
     local -i relative=$((desired - _shell_sense_bash_window_start + 1))
-    if ((relative >= 1 && relative <= ${#_shell_sense_bash_view_ids[@]})); then
+    _shell_sense_bash_menu_viewport_start_for "$desired" "$_shell_sense_bash_menu_view_start"
+    local -i desired_view_start=$_shell_sense_bash_menu_viewport_start
+    if ((relative >= 1 && relative <= ${#_shell_sense_bash_view_ids[@]})) &&
+      _shell_sense_bash_cached_menu_viewport_contains "$desired_view_start"; then
       _shell_sense_bash_selected=$relative
       _shell_sense_bash_selected_absolute=$desired
+      _shell_sense_bash_menu_view_start=$desired_view_start
       _shell_sense_bash_render_popup
     fi
   fi

@@ -87,8 +87,11 @@ shell_sense_pty_read_until '*<BASH-CWD>/home/akisarou</BASH-CWD>*' ||
   fail 'Bash test shell did not enter the fixture directory'
 shell_sense_pty_write_line 'x() { printf "<BASH-ACCEPT>%s</BASH-ACCEPT>\n" "$1"; }'
 shell_sense_pty_write_line "complete -W 'restart reset-failed rescue reload' x"
+shell_sense_pty_write_line 'complete -W "$(printf '\''candidate-%02d '\'' {1..46})" y'
 shell_sense_pty_write_line '_shell_sense_test_state() { printf "<BASH-STATE>line=%s,active=%s,visible=%s</BASH-STATE>\n" "$READLINE_LINE" "$_shell_sense_bash_active_buffer" "$_shell_sense_bash_popup_visible"; }'
 shell_sense_pty_write_line 'bind -x '\''"\C-x\C-g":_shell_sense_test_state'\'''
+shell_sense_pty_write_line '_shell_sense_test_viewport_state() { [[ ! -s $_shell_sense_bash_output_mailbox ]] || _shell_sense_bash_drain; _shell_sense_bash_menu_scrollbar_geometry "$_shell_sense_bash_max_rows" "$_shell_sense_bash_total" "$_shell_sense_bash_menu_view_start"; printf "<BASH-VIEW>selected=%s,viewport=%s,window=%s,thumb=%s:%s</BASH-VIEW>\n" "$_shell_sense_bash_selected_absolute" "$_shell_sense_bash_menu_view_start" "$_shell_sense_bash_window_start" "$_shell_sense_bash_scrollbar_thumb_first" "$_shell_sense_bash_scrollbar_thumb_rows"; }'
+shell_sense_pty_write_line 'bind -x '\''"\C-x\C-v":_shell_sense_test_viewport_state'\'''
 shell_sense_pty_write_line '_shell_sense_test_documentation_state() { [[ ! -s $_shell_sense_bash_output_mailbox ]] || _shell_sense_bash_drain; local selected=${_shell_sense_bash_view_labels[_shell_sense_bash_selected-1]-}; printf "<BASH-DOC>offset=%s,total=%s,lines=%s,item=%s,selected=%s</BASH-DOC>\n" "$_shell_sense_bash_documentation_offset" "$_shell_sense_bash_documentation_total" "${#_shell_sense_bash_documentation_lines[@]}" "$_shell_sense_bash_documentation_item" "$selected"; }'
 shell_sense_pty_write_line 'bind -x '\''"\C-x\C-d":_shell_sense_test_documentation_state'\'''
 shell_sense_pty_write_line '_shell_sense_test_worker_state() { local changed=0; ((__sense_test_old_worker != _shell_sense_bash_worker_pid)) && changed=1; printf "<BASH-WORKER-RECOVERED>%s:%s:%s</BASH-WORKER-RECOVERED>\n" "$changed" "$_shell_sense_bash_ready" "$_shell_sense_bash_configured"; }'
@@ -183,6 +186,23 @@ wait_for_bash_documentation \
 shell_sense_pty_write_raw $'\x03'
 shell_sense_pty_reset
 shell_sense_pty_read_until '*<BASH-PROMPT-PWD>*' || fail 'Bash did not clear the documentation probe'
+
+# Candidate navigation owns a persistent absolute viewport. Crossing the
+# worker prefetch boundary must neither recompute the viewport nor move its
+# scrollbar, and reversing direction stays inside the existing window.
+shell_sense_pty_reset
+shell_sense_pty_write_raw 'y '
+shell_sense_pty_write_raw $'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
+shell_sense_pty_write_raw $'\x18\x16'
+shell_sense_pty_read_until '*<BASH-VIEW>selected=18,viewport=11,window=<1->,thumb=2:2</BASH-VIEW>*' ||
+  fail 'Bash navigation did not preserve its absolute viewport across prefetch'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x10\x18\x16'
+shell_sense_pty_read_until '*<BASH-VIEW>selected=17,viewport=11,window=<1->,thumb=2:2</BASH-VIEW>*' ||
+  fail 'Bash reverse navigation recomputed the viewport or scrollbar'
+shell_sense_pty_write_raw $'\x03'
+shell_sense_pty_reset
+shell_sense_pty_read_until '*<BASH-PROMPT-PWD>*' || fail 'Bash did not clear the viewport probe'
 
 # PROMPT_COMMAND owns worker recovery without replacing the user's existing
 # prompt command or recapturing Shell Sense's own Readline bindings.

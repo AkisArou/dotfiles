@@ -165,7 +165,7 @@ _shell_sense_test_state() {
     _shell_sense_fd_callback $_shell_sense_read_fd
   }
   zle -I
-  print -r -- "<STATE>ready=$_shell_sense_ready configured=$_shell_sense_configured read=$_shell_sense_read_fd write=$_shell_sense_write_fd sync-fd=$_shell_sense_sync_fd sync-active=$_shell_sense_sync_active redraw-pending=$_shell_sense_redraw_pending worker=$_shell_sense_worker_pid fifo=$_shell_sense_fifo_in log=$_shell_sense_log_file request=$_shell_sense_active_request items=$#_shell_sense_item_ids captured=${(j:|:)_shell_sense_capture_words} kinds=${(j:|:)_shell_sense_item_kinds} flags=${(j:|:)_shell_sense_capture_flags} prefixes=${(j:|:)_shell_sense_capture_prefixes} selected=$_shell_sense_selected selected-absolute=$_shell_sense_selected_absolute navigation-serial=$_shell_sense_navigation_serial menu-start=$_shell_sense_menu_view_start render-first=$_shell_sense_render_first render-rows=$_shell_sense_render_menu_lines source=${_shell_sense_item_acceptance_sources[_shell_sense_selected]-} identity=${_shell_sense_item_acceptance_identities[_shell_sense_selected]-} serial=$_shell_sense_capture_serial apply=${_shell_sense_last_apply_status-unset} aligned=$render_aligned width=$render_width duplicates=$detail_duplicates flush=$scrollbar_flush doc-place=${_shell_sense_documentation_placement:-none} interrupt-key=$_shell_sense_interrupt_key_enabled terminal-interrupt=$_shell_sense_terminal_interrupt_disabled dispatches=$_shell_sense_test_key_dispatch_count erase=$_shell_sense_test_interrupt_erase_count buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_shell_sense_last_error-}</STATE>"
+  print -r -- "<STATE>ready=$_shell_sense_ready configured=$_shell_sense_configured read=$_shell_sense_read_fd write=$_shell_sense_write_fd sync-fd=$_shell_sense_sync_fd sync-active=$_shell_sense_sync_active redraw-pending=$_shell_sense_redraw_pending worker=$_shell_sense_worker_pid fifo=$_shell_sense_fifo_in log=$_shell_sense_log_file request=$_shell_sense_active_request generation=$_shell_sense_active_generation items=$#_shell_sense_item_ids captured=${(j:|:)_shell_sense_capture_words} kinds=${(j:|:)_shell_sense_item_kinds} flags=${(j:|:)_shell_sense_capture_flags} prefixes=${(j:|:)_shell_sense_capture_prefixes} selected=$_shell_sense_selected selected-absolute=$_shell_sense_selected_absolute navigation-serial=$_shell_sense_navigation_serial menu-start=$_shell_sense_menu_view_start render-first=$_shell_sense_render_first render-rows=$_shell_sense_render_menu_lines source=${_shell_sense_item_acceptance_sources[_shell_sense_selected]-} identity=${_shell_sense_item_acceptance_identities[_shell_sense_selected]-} serial=$_shell_sense_capture_serial apply=${_shell_sense_last_apply_status-unset} aligned=$render_aligned width=$render_width duplicates=$detail_duplicates flush=$scrollbar_flush doc-place=${_shell_sense_documentation_placement:-none} interrupt-key=$_shell_sense_interrupt_key_enabled terminal-interrupt=$_shell_sense_terminal_interrupt_disabled dispatches=$_shell_sense_test_key_dispatch_count erase=$_shell_sense_test_interrupt_erase_count buffer=${(qqq)BUFFER} handler=${(qqq)handler} error=${_shell_sense_last_error-}</STATE>"
   BUFFER=
   CURSOR=0
   zle accept-line
@@ -189,6 +189,20 @@ _shell_sense_test_documentation_state() {
 }
 zle -N _shell_sense_test_documentation_state
 bindkey '^X^D' _shell_sense_test_documentation_state
+
+_shell_sense_test_toggle_documentation_placement() {
+  if [[ $_shell_sense_documentation_placement == side ]]; then
+    _shell_sense_documentation_placement=below
+  else
+    _shell_sense_documentation_placement=side
+  fi
+  _shell_sense_render_dirty=1
+  _shell_sense_render
+  print -r -- "<DOC-LAYOUT>placement=$_shell_sense_documentation_placement menu-rows=$_shell_sense_render_menu_lines total-rows=$#_shell_sense_render_lines viewport=$_shell_sense_documentation_viewport_rows</DOC-LAYOUT>"
+  zle -R
+}
+zle -N _shell_sense_test_toggle_documentation_placement
+bindkey '^X^L' _shell_sense_test_toggle_documentation_placement
 
 _shell_sense_test_navigation_state() {
   local selected_id=${_shell_sense_item_ids[_shell_sense_selected]-}

@@ -117,6 +117,20 @@ while IFS=$'\t' read -r case_id line expected_label fish_label bash_label expect
   fi
 done < "$SHELL_SENSE_TEST_ROOT/tests/conformance/cases.tsv"
 
+# Native capture must retain a large provider result without imposing a UI
+# limit or manufacturing a second source of candidates.
+zpty -n -w sense-worker $'shell-sense-large \t'
+zpty -r -m sense-worker output '*<LARGE-LAST>*</LARGE-LAST>*<SENSE-PROMPT>*' || {
+  print -u2 -- 'Zsh large-provider capture did not finish'
+  return 1
+}
+for expected in '<LARGE-COUNT>4096</LARGE-COUNT>' '<LARGE-LAST>4096</LARGE-LAST>'; do
+  [[ $output == *$expected* ]] || {
+    print -u2 -- "Zsh large-provider capture is missing: $expected"
+    return 1
+  }
+done
+
 zpty -n -w sense-worker $'ls -l\t'
 zpty -r -m sense-worker output '*<LS-DESC>*</LS-DESC>*<SENSE-PROMPT>*' || {
   print -u2 -- 'Zsh standard option-description capture did not finish'

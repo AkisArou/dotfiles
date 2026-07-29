@@ -11,7 +11,7 @@ typeset -gx XDG_RUNTIME_DIR="$SHELL_SENSE_TEST_TEMP/runtime"
 typeset -gx XDG_STATE_HOME="$SHELL_SENSE_TEST_TEMP/state"
 typeset -gx SHELL_SENSE_SOCKET="$SHELL_SENSE_TEST_TEMP/daemon.sock"
 typeset -gx SHELL_SENSE_CONFIG="$SHELL_SENSE_TEST_ROOT/config.example.toml"
-typeset -gx SHELL_SENSE_COMMAND="$SHELL_SENSE_TEST_ROOT/target/debug/shell-sense"
+typeset -gx SHELL_SENSE_COMMAND=${SHELL_SENSE_TEST_BINARY:-$SHELL_SENSE_TEST_ROOT/target/debug/shell-sense}
 typeset -gx SHELL_SENSE_NO_DAEMON_AUTOSTART=1
 typeset -gx SHELL_SENSE_TEST_WORK="$SHELL_SENSE_TEST_TEMP/work"
 typeset -gx TERM=xterm-256color
@@ -212,6 +212,77 @@ read_until '*<EXEC>--amend</EXEC>*<FINISH-POST>0</FINISH-POST>*<SENSE-PROMPT>*' 
   return 1
 }
 
+if (( ${SHELL_SENSE_LATENCY_SAMPLES:-0} > 0 )); then
+  typeset -a terminal_samples=() pipeline_samples=() sample_requests=() sample_generations=()
+  typeset -F sample_started sample_elapsed terminal_p95 pipeline_p95
+  typeset -i sample sample_count=${SHELL_SENSE_LATENCY_SAMPLES}
+  for (( sample = 1; sample <= sample_count; sample++ )); do
+    output=
+    sample_started=$EPOCHREALTIME
+    zpty -n -w sense-live 'sense-test --a'
+    read_until '*replace the previous commit*' 200 || {
+      print -u2 -- "release latency sample $sample did not produce a visible view"
+      return 1
+    }
+    sample_elapsed=$(( (EPOCHREALTIME - sample_started) * 1000.0 ))
+    terminal_samples+=( $sample_elapsed )
+
+    output=
+    zpty -n -w sense-live $'\x18\x07'
+    read_until '*<STATE>*</STATE>*<SENSE-PROMPT>*' 200 || {
+      print -u2 -- "release latency sample $sample did not reset ZLE"
+      print -u2 -r -- "$output"
+      return 1
+    }
+    plain_output=${output//$'\e'\[[0-9;]#[[:alpha:]]/}
+    [[ $plain_output =~ 'request=([0-9]+) generation=([0-9]+)' ]] || {
+      print -u2 -- "release latency sample $sample did not expose its request identity"
+      print -u2 -r -- "$plain_output"
+      return 1
+    }
+    sample_requests+=( $match[1] )
+    sample_generations+=( $match[2] )
+  done
+
+  typeset -a timing_worker_logs=( $XDG_STATE_HOME/shell-sense/worker-*.log(N) )
+  (( $#timing_worker_logs )) || {
+    print -u2 -- 'release latency samples produced no worker trace log'
+    return 1
+  }
+  typeset timing_line
+  typeset -i elapsed_micros
+  for (( sample = 1; sample <= sample_count; sample++ )); do
+    timing_line=$(command rg --no-filename -- \
+      "request_id=$sample_requests[sample] generation=$sample_generations[sample] stage=\"first-view-delivery\"" \
+      "${timing_worker_logs[@]}" | command tail -n 1)
+    [[ $timing_line =~ 'elapsed_micros=([0-9]+)' ]] || {
+      print -u2 -- "release latency sample $sample has no request-to-delivery trace"
+      return 1
+    }
+    elapsed_micros=$match[1]
+    pipeline_samples+=( $(( elapsed_micros / 1000.0 )) )
+  done
+
+  terminal_samples=( ${(on)terminal_samples} )
+  pipeline_samples=( ${(on)pipeline_samples} )
+  typeset -i p95_index=$(( (sample_count * 95 + 99) / 100 ))
+  terminal_p95=$terminal_samples[p95_index]
+  pipeline_p95=$pipeline_samples[p95_index]
+  if [[ ${SHELL_SENSE_REPORT_TIMING_SAMPLES:-0} == 1 ]]; then
+    print -r -- "pipeline-samples-ms=${(j:,:)pipeline_samples}"
+    print -r -- "terminal-observation-samples-ms=${(j:,:)terminal_samples}"
+  fi
+  (( pipeline_p95 < ${SHELL_SENSE_PIPELINE_BUDGET_MS:-30.0} )) || {
+    print -u2 -- "release request-to-delivery p95 was ${pipeline_p95}ms"
+    return 1
+  }
+  (( terminal_p95 < ${SHELL_SENSE_TERMINAL_OBSERVATION_BUDGET_MS:-75.0} )) || {
+    print -u2 -- "release terminal-observation p95 was ${terminal_p95}ms"
+    return 1
+  }
+  print -r -- "request-to-delivery-p95-ms=$pipeline_p95 terminal-observation-p95-ms=$terminal_p95 samples=$sample_count"
+fi
+
 # A unique authoritative prefix contributes end-of-line ghost text. Right
 # accepts that completion token through Zsh rather than splicing display text
 # into BUFFER, preserving all ordinary completion semantics.
@@ -331,6 +402,24 @@ zselect -t 50 >/dev/null 2>&1 || true
 zpty -n -w sense-live $'\x18\x04'
 read_until '*<DOC>placement=side offset=0 total=<-> viewport=10 lines=10 scrollbar=1 render-rows=10 text=*entry-01*</DOC>*' || {
   print -u2 -- 'configured directory documentation did not resolve the typed path'
+  print -u2 -r -- "$output"
+  return 1
+}
+
+# The terminal presenter composes the same bounded documentation model either
+# beside or below the menu. Switching placement must atomically add/remove the
+# documentation rows without changing its viewport.
+zpty -n -w sense-live $'\x18\x0c'
+output=
+read_until '*<DOC-LAYOUT>placement=below menu-rows=1 total-rows=11 viewport=10</DOC-LAYOUT>*' || {
+  print -u2 -- 'below documentation was not composed after the menu'
+  print -u2 -r -- "$output"
+  return 1
+}
+zpty -n -w sense-live $'\x18\x0c'
+output=
+read_until '*<DOC-LAYOUT>placement=side menu-rows=1 total-rows=10 viewport=10</DOC-LAYOUT>*' || {
+  print -u2 -- 'side documentation did not return to the aligned menu height'
   print -u2 -r -- "$output"
   return 1
 }
@@ -809,5 +898,25 @@ read_until '*replace the previous commit*' || {
 zpty -n -w sense-live $'\x18\x07'
 output=
 read_until '*<SENSE-PROMPT>*' || return 1
+
+if [[ ${SHELL_SENSE_ASSERT_TIMING_TRACES:-0} == 1 ]]; then
+  typeset -a worker_logs=( $XDG_STATE_HOME/shell-sense/worker-*.log(N) )
+  (( $#worker_logs )) || {
+    print -u2 -- 'request timing gate found no worker logs'
+    return 1
+  }
+  for stage in native-capture layout render-delivery first-view-delivery; do
+    command rg -q -- "stage=\"?$stage\"?" "${worker_logs[@]}" || {
+      print -u2 -- "worker trace is missing the $stage stage"
+      return 1
+    }
+  done
+  for stage in ranking enrichment; do
+    command rg -q -- "stage=\"?$stage\"?" "$SHELL_SENSE_TEST_TEMP/daemon.log" || {
+      print -u2 -- "daemon trace is missing the $stage stage"
+      return 1
+    }
+  done
+fi
 
 print -r -- 'live-client-ok'

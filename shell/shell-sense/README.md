@@ -304,14 +304,21 @@ query succeed.
 cargo test --workspace --all-targets
 cargo clippy --workspace --all-targets -- -D warnings
 cargo bench -p sense-rank --bench rank
+cargo build --release
 zsh tests/native-conformance.zsh
 zsh tests/fifo-transport.zsh
 zsh tests/live-client.zsh
 zsh tests/live-fish.zsh
 zsh tests/live-bash.zsh
+zsh tests/live-blink.zsh
+zsh tests/release-latency.zsh
+zsh tests/release-package.zsh
 ```
 
 The PTY tests verify real line-editor behavior and native candidate acceptance;
 the shared 10-case provider contract covers fuzzy subcommands, short, combined,
 long and value options, user completions, path forms, programmable completions,
-and context reconstruction.
+and context reconstruction. The release gates enforce a 30 ms p95
+request-to-worker-delivery budget for the standard completion fixture, retain a
+separate 75 ms terminal-observation guard, and validate the exact installed
+binary, runtime assets, shell initialization, and Blink module.

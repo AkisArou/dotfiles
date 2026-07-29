@@ -63,6 +63,18 @@ _shell_sense_value_completion() {
 complete -F _shell_sense_value_completion shell-sense-value
 complete -o filenames -d shell-sense-path
 
+large_candidates=()
+for ((index = 1; index <= 4096; index++)); do
+  printf -v candidate 'candidate-%04d' "$index"
+  large_candidates+=("$candidate")
+done
+printf -v large_wordlist '%s ' "${large_candidates[@]}"
+complete -W "$large_wordlist" shell-sense-large
+line='shell-sense-large '
+_shell_sense_bash_collect "$line" "${#line}" 3
+[[ ${#_shell_sense_bash_candidates[@]} == 4096 ]] || fail 'large-provider candidate count'
+[[ ${_shell_sense_bash_candidates[4095]} == candidate-4096 ]] || fail 'large-provider final candidate'
+
 _shell_sense_test_broad_context() {
   if [[ $COMP_LINE == 'shell-sense-context ' && $COMP_POINT == 20 &&
         $COMP_CWORD == 1 && ${COMP_WORDS[1]} == '' ]]; then

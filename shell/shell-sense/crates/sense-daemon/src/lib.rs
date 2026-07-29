@@ -222,6 +222,7 @@ impl ActiveRequest {
         trace!(
             request_id = self.request.request_id.0,
             generation = self.request.generation.0,
+            stage = "ranking",
             candidate_count,
             matched_count = view_results.matched_before_limit,
             result_count = view_results.items.len(),
@@ -363,11 +364,23 @@ impl Session {
     fn spawn_enrichment(self: &Arc<Self>, job: EnrichmentJob) {
         let session = Arc::clone(self);
         tokio::spawn(async move {
+            let started = Instant::now();
+            let item_count = job.items.len();
+            let key = job.key;
             let events = session
                 .adapters
                 .enrich(job.context, job.items, job.cancellation)
                 .await;
-            session.finish_enrichment(job.key, events).await;
+            trace!(
+                request_id = key.0.0,
+                generation = key.1.0,
+                stage = "enrichment",
+                item_count,
+                event_count = events.len(),
+                elapsed_micros = u64::try_from(started.elapsed().as_micros()).unwrap_or(u64::MAX),
+                "completion stage latency"
+            );
+            session.finish_enrichment(key, events).await;
         });
     }
 
@@ -410,12 +423,22 @@ impl Session {
     fn spawn_resolve(self: &Arc<Self>, job: ResolveJob) {
         let session = Arc::clone(self);
         tokio::spawn(async move {
+            let started = Instant::now();
             let item_id = job.item.id.clone();
+            let key = job.key;
             let events = session
                 .adapters
                 .resolve(job.context, job.item, job.cancellation)
                 .await;
-            session.finish_resolve(job.key, item_id, events).await;
+            trace!(
+                request_id = key.0.0,
+                generation = key.1.0,
+                stage = "documentation-resolution",
+                event_count = events.len(),
+                elapsed_micros = u64::try_from(started.elapsed().as_micros()).unwrap_or(u64::MAX),
+                "completion stage latency"
+            );
+            session.finish_resolve(key, item_id, events).await;
         });
     }
 

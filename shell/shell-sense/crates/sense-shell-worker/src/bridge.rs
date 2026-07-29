@@ -8,7 +8,7 @@ use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::OpenOptionsExt;
 use std::os::unix::fs::{FileTypeExt, PermissionsExt};
 use std::path::PathBuf;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use bytes::BytesMut;
 use futures_util::{SinkExt, StreamExt};
@@ -368,6 +368,23 @@ struct RetainedViewState {
     documentation_offset: usize,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct RequestTiming {
+    received_at: Instant,
+    capture_requested_at: Option<Instant>,
+    first_view_delivered: bool,
+}
+
+impl RequestTiming {
+    fn received() -> Self {
+        Self {
+            received_at: Instant::now(),
+            capture_requested_at: None,
+            first_view_delivered: false,
+        }
+    }
+}
+
 #[derive(Debug)]
 struct WindowedView {
     view: CandidateView,
@@ -420,6 +437,7 @@ struct BridgeState {
     capture_store: CaptureStore,
     shell_capture_store: Option<ShellCaptureStore>,
     pending_completion: Option<CompletionRequest>,
+    request_timings: HashMap<RequestKey, RequestTiming>,
     cancelled_captures: HashSet<RequestKey>,
     cancelled_capture_order: VecDeque<RequestKey>,
     highest_generation: u64,
@@ -454,6 +472,7 @@ impl BridgeState {
                 Some(ShellCaptureStore::new(shell, capture_limits)?)
             },
             pending_completion: None,
+            request_timings: HashMap::new(),
             cancelled_captures: HashSet::new(),
             cancelled_capture_order: VecDeque::new(),
             highest_generation: 0,
@@ -1032,9 +1051,7 @@ impl BridgeState {
                     .await?;
             }
             ShellInput::CaptureEnd(request_id, generation) => {
-                for batch in self.end_capture(request_id, generation)? {
-                    worker.send(ClientMessage::PublishCandidates(batch)).await?;
-                }
+                self.publish_capture(request_id, generation, worker).await?;
             }
             ShellInput::Ping(nonce) => {
                 client.send(ClientMessage::Ping { nonce }).await?;
@@ -1046,6 +1063,7 @@ impl BridgeState {
 
     fn invalidate_request(&mut self, request_id: RequestId, generation: Generation) {
         let key = (request_id, generation);
+        self.request_timings.remove(&key);
         self.requests.remove(&key);
         self.pending.remove(&key);
         self.pending_contexts.remove(&key);
@@ -1079,6 +1097,7 @@ impl BridgeState {
         let key = (request_id, generation);
         self.pending.remove(&key);
         self.pending_contexts.remove(&key);
+        self.request_timings.remove(&key);
     }
 
     fn begin_native_context(
@@ -1186,9 +1205,15 @@ impl BridgeState {
     fn queue_completion(&mut self, request: CompletionRequest) {
         self.highest_generation = self.highest_generation.max(request.generation.0);
         if let Some(previous) = self.pending_completion.replace(request.clone()) {
+            self.request_timings
+                .remove(&(previous.request_id, previous.generation));
             self.requests
                 .remove(&(previous.request_id, previous.generation));
         }
+        self.request_timings.insert(
+            (request.request_id, request.generation),
+            RequestTiming::received(),
+        );
         self.requests
             .insert((request.request_id, request.generation), request);
     }
@@ -1215,6 +1240,9 @@ impl BridgeState {
     ) -> Result<(), ProtocolError> {
         self.highest_generation = self.highest_generation.max(request.generation.0);
         let key = (request.request_id, request.generation);
+        self.request_timings
+            .entry(key)
+            .or_insert_with(RequestTiming::received);
         tracing::trace!(
             request_id = request.request_id.0,
             generation = request.generation.0,
@@ -1400,6 +1428,91 @@ impl BridgeState {
             outcome.batch.is_incomplete = true;
         }
         split_candidate_batch(outcome.batch, self.daemon_frame_bytes)
+    }
+
+    async fn publish_capture(
+        &mut self,
+        request_id: RequestId,
+        generation: Generation,
+        worker: &mut DaemonConnection,
+    ) -> Result<(), BridgeError> {
+        let batches = self.end_capture(request_id, generation)?;
+        let candidate_count = batches.iter().map(|batch| batch.items.len()).sum::<usize>();
+        if let Some(started) = self
+            .request_timings
+            .get(&(request_id, generation))
+            .and_then(|timing| timing.capture_requested_at)
+        {
+            tracing::trace!(
+                request_id = request_id.0,
+                generation = generation.0,
+                stage = "native-capture",
+                candidate_count,
+                elapsed_micros = u64::try_from(started.elapsed().as_micros()).unwrap_or(u64::MAX),
+                "completion stage latency"
+            );
+        }
+        for batch in batches {
+            worker.send(ClientMessage::PublishCandidates(batch)).await?;
+        }
+        Ok(())
+    }
+
+    async fn route_selection_request<W>(
+        &self,
+        selection: sense_protocol::SelectionRequest,
+        worker: &mut DaemonConnection,
+        shell: &mut FramedWrite<W, ShellWireCodec>,
+    ) -> Result<(), BridgeError>
+    where
+        W: AsyncWrite + Unpin,
+    {
+        let rejection = selection.clone();
+        let result = if self.shell == NativeShell::Zsh {
+            self.capture_store
+                .acceptance_by_item(
+                    selection.request_id,
+                    selection.generation,
+                    &selection.item_id,
+                )
+                .map(|route| Acceptance::Zsh(Box::new(route.clone())))
+        } else {
+            self.shell_capture_store
+                .as_ref()
+                .ok_or(CaptureError::InvalidShellStore)
+                .and_then(|store| {
+                    store.acceptance_by_item(
+                        selection.request_id,
+                        selection.generation,
+                        &selection.item_id,
+                    )
+                })
+                .map(|route| Acceptance::Shell(route.clone()))
+        };
+        match result {
+            Ok(route) => send_acceptance(shell, selection.item_id, route).await?,
+            Err(error) => {
+                worker
+                    .send(ClientMessage::ReportSelection(
+                        sense_protocol::SelectionResult {
+                            selection: rejection,
+                            applied: false,
+                        },
+                    ))
+                    .await?;
+                send_shell(
+                    shell,
+                    "error",
+                    [
+                        RawBytes::from("stale-selection"),
+                        error.to_string().into(),
+                        selection.request_id.0.to_string().into(),
+                    ],
+                )
+                .await?;
+            }
+        }
+        Ok(())
     }
 
     fn is_stale_capture(&self, key: RequestKey) -> bool {
@@ -1968,6 +2081,11 @@ where
 {
     match message {
         ServerMessage::CandidateView(view) => {
+            let key = (view.request_id, view.generation);
+            let first_view_started = state
+                .request_timings
+                .get(&key)
+                .and_then(|timing| (!timing.first_view_delivered).then_some(timing.received_at));
             if state.install_view(view)
                 && let Some(window) = state.current_window()
             {
@@ -1980,6 +2098,19 @@ where
                     DocumentationTransfer::Replace,
                 )
                 .await?;
+                if let Some(started) = first_view_started {
+                    if let Some(timing) = state.request_timings.get_mut(&key) {
+                        timing.first_view_delivered = true;
+                    }
+                    tracing::trace!(
+                        request_id = key.0.0,
+                        generation = key.1.0,
+                        stage = "first-view-delivery",
+                        elapsed_micros =
+                            u64::try_from(started.elapsed().as_micros()).unwrap_or(u64::MAX),
+                        "completion stage latency"
+                    );
+                }
             }
         }
         ServerMessage::RequestStarted {
@@ -2087,6 +2218,7 @@ where
     let Some(window) = state.current_window() else {
         return Ok(());
     };
+    let delivery_started = Instant::now();
     let presentation = view_presentation(&window, state.documentation);
     send_view_presentation(
         shell,
@@ -2096,7 +2228,17 @@ where
         &presentation,
     )
     .await?;
-    shell.flush().await
+    shell.flush().await?;
+    tracing::trace!(
+        request_id = window.view.request_id.0,
+        generation = window.view.generation.0,
+        revision = window.view.revision,
+        stage = "render-delivery",
+        delivery = "documentation",
+        elapsed_micros = u64::try_from(delivery_started.elapsed().as_micros()).unwrap_or(u64::MAX),
+        "completion stage latency"
+    );
+    Ok(())
 }
 
 async fn handle_worker_message<W>(
@@ -2118,6 +2260,11 @@ where
             );
             let key = (request.request_id, request.generation);
             state.requests.insert(key, request.clone());
+            state
+                .request_timings
+                .entry(key)
+                .or_insert_with(RequestTiming::received)
+                .capture_requested_at = Some(Instant::now());
             send_shell(
                 shell,
                 "capture-request",
@@ -2137,53 +2284,9 @@ where
             state.invalidate_request(request_id, generation);
         }
         ServerMessage::SelectionRequested(selection) => {
-            let rejection = selection.clone();
-            let result = if state.shell == NativeShell::Zsh {
-                state
-                    .capture_store
-                    .acceptance_by_item(
-                        selection.request_id,
-                        selection.generation,
-                        &selection.item_id,
-                    )
-                    .map(|route| Acceptance::Zsh(Box::new(route.clone())))
-            } else {
-                state
-                    .shell_capture_store
-                    .as_ref()
-                    .ok_or(CaptureError::InvalidShellStore)
-                    .and_then(|store| {
-                        store.acceptance_by_item(
-                            selection.request_id,
-                            selection.generation,
-                            &selection.item_id,
-                        )
-                    })
-                    .map(|route| Acceptance::Shell(route.clone()))
-            };
-            match result {
-                Ok(route) => send_acceptance(shell, selection.item_id, route).await?,
-                Err(error) => {
-                    worker
-                        .send(ClientMessage::ReportSelection(
-                            sense_protocol::SelectionResult {
-                                selection: rejection,
-                                applied: false,
-                            },
-                        ))
-                        .await?;
-                    send_shell(
-                        shell,
-                        "error",
-                        [
-                            RawBytes::from("stale-selection"),
-                            error.to_string().into(),
-                            selection.request_id.0.to_string().into(),
-                        ],
-                    )
-                    .await?;
-                }
-            }
+            state
+                .route_selection_request(selection, worker, shell)
+                .await?;
         }
         ServerMessage::Error {
             code,
@@ -2260,6 +2363,7 @@ async fn send_candidate_view<W>(
 where
     W: AsyncWrite + Unpin,
 {
+    let delivery_started = Instant::now();
     let presentation = view_presentation(&window, documentation);
     let view = window.view;
     let mut begin_fields = vec![
@@ -2339,7 +2443,18 @@ where
         ],
     )
     .await?;
-    shell.flush().await
+    shell.flush().await?;
+    tracing::trace!(
+        request_id = view.request_id.0,
+        generation = view.generation.0,
+        revision = view.revision,
+        stage = "render-delivery",
+        delivery = "candidate-view",
+        item_count = view.items.len(),
+        elapsed_micros = u64::try_from(delivery_started.elapsed().as_micros()).unwrap_or(u64::MAX),
+        "completion stage latency"
+    );
+    Ok(())
 }
 
 async fn send_selection_changed<W>(
@@ -2372,6 +2487,7 @@ struct ViewPresentation {
 }
 
 fn view_presentation(window: &WindowedView, policy: DocumentationPolicy) -> ViewPresentation {
+    let started = Instant::now();
     let documentation = window
         .documentation_visible
         .then_some(window.documentation_item.as_ref())
@@ -2417,7 +2533,7 @@ fn view_presentation(window: &WindowedView, policy: DocumentationPolicy) -> View
             render_markdown: policy.layout.render_markdown,
         },
     );
-    ViewPresentation {
+    let presentation = ViewPresentation {
         menu_width: layout.menu_width,
         documentation: window
             .documentation_item
@@ -2425,7 +2541,18 @@ fn view_presentation(window: &WindowedView, policy: DocumentationPolicy) -> View
             .filter(|_| window.documentation_visible)
             .map(|item| item.id.clone())
             .zip(layout.documentation),
-    }
+    };
+    tracing::trace!(
+        request_id = window.view.request_id.0,
+        generation = window.view.generation.0,
+        revision = window.view.revision,
+        stage = "layout",
+        item_count = window.view.items.len(),
+        documentation_visible = window.documentation_visible,
+        elapsed_micros = u64::try_from(started.elapsed().as_micros()).unwrap_or(u64::MAX),
+        "completion stage latency"
+    );
+    presentation
 }
 
 async fn send_view_presentation<W>(
@@ -4170,6 +4297,64 @@ mod tests {
             state.documentation_update_target().unwrap().item_id,
             ItemId("item-0".into())
         );
+    }
+
+    #[test]
+    fn unresolved_empty_and_cancelled_documentation_have_distinct_lifecycles() {
+        let session_id = SessionId::new();
+        let policy = DocumentationPolicy::default();
+        let mut state = BridgeState::new(
+            NativeShell::Zsh,
+            session_id,
+            sense_protocol::DEFAULT_MAX_FRAME_BYTES,
+            CaptureLimits::default(),
+            2,
+            GhostTextPolicy::default(),
+            policy,
+        )
+        .unwrap();
+        register_default_request(&mut state);
+        let mut items = batch(1).items;
+        items[0].documentation = sense_model::DocumentationState::Unresolved;
+        state.install_view(CandidateView {
+            session_id,
+            request_id: RequestId(1),
+            generation: Generation(2),
+            revision: 1,
+            items,
+            selected_index: Some(0),
+            matched_before_limit: 1,
+            sources_pending: Vec::new(),
+            is_final: true,
+            is_incomplete: false,
+            is_settled: true,
+        });
+
+        assert!(
+            view_presentation(&state.current_window().unwrap(), policy)
+                .documentation
+                .is_none()
+        );
+        let target = state.documentation_update_target().unwrap();
+        assert!(state.install_documentation(
+            RequestId(1),
+            Generation(2),
+            &target.item_id,
+            sense_model::DocumentationState::Resolved(sense_model::MarkupContent {
+                kind: sense_model::MarkupKind::Markdown,
+                value: " \n\t ".into(),
+            }),
+        ));
+        assert!(state.commit_documentation_target(&target));
+        assert!(
+            view_presentation(&state.current_window().unwrap(), policy)
+                .documentation
+                .is_none()
+        );
+
+        state.invalidate_request(RequestId(1), Generation(2));
+        assert!(state.current_view.is_none());
+        assert!(state.documentation_update_target().is_none());
     }
 
     #[test]

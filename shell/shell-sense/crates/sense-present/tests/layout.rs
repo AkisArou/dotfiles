@@ -140,3 +140,104 @@ fn side_documentation_matches_the_menu_height_and_reserves_its_scrollbar() {
     assert!(panel.scrollbar);
     assert!(panel.lines.iter().all(|line| line.cells < panel.width));
 }
+
+#[test]
+fn bordered_and_borderless_layouts_reserve_their_exact_decoration_width() {
+    let content = MarkupContent {
+        kind: MarkupKind::PlainText,
+        value: "one two three four five six seven eight nine ten".into(),
+    };
+    for bordered in [false, true] {
+        let mut configuration = request(72);
+        configuration.preference = DocumentationPlacementPreference::Below;
+        configuration.preferred_menu_width = 32;
+        configuration.minimum_menu_width = 24;
+        configuration.documentation_padding = 2;
+        configuration.bordered = bordered;
+        let panel = layout(Some(&content), configuration).documentation.unwrap();
+        let decorations = 4 + usize::from(bordered) * 2;
+        assert_eq!(panel.placement, DocumentationPlacement::Below);
+        assert_eq!(panel.width, 32);
+        assert!(
+            panel
+                .lines
+                .iter()
+                .all(|line| usize::from(line.cells) + decorations <= usize::from(panel.width))
+        );
+    }
+}
+
+#[test]
+fn long_unicode_markdown_pages_from_the_first_to_the_last_complete_line() {
+    let content = MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: format!(
+            "# Unicode 界\n\n{}",
+            (0..18)
+                .map(|line| format!("- λ-item-{line}: documentation with 界 and 😀"))
+                .collect::<Vec<_>>()
+                .join("\n")
+        ),
+    };
+    let mut configuration = request(64);
+    configuration.preference = DocumentationPlacementPreference::Below;
+    configuration.preferred_menu_width = 28;
+    configuration.documentation_max_rows = 4;
+
+    let first = layout(Some(&content), configuration).documentation.unwrap();
+    assert_eq!(first.offset, 0);
+    assert_eq!(first.lines[0].kind, DocumentationLineKind::Heading);
+    assert_eq!(first.lines[0].text, "Unicode 界");
+    assert!(!first.has_previous);
+    assert!(first.has_next);
+    assert!(first.scrollbar);
+    assert!(first.lines.iter().all(|line| line.cells <= 25));
+
+    configuration.documentation_offset = usize::MAX;
+    let last = layout(Some(&content), configuration).documentation.unwrap();
+    assert_eq!(last.lines.len(), 4);
+    assert_eq!(last.offset + last.lines.len(), last.total_lines);
+    assert!(last.has_previous);
+    assert!(!last.has_next);
+    assert!(last.lines.iter().all(|line| line.cells <= 25));
+}
+
+#[test]
+fn empty_documentation_is_absent_and_markdown_can_be_rendered_literally() {
+    let empty = MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: " \n\t ".into(),
+    };
+    assert!(layout(Some(&empty), request(80)).documentation.is_none());
+    assert!(layout(None, request(80)).documentation.is_none());
+
+    let markdown = MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: "# literal heading".into(),
+    };
+    let mut configuration = request(80);
+    configuration.render_markdown = false;
+    let panel = layout(Some(&markdown), configuration)
+        .documentation
+        .unwrap();
+    assert_eq!(panel.lines[0].kind, DocumentationLineKind::Text);
+    assert_eq!(panel.lines[0].text, "# literal heading");
+}
+
+#[test]
+fn extremely_narrow_terminals_fall_back_below_without_invalid_widths() {
+    let content = MarkupContent {
+        kind: MarkupKind::PlainText,
+        value: "documentation".into(),
+    };
+    let mut configuration = request(8);
+    configuration.preference = DocumentationPlacementPreference::Side;
+    configuration.bordered = true;
+    configuration.documentation_padding = 2;
+    let result = layout(Some(&content), configuration);
+    let panel = result.documentation.unwrap();
+    assert_eq!(panel.placement, DocumentationPlacement::Below);
+    assert!((1..8).contains(&result.menu_width));
+    assert_eq!(panel.width, result.menu_width);
+    assert!(panel.lines.iter().all(|line| line.cells <= 1));
+}

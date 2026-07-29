@@ -86,11 +86,13 @@ shell_sense_pty_read_until '*<FISH-CWD>/home/akisarou</FISH-CWD>*' ||
   fail 'Fish test shell did not enter the fixture directory'
 shell_sense_pty_write_line 'function x; printf "<FISH-ACCEPT>%s</FISH-ACCEPT>\n" "$argv[1]"; end'
 shell_sense_pty_write_line "complete -c x -a 'restart reset-failed rescue reload' -d 'native action'"
+shell_sense_pty_write_line "complete -c y -a '(for index in (seq -w 1 46); echo candidate-\$index; end)' -d 'viewport candidate'"
 shell_sense_pty_write_line 'function __shell_sense_test_prompt --on-event fish_prompt; printf "<FISH-PROMPT-PWD>%s</FISH-PROMPT-PWD>\n" "$PWD"; end'
 shell_sense_pty_write_line 'function __shell_sense_test_state; printf "<FISH-STATE>line=%s,active=%s,ready=%s,visible=%s</FISH-STATE>\n" (commandline -b) "$_shell_sense_fish_active_buffer" "$_shell_sense_fish_view_ready" "$_shell_sense_fish_popup_visible"; end'
+shell_sense_pty_write_line 'function __shell_sense_test_viewport_state; __shell_sense_fish_drain; __shell_sense_fish_menu_scrollbar_geometry $_shell_sense_fish_max_rows $_shell_sense_fish_total $_shell_sense_fish_menu_view_start; printf "<FISH-VIEW>selected=%s,viewport=%s,window=%s,thumb=%s:%s</FISH-VIEW>\n" $_shell_sense_fish_selected_absolute $_shell_sense_fish_menu_view_start $_shell_sense_fish_window_start $_shell_sense_fish_scrollbar_thumb_first $_shell_sense_fish_scrollbar_thumb_rows; end'
 shell_sense_pty_write_line 'function __shell_sense_test_documentation_state; set -l selected $_shell_sense_fish_view_labels[$_shell_sense_fish_selected]; printf "<FISH-DOC>offset=%s,total=%s,lines=%s,item=%s,selected=%s</FISH-DOC>\n" "$_shell_sense_fish_documentation_offset" "$_shell_sense_fish_documentation_total" (count $_shell_sense_fish_documentation_lines) "$_shell_sense_fish_documentation_item" "$selected"; end'
 shell_sense_pty_write_line 'function __shell_sense_test_worker_state; set -l changed 0; test $__sense_test_old_worker -ne $_shell_sense_fish_worker_pid; and set changed 1; printf "<FISH-WORKER-RECOVERED>%s:%s:%s</FISH-WORKER-RECOVERED>\n" $changed $_shell_sense_fish_ready $_shell_sense_fish_configured; end'
-shell_sense_pty_write_line "source ${(q)entry}; bind \\cx\\cg __shell_sense_test_state; bind \\cx\\cd __shell_sense_test_documentation_state; bind \\cx\\cw __shell_sense_test_worker_state; printf '<FISH-READY>ready</FISH-READY>\\n'"
+shell_sense_pty_write_line "source ${(q)entry}; bind \\cx\\cg __shell_sense_test_state; bind \\cx\\cv __shell_sense_test_viewport_state; bind \\cx\\cd __shell_sense_test_documentation_state; bind \\cx\\cw __shell_sense_test_worker_state; printf '<FISH-READY>ready</FISH-READY>\\n'"
 shell_sense_pty_reset
 shell_sense_pty_read_until '*<FISH-READY>ready</FISH-READY>*' 1000 ||
   fail 'Fish client initialization did not finish'
@@ -182,6 +184,23 @@ shell_sense_pty_read_until '*<FISH-DOC>offset=0,total=[1-9]<->,lines=<->,item=*,
 shell_sense_pty_write_raw $'\x03'
 shell_sense_pty_reset
 shell_sense_pty_read_until '*> *' || fail 'Fish did not clear the documentation probe'
+
+# Fish shares the same persistent absolute viewport and prefetch contract as
+# the ZLE and Readline presenters.
+shell_sense_pty_reset
+shell_sense_pty_write_raw 'y '
+shell_sense_pty_read_until '*candidate-01*' || fail 'Fish viewport fixture did not produce candidates'
+shell_sense_pty_write_raw $'\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e\x0e'
+shell_sense_pty_write_raw $'\x18\x16'
+shell_sense_pty_read_until '*<FISH-VIEW>selected=18,viewport=11,window=<1->,thumb=2:2</FISH-VIEW>*' ||
+  fail 'Fish navigation did not preserve its absolute viewport across prefetch'
+shell_sense_pty_reset
+shell_sense_pty_write_raw $'\x10\x18\x16'
+shell_sense_pty_read_until '*<FISH-VIEW>selected=17,viewport=11,window=<1->,thumb=2:2</FISH-VIEW>*' ||
+  fail 'Fish reverse navigation recomputed the viewport or scrollbar'
+shell_sense_pty_write_raw $'\x03'
+shell_sense_pty_reset
+shell_sense_pty_read_until '*> *' || fail 'Fish did not clear the viewport probe'
 
 # fish_prompt owns recovery after a bridge crash; no re-sourcing or synthetic
 # candidates are involved.

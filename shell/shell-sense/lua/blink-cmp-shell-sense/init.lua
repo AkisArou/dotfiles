@@ -48,15 +48,23 @@ local function completion_key(request_id, generation)
   return tostring(request_id) .. ":" .. tostring(generation)
 end
 
+local function optional(value)
+  if value == vim.NIL then
+    return nil
+  end
+  return value
+end
+
 local function item_key(request_id, generation, item_id)
   return completion_key(request_id, generation) .. ":" .. item_id
 end
 
 local function request_line(request)
-  if request.command == nil then
+  local command = optional(request.command)
+  if command == nil then
     return nil
   end
-  local prefix = request.command:sub(1, request.cursor)
+  local prefix = command:sub(1, request.cursor)
   local line_start = 1
   local search_from = 1
   while true do
@@ -93,6 +101,7 @@ local function request_column_offset(waiter, request)
 end
 
 local function markup(markup_value)
+  markup_value = optional(markup_value)
   if markup_value == nil then
     return nil
   end
@@ -114,20 +123,20 @@ local function blink_item(candidate, list, waiter, request, client)
       generation = list.generation,
       item_id = candidate.id,
       documentation_unresolved = candidate.documentation_unresolved,
-      matched = candidate.matched,
+      matched = optional(candidate.matched),
     },
   }
   return {
     label = candidate.label,
     labelDetails = {
-      detail = candidate.label_detail,
-      description = candidate.detail,
+      detail = optional(candidate.label_detail),
+      description = optional(candidate.detail),
     },
     kind = candidate.lsp_kind,
-    detail = candidate.detail,
+    detail = optional(candidate.detail),
     documentation = markup(candidate.documentation),
     deprecated = candidate.deprecated,
-    filterText = candidate.filter_text or candidate.label,
+    filterText = optional(candidate.filter_text) or candidate.label,
     sortText = candidate.sort_text,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
     textEdit = {
@@ -283,9 +292,10 @@ function Client:on_event(event)
     return
   end
   if event.type == "error" then
-    if event.request_id then
+    local request_id = optional(event.request_id)
+    if request_id then
       for key, waiter in pairs(self.selection_waiters) do
-        if waiter.request_id == event.request_id then
+        if waiter.request_id == request_id then
           self:finish_selection(key, nil)
         end
       end

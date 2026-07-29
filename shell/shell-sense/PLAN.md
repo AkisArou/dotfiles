@@ -592,7 +592,7 @@ actions their line editors cannot faithfully implement.
   empty module/ABI scaffold and its obsolete protocol fields (implemented);
 - user documentation and compatibility matrix (implemented).
 
-### Phase H — native conformance and documentation UX (in progress)
+### Phase H — native conformance and documentation UX (implemented)
 
 This phase is a stabilization gate, not a new candidate source. It turns the
 acceptance matrix below into a shared, data-driven contract exercised against
@@ -605,11 +605,11 @@ navigable IntelliSense surface.
   covers fuzzy subcommands, short, combined and long options, option values,
   user completions, and parent, nested, quoted, and symlinked directory
   resources);
-- expand coverage to large providers and further destructive-edit/cancellation
-  cases; arbitrary slow native completion code is explicitly recorded as
-  non-preemptible through supported shell APIs, while native
-  descriptions/groups and shell-owned acceptance already have capability and
-  live-client coverage;
+- expand coverage to 4,096-item native providers and further
+  destructive-edit/cancellation cases; arbitrary slow native completion code
+  is explicitly recorded as non-preemptible through supported shell APIs,
+  while native descriptions/groups and shell-owned acceptance have capability
+  and live-client coverage (implemented);
 - record explicitly unsupported shell capabilities instead of weakening a
   shared assertion or silently manufacturing parity (implemented as a
   validated capability matrix);
@@ -649,17 +649,22 @@ navigable IntelliSense surface.
   action-driven delivery path);
 - cover side/below, bordered/borderless, narrow/wide, long Markdown, Unicode,
   first/last page, selection changes, cancellation, and unresolved/empty
-  documentation in layout, bridge, and live-shell tests;
+  documentation in layout, bridge, and live-shell tests (implemented);
 - complete the Blink source contract tests for resolve, cancellation, stale
   generations, native acceptance acknowledgement, and terminal lifecycle
-  (bridge-level resolved/unresolved documentation, cancellation, and
-  generation-scoped native acceptance acknowledgement are implemented; the
-  live Neovim lifecycle gate remains);
+  (implemented with a real Neovim, Blink.cmp, PTY-backed Zsh, and daemon
+  lifecycle gate);
 - add release-mode end-to-end latency measurements and request-scoped
   observability for native capture, ranking, enrichment, layout, and render
-  delivery;
+  delivery (implemented; a 25-sample release run on the development machine
+  measured 26.8 ms p95 from worker request receipt through flushed view
+  delivery and 51.6 ms p95 for external terminal observation, against 30 ms
+  and 75 ms gates respectively; 10,000-candidate ranking measured 3.56 ms);
 - finish packaging and release checks only after the conformance and UX gates
-  are green on all supported shells.
+  are green on all supported shells (implemented; the gate validates the exact
+  release executable and embedded assets, atomic replacement, user-config
+  isolation, config/schema commands, all generated shell source paths, and the
+  installed Blink module).
 
 Implementation order:
 
@@ -667,10 +672,9 @@ Implementation order:
    (implemented);
 2. scrollable documentation model, worker state, actions, and presenters
    (implemented);
-3. expanded conformance and adversarial lifecycle cases (in progress);
-4. Blink integration contract (bridge mapping implemented; live Neovim gate
-   remains);
-5. latency/observability and packaging gates.
+3. expanded conformance and adversarial lifecycle cases (implemented);
+4. Blink integration contract (implemented);
+5. latency/observability and packaging gates (implemented).
 
 ## 15. Acceptance matrix
 
