@@ -1,7 +1,5 @@
 vim.g.disable_blink_treesitter = true
 
-vim.opt.runtimepath:prepend(vim.fn.expand("~/dotfiles/shell/shell-sense"))
-
 require("lazydev").setup({
   library = {
     { path = "${3rd}/luv/library", words = { "vim%.uv" } },
@@ -48,13 +46,6 @@ cmp.setup({
     },
 
     providers = {
-      shell_sense = {
-        name = "Shell Sense",
-        module = "blink-cmp-shell-sense",
-        async = true,
-        timeout_ms = 2000,
-        opts = {},
-      },
       lazydev = {
         name = "LazyDev",
         module = "lazydev.integrations.blink",
@@ -69,16 +60,6 @@ cmp.setup({
         end,
         opts = {},
       },
-    },
-  },
-
-  term = {
-    enabled = true,
-    sources = { default = { "shell_sense" } },
-    completion = {
-      list = { selection = { auto_insert = false } },
-      menu = { auto_show = true },
-      ghost_text = { enabled = false },
     },
   },
 
