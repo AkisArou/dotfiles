@@ -96,10 +96,9 @@ Various
 Brave Debloat
 -------------
 * Settings
-search "Data collection" and turn everything off
+  - Appearance -> Use system title bar and borders, Use compact mode
+  - search "Data collection" and turn everything off
 
-* UI Flags:
-#brave-compact-horizontal-tabs
 
 * Toolbar
 Settings -> Appearance -> Customize your toolbar -> Disable all except "Forward" button
