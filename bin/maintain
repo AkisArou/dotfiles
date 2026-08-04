@@ -29,6 +29,10 @@ sudo rm -rf ~/.cache/
 echo "Spaced saved: $home_cache_used"
 
 echo
+zinit delete --clean --yes
+echo "Cleaning up zinit"
+
+echo
 print_info "Clearing system logs"
 sudo journalctl --vacuum-time=7d
 

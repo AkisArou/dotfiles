@@ -23,6 +23,7 @@ echo
 
 print_info "zinit:"
 source /usr/share/zinit/zinit.zsh
+zinit delete --clean --yes
 zinit update --parallel
 echo
 
