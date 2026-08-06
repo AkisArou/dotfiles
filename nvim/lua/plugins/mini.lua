@@ -18,7 +18,7 @@ require("mini.git").setup()
 
 vim.keymap.set({ "n", "x" }, "<leader>gmc", "<Cmd>lua MiniGit.show_at_cursor()<CR>", { desc = "Show at cursor" })
 vim.keymap.set(
-  { "n", "x" },
+  { "n", "x", "v" },
   "<leader>gmr",
   "<Cmd>lua MiniGit.show_range_history()<CR>",
   { desc = "Show range history" }
