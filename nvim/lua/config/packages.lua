@@ -141,7 +141,6 @@ vim.pack.add({
 
   gh("MunifTanjim/nui.nvim"),
   gh("esmuellert/codediff.nvim"),
-  gh("pwntester/octo.nvim"),
 
   gh("NeogitOrg/neogit"),
   gh("nvim-mini/mini-git"),
