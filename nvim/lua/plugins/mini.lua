@@ -17,7 +17,12 @@ require("mini.ai").setup({
 require("mini.git").setup()
 
 vim.keymap.set({ "n", "x" }, "<leader>gmc", "<Cmd>lua MiniGit.show_at_cursor()<CR>", { desc = "Show at cursor" })
-vim.keymap.set({ "n", "x" }, "<leader>gmr", "<Cmd>lua MiniGit.show_range_history()<CR>", { desc = "Show at cursor" })
+vim.keymap.set(
+  { "n", "x" },
+  "<leader>gmr",
+  "<Cmd>lua MiniGit.show_range_history()<CR>",
+  { desc = "Show range history" }
+)
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "git" },
