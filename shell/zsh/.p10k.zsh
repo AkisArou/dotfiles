@@ -169,6 +169,7 @@
     ((VCS_STATUS_NUM_UNSTAGED)) && res+="${modified}!${VCS_STATUS_NUM_UNSTAGED}${reset} "
     ((VCS_STATUS_NUM_UNTRACKED)) && res+="${untracked}?${VCS_STATUS_NUM_UNTRACKED}${reset} "
     ((VCS_STATUS_NUM_CONFLICTED)) && res+="${conflicted}~${VCS_STATUS_NUM_CONFLICTED}${reset} "
+    ((VCS_STATUS_HAS_UNSTAGED == -1)) && res+="${modified}─${reset} "
 
     # Remove trailing space
     res=${res%% }
