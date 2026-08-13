@@ -19,7 +19,7 @@ config_wayland() {
 config_xorg() {
   export MOZ_USE_XINPUT2=1
   export MOZ_X11_EGL=1
-  if [ "$ULTRAWIDE" ]; then
+  if [[ $ULTRAWIDE == 1 ]]; then
     export ROFI_DPI=-1
   else
     export ROFI_DPI=152

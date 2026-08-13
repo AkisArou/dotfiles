@@ -1,7 +1,5 @@
 #!/usr/bin/zsh
 
-source "$HOME/dotfiles/shell/common/exports"
-
 tmux has-session -t '=default' 2>/dev/null ||
   tmux new-session -s default -d
 

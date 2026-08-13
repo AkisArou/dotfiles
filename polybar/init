@@ -2,7 +2,7 @@
 
 FONT_FAMILY="Hasklug Nerd Font Mono"
 
-if [ "$ULTRAWIDE" ]; then
+if [[ $ULTRAWIDE == 1 ]]; then
   POLY_FONT="$FONT_FAMILY":size=9
   POLY_BAR_HEIGHT="16pt"
 else

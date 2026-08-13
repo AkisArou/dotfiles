@@ -7,6 +7,7 @@ _dotfiles_p10k_instant_prompt="${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prom
 [[ -r $_dotfiles_p10k_instant_prompt ]] && source "$_dotfiles_p10k_instant_prompt"
 unset _dotfiles_p10k_instant_prompt
 
+source "$HOME/dotfiles/shell/common/fzf"
 source <(fzf --zsh)
 source "$HOME/dotfiles/shell/zsh/completions"
 source "$HOME/dotfiles/shell/common/aliases"
@@ -32,4 +33,12 @@ if (( $+commands[asdf] )); then
   _dotfiles_update_java_home
 fi
 
-fast-theme XDG:vscode &>/dev/null
+() {
+  local theme_file="${XDG_CONFIG_HOME:-$HOME/.config}/fsh/vscode.ini"
+  local compiled_theme="$FAST_WORK_DIR/current_theme.zsh"
+
+  if [[ ! -r $theme_file || $FAST_THEME_NAME != vscode ||
+        ! -r $compiled_theme || $theme_file -nt $compiled_theme ]]; then
+    fast-theme -q XDG:vscode
+  fi
+}

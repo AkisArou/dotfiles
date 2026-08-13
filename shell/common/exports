@@ -10,8 +10,6 @@ if [[ -f $HOME/.env ]]; then
   fi
 fi
 
-. "$HOME/dotfiles/shell/common/fzf"
-
 export QT_QPA_PLATFORMTHEME=qt6ct
 export JQ_COLORS="0;90:38;5;180:38;5;180:37:38;5;107:37:37:38;5;117"
 
@@ -76,7 +74,7 @@ if [[ -n $WAYLAND_DISPLAY ]]; then
   export ELECTRON_OZONE_PLATFORM_HINT=wayland
 fi
 
-if [ "$ULTRAWIDE" ]; then
+if [[ $ULTRAWIDE == 1 ]]; then
   export EMULATOR_WIDTH=687
 else
   export EMULATOR_WIDTH=473

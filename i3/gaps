@@ -1,5 +1,5 @@
 #!/usr/bin/zsh
 
-if [ "$ULTRAWIDE" ]; then
+if [[ $ULTRAWIDE == 1 ]]; then
   i3-msg "gaps horizontal all set 1700"
 fi

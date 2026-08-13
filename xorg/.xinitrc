@@ -23,7 +23,7 @@ if [ -f "$usermodmap" ]; then
   xmodmap "$usermodmap"
 fi
 
-if [ "$ULTRAWIDE" ]; then
+if [[ $ULTRAWIDE == 1 ]]; then
   export XCURSOR_SIZE=24
 else
   xrdb -merge <<<"Xft.dpi: 154"
