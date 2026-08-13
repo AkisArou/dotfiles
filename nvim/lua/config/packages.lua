@@ -102,7 +102,6 @@ vim.pack.add({
 
   gh("kawre/neotab.nvim"),
 
-  gh("nvim-neotest/nvim-nio"),
   gh("antoinemadec/FixCursorHold.nvim"),
   gh("nvim-neotest/neotest"),
   gh("AkisArou/neotest-nodejs"),
@@ -161,7 +160,7 @@ vim.schedule(function()
   require("plugins.vim-tmux-navigator")
   require("plugins.oil")
   require("plugins.lsp.conform")
-  require("plugins.lsp.lsp")
+  require("plugins.lsp.lazydev")
   require("plugins.lsp.mason")
   require("plugins.lsp.blink")
   require("plugins.dap")
@@ -181,6 +180,7 @@ vim.schedule(function()
   require("plugins.neogit")
   require("plugins.sidekick")
   require("plugins.notepad")
+  require("plugins.image")
 end)
 
 -- Autocmd load
@@ -189,14 +189,6 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   pattern = { "*test.ts", "*test.tsx", "*test.js", "*test.jsx" },
   callback = function()
     require("plugins.neotest")
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufReadPost", {
-  once = true,
-  pattern = { "*.json", "*.jsonc", "*.yaml", "*.yml" },
-  callback = function()
-    require("plugins.schemastore")
   end,
 })
 

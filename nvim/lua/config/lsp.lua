@@ -33,8 +33,9 @@ local function on_attach(client, bufnr)
     vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = "LSP: " .. desc })
   end
 
-  if client:supports_method("textDocument/documentHighlight") then
-    local under_cursor_highlights_group = vim.api.nvim_create_augroup("akisarou/cursor_highlights", { clear = false })
+  if client:supports_method("textDocument/documentHighlight", bufnr) then
+    local under_cursor_highlights_group =
+      vim.api.nvim_create_augroup("akisarou.lsp.document_highlight." .. bufnr, { clear = true })
     vim.api.nvim_create_autocmd({ "CursorHold", "InsertLeave" }, {
       group = under_cursor_highlights_group,
       desc = "Highlight references under the cursor",
@@ -119,14 +120,17 @@ end
 -- Update mappings when registering dynamic capabilities.
 local register_capability = vim.lsp.handlers["client/registerCapability"]
 vim.lsp.handlers["client/registerCapability"] = function(err, res, ctx)
+  local result = register_capability(err, res, ctx)
   local client = vim.lsp.get_client_by_id(ctx.client_id)
   if not client then
-    return
+    return result
   end
 
-  on_attach(client, vim.api.nvim_get_current_buf())
+  for bufnr in pairs(client.attached_buffers) do
+    on_attach(client, bufnr)
+  end
 
-  return register_capability(err, res, ctx)
+  return result
 end
 
 vim.api.nvim_create_autocmd("LspAttach", {
