@@ -1,6 +1,4 @@
-source ~/dotfiles/scripts/hw-info
-
-[ "$HOST" = "arch-desktop" ] && export ULTRAWIDE=1
+source "$HOME/dotfiles/scripts/hw-info"
 
 if gpu_has_amd; then
   export VDPAU_DRIVER=radeonsi
@@ -47,7 +45,7 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
   echo "1) sway (default)"
   echo "2) i3"
   printf "Enter choice [1-2]: "
-  read session_choice
+  read -r session_choice
 
   session_choice=${session_choice:-1}
 
@@ -59,4 +57,6 @@ if [ -n "$XDG_VTNR" ] && [ "$XDG_VTNR" -eq 1 ] && [ -z "$WAYLAND_DISPLAY" ] && [
     echo "Falling back to default (sway)."
     run_sway
   fi
+
+  unset session_choice
 fi

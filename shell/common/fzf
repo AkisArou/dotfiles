@@ -4,10 +4,9 @@ export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
 if [ -n "$ZSH_VERSION" ]; then
   zstyle ':fzf-tab:*' use-fzf-default-opts yes
-
-  history_file="$HOME/.fzf_history"
-else
-  history_file="$HOME/.bash_history"
+  zstyle ':fzf-tab:*' fzf-command 'ftb-tmux-popup'
+  zstyle ':fzf-tab:*' fzf-flags \
+    '--color=fg:#808080,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F'
 fi
 
 export FZF_DEFAULT_OPTS="\
@@ -23,7 +22,7 @@ export FZF_DEFAULT_OPTS="\
   --layout=reverse \
   --border=none \
   --no-separator \
-  --history=$history_file \
+  --history='$HOME/.fzf_history' \
   --color=bg:#18191a \
   --color=bg+:#1f1f1f \
   --color=border:#444444 \
@@ -41,5 +40,3 @@ export FZF_DEFAULT_OPTS="\
   --color=separator:#444444 \
   --color=spinner:#c586c0
 "
-
-zstyle ":fzf-tab:*" fzf-flags "--color=fg:#808080,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F"

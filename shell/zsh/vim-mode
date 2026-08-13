@@ -18,23 +18,27 @@ select-word-style bash
 ##########
 
 # Change cursor shape for different vi modes.
-zle-keymap-select() {
-    case $KEYMAP in
-        vicmd) echo -ne '\e[1 q';;      # block
-        viins|main) echo -ne '\e[5 q';; # beam
-    esac
+autoload -Uz add-zle-hook-widget
+
+_dotfiles_cursor_keymap_select() {
+  case $KEYMAP in
+    vicmd) printf '\e[1 q' ;;      # block
+    viins|main) printf '\e[5 q' ;; # beam
+  esac
 }
-zle -N zle-keymap-select
 
-zle-line-init() {
-    zle -K viins # initiate `vi insert` as keymap (can be removed if `bindkey -V` has been set elsewhere)
-    echo -ne "\e[5 q"
+_dotfiles_cursor_line_init() {
+  zle -K viins
+  printf '\e[5 q'
 }
-zle -N zle-line-init
 
-echo -ne '\e[5 q' # Use beam shape cursor on startup.
-preexec() { echo -ne '\e[5 q' ;} # Use beam shape cursor for each new prompt.
+_dotfiles_cursor_line_finish() {
+  printf '\e[5 q'
+}
 
+add-zle-hook-widget keymap-select _dotfiles_cursor_keymap_select
+add-zle-hook-widget line-init _dotfiles_cursor_line_init
+add-zle-hook-widget line-finish _dotfiles_cursor_line_finish
 
 
 ############
@@ -53,24 +57,6 @@ bindkey -M vicmd 'vv' edit-command-line
 
 bindkey -M viins '^H' backward-delete-char # ^H is same as ^h
 bindkey -M viins '^W' backward-kill-word
-
-vi-jk-escape() {
-  zle self-insert        # insert 'j' into buffer
-  zle -R                 # force immediate redraw to display it
-
-  local key
-  if read -t 0.3 -k 1 key; then
-    if [[ $key == k ]]; then
-      LBUFFER=${LBUFFER%j}
-      zle vi-cmd-mode
-    else
-      zle -U "$key"      # re-queue the key so ZLE processes it normally
-    fi
-  fi
-}
-zle -N vi-jk-escape
-bindkey -M viins 'j' vi-jk-escape
-
 
 ############
 # Surround #
@@ -105,98 +91,55 @@ done
 
 # Function to select any quote (single, double, or backtick)
 select-any-quote() {
-  local REPLY
-  local quotes=("'" '"' '`')
-  local best_start=-1
-  local best_end=-1
-  local best_quote=""
-  local found=0
-  
-  # Find the closest quote pair around cursor
-  for quote in "${quotes[@]}"; do
-    # Save current cursor position
-    local orig_cursor=$CURSOR
-    
-    # Look for opening quote before cursor
-    local start_pos=-1
-    local temp_cursor=$CURSOR
-    
-    # Search backwards for opening quote
-    while [[ $temp_cursor -gt 0 ]]; do
-      temp_cursor=$((temp_cursor - 1))
-      if [[ "${BUFFER[$temp_cursor]}" == "$quote" ]]; then
-        # Check if this quote is escaped
-        local escaped=0
-        local check_pos=$((temp_cursor - 1))
-        while [[ $check_pos -gt 0 && "${BUFFER[$check_pos]}" == '\' ]]; do
-          escaped=$((1 - escaped))
-          check_pos=$((check_pos - 1))
-        done
-        
-        if [[ $escaped -eq 0 ]]; then
-          start_pos=$temp_cursor
-          break
-        fi
-      fi
-    done
-    
-    if [[ $start_pos -ne -1 ]]; then
-      # Look for closing quote after cursor
-      temp_cursor=$CURSOR
-      local end_pos=-1
-      
-      while [[ $temp_cursor -lt ${#BUFFER} ]]; do
-        temp_cursor=$((temp_cursor + 1))
-        if [[ "${BUFFER[$temp_cursor]}" == "$quote" ]]; then
-          # Check if this quote is escaped
-          local escaped=0
-          local check_pos=$((temp_cursor - 1))
-          while [[ $check_pos -gt 0 && "${BUFFER[$check_pos]}" == '\' ]]; do
-            escaped=$((1 - escaped))
-            check_pos=$((check_pos - 1))
-          done
-          
-          if [[ $escaped -eq 0 ]]; then
-            end_pos=$temp_cursor
-            break
-          fi
-        fi
+  emulate -L zsh
+
+  local -a quote_types=("'" '"' '`')
+  local quote best_quote
+  local -i index opening backslash_count check_pos
+  local -i cursor_position=$((CURSOR + 1))
+  local -i distance span best_distance=-1 best_span=-1
+
+  for quote in $quote_types; do
+    opening=0
+
+    for (( index = 1; index <= ${#BUFFER}; index++ )); do
+      [[ $BUFFER[index] == $quote ]] || continue
+
+      backslash_count=0
+      check_pos=$((index - 1))
+      while (( check_pos >= 1 )) && [[ $BUFFER[check_pos] == \\ ]]; do
+        ((backslash_count++))
+        ((check_pos--))
       done
-      
-      if [[ $end_pos -ne -1 ]]; then
-        # Check if this is the closest pair
-        local distance=$((start_pos + (${#BUFFER} - end_pos)))
-        if [[ $found -eq 0 || $distance -lt $((best_start + (${#BUFFER} - best_end))) ]]; then
-          best_start=$start_pos
-          best_end=$end_pos
-          best_quote=$quote
-          found=1
-        fi
+      (( backslash_count % 2 )) && continue
+
+      if (( ! opening )); then
+        opening=$index
+        continue
       fi
-    fi
-  done
-  
-  if [[ $found -eq 1 ]]; then
-    if [[ $KEYMAP == "viopp" ]]; then
-      # For operators (like c, d, y) - select inner content
-      CURSOR=$best_start
-      MARK=$((best_end - 1))
-    else
-      # For visual mode
-      if [[ $KEYS == "aq" ]]; then
-        # Select around quotes (including quotes)
-        CURSOR=$((best_start - 1))
-        MARK=$best_end
+
+      span=$((index - opening))
+      if (( cursor_position < opening )); then
+        distance=$((opening - cursor_position))
+      elif (( cursor_position > index )); then
+        distance=$((cursor_position - index))
       else
-        # Select inner quotes (excluding quotes)
-        CURSOR=$best_start
-        MARK=$((best_end - 1))
+        distance=0
       fi
-    fi
-  else
-    # No quotes found, do nothing
-    return 1
-  fi
+
+      if (( best_distance < 0 || distance < best_distance ||
+            (distance == best_distance && span < best_span) )); then
+        best_quote=$quote
+        best_distance=$distance
+        best_span=$span
+      fi
+
+      opening=0
+    done
+  done
+
+  [[ -n $best_quote ]] || return 1
+  zle select-quoted "${KEYS[1]}${best_quote}"
 }
 
 # Register the widget

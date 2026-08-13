@@ -1,23 +1,25 @@
 #!/usr/bin/zsh
 
-if [ -f ~/.env ]; then
-  set -a
-  source ~/.env
-  set +a
+if [[ -f $HOME/.env ]]; then
+  if [[ $- == *a* ]]; then
+    source "$HOME/.env"
+  else
+    set -a
+    source "$HOME/.env"
+    set +a
+  fi
 fi
 
-. ~/dotfiles/shell/common/fzf
+. "$HOME/dotfiles/shell/common/fzf"
 
 export QT_QPA_PLATFORMTHEME=qt6ct
 export JQ_COLORS="0;90:38;5;180:38;5;180:37:38;5;107:37:37:38;5;117"
 
 export TMPDIR=/tmp
-export ZSH_COMPDUMP="${ZDOTFILES}/.zcompdump"
 
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
-export PATH="$HOME/asdf:$PATH"
 export PATH="$HOME/neovim/bin:$PATH"
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
@@ -36,7 +38,7 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_DATA_DIRS="/usr/local/share:/usr/share:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share"
 export XDG_CONFIG_DIRS="/etc/xdg"
-export XDG_RUNTIME_DIR=/run/user/$(id -u)
+export XDG_RUNTIME_DIR="/run/user/$UID"
 
 export XKB_DEFAULT_LAYOUT="us,gr"
 export XKB_DEFAULT_OPTIONS="grp:alt_shift_toggle"
@@ -45,12 +47,16 @@ export EDITOR="nvim"
 export VISUAL="gvim"
 export SUDO_EDITOR=$EDITOR
 export BROWSER="brave"
-export EDGE_PATH=$(which brave)
+export EDGE_PATH=/usr/bin/brave
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
-export COLORTERM=truecolor
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/.ripgreprc"
-export GPG_TTY=$(tty)
+if [[ -n $TTY ]]; then
+  export GPG_TTY=$TTY
+elif [[ -t 0 ]]; then
+  GPG_TTY=$(tty)
+  export GPG_TTY
+fi
 
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning"
 export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
@@ -58,7 +64,9 @@ export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
 export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
 
-export SUDO_PROMPT="$(tput setaf 1 bold)Password:$(tput sgr0) "
+[ "${HOST:-$HOSTNAME}" = "arch-desktop" ] && export ULTRAWIDE=1
+
+export SUDO_PROMPT=$'\e[1;31mPassword:\e[0m '
 
 export EXPO_NO_TYPESCRIPT_SETUP=1
 export EAS_LOCAL_BUILD_WORKINGDIR="$HOME/.tmp"

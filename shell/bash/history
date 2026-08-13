@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
-export HISTFILE=~/.bash_history
-export HISTCONTROL=ignoredups:erasedups
-export HISTSIZE=1000000
-export SAVEHIST=1000000
+HISTFILE="$HOME/.bash_history"
+HISTCONTROL=ignoredups:erasedups
+HISTSIZE=1000000
+HISTFILESIZE=1000000
+export -n HISTFILE HISTCONTROL HISTSIZE HISTFILESIZE
 
-shopt -s histappend
-shopt -s cmdhist
+shopt -s histappend cmdhist

@@ -1,4 +1,2 @@
-source "$HOME/dotfiles/shell/common/exports"
-source "$HOME/dotfiles/shell/common/aliases"
-
-source ~/dotfiles/shell/common/.profile
+source "$HOME/dotfiles/shell/bash/.bashrc"
+source "$HOME/dotfiles/shell/common/.profile"

@@ -1,7 +1,5 @@
 #!/usr/bin/zsh
 
-alias sudo="sudo -E"
-alias vim="TERM=xterm-256color vim"
 alias v="nvim"
 alias e="nvim ."
 alias info="info --vi-keys"
@@ -26,6 +24,7 @@ alias ls="$eza_base"
 alias ll="$eza_base -lh --git"
 alias la="$eza_base -lha --git"
 alias tree="$eza_base --tree --level=2"
+unset eza_base
 
 alias gs="git status"
 alias ga="git add ."
@@ -33,6 +32,6 @@ alias gc="git commit -m"
 alias gp="git pull"
 alias gP="git push"
 
-alias weather="curl wttr.in/didymoteicho"
+alias weather="curl https://wttr.in/didymoteicho"
 
 alias avante='nvim -c "lua vim.defer_fn(function()require(\"avante.api\").zen_mode()end, 100)"'

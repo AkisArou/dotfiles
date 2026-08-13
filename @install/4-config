@@ -71,7 +71,7 @@ cd ~
 asdf install
 
 print_info "Configuring java... (for the current session only)"
-. ~/.asdf/plugins/java/set-java-home.zsh
+. "$HOME/.asdf/plugins/java/set-java-home.zsh"
 
 print_info "Increasing file descriptor and inotify limits..."
 # Check current limit

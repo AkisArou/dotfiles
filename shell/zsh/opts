@@ -4,15 +4,6 @@ autoload -Uz add-zsh-hook
 
 WORDCHARS=${WORDCHARS//\//}
 
-zstyle ':completion:*' menu yes select
-zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
-
-zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
-
-zmodload zsh/complist
-
-_comp_options+=(globdots) # Include hidden files.
-
 unsetopt BEEP
 setopt AUTO_CD
 setopt GLOB_DOTS
@@ -21,28 +12,6 @@ setopt NOMATCH
 setopt MENU_COMPLETE
 setopt EXTENDED_GLOB
 setopt INTERACTIVE_COMMENTS
-setopt APPEND_HISTORY
-
-ZSH_AUTOSUGGEST_ENABLED=0
-
-function autosuggest-toggle() {
-  if ! typeset -f _zsh_autosuggest_start >/dev/null; then
-    zinit load zsh-users/zsh-autosuggestions
-  fi
-
-  if [[ $ZSH_AUTOSUGGEST_ENABLED -eq 1 ]]; then
-    _zsh_autosuggest_disable
-    ZSH_AUTOSUGGEST_ENABLED=0
-  else
-    _zsh_autosuggest_enable
-    ZSH_AUTOSUGGEST_ENABLED=1
-  fi
-}
-
-# autosuggestions
-zle -N autosuggest-toggle
-bindkey '^E' autosuggest-accept
-bindkey '^G' autosuggest-toggle
 
 bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history
@@ -51,8 +20,28 @@ bindkey -M menuselect '^P' up-line-or-history
 bindkey -s '\ee' 'v\n'
 
 # PRECMD
+_dotfiles_encode_uri_path() {
+  emulate -L zsh
+
+  local LC_ALL=C
+  local character encoded_character
+  local encoded_path=
+
+  for character in ${(s::)1}; do
+    if [[ $character == [A-Za-z0-9._~/-] ]]; then
+      encoded_path+=$character
+    else
+      printf -v encoded_character '%%%02X' "'$character"
+      encoded_path+=$encoded_character
+    fi
+  done
+
+  REPLY=$encoded_path
+}
+
 print_osc7() {
-  printf '\033]7;file://%s\033\\' "$PWD"
+  _dotfiles_encode_uri_path "$PWD"
+  printf '\033]7;file://%s%s\033\\' "${HOST:-localhost}" "$REPLY"
 }
 
 print_osc133() {

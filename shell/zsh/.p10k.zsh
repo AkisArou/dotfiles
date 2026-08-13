@@ -1,29 +1,3 @@
-local BLUE="#569CD6"
-local BLUE0="#569CD6"
-local BLUE1="#4FC1FF"
-local BLUE2="#9CDCFE"
-local BLUE5="#4FC1FF"
-local BLUE6="#9CDCFE"
-local BLUE7="#264F78"
-local COMMENT="#6A9955"
-local CYAN="#4EC9B0"
-local DARK3="#636369"
-local DARK5="#808080"
-local FG="#D4D4D4"
-local FG_DARK="#BBBBBB"
-local FG_GUTTER="#5A5A5A"
-local GREEN="#6A9955"
-local GREEN1="#81b88b"
-local GREEN2="#B5CEA8"
-local MAGENTA="#C586C0"
-local MAGENTA2="#C586C0"
-local ORANGE="#C48081"
-local YELLOW="#DCDCAA"
-local PURPLE="#C586C0"
-local RED="#E4676B"
-local TEAL="#4EC9B0"
-local TERMINAL_BLACK="#121314"
-
 # =====================[ Powerlevel10k Config ]=====================
 'builtin' 'local' '-a' 'p10k_config_opts'
 [[ ! -o 'aliases' ]] || p10k_config_opts+=('aliases')
@@ -33,6 +7,18 @@ local TERMINAL_BLACK="#121314"
 
 () {
   emulate -L zsh -o extended_glob
+
+  local BLUE="#569CD6"
+  local BLUE2="#9CDCFE"
+  local COMMENT="#6A9955"
+  local DARK5="#808080"
+  local FG="#D4D4D4"
+  local GREEN="#6A9955"
+  local MAGENTA="#C586C0"
+  local ORANGE="#C48081"
+  local YELLOW="#DCDCAA"
+  local PURPLE="#C586C0"
+  local RED="#E4676B"
 
   # Unset previous config
   unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
@@ -133,22 +119,26 @@ local TERMINAL_BLACK="#121314"
   function my_git_formatter() {
     emulate -L zsh
 
-    # Convert hex to true color ANSI
-    hex_to_truecolor() {
-      local hex=$1
-      [[ $hex == \#* ]] && hex=${hex#\#}
-      local r=$((16#${hex[1,2]}))
-      local g=$((16#${hex[3,4]}))
-      local b=$((16#${hex[5,6]}))
-      echo -n "\x1b[38;2;${r};${g};${b}m"
-    }
+    if [[ -n $P9K_CONTENT ]]; then
+      typeset -g my_git_format=$P9K_CONTENT
+      return
+    fi
 
-    local meta=$(hex_to_truecolor $FG)
-    local clean=$(hex_to_truecolor $DARK5)
-    local modified=$(hex_to_truecolor $YELLOW)
-    local untracked=$(hex_to_truecolor $BLUE)
-    local conflicted=$(hex_to_truecolor $RED)
-    local reset=$'\x1b[0m'
+    local meta clean modified untracked conflicted
+    if (( $1 )); then
+      meta='%F{#D4D4D4}'
+      clean='%F{#808080}'
+      modified='%F{#DCDCAA}'
+      untracked='%F{#569CD6}'
+      conflicted='%F{#E4676B}'
+    else
+      meta='%F{#808080}'
+      clean='%F{#808080}'
+      modified='%F{#808080}'
+      untracked='%F{#808080}'
+      conflicted='%F{#808080}'
+    fi
+    local reset='%f'
 
     local res=""
 
@@ -159,7 +149,9 @@ local TERMINAL_BLACK="#121314"
     fi
 
     if [[ -n $VCS_STATUS_TAG && -z $VCS_STATUS_LOCAL_BRANCH ]]; then
-      res+="${meta}#${clean}${VCS_STATUS_TAG//\%/%%}${reset} "
+      local tag=${(V)VCS_STATUS_TAG}
+      (($#tag > 32)) && tag[13,-13]="…"
+      res+="${meta}#${clean}${tag//\%/%%}${reset} "
     fi
 
     if [[ -z $VCS_STATUS_LOCAL_BRANCH && -z $VCS_STATUS_TAG ]]; then
@@ -168,6 +160,11 @@ local TERMINAL_BLACK="#121314"
 
     ((VCS_STATUS_COMMITS_BEHIND)) && res+="${clean}⇣${VCS_STATUS_COMMITS_BEHIND}${reset} "
     ((VCS_STATUS_COMMITS_AHEAD)) && res+="${clean}⇡${VCS_STATUS_COMMITS_AHEAD}${reset} "
+    if [[ -n $VCS_STATUS_ACTION ]]; then
+      local action=${(V)VCS_STATUS_ACTION}
+      res+="${conflicted}${action//\%/%%}${reset} "
+    fi
+    ((VCS_STATUS_STASHES)) && res+="${clean}*${VCS_STATUS_STASHES}${reset} "
     ((VCS_STATUS_NUM_STAGED)) && res+="${modified}+${VCS_STATUS_NUM_STAGED}${reset} "
     ((VCS_STATUS_NUM_UNSTAGED)) && res+="${modified}!${VCS_STATUS_NUM_UNSTAGED}${reset} "
     ((VCS_STATUS_NUM_UNTRACKED)) && res+="${untracked}?${VCS_STATUS_NUM_UNTRACKED}${reset} "

@@ -4,18 +4,27 @@ zstyle ':completion:*:make:*:targets' call-command true
 zstyle ':completion:*:*:make:*' tag-order 'targets'
 zstyle ':completion:*:git-checkout:*' sort false
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' menu no
+zstyle ':completion:*' menu yes select
 zstyle ':completion:*:descriptions' format '%d'
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' verbose yes
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+
+zmodload zsh/complist
 
 autoload -Uz zrecompile
 autoload -Uz compinit
-dump=$ZSH_COMPDUMP
+typeset -g ZSH_COMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump-$ZSH_VERSION"
+[[ -d ${ZSH_COMPDUMP:h} ]] || mkdir -p -- "${ZSH_COMPDUMP:h}"
 
-if [[ -s $dump(#qN.mh+24) && (! -s "$dump.zwc" || "$dump" -nt "$dump.zwc") ]]; then
-  compinit -i d $ZSH_COMPDUMP
-  zrecompile $ZSH_COMPDUMP
+if [[ ! -s $ZSH_COMPDUMP || -n $ZSH_COMPDUMP(#qN.mh+24) ]]; then
+  compinit -d "$ZSH_COMPDUMP"
+else
+  compinit -C -d "$ZSH_COMPDUMP"
 fi
 
-compinit -C
+if [[ -s $ZSH_COMPDUMP && (! -s "$ZSH_COMPDUMP.zwc" || "$ZSH_COMPDUMP" -nt "$ZSH_COMPDUMP.zwc") ]]; then
+  zrecompile -pq -M "$ZSH_COMPDUMP"
+fi
+
+_comp_options+=(globdots) # Include hidden files.

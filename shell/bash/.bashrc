@@ -3,9 +3,11 @@ source "$HOME/dotfiles/shell/common/aliases"
 
 if [[ $- == *i* ]]; then # in interactive session
   set -o vi
+
+  source "$HOME/dotfiles/shell/bash/history"
+
+  shopt -s checkwinsize
+
+  # completions
+  . <(asdf completion bash)
 fi
-
-shopt -s checkwinsize
-
-# completions
-. <(asdf completion bash)

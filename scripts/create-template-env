@@ -1,9 +1,17 @@
 #!/usr/bin/zsh
 
-if [ ! -f "$HOME/.env" ]; then
-  touch "$HOME/.env"
-  echo 'DESKTOP_MAC=""' >>"$HOME/.env"
-  echo "EXPO_TOKEN=12345" >>"$HOME/.env"
-  echo "SENTRY_AUTH_TOKEN=12345" >>"$HOME/.env"
-  echo "Created ~/.env file."
+env_file="$HOME/.env"
+
+if [[ ! -e $env_file ]]; then
+  umask 077
+
+  {
+    print -r -- 'DESKTOP_MAC=""'
+    print -r -- 'EXPO_TOKEN=12345'
+    print -r -- 'SENTRY_AUTH_TOKEN=12345'
+  } >"$env_file"
+
+  print -r -- 'Created ~/.env file.'
 fi
+
+chmod 600 "$env_file"

@@ -1,2 +1,3 @@
-source "/home/akisarou/dotfiles/shell/common/exports"
-source "/home/akisarou/dotfiles/shell/common/aliases"
+typeset -gU path PATH
+
+source "$HOME/dotfiles/shell/common/exports"
