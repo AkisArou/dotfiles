@@ -47,3 +47,4 @@ image/webp=brave-browser.desktop
 image/bmp=brave-browser.desktop
 image/tiff=brave-browser.desktop
 image/svg+xml=brave-browser.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop
