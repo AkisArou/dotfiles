@@ -146,6 +146,7 @@ vim.pack.add({
   gh("folke/sidekick.nvim"),
 
   gh("carloscalla/notepad.nvim"),
+  gh("MeanderingProgrammer/render-markdown.nvim"),
 })
 
 -- Instant load
@@ -198,5 +199,15 @@ vim.api.nvim_create_autocmd("InsertEnter", {
   callback = function()
     require("plugins.neotab")
     require("plugins.vim-visual-multi")
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  once = true,
+  pattern = {
+    "markdown",
+  },
+  callback = function()
+    require("plugins.render-markdown")
   end,
 })
