@@ -27,7 +27,7 @@ _dotfiles_update_java_home() {
   export JDK_HOME=$JAVA_HOME
 }
 
-if (( $+commands[asdf] )); then
+if (($+commands[asdf])); then
   autoload -Uz add-zsh-hook
   add-zsh-hook chpwd _dotfiles_update_java_home
   _dotfiles_update_java_home
@@ -38,7 +38,7 @@ fi
   local compiled_theme="$FAST_WORK_DIR/current_theme.zsh"
 
   if [[ ! -r $theme_file || $FAST_THEME_NAME != vscode ||
-        ! -r $compiled_theme || $theme_file -nt $compiled_theme ]]; then
+    ! -r $compiled_theme || $theme_file -nt $compiled_theme ]]; then
     fast-theme -q XDG:vscode
   fi
 }

@@ -30,6 +30,9 @@ export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 export PATH=$PATH:$ANDROID_SDK_ROOT/emulator
 
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_DATA_HOME="$HOME/.local/share"
