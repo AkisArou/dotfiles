@@ -1,0 +1,37 @@
+#!/usr/bin/zsh
+
+# Request terminal focus reports only while ZLE is active. Inside tmux these
+# reports are forwarded when `focus-events` is enabled.
+_dotfiles_focus_reports_on() {
+  printf '\e[?1004h'
+}
+
+_dotfiles_focus_reports_off() {
+  printf '\e[?1004l'
+}
+
+autoload -Uz add-zle-hook-widget
+add-zle-hook-widget line-init _dotfiles_focus_reports_on
+add-zle-hook-widget line-finish _dotfiles_focus_reports_off
+
+# Refresh p10k's cached VCS state when this terminal or pane regains focus.
+# p10k has no public VCS-refresh API, so this deliberately calls its precmd
+# hook before asking it to redraw the current prompt in place.
+_dotfiles_p10k_focus_in() {
+  (($+functions[_p9k_precmd])) || return 0
+  _p9k_precmd
+  p10k display -r
+}
+
+_dotfiles_focus_out() {
+  return 0
+}
+
+zle -N _dotfiles_p10k_focus_in
+zle -N _dotfiles_focus_out
+
+for _dotfiles_focus_keymap in viins vicmd; do
+  bindkey -M "$_dotfiles_focus_keymap" $'\e[I' _dotfiles_p10k_focus_in
+  bindkey -M "$_dotfiles_focus_keymap" $'\e[O' _dotfiles_focus_out
+done
+unset _dotfiles_focus_keymap
