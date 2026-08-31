@@ -183,3 +183,9 @@ vim.keymap.set("n", "<leader>fe", function()
     },
   })
 end, { desc = "Buffers" })
+
+vim.keymap.set("n", "<leader>fh", function()
+  require("custom.undotree").open({
+    winopts = { preview = { layout = "flex" } },
+  })
+end, { desc = "saved undo history" })
