@@ -1,0 +1,4 @@
+{
+  "$schema": "https://raw.githubusercontent.com/AkisArou/yesterfile/main/yesterfile.schema.json",
+  "repositories": ["~/dotfiles/"]
+}

@@ -86,6 +86,7 @@ vim.pack.add({
   gh("AkisArou/nvim-dap-react-native"),
 
   gh("ibhagwan/fzf-lua"),
+  gh("AkisArou/yesterfile.nvim"),
 
   gh("lewis6991/gitsigns.nvim"),
 
@@ -153,6 +154,7 @@ vim.pack.add({
 require("plugins.colorscheme")
 require("plugins.lualine")
 require("plugins.fzf")
+require("plugins.yesterfile")
 
 -- Deferred load
 vim.schedule(function()
