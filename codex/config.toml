@@ -36,6 +36,9 @@ trust_level = "trusted"
 [projects."/home/akisarou/Projects/electron-like"]
 trust_level = "trusted"
 
+[projects."/home/akisarou/Projects/orcode"]
+trust_level = "trusted"
+
 [mcp_servers.chrome-devtools]
 command = "npx"
 args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
