@@ -1,6 +1,7 @@
 require("codediff").setup({
   highlights = {
-    char_insert = "#444D2E",
+    char_insert = "#394126",
+    line_insert = "#394126",
   },
 })
 
