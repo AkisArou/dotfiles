@@ -14,6 +14,7 @@ theme = "vscode"
 
 [notice]
 hide_full_access_warning = true
+hide_rate_limit_model_nudge = true
 
 [projects."/home/akisarou"]
 trust_level = "trusted"
