@@ -86,7 +86,6 @@ vim.pack.add({
   gh("AkisArou/nvim-dap-react-native"),
 
   gh("ibhagwan/fzf-lua"),
-  gh("AkisArou/yesterfile.nvim"),
 
   gh("lewis6991/gitsigns.nvim"),
 
