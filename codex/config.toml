@@ -11,6 +11,7 @@ theme = "vscode"
 [tui.model_availability_nux]
 "gpt-5.5" = 4
 "gpt-5.6-sol" = 4
+gpt-6-astra = 3
 
 [notice]
 hide_full_access_warning = true
@@ -38,6 +39,9 @@ trust_level = "trusted"
 trust_level = "trusted"
 
 [projects."/home/akisarou/Projects/orcode"]
+trust_level = "trusted"
+
+[projects."/home/akisarou/Downloads"]
 trust_level = "trusted"
 
 [mcp_servers.chrome-devtools]

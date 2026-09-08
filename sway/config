@@ -10,6 +10,7 @@ exec_always ~/dotfiles/sway/gaps
 exec --no-startup-id flameshot
 exec --no-startup-id wl-clip-persist --clipboard both
 exec --no-startup-id xrdb -merge ~/.Xresources
+exec --no-startup-id zsh -c 'command -v enable-private-access-connect >/dev/null 2>&1 && exec enable-private-access-connect'
 
 set $mod Mod4
 set $left h
