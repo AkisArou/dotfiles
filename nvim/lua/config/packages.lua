@@ -153,7 +153,6 @@ vim.pack.add({
 require("plugins.colorscheme")
 require("plugins.lualine")
 require("plugins.fzf")
-require("plugins.yesterfile")
 
 -- Deferred load
 vim.schedule(function()
