@@ -32,7 +32,11 @@ fzf_lua.setup({
     RIPGREP_CONFIG_PATH = vim.env.RIPGREP_CONFIG_PATH,
   },
   keymap = {
-    fzf = { ["ctrl-q"] = "select-all+accept" },
+    fzf = {
+      -- Work without shell FZF_DEFAULT_OPTS and preserve the hide profile's Enter action.
+      ["ctrl-e"] = "trigger(enter)",
+      ["ctrl-q"] = "select-all+accept",
+    },
     builtin = {
       ["<C-c>"] = "hide", -- hide fzf-lua, `:FzfLua resume` to continue
     },

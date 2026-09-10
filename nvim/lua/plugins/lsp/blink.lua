@@ -6,6 +6,15 @@ local cmp = require("blink-cmp")
 cmp.build():wait(60000)
 
 cmp.setup({
+  term = {
+    enabled = true,
+    keymap = {
+      preset = "inherit",
+      -- Pass Ctrl-E to fzf/the terminal when there is no completion to accept.
+      ["<C-e>"] = { "select_and_accept", "fallback" },
+    },
+  },
+
   keymap = {
     preset = "default",
     ["<C-e>"] = { "select_and_accept" },
