@@ -12,6 +12,7 @@ setopt NOMATCH
 setopt MENU_COMPLETE
 setopt EXTENDED_GLOB
 setopt INTERACTIVE_COMMENTS
+setopt IGNORE_EOF # Let the Ctrl-D no-op widget handle empty prompts too.
 
 bindkey -M menuselect '^N' down-line-or-history
 bindkey -M menuselect '^P' up-line-or-history

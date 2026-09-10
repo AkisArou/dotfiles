@@ -44,6 +44,11 @@ add-zle-hook-widget line-finish _dotfiles_cursor_line_finish
 ############
 # Keydings #
 ############
+_dotfiles_noop() { :; }
+zle -N _dotfiles_noop
+bindkey -M viins '^D' _dotfiles_noop
+bindkey -M vicmd '^D' _dotfiles_noop
+
 bindkey -M viins '^R' fzf-history-widget # fzf should be sourced first
 vi-redo() { zle redo }
 zle -N vi-redo
