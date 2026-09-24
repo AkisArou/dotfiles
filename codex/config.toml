@@ -7,6 +7,7 @@ plan_mode_reasoning_effort = "xhigh"
 
 [tui]
 theme = "vscode"
+screen_reader_detection_done = true
 
 [tui.model_availability_nux]
 "gpt-5.5" = 4
