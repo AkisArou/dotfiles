@@ -1,0 +1,34 @@
+#!/usr/bin/zsh
+
+# Renders memory and CPU for the tmux status line: a blue label, then a
+# whole-number percentage.
+#
+# Memory is read straight from /proc/meminfo as MemTotal - MemAvailable, the
+# kernel's own estimate of what is actually allocatable. tmux-mem-cpu-load's
+# own -m 2 uses the htop definition instead (buffers/cache not counted as
+# used) and reads a couple of points lower.
+#
+# CPU comes from the plugin, which keeps the /proc/stat delta state between
+# invocations:
+#   -g 0  no bar graph
+#   -a 0  no load averages
+#   -m 2  memory as percent; unused here, but keeps output to two clean fields
+#   -i    must match status-interval in .tmux.conf -- CPU % is a delta between
+#         invocations, so a mismatch skews it
+#
+# Not inlined into .tmux.conf because tmux runs status-right through strftime,
+# so awk's %d becomes the day of the month, and it mangles #[...] colour tags
+# inside #(), which silently empties the output.
+
+LABEL="#[fg=#569CD6]"
+VALUE="#[fg=#AEAFAD]"
+
+cpu=$(~/.tmux/plugins/tmux-mem-cpu-load/tmux-mem-cpu-load -i 5 -m 2 -g 0 -a 0 |
+  awk '{ gsub(/%/, ""); printf "%d", $2 }')
+
+awk -v l="$LABEL" -v v="$VALUE" -v cpu="$cpu" '
+  /^MemTotal:/     { total = $2 }
+  /^MemAvailable:/ { avail = $2 }
+  END {
+    printf "%sMEM%s %d%% %sCPU%s %d%%", l, v, (total - avail) / total * 100, l, v, cpu
+  }' /proc/meminfo
