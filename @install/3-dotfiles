@@ -26,7 +26,12 @@ sudo mkdir -p /usr/share/chromium/extensions
 sudo mkdir -p /etc/brave/policies/managed
 
 # copying
+# These are read by early-boot units and generators, so they are copied
+# rather than symlinked into $HOME. Editing the dotfile takes effect only
+# after re-running this script.
 sudo cp "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
+sudo cp "$HOME/dotfiles/systemd/zram-generator.conf" /etc/systemd/zram-generator.conf
+sudo sysctl --system >/dev/null
 
 # linking
 sudo ln -sf "$HOME/dotfiles/environment" /etc/environment

@@ -11,21 +11,24 @@ else
   echo "The following orphan packages were found:"
   # Remove orphaned packages
   paru -Rns $(paru -Qtdq)
-
-  # Remove old cached packages (keep 3 versions)
-  sudo paccache -r
-
-  # Clean paru cache
-  paru -Sc
-
-  # Clear AUR build files
-  rm -rf ~/.cache/paru/*
 fi
+
+# Cache cleanup is unconditional: it used to sit in the else branch above, so on
+# a system with no orphans it never ran and the caches grew without bound.
+
+# Remove old cached packages (keep 3 versions)
+sudo paccache -r
+
+# Clean paru cache
+paru -Sc
+
+# Clear AUR build files
+rm -rf ~/.cache/paru/*
 
 echo
 print_info "Clearing ~/.cache"
 home_cache_used="$(du -sh ~/.cache)"
-sudo rm -rf ~/.cache/
+rm -rf ~/.cache/
 echo "Spaced saved: $home_cache_used"
 
 echo

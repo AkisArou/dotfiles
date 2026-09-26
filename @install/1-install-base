@@ -97,6 +97,7 @@ packages=(
   "openslide" # Needed by ueberzug
   "openssh"
   "otf-hasklig-nerd"
+  "pacman-contrib" #paccache
   "pass"
   "pavucontrol"
   "pipewire"
@@ -139,6 +140,7 @@ packages=(
   "xdg-user-dirs"
   "xdg-utils"
   "zinit-git"
+  "zram-generator"
   "zsh"
 )
 

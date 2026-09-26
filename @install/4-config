@@ -15,6 +15,7 @@ sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
+sudo systemctl enable --now paccache.timer
 
 print_info "Setting up gnome settings..."
 mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
@@ -80,10 +81,19 @@ ulimit -Sn
 # Change limit (temporary)
 ulimit -Sn 10000 # You might need to change the hard limit too
 
-# Change limits (temporary)
-sudo sysctl fs.inotify.max_queued_events=16384
-sudo sysctl fs.inotify.max_user_instances=8192
-sudo sysctl fs.inotify.max_user_watches=524288
+# inotify limits now live in sysctl/99-sysctl.conf so they survive reboots
+
+print_info "Disabling zswap (redundant with zram)..."
+# zswap is built into the kernel with CONFIG_ZSWAP_DEFAULT_ON=y, so it fronts
+# zram0 and compresses every page twice. It is builtin, not a module, so the
+# kernel cmdline is the only persistent route.
+if [[ -f /etc/default/grub ]] && ! grep -q "zswap.enabled=0" /etc/default/grub; then
+  sudo sed -i 's/^\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)"/\1 zswap.enabled=0"/' /etc/default/grub
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+fi
+# ...and for the running system, so no reboot is needed for this one
+[[ -w /sys/module/zswap/parameters/enabled ]] &&
+  echo 0 | sudo tee /sys/module/zswap/parameters/enabled >/dev/null
 
 grep -qxF '* - nofile 65536' /etc/security/limits.conf || echo '* - nofile 65536' | sudo tee -a /etc/security/limits.conf
 grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/system.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/system.conf
