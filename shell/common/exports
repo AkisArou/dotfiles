@@ -13,8 +13,6 @@ fi
 export QT_QPA_PLATFORMTHEME=qt6ct
 export JQ_COLORS="0;90:38;5;180:38;5;180:37:38;5;107:37:37:38;5;117"
 
-export TMPDIR=/tmp
-
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/usr/bin:$PATH"
 export PATH="/usr/bin/go/bin:$PATH"
