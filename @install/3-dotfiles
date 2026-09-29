@@ -31,6 +31,7 @@ sudo mkdir -p /etc/brave/policies/managed
 # after re-running this script.
 sudo cp "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
 sudo cp "$HOME/dotfiles/systemd/zram-generator.conf" /etc/systemd/zram-generator.conf
+sudo cp "$HOME/dotfiles/systemd/network/"*.network /etc/systemd/network/
 sudo sysctl --system >/dev/null
 
 # linking
