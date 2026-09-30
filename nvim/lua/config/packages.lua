@@ -145,7 +145,6 @@ vim.pack.add({
   gh("nvim-mini/mini-git"),
   gh("folke/sidekick.nvim"),
 
-  gh("carloscalla/notepad.nvim"),
   gh("MeanderingProgrammer/render-markdown.nvim"),
 })
 
@@ -180,7 +179,6 @@ vim.schedule(function()
   require("plugins.codediff")
   require("plugins.neogit")
   require("plugins.sidekick")
-  require("plugins.notepad")
   require("plugins.image")
 end)
 
