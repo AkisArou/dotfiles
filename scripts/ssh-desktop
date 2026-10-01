@@ -1,9 +1,10 @@
 #!/usr/bin/zsh
 
 source "$HOME/dotfiles/shell/common/functions"
+launcher="${1:-$HOME/dotfiles/foot/launch}"
 
 wake-desktop
-NO_TMUX_AUTO_ATTACH=true "$HOME/dotfiles/foot/launch" -e zsh -c '
+NO_TMUX_AUTO_ATTACH=true "$launcher" -e zsh -c '
 # Wait-for-desktop function
 wait_for_desktop() {
     local host=$DESKTOP
