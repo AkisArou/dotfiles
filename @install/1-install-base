@@ -159,6 +159,7 @@ elif gpu_has_intel; then
   packages+=(
     "intel-gpu-tools"
     "intel-media-driver"
+    "vpl-gpu-rt"
     "vulkan-intel"
   )
 fi
