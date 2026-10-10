@@ -19,8 +19,6 @@ gui:
       - "#D4D4D4"
     selectedLineBgColor:
       - "#264F78"
-    selectedRangeBgColor:
-      - "#264F78"
     # Git states
     unstagedChangesColor:
       - "#e2c08d"
@@ -32,9 +30,6 @@ gui:
       - "#121314"
     markedBaseCommitBgColor:
       - "#C48081"
-    # Commit / diff emphasis
-    diffAddedColor:
-      - "#81b88b"
 git:
   diffRenderers:
     - command: delta --dark --paging=never
