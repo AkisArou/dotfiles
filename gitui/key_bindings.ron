@@ -1,0 +1,138 @@
+
+//
+// GitUI — Extended Vim-style keybindings
+//
+(
+    // ─────────────────────────────────────
+    // General
+    // ─────────────────────────────────────
+
+    open_help: Some((code: Char('?'), modifiers: "SHIFT")),
+    open_options: Some((code: Char('o'), modifiers: "")),
+
+    quit: Some((code: Char('q'), modifiers: "")),
+    exit_popup: Some((code: Esc, modifiers: "")),
+
+    // Keep Ctrl+C as emergency exit.
+    exit: Some((code: Char('c'), modifiers: "CONTROL")),
+
+    // ─────────────────────────────────────
+    // Vim navigation
+    // ─────────────────────────────────────
+
+    move_left: Some((code: Char('h'), modifiers: "")),
+    move_down: Some((code: Char('j'), modifiers: "")),
+    move_up: Some((code: Char('k'), modifiers: "")),
+    move_right: Some((code: Char('l'), modifiers: "")),
+
+    // Single 'g' replaces Vim's 'gg'.
+    home: Some((code: Char('g'), modifiers: "")),
+    end: Some((code: Char('G'), modifiers: "SHIFT")),
+
+    // Vim page navigation.
+    page_down: Some((code: Char('f'), modifiers: "CONTROL")),
+    page_up: Some((code: Char('b'), modifiers: "CONTROL")),
+
+    // Selection movement.
+    shift_down: Some((code: Char('J'), modifiers: "SHIFT")),
+    shift_up: Some((code: Char('K'), modifiers: "SHIFT")),
+
+    // Popup navigation.
+    popup_down: Some((code: Char('n'), modifiers: "CONTROL")),
+    popup_up: Some((code: Char('p'), modifiers: "CONTROL")),
+
+    // ─────────────────────────────────────
+    // Tabs and panels
+    // ─────────────────────────────────────
+
+    tab_status: Some((code: Char('1'), modifiers: "")),
+    tab_log: Some((code: Char('2'), modifiers: "")),
+    tab_files: Some((code: Char('3'), modifiers: "")),
+    tab_stashing: Some((code: Char('4'), modifiers: "")),
+    tab_stashes: Some((code: Char('5'), modifiers: "")),
+
+    tab_toggle: Some((code: Tab, modifiers: "")),
+    tab_toggle_reverse: Some((code: BackTab, modifiers: "SHIFT")),
+
+    toggle_workarea: Some((code: Char('w'), modifiers: "CONTROL")),
+
+    // ─────────────────────────────────────
+    // Search and navigation
+    // ─────────────────────────────────────
+
+    log_find: Some((code: Char('/'), modifiers: "")),
+    file_find: Some((code: Char('/'), modifiers: "")),
+    branch_find: Some((code: Char('/'), modifiers: "")),
+
+    diff_hunk_next: Some((code: Char('n'), modifiers: "")),
+    diff_hunk_prev: Some((code: Char('N'), modifiers: "SHIFT")),
+
+    // Single-key alternative to Vim ':line'.
+    goto_line: Some((code: Char('L'), modifiers: "SHIFT")),
+
+    // ─────────────────────────────────────
+    // Files and status
+    // ─────────────────────────────────────
+
+    edit_file: Some((code: Char('i'), modifiers: "")),
+
+    // Keep ignore separate from edit.
+    status_ignore_file: Some((code: Char('I'), modifiers: "SHIFT")),
+
+    status_stage_all: Some((code: Char('a'), modifiers: "")),
+
+    stage_unstage_item: Some((code: Char(' '), modifiers: "")),
+
+    status_reset_item: Some((code: Char('U'), modifiers: "SHIFT")),
+
+    // ─────────────────────────────────────
+    // Diff operations
+    // ─────────────────────────────────────
+
+    diff_stage_lines: Some((code: Char('s'), modifiers: "")),
+    diff_reset_lines: Some((code: Char('u'), modifiers: "")),
+
+    // ─────────────────────────────────────
+    // File inspection
+    // ─────────────────────────────────────
+
+    blame: Some((code: Char('B'), modifiers: "SHIFT")),
+    file_history: Some((code: Char('H'), modifiers: "SHIFT")),
+    copy: Some((code: Char('y'), modifiers: "")),
+
+    // ─────────────────────────────────────
+    // Stashing
+    // ─────────────────────────────────────
+
+    stashing_save: Some((code: Char('w'), modifiers: "")),
+    stashing_toggle_index: Some((code: Char('m'), modifiers: "")),
+    stashing_toggle_untracked: Some((code: Char('u'), modifiers: "")),
+
+    stash_open: Some((code: Char('l'), modifiers: "")),
+    stash_apply: Some((code: Char('a'), modifiers: "")),
+    stash_drop: Some((code: Char('D'), modifiers: "SHIFT")),
+
+    // ─────────────────────────────────────
+    // Commits and branches
+    // ─────────────────────────────────────
+
+    open_commit: Some((code: Char('c'), modifiers: "")),
+
+    log_mark_commit: Some((code: Char(' '), modifiers: "")),
+    log_tag_commit: Some((code: Char('t'), modifiers: "")),
+    log_reword_commit: Some((code: Char('r'), modifiers: "")),
+
+    create_branch: Some((code: Char('c'), modifiers: "")),
+    rename_branch: Some((code: Char('r'), modifiers: "")),
+    select_branch: Some((code: Char('b'), modifiers: "")),
+    delete_branch: Some((code: Char('D'), modifiers: "SHIFT")),
+
+    merge_branch: Some((code: Char('m'), modifiers: "")),
+    rebase_branch: Some((code: Char('R'), modifiers: "SHIFT")),
+
+    // ─────────────────────────────────────
+    // Recovery and merge operations
+    // ─────────────────────────────────────
+
+    abort_merge: Some((code: Char('M'), modifiers: "SHIFT")),
+)

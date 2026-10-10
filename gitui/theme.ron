@@ -1,0 +1,31 @@
+// UI colors from ../.vscode/vscode-colors.css (dark palette).
+(
+    selected_tab: Some("#569cd6"),
+    command_fg: Some("#d4d4d4"),
+    selection_bg: Some("#264f78"),
+    selection_fg: Some("#d4d4d4"),
+    // Keep Git status colors visible when selecting an item.
+    use_selection_fg: Some(false),
+    cmdbar_bg: Some("#252526"),
+    disabled_fg: Some("#808080"),
+
+    diff_line_add: Some("#81b88b"),
+    diff_line_delete: Some("#c74e39"),
+    diff_file_added: Some("#81b88b"),
+    diff_file_removed: Some("#c74e39"),
+    diff_file_moved: Some("#73c991"),
+    diff_file_modified: Some("#e2c08d"),
+
+    commit_hash: Some("#d7ba7d"),
+    commit_time: Some("#808080"),
+    commit_author: Some("#9cdcfe"),
+    danger_fg: Some("#f44747"),
+    push_gauge_bg: Some("#373737"),
+    push_gauge_fg: Some("#569cd6"),
+    tag_fg: Some("#c586c0"),
+    branch_fg: Some("#4ec9b0"),
+    block_title_focused: Some("#569cd6"),
+
+    // vscode.tmTheme links to the shared theme in ../bat/themes/.
+    syntax: Some("vscode"),
+)

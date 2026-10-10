@@ -72,6 +72,7 @@ create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"
 create_symlink "$HOME/dotfiles/foot" "$HOME/.config/foot"
 create_symlink "$HOME/dotfiles/flameshot" "$HOME/.config/flameshot"
 create_symlink "$HOME/dotfiles/lazygit" "$HOME/.config/lazygit"
+create_symlink "$HOME/dotfiles/gitui" "$HOME/.config/gitui"
 create_symlink "$HOME/dotfiles/bat" "$HOME/.config/bat"
 bat cache --build
 create_symlink "$HOME/dotfiles/rofi" "$HOME/.config/rofi"
