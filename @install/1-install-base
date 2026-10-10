@@ -63,6 +63,7 @@ packages=(
   "git"
   "git-delta"
   "github-cli"
+  "gitui"
   "gnome-terminal"
   "gnupg"
   "go"
