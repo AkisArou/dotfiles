@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "orcode": {
+      "type": "stdio",
+      "command": "orcode",
+      "args": ["mcp", "--host", "claude"],
+      "env": {}
+    }
+  }
+}

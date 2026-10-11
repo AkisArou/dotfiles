@@ -1,3 +1,6 @@
+# Shared defaults, loaded through /etc/codex/config.toml.
+# Codex keeps local overrides and remembered state in ~/.codex/config.toml.
+
 approvals_reviewer = "user"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
@@ -7,50 +10,6 @@ plan_mode_reasoning_effort = "xhigh"
 
 [tui]
 theme = "vscode"
-screen_reader_detection_done = true
-
-[tui.model_availability_nux]
-"gpt-5.5" = 4
-"gpt-5.6-sol" = 4
-gpt-6-astra = 4
-"gpt-6.1-sol" = 4
-
-[notice]
-hide_full_access_warning = true
-hide_rate_limit_model_nudge = true
-
-[projects."/home/akisarou"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/dotfiles"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/nable-solutions"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/cvite"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/native-typescript"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/nts"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/electron-like"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/orcode"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Downloads"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/buildashop"]
-trust_level = "trusted"
-
-[projects."/home/akisarou/Projects/chromium"]
-trust_level = "trusted"
 
 [mcp_servers.chrome-devtools]
 command = "npx"
@@ -67,35 +26,58 @@ url = "https://mcp.expo.dev/mcp"
 command = "argent"
 args = ["mcp"]
 
-[mcp_servers.mdn]
-url = "https://mcp.mdn.mozilla.net/"
-http_headers = { "X-Moz-1st-Party-Data-Opt-Out" = "1" }
-
-[mcp_servers.argent.tools.list-devices]
-approval_mode = "approve"
-
 [mcp_servers.argent.tools.boot-device]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.launch-app]
+[mcp_servers.argent.tools.button]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.restart-app]
+[mcp_servers.argent.tools.debugger-component-tree]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.reinstall-app]
+[mcp_servers.argent.tools.debugger-connect]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.open-url]
+[mcp_servers.argent.tools.debugger-evaluate]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.screenshot]
+[mcp_servers.argent.tools.debugger-inspect-element]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.gesture-tap]
+[mcp_servers.argent.tools.debugger-log-registry]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.gesture-swipe]
+[mcp_servers.argent.tools.debugger-reload-metro]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-status]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.describe]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.dismiss-update]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-add-echo]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-add-step]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-execute]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-finish-recording]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-read-prerequisite]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-start-recording]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gather-workspace-data]
 approval_mode = "approve"
 
 [mcp_servers.argent.tools.gesture-custom]
@@ -107,55 +89,67 @@ approval_mode = "approve"
 [mcp_servers.argent.tools.gesture-rotate]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.button]
+[mcp_servers.argent.tools.gesture-swipe]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gesture-tap]
 approval_mode = "approve"
 
 [mcp_servers.argent.tools.keyboard]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.rotate]
+[mcp_servers.argent.tools.launch-app]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.run-sequence]
+[mcp_servers.argent.tools.list-devices]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-connect]
+[mcp_servers.argent.tools.native-describe-screen]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-status]
+[mcp_servers.argent.tools.native-devtools-status]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-evaluate]
+[mcp_servers.argent.tools.native-find-views]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-reload-metro]
+[mcp_servers.argent.tools.native-full-hierarchy]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-component-tree]
+[mcp_servers.argent.tools.native-network-logs]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-inspect-element]
+[mcp_servers.argent.tools.native-profiler-analyze]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.debugger-log-registry]
+[mcp_servers.argent.tools.native-profiler-start]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.view-network-logs]
+[mcp_servers.argent.tools.native-profiler-stop]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.view-network-request-details]
+[mcp_servers.argent.tools.native-user-interactable-view-at-point]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.describe]
+[mcp_servers.argent.tools.native-view-at-point]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.react-profiler-start]
+[mcp_servers.argent.tools.open-url]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.react-profiler-stop]
+[mcp_servers.argent.tools.profiler-combined-report]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.react-profiler-status]
+[mcp_servers.argent.tools.profiler-commit-query]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-cpu-query]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-load]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-stack-query]
 approval_mode = "approve"
 
 [mcp_servers.argent.tools.react-profiler-analyze]
@@ -167,61 +161,34 @@ approval_mode = "approve"
 [mcp_servers.argent.tools.react-profiler-cpu-summary]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.react-profiler-renders]
-approval_mode = "approve"
-
 [mcp_servers.argent.tools.react-profiler-fiber-tree]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.native-profiler-start]
+[mcp_servers.argent.tools.react-profiler-renders]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.native-profiler-stop]
+[mcp_servers.argent.tools.react-profiler-start]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.native-profiler-analyze]
+[mcp_servers.argent.tools.react-profiler-status]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.profiler-cpu-query]
+[mcp_servers.argent.tools.react-profiler-stop]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.profiler-commit-query]
+[mcp_servers.argent.tools.reinstall-app]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.profiler-stack-query]
+[mcp_servers.argent.tools.restart-app]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.profiler-combined-report]
+[mcp_servers.argent.tools.rotate]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.profiler-load]
+[mcp_servers.argent.tools.run-sequence]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.gather-workspace-data]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-devtools-status]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-network-logs]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-find-views]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-full-hierarchy]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-describe-screen]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-view-at-point]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.native-user-interactable-view-at-point]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.stop-simulator-server]
+[mcp_servers.argent.tools.screenshot]
 approval_mode = "approve"
 
 [mcp_servers.argent.tools.stop-all-simulator-servers]
@@ -230,26 +197,24 @@ approval_mode = "approve"
 [mcp_servers.argent.tools.stop-metro]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.flow-start-recording]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.flow-add-step]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.flow-add-echo]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.flow-finish-recording]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.flow-read-prerequisite]
-approval_mode = "approve"
-
-[mcp_servers.argent.tools.flow-execute]
+[mcp_servers.argent.tools.stop-simulator-server]
 approval_mode = "approve"
 
 [mcp_servers.argent.tools.update-argent]
 approval_mode = "approve"
 
-[mcp_servers.argent.tools.dismiss-update]
+[mcp_servers.argent.tools.view-network-logs]
 approval_mode = "approve"
+
+[mcp_servers.argent.tools.view-network-request-details]
+approval_mode = "approve"
+
+[mcp_servers.mdn]
+url = "https://mcp.mdn.mozilla.net/"
+
+[mcp_servers.mdn.http_headers]
+X-Moz-1st-Party-Data-Opt-Out = "1"
+
+[mcp_servers.orcode]
+command = "orcode"
+args = ["mcp", "--host", "codex"]

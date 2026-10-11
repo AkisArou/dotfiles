@@ -86,8 +86,9 @@ create_symlink "$HOME/dotfiles/gnupg" "$HOME/.config/gnupg"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/ripgrep" "$HOME/.config/ripgrep"
 create_symlink "$HOME/dotfiles/tealdeer" "$HOME/.config/tealdeer"
-create_symlink "$HOME/dotfiles/codex/config.toml" "$HOME/.codex/config.toml"
+zsh "$HOME/dotfiles/codex/install" || exit 1
 create_symlink "$HOME/dotfiles/codex/themes" "$HOME/.codex/themes"
+zsh "$HOME/dotfiles/claude/install" || exit 1
 create_symlink "$HOME/dotfiles/.default-npm-packages" "$HOME/.default-npm-packages"
 
 sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
