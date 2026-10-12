@@ -1,0 +1,84 @@
+#!/usr/bin/zsh
+
+# gitstatusd ignores dirty submodule contents. For worktrees with .gitmodules,
+# use native Git's unstaged count, without blocking the prompt or writing the index.
+typeset -gi _dotfiles_submodule_epoch=${_dotfiles_submodule_epoch:-0}
+typeset -g _dotfiles_submodule_fd _dotfiles_submodule_pending_root
+typeset -g _dotfiles_submodule_pending_epoch _dotfiles_submodule_requested_root
+typeset -g _dotfiles_submodule_requested_epoch _dotfiles_submodule_cached_root
+typeset -g _dotfiles_submodule_unstaged
+
+_dotfiles_submodule_refresh() {
+  (( ++_dotfiles_submodule_epoch ))
+  return 0
+}
+
+_dotfiles_submodule_count() {
+  emulate -L zsh
+  local output record
+  output=$(command timeout 5s git --no-optional-locks -C "$1" status --porcelain=v1 -z 2>/dev/null) || return
+  local -i count=0 skip=0
+  for record in "${(@0)output}"; do
+    # A rename/copy has a second NUL-delimited pathname, not another status entry.
+    if (( skip )); then
+      skip=0
+      continue
+    fi
+    [[ ${record[1,2]} == *[RC]* ]] && skip=1
+    case ${record[1,2]} in
+      DD|AU|UD|UA|DU|AA|UU) continue ;; # Conflicts have their own ~N indicator.
+    esac
+    [[ $record[2] == [MDT] ]] && (( ++count ))
+  done
+  print -r -- "$count"
+}
+
+_dotfiles_submodule_receive() {
+  emulate -L zsh
+  local fd=$1 count root=$_dotfiles_submodule_pending_root
+  local epoch=$_dotfiles_submodule_pending_epoch
+  local -i valid=0
+  if [[ $2 != nval ]] && IFS= read -r -u "$fd" count && [[ $count == <0-> ]]; then
+    valid=1
+  fi
+  zle -F "$fd"
+  exec {fd}<&-
+  _dotfiles_submodule_fd=
+
+  # A command or directory change may have happened while Git was running.
+  if (( epoch == _dotfiles_submodule_epoch )); then
+    _dotfiles_submodule_cached_root=
+    if (( valid )); then
+      _dotfiles_submodule_cached_root=$root
+      _dotfiles_submodule_unstaged=$count
+    fi
+  fi
+  # Re-expanding the formatter also starts a fresh query if this one was stale.
+  if zle && (( $+functions[p10k] )); then
+    p10k display -r
+  fi
+}
+
+_dotfiles_submodule_request() {
+  emulate -L zsh
+  local root=$1
+  [[ -f $root/.gitmodules ]] || return 0
+  [[ ${PWD:A} == "$root" || ${PWD:A} == "$root"/* ]] || return 0
+  [[ -z $_dotfiles_submodule_fd ]] || return 0
+  if [[ $_dotfiles_submodule_requested_root == "$root" ]] &&
+    (( _dotfiles_submodule_requested_epoch == _dotfiles_submodule_epoch )); then
+    return 0
+  fi
+
+  _dotfiles_submodule_requested_root=$root
+  _dotfiles_submodule_requested_epoch=$_dotfiles_submodule_epoch
+  _dotfiles_submodule_pending_root=$root
+  _dotfiles_submodule_pending_epoch=$_dotfiles_submodule_epoch
+  zmodload zsh/system
+  sysopen -r -o cloexec -u _dotfiles_submodule_fd <(_dotfiles_submodule_count "$root") || return
+  zle -F "$_dotfiles_submodule_fd" _dotfiles_submodule_receive
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _dotfiles_submodule_refresh
+_dotfiles_submodule_refresh

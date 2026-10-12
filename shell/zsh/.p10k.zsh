@@ -116,6 +116,8 @@
   typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION=
   typeset -g POWERLEVEL9K_VCS_BACKENDS=(git)
 
+  source "$HOME/dotfiles/shell/zsh/p10k-submodule-status"
+
   function my_git_formatter() {
     emulate -L zsh
 
@@ -139,6 +141,14 @@
       conflicted='%F{#808080}'
     fi
     local reset='%f'
+    local -i unstaged=$VCS_STATUS_NUM_UNSTAGED
+    if (( $1 )); then
+      _dotfiles_submodule_request "$VCS_STATUS_WORKDIR"
+      if [[ -f $VCS_STATUS_WORKDIR/.gitmodules &&
+        $_dotfiles_submodule_cached_root == "$VCS_STATUS_WORKDIR" ]]; then
+        unstaged=$_dotfiles_submodule_unstaged
+      fi
+    fi
 
     local res=""
 
@@ -166,7 +176,7 @@
     fi
     ((VCS_STATUS_STASHES)) && res+="${clean}*${VCS_STATUS_STASHES}${reset} "
     ((VCS_STATUS_NUM_STAGED)) && res+="${modified}+${VCS_STATUS_NUM_STAGED}${reset} "
-    ((VCS_STATUS_NUM_UNSTAGED)) && res+="${modified}!${VCS_STATUS_NUM_UNSTAGED}${reset} "
+    ((unstaged)) && res+="${modified}!${unstaged}${reset} "
     ((VCS_STATUS_NUM_UNTRACKED)) && res+="${untracked}?${VCS_STATUS_NUM_UNTRACKED}${reset} "
     ((VCS_STATUS_NUM_CONFLICTED)) && res+="${conflicted}~${VCS_STATUS_NUM_CONFLICTED}${reset} "
     ((VCS_STATUS_HAS_UNSTAGED == -1)) && res+="${modified}─${reset} "

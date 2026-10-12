@@ -19,6 +19,7 @@ add-zle-hook-widget line-finish _dotfiles_focus_reports_off
 # hook before asking it to redraw the current prompt in place.
 _dotfiles_p10k_focus_in() {
   (($+functions[_p9k_precmd])) || return 0
+  (($+functions[_dotfiles_submodule_refresh])) && _dotfiles_submodule_refresh
   _p9k_precmd
   p10k display -r
 }
