@@ -50,53 +50,73 @@ install_packages() {
 }
 
 create_symlink() {
+  if (($# < 2)); then
+    print_failure "Usage: create_symlink <target>... <link-name-or-directory/>"
+    return 1
+  fi
+
+  local destination="${@: -1}"
+  if (($# > 2)) || [[ $destination == */ ]]; then
+    while (($# > 1)); do
+      create_symlink "$1" "${destination%/}/$(basename -- "$1")" || return 1
+      shift
+    done
+    return 0
+  fi
+
   local target=$1
   local link_name=$2
+  local parent_dir permission_dir existing_target choice backup
+  local suffix=1
+  local -a link_cmd=()
 
-  # Check if the target exists
   if [[ ! -e $target ]]; then
     print_failure "Error: Target '$target' does not exist."
     return 1
   fi
 
-  # Check if the link name already exists
-  if [[ -e $link_name || -L $link_name ]]; then
-    if [[ -L $link_name ]]; then
-      # It's a symlink, check if it points to the same target
-      existing_target=$(readlink "$link_name")
+  parent_dir=$(dirname -- "$link_name")
+  permission_dir=$parent_dir
+  while [[ ! -e $permission_dir && ! -L $permission_dir ]]; do
+    permission_dir=$(dirname -- "$permission_dir")
+  done
+  if [[ ! -w $permission_dir || ! -x $permission_dir ]]; then
+    link_cmd=(sudo)
+  fi
+
+  if "${link_cmd[@]}" test -e "$link_name" || "${link_cmd[@]}" test -L "$link_name"; then
+    if "${link_cmd[@]}" test -L "$link_name"; then
+      existing_target=$("${link_cmd[@]}" readlink -- "$link_name") || return 1
       if [[ $existing_target == $target ]]; then
         print_success "Symlink '$link_name' already exists and points to '$target'."
         return 0
       else
         print_failure "Warning: Symlink '$link_name' points to a different target '$existing_target'."
-        read -p "Do you want to replace it? (y/n) " choice
-        if [[ $choice != "y" ]]; then
+        printf '%s' "Do you want to replace it? (y/n) "
+        if ! IFS= read -r choice || [[ $choice != "y" ]]; then
           echo -e "${NC}Skipping '$link_name'."
           return 1
         fi
-        # Remove the old symlink
-        rm -f "$link_name"
+        "${link_cmd[@]}" rm -f -- "$link_name" || return 1
       fi
     else
-      # It's not a symlink, back it up or remove it
+      backup="${link_name}.bak"
+      while "${link_cmd[@]}" test -e "$backup" || "${link_cmd[@]}" test -L "$backup"; do
+        backup="${link_name}.bak.$suffix"
+        suffix=$((suffix + 1))
+      done
       print_info "Warning: '$link_name' already exists and is not a symlink. Replacing with a backup"
-      mv "$link_name" "${link_name}.bak"
-      echo "Backed up '$link_name' to '${link_name}.bak'."
+      "${link_cmd[@]}" mv -T -- "$link_name" "$backup" || return 1
+      echo "Backed up '$link_name' to '$backup'."
     fi
   fi
 
-  # Create the symlink
-  ln -s "$target" "$link_name"
+  "${link_cmd[@]}" mkdir -p -- "$parent_dir" || return 1
 
-  # Check if the symlink creation was successful
-  if [[ $? -eq 0 ]]; then
+  if "${link_cmd[@]}" ln -sT -- "$target" "$link_name"; then
     print_success "Created symlink: '$link_name' -> '$target'."
   else
-    # If failed, check if the link is in a privileged directory
-    if [[ $link_name == /usr/* ]]; then
-      print_failure "Failed to create symlink: '$link_name' -> '$target'. You might need to run this command with sudo."
-    else
-      print_failure "Failed to create symlink: '$link_name' -> '$target'."
-    fi
+    print_failure "Failed to create symlink: '$link_name' -> '$target'."
+    return 1
   fi
 }

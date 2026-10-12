@@ -9,6 +9,9 @@ Host 192.168.1.2
 Host *
   Protocol 2
   ConnectTimeout 10
+  # Notice unresponsive servers after roughly 45 seconds without a reply.
+  ServerAliveInterval 15
+  ServerAliveCountMax 3
 
 # Local network hosts
 Host 192.168.*.*

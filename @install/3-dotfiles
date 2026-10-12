@@ -1,5 +1,12 @@
 #!/usr/bin/zsh
 
+set -e
+
+if ((EUID == 0)); then
+  print -u2 "Run this script as your normal user; it uses sudo when needed."
+  exit 1
+fi
+
 source "$HOME/dotfiles/scripts/library"
 
 clear
@@ -7,39 +14,24 @@ echo "Applying application configs..."
 echo "-------------------------------"
 echo ""
 
-if [ -d ~/.config ]; then
-  print_info ".config folder already exists."
-else
-  mkdir ~/.config
-  print_success ".config folder created."
-fi
-
 # Create symbolic links
 
-# create dirs
-mkdir -p "$HOME/.ssh"
-mkdir -p "$HOME/.themes"
-mkdir -p "$HOME/.local/share/applications"
-mkdir -p "$HOME/.config/BraveSoftware/Brave-Browser/Default/Web Applications/Manifest Resources/"
-mkdir -p "$HOME/.codex"
-sudo mkdir -p /usr/share/chromium/extensions
-sudo mkdir -p /etc/brave/policies/managed
+create_symlink "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
+create_symlink "$HOME/dotfiles/systemd/zram-generator.conf" /etc/systemd/zram-generator.conf
+create_symlink "$HOME/dotfiles/systemd/network/"*.network /etc/systemd/network/
+create_symlink "$HOME/dotfiles/systemd/system.conf.d/20-dotfiles-nofile.conf" \
+  /etc/systemd/system.conf.d/20-dotfiles-nofile.conf
+create_symlink "$HOME/dotfiles/systemd/user.conf.d/20-dotfiles-nofile.conf" \
+  /etc/systemd/user.conf.d/20-dotfiles-nofile.conf
+create_symlink "$HOME/dotfiles/security/limits.d/20-dotfiles-nofile.conf" \
+  /etc/security/limits.d/20-dotfiles-nofile.conf
 
-# copying
-# These are read by early-boot units and generators, so they are copied
-# rather than symlinked into $HOME. Editing the dotfile takes effect only
-# after re-running this script.
-sudo cp "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
-sudo cp "$HOME/dotfiles/systemd/zram-generator.conf" /etc/systemd/zram-generator.conf
-sudo cp "$HOME/dotfiles/systemd/network/"*.network /etc/systemd/network/
 sudo sysctl --system >/dev/null
 
-# linking
-sudo ln -sf "$HOME/dotfiles/environment" /etc/environment
-sudo ln -sf "$HOME/dotfiles/systemd/coredump.conf.d" /etc/systemd/coredump.conf.d
-sudo ln -sf "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
-sudo ln -sf "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
-sudo ln -sf "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/policies.json"
+create_symlink "$HOME/dotfiles/environment" /etc/environment
+create_symlink "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
+create_symlink "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
+create_symlink "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/policies.json"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
 create_symlink "$HOME/dotfiles/mimeapps.list" "$HOME/.config/mimeapps.list"
@@ -86,17 +78,11 @@ create_symlink "$HOME/dotfiles/gnupg" "$HOME/.config/gnupg"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/ripgrep" "$HOME/.config/ripgrep"
 create_symlink "$HOME/dotfiles/tealdeer" "$HOME/.config/tealdeer"
-zsh "$HOME/dotfiles/codex/install" || exit 1
+zsh "$HOME/dotfiles/codex/install"
 create_symlink "$HOME/dotfiles/codex/themes" "$HOME/.codex/themes"
-zsh "$HOME/dotfiles/claude/install" || exit 1
+zsh "$HOME/dotfiles/claude/install"
 create_symlink "$HOME/dotfiles/.default-npm-packages" "$HOME/.default-npm-packages"
 
-sudo ln -sf "$HOME/dotfiles/brave/extensions/fmkadmapgofadopljbjfkapdkoienihi.json" "/usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json"
-sudo ln -sf "$HOME/dotfiles/brave/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json" "/usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json"
-sudo ln -sf "$HOME/dotfiles/brave/extensions/nngceckbapebfimnlniiiahkandclblb.json" "/usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json"
-
-sudo chmod 644 /usr/share/chromium/extensions/fmkadmapgofadopljbjfkapdkoienihi.json
-sudo chmod 644 /usr/share/chromium/extensions/eimadpbcbfnmbkopoojfekhnkhdbieeh.json
-sudo chmod 644 /usr/share/chromium/extensions/nngceckbapebfimnlniiiahkandclblb.json
+create_symlink "$HOME/dotfiles/brave/extensions/"*.json /usr/share/chromium/extensions/
 
 print_success "DONE!"

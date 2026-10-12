@@ -81,8 +81,6 @@ ulimit -Sn
 # Change limit (temporary)
 ulimit -Sn 10000 # You might need to change the hard limit too
 
-# inotify limits now live in sysctl/99-sysctl.conf so they survive reboots
-
 print_info "Disabling zswap (redundant with zram)..."
 # zswap is built into the kernel with CONFIG_ZSWAP_DEFAULT_ON=y, so it fronts
 # zram0 and compresses every page twice. It is builtin, not a module, so the
@@ -94,10 +92,6 @@ fi
 # ...and for the running system, so no reboot is needed for this one
 [[ -w /sys/module/zswap/parameters/enabled ]] &&
   echo 0 | sudo tee /sys/module/zswap/parameters/enabled >/dev/null
-
-grep -qxF '* - nofile 65536' /etc/security/limits.conf || echo '* - nofile 65536' | sudo tee -a /etc/security/limits.conf
-grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/system.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/system.conf
-grep -qxF 'DefaultLimitNOFILE=65536' /etc/systemd/user.conf || echo 'DefaultLimitNOFILE=65536' | sudo tee -a /etc/systemd/user.conf
 
 print_info "Setting up docker..."
 ls -al /dev/kvm
