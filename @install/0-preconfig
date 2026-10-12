@@ -1,5 +1,12 @@
 #!/bin/bash
 
+set -e
+
+if ((EUID == 0)); then
+  printf '%s\n' "Run this script as your normal user; it uses sudo when needed." >&2
+  exit 1
+fi
+
 source "$HOME/dotfiles/scripts/library"
 
 sudo usermod -aG wheel akisarou
@@ -7,7 +14,7 @@ sudo usermod -aG wheel akisarou
 sudo cp "/home/akisarou/dotfiles/sudoers.d/sudoers" /etc/sudoers.d/sudoers
 sudo chown root:root /etc/sudoers.d/sudoers
 
-sudo pacman -S zsh
+sudo pacman -S --needed zsh
 
 # Check if the current shell is zsh
 if [[ "$SHELL" != */zsh ]]; then

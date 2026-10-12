@@ -1,0 +1,5 @@
+# Remove local hosts overrides for update and security resources.
+laptop-updates.brave.com
+static.brave.com
+static1.brave.com
+crlsets.brave.com

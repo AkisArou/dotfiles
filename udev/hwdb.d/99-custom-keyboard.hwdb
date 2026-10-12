@@ -1,0 +1,3 @@
+# ASUS ExpertBook built-in AT keyboard: remap < to Left Shift.
+evdev:atkbd:dmi:*:svnASUSTeKCOMPUTERINC.:pnASUSEXPERTBOOKP5405CSA:*
+ KEYBOARD_KEY_56=leftshift

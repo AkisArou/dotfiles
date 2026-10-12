@@ -1,11 +1,13 @@
 [Unit]
-Description=Set Performance Mode if powerprofilesctl exists
-After=multi-user.target
+Description=Set the performance power profile
+After=power-profiles-daemon.service
+Requires=power-profiles-daemon.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'command -v powerprofilesctl &> /dev/null && powerprofilesctl set performance'
+ExecCondition=/bin/sh -c '/usr/bin/powerprofilesctl list | /usr/bin/grep -q "performance:"'
+ExecStart=/usr/bin/powerprofilesctl set performance
 RemainAfterExit=true
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical.target

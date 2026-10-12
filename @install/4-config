@@ -1,5 +1,7 @@
 #!/usr/bin/zsh
 
+set -e
+
 source "$HOME/dotfiles/scripts/library"
 
 clear
@@ -15,43 +17,19 @@ sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
 sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
+sudo systemctl enable --now performance.service
 sudo systemctl enable --now paccache.timer
 
-print_info "Setting up gnome settings..."
-mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
-cat >"$HOME/.config/gtk-3.0/settings.ini" <<EOF
-[Settings]
-gtk-theme-name=VSCode-Dark
-gtk-application-prefer-dark-theme=true
-gtk-icon-theme-name=Adwaita
-gtk-cursor-theme-name=Adwaita
-EOF
-cat >"$HOME/.config/gtk-4.0/settings.ini" <<EOF
-[Settings]
-gtk-theme-name=VSCode-Dark
-gtk-application-prefer-dark-theme=true
-gtk-icon-theme-name=Adwaita
-gtk-cursor-theme-name=Adwaita
-EOF
-cat >"$HOME/.gtkrc-2.0" <<EOF
-gtk-theme-name="VSCode-Dark"
-gtk-icon-theme-name="Adwaita"
-gtk-cursor-theme-name="Adwaita"
-EOF
-if command -v gsettings &>/dev/null; then
-  gsettings set org.gnome.desktop.interface gtk-theme VSCode-Dark
-  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-  gsettings set org.gnome.desktop.interface icon-theme Adwaita
-  gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 33
-  gsettings set org.gnome.desktop.peripherals.keyboard delay 220
-  gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'us'), ('xkb', 'gr')]"
-  gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
-fi
-
 print_info "Setting up tmux..."
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-~/.tmux/plugins/tpm/bin/install_plugins
-tmux source ~/.tmux.conf
+if [[ -e "$HOME/.tmux/plugins/tpm/.git" ]]; then
+  git -C "$HOME/.tmux/plugins/tpm" pull --ff-only
+else
+  git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+fi
+"$HOME/.tmux/plugins/tpm/bin/install_plugins"
+if tmux has-session 2>/dev/null; then
+  tmux source-file "$HOME/.tmux.conf"
+fi
 
 print_info "Setting up asdf..."
 # Generate asdf completions
@@ -74,24 +52,6 @@ asdf install
 
 print_info "Configuring java... (for the current session only)"
 . "$HOME/.asdf/plugins/java/set-java-home.zsh"
-
-print_info "Increasing file descriptor and inotify limits..."
-# Check current limit
-ulimit -Sn
-# Change limit (temporary)
-ulimit -Sn 10000 # You might need to change the hard limit too
-
-print_info "Disabling zswap (redundant with zram)..."
-# zswap is built into the kernel with CONFIG_ZSWAP_DEFAULT_ON=y, so it fronts
-# zram0 and compresses every page twice. It is builtin, not a module, so the
-# kernel cmdline is the only persistent route.
-if [[ -f /etc/default/grub ]] && ! grep -q "zswap.enabled=0" /etc/default/grub; then
-  sudo sed -i 's/^\(GRUB_CMDLINE_LINUX_DEFAULT="[^"]*\)"/\1 zswap.enabled=0"/' /etc/default/grub
-  sudo grub-mkconfig -o /boot/grub/grub.cfg
-fi
-# ...and for the running system, so no reboot is needed for this one
-[[ -w /sys/module/zswap/parameters/enabled ]] &&
-  echo 0 | sudo tee /sys/module/zswap/parameters/enabled >/dev/null
 
 print_info "Setting up docker..."
 ls -al /dev/kvm
@@ -127,26 +87,14 @@ print_info "Removing thunar extra desktop files..."
 sudo rm -rf /usr/share/applications/{thunar-bulk-rename.desktop,thunar-settings.desktop}
 
 print_info "Setting up git remote..."
-# Check if the remote origin URL is set and if it's using SSH or HTTP
-remote_url=$(git remote get-url origin 2>/dev/null)
-
-if [[ -z "$remote_url" ]]; then
+if ! remote_url=$(git -C "$HOME/dotfiles" remote get-url origin 2>/dev/null); then
   echo "No remote 'origin' configured. Adding SSH origin..."
-  git remote add origin git@github.com:AkisArou/dotfiles.git
+  git -C "$HOME/dotfiles" remote add origin git@github.com:AkisArou/dotfiles.git
+elif [[ "$remote_url" != git@github.com:AkisArou/dotfiles.git ]]; then
+  echo "Switching dotfiles origin to SSH..."
+  git -C "$HOME/dotfiles" remote set-url origin git@github.com:AkisArou/dotfiles.git
 else
-  if [[ "$remote_url" != git@github.com:* ]]; then
-    echo "Remote origin is not configured via SSH."
-    echo "Removing HTTP origin..."
-    git remote remove origin
-
-    echo "Adding SSH origin..."
-    git remote add origin git@github.com:AkisArou/dotfiles.git
-
-    echo "Setting upstream branch of main to origin/main..."
-    git branch --set-upstream-to=origin/main main
-  else
-    echo "Remote origin is already configured via SSH."
-  fi
+  echo "Dotfiles origin is already configured via SSH."
 fi
 
 print_success "DONE!"

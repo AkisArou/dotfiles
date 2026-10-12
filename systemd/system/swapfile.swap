@@ -1,0 +1,9 @@
+[Unit]
+Description=Disk swap fallback
+
+[Swap]
+What=/swapfile
+Priority=10
+
+[Install]
+WantedBy=swap.target

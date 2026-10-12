@@ -18,20 +18,50 @@ echo ""
 
 create_symlink "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.conf
 create_symlink "$HOME/dotfiles/systemd/zram-generator.conf" /etc/systemd/zram-generator.conf
-create_symlink "$HOME/dotfiles/systemd/network/"*.network /etc/systemd/network/
 create_symlink "$HOME/dotfiles/systemd/system.conf.d/20-dotfiles-nofile.conf" \
   /etc/systemd/system.conf.d/20-dotfiles-nofile.conf
 create_symlink "$HOME/dotfiles/systemd/user.conf.d/20-dotfiles-nofile.conf" \
   /etc/systemd/user.conf.d/20-dotfiles-nofile.conf
 create_symlink "$HOME/dotfiles/security/limits.d/20-dotfiles-nofile.conf" \
   /etc/security/limits.d/20-dotfiles-nofile.conf
-
+create_symlink "$HOME/dotfiles/makepkg/99-native.conf" /etc/makepkg.conf.d/99-native.conf
 sudo sysctl --system >/dev/null
+if [[ -e /sys/module/zswap/parameters/enabled ]]; then
+  printf '0\n' | sudo tee /sys/module/zswap/parameters/enabled >/dev/null
+fi
+zsh "$HOME/dotfiles/scripts/conf-swapfile"
+sudo systemctl start dev-zram0.swap
+
+# networkd hides /home and runs as systemd-network.
+sudo install -d -m 755 /etc/systemd/network
+sudo install -o root -g root -m 644 "$HOME/dotfiles/systemd/network/"*.network /etc/systemd/network/
+create_symlink "$HOME/dotfiles/grub/"*.cfg /etc/default/grub.d/
+create_symlink "$HOME/dotfiles/modprobe.d/90-dotfiles-watchdog.conf" /etc/modprobe.d/90-dotfiles-watchdog.conf
+create_symlink "$HOME/dotfiles/mkinitcpio/90-dotfiles.conf" /etc/mkinitcpio.conf.d/90-dotfiles.conf
+create_symlink "$HOME/dotfiles/udev/hwdb.d/99-custom-keyboard.hwdb" /etc/udev/hwdb.d/99-custom-keyboard.hwdb
+if [[ "$(cat /sys/class/dmi/id/product_name 2>/dev/null)" == "ASUS EXPERTBOOK P5405CSA" ]]; then
+  create_symlink "$HOME/dotfiles/vconsole/asus-expertbook.conf" /etc/vconsole.conf
+else
+  create_symlink "$HOME/dotfiles/vconsole/desktop.conf" /etc/vconsole.conf
+fi
+
+sudo systemd-hwdb update
+sudo udevadm trigger --subsystem-match=input --property-match=ID_INPUT_KEYBOARD=1
+sudo mkinitcpio -P
+if [[ -f /etc/default/grub ]]; then
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+fi
 
 create_symlink "$HOME/dotfiles/environment" /etc/environment
 create_symlink "$HOME/dotfiles/systemd/system/performance.service" /etc/systemd/system/performance.service
 create_symlink "$HOME/dotfiles/xorg/xorg.conf" "/etc/X11/xorg.conf"
 create_symlink "$HOME/dotfiles/brave/policies.json" "/etc/brave/policies/managed/policies.json"
+sudo python3 "$HOME/dotfiles/scripts/conf-hosts" \
+  "$HOME/dotfiles/brave/hosts-blocklist" "$HOME/dotfiles/brave/hosts-allowlist"
+if systemctl is-active --quiet systemd-resolved.service; then
+  sudo resolvectl flush-caches
+fi
+python3 "$HOME/dotfiles/scripts/conf-brave"
 
 create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
 create_symlink "$HOME/dotfiles/mimeapps.list" "$HOME/.config/mimeapps.list"
@@ -58,6 +88,7 @@ create_symlink "$HOME/dotfiles/vim/.ideavimrc" "$HOME/.ideavimrc"
 create_symlink "$HOME/dotfiles/tmux/.tmux.conf" "$HOME/.tmux.conf"
 create_symlink "$HOME/dotfiles/.tool-versions" "$HOME/.tool-versions"
 create_symlink "$HOME/dotfiles/pipewire" "$HOME/.config/pipewire"
+create_symlink "$HOME/dotfiles/wireplumber/wireplumber.conf.d/"*.conf "$HOME/.config/wireplumber/wireplumber.conf.d/"
 create_symlink "$HOME/dotfiles/polybar" "$HOME/.config/polybar"
 create_symlink "$HOME/dotfiles/sway" "$HOME/.config/sway"
 create_symlink "$HOME/dotfiles/waybar" "$HOME/.config/waybar"
@@ -73,7 +104,11 @@ create_symlink "$HOME/dotfiles/paru" "$HOME/.config/paru"
 create_symlink "$HOME/dotfiles/brave/brave-flags.conf" "$HOME/.config/brave-flags.conf"
 create_symlink "$HOME/dotfiles/qt6ct" "$HOME/.config/qt6ct"
 create_symlink "$HOME/dotfiles/eza" "$HOME/.config/eza"
+create_symlink "$HOME/dotfiles/gtk/gtk-2.0/gtkrc" "$HOME/.gtkrc-2.0"
+create_symlink "$HOME/dotfiles/gtk/gtk-3.0/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+create_symlink "$HOME/dotfiles/gtk/gtk-4.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
 create_symlink "$HOME/dotfiles/gtk/themes/VSCode-Dark" "$HOME/.themes/VSCode-Dark"
+dconf load / < "$HOME/dotfiles/gtk/dconf.ini"
 create_symlink "$HOME/dotfiles/gnupg" "$HOME/.config/gnupg"
 create_symlink "$HOME/dotfiles/fsh" "$HOME/.config/fsh"
 create_symlink "$HOME/dotfiles/ripgrep" "$HOME/.config/ripgrep"
