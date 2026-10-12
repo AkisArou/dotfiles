@@ -64,6 +64,7 @@ packages=(
   "git"
   "git-delta"
   "github-cli"
+  "gitmux-bin"
   "gitui"
   "gnome-terminal"
   "gnupg"
