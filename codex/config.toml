@@ -10,6 +10,8 @@ plan_mode_reasoning_effort = "xhigh"
 
 [tui]
 theme = "vscode"
+# tmux converts the status component to a leading icon.
+terminal_title = ["spinner", "thread", "status"]
 
 [mcp_servers.chrome-devtools]
 command = "npx"
