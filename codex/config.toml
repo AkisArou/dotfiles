@@ -13,6 +13,25 @@ theme = "vscode"
 # tmux converts the status component to a leading icon.
 terminal_title = ["spinner", "thread", "status"]
 
+# Keep each tmux pane associated with its exact conversation for Resurrect.
+[[hooks.SessionStart]]
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/dotfiles/tmux/agent-sessions.py" codex-hook'
+timeout = 2
+
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/dotfiles/tmux/agent-sessions.py" codex-hook'
+timeout = 2
+
+[[hooks.SessionEnd]]
+[[hooks.SessionEnd.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/dotfiles/tmux/agent-sessions.py" codex-hook'
+timeout = 2
+
 [mcp_servers.chrome-devtools]
 command = "npx"
 args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]

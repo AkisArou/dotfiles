@@ -74,6 +74,7 @@ packages=(
   "gvim"
   "htop"
   "imagemagick"
+  "inetutils" # hostname is required by tmux-resurrect
   "iwd"
   "jq"
   "just"
@@ -112,6 +113,7 @@ packages=(
   "posix"
   "power-profiles-daemon"
   "preload"
+  "python-gobject"
   "python-pip"
   "python-pipx"
   "qt6ct"

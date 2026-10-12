@@ -1,7 +1,25 @@
 #!/usr/bin/zsh
 
-tmux has-session -t '=default' 2>/dev/null ||
-  tmux new-session -s default -d
+set -e
+
+starting_server=0
+if ! tmux has-session 2>/dev/null; then
+  starting_server=1
+fi
+
+if ! tmux has-session -t '=default' 2>/dev/null; then
+  # Automatic restore can create default while the new server loads its config.
+  if ! tmux new-session -s default -d 2>/dev/null; then
+    tmux has-session -t '=default'
+  fi
+fi
+
+# Resurrect can replace the initial empty pane, but skips other existing panes.
+# Let automatic restore finish before creating the fallback work session.
+if ((starting_server)) && [[ $(tmux show-option -gqv @continuum-restore) == on ]] &&
+  [[ -f "$(tmux show-option -gqv @resurrect-dir)/last" && ! -e "$HOME/tmux_no_auto_restore" ]]; then
+  timeout 15s tmux wait-for dotfiles-tmux-restored
+fi
 
 tmux has-session -t '=work' 2>/dev/null ||
   tmux new-session -s work -d -c "$HOME/nable-solutions"

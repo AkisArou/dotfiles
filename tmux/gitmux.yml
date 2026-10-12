@@ -1,0 +1,33 @@
+tmux:
+  symbols:
+    branch: ''
+    hashprefix: '@'
+    ahead: '⇡'
+    behind: '⇣'
+    staged: '+'
+    conflict: '~'
+    modified: '!'
+    untracked: '?'
+    stashed: '*'
+    clean: ''
+  styles:
+    clear: '#[fg=#AEAFAD,nobold]'
+    state: '#[fg=#E4676B,nobold]'
+    branch: '#[fg=#808080,nobold]'
+    remote: '#[fg=#808080,nobold]'
+    divergence: '#[fg=#808080,nobold]'
+    staged: '#[fg=#DCDCAA,nobold]'
+    conflict: '#[fg=#E4676B,nobold]'
+    modified: '#[fg=#DCDCAA,nobold]'
+    untracked: '#[fg=#569CD6,nobold]'
+    stashed: '#[fg=#808080,nobold]'
+    clean: '#[fg=#808080,nobold]'
+    insertions: '#[fg=#DCDCAA,nobold]'
+    deletions: '#[fg=#E4676B,nobold]'
+  layout: [branch, divergence, flags]
+  options:
+    branch_max_len: 32
+    branch_trim: center
+    ellipsis: '…'
+    hide_clean: true
+    divergence_space: true

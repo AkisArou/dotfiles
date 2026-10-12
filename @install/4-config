@@ -30,6 +30,8 @@ fi
 if tmux has-session 2>/dev/null; then
   tmux source-file "$HOME/.tmux.conf"
 fi
+systemctl --user daemon-reload
+systemctl --user enable --now tmux-save-on-shutdown.service
 
 print_info "Setting up asdf..."
 # Generate asdf completions

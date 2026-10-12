@@ -1,0 +1,29 @@
+#!/usr/bin/bash
+
+set -euo pipefail
+umask 077
+
+# Querying an absent server must not start tmux or replace the previous snapshot.
+tmux has-session 2>/dev/null || exit 0
+
+save_script="$HOME/.tmux/plugins/tmux-resurrect/scripts/save.sh"
+if [[ ! -x "$save_script" ]]; then
+  printf '%s\n' "tmux-resurrect is not installed." >&2
+  exit 1
+fi
+
+lock_dir="${XDG_RUNTIME_DIR:-$HOME/.cache}/dotfiles-tmux"
+mkdir -p -m 700 -- "$lock_dir"
+exec 9>"$lock_dir/resurrect.lock"
+flock -w 3 9
+tmux has-session 2>/dev/null || exit 0
+
+save_dir=$(tmux show-option -gqv @resurrect-dir)
+mkdir -p -m 700 -- "$save_dir"
+# Resurrect names snapshots by second; avoid reusing a file on rapid saves.
+if [[ -e "$save_dir/tmux_resurrect_$(date +%Y%m%dT%H%M%S).txt" ]]; then
+  sleep 1
+fi
+# Abort before publishing the snapshot if a save hook fails.
+bash -e "$save_script" "${1:-quiet}"
+[[ -s "$save_dir/last" ]]
