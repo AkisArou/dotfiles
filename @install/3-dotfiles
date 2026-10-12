@@ -20,6 +20,10 @@ create_symlink "$HOME/dotfiles/sysctl/99-sysctl.conf" /etc/sysctl.d/99-sysctl.co
 create_symlink "$HOME/dotfiles/systemd/zram-generator.conf" /etc/systemd/zram-generator.conf
 create_symlink "$HOME/dotfiles/systemd/system.conf.d/20-dotfiles-nofile.conf" \
   /etc/systemd/system.conf.d/20-dotfiles-nofile.conf
+create_symlink "$HOME/dotfiles/systemd/system.conf.d/20-dotfiles-stop-timeout.conf" \
+  /etc/systemd/system.conf.d/20-dotfiles-stop-timeout.conf
+create_symlink "$HOME/dotfiles/systemd/system/user@.service.d/20-dotfiles-stop-timeout.conf" \
+  /etc/systemd/system/user@.service.d/20-dotfiles-stop-timeout.conf
 create_symlink "$HOME/dotfiles/systemd/user.conf.d/20-dotfiles-nofile.conf" \
   /etc/systemd/user.conf.d/20-dotfiles-nofile.conf
 create_symlink "$HOME/dotfiles/security/limits.d/20-dotfiles-nofile.conf" \
