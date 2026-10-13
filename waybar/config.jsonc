@@ -145,7 +145,7 @@
     "return-type": "json",
     "interval": 300,
     "tooltip": true,
-    "on-click": "foot -T 'AI usage' ai-usagebar-tui",
+    "on-click": "foot -T 'AI usage' python3 \"$HOME/.config/waybar/ai-usage.py\" --pretty",
     "exec-on-event": false,
   },
 }

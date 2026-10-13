@@ -78,6 +78,26 @@ modified or unrelated servers. It keeps the MCP baseline alongside the settings
 baseline. `CLAUDE_CONFIG_DIR` and `XDG_STATE_HOME` are respected; custom Claude
 config directories receive separate baselines under the state directory.
 
+## Waybar AI usage
+
+The robot module uses `waybar/ai-usage.py` to fetch Claude, OpenAI/Codex,
+and Meta/Muse subscription usage directly. Hover for weekly usage bars and reset
+timers; click for a terminal summary. It uses Python's standard library.
+
+Sign in with the provider CLIs first. The script reads their existing login
+files and leaves token refresh to the CLIs; reopen the relevant CLI if its
+login expires. `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `MUSE_AUTH_PATH`, and the XDG
+config/cache directories are respected. Muse needs a browser/device login
+for subscription usage.
+
+Usage is cached for five minutes under `~/.cache/waybar-ai-usage`. Failed
+requests retain the last successful usage, marked as cached. Cache files
+contain only normalized quota data and a login fingerprint. Fable is omitted.
+
+Run `python3 ~/.config/waybar/ai-usage.py --pretty` for the terminal summary,
+or `python3 -m unittest discover -s waybar -p 'test_*.py'` for the regression
+checks.
+
 ## Screenshots
 
 ![nvim](./.screenshots/nvim.png)
