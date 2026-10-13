@@ -313,18 +313,17 @@ def provider_tooltip(entry, label):
 
     if rows:
         label_width = max(8, *(len(name) for name, _, _ in rows))
-        header = f"{'Window':<{label_width}}  {'Usage':<{BAR_WIDTH}}  {'Used':>4}  {'Left':>4}  Resets in"
+        header = f"{'Window':<{label_width}}  {'Usage':<{BAR_WIDTH}}  {'Used':>4}  Resets in"
         table = [f"<span foreground='#858585'>{html.escape(header)}</span>"]
         for name, percent, reset_at in rows:
             filled = round(max(0, min(100, percent)) * BAR_WIDTH / 100)
-            left = max(0, 100 - percent)
             bar = (
                 f"<span foreground='#569CD6'>{'█' * filled}</span>"
                 f"<span foreground='#444444'>{'░' * (BAR_WIDTH - filled)}</span>"
             )
             table.append(
                 f"{html.escape(name.ljust(label_width))}  {bar}  "
-                f"<b>{percent:>3g}%</b>  {left:>3g}%  {html.escape(countdown(reset_at, time.time()))}"
+                f"<b>{percent:>3g}%</b>  {html.escape(countdown(reset_at, time.time()))}"
             )
             if reset_at is not None:
                 reset_date = f"{'Reset':<{label_width}}  {local_datetime(reset_at)}"
