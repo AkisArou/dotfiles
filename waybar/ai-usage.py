@@ -19,7 +19,7 @@ import urllib.error
 import urllib.request
 from xml.etree import ElementTree
 
-PROVIDERS = (("claude", "Claude"), ("openai", "OpenAI / Codex"), ("muse", "Meta / Muse"))
+PROVIDERS = (("claude", "Claude"), ("openai", "Codex"), ("muse", "Muse"))
 ROBOT = "󰚩"
 BAR_WIDTH = 12
 CACHE_TTL = 300
