@@ -1,5 +1,9 @@
-#!/usr/bin/zsh
+#!/usr/bin/env zsh
 
-GIT_CMD="git for-each-ref --color=always --sort=-committerdate --format='%(color:yellow)%(committerdate:relative)%(color:reset) | %(color:cyan)%(refname:short)%(color:reset) | %(subject)' refs/heads/ | less -RS"
+FORMAT='%(color:yellow)%(committerdate:relative)%(color:reset) | %(color:cyan)%(refname:short)%(color:reset) | %(subject)'
 
-watch --no-title -c -n 4 $GIT_CMD
+git for-each-ref \
+  --color=always \
+  --sort=-committerdate \
+  --format="$FORMAT" \
+  refs/heads/ | less -RS
