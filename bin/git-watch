@@ -1,0 +1,3 @@
+#!/usr/bin/zsh
+
+git for-each-ref --color=always --sort=-committerdate --format='%(color:yellow)%(committerdate:relative)%(color:reset) | %(color:cyan)%(refname:short)%(color:reset) | %(subject)' refs/heads/ | less -RS
