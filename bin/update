@@ -22,14 +22,19 @@ nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'lua require
 echo
 
 print_info "ai agents:"
-curl -fsSL https://chatgpt.com/codex/install.sh | sh
+curl -fsSL https://chatgpt.com/codex/install.sh | CODEX_NON_INTERACTIVE=1 sh
 curl -fsSL https://claude.ai/install.sh | bash
 curl -fsSL https://dev.meta.ai/install.sh | sh
 echo
 
 print_info "zinit:"
-source /usr/share/zinit/zinit.zsh
-zinit update --parallel
+(
+  source /usr/share/zinit/zinit.zsh || exit
+  source "${ZINIT[BIN_DIR]}/zinit-autoload.zsh" || exit
+  # Paru updates the packaged Zinit; bulk plugin updates also call self-update.
+  .zinit-self-update() { return 0; }
+  zinit update --parallel
+)
 echo
 
 print_info "tmux:"
