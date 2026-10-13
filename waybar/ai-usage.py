@@ -139,6 +139,26 @@ def window(label, value, percent_field, now):
     return {"label": label, "percent": used, "reset_at": reset}
 
 
+def reset_credits(value):
+    if not isinstance(value, dict):
+        return None
+    count = value.get("available_count")
+    if isinstance(count, bool) or not isinstance(count, int) or count < 0:
+        return None
+    credits = []
+    reported = value.get("credits")
+    for credit in reported if isinstance(reported, list) else []:
+        if not isinstance(credit, dict) or credit.get("status") != "available":
+            continue
+        title = credit.get("title")
+        credits.append({
+            "title": title if isinstance(title, str) and title else "Reset credit",
+            "expires_at": timestamp(credit.get("expires_at")),
+        })
+    # Redemption IDs never leave the response; only descriptive fields are cached.
+    return {"available": count, "credits": credits}
+
+
 def parse_usage(provider, payload, plan, now):
     metrics = []
     note = ""
@@ -179,7 +199,10 @@ def parse_usage(provider, payload, plan, now):
                     metrics.append(metric)
             if not metrics:
                 note = "Muse did not report usage; the window may be idle"
-    return {"id": provider, "plan": plan, "metrics": metrics, "note": note}
+    entry = {"id": provider, "plan": plan, "metrics": metrics, "note": note}
+    if provider == "openai":
+        entry["reset_credits"] = reset_credits(payload.get("rate_limit_reset_credits"))
+    return entry
 
 
 def write_cache(filename, value):
@@ -205,11 +228,23 @@ def load_provider(provider):
             if cached.get("identity") != identity:
                 cached = {}
             now = time.time()
-            if 0 <= now - cached.get("checked_at", 0) < CACHE_TTL and isinstance(cached.get("entry"), dict):
+            entry = cached.get("entry")
+            has_reset_data = provider != "openai" or isinstance(entry, dict) and "reset_credits" in entry
+            if 0 <= now - cached.get("checked_at", 0) < CACHE_TTL and isinstance(entry, dict) and has_reset_data:
                 return cached["entry"]
             try:
                 payload = fetch_json(url, headers, body)
                 entry = parse_usage(provider, payload, plan, now)
+                resets = entry.get("reset_credits")
+                if resets and resets["available"] > 0:
+                    try:
+                        details = fetch_json(url.removesuffix("/usage") + "/rate-limit-reset-credits", headers, None)
+                        details = reset_credits(details)
+                        if details:
+                            # The count stays consistent with the main usage response.
+                            resets["credits"] = details["credits"]
+                    except (UsageError, ValueError, TypeError, AttributeError):
+                        pass  # Expiry is optional; keep quota and the available count.
                 fetched_at = now
             except (UsageError, ValueError, TypeError, AttributeError) as exception:
                 # Provider errors contain only our own messages, never raw bodies.
@@ -217,6 +252,8 @@ def load_provider(provider):
                 entry = dict(cached.get("entry") or empty)
                 entry.update({"error": error, "stale": bool(entry.get("metrics"))})
                 entry.setdefault("plan", plan)
+                if provider == "openai":
+                    entry.setdefault("reset_credits", None)
                 fetched_at = cached.get("fetched_at", 0)
             try:
                 write_cache(filename, {"identity": identity, "checked_at": now, "fetched_at": fetched_at, "entry": entry})
@@ -241,6 +278,15 @@ def countdown(reset_at, now):
     return f"{hours}h {minutes:02d}m" if hours else f"{minutes}m"
 
 
+def local_datetime(value):
+    if value is None:
+        return "—"
+    try:
+        return datetime.fromtimestamp(value).astimezone().strftime("%a %d %b, %H:%M %Z")
+    except (ValueError, OSError, OverflowError):
+        return "—"
+
+
 def provider_tooltip(entry, label):
     heading = f"<span foreground='#569CD6'><b>{html.escape(label)}</b></span>"
     plan = entry.get("plan") or ""
@@ -263,25 +309,42 @@ def provider_tooltip(entry, label):
         name = metric["label"]
         if percent is None or name == "5-hour" or "fable" in name.casefold():
             continue
-        rows.append((name, percent, countdown(metric.get("reset_at"), time.time())))
+        rows.append((name, percent, metric.get("reset_at")))
 
     if rows:
         label_width = max(8, *(len(name) for name, _, _ in rows))
-        header = f"{'Window':<{label_width}}  {'Usage':<{BAR_WIDTH}}  {'Used':>4}  Resets in"
+        header = f"{'Window':<{label_width}}  {'Usage':<{BAR_WIDTH}}  {'Used':>4}  {'Left':>4}  Resets in"
         table = [f"<span foreground='#858585'>{html.escape(header)}</span>"]
-        for name, percent, reset in rows:
+        for name, percent, reset_at in rows:
             filled = round(max(0, min(100, percent)) * BAR_WIDTH / 100)
+            left = max(0, 100 - percent)
             bar = (
                 f"<span foreground='#569CD6'>{'█' * filled}</span>"
                 f"<span foreground='#444444'>{'░' * (BAR_WIDTH - filled)}</span>"
             )
             table.append(
                 f"{html.escape(name.ljust(label_width))}  {bar}  "
-                f"<b>{percent:>3g}%</b>  {html.escape(reset)}"
+                f"<b>{percent:>3g}%</b>  {left:>3g}%  {html.escape(countdown(reset_at, time.time()))}"
             )
+            if reset_at is not None:
+                reset_date = f"{'Reset':<{label_width}}  {local_datetime(reset_at)}"
+                table.append(f"<span foreground='#858585'>{html.escape(reset_date)}</span>")
         lines.append("<tt>" + "\n".join(table) + "</tt>")
 
-    if len(lines) == 1:
+    resets = entry.get("reset_credits")
+    if resets is not None:
+        count = resets["available"]
+        lines.append(f"<span foreground='#6a9955'><b>{count}</b> reset{'s' if count != 1 else ''} available</span>")
+        if count:
+            for credit in resets["credits"]:
+                detail = credit["title"]
+                if credit["expires_at"] is not None:
+                    detail += f" · expires {local_datetime(credit['expires_at'])}"
+                lines.append(f"<span foreground='#858585'>{html.escape(detail)}</span>")
+            if not resets["credits"]:
+                lines.append("<span foreground='#858585'>Expiry unavailable</span>")
+
+    if not rows and not entry.get("error") and not entry.get("note"):
         lines.append("Usage unavailable")
     return "\n".join(lines)
 

@@ -41,6 +41,44 @@ class ProviderTests(unittest.TestCase):
         }, "", 1000)
         self.assertEqual(result["metrics"], [{"label": "Weekly", "percent": 42.5, "reset_at": 4600}])
 
+    def test_reset_credits_exclude_redemption_ids_and_used_credits(self):
+        result = usage.parse_usage("openai", {
+            "rate_limit": {},
+            "rate_limit_reset_credits": {"available_count": 1, "credits": [
+                {"id": "SECRET-REDEMPTION-ID", "status": "available", "title": "Full reset", "expires_at": "2026-11-06T23:21:40Z"},
+                {"id": "SECRET-USED-ID", "status": "redeemed", "title": "Already used"},
+            ]},
+        }, "", 1000)
+        self.assertEqual(result["reset_credits"]["available"], 1)
+        self.assertEqual(len(result["reset_credits"]["credits"]), 1)
+        self.assertNotIn("SECRET", json.dumps(result))
+        self.assertNotIn("Already used", json.dumps(result))
+
+    def test_exact_reset_dates_follow_local_daylight_saving_time(self):
+        try:
+            with patch.dict(usage.os.environ, {"TZ": "Europe/Athens"}):
+                usage.time.tzset()
+                self.assertEqual(usage.local_datetime(usage.timestamp("2026-10-19T13:00:00Z")), "Mon 19 Oct, 16:00 EEST")
+                self.assertEqual(usage.local_datetime(usage.timestamp("2026-11-06T23:21:40Z")), "Sat 07 Nov, 01:21 EET")
+                self.assertEqual(usage.local_datetime(None), "—")
+        finally:
+            usage.time.tzset()
+
+    def test_tooltip_shows_remaining_allowance_and_only_weekly_rows(self):
+        text = usage.provider_tooltip({"metrics": [
+            {"label": "Weekly", "percent": 37, "reset_at": 1792414800},
+            {"label": "Sonnet", "percent": 110, "reset_at": None},
+            {"label": "5-hour", "percent": 20, "reset_at": None},
+            {"label": "Fable", "percent": 90, "reset_at": None},
+        ]}, "Claude")
+        plain = "".join(ElementTree.fromstring("<tooltip>" + text + "</tooltip>").itertext())
+        self.assertIn("Left", plain)
+        self.assertIn("63%", plain)
+        self.assertIn("  0%", plain)
+        self.assertIn("Reset", plain)
+        self.assertNotIn("5-hour", plain)
+        self.assertNotIn("Fable", plain)
+
     def test_muse_keeps_only_usage_and_plan(self):
         result = usage.parse_usage("muse", {
             "api_key": "SECRET-KEY", "user_email": "PRIVATE-EMAIL", "payment_method": {"id": "PRIVATE-PAYMENT"},
@@ -123,6 +161,28 @@ class CacheTests(unittest.TestCase):
         self.assertEqual(result["metrics"], [])
         self.assertFalse(result["stale"])
 
+    def test_reset_expiry_failure_keeps_live_usage_and_available_count(self):
+        payload = {"rate_limit": {"primary_window": {"used_percent": 11, "limit_window_seconds": 604800}},
+                   "rate_limit_reset_credits": {"available_count": 1}}
+        with patch.object(usage, "fetch_json", side_effect=[payload, usage.UsageError("Offline")]) as fetch, patch.object(usage.time, "time", return_value=1000):
+            result = usage.load_provider("openai")
+            self.assertEqual(usage.load_provider("openai"), result)
+        self.assertEqual(fetch.call_count, 2)
+        self.assertEqual(result["metrics"][0]["percent"], 11)
+        self.assertEqual(result["reset_credits"], {"available": 1, "credits": []})
+        self.assertNotIn("error", result)
+
+    def test_legacy_openai_cache_refreshes_reset_data_once(self):
+        filename = self.directory / "waybar-ai-usage/openai.json"
+        filename.parent.mkdir()
+        old = {"id": "openai", "metrics": [], "plan": "Prolite"}
+        usage.write_cache(filename, {"identity": "identity-one", "checked_at": 1000, "entry": old})
+        payload = {"rate_limit": {}, "rate_limit_reset_credits": {"available_count": 0}}
+        with patch.object(usage, "fetch_json", return_value=payload) as fetch, patch.object(usage.time, "time", return_value=1001):
+            result = usage.load_provider("openai")
+            self.assertEqual(usage.load_provider("openai"), result)
+        fetch.assert_called_once()
+        self.assertEqual(result["reset_credits"]["available"], 0)
 
 if __name__ == "__main__":
     unittest.main()

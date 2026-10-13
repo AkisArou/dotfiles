@@ -81,8 +81,10 @@ config directories receive separate baselines under the state directory.
 ## Waybar AI usage
 
 The robot module uses `waybar/ai-usage.py` to fetch Claude, OpenAI/Codex,
-and Meta/Muse subscription usage directly. Hover for weekly usage bars and reset
-timers; click for a terminal summary. It uses Python's standard library.
+and Meta/Muse subscription usage directly. Hover for weekly usage bars, remaining
+allowance, reset countdowns and local reset dates. OpenAI also shows available
+reset credits and their expiry when reported. Click for a terminal summary.
+It uses Python's standard library.
 
 Sign in with the provider CLIs first. The script reads their existing login
 files and leaves token refresh to the CLIs; reopen the relevant CLI if its
