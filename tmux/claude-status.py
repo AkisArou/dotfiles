@@ -1,6 +1,7 @@
-"""Claude command hooks: per-pane attention badges, alongside its native title.
+"""Claude command hooks: per-pane activity state, alongside its native title.
 
-? question, ! approval, ✓ finished turn, × API error, ≋ compaction, +N subagents.
+tmux renders working, attention, or error as one steady colored dot.
+Ready, compaction, and background subagent counts have no extra marker.
 No output or permission decisions: a missing tmux server must never block Claude.
 """
 
@@ -105,19 +106,13 @@ def update(state, event):
 
 def badge(state):
     waits = set(state.get("waits", {}).values())
-    if "?" in waits:
-        marker = "?"
-    elif "!" in waits:
-        marker = "!"
-    elif state.get("compacting"):
-        marker = "≋"
-    else:
-        marker = {"done": "✓", "error": "×"}.get(state.get("status"), "")
-    parts = [f"[{marker}]"] if marker else []
-    count = len(state.get("agents", []))
-    if count:
-        parts.append(f"[+{count}]")
-    return " ".join(parts)
+    if waits & {"?", "!"}:
+        return "attention"
+    if state.get("status") == "error":
+        return "error"
+    if state.get("status") == "working" and not state.get("compacting"):
+        return "working"
+    return ""
 
 
 def main():
