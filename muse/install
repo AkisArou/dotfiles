@@ -1,0 +1,12 @@
+#!/usr/bin/zsh
+
+set -euo pipefail
+
+if (( EUID == 0 )); then
+  print -u2 "Run this installer as your normal user."
+  exit 1
+fi
+
+source "$HOME/dotfiles/scripts/library"
+python3 "${0:A:h}/install.py"
+create_symlink "$HOME/dotfiles/muse/hooks.json" "${XDG_CONFIG_HOME:-$HOME/.config}/muse/dotfiles-hooks.json"

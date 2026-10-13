@@ -121,6 +121,7 @@ create_symlink "$HOME/dotfiles/tealdeer" "$HOME/.config/tealdeer"
 zsh "$HOME/dotfiles/codex/install"
 create_symlink "$HOME/dotfiles/codex/themes" "$HOME/.codex/themes"
 zsh "$HOME/dotfiles/claude/install"
+zsh "$HOME/dotfiles/muse/install"
 create_symlink "$HOME/dotfiles/.default-npm-packages" "$HOME/.default-npm-packages"
 
 create_symlink "$HOME/dotfiles/brave/extensions/"*.json /usr/share/chromium/extensions/

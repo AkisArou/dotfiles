@@ -19,6 +19,7 @@
     "clock",
     "network",
     "systemd-failed-units",
+    "custom/aibar",
   ],
   "sway/scratchpad": {
     "format": "{icon} {count}",
@@ -137,5 +138,14 @@
     "format-ok": "✓",
     "system": true,
     "user": true,
+  },
+  "custom/aibar": {
+    "exec": "python3 \"$HOME/.config/waybar/ai-usage.py\"",
+    "format": "<span color='#569CD6'>{text}</span>",
+    "return-type": "json",
+    "interval": 300,
+    "tooltip": true,
+    "on-click": "foot -T 'AI usage' ai-usagebar-tui",
+    "exec-on-event": false,
   },
 }
