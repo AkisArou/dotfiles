@@ -67,7 +67,7 @@ if systemctl is-active --quiet systemd-resolved.service; then
 fi
 python3 "$HOME/dotfiles/scripts/conf-brave"
 
-create_symlink "$HOME/dotfiles/bin" "$HOME/.local/bin"
+create_symlink "$HOME/dotfiles/bin/"* "$HOME/.local/bin/"
 create_symlink "$HOME/dotfiles/mimeapps.list" "$HOME/.config/mimeapps.list"
 create_symlink "$HOME/dotfiles/applications/nvim.desktop" "$HOME/.local/share/applications/nvim.desktop"
 create_symlink "$HOME/dotfiles/shell/zsh/.zshenv" "$HOME/.zshenv"
