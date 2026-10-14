@@ -4,6 +4,7 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 import fcntl
 import hashlib
 import html
@@ -13,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import tempfile
 import time
 import urllib.error
@@ -23,11 +25,40 @@ PROVIDERS = (("claude", "Claude"), ("openai", "Codex"), ("muse", "Muse"))
 ROBOT = "󰚩"
 BAR_WIDTH = 12
 CACHE_TTL = 300
+CLAUDE_CACHE_TTL = 900
+CLAUDE_RATE_LIMIT_DELAY = 3600
+MAX_RATE_LIMIT_DELAY = 7200
 HTTP_TIMEOUT = 12
 
 
 class UsageError(Exception):
     """A safe, user-facing error that contains no credentials or response body."""
+
+
+class RateLimited(UsageError):
+    def __init__(self, retry_after=0):
+        super().__init__("Rate limited")
+        self.retry_after = retry_after
+
+
+class LoginExpired(UsageError):
+    def __init__(self, identity, plan):
+        super().__init__("Claude login expired; open Claude Code to refresh it")
+        self.identity = identity
+        self.plan = plan
+
+
+def retry_after_seconds(value, now):
+    if not value:
+        return 0
+    try:
+        seconds = float(value)
+    except (ValueError, TypeError):
+        try:
+            seconds = parsedate_to_datetime(value).timestamp() - now
+        except (ValueError, TypeError, OverflowError):
+            return 0
+    return max(0, math.ceil(seconds)) if math.isfinite(seconds) else 0
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -85,7 +116,37 @@ def credentials(provider):
     headers["Authorization"] = "Bearer " + token
     # Scope cached usage to the login without storing the token or account ID.
     identity = hashlib.sha256((token + headers.get("ChatGPT-Account-Id", "")).encode()).hexdigest()
+    if provider == "claude":
+        expires_at = auth.get("expiresAt")
+        if isinstance(expires_at, (int, float)) and 0 < expires_at <= time.time() * 1000:
+            raise LoginExpired(identity, plan)
     return url, headers, body, plan, identity
+
+
+def refresh_claude_login():
+    # A cold /usage command waits for the CLI to save its renewed credentials.
+    # Avoid the CLI's short-command refresh race when its own usage cache is warm.
+    directory = Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    state = directory / ".claude.json" if os.environ.get("CLAUDE_CONFIG_DIR") else Path.home() / ".claude.json"
+    native_cache = read_json(state).get("cachedUsageUtilization") or {}
+    if isinstance(native_cache, dict):
+        fetched_at = native_cache.get("fetchedAtMs")
+        if isinstance(fetched_at, (int, float)) and 0 <= time.time() - fetched_at / 1000 < 120:
+            raise UsageError("Claude login renewal deferred; retrying shortly")
+    try:
+        with tempfile.TemporaryDirectory(prefix="claude-usage-refresh-") as workdir:
+            result = subprocess.run(
+                ["claude", "--safe-mode", "--print", "/usage", "--no-session-persistence",
+                 "--output-format", "json", "--max-budget-usd", "0.000001", "--tools", ""],
+                cwd=workdir, input="", capture_output=True, text=True, timeout=45,
+            )
+        report = json.loads(result.stdout)
+        if result.returncode or not isinstance(report, dict) or report.get("is_error"):
+            raise UsageError("Claude login renewal failed; run claude auth login")
+        if report.get("num_turns") != 0 or report.get("total_cost_usd") != 0:
+            raise UsageError("Unexpected Claude /usage result; open Claude Code")
+    except (OSError, ValueError, subprocess.SubprocessError):
+        raise UsageError("Claude login renewal failed; run claude auth login") from None
 
 
 def fetch_json(url, headers, body):
@@ -103,7 +164,8 @@ def fetch_json(url, headers, body):
         if error.code in (401, 403):
             raise UsageError("Login rejected; reopen the provider CLI to sign in") from None
         if error.code == 429:
-            raise UsageError("Rate limited; retrying in a few minutes") from None
+            delay = retry_after_seconds((error.headers or {}).get("Retry-After"), time.time())
+            raise RateLimited(delay) from None
         raise UsageError(f"Usage request failed (HTTP {error.code})") from None
     except (OSError, ValueError):
         raise UsageError("Could not reach the usage service") from None
@@ -215,23 +277,63 @@ def write_cache(filename, value):
         Path(temporary).unlink(missing_ok=True)
 
 
+def cached_entry(cached):
+    entry = dict(cached["entry"])
+    entry["updated_at"] = cached.get("fetched_at")
+    entry["retry_at"] = cached.get("retry_at", 0)
+    return entry
+
+
 def load_provider(provider):
     empty = {"id": provider, "metrics": []}
     try:
-        url, headers, body, plan, identity = credentials(provider)
         directory = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "waybar-ai-usage"
         directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         filename = directory / f"{provider}.json"
         with (directory / f"{provider}.lock").open("a") as lock:
             fcntl.flock(lock, fcntl.LOCK_EX)
             cached = read_json(filename)
+            now = time.time()
+            try:
+                url, headers, body, plan, identity = credentials(provider)
+            except LoginExpired as expired:
+                if cached.get("identity") != expired.identity:
+                    cached = {}
+                if now < cached.get("auth_retry_at", 0):
+                    return cached_entry(cached)
+                try:
+                    refresh_claude_login()
+                    url, headers, body, plan, identity = credentials(provider)
+                except UsageError as error:
+                    entry = dict(cached.get("entry") or empty)
+                    entry.update({"plan": expired.plan, "error": str(error), "stale": bool(entry.get("metrics"))})
+                    retry_at = now + (CACHE_TTL if "deferred" in str(error) else CLAUDE_RATE_LIMIT_DELAY)
+                    cached.update({"identity": expired.identity, "checked_at": now, "retry_at": retry_at, "auth_retry_at": retry_at, "entry": entry})
+                    try:
+                        write_cache(filename, cached)
+                    except OSError:
+                        pass
+                    return cached_entry(cached)
             if cached.get("identity") != identity:
                 cached = {}
-            now = time.time()
+            elif cached.get("auth_retry_at"):
+                cached = {}  # A login repaired externally should refresh immediately.
             entry = cached.get("entry")
+            cache_ttl = CLAUDE_CACHE_TTL if provider == "claude" else CACHE_TTL
+            base_delay = CLAUDE_RATE_LIMIT_DELAY if provider == "claude" else CACHE_TTL
+            # Upgrade an existing retry loop without making another request first.
+            if isinstance(entry, dict) and str(entry.get("error", "")).startswith("Rate limited") and "rate_limit_count" not in cached:
+                cached.update({"rate_limit_count": 1, "retry_at": cached.get("checked_at", now) + base_delay})
+                entry["error"] = "Rate limited"
+                try:
+                    write_cache(filename, cached)
+                except OSError:
+                    pass
+            if isinstance(entry, dict) and now < cached.get("retry_at", 0):
+                return cached_entry(cached)
             has_reset_data = provider != "openai" or isinstance(entry, dict) and "reset_credits" in entry
-            if 0 <= now - cached.get("checked_at", 0) < CACHE_TTL and isinstance(entry, dict) and has_reset_data:
-                return cached["entry"]
+            if 0 <= now - cached.get("checked_at", 0) < cache_ttl and isinstance(entry, dict) and has_reset_data:
+                return cached_entry(cached)
             try:
                 payload = fetch_json(url, headers, body)
                 entry = parse_usage(provider, payload, plan, now)
@@ -246,6 +348,8 @@ def load_provider(provider):
                     except (UsageError, ValueError, TypeError, AttributeError):
                         pass  # Expiry is optional; keep quota and the available count.
                 fetched_at = now
+                rate_limit_count = 0
+                retry_at = 0
             except (UsageError, ValueError, TypeError, AttributeError) as exception:
                 # Provider errors contain only our own messages, never raw bodies.
                 error = str(exception) if isinstance(exception, UsageError) else "Unexpected usage response"
@@ -255,11 +359,21 @@ def load_provider(provider):
                 if provider == "openai":
                     entry.setdefault("reset_credits", None)
                 fetched_at = cached.get("fetched_at", 0)
+                rate_limit_count = cached.get("rate_limit_count", 0)
+                retry_at = 0
+                if isinstance(exception, RateLimited):
+                    rate_limit_count = min(rate_limit_count + 1, 8)
+                    delay = min(MAX_RATE_LIMIT_DELAY, base_delay * 2 ** (rate_limit_count - 1))
+                    retry_at = now + max(delay, exception.retry_after)
+            updated = {
+                "identity": identity, "checked_at": now, "fetched_at": fetched_at,
+                "rate_limit_count": rate_limit_count, "retry_at": retry_at, "entry": entry,
+            }
             try:
-                write_cache(filename, {"identity": identity, "checked_at": now, "fetched_at": fetched_at, "entry": entry})
+                write_cache(filename, updated)
             except OSError:
                 pass  # Still show the live result if caching is unavailable.
-            return entry
+            return cached_entry(updated)
     except (UsageError, OSError, TypeError, AttributeError) as error:
         return {**empty, "error": str(error) if isinstance(error, UsageError) else "Cannot read login or usage cache"}
 
@@ -297,9 +411,13 @@ def provider_tooltip(entry, label):
     lines = [heading]
 
     if entry.get("stale"):
-        lines.append("Showing cached usage")
+        age = countdown(time.time(), entry["updated_at"]) if entry.get("updated_at") else None
+        lines.append(f"Cached usage · updated {age} ago" if age and age != "now" else "Showing cached usage")
     if entry.get("error"):
         lines.append(html.escape(str(entry["error"])))
+    if entry.get("retry_at", 0) > time.time():
+        retry_time = datetime.fromtimestamp(entry["retry_at"]).astimezone().strftime("%H:%M")
+        lines.append(f"Next attempt after {retry_time} · in {countdown(entry['retry_at'], time.time())}")
     if entry.get("note"):
         lines.append(html.escape(entry["note"]))
 

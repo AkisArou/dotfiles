@@ -16,6 +16,52 @@ spec.loader.exec_module(usage)
 
 
 class ProviderTests(unittest.TestCase):
+    def test_expired_claude_token_is_rejected_before_any_usage_request(self):
+        auth = {"claudeAiOauth": {"accessToken": "SECRET-TOKEN", "expiresAt": 900000}}
+        with patch.object(usage, "read_json", return_value=auth), patch.object(usage.time, "time", return_value=1000):
+            with self.assertRaises(usage.LoginExpired) as caught:
+                usage.credentials("claude")
+        self.assertIn("expired", str(caught.exception))
+        self.assertNotIn("SECRET", str(caught.exception))
+
+    def test_retry_after_supports_seconds_and_http_dates(self):
+        self.assertEqual(usage.retry_after_seconds("3600", 1000), 3600)
+        self.assertEqual(usage.retry_after_seconds("Thu, 01 Jan 1970 01:00:00 GMT", 1000), 2600)
+        for value in (None, "0", "-1", "not a date", "inf"):
+            self.assertEqual(usage.retry_after_seconds(value, 1000), 0)
+
+    def test_rate_limit_response_preserves_server_cooldown(self):
+        failure = urllib.error.HTTPError("https://provider.invalid", 429, "PRIVATE", {"Retry-After": "7200"}, io.BytesIO(b"SECRET"))
+        with patch.object(usage.HTTP, "open", side_effect=failure), self.assertRaises(usage.RateLimited) as caught:
+            usage.fetch_json("https://provider.invalid", {}, None)
+        self.assertEqual(caught.exception.retry_after, 7200)
+        self.assertEqual(str(caught.exception), "Rate limited")
+
+    def test_claude_renews_through_readonly_cli_usage_command(self):
+        result = usage.subprocess.CompletedProcess([], 0, json.dumps({"is_error": False, "num_turns": 0, "total_cost_usd": 0}))
+        with patch.object(usage, "read_json", return_value={}), patch.object(usage.subprocess, "run", return_value=result) as run:
+            usage.refresh_claude_login()
+        args = run.call_args.args[0]
+        self.assertIn("/usage", args)
+        self.assertIn("--safe-mode", args)
+        self.assertIn("--no-session-persistence", args)
+
+    def test_claude_warm_native_cache_defers_renewal(self):
+        state = {"cachedUsageUtilization": {"fetchedAtMs": 900000}}
+        with patch.object(usage, "read_json", return_value=state), patch.object(usage.time, "time", return_value=1000), patch.object(usage.subprocess, "run") as run:
+            with self.assertRaisesRegex(usage.UsageError, "deferred"):
+                usage.refresh_claude_login()
+        run.assert_not_called()
+
+    def test_tooltip_identifies_old_cached_usage_and_next_retry(self):
+        entry = {"stale": True, "updated_at": 1000, "retry_at": 43600,
+                 "error": "Rate limited", "metrics": [{"label": "Weekly", "percent": 46, "reset_at": 100000}]}
+        with patch.object(usage.time, "time", return_value=40000):
+            text = usage.provider_tooltip(entry, "Claude")
+        self.assertIn("updated 10h 50m ago", text)
+        self.assertIn("Next attempt after", text)
+        self.assertIn("in 1h 00m", text)
+
     def test_claude_uses_reported_windows_and_excludes_fable(self):
         result = usage.parse_usage("claude", {
             "five_hour": {"utilization": 0, "resets_at": "2030-01-01T00:00:00Z"},
@@ -117,7 +163,7 @@ class ProviderTests(unittest.TestCase):
         ElementTree.fromstring("<tooltip>" + text + "</tooltip>")
         self.assertIn("&lt;20x&gt; &amp; friends", text)
         self.assertIn("█", text)
-        self.assertIn("Meta / Muse", text)
+        self.assertIn("Muse", text)
         self.assertEqual(usage.countdown(1000, 1000), "now")
         self.assertEqual(usage.countdown(4660, 1000), "1h 01m")
 
@@ -146,7 +192,7 @@ class CacheTests(unittest.TestCase):
     def test_failed_refresh_retains_usage_and_backs_off(self):
         with patch.object(usage, "fetch_json", return_value=self.payload), patch.object(usage.time, "time", return_value=1000):
             usage.load_provider("claude")
-        with patch.object(usage, "fetch_json", side_effect=usage.UsageError("Rate limited")) as fetch, patch.object(usage.time, "time", return_value=1400):
+        with patch.object(usage, "fetch_json", side_effect=usage.RateLimited()) as fetch, patch.object(usage.time, "time", return_value=2000):
             result = usage.load_provider("claude")
             self.assertEqual(usage.load_provider("claude"), result)
         self.assertTrue(result["stale"])
@@ -183,6 +229,56 @@ class CacheTests(unittest.TestCase):
             self.assertEqual(usage.load_provider("openai"), result)
         fetch.assert_called_once()
         self.assertEqual(result["reset_credits"]["available"], 0)
+
+    def test_claude_backoff_grows_and_resets_after_success(self):
+        with patch.object(usage, "fetch_json", side_effect=[self.payload, usage.RateLimited(), usage.RateLimited(), self.payload]) as fetch, patch.object(usage.time, "time", return_value=1000) as clock:
+            usage.load_provider("claude")
+            clock.return_value = 2000
+            limited = usage.load_provider("claude")
+            self.assertEqual(limited["retry_at"], 5600)
+            clock.return_value = 2300
+            self.assertEqual(usage.load_provider("claude"), limited)
+            self.assertEqual(fetch.call_count, 2)
+            clock.return_value = 5600
+            limited = usage.load_provider("claude")
+            self.assertEqual(limited["retry_at"], 12800)
+            clock.return_value = 12800
+            fresh = usage.load_provider("claude")
+            self.assertEqual(fresh["retry_at"], 0)
+            self.assertNotIn("error", fresh)
+        self.assertEqual(fetch.call_count, 4)
+
+    def test_server_retry_after_can_exceed_normal_backoff(self):
+        with patch.object(usage, "fetch_json", side_effect=usage.RateLimited(10000)), patch.object(usage.time, "time", return_value=1000):
+            result = usage.load_provider("claude")
+        self.assertEqual(result["retry_at"], 11000)
+
+    def test_legacy_rate_limited_cache_starts_quiet_period_without_request(self):
+        filename = self.directory / "waybar-ai-usage/claude.json"
+        filename.parent.mkdir()
+        old = {"id": "claude", "metrics": [], "error": "Rate limited; retrying in a few minutes"}
+        usage.write_cache(filename, {"identity": "identity-one", "checked_at": 1000, "entry": old})
+        with patch.object(usage, "fetch_json") as fetch, patch.object(usage.time, "time", return_value=1400):
+            result = usage.load_provider("claude")
+        fetch.assert_not_called()
+        self.assertEqual(result["retry_at"], 4600)
+
+    def test_expired_login_renews_once_before_fetching(self):
+        fresh_credentials = ("https://provider.invalid", {}, None, "Max", "renewed-identity")
+        with patch.object(usage, "credentials", side_effect=[usage.LoginExpired("identity-one", "Max"), fresh_credentials, fresh_credentials]), patch.object(usage, "refresh_claude_login") as renew, patch.object(usage, "fetch_json", return_value=self.payload) as fetch, patch.object(usage.time, "time", return_value=1000):
+            fresh = usage.load_provider("claude")
+            self.assertEqual(usage.load_provider("claude"), fresh)
+        renew.assert_called_once()
+        fetch.assert_called_once()
+        self.assertNotIn("error", fresh)
+
+    def test_failed_login_renewal_is_backed_off_without_usage_requests(self):
+        with patch.object(usage, "credentials", side_effect=usage.LoginExpired("identity-one", "Max")), patch.object(usage, "refresh_claude_login", side_effect=usage.UsageError("Claude login renewal failed")) as renew, patch.object(usage, "fetch_json") as fetch, patch.object(usage.time, "time", return_value=1000):
+            failed = usage.load_provider("claude")
+            self.assertEqual(usage.load_provider("claude"), failed)
+        renew.assert_called_once()
+        fetch.assert_not_called()
+        self.assertEqual(failed["retry_at"], 4600)
 
 if __name__ == "__main__":
     unittest.main()
