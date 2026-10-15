@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Deploy personal files, then apply the handlers listed in link_tree.py."""
+
+import argparse
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+import configure_claude
+import configure_muse
+from link_tree import deploy, deployment_rules, detach_config
+
+
+def install_home(repo, home, *, dry_run=False):
+    source = repo / 'home'
+    _, rules = deployment_rules(source)
+    handlers = {}
+    for method in ('merge', 'import'):
+        for relative, handler in rules.get(method, {}).items():
+            if (source / relative).exists():
+                handlers.setdefault(handler, method)
+    unknown = handlers.keys() - {'claude', 'muse', 'brave', 'dconf'}
+    if unknown:
+        raise ValueError(f'Unknown deployment handlers: {", ".join(sorted(unknown))}')
+    codex_config = Path(os.environ.get('CODEX_HOME') or home / '.codex') / 'config.toml'
+    detach_config(codex_config, dry_run=dry_run)
+    deploy(source, home, dry_run=dry_run)
+    for handler, method in handlers.items():
+        if dry_run:
+            print(f'{method.capitalize()} defaults: {handler}')
+            continue
+        if handler == 'claude':
+            configure_claude.main(source)
+        elif handler == 'muse':
+            configure_muse.install(source / '.config/muse/settings.json')
+            config = Path(os.environ.get('XDG_CONFIG_HOME') or home / '.config')
+            deploy(source / '.config/muse/dotfiles-hooks.json', config / 'muse/dotfiles-hooks.json')
+        elif handler == 'brave':
+            subprocess.run([sys.executable, str(home / '.local/libexec/configure-brave')], check=True)
+        elif handler == 'dconf':
+            subprocess.run(['dconf', 'load', '/'],
+                           input=(source / '.config/dconf/user').read_bytes(), check=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args()
+    if os.geteuid() == 0:
+        parser.error('Run as your normal user')
+    install_home(Path(__file__).resolve().parent.parent, Path.home(), dry_run=args.dry_run)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as error:
+        print(f'Personal deployment failed: {error}', file=sys.stderr)
+        sys.exit(1)

@@ -1,0 +1,72 @@
+#!/usr/bin/python3
+
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from browser_paths import migrate_extension
+
+
+def merge_preferences(current, patch):
+    for key, value in patch.items():
+        if isinstance(value, dict):
+            branch = current.setdefault(key, {})
+            if not isinstance(branch, dict):
+                raise ValueError(f"Unexpected preference structure at {key}.")
+            merge_preferences(branch, value)
+        else:
+            current[key] = value
+
+
+def configure_brave(profile_root, defaults_root):
+    pending = []
+    for relative in ('Default/Preferences', 'Local State'):
+        patch = json.loads((defaults_root / relative).read_text())
+        destination = profile_root / relative
+        original = json.loads(destination.read_text()) if destination.exists() else {}
+        updated = json.loads(json.dumps(original))
+        merge_preferences(updated, patch)
+        if updated != original or destination.is_symlink():
+            pending.append((destination, updated))
+
+    for destination, updated in pending:
+        destination.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        backup = destination.with_name(destination.name + ".dotfiles-backup")
+        if destination.exists() and not backup.exists():
+            shutil.copy2(destination, backup)
+            backup.chmod(0o600)
+        descriptor, temporary = tempfile.mkstemp(dir=destination.parent, prefix=".brave-prefs-")
+        try:
+            with os.fdopen(descriptor, "w") as output:
+                json.dump(updated, output, separators=(",", ":"))
+                output.write("\n")
+            os.replace(temporary, destination)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+
+
+if __name__ == "__main__":
+    if os.geteuid() == 0:
+        sys.exit("Run this script as your normal user.")
+    running = subprocess.run(
+        ["pgrep", "-u", str(os.getuid()), "-x", "brave"],
+        stdout=subprocess.DEVNULL,
+    ).returncode == 0
+    migrate_extension(
+        Path.home() / '.config/BraveSoftware/Brave-Browser',
+        Path.home() / '.local/share/brave/extensions/video-repeater',
+        running=running,
+    )
+    if running:
+        print("Brave is running; appearance settings will apply on the next fresh launch through brave-launch.")
+        sys.exit(0)
+    configure_brave(
+        Path.home() / ".config/BraveSoftware/Brave-Browser",
+        Path(__file__).resolve().parents[2] / ".config/BraveSoftware/Brave-Browser",
+    )

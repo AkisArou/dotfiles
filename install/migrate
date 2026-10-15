@@ -1,0 +1,226 @@
+#!/usr/bin/env python3
+"""Migrate an existing computer to the home/ and root/ repository layout."""
+
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+from legacy_paths import relocate
+from link_tree import backup, deploy, deployment_rules, replace_link
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'home/.local/libexec'))
+from browser_paths import migrate_extension
+
+
+def write_local_file(path, contents, mode):
+    descriptor, temporary = tempfile.mkstemp(prefix='.dotfiles-', dir=path.parent)
+    try:
+        with os.fdopen(descriptor, 'wb') as output:
+            output.write(contents)
+        os.chmod(temporary, mode)
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
+def detach_managed_configs(paths, repo, *, dry_run=False, planned_links=None):
+    for path in paths:
+        if not path.is_symlink():
+            continue
+        target = (planned_links or {}).get(path, path.resolve())
+        if target.is_file() and target.is_relative_to(repo):
+            print(f'Keep local config as a regular file: {path}')
+            if not dry_run:
+                write_local_file(path, target.read_bytes(), target.stat().st_mode & 0o777)
+
+
+def detach_managed_directories(repo, home, *, dry_run=False, planned_links=None):
+    source = repo / 'home'
+    _, rules = deployment_rules(source)
+    directories = set()
+    for method in ('merge', 'import'):
+        for relative in rules.get(method, {}):
+            path = Path(relative)
+            directories.update(parent for parent in path.parents if parent != Path('.'))
+            if (source / path).is_dir():
+                directories.add(path)
+    for relative in sorted(directories, key=lambda path: len(path.parts)):
+        destination = home / relative
+        if not destination.is_symlink():
+            continue
+        target = (planned_links or {}).get(destination, destination.resolve())
+        if not target.is_dir() or not target.is_relative_to(repo):
+            continue
+        print(f'Keep managed settings in a real directory: {destination}')
+        if planned_links is not None:
+            planned_links[destination] = target
+        if not dry_run:
+            with tempfile.TemporaryDirectory(prefix='.dotfiles-', dir=destination.parent) as directory:
+                contents = Path(directory) / 'contents'
+                shutil.copytree(target, contents, symlinks=True)
+                backup(destination)
+                os.replace(contents, destination)
+
+
+def links_under(base):
+    if base.is_symlink():
+        yield base
+        return
+    for directory, dirs, files in os.walk(base):
+        for name in dirs + files:
+            path = Path(directory) / name
+            if path.is_symlink() and '.before-dotfiles' not in path.name:
+                yield path
+
+
+def remove_old_codex_wrapper(home, repo, old_repo, *, dry_run=False):
+    path = home / '.codex/codex.py'
+    if not path.is_symlink():
+        return
+    target = Path(os.path.abspath(path.parent / path.readlink()))
+    owned = {base / relative for base in (repo, old_repo)
+             for relative in ('codex/codex.py', 'home/.codex/codex.py')}
+    if target in owned:
+        print(f'Remove old Codex wrapper link: {path}')
+        if not dry_run:
+            path.unlink()
+
+
+def migrate_links(links, repo, old_repo, *, dry_run=False):
+    planned = {}
+    for link in links:
+        old = Path(os.path.abspath(link.parent / link.readlink()))
+        try:
+            relative = old.relative_to(old_repo).as_posix()
+        except ValueError:
+            continue
+        moved = relocate(relative)
+        if moved is None:
+            continue
+        target = repo / moved
+        # Leave links that were already broken before this migration alone.
+        if target.exists():
+            replace_link(target, link, dry_run=dry_run)
+            planned[link] = target
+    return planned
+
+
+def migrate_claude_hooks(home, old_repo, *, dry_run=False):
+    config = Path(os.environ.get('CLAUDE_CONFIG_DIR') or home / '.claude').expanduser()
+    state = Path(os.environ.get('XDG_STATE_HOME') or home / '.local/state').expanduser()
+    paths = [config / 'settings.json', *sorted((state / 'dotfiles/claude').rglob('settings.json'))]
+    replacements = {
+        '$HOME/dotfiles/tmux/': '$HOME/.config/tmux/',
+        '~/dotfiles/tmux/': '~/.config/tmux/',
+        f'{old_repo}/tmux/': f'{home}/.config/tmux/',
+    }
+
+    def rewrite(value):
+        if isinstance(value, dict):
+            return {key: rewrite(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [rewrite(item) for item in value]
+        if isinstance(value, str):
+            for old, new in replacements.items():
+                value = value.replace(old, new)
+        return value
+
+    for path in paths:
+        if not path.is_file():
+            continue
+        original = json.loads(path.read_text())
+        updated = rewrite(original)
+        if original != updated:
+            print(f'Update hook paths: {path}')
+            saved = backup(path, dry_run=dry_run)
+            if not dry_run:
+                write_local_file(path, (json.dumps(updated, indent=2) + '\n').encode(),
+                                 saved.stat().st_mode & 0o777)
+
+
+def refresh_session(home):
+    for variable, command in (('SWAYSOCK', 'swaymsg'), ('I3SOCK', 'i3-msg')):
+        if os.environ.get(variable) and shutil.which(command):
+            subprocess.run([command, 'reload'], check=True, stdout=subprocess.DEVNULL)
+            break
+    if shutil.which('tmux') and subprocess.run(
+        ['tmux', 'has-session'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+    ).returncode == 0:
+        subprocess.run(['tmux', 'source-file', str(home / '.tmux.conf')], check=True)
+    if shutil.which('systemctl'):
+        if subprocess.run(['systemctl', '--user', 'daemon-reload'],
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
+            print('User service manager is unavailable; services will use the new paths on next login.')
+            return
+        if subprocess.run(['systemctl', '--user', 'is-active', '--quiet', 'tmux-save-on-shutdown.service']).returncode == 0:
+            subprocess.run(['systemctl', '--user', 'restart', 'tmux-save-on-shutdown.service'], check=True)
+
+
+def main():
+    repo = Path(__file__).resolve().parent.parent
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--skip-root', action='store_true', help='Migrate only personal files')
+    parser.add_argument('--no-reload', action='store_true', help='Leave running tmux and user services alone')
+    parser.add_argument('--old-repo', type=Path, default=repo,
+                        help='Previous checkout path, if the checkout itself moved')
+    parser.add_argument('--root-only', action='store_true', help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    old_repo = args.old_repo.expanduser().absolute()
+    if args.root_only:
+        if os.geteuid() != 0 and not args.dry_run:
+            parser.error('--root-only requires sudo')
+        for base in (Path('/etc'), Path('/usr/share/chromium/extensions')):
+            migrate_links(links_under(base), repo, old_repo, dry_run=args.dry_run)
+        if not args.dry_run:
+            subprocess.run(['systemctl', 'daemon-reload'], check=True)
+        return
+    if os.geteuid() == 0:
+        parser.error('Run as your normal user; the script uses sudo for system files')
+
+    home = Path.home()
+    claude = Path(os.environ.get('CLAUDE_CONFIG_DIR') or home / '.claude').expanduser()
+    codex = Path(os.environ.get('CODEX_HOME') or home / '.codex').expanduser()
+    remove_old_codex_wrapper(home, repo, old_repo, dry_run=args.dry_run)
+    links = [path for path in home.iterdir() if path.is_symlink()]
+    for directory in ('.config', '.local/bin', '.local/libexec', '.local/share/applications',
+                      '.local/share/nable-private-access', '.codex/themes', '.codex/config.toml',
+                      '.claude/settings.json', '.themes', '.ssh'):
+        links.extend(links_under(home / directory))
+    links.extend(path for path in (claude / 'settings.json', codex / 'config.toml') if path.is_symlink())
+    planned = migrate_links(dict.fromkeys(links), repo, old_repo, dry_run=args.dry_run)
+    detach_managed_directories(repo, home, dry_run=args.dry_run, planned_links=planned)
+    deploy(repo / 'home', home, dry_run=args.dry_run, planned_links=planned)
+    detach_managed_configs((claude / 'settings.json', codex / 'config.toml'), repo,
+                           dry_run=args.dry_run, planned_links=planned)
+    migrate_claude_hooks(home, old_repo, dry_run=args.dry_run)
+    running = shutil.which('pgrep') and subprocess.run(
+        ['pgrep', '-u', str(os.getuid()), '-x', 'brave'], stdout=subprocess.DEVNULL,
+    ).returncode == 0
+    migrate_extension(home / '.config/BraveSoftware/Brave-Browser',
+                      home / '.local/share/brave/extensions/video-repeater',
+                      running=running, dry_run=args.dry_run)
+    sys.stdout.flush()
+    if not args.skip_root:
+        command = [sys.executable, str(Path(__file__).resolve()), '--root-only', '--old-repo', str(old_repo)]
+        if args.dry_run:
+            command.append('--dry-run')
+        else:
+            command.insert(0, 'sudo')
+        subprocess.run(command, check=True)
+    if not args.dry_run and not args.no_reload:
+        refresh_session(home)
+    print('Migration preview complete.' if args.dry_run else 'Migration complete.')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+        print(f'Migration failed: {error}', file=sys.stderr)
+        sys.exit(1)

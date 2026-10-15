@@ -1,0 +1,250 @@
+# Shared defaults, loaded through /etc/codex/config.toml.
+# Codex keeps local overrides and remembered state in ~/.codex/config.toml.
+
+approvals_reviewer = "user"
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+model = "gpt-6.1-sol"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
+
+[tui]
+theme = "vscode"
+# tmux converts the status component to a leading icon.
+terminal_title = ["spinner", "thread", "status"]
+
+# Keep each tmux pane associated with its exact conversation for Resurrect.
+[[hooks.SessionStart]]
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/.config/tmux/agent-sessions.py" codex-hook'
+timeout = 2
+
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/.config/tmux/agent-sessions.py" codex-hook'
+timeout = 2
+
+[[hooks.SessionEnd]]
+[[hooks.SessionEnd.hooks]]
+type = "command"
+command = '/usr/bin/python3 "$HOME/.config/tmux/agent-sessions.py" codex-hook'
+timeout = 2
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
+
+[mcp_servers.react-aria]
+command = "npx"
+args = ["@react-aria/mcp@latest"]
+
+[mcp_servers.huly]
+command = "npx"
+args = ["-y", "@firfi/huly-mcp@latest"]
+env_vars = ["HULY_URL", "HULY_TOKEN", "HULY_WORKSPACE"]
+
+[mcp_servers.huly.env]
+# Trust the internal Huly CA already installed in the system certificate store.
+NODE_USE_SYSTEM_CA = "1"
+
+[mcp_servers.expo]
+url = "https://mcp.expo.dev/mcp"
+
+[mcp_servers.argent]
+command = "argent"
+args = ["mcp"]
+
+[mcp_servers.argent.tools.boot-device]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.button]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-component-tree]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-connect]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-evaluate]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-inspect-element]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-log-registry]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-reload-metro]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.debugger-status]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.describe]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.dismiss-update]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-add-echo]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-add-step]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-execute]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-finish-recording]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-read-prerequisite]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.flow-start-recording]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gather-workspace-data]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gesture-custom]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gesture-pinch]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gesture-rotate]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gesture-swipe]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.gesture-tap]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.keyboard]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.launch-app]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.list-devices]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-describe-screen]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-devtools-status]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-find-views]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-full-hierarchy]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-network-logs]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-profiler-analyze]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-profiler-start]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-profiler-stop]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-user-interactable-view-at-point]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.native-view-at-point]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.open-url]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-combined-report]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-commit-query]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-cpu-query]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-load]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.profiler-stack-query]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-analyze]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-component-source]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-cpu-summary]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-fiber-tree]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-renders]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-start]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-status]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.react-profiler-stop]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.reinstall-app]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.restart-app]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.rotate]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.run-sequence]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.screenshot]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.stop-all-simulator-servers]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.stop-metro]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.stop-simulator-server]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.update-argent]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.view-network-logs]
+approval_mode = "approve"
+
+[mcp_servers.argent.tools.view-network-request-details]
+approval_mode = "approve"
+
+[mcp_servers.mdn]
+url = "https://mcp.mdn.mozilla.net/"
+
+[mcp_servers.mdn.http_headers]
+X-Moz-1st-Party-Data-Opt-Out = "1"
+
+[mcp_servers.orcode]
+command = "orcode"
+args = ["mcp", "--host", "codex"]

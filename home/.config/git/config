@@ -1,0 +1,133 @@
+[user]
+  name = AkisArou
+  email = akisarou90@gmail.com
+
+[github]
+	user = AkisArou
+
+[includeIf "gitdir:~/nable-solutions/.git"]
+  path = ./config-nable
+
+[core]
+  pager = delta
+  # Global ignore file (not shared)
+  excludesfile = ~/.gitignore_global
+  editor = nvim
+  # Don't consider trailing space change as a cause for merge conflicts
+  whitespace = -trailing-space
+
+[delta]
+  ; side-by-side = true
+  line-numbers = true
+	navigate = true
+  dark = true
+  features = vscode
+  true-color = always
+  line-numbers-left-format = "{nm:^4}⋮ "
+  line-numbers-right-format = "{np:^4}: "
+
+[delta "vscode"]
+  syntax-theme = vscode
+  hunk-header-decoration-style = "#252526 ul"
+  file-style = "#DCDCAA"
+  file-decoration-style = "#121314 ul ol"
+  # minus
+  minus-style                   = syntax "#321f1f"
+  minus-non-emph-style          = syntax "#321f1f"
+  minus-emph-style              = syntax "#5a2a2a"
+  minus-empty-line-marker-style = syntax "#321f1f"
+  line-numbers-minus-style      = "#f48771"
+  # plus
+  plus-style                    = syntax "#1f3325"
+  plus-non-emph-style           = syntax "#1f3325"
+  plus-emph-style               = syntax "#2f4f36"
+  plus-empty-line-marker-style  = syntax "#1f3325"
+  line-numbers-plus-style       = "#89d185"
+  # zero
+  line-numbers-zero-style       = "#5a5a5a"
+
+[interactive]
+	diffFilter = delta --color-only
+
+[merge]
+	tool = codediff
+
+[mergetool]
+  prompt = false
+  keepBackup = false
+
+[mergetool "nvimdiff"]
+  layout = "LOCAL,BASE,REMOTE / MERGED"
+
+[mergetool "codediff"]
+	cmd = nvim \"$MERGED\" -c \"CodeDiff merge \\\"$MERGED\\\"\"
+
+[diff]
+	tool = codediff
+  colorMoved = default
+
+[difftool]
+	prompt = false
+
+[difftool "nvimdiff"]
+  cmd = "nvim -d \"$LOCAL\" \"$REMOTE\""
+
+[difftool "nvimdifftool"]
+  cmd = nvim -c "\"DiffTool $LOCAL $REMOTE\""
+
+[difftool "codediff"]
+  cmd = "$HOME/.config/git/codediff" "$LOCAL" "$REMOTE"
+
+[fetch]
+  # Auto-fetch submodule changes (sadly, won't auto-update)
+  recurseSubmodules = on-demand
+
+[grep]
+  break = true
+  heading = true
+  lineNumber = true
+  # Consider most regexes to be ERE
+  extendedRegexp = true
+
+[log]
+  # Use abbrev SHAs whenever possible/relevant instead of full 40 chars
+  abbrevCommit = true
+  # Automatically --follow when given a single path
+  follow = true
+  # Disable decorate for reflog
+  # (because there is no dedicated `reflog` section available)
+  decorate = false
+	date = format-local:%A %d/%m/%Y %H:%M
+
+[pull]
+  rebase = merges
+
+[push]
+  # Default push should only push the current branch to its push target, regardless of its remote name
+  default = upstream
+  # When pushing, also push tags whose commit-ishs are now reachable upstream
+  followTags = true
+
+[status]
+  # Display submodule rev change summaries in status
+  submoduleSummary = true
+  # Recursively traverse untracked directories to display all contents
+  showUntrackedFiles = all
+
+[tag]
+  # Sort tags as version numbers whenever applicable, so 1.10.2 is AFTER 1.2.0.
+  sort = version:refname
+
+[versionsort]
+  prereleaseSuffix = -pre
+  prereleaseSuffix = .pre
+  prereleaseSuffix = -beta
+  prereleaseSuffix = .beta
+  prereleaseSuffix = -rc
+  prereleaseSuffix = .rc
+
+[init]
+	defaultBranch = main
+
+[credentials]
+	helper = --help

@@ -1,0 +1,16 @@
+[Unit]
+Description=Save tmux sessions before shutdown or reboot
+After=dbus.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.config/tmux/save-on-shutdown.py
+Restart=on-failure
+RestartSec=3s
+TimeoutStopSec=1s
+UnsetEnvironment=TMUX TMUX_PANE
+UMask=0077
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=default.target

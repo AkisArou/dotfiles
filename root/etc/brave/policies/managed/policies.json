@@ -1,0 +1,16 @@
+{
+  "BraveRewardsDisabled": true,
+  "BraveWalletDisabled": true,
+  "BraveVPNDisabled": 1,
+  "BraveAIChatEnabled": false,
+  "BraveNewsDisabled": true,
+  "BraveP3AEnabled": false,
+  "BraveStatsPingEnabled": false,
+  "BraveWebDiscoveryEnabled": false,
+  "MetricsReportingEnabled": false,
+  "ShowHomeButton": false,
+  "NewTabPageLocation": "file:///home/akisarou/.local/share/brave/landing.html",
+  "TorDisabled": false,
+  "PasswordManagerEnabled": false,
+  "DnsOverHttpsMode": "automatic"
+}

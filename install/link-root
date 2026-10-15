@@ -1,0 +1,36 @@
+#!/usr/bin/env python3
+"""Deploy root/ and the console configuration for this machine."""
+
+import argparse
+from pathlib import Path
+import os
+import sys
+
+from link_tree import deploy
+
+
+def install_root(repo, *, dry_run=False, destination=Path('/'), planned_links=None):
+    deploy(repo / 'root', destination, dry_run=dry_run,
+           planned_links=planned_links)
+    model_file = Path('/sys/class/dmi/id/product_name')
+    model = model_file.read_text().strip() if model_file.exists() else ''
+    console = 'asus-expertbook.conf' if model == 'ASUS EXPERTBOOK P5405CSA' else 'desktop.conf'
+    deploy(repo / 'root/etc/vconsole' / console,
+           destination / 'etc/vconsole.conf', dry_run=dry_run)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args()
+    if os.geteuid() != 0 and not args.dry_run:
+        parser.error('Run with sudo to deploy system files')
+    install_root(Path(__file__).resolve().parent.parent, dry_run=args.dry_run)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, ValueError) as error:
+        print(f'System deployment failed: {error}', file=sys.stderr)
+        sys.exit(1)

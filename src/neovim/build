@@ -1,0 +1,44 @@
+#!/bin/sh
+
+recipe_directory="$(dirname -- "$(readlink -f -- "$0")")"
+
+INSTALL_DIR="$HOME/neovim"
+REPO_URL="https://github.com/neovim/neovim"
+NAME="Neovim"
+BIN_DIR=bin
+GLOBAL_BIN="/usr/local/bin/nvim"
+
+build_neovim() {
+  local CFLAGS="-O2 -march=native"
+  local CXXFLAGS="$CFLAGS"
+
+  CC=clang \
+    CFLAGS="$CFLAGS" \
+    CXXFLAGS="$CXXFLAGS" \
+    make CMAKE_BUILD_TYPE=Release \
+    CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$INSTALL_DIR"
+
+  make install
+
+  sudo ln -sfn "$INSTALL_DIR/bin/nvim" "$GLOBAL_BIN"
+}
+
+post_build_neovim() {
+  cd "$INSTALL_DIR" || return 1
+
+  FILE="runtime/doc/news.txt"
+
+  # Check if file changed between previous HEAD and new HEAD
+  if git diff --quiet HEAD@{1} HEAD -- "$FILE"; then
+    echo "No updates in $FILE."
+  else
+    echo "===== Updates detected in $FILE ====="
+    git diff HEAD@{1} HEAD -- "$FILE"
+    echo "====================================="
+  fi
+}
+
+BUILD_CALLBACK="build_neovim"
+POST_BUILD_CALLBACK="post_build_neovim"
+
+. "$recipe_directory/../lib/build-from-source.sh"

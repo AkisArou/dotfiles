@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+if ((EUID == 0)); then
+  printf '%s\n' "Run this script as your normal user; it uses sudo when needed." >&2
+  exit 1
+fi
+
+source "$HOME/dotfiles/home/.config/shell/common/functions"
+
+sudo usermod -aG wheel akisarou
+
+sudo cp "/home/akisarou/dotfiles/root/etc/sudoers.d/sudoers" /etc/sudoers.d/sudoers
+sudo chown root:root /etc/sudoers.d/sudoers
+
+sudo pacman -S --needed zsh
+
+# Check if the current shell is zsh
+if [[ "$SHELL" != */zsh ]]; then
+  print_info "Current shell is not zsh. Changing default shell to zsh..."
+  chsh -s $(which zsh)
+else
+  print_success "Current shell is already zsh."
+fi
+
+"$HOME/dotfiles/install/ssh-gen"
+
+print_success "DONE!"

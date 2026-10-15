@@ -1,3 +1,0 @@
-#!/usr/bin/zsh
-
-rofi -show power-menu -modi power-menu:"$HOME/dotfiles/rofi/powermenu-script"

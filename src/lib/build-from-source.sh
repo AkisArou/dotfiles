@@ -1,0 +1,71 @@
+#!/bin/sh
+
+# This file must be sourced:
+#   . ./build-from-source.sh
+#
+# Requires the following variables to be set before sourcing:
+#   INSTALL_DIR
+#   REPO_URL
+#   NAME
+#   BUILD_CALLBACK                   (name of the function)
+#   POST_BUILD_CALLBACK (optional)   (name of the function)
+
+# Ensure required vars exist
+if [ -z "$INSTALL_DIR" ] || [ -z "$REPO_URL" ] || [ -z "$NAME" ] || [ -z "$BUILD_CALLBACK" ]; then
+  echo "Error: Required variables are not set:"
+  echo "  INSTALL_DIR, REPO_URL, NAME, BUILD_CALLBACK"
+  return 1
+fi
+
+# Ensure callback function exists
+if ! command -v "$BUILD_CALLBACK" >/dev/null 2>&1; then
+  echo "Error: Build callback '$BUILD_CALLBACK' is not defined."
+  return 1
+fi
+
+build() {
+  echo "Building $NAME..."
+  cd "$INSTALL_DIR" || exit 1
+  $BUILD_CALLBACK
+}
+
+post_build() {
+  if [ -n "$POST_BUILD_CALLBACK" ] && command -v "$POST_BUILD_CALLBACK" >/dev/null 2>&1; then
+    "$POST_BUILD_CALLBACK"
+  fi
+}
+
+# Clone or update repository
+if [ -d "$INSTALL_DIR" ]; then
+  echo "$NAME already installed... checking for updates..."
+
+  cd "$INSTALL_DIR" || return 1
+
+  git fetch
+
+  LOCAL_HASH=$(git rev-parse @)
+  REMOTE_HASH=$(git rev-parse @{u})
+  BASE_HASH=$(git merge-base @ @{u})
+
+  if [ "$LOCAL_HASH" = "$REMOTE_HASH" ]; then
+    echo "$NAME is already up to date."
+    return 0
+  elif [ "$LOCAL_HASH" = "$BASE_HASH" ]; then
+    echo "Changes detected for $NAME. Pulling and rebuilding..."
+    git pull --rebase
+    build
+    post_build
+  else
+    echo "Local changes diverged from remote for $NAME. Manual intervention required."
+    return 1
+  fi
+
+else
+  echo "$NAME not found. Cloning and building..."
+  git clone --depth=1 "$REPO_URL" "$INSTALL_DIR"
+  build
+fi
+
+echo "$NAME is installed and up-to-date."
+
+return 0

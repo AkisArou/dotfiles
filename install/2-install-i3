@@ -1,0 +1,26 @@
+#!/usr/bin/zsh
+
+source "$HOME/dotfiles/install/lib/packages.sh"
+
+clear
+echo "Installing xorg with i3wm..."
+echo "----------------------------"
+echo ""
+
+packages=(
+  "i3-wm"
+  "picom"
+  "polybar"
+  "xidlehook"
+  "xorg"
+  "xorg-xinit"
+  "xorg-xinput"
+  "xsel"
+  "xwallpaper"
+)
+
+install_packages "${packages[@]}"
+
+~/dotfiles/src/st/build
+
+print_success "DONE!"

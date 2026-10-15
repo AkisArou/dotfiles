@@ -1,0 +1,44 @@
+#!/usr/bin/zsh
+
+set -e
+
+if ((EUID == 0)); then
+  print -u2 "Run this script as your normal user; it uses sudo when needed."
+  exit 1
+fi
+
+repo_directory="${0:A:h:h}"
+source "$repo_directory/home/.config/shell/common/functions"
+
+clear
+echo "Applying application configs..."
+echo "-------------------------------"
+echo ""
+
+# Merge the installation trees, including hidden files, into their destinations.
+python3 "$repo_directory/install/deploy-home"
+sudo python3 "$repo_directory/install/link-root"
+
+sudo sysctl --system >/dev/null
+if [[ -e /sys/module/zswap/parameters/enabled ]]; then
+  printf '0\n' | sudo tee /sys/module/zswap/parameters/enabled >/dev/null
+fi
+zsh "$repo_directory/install/configure-swapfile"
+sudo systemctl start dev-zram0.swap
+
+sudo systemd-hwdb update
+sudo udevadm trigger --subsystem-match=input --property-match=ID_INPUT_KEYBOARD=1
+sudo mkinitcpio -P
+if [[ -f /etc/default/grub ]]; then
+  sudo grub-mkconfig -o /boot/grub/grub.cfg
+fi
+
+sudo python3 "$repo_directory/install/configure_hosts.py" \
+  "$HOME/.config/hosts/blocklist" \
+  "$HOME/.config/hosts/allowlist"
+if systemctl is-active --quiet systemd-resolved.service; then
+  sudo resolvectl flush-caches
+fi
+bat cache --build
+
+print_success "DONE!"

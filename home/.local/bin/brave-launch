@@ -1,0 +1,3 @@
+#!/usr/bin/zsh
+python3 "$HOME/.local/libexec/configure-brave" >/dev/null
+exec /usr/bin/brave --password-store=basic --remote-debugging-port=9222 "$@"
