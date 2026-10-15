@@ -40,6 +40,15 @@ args = ["chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
 command = "npx"
 args = ["@react-aria/mcp@latest"]
 
+[mcp_servers.huly]
+command = "npx"
+args = ["-y", "@firfi/huly-mcp@latest"]
+env_vars = ["HULY_URL", "HULY_TOKEN", "HULY_WORKSPACE"]
+
+[mcp_servers.huly.env]
+# Trust the internal Huly CA already installed in the system certificate store.
+NODE_USE_SYSTEM_CA = "1"
+
 [mcp_servers.expo]
 url = "https://mcp.expo.dev/mcp"
 

@@ -9,6 +9,10 @@ if [[ ! -e $env_file ]]; then
     print -r -- 'DESKTOP_MAC=""'
     print -r -- 'EXPO_TOKEN=12345'
     print -r -- 'SENTRY_AUTH_TOKEN=12345'
+    print -r -- 'MODEL_API_KEY=""'
+    print -r -- 'HULY_URL=""'
+    print -r -- 'HULY_TOKEN=""'
+    print -r -- 'HULY_WORKSPACE=""'
   } >"$env_file"
 
   print -r -- 'Created ~/.env file.'

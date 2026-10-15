@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ "$EUID" -eq 0 ]]; then
+  echo "Run nable-private-access-connect as the desktop user, without sudo." >&2
+  exit 2
+fi
+
+connection="nable-private-access"
+script_directory="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+install_prefix="$(cd -- "$script_directory/.." && pwd)"
+resolved_source="${install_prefix}/share/nable-private-access/resolved.conf"
+resolved_directory="/run/systemd/resolved.conf.d"
+resolved_drop_in="${resolved_directory}/nable-private-access.conf"
+
+for command_name in grep install ip resolvectl rm sleep sudo swanctl systemctl timeout; do
+  command -v "$command_name" >/dev/null || {
+    echo "Required command is missing: ${command_name}" >&2
+    exit 1
+  }
+done
+[[ -r "$resolved_source" ]] || {
+  echo "Private DNS configuration is missing: ${resolved_source}" >&2
+  exit 1
+}
+
+vpn_address_is_installed() {
+  ip -4 -o address show 2>/dev/null \
+    | grep -Eq '[[:space:]]10\.0\.62\.[0-9]+/32([[:space:]]|$)'
+}
+
+remove_private_dns() {
+  sudo rm -f "$resolved_drop_in" || true
+  sudo systemctl restart systemd-resolved.service >/dev/null 2>&1 || true
+  sudo resolvectl flush-caches >/dev/null 2>&1 || true
+}
+
+rollback() {
+  local exit_code="${1:-1}"
+  trap - ERR INT TERM
+
+  printf '\nConnection setup failed; restoring the previous network state.\n' >&2
+  sudo swanctl --terminate --ike "$connection" --timeout 10 >/dev/null 2>&1 || true
+  remove_private_dns
+
+  for attempt in {1..10}; do
+    if ! vpn_address_is_installed; then
+      break
+    fi
+    sleep 1
+  done
+  if vpn_address_is_installed; then
+    printf '%s\n' \
+      'The IKEv2 virtual address is still installed after termination.' \
+      >&2
+    printf '%s\n' \
+      'Retry nable-private-access-disconnect after the IKEv2 state clears.' \
+      >&2
+  fi
+
+  exit "$exit_code"
+}
+
+fail() {
+  printf '%s\n' "$1" >&2
+  rollback 1
+}
+
+trap 'rollback $?' ERR
+trap 'rollback 130' INT TERM
+
+sudo -v
+systemctl is-active --quiet systemd-resolved.service || {
+  echo "systemd-resolved is required for private split DNS." >&2
+  exit 1
+}
+
+sudo systemctl start strongswan.service
+sudo swanctl --load-conns
+
+ike_active="no"
+if sudo swanctl --list-sas --ike "$connection" 2>/dev/null \
+  | grep -Fq 'ESTABLISHED'; then
+  ike_active="yes"
+fi
+
+if [[ "$ike_active" != "yes" ]]; then
+  if [[ "${NABLE_PRIVATE_ACCESS_REUSE_LOADED_KEY:-no}" != "yes" ]]; then
+    printf '\nEnter the private-key passphrase created during enrollment.\n'
+    printf 'It is read directly by swanctl and is not stored.\n\n'
+    sudo swanctl --load-creds
+  fi
+
+  sudo swanctl --initiate --child "$connection" --timeout 60
+else
+  printf 'The existing Nable IPsec tunnel is established; reusing it.\n'
+fi
+
+route_to_private_dns="$(ip -4 route get 10.0.0.2)"
+if [[ "$route_to_private_dns" != *"src 10.0.62."* ]]; then
+  fail "The private DNS route is not using the assigned VPN address: ${route_to_private_dns}"
+fi
+
+sudo install -d -m 0755 "$resolved_directory"
+sudo install -m 0644 "$resolved_source" "$resolved_drop_in"
+sudo systemctl restart systemd-resolved.service
+sudo resolvectl flush-caches
+
+dns_ready="no"
+for attempt in {1..10}; do
+  dns_output=""
+  if dns_output="$(
+    timeout --foreground 8s \
+      resolvectl query \
+        huly.nable.internal \
+        hermes.nable.internal \
+        grafana.nable.internal \
+        2>/dev/null
+  )" \
+    && [[ "$(grep -Eoc '(^|[[:space:]])10\.0\.4\.50([[:space:]]|$)' <<< "$dns_output")" -ge 3 ]]; then
+    dns_ready="yes"
+    break
+  fi
+  sleep 1
+done
+
+if [[ "$dns_ready" != "yes" ]]; then
+  fail "Private split DNS did not resolve the private service names."
+fi
+
+printf '\nNable VPN is connected.\n'
+sudo swanctl --list-sas --ike "$connection"
+
+trap - ERR INT TERM

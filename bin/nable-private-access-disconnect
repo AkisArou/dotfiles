@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ "$EUID" -eq 0 ]]; then
+  echo "Run nable-private-access-disconnect as the desktop user, without sudo." >&2
+  exit 2
+fi
+
+connection="nable-private-access"
+resolved_drop_in="/run/systemd/resolved.conf.d/nable-private-access.conf"
+dns_cleanup_failed="no"
+
+for command_name in grep ip resolvectl rm sleep sudo swanctl systemctl; do
+  command -v "$command_name" >/dev/null || {
+    echo "Required command is missing: ${command_name}" >&2
+    exit 1
+  }
+done
+
+vpn_address_is_installed() {
+  ip -4 -o address show 2>/dev/null \
+    | grep -Eq '[[:space:]]10\.0\.62\.[0-9]+/32([[:space:]]|$)'
+}
+
+sudo -v
+# Terminate unconditionally.  A failed or interrupted negotiation can leave a
+# virtual IP installed even though swanctl does not report an ESTABLISHED SA.
+# "No matching SA" is already the desired end state, so that result is safe to
+# ignore; the virtual-address check below remains the authoritative guard.
+sudo swanctl --terminate --ike "$connection" --timeout 30 \
+  >/dev/null 2>&1 || true
+
+for attempt in {1..10}; do
+  if ! vpn_address_is_installed; then
+    break
+  fi
+  sleep 1
+done
+if vpn_address_is_installed; then
+  echo "The IKEv2 virtual address is still installed; the tunnel is not fully down." >&2
+  exit 1
+fi
+
+if ! sudo rm -f "$resolved_drop_in"; then
+  dns_cleanup_failed="yes"
+fi
+if ! sudo systemctl restart systemd-resolved.service; then
+  dns_cleanup_failed="yes"
+fi
+if ! sudo resolvectl flush-caches; then
+  dns_cleanup_failed="yes"
+fi
+
+if [[ "$dns_cleanup_failed" == "yes" ]]; then
+  printf '%s\n' 'IKEv2 is down, but private DNS cleanup failed.' >&2
+  printf '%s\n' 'Retry this disconnect command after fixing systemd-resolved.' >&2
+  exit 1
+fi
+
+printf 'Nable VPN is disconnected.\n'
