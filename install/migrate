@@ -43,7 +43,7 @@ def detach_managed_directories(repo, home, *, dry_run=False, planned_links=None)
     source = repo / 'home'
     _, rules = deployment_rules(source)
     directories = set()
-    for method in ('merge', 'import'):
+    for method in ('merge', 'import', 'mkdir'):
         for relative in rules.get(method, {}):
             path = Path(relative)
             directories.update(parent for parent in path.parents if parent != Path('.'))

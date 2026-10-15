@@ -4,6 +4,7 @@ __pycache__/
 node_modules/
 bookmarks
 home/.config/lazygit/state.yml
+/home/.config/nable/
 tt.*
 .tests
 doc/tags

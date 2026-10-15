@@ -65,6 +65,42 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse(target.is_symlink())
         self.assertEqual(json.loads(target.read_text()), {'accountState': 'personal'})
 
+    def test_private_directories_bootstrap_without_files_or_links_and_preserve_local_state(self):
+        self.write(self.repo / 'home/.config/ordinary/settings', 'ordinary')
+        # Even an accidentally present source must never be linked or copied.
+        self.write(self.repo / 'home/.config/nable/session', 'repository session')
+        self.write(self.repo / 'home/.config/nable/huly-agent/settings', 'repository settings')
+        local = self.home / '.config/nable'
+        deploy(self.repo / 'home', self.home, dry_run=True)
+        self.assertFalse(local.exists())
+        deploy(self.repo / 'home', self.home)
+        self.assertFalse(local.is_symlink())
+        self.assertEqual(local.stat().st_mode & 0o777, 0o700)
+        self.assertEqual((local / 'huly-agent').stat().st_mode & 0o777, 0o700)
+        self.assertEqual(list(local.iterdir()), [local / 'huly-agent'])
+        self.assertEqual(list((local / 'huly-agent').iterdir()), [])
+        session = self.write(local / 'session', 'personal session')
+        secret = self.write(local / 'huly-agent/settings', 'personal secret')
+        local.chmod(0o750)
+        deploy(self.repo / 'home', self.home)
+        self.assertEqual(session.read_text(), 'personal session')
+        self.assertEqual(secret.read_text(), 'personal secret')
+        self.assertEqual(local.stat().st_mode & 0o777, 0o750)
+        self.assertFalse(session.is_symlink())
+        self.assertFalse(secret.is_symlink())
+
+    def test_private_directory_bootstrap_does_not_follow_an_existing_symlink(self):
+        self.write(self.repo / 'home/.config/ordinary/settings', 'ordinary')
+        external = self.base / 'external'
+        external.mkdir()
+        link = self.home / '.config/nable'
+        link.parent.mkdir()
+        link.symlink_to(external)
+        with self.assertRaises(ValueError):
+            deploy(self.repo / 'home', self.home)
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(list(external.iterdir()), [])
+
     def test_root_copy_rules_are_applied_from_the_table(self):
         network = self.write(self.repo / 'root/etc/systemd/network/20-test.network', '[Match]\nName=en*\n')
         environment = self.write(self.repo / 'root/etc/environment', 'EDITOR=vim\n')

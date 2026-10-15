@@ -22,6 +22,10 @@ DEPLOYMENT_RULES = {
         },
         'import': {'.config/dconf/user': 'dconf'},
         'wrap': {'.local/bin/codex': '.local/libexec/codex'},
+        'mkdir': {
+            '.config/nable': 0o700,
+            '.config/nable/huly-agent': 0o700,
+        },
     },
     'root': {
         'copy': {
@@ -103,6 +107,20 @@ def detach_config(path, *, dry_run=False):
         Path(temporary).unlink(missing_ok=True)
 
 
+def create_local_directory(destination, relative, mode, *, dry_run=False):
+    """Create a missing local directory without following or replacing links."""
+    path = destination
+    for part in Path(relative).parts:
+        path = path / part
+        if path.is_symlink() or (path.exists() and not path.is_dir()):
+            raise ValueError(f'Local directory requires a real directory: {path}')
+    if path.is_dir():
+        return
+    print(f'Create local directory: {path}')
+    if not dry_run:
+        path.mkdir(mode=mode, parents=True)
+
+
 def deploy(source, destination, *, dry_run=False, copies=None, planned_links=None):
     """Merge directories; back up conflicting files before linking or copying."""
     source = Path(source).absolute()
@@ -132,10 +150,13 @@ def deploy(source, destination, *, dry_run=False, copies=None, planned_links=Non
                     allowed.add(path)
                     allowed.update(parent for parent in path.parents if parent.is_relative_to(source))
 
-    managed = [name for method in ('merge', 'import') for name in rules.get(method, {})]
+    managed = [name for method in ('merge', 'import', 'mkdir') for name in rules.get(method, {})]
     destination_tree = destination
     for _ in source.relative_to(tree).parts:
         destination_tree = destination_tree.parent
+    for name, mode in rules.get('mkdir', {}).items():
+        if (tree / name).is_relative_to(source):
+            create_local_directory(destination_tree, name, mode, dry_run=dry_run)
 
     def visit(current, target, relative):
         policy_path = current.relative_to(tree).as_posix()
