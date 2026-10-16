@@ -449,7 +449,7 @@ def provider_tooltip(entry, label):
         lines.append("<tt>" + "\n".join(table) + "</tt>")
 
     resets = entry.get("reset_credits")
-    if resets is not None:
+    if resets is not None and resets["available"] > 0:
         count = resets["available"]
         lines.append(f"<span foreground='#6a9955'><b>{count}</b> reset{'s' if count != 1 else ''} available</span>")
         if count:
