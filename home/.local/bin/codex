@@ -1,10 +1,77 @@
 #!/usr/bin/env python3
-"""Run the real Codex CLI with the current project trusted."""
+"""Trust the current project on disk, then run Codex without config overrides."""
 
 import json
 import os
+import selectors
+import subprocess
 import sys
+import time
+import tomllib
 from pathlib import Path
+
+
+def trust_project(executable: Path, project: Path) -> None:
+    config_home = Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex')))
+    config_path = config_home / 'config.toml'
+    config = tomllib.loads(config_path.read_text()) if config_path.exists() else {}
+    if config.get('projects', {}).get(str(project), {}).get('trust_level') == 'trusted':
+        return
+
+    # Let Codex edit its own TOML so comments, other projects, and concurrent
+    # config updates are preserved. No thread or model turn is started here.
+    with subprocess.Popen(
+        [str(executable), 'app-server', '--stdio'],
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        bufsize=0,
+    ) as server:
+        try:
+            with selectors.DefaultSelector() as selector:
+                selector.register(server.stdout, selectors.EVENT_READ)
+                buffer = bytearray()
+
+                def send(message: dict) -> None:
+                    server.stdin.write((json.dumps(message) + '\n').encode())
+                    server.stdin.flush()
+
+                def response(request_id: int) -> dict:
+                    deadline = time.monotonic() + 10
+                    while True:
+                        while b'\n' in buffer:
+                            line, _, rest = buffer.partition(b'\n')
+                            buffer[:] = rest
+                            message = json.loads(line)
+                            if message.get('id') != request_id:
+                                continue
+                            if 'error' in message:
+                                raise RuntimeError(message['error'].get('message', 'config update failed'))
+                            return message
+                        remaining = deadline - time.monotonic()
+                        if remaining <= 0 or not selector.select(remaining):
+                            raise RuntimeError('timed out saving project trust')
+                        chunk = os.read(server.stdout.fileno(), 65536)
+                        if not chunk:
+                            raise RuntimeError('Codex exited before saving project trust')
+                        buffer.extend(chunk)
+
+                send({'id': 1, 'method': 'initialize', 'params': {
+                    'clientInfo': {'name': 'codex-local-launcher', 'version': '1.0.0'},
+                }})
+                response(1)
+                send({'method': 'initialized'})
+                send({'id': 2, 'method': 'config/value/write', 'params': {
+                    'keyPath': 'projects',
+                    'value': {str(project): {'trust_level': 'trusted'}},
+                    'mergeStrategy': 'upsert',
+                }})
+                response(2)
+        finally:
+            server.terminate()
+            try:
+                server.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                server.kill()
+                server.wait()
 
 
 def main() -> None:
@@ -22,9 +89,20 @@ def main() -> None:
     # Keep standalone updates away from this wrapper and shell configuration.
     os.environ['CODEX_INSTALL_DIR'] = str(install_directory)
     os.environ['PATH'] = os.environ.get('PATH', os.defpath) + os.pathsep + str(install_directory)
-    project = json.dumps(str(Path.cwd()))
-    config = f'projects={{{project}={{trust_level="trusted"}}}}'
-    os.execv(str(executable), ['codex', '-c', config, *sys.argv[1:]])
+    administrative = {
+        'app-server', 'mcp', 'features', 'doctor', 'update', 'login', 'logout',
+        'debug', 'completion', 'help', 'remote-control',
+    }
+    arguments = sys.argv[1:]
+    if (not arguments or arguments[0] not in administrative) and not any(
+        argument in {'-h', '--help', '-V', '--version'} for argument in arguments
+    ):
+        try:
+            trust_project(executable, Path.cwd())
+        except (OSError, ValueError, RuntimeError) as error:
+            print(f'codex: could not save project trust: {error}', file=sys.stderr)
+            sys.exit(1)
+    os.execv(str(executable), ['codex', *sys.argv[1:]])
 
 
 if __name__ == "__main__":
