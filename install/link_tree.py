@@ -29,6 +29,7 @@ DEPLOYMENT_RULES = {
     },
     'root': {
         'copy': {
+            'etc/strongswan.d': 0o644,
             'etc/systemd/network': 0o644,
             'etc/sudoers.d': 0o440,
             'etc/issue': 0o644,

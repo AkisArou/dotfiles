@@ -14,6 +14,12 @@ import unittest
 from link_tree import deploy
 
 
+loader = importlib.machinery.SourceFileLoader('link_root', str(Path(__file__).with_name('link-root')))
+spec = importlib.util.spec_from_loader(loader.name, loader)
+link_root = importlib.util.module_from_spec(spec)
+loader.exec_module(link_root)
+
+
 class DeploymentTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -103,14 +109,50 @@ class DeploymentTests(unittest.TestCase):
 
     def test_root_copy_rules_are_applied_from_the_table(self):
         network = self.write(self.repo / 'root/etc/systemd/network/20-test.network', '[Match]\nName=en*\n')
+        vpn = self.write(self.repo / 'root/etc/strongswan.d/charon/resolve.conf', 'resolve { load = no }\n')
         environment = self.write(self.repo / 'root/etc/environment', 'EDITOR=vim\n')
         destination = self.base / 'filesystem'
         deploy(self.repo / 'root', destination)
-        copied = destination / 'etc/systemd/network/20-test.network'
-        self.assertFalse(copied.is_symlink())
-        self.assertEqual(copied.read_bytes(), network.read_bytes())
-        self.assertEqual(copied.stat().st_mode & 0o777, 0o644)
+        for source in (network, vpn):
+            copied = destination / source.relative_to(self.repo / 'root')
+            self.assertFalse(copied.is_symlink())
+            self.assertEqual(copied.read_bytes(), source.read_bytes())
+            self.assertEqual(copied.stat().st_mode & 0o777, 0o644)
         self.assertEqual((destination / 'etc/environment').resolve(), environment)
+
+    def test_root_install_preserves_previous_resolver_and_can_be_repeated(self):
+        for console in ('desktop.conf', 'asus-expertbook.conf'):
+            self.write(self.repo / 'root/etc/vconsole' / console, 'KEYMAP=us\n')
+        old_stub = self.write(self.base / 'old-resolver', 'nameserver 10.0.0.2\n')
+        for previous in ('missing', 'file', 'symlink'):
+            with self.subTest(previous=previous):
+                destination = self.base / previous
+                resolver = destination / 'etc/resolv.conf'
+                if previous == 'file':
+                    self.write(resolver, old_stub.read_text())
+                elif previous == 'symlink':
+                    resolver.parent.mkdir(parents=True)
+                    resolver.symlink_to(old_stub)
+
+                link_root.install_root(self.repo, destination=destination, dry_run=True)
+                if previous == 'missing':
+                    self.assertFalse(destination.exists())
+                else:
+                    self.assertEqual(resolver.read_bytes(), old_stub.read_bytes())
+                    self.assertEqual(resolver.is_symlink(), previous == 'symlink')
+                    self.assertFalse(resolver.with_name('resolv.conf.before-dotfiles').exists())
+
+                link_root.install_root(self.repo, destination=destination)
+                link_root.install_root(self.repo, destination=destination)
+                self.assertEqual(resolver.readlink(), Path('/run/systemd/resolve/stub-resolv.conf'))
+                saved = resolver.with_name('resolv.conf.before-dotfiles')
+                if previous == 'missing':
+                    self.assertFalse(os.path.lexists(saved))
+                else:
+                    self.assertEqual(saved.read_bytes(), old_stub.read_bytes())
+                    self.assertEqual(saved.is_symlink(), previous == 'symlink')
+                self.assertFalse(os.path.lexists(saved.with_name(saved.name + '.1')))
+        self.assertEqual(old_stub.read_text(), 'nameserver 10.0.0.2\n')
 
     def test_full_deployment_merges_defaults_without_linking_live_agent_state(self):
         for name in ('deploy-home', 'link_tree.py', 'configure_claude.py', 'configure_muse.py'):

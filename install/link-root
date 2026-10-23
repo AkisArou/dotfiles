@@ -6,7 +6,7 @@ from pathlib import Path
 import os
 import sys
 
-from link_tree import deploy
+from link_tree import backup, deploy, replace_link
 
 
 def install_root(repo, *, dry_run=False, destination=Path('/'), planned_links=None):
@@ -17,6 +17,14 @@ def install_root(repo, *, dry_run=False, destination=Path('/'), planned_links=No
     console = 'asus-expertbook.conf' if model == 'ASUS EXPERTBOOK P5405CSA' else 'desktop.conf'
     deploy(repo / 'root/etc/vconsole' / console,
            destination / 'etc/vconsole.conf', dry_run=dry_run)
+
+    # DNS state belongs to systemd-resolved, outside the repository tree.
+    resolver = destination / 'etc/resolv.conf'
+    stub = Path('/run/systemd/resolve/stub-resolv.conf')
+    if not (resolver.is_symlink() and resolver.readlink() == stub):
+        if os.path.lexists(resolver):
+            backup(resolver, dry_run=dry_run)
+        replace_link(stub, resolver, dry_run=dry_run)
 
 
 def main():

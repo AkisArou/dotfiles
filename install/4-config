@@ -12,6 +12,8 @@ sudo usermod -aG wheel,audio,video,docker,network,adm,input,storage,wireshark "$
 
 print_info "Enabling systemctl daemons..."
 loginctl enable-linger
+sudo systemctl enable --now systemd-networkd
+sudo systemctl enable --now systemd-resolved
 sudo systemctl enable --now iwd
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
