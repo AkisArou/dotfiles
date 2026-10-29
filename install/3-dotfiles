@@ -17,6 +17,12 @@ echo ""
 
 # Merge the installation trees, including hidden files, into their destinations.
 python3 "$repo_directory/install/deploy-home"
+
+# Explicitly deploy the helper required by tmux's Vim copy-mode bindings.
+python3 "$repo_directory/install/link_tree.py" \
+  "$repo_directory/home/.config/tmux/vim-copy.py" \
+  "$HOME/.config/tmux/vim-copy.py"
+
 sudo python3 "$repo_directory/install/link-root"
 
 sudo sysctl --system >/dev/null
