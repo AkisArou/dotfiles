@@ -4,6 +4,7 @@ import importlib.util
 import os
 from pathlib import Path
 import pty
+import re
 import signal
 import shutil
 import struct
@@ -66,6 +67,12 @@ class Ranges(unittest.TestCase):
         self.yank(text, 5, 'G', 'two\nthree\n', 3, explicit=True)
         self.yank(text, 5, 'gg', 'one\ntwo\n')
         self.yank(text, 5, '$', 'wo\nthree', 2)
+
+    def test_line_yanks_trim_right_padding_and_preserve_indentation(self):
+        document = copy.Document('  first   \n   \n  second \t\n')
+        self.assertEqual(document.copy_text(document.line_span(0, 2)), '  first\n   \n  second\n')
+        # Explicit character selections can intentionally include spaces.
+        self.assertEqual(document.copy_text(copy.Span(0, 10)), '  first   ')
 
     def test_word_objects_at_start_middle_whitespace_and_end(self):
         self.object('previous alpha.beta next', 9, 'W', 'alpha.beta')
@@ -150,6 +157,33 @@ class Ranges(unittest.TestCase):
         self.yank('Last sentence.', 0, ')', 'Last sentence.')
         self.assertEqual(copy.Document('version1.2 still going\n  \nnext').sentence_starts, [0])
 
+    def test_vim_paragraph_boundaries_counts_and_endpoints(self):
+        text = '  alpha\n   \nbeta\n\n\n  gamma\n.IP list\nitem\n.SH title\nsection\n'
+        document = copy.Document(text)
+        for row, column, key, count, target in [
+            (0, 3, '}', 1, 3), (0, 3, '}', 2, 6),
+            (3, 0, '}', 1, 6), (4, 0, '}', 1, 6),
+            (5, 3, '{', 1, 4), (6, 4, '{', 1, 4),
+            (7, 2, '{', 1, 6), (9, 2, '{', 1, 8),
+            (6, 3, '}', 1, 8), (3, 0, '{', 1, 0),
+            (0, 6, '{', 1, 0),
+        ]:
+            with self.subTest(row=row, key=key, count=count):
+                self.assertEqual(document.paragraph_target(document.starts[row] + column, key, count),
+                                 document.starts[target])
+        for line, boundary in [('', True), (' ', False), ('\t', False),
+                               ('.IP', True), ('.P text', True), ('.Pstuff', False),
+                               ('.SH title', True), (' .IP', False), ('\fsection', True),
+                               ('{', False), ('}', False)]:
+            with self.subTest(line=line):
+                self.assertEqual(copy.Document(line).paragraph_boundary(0), boundary)
+        document = copy.Document('first\n界e\u0301')
+        self.assertEqual(document.paragraph_target(0, '}'), document.starts[1] + 1)
+        self.yank('first\nlast', 0, '}', 'first\nlast')
+        self.yank('first\n   \nlast\n\nnext', 0, '}', 'first\n   \nlast\n')
+        with self.assertRaises(copy.NoMotion):
+            copy.Document('one\ntwo').paragraph_target(0, '}', 3)
+
     def test_tags_handle_nesting_attributes_comments_and_void_elements(self):
         text = '<div title="a>b"><p>first <b>bold</b> tail</p><!-- </div> --><br></div>'
         self.object(text, text.index('tail'), 't', 'first <b>bold</b> tail')
@@ -175,10 +209,13 @@ class Terminal(unittest.TestCase):
         config = cls.directory / 'tmux.conf'
         bindings = subprocess.check_output(['python3', str(SCRIPT), 'bindings'], text=True)
         centering = SCRIPT.parents[1].parent / '.tmux.conf'
-        centering = centering.read_text().split('# ALWAYS CENTERED', 1)[1]
+        configuration = centering.read_text()
+        numbering = next(line for line in configuration.splitlines()
+                         if line.startswith('set -gw copy-mode-line-numbers '))
+        centering = configuration.split('# ALWAYS CENTERED', 1)[1]
         config.write_text('set -g mode-keys vi\nset -g status off\nset -g escape-time 0\nset -g set-clipboard off\n'
                           'set -as terminal-features ",xterm-256color:RGB"\n'
-                          'bind -T copy-mode-vi v send -X begin-selection\n' + bindings + centering)
+                          'bind -T copy-mode-vi v send -X begin-selection\n' + numbering + '\n' + bindings + centering)
         cls.tm('-f', str(config), 'new-session', '-d', '-x', '60', '-y', '12', '-s', 'test', 'sleep 1000')
         cls.master, slave = pty.openpty()
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 12, 60, 0, 0))
@@ -404,7 +441,7 @@ class Terminal(unittest.TestCase):
             self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), signature)
             self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'), position)
         finally:
-            self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'off')
+            self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'hybrid')
 
     def test_gv_handles_trimmed_history_and_rejects_cleared_history(self):
         self.tm('set-option', '-g', 'history-limit', '30')
@@ -542,6 +579,105 @@ class Terminal(unittest.TestCase):
         self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 64)
         self.assertFalse(any('clear-selection' in args or 'begin-selection' in args or 'copy-pipe' in args for args in calls))
 
+    def test_vim_paragraph_movements_counts_macros_and_whitespace(self):
+        text = '  one\n   \ntwo\n\n\nthree\n.IP list\nitem\n.SH title\nsection'
+        for row, column, sequence, target_row, target_column in [
+            (0, 2, '}', 3, 0), (0, 2, '2}', 6, 0),
+            (0, 2, '}}', 6, 0), (3, 0, '}', 6, 0),
+            (4, 0, '}', 6, 0), (5, 3, '{', 4, 0),
+            (6, 3, '{', 4, 0), (7, 2, '{', 6, 0),
+            (9, 3, '2{', 6, 0), (3, 0, '{', 0, 0),
+            (0, 3, '{', 0, 0),
+        ]:
+            with self.subTest(sequence=sequence, row=row):
+                self.fixture(text, row=row, column=column)
+                self.keys(sequence)
+                top = int(self.tm('display-message', '-p', '#{copy_position}')) - 1
+                self.assertEqual(top + int(self.tm('display-message', '-p', '#{copy_cursor_y}')), target_row)
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), str(target_column))
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+        self.fixture('\n'.join(['first'] * 11 + ['界e\u0301']), column=2)
+        self.keys('}')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '2:11')
+
+    def test_paragraph_motions_preserve_visual_and_yank_rules(self):
+        text = '  one\n   \ntwo\n\n\nthree\n.IP list\nitem\nnext'
+        for sequence, expected in [
+            ('y}', '  one\n   \ntwo\n'),
+            ('y2}', '  one\n   \ntwo\n\n\nthree\n'),
+            ('2y}', '  one\n   \ntwo\n\n\nthree\n'),
+            ('v}y', 'one\n   \ntwo\n\n'),
+            ('V}y', '  one\n   \ntwo\n\n'),
+        ]:
+            with self.subTest(sequence=sequence):
+                self.fixture(text, column=2)
+                self.keys(sequence, expected)
+        self.fixture(text, row=7, column=2)
+        self.keys('y{', '.IP list\nit')
+        self.fixture('a' * 62 + '.IP not a macro\ntail\n\nnext')
+        self.tm('send-keys', '-X', '-N', '62', 'cursor-right')
+        self.keys('}')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '0:3')
+
+    def test_relative_number_gutter_renders_and_never_enters_yanks(self):
+        self.assertEqual(self.tm('show-options', '-gwv', 'copy-mode-line-numbers'), 'hybrid')
+        self.fixture('\n'.join(f'ROW{i:03}' for i in range(30)), row=13)
+        self.tm('send-keys', '-X', 'scroll-middle')
+        self.drain()
+        self.terminal_output.clear()
+        self.tm('refresh-client')
+        def screen():
+            self.drain()
+            return re.sub(rb'\x1b(?:\[[0-?]*[ -/]*[@-~]|\([A-Za-z0-9])', b'', bytes(self.terminal_output))
+        self.until(lambda: b' 14 ROW013' in screen())
+        self.assertIn(b'  1 ROW012', screen())
+        self.assertIn(b'  1 ROW014', screen())
+        self.assertIn(b'  3 ROW010', screen())
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_line_numbers}'), '1')
+        self.keys('3j')
+        self.keys('Vy', 'ROW016\n')
+        self.keys('gv')
+        self.keys('y', 'ROW016\n')
+        self.keys('q')
+        self.assertEqual(self.tm('display-message', '-p', '#{pane_mode}'), '')
+
+    def test_hidden_gutter_keeps_copy_coordinates_correct(self):
+        self.fixture('\n'.join(f'{i:03} alpha beta' for i in range(100)), row=60, column=4)
+        self.tm('send-keys', '-X', 'line-numbers-off')
+        before = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}')
+        self.keys('yiw', 'alpha')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'), before)
+
+    def test_cached_paragraph_jump_skips_intermediate_scrollback_rows(self):
+        lines = [f'row {i:03}' if i not in (20, 60, 100) else '' for i in range(150)]
+        self.fixture('\n'.join(lines), row=25, column=3)
+        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
+        tmux.command = self.base
+        state = tmux.state()
+        document = tmux.snapshot(state)
+        tmux.commands(tmux.sentence_cache(state, document))
+        self.tm('display-message', '-p', 'native-paragraph-jump-start')
+        self.keys('}')
+        top = int(self.tm('display-message', '-p', '#{copy_position}')) - 1
+        self.assertEqual(top + int(self.tm('display-message', '-p', '#{copy_cursor_y}')), 60)
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '0')
+        messages = self.tm('show-messages').split('native-paragraph-jump-start', 1)[0]
+        self.assertIn('send-keys -X goto-line 61', messages)
+        self.assertNotIn('key }: run-shell "python3 ', messages)
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_cached_motion_compares_line_and_column_numbers_numerically(self):
+        self.fixture('\n'.join('One. Two.' for _ in range(40)), row=9)
+        self.until(lambda: bool(self.tm('show-options', '-pqv', '@vim-copy-sentence-frame')))
+        self.keys('))')
+        top = int(self.tm('display-message', '-p', '#{copy_position}')) - 1
+        self.assertEqual(top + int(self.tm('display-message', '-p', '#{copy_cursor_y}')), 10)
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '0')
+        self.keys('((')
+        top = int(self.tm('display-message', '-p', '#{copy_position}')) - 1
+        self.assertEqual(top + int(self.tm('display-message', '-p', '#{copy_cursor_y}')), 9)
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '0')
+
     def test_gg_remains_available(self):
         self.fixture('\n'.join('line ' + str(i) for i in range(30)), row=20)
         self.keys('gg')
@@ -560,6 +696,45 @@ class Terminal(unittest.TestCase):
             self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
             self.assertEqual(self.tm('display-message', '-p', '#{selection_present},#{selection_active},#{copy_cursor_x}'), '0,0,0')
             self.assertEqual(self.buffer(), 'alpha')
+        finally:
+            self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
+
+    def test_padded_line_yank_highlights_only_the_copied_line(self):
+        self.tm('set-option', '-g', '@vim-copy-highlight-ms', '800')
+        try:
+            header = "• Ran python3 - <<'PY' …"
+            result = '  └ Loaded Vim paragraph bindings and relative line numbers.'
+            for sequence in ['yy', 'Vy']:
+                with self.subTest(sequence=sequence):
+                    self.fixture(header.ljust(60) + '\n' + result)
+                    self.keys(sequence, header + '\n')
+                    self.assertEqual(self.tm('display-message', '-p', '#{selection_start_y}:#{selection_end_y}'), '0:0')
+                    self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_y}'), '0')
+        finally:
+            self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
+
+    def test_counted_padded_line_yank_keeps_range_and_cursor(self):
+        self.tm('set-option', '-g', '@vim-copy-highlight-ms', '800')
+        try:
+            for sequence in ['2yy', 'y2y', 'Vjy']:
+                with self.subTest(sequence=sequence):
+                    self.fixture('  first'.ljust(60) + '\n' + '  界e\u0301 second'.ljust(59) + '\nleave this line alone')
+                    self.keys(sequence, '  first\n  界e\u0301 second\n')
+                    self.assertEqual(self.tm('display-message', '-p', '#{selection_start_y}:#{selection_end_y}'), '0:1')
+            self.fixture('top\n' + '  padded'.ljust(60) + '\nnext', row=1, column=4)
+            self.keys('yy', '  padded\n')
+            self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '4:1')
+        finally:
+            self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
+
+    def test_wrapped_line_yank_trims_only_the_final_padding(self):
+        self.tm('set-option', '-g', '@vim-copy-highlight-ms', '800')
+        try:
+            line = '  ' + 'a' * 65 + ' wrapped content'
+            self.fixture(line.ljust(120) + '\nnext hard line')
+            self.keys('yy', line + '\n')
+            self.assertEqual(self.tm('display-message', '-p', '#{selection_start_y}:#{selection_end_y}'), '0:1')
+            self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '0:0')
         finally:
             self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
 
@@ -748,7 +923,7 @@ class Terminal(unittest.TestCase):
             self.fixture('\n'.join('line ' + str(i) for i in range(1, 21)), row=10)
             self.keys('yy', 'line 11\n')
         finally:
-            self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'off')
+            self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'hybrid')
 
 
 if __name__ == '__main__':

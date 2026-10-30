@@ -27,6 +27,8 @@ import uuid
 
 
 MAX_COUNT = 100000
+_VIM_MACROS = 'IPLPPPQPP TPHPLIPpLpItpplpipbpSHNHH HUnhsh'
+PARAGRAPH_MACROS = frozenset(_VIM_MACROS[i:i + 2] for i in range(0, len(_VIM_MACROS), 2))
 SELECTION_SIGNATURE = ':'.join('#{' + name + '}' for name in (
     'selection_start_x', 'selection_start_y', 'selection_end_x',
     'selection_end_y', 'rectangle_toggle'))
@@ -37,7 +39,7 @@ VISUAL_SELECTION = ('#{&&:#{||:#{selection_present},#{selection_active}},'
 SAVED_FIELDS = ('selection_start_x', 'selection_start_y', 'selection_end_x',
                 'selection_end_y', 'rectangle_toggle', 'selection_mode',
                 'copy_cursor_x', 'copy_cursor_y', 'scroll_position',
-                'copy_position_limit', 'pane_height', 'pane_width')
+                'copy_position_limit', 'pane_height', 'pane_width', 'copy_line_numbers')
 SAVED_SELECTION = json.dumps({
     **{name: '#{' + name + '}' for name in SAVED_FIELDS},
     'numbering': '#{copy-mode-line-numbers}', 'frame': '#{@vim-copy-frame}',
@@ -92,6 +94,15 @@ class Document:
     def line_span(self, first, last, cursor=None):
         first, last = sorted((first, last))
         return Span(self.starts[first], self.starts[last + 1], True, cursor)
+
+    def copy_text(self, span):
+        text = self.text[span.start:span.end]
+        if span.linewise:
+            # Terminal UIs paint trailing spaces to erase the rest of a row.
+            # Keep indentation and whitespace-only lines, but don't put that
+            # right padding after visible text into a line yank.
+            text = re.sub(r'(?<=\S)[ \t]+(?=\n)', '', text)
+        return text
 
     @staticmethod
     def kind(char, big=False):
@@ -226,20 +237,42 @@ class Document:
                 target = self.end(len(self.lines) - 1)
             return self.exclusive(position, target)
         if key in '{}':
-            target = row
-            for _ in range(count):
-                direction = 1 if key == '}' else -1
-                while 0 <= target + direction < len(self.lines) and not self.lines[target].strip():
-                    target += direction
-                while 0 <= target + direction < len(self.lines):
-                    target += direction
-                    if not self.lines[target].strip():
-                        break
-            destination = self.starts[target]
-            if key == '}' and target == len(self.lines) - 1 and self.lines[target].strip():
-                return Span(position, self.end(target))
-            return self.exclusive(position, destination)
+            target = self.paragraph_target(position, key, count)
+            if key == '}' and self.line(target) == len(self.lines) - 1 and self.lines[-1]:
+                return Span(position, self.end(len(self.lines) - 1))
+            return self.exclusive(position, target)
         raise NoMotion('Unsupported yank motion: ' + key)
+
+    def paragraph_boundary(self, row):
+        line = self.lines[row]
+        # :help paragraph: whitespace-only lines are not empty lines. Match
+        # the default 'paragraphs' and 'sections' nroff macros in column zero.
+        return (not line or line.startswith('\f') or
+                (line.startswith('.') and line[1:3].ljust(2) in PARAGRAPH_MACROS))
+
+    def paragraph_target(self, position, key, count=1):
+        row = self.line(position)
+        direction = 1 if key == '}' else -1
+        # Vim's findpar(): ignore the starting line, skip a run of empty
+        # lines, then stop at a boundary after encountering nonempty text.
+        for remaining in range(count, 0, -1):
+            skipped, first = False, True
+            while True:
+                skipped = skipped or bool(self.lines[row])
+                if not first and skipped and self.paragraph_boundary(row):
+                    break
+                if not 0 <= row + direction < len(self.lines):
+                    if remaining > 1:
+                        raise NoMotion('Not enough paragraphs')
+                    break
+                row += direction
+                first = False
+        if direction > 0 and row == len(self.lines) - 1 and self.lines[row]:
+            target = self.end(row) - 1
+            while target > self.starts[row] and cell_width(self.text[target]) == 0:
+                target -= 1
+            return target
+        return self.starts[row]
 
     @cached_property
     def sentence_starts(self):
@@ -530,17 +563,17 @@ class Tmux:
         names = ('copy_cursor_x', 'copy_cursor_y', 'scroll_position', 'copy_position_limit',
                  'pane_height', 'pane_width', 'selection_present', 'selection_active',
                  'selection_start_x', 'selection_start_y', 'selection_end_x', 'selection_end_y',
-                 'rectangle_toggle', 'selection_mode', 'pane_mode', 'copy-mode-line-numbers')
+                 'rectangle_toggle', 'copy_line_numbers', 'selection_mode', 'pane_mode', 'copy-mode-line-numbers')
         values = self.call('display-message', '-p', '-t', self.pane, '\t'.join('#{' + k + '}' for k in names)).rstrip('\n').split('\t')
         state = dict(zip(names, values))
         if state['pane_mode'] != 'copy-mode':
             raise NoMotion('Enter tmux copy mode first')
         for name in names[:-3]:
             state[name] = int(state[name] or 0)
-        # Position numbering depends on this window option, not whether the
-        # gutter happens to be visible at the moment.
+        # A mouse entry or line-numbers-off can hide the gutter even when the
+        # window option requests numbers. That also changes goto-line units.
         numbering = state['copy-mode-line-numbers']
-        state['absolute_line_numbers'] = numbering in ('absolute', 'relative', 'hybrid')
+        state['absolute_line_numbers'] = bool(state['copy_line_numbers']) and numbering in ('absolute', 'relative', 'hybrid')
         state['history'] = state['copy_position_limit'] - (state['pane_height'] if state['absolute_line_numbers'] else 0)
         state['row'] = state['history'] - state['scroll_position'] + state['copy_cursor_y']
         return state
@@ -601,17 +634,28 @@ class Tmux:
 
     def visual_yank(self):
         state = self.state()
-        if state['selection_mode'] == 'line':
+        if state['selection_mode'] == 'line' or (
+                state['selection_mode'] == 'char' and not state['rectangle_toggle']):
             # Native tmux can omit the final newline depending on which end
             # of a line selection is being dragged. Vim line yanks include it.
             first_row, last_row = sorted((state['selection_start_y'], state['selection_end_y']))
             document = self.snapshot(state, first_row, last_row)
             layout = state['layout']
-            first = document.line(layout.offset(state['selection_start_y'], 0))
-            last = document.line(layout.offset(state['selection_end_y'], 0))
-            span = document.line_span(first, last)
+            if state['selection_mode'] == 'line':
+                first = document.line(layout.offset(state['selection_start_y'], 0))
+                last = document.line(layout.offset(state['selection_end_y'], 0))
+                span = document.line_span(first, last)
+            else:
+                # Native character copies trim trailing spaces, including a
+                # whitespace-only line that Vim correctly kept in a paragraph.
+                start, end = sorted((layout.offset(state['selection_start_y'], state['selection_start_x']),
+                                     layout.offset(state['selection_end_y'], state['selection_end_x'])))
+                end += 1
+                while end < len(document.text) and cell_width(document.text[end]) == 0:
+                    end += 1
+                span = Span(start, end)
             self.call('load-buffer', '-w', '-t', self.client, '-',
-                      input=document.text[span.start:span.end])
+                      input=document.copy_text(span))
         else:
             self.call('send-keys', '-t', self.pane, '-X', 'copy-selection-no-clear')
         self.flash()
@@ -622,6 +666,9 @@ class Tmux:
         if not value:
             raise NoMotion('No previous visual selection')
         saved = json.loads(value)
+        # Selections saved before the gutter was enabled have no visibility
+        # field. Keep gv usable across a config reload.
+        saved.setdefault('copy_line_numbers', int(saved['numbering'] in ('absolute', 'relative', 'hybrid')))
         state = self.state()
         frame = self.call('show-options', '-pqv', '-t', self.pane, '@vim-copy-frame').strip()
         generation, collected = map(int, frame.split(':'))
@@ -635,7 +682,8 @@ class Tmux:
         # While still in the same frozen snapshot, the frame stays unchanged.
         removed = collected - old_collected
         old_history = saved['copy_position_limit'] - (
-            saved['pane_height'] if saved['numbering'] in ('absolute', 'relative', 'hybrid') else 0)
+            saved['pane_height'] if saved['copy_line_numbers'] and
+            saved['numbering'] in ('absolute', 'relative', 'hybrid') else 0)
         top = old_history - saved['scroll_position'] - removed
         row = top + saved['copy_cursor_y']
         saved['selection_start_y'] -= removed
@@ -683,8 +731,17 @@ class Tmux:
             document = self.snapshot(state, first, last)
             layout = state['layout']
             position = layout.offset(state['row'], state['copy_cursor_x'])
-            target = document.sentence_target(position, key, count)
-            if key == ')':
+            try:
+                target = (document.paragraph_target(position, key, count) if key in '{}' else
+                          document.sentence_target(position, key, count))
+            except NoMotion:
+                if (key == '}' and last < limit) or (key == '{' and first):
+                    distance *= 2
+                    continue
+                raise
+            if key == '}':
+                complete = document.line(target) < len(document.lines) - 1 or last == limit
+            elif key == ')':
                 complete = target < len(document.text) or last == limit
             else:
                 # The first logical line may continue from before the read;
@@ -711,7 +768,28 @@ class Tmux:
         lower = max(first, *(points[0] for points in groups.values()))
         upper = min(last, *(points[-1] for points in groups.values()))
         if lower >= upper:
-            return []
+            commands = [['set-option', '-p', '-t', self.pane, '@vim-copy-sentence-lower', '0'],
+                        ['set-option', '-p', '-t', self.pane, '@vim-copy-sentence-upper', '0']]
+        else:
+            commands = self.sentence_expressions(state, document, groups, lower, upper)
+        commands += self.paragraph_cache(state, document)
+        commands.append(['set-option', '-p', '-t', self.pane, '@vim-copy-sentence-history', str(state['history'])])
+        commands.append(['set-option', '-pF', '-t', self.pane, '@vim-copy-sentence-frame', SENTENCE_FRAME])
+        return commands
+
+    @staticmethod
+    def boundary_expression(limits, values, comparison='<'):
+        def expression(left, right):
+            if left == right:
+                return str(values[left])
+            middle = (left + right) // 2
+            return ('#{?#{e|' + comparison + '|:#{@vim-copy-sentence-position},' +
+                    str(limits[middle]) + '},' + expression(left, middle) + ',' +
+                    expression(middle + 1, right) + '}')
+        return expression(0, len(limits))
+
+    def sentence_expressions(self, state, document, groups, lower, upper):
+        layout = state['layout']
 
         def code(offset):
             row, column = layout.point(offset)
@@ -727,22 +805,45 @@ class Tmux:
                     row, column = layout.point(offset)
                     values.append(str(row if part == 'row' else layout.steps(row, column)))
 
-                def expression(left, right):
-                    if left == right:
-                        return values[left]
-                    middle = (left + right) // 2
-                    comparison = '<' if key == 'next' else '<='
-                    return ('#{?#{' + comparison + ':#{@vim-copy-sentence-position},' +
-                            str(limits[middle]) + '},' + expression(left, middle) + ',' +
-                            expression(middle + 1, right) + '}')
-
                 commands.append(['set-option', '-p', '-t', self.pane,
                                  '@vim-copy-sentence-' + key + '-' + part,
-                                 expression(0, len(points))])
-        for name, value in [('lower', code(lower)), ('upper', code(upper)), ('history', state['history'])]:
+                                 self.boundary_expression(limits, values, '<' if key == 'next' else '<=')])
+        for name, value in [('lower', code(lower)), ('upper', code(upper))]:
             commands.append(['set-option', '-p', '-t', self.pane,
                              '@vim-copy-sentence-' + name, str(value)])
-        commands.append(['set-option', '-pF', '-t', self.pane, '@vim-copy-sentence-frame', SENTENCE_FRAME])
+        return commands
+
+    def paragraph_cache(self, state, document):
+        layout = state['layout']
+        first = max(layout.first_row, state['row'] - 16)
+        last = min(layout.first_row + len(layout.rows) - 1, state['row'] + 16)
+        at_end = layout.first_row + len(layout.rows) == state['history'] + state['pane_height']
+        commands = []
+        for direction, key in [('paragraph-next', '}'), ('paragraph-previous', '{')]:
+            records, targets = [], {}
+            for row in range(first, last + 1):
+                origin = layout.offset(row, 0)
+                logical = document.line(origin)
+                if logical not in targets:
+                    targets[logical] = document.paragraph_target(origin, key)
+                target = targets[logical]
+                line = document.line(target)
+                if ((key == '}' and line == len(document.lines) - 1 and not at_end) or
+                    (key == '{' and line == 0 and layout.first_row)):
+                    continue
+                target_row, column = layout.point(target)
+                records.append((row, target_row, layout.steps(target_row, column)))
+            lower = records[0][0] * (state['pane_width'] + 1) if records else 0
+            upper = (records[-1][0] + 1) * (state['pane_width'] + 1) if records else 0
+            for name, value in [('lower', lower), ('upper', upper)]:
+                commands.append(['set-option', '-p', '-t', self.pane,
+                                 '@vim-copy-sentence-' + direction + '-' + name, str(value)])
+            if records:
+                limits = [row * (state['pane_width'] + 1) for row, _, _ in records[1:]]
+                for part, index in [('row', 1), ('steps', 2)]:
+                    commands.append(['set-option', '-p', '-t', self.pane,
+                                     '@vim-copy-sentence-' + direction + '-' + part,
+                                     self.boundary_expression(limits, [record[index] for record in records])])
         return commands
 
     def prime_sentences(self):
@@ -856,7 +957,12 @@ def select_span(tmux, state, start, end, linewise=False):
         end -= 1
     if linewise:
         last = document.line(end)
-        end = max(document.starts[last], document.end(last) - 1)
+        # Native cursor-right stops at tmux's trimmed EOL. Counting through
+        # painted padding wraps it into the next row, enlarging the flash.
+        end = max(document.starts[last], document.starts[last] +
+                  len(document.lines[last].rstrip(' \t')) - 1)
+        while end > start and cell_width(document.text[end]) == 0:
+            end -= 1
     commands = [tmux.x('clear-selection'), tmux.x('rectangle-off')]
     commands += tmux.move(*layout.point(start), state)
     commands.append(tmux.x('begin-selection'))
@@ -918,7 +1024,7 @@ def perform(tmux, context, argument=None):
     if end != span.end:
         span = Span(span.start, end, span.linewise, span.cursor)
     if context['mode'] == 'yank':
-        tmux.call('load-buffer', '-w', '-t', tmux.client, '-', input=document.text[span.start:span.end])
+        tmux.call('load-buffer', '-w', '-t', tmux.client, '-', input=document.copy_text(span))
         cursor = position if context.get('object') else (
             span.cursor if span.cursor is not None else span.start)
         row, column = layout.point(cursor)
@@ -956,7 +1062,7 @@ def bindings():
     # output must not change that origin. An indexed hook makes reloads
     # idempotent and leaves unrelated user hooks in place.
     print('set-hook -g pane-mode-entered[17391] { if-shell -F "#{==:#{pane_mode},copy-mode}" '
-          '{ set-option -pF @vim-copy-frame ' + quote(COPY_FRAME) +
+          '{ send-keys -X line-numbers-on; set-option -pF @vim-copy-frame ' + quote(COPY_FRAME) +
           '; set-option -pF @vim-copy-epoch "#{e|+|:#{?@vim-copy-epoch,#{@vim-copy-epoch},0},1}"; '
           'set-option -pu @vim-copy-sentence-frame; run-shell -b ' + quote(
               shell_command('prime-sentences') + ' #{q:pane_id} -') + ' } }')
@@ -995,20 +1101,35 @@ def bindings():
     position = '#{e|+|:#{e|*|:' + row + ',#{e|+|:#{pane_width},1}},#{copy_cursor_x}}'
 
     def sentence(key, before):
-        direction = 'next' if key == ')' else 'previous'
+        direction = {'(': 'previous', ')': 'next', '{': 'paragraph-previous', '}': 'paragraph-next'}[key]
+        bound = '@vim-copy-sentence-' + (direction + '-' if key in '{}' else '')
         valid = ('#{&&:#{==:#{@vim-copy-sentence-frame},' + SENTENCE_FRAME + '},'
-                 '#{&&:#{<=:' + before + ',1},#{&&:#{==:#{refresh_active},0},'
-                 '#{&&:#{>=:#{@vim-copy-sentence-position},#{@vim-copy-sentence-lower}},'
-                 '#{<:#{@vim-copy-sentence-position},#{@vim-copy-sentence-upper}}}}}}')
+                 '#{&&:#{e|<=|:' + before + ',1},#{&&:#{==:#{refresh_active},0},'
+                 '#{&&:#{e|>=|:#{@vim-copy-sentence-position},#{' + bound + 'lower}},'
+                 '#{e|<|:#{@vim-copy-sentence-position},#{' + bound + 'upper}}}}}}')
+        relative = ('if-shell -F "#{e|>|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}}" '
+                    '{ send-keys -FX -N "#{e|-|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}}" cursor-down }; '
+                    'if-shell -F "#{e|<|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}}" '
+                    '{ send-keys -FX -N "#{e|-|:#{@vim-copy-sentence-row},#{@vim-copy-sentence-target}}" cursor-up }')
+        # Jump directly for a large gap rather than redrawing every row on
+        # the way. This also keeps long paragraph movement responsive.
+        top = '#{?#{e|<|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-history}},#{@vim-copy-sentence-target},#{@vim-copy-sentence-history}}'
+        line = ('#{?#{&&:#{copy_line_numbers},#{m/r:^(absolute|relative|hybrid)$,#{copy-mode-line-numbers}}},'
+                '#{e|+|:#{@vim-copy-sentence-top},1},#{e|-|:#{@vim-copy-sentence-history},#{@vim-copy-sentence-top}}}')
+        # -F does not expand goto-line's argument. run-shell -C expands and
+        # executes a tmux command directly, without starting a shell process.
+        jump = ('set-option -pF @vim-copy-sentence-top ' + quote(top) + '; run-shell -C ' + quote(
+                'send-keys -X goto-line ' + line + '; send-keys -X top-line; '
+                'if-shell -F "#{e|>|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-top}}" '
+                '{ send-keys -X -N "#{e|-|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-top}}" cursor-down }'))
+        far = ('#{||:#{e|>|:#{e|-|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}},#{pane_height}},'
+               '#{e|>|:#{e|-|:#{@vim-copy-sentence-row},#{@vim-copy-sentence-target}},#{pane_height}}}')
         native = ('set-option -pF @vim-copy-sentence-row ' + quote(row) + '; '
                   'set-option -pF @vim-copy-sentence-target "#{E:@vim-copy-sentence-' + direction + '-row}"; '
                   'set-option -pF @vim-copy-sentence-steps "#{E:@vim-copy-sentence-' + direction + '-steps}"; '
-                  'if-shell -F "#{>:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}}" '
-                  '{ send-keys -FX -N "#{e|-|:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}}" cursor-down }; '
-                  'if-shell -F "#{<:#{@vim-copy-sentence-target},#{@vim-copy-sentence-row}}" '
-                  '{ send-keys -FX -N "#{e|-|:#{@vim-copy-sentence-row},#{@vim-copy-sentence-target}}" cursor-up }; '
+                  'if-shell -F ' + quote(far) + ' { ' + jump + ' } { ' + relative + ' }; '
                   'if-shell -F "#{!=:#{copy_cursor_x},0}" { send-keys -X start-of-line }; '
-                  'if-shell -F "#{>:#{@vim-copy-sentence-steps},0}" '
+                  'if-shell -F "#{e|>|:#{@vim-copy-sentence-steps},0}" '
                   '{ send-keys -FX -N "#{@vim-copy-sentence-steps}" cursor-right }; '
                   'if-shell -F "#{!:' + '#{||:#{selection_present},#{selection_active}}' + '}" '
                   '{ send-keys -X scroll-middle }')
@@ -1032,7 +1153,7 @@ def bindings():
              '{ ' + remember + 'run-shell ' + quote(visual_yank) + ' } { ' + enter('yank', before) + ' }')
         for key in ('i', 'a'):
             emit(table, key, cancel_flash + "if-shell -F '#{||:#{selection_present},#{selection_active}}' { " + enter('visual', before, key) + ' }')
-        for key in '()':
+        for key in '(){}':
             emit(table, key, sentence(key, before))
         emit(table, 'g', cancel_flash + 'switch-client -T copyVimNormalG')
     emit('copyVimNormalG', 'g', 'send-keys -X history-top')
