@@ -1,6 +1,7 @@
 """Range tests and real terminal input against a separate tmux server."""
 
 import importlib.util
+import json
 import os
 from pathlib import Path
 import pty
@@ -198,6 +199,33 @@ class Ranges(unittest.TestCase):
         self.assertEqual(layout.point(25), (3, 3))
         self.assertEqual(layout.offset(3, 3), 25)
 
+    def test_link_at_handles_markup_punctuation_and_url_delimiters(self):
+        for text, expected in [
+            ('See https://example.test/a?b=c&d=e#part.', 'https://example.test/a?b=c&d=e#part'),
+            ('[docs](https://example.test/a_(b)).', 'https://example.test/a_(b)'),
+            ('<https://example.test/>', 'https://example.test/'),
+            ("'https://example.test/a'", 'https://example.test/a'),
+            ('"https://example.test/a"', 'https://example.test/a'),
+            ('`https://example.test/a`', 'https://example.test/a'),
+            ('www.example.test/path!', 'https://www.example.test/path'),
+            ('mailto:person@example.test', 'mailto:person@example.test'),
+            ('https://[::1]:8000/a', 'https://[::1]:8000/a'),
+            ('界 https://example.test/διαδρομή', 'https://example.test/διαδρομή'),
+            ("https://example.test/a'b;$HOME?q=$(id)#%1", "https://example.test/a'b;$HOME?q=$(id)#%1"),
+        ]:
+            with self.subTest(text=text):
+                position = text.index('example') if 'example' in text else text.index('8000')
+                self.assertEqual(copy.link_at(text, position), expected)
+
+    def test_link_at_requires_cursor_inside_the_specific_link(self):
+        text = 'https://one.test/a and https://two.test/b.'
+        self.assertEqual(copy.link_at(text, text.index('two')), 'https://two.test/b')
+        for position in (text.index(' and ') + 1, len(text) - 1):
+            with self.assertRaises(copy.NoMotion):
+                copy.link_at(text, position)
+        with self.assertRaises(copy.NoMotion):
+            copy.link_at('no link here', 4)
+
 
 @unittest.skipUnless(shutil.which('tmux'), 'tmux is required for terminal integration')
 class Terminal(unittest.TestCase):
@@ -217,6 +245,17 @@ class Terminal(unittest.TestCase):
                           'set -as terminal-features ",xterm-256color:RGB"\n'
                           'bind -T copy-mode-vi v send -X begin-selection\n' + numbering + '\n' + bindings + centering)
         cls.tm('-f', str(config), 'new-session', '-d', '-x', '60', '-y', '12', '-s', 'test', 'sleep 1000')
+        # Exercise the real gx binding without launching a browser.
+        binaries = cls.directory / 'bin'
+        binaries.mkdir()
+        opener = binaries / 'xdg-open'
+        cls.link_log = cls.directory / 'opened-links.jsonl'
+        opener.write_text('#!/usr/bin/env python3\nimport json,sys\n'
+                          'with open(' + repr(str(cls.link_log)) + ', "a") as output:\n'
+                          '    output.write(json.dumps(sys.argv[1:]) + "\\n")\n')
+        opener.chmod(0o755)
+        cls.tm('set-environment', '-g', 'PATH', str(binaries) + os.pathsep + os.environ['PATH'])
+        cls.tm('set-environment', 'PATH', str(binaries) + os.pathsep + os.environ['PATH'])
         cls.master, slave = pty.openpty()
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 12, 60, 0, 0))
         env = os.environ.copy()
@@ -282,6 +321,15 @@ class Terminal(unittest.TestCase):
     def buffer(self):
         return subprocess.check_output([*self.base, 'save-buffer', '-'], text=True)
 
+    def opened_links(self):
+        return [json.loads(line) for line in self.link_log.read_text().splitlines()] if self.link_log.exists() else []
+
+    def open_link(self, expected):
+        before = len(self.opened_links())
+        self.keys('gx')
+        self.until(lambda: len(self.opened_links()) > before)
+        self.assertEqual(self.opened_links()[before:], [[expected]])
+
     def keys(self, sequence, expected=None):
         # Real key events, rather than one terminal paste. In particular a
         # single-character command-prompt needs a subsequent input event.
@@ -330,6 +378,44 @@ class Terminal(unittest.TestCase):
                 self.fixture('previous alpha.beta next', column=9)
                 self.keys(sequence, expected)
 
+    def test_visual_objects_preserve_scrolled_viewport(self):
+        text = '\n'.join(f'{i:03} alpha (inner words) "quoted text" tail' for i in range(100))
+        for row, column, sequence, expected in [
+            (10, 7, 'viw', 'alpha'),
+            (60, 7, 'vaw', 'alpha '),
+            (90, 16, 'vib', 'inner words'),
+            (60, 29, 'vaq', '"quoted text" '),
+            (60, 7, 'vll', 'ha '),
+        ]:
+            with self.subTest(sequence=sequence, row=row):
+                self.fixture(text, row=row, column=column)
+                self.tm('send-keys', '-X', 'scroll-middle')
+                viewport = '#{scroll_position}:#{copy_cursor_y}'
+                before = self.tm('display-message', '-p', viewport)
+                self.keys(sequence)
+                self.assertEqual(self.tm('display-message', '-p', viewport), before)
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+                self.keys('y', expected)
+
+    def test_multiline_visual_object_preserves_viewport_until_selection_goes_offscreen(self):
+        for last_row in (62, 80):
+            with self.subTest(last_row=last_row):
+                lines = [f'{i:03} filler' for i in range(100)]
+                lines[59] = '(first'
+                lines[last_row] = 'last)'
+                self.fixture('\n'.join(lines), row=60, column=3)
+                self.tm('send-keys', '-X', 'scroll-middle')
+                before_y = int(self.tm('display-message', '-p', '#{copy_cursor_y}'))
+                before_scroll = int(self.tm('display-message', '-p', '#{scroll_position}'))
+                height = int(self.tm('display-message', '-p', '#{pane_height}'))
+                scroll = max(0, last_row - 60 + before_y - height + 1)
+                self.keys('vib')
+                self.assertEqual(int(self.tm('display-message', '-p', '#{scroll_position}')),
+                                 before_scroll - scroll)
+                self.assertEqual(int(self.tm('display-message', '-p', '#{copy_cursor_y}')),
+                                 last_row - 60 + before_y - scroll)
+                self.keys('y', 'first\n' + '\n'.join(lines[60:last_row]) + '\nlast')
+
     def test_any_quote_yanks_and_visual_objects(self):
         for delimiter in '\'"`':
             for sequence, expected in [('yiq', 'quoted text'), ('viqy', 'quoted text'),
@@ -340,6 +426,64 @@ class Terminal(unittest.TestCase):
                     self.keys(sequence, expected)
         self.fixture('"outer \'inner\' tail"', column=10)
         self.keys('yiq', 'inner')
+
+    def test_text_object_yanks_move_to_vim_cursor_positions(self):
+        # Cursor positions checked against nvim --headless -u NONE.
+        for text, row, column, sequence, expected, target_row, target_column in [
+            ('alpha beta', 0, 3, 'yiw', 'alpha', 0, 0),
+            ('prefix alpha', 0, 10, 'yaw', ' alpha', 0, 6),
+            ('(outer (inner) tail)', 0, 16, 'yib', 'outer (inner) tail', 0, 1),
+            ('(outer (inner) tail)', 0, 16, 'yab', '(outer (inner) tail)', 0, 0),
+            ('(outer (inner) tail)', 0, 10, 'y2ib', 'outer (inner) tail', 0, 1),
+            ('[one two]', 0, 6, 'yi[', 'one two', 0, 1),
+            ('(first\n  second)', 1, 4, 'yib', 'first\n  second', 0, 1),
+            ('{\n  first\n  second\n}', 2, 5, 'yiB', '  first\n  second\n', 1, 0),
+            ('  first\n  second\n\nnext', 1, 4, 'yip', '  first\n  second\n', 0, 0),
+            ('One sentence.  Another!', 0, 7, 'yis', 'One sentence.', 0, 0),
+            ('prefix "quoted text" end', 0, 15, 'yiq', 'quoted text', 0, 8),
+            ('<p>\n  text\n</p>', 1, 3, 'yit', '\n  text\n', 0, 2),
+        ]:
+            with self.subTest(sequence=sequence, text=text):
+                self.fixture(text, row=row, column=column)
+                self.keys(sequence, expected)
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'),
+                                 f'{target_column}:{target_row}')
+                self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'),
+                                 f'{target_column}:{target_row}')
+
+    def test_gx_opens_printed_wrapped_and_unicode_urls_without_changing_copy_state(self):
+        for text, row, column, expected in [
+            ('See [docs](https://example.test/a_(b)).', 0, 24, 'https://example.test/a_(b)'),
+            ('See https://example.test/' + 'long-path/' * 15 + ' end', 2, 5,
+             'https://example.test/' + 'long-path/' * 15),
+            ('界e\u0301 https://example.test/διαδρομή end', 0, 12, 'https://example.test/διαδρομή'),
+            ("See https://example.test/a'b;$HOME?q=$(id)#%1 end", 0, 12,
+             "https://example.test/a'b;$HOME?q=$(id)#%1"),
+        ]:
+            with self.subTest(text=text):
+                self.fixture(text, row=row, column=column)
+                self.tm('send-keys', '-X', 'begin-selection')
+                before = self.tm('display-message', '-p', copy.SAVED_SELECTION)
+                self.open_link(expected)
+                self.assertEqual(self.tm('display-message', '-p', copy.SAVED_SELECTION), before)
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_gx_opens_labelled_terminal_hyperlinks(self):
+        target = 'https://example.test/#{pane_id}?q=$HOME&x=%1'
+        self.fixture('See \033]8;;' + target + '\033\\click here\033]8;;\033\\ end', column=8)
+        self.open_link(target)
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_gx_with_no_link_preserves_selection_and_does_not_open_a_nearby_url(self):
+        self.fixture('plain text https://example.test/', column=2)
+        self.tm('send-keys', '-X', 'begin-selection')
+        before = self.tm('display-message', '-p', copy.SAVED_SELECTION)
+        opened = self.opened_links()
+        self.keys('gx')
+        self.assertEqual(self.opened_links(), opened)
+        self.assertEqual(self.tm('display-message', '-p', copy.SAVED_SELECTION), before)
+        self.assertEqual(self.buffer(), 'UNCHANGED')
 
     def test_gv_restores_character_line_block_and_reverse_selections(self):
         for sequence, row, column, expected, mode, rectangle in [
@@ -741,21 +885,21 @@ class Terminal(unittest.TestCase):
     def test_yank_flash_restores_cursor_in_scrolled_history(self):
         text = '\n'.join(f'{i:03} alpha "quoted text" omega' for i in range(100))
         location = '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}:#{copy_cursor_line}'
-        for row, column, sequence, expected in [
-            (10, 7, 'yiw', 'alpha'),
-            (25, 7, 'yiw', 'alpha'),
-            (90, 7, 'yiw', 'alpha'),
-            (60, 18, 'yiq', 'quoted text'),
-            (25, 4, 'yw', 'alpha '),
+        for row, column, sequence, expected, target_column in [
+            (10, 7, 'yiw', 'alpha', 4),
+            (25, 7, 'yiw', 'alpha', 4),
+            (90, 7, 'yiw', 'alpha', 4),
+            (60, 18, 'yiq', 'quoted text', 11),
+            (25, 4, 'yw', 'alpha ', 4),
         ]:
             with self.subTest(row=row, sequence=sequence):
                 self.fixture(text, row=row, column=column)
                 self.tm('send-keys', '-X', 'scroll-middle')
-                before = self.tm('display-message', '-p', location)
+                before = self.tm('display-message', '-p', location).split(':', 1)[1]
                 self.keys(sequence, expected)
-                self.assertEqual(self.tm('display-message', '-p', location), before)
+                self.assertEqual(self.tm('display-message', '-p', location), str(target_column) + ':' + before)
                 self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
-                self.assertEqual(self.tm('display-message', '-p', location), before)
+                self.assertEqual(self.tm('display-message', '-p', location), str(target_column) + ':' + before)
 
     def test_flash_duration_starts_with_visible_paint_in_large_history(self):
         # Match the real terminal geometry. Traversing history used to flood

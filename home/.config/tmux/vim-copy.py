@@ -6,6 +6,7 @@ buffer without moving the cursor or changing selections, buffers or clipboard.
 Only a successful yank writes a buffer. Esc cancels any pending input.
 The q object matches any quote type; successful yanks briefly highlight their
 range. gv restores the last visual selection; ( and ) move by sentences.
+gx opens the hyperlink or URL under the copy cursor with the system opener.
 Configure @vim-copy-highlight-ms and @vim-copy-highlight-style in tmux.
 
 Run `bindings` to emit the tmux bindings, or `python3 -m unittest discover
@@ -72,6 +73,26 @@ def cell_width(char):
     if unicodedata.combining(char) or unicodedata.category(char) in ('Mn', 'Me', 'Cf'):
         return 0
     return 2 if unicodedata.east_asian_width(char) in ('W', 'F') else 1
+
+
+def link_at(text, position):
+    """Find the URL containing the cursor, excluding surrounding prose markup."""
+    pattern = r'\b(?:[a-z][a-z0-9+.-]*://|mailto:|www\.)[^\s<>"`]+'
+    for match in re.finditer(pattern, text, re.IGNORECASE):
+        link = match.group()
+        while link:
+            previous = link
+            link = link.rstrip('.,;:!?')
+            if match.start() and text[match.start() - 1] == "'":
+                link = link.removesuffix("'")
+            for opening, closing in [('(', ')'), ('[', ']'), ('{', '}')]:
+                if link.endswith(closing) and link.count(closing) > link.count(opening):
+                    link = link[:-1]
+            if link == previous:
+                break
+        if match.start() <= position < match.start() + len(link):
+            return 'https://' + link if link.lower().startswith('www.') else link
+    raise NoMotion('No link under cursor')
 
 
 class Document:
@@ -580,7 +601,10 @@ class Tmux:
 
     def move(self, row, column, state, top=None):
         if top is None:
-            top = max(0, row - state['pane_height'] + 1)
+            # Keep visible targets in their current viewport. Only scroll
+            # enough to reveal a target that has moved beyond either edge.
+            top = max(row - state['pane_height'] + 1,
+                      min(row, state['history'] - state['scroll_position']))
         top = max(0, min(top, state['history']))
         # Jump straight to the viewport. Walking through history redraws
         # every intermediate row and can block tty updates for 100 ms,
@@ -659,6 +683,30 @@ class Tmux:
         else:
             self.call('send-keys', '-t', self.pane, '-X', 'copy-selection-no-clear')
         self.flash()
+
+    def open_link(self):
+        state = self.state()
+        link = self.call('display-message', '-p', '-t', self.pane,
+                         '#{copy_cursor_hyperlink}').removesuffix('\n')
+        if not link:
+            # Read only nearby rows, extending until the logical line is
+            # complete on both sides. A URL can wrap across several rows.
+            distance = 4
+            limit = state['history'] + state['pane_height'] - 1
+            while True:
+                first, last = max(0, state['row'] - distance), min(limit, state['row'] + distance)
+                document = self.snapshot(state, first, last)
+                position = state['layout'].offset(state['row'], state['copy_cursor_x'])
+                row = document.line(position)
+                if (first == 0 or row > 0) and (last == limit or row < len(document.lines) - 1):
+                    link = link_at(document.lines[row], position - document.starts[row])
+                    break
+                distance *= 2
+        # Pass the URI as data, never through a shell or tmux format expansion.
+        # Detach the opener so starting a browser cannot block copy mode.
+        opener = 'open' if sys.platform == 'darwin' else 'xdg-open'
+        subprocess.Popen([opener, link], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
 
     def reselect(self):
         value = self.call('show-options', '-pqv', '-t', self.pane,
@@ -1025,8 +1073,17 @@ def perform(tmux, context, argument=None):
         span = Span(span.start, end, span.linewise, span.cursor)
     if context['mode'] == 'yank':
         tmux.call('load-buffer', '-w', '-t', tmux.client, '-', input=document.copy_text(span))
-        cursor = position if context.get('object') else (
-            span.cursor if span.cursor is not None else span.start)
+        cursor = span.cursor if span.cursor is not None else span.start
+        if context.get('object'):
+            line = document.line(cursor)
+            # Inner blocks that start on a newline land on the next line.
+            # Other characterwise objects (notably tags) clamp to the last
+            # character, since Vim's normal cursor cannot sit on a newline.
+            if (context['object'] == 'i' and key in 'bB(){}[]<>' and
+                    cursor == document.end(line) and document.lines[line]):
+                cursor += 1
+                line = document.line(cursor)
+            cursor = max(document.starts[line], min(cursor, document.end(line) - 1))
         row, column = layout.point(cursor)
         top = max(0, min(state['history'] - state['scroll_position'], row))
         top = max(top, row - state['pane_height'] + 1)
@@ -1159,6 +1216,8 @@ def bindings():
     emit('copyVimNormalG', 'g', 'send-keys -X history-top')
     emit('copyVimNormalG', 'v', 'send-keys -N 1; run-shell ' + quote(
         shell_command('reselect') + ' #{q:pane_id} #{q:client_name}'))
+    emit('copyVimNormalG', 'x', 'send-keys -N 1; run-shell ' + quote(
+        shell_command('open-link') + ' #{q:pane_id} #{q:client_name}'))
     emit('copyVimNormalG', 'Any', 'send-keys -N 1')
     for digit in '123456789':
         emit('copy-mode-vi', digit, 'command-prompt -NP -I ' + digit +
@@ -1194,6 +1253,8 @@ def main():
             tmux.visual_yank()
         elif action == 'reselect':
             tmux.reselect()
+        elif action == 'open-link':
+            tmux.open_link()
         elif action == 'prime-sentences':
             tmux.prime_sentences()
         elif action == 'execute':
@@ -1209,7 +1270,8 @@ def main():
     except (NoMotion, subprocess.SubprocessError, OSError, ValueError) as error:
         if action in ('finish-flash', 'prime-sentences'):
             return  # Closing a pane/client during background work is harmless.
-        message = str(error) if isinstance(error, NoMotion) else 'Copy command failed'
+        message = str(error) if isinstance(error, NoMotion) else (
+            'Could not open link' if action == 'open-link' else 'Copy command failed')
         tmux.call('display-message', '-c', client, '--', message)
 
 
