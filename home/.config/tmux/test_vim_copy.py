@@ -128,6 +128,28 @@ class Ranges(unittest.TestCase):
         self.object('One sentence.  Another! Last?', 4, 's', 'One sentence.  ', count=2)
         self.object('One sentence.  Another! Last?', 4, 's', 'One sentence.  Another! ', around=True, count=2)
 
+    def test_sentence_motion_boundaries_and_counts(self):
+        text = '''  One sentence.")  Another!\tLast?\ncontinued\n\n\n  New paragraph'''
+        document = copy.Document(text)
+        first, second, third = text.index('One'), text.index('Another'), text.index('Last')
+        blank, paragraph = text.index('\n\n') + 1, text.index('New')
+        for origin, key, count, expected in [
+            (0, ')', 1, first), (first, ')', 1, second),
+            (first, ')', 2, third), (second + 3, '(', 1, second),
+            (second, '(', 1, first), (third, ')', 1, text.index('continued')),
+            (text.index('continued'), ')', 1, blank),
+            (blank, ')', 1, paragraph), (paragraph, '(', 1, blank + 1),
+            (first, '(', 99, 0), (paragraph, ')', 99, len(document.text)),
+        ]:
+            with self.subTest(origin=origin, key=key, count=count):
+                self.assertEqual(document.sentence_target(origin, key, count), expected)
+        self.yank('One.  Two! Three?', 0, ')', 'One.  ')
+        self.yank('One.  Two! Three?', 0, ')', 'One.  Two! ', 2)
+        self.yank('One.  Two! Three?', 8, '(', 'Tw')
+        self.yank('One.\nTwo!', 0, ')', 'One.\n')
+        self.yank('Last sentence.', 0, ')', 'Last sentence.')
+        self.assertEqual(copy.Document('version1.2 still going\n  \nnext').sentence_starts, [0])
+
     def test_tags_handle_nesting_attributes_comments_and_void_elements(self):
         text = '<div title="a>b"><p>first <b>bold</b> tail</p><!-- </div> --><br></div>'
         self.object(text, text.index('tail'), 't', 'first <b>bold</b> tail')
@@ -198,6 +220,7 @@ class Terminal(unittest.TestCase):
         self.tm('clear-history')
         self.tm('set-option', '-pu', '@vim-copy-flash')
         self.tm('set-option', '-pu', '@vim-copy-flash-selection')
+        self.tm('set-option', '-pu', '@vim-copy-last-selection')
         self.drain()
         self.terminal_output = bytearray()
         script = self.directory / 'fixture.py'
@@ -280,6 +303,249 @@ class Terminal(unittest.TestCase):
                     self.keys(sequence, expected)
         self.fixture('"outer \'inner\' tail"', column=10)
         self.keys('yiq', 'inner')
+
+    def test_gv_restores_character_line_block_and_reverse_selections(self):
+        for sequence, row, column, expected, mode, rectangle in [
+            ('vll', 0, 2, 'pha', 'char', '0'),
+            ('vhh', 0, 4, 'pha', 'char', '0'),
+            ('Vj', 0, 2, 'alpha beta\ngamma delta\n', 'line', '0'),
+            ('Vk', 1, 2, 'alpha beta\ngamma delta\n', 'line', '0'),
+            ('\x16jll', 0, 2, 'pha\nmma', 'char', '1'),
+            ('v', 0, 2, 'p', 'char', '0'),
+            ('viw', 0, 2, 'alpha', 'char', '0'),
+        ]:
+            with self.subTest(sequence=sequence):
+                self.fixture('alpha beta\ngamma delta\nlast line', row=row, column=column)
+                self.keys(sequence)
+                # Native line mode may represent EOL as either the final
+                # character or the following cell. Check its lines and mode;
+                # the copied text below verifies the actual selected range.
+                signature = (copy.SELECTION_SIGNATURE if mode != 'line' else
+                             '#{selection_start_y}:#{selection_end_y}:#{rectangle_toggle}')
+                before = self.tm('display-message', '-p', signature)
+                cursor = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}')
+                self.keys('y', expected)
+                self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
+                self.keys('jgv')
+                self.assertEqual(self.tm('display-message', '-p', signature), before)
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'), cursor)
+                self.assertEqual(self.tm('display-message', '-p', '#{selection_mode}:#{rectangle_toggle}:#{selection_active}'),
+                                 mode + ':' + rectangle + ':1')
+                self.tm('set-buffer', '--', 'UNCHANGED')
+                self.keys('y', expected)
+
+    def test_gv_after_escape_and_swap_current_visual_selection(self):
+        self.fixture('alpha beta gamma', column=2)
+        self.keys('viw\x1b')
+        self.until(lambda: self.tm('display-message', '-p', '#{selection_active}') == '0')
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+        self.keys('wviw')
+        beta = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+        self.keys('gv')
+        self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), '0:0:4:0:0')
+        self.keys('gv')
+        self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), beta)
+        self.keys('y', 'beta')
+
+    def test_gv_block_selection_past_short_line_end(self):
+        self.fixture('alpha beta\nx\nlast line', column=4)
+        self.keys('\x16jll')
+        signature = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+        self.keys('y', 'a b\n\n')
+        self.keys('gv')
+        self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), signature)
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '6:1')
+        self.tm('set-buffer', '--', 'UNCHANGED')
+        self.keys('y', 'a b\n\n')
+
+    def test_gv_survives_old_highlight_timer_and_operator_yank(self):
+        self.tm('set-option', '-g', '@vim-copy-highlight-ms', '1000')
+        try:
+            self.fixture('alpha beta')
+            self.keys('viwy', 'alpha')
+            token = self.tm('show-options', '-pqv', '@vim-copy-flash')
+            self.keys('gv')
+            selected = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+            tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
+            tmux.command = self.base
+            tmux.finish_flash(token)
+            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), selected)
+            self.assertEqual(self.tm('display-message', '-p', '#{selection_active}'), '1')
+            self.keys('\x1b')
+            self.until(lambda: self.tm('display-message', '-p', '#{selection_active}') == '0')
+            self.keys('w')
+            self.keys('yiw', 'beta')
+            self.keys('gv')
+            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), selected)
+        finally:
+            self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
+
+    def test_gv_after_copy_mode_reentry_and_new_output(self):
+        self.fixture('alpha beta', later='\n' + 'later output\n' * 30)
+        self.keys('viwy', 'alpha')
+        self.keys('q')
+        (self.directory / 'continue').touch()
+        self.until(lambda: 'later output' in self.tm('capture-pane', '-p'))
+        self.tm('copy-mode')
+        self.keys('gv')
+        self.keys('y', 'alpha')
+
+    def test_gv_preserves_scrolled_unicode_and_numbered_selections(self):
+        self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'absolute')
+        try:
+            text = '\n'.join(f'{i:03} 界e\u0301 alpha.beta next' for i in range(100))
+            self.fixture(text, row=60, column=4)
+            self.tm('send-keys', '-X', 'scroll-middle')
+            self.keys('vll')
+            signature = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+            position = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}')
+            self.keys('y', '界e\u0301 ')
+            self.keys('jjgv')
+            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), signature)
+            self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'), position)
+        finally:
+            self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'off')
+
+    def test_gv_handles_trimmed_history_and_rejects_cleared_history(self):
+        self.tm('set-option', '-g', 'history-limit', '30')
+        try:
+            text = '\n'.join(f'{i:03} alpha beta' for i in range(35))
+            self.fixture(text, row=25, column=4, later='\n' + 'new output\n' * 20)
+            self.keys('viwy', 'alpha')
+            frame = self.tm('show-options', '-pqv', '@vim-copy-frame')
+            self.keys('q')
+            (self.directory / 'continue').touch()
+            self.until(lambda: 'new output' in self.tm('capture-pane', '-p'))
+            self.tm('copy-mode')
+            self.assertNotEqual(self.tm('show-options', '-pqv', '@vim-copy-frame'), frame)
+            self.keys('gv')
+            self.tm('set-buffer', '--', 'UNCHANGED')
+            self.keys('y', 'alpha')
+            self.keys('q')
+            self.tm('clear-history')
+            self.tm('copy-mode')
+            self.tm('set-buffer', '--', 'UNCHANGED')
+            self.keys('gv')
+            self.assertEqual(self.buffer(), 'UNCHANGED')
+            self.assertEqual(self.tm('display-message', '-p', '#{selection_active}'), '0')
+        finally:
+            self.tm('set-option', '-g', 'history-limit', '2000')
+
+    def test_sentence_movements_counts_visual_selection_and_yanks(self):
+        text = 'One sentence.  Another! Last?\nnext paragraph\n\nFinal.'
+        for sequence, column in [(')', 15), ('2)', 24), (')(', 0), ('))(', 15)]:
+            with self.subTest(sequence=sequence):
+                self.fixture(text)
+                self.keys(sequence)
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), str(column) + ':0')
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+        for sequence, expected in [('y)', 'One sentence.  '),
+                                   ('y2)', 'One sentence.  Another! '),
+                                   ('2y)', 'One sentence.  Another! '),
+                                   ('v)y', 'One sentence.  A'),
+                                   ('V)y', 'One sentence.  Another! Last?\nnext paragraph\n')]:
+            with self.subTest(sequence=sequence):
+                self.fixture(text)
+                self.keys(sequence, expected)
+        self.fixture('a' * 58 + '. Another. Tail')
+        self.keys(')')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '0:1')
+        self.keys('y)', 'Another. ')
+        self.fixture(text, column=20)
+        self.keys('y(', 'Anoth')
+        self.fixture(text, column=24)
+        self.keys('2(')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '0:0')
+        self.fixture(text)
+        self.keys('4)')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '0:2')
+
+    def test_plain_visual_line_yank_and_read_preserve_selection(self):
+        for text, row, column, expected in [
+            ('alpha beta\ngamma delta', 0, 2, 'alpha beta\n'),
+            ('alpha beta\ngamma delta', 1, 2, 'gamma delta\n'),
+            ('first\n\nlast', 1, 0, '\n'),
+            ('界e\u0301 alpha\nnext', 0, 1, '界e\u0301 alpha\n'),
+            ('a' * 59 + ' wrapped text\nnext', 1, 3, 'a' * 59 + ' wrapped text\n'),
+        ]:
+            with self.subTest(row=row, text=text[:15]):
+                self.fixture(text, row=row, column=column)
+                self.keys('V')
+                signature = copy.SELECTION_SIGNATURE + ':#{selection_mode}:#{selection_active}:#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'
+                before = self.tm('display-message', '-p', signature)
+                tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
+                tmux.command = self.base
+                tmux.snapshot(tmux.state())
+                self.assertEqual(self.tm('display-message', '-p', signature), before)
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+                self.keys('y', expected)
+        self.fixture('one line\nnext line', column=2)
+        self.keys('Vy', 'one line\n')
+
+    def test_sentence_cache_uses_native_commands_for_rapid_repeats(self):
+        fcntl.ioctl(self.master, termios.TIOCSWINSZ, struct.pack('HHHH', 55, 190, 0, 0))
+        os.kill(self.client.pid, signal.SIGWINCH)
+        try:
+            self.until(lambda: self.tm('display-message', '-p', '#{pane_width}x#{pane_height}') == '190x55')
+            self.fixture('\n'.join(f'{i:04} One sentence. Another sentence! Last sentence?'
+                                   for i in range(1800)), row=1500, column=8)
+            self.tm('send-keys', '-X', 'scroll-middle')
+            self.until(lambda: bool(self.tm('show-options', '-pqv', '@vim-copy-sentence-frame')))
+            self.tm('display-message', '-p', 'native-motion-benchmark-start')
+            timings = []
+            for key, column in [(')', 19), (')', 37), ('(', 19), ('(', 0)] * 4:
+                started = time.monotonic()
+                os.write(self.master, key.encode())
+                while self.tm('display-message', '-p', '#{copy_cursor_x}') != str(column):
+                    self.assertLess(time.monotonic() - started, 1)
+                    self.drain()
+                    time.sleep(.001)
+                self.drain()
+                timings.append(time.monotonic() - started)
+            self.assertLess(sorted(timings)[len(timings) // 2], .025,
+                            'Cached sentence movements should respond like native tmux keys')
+            messages = self.tm('show-messages').split('native-motion-benchmark-start', 1)[0]
+            executions = [line for line in messages.splitlines() if ' execute ' in line and
+                          ('key (: run-shell ' in line or 'key ): run-shell ' in line)]
+            self.assertEqual(executions, [])
+            self.assertEqual(self.buffer(), 'UNCHANGED')
+        finally:
+            fcntl.ioctl(self.master, termios.TIOCSWINSZ, struct.pack('HHHH', 12, 60, 0, 0))
+            os.kill(self.client.pid, signal.SIGWINCH)
+            self.until(lambda: self.tm('display-message', '-p', '#{pane_width}x#{pane_height}') == '60x12')
+
+    def test_sentence_cache_handles_unicode_rows_and_refresh(self):
+        self.fixture('界e\u0301 One. Two!\n  Three. Four?\n\nlast')
+        self.keys(')')
+        self.keys(')')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '2:1')
+        self.keys('(')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '9:0')
+        self.keys('r')
+        self.assertEqual(self.tm('show-options', '-pqv', '@vim-copy-sentence-frame'), '')
+        self.keys('(')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '0:0')
+
+    def test_sentence_cache_miss_reads_nearby_rows_without_selection_commands(self):
+        self.fixture('\n'.join(f'{i:04} One. Two! Three?' for i in range(1800)), row=1500, column=5)
+        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
+        tmux.command = self.base
+        calls, call = [], tmux.call
+        def record(*args, **kwargs):
+            calls.append(args)
+            return call(*args, **kwargs)
+        tmux.call = record
+        copy.perform(tmux, {'mode': 'move', 'motion': ')', 'before': 1})
+        captures = [args for args in calls if args[0] == 'capture-pane']
+        self.assertEqual(len(captures), 1)
+        capture = captures[0]
+        self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 64)
+        self.assertFalse(any('clear-selection' in args or 'begin-selection' in args or 'copy-pipe' in args for args in calls))
+
+    def test_gg_remains_available(self):
+        self.fixture('\n'.join('line ' + str(i) for i in range(30)), row=20)
+        self.keys('gg')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_line}'), 'line 0')
 
     def test_yank_flash_renders_copied_range_then_expires(self):
         self.tm('set-option', '-g', '@vim-copy-highlight-ms', '500')
