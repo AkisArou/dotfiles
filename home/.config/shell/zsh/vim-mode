@@ -12,7 +12,6 @@ zle_highlight=(region:bg="#292e42" paste:none)
 autoload -Uz select-word-style
 select-word-style bash
 
-
 ##########
 # Cursor #
 ##########
@@ -22,8 +21,8 @@ autoload -Uz add-zle-hook-widget
 
 _dotfiles_cursor_keymap_select() {
   case $KEYMAP in
-    vicmd) printf '\e[1 q' ;;      # block
-    viins|main) printf '\e[5 q' ;; # beam
+  vicmd) printf '\e[1 q' ;;        # block
+  viins | main) printf '\e[5 q' ;; # beam
   esac
 }
 
@@ -40,7 +39,6 @@ add-zle-hook-widget keymap-select _dotfiles_cursor_keymap_select
 add-zle-hook-widget line-init _dotfiles_cursor_line_init
 add-zle-hook-widget line-finish _dotfiles_cursor_line_finish
 
-
 ############
 # Keydings #
 ############
@@ -50,7 +48,7 @@ bindkey -M viins '^D' _dotfiles_noop
 bindkey -M vicmd '^D' _dotfiles_noop
 
 bindkey -M viins '^R' fzf-history-widget # fzf should be sourced first
-vi-redo() { zle redo }
+vi-redo() { zle redo; }
 zle -N vi-redo
 bindkey -M vicmd '^R' vi-redo
 
@@ -59,21 +57,20 @@ autoload -Uz edit-command-line
 zle -N edit-command-line
 bindkey -M vicmd 'vv' edit-command-line
 
-
 bindkey -M viins '^H' backward-delete-char # ^H is same as ^h
 bindkey -M viins '^W' backward-kill-word
 
 vi-jk-escape() {
-  zle self-insert        # insert 'j' into buffer
-  zle -R                 # force immediate redraw to display it
+  zle self-insert # insert 'j' into buffer
+  zle -R          # force immediate redraw to display it
 
   local key
-  if read -t 0.3 -k 1 key; then
+  if read -t 0.15 -k 1 key; then
     if [[ $key == k ]]; then
       LBUFFER=${LBUFFER%j}
       zle vi-cmd-mode
     else
-      zle -U "$key"      # re-queue the key so ZLE processes it normally
+      zle -U "$key" # re-queue the key so ZLE processes it normally
     fi
   fi
 }
@@ -124,33 +121,33 @@ select-any-quote() {
   for quote in $quote_types; do
     opening=0
 
-    for (( index = 1; index <= ${#BUFFER}; index++ )); do
+    for ((index = 1; index <= ${#BUFFER}; index++)); do
       [[ $BUFFER[index] == $quote ]] || continue
 
       backslash_count=0
       check_pos=$((index - 1))
-      while (( check_pos >= 1 )) && [[ $BUFFER[check_pos] == \\ ]]; do
+      while ((check_pos >= 1)) && [[ $BUFFER[check_pos] == \\ ]]; do
         ((backslash_count++))
         ((check_pos--))
       done
-      (( backslash_count % 2 )) && continue
+      ((backslash_count % 2)) && continue
 
-      if (( ! opening )); then
+      if ((! opening)); then
         opening=$index
         continue
       fi
 
       span=$((index - opening))
-      if (( cursor_position < opening )); then
+      if ((cursor_position < opening)); then
         distance=$((opening - cursor_position))
-      elif (( cursor_position > index )); then
+      elif ((cursor_position > index)); then
         distance=$((cursor_position - index))
       else
         distance=0
       fi
 
-      if (( best_distance < 0 || distance < best_distance ||
-            (distance == best_distance && span < best_span) )); then
+      if ((best_distance < 0 || distance < best_distance || (\
+        distance == best_distance && span < best_span))); then
         best_quote=$quote
         best_distance=$distance
         best_span=$span
