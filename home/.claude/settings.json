@@ -11,6 +11,9 @@
   },
   "theme": "dark",
   "editorMode": "vim",
+  "vimInsertModeRemaps": {
+    "jk": "<Esc>"
+  },
   "agentPushNotifEnabled": true,
   "autoUpdatesChannel": "stable",
   "enabledPlugins": {
