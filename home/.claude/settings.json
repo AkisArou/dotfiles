@@ -9,6 +9,7 @@
       "effortLevel": "xhigh"
     }
   },
+  "tui": "default",
   "theme": "dark",
   "editorMode": "vim",
   "vimInsertModeRemaps": {
