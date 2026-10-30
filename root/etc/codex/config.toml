@@ -12,6 +12,7 @@ plan_mode_reasoning_effort = "xhigh"
 theme = "vscode"
 # tmux converts the status component to a leading icon.
 terminal_title = ["spinner", "thread", "status"]
+vim_mode_default = true
 
 # Keep each tmux pane associated with its exact conversation for Resurrect.
 [[hooks.SessionStart]]
