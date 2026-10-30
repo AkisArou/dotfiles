@@ -10,6 +10,9 @@ cmp.setup({
     enabled = true,
     keymap = {
       preset = "inherit",
+      -- Terminal applications need the raw key when completion is inactive.
+      ["<C-n>"] = { "select_next", "fallback" },
+      ["<C-p>"] = { "select_prev", "fallback" },
       -- Pass Ctrl-E to fzf/the terminal when there is no completion to accept.
       ["<C-e>"] = { "select_and_accept", "fallback" },
     },
