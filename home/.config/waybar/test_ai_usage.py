@@ -110,7 +110,7 @@ class ProviderTests(unittest.TestCase):
         finally:
             usage.time.tzset()
 
-    def test_tooltip_shows_used_allowance_and_only_weekly_rows(self):
+    def test_tooltip_shows_remaining_allowance_and_only_weekly_rows(self):
         text = usage.provider_tooltip({"metrics": [
             {"label": "Weekly", "percent": 37, "reset_at": 1792414800},
             {"label": "Sonnet", "percent": 110, "reset_at": None},
@@ -118,9 +118,11 @@ class ProviderTests(unittest.TestCase):
             {"label": "Fable", "percent": 90, "reset_at": None},
         ]}, "Claude")
         plain = "".join(ElementTree.fromstring("<tooltip>" + text + "</tooltip>").itertext())
-        self.assertIn("Used", plain)
-        self.assertIn("37%", plain)
-        self.assertNotIn("Left", plain)
+        self.assertIn("Left", plain)
+        self.assertNotIn("Used", plain)
+        # 37% used leaves 63%: 8 of 12 blocks. 110% used leaves nothing.
+        self.assertIn("████████░░░░   63%", plain)
+        self.assertIn("░░░░░░░░░░░░    0%", plain)
         self.assertIn("Reset", plain)
         self.assertNotIn("5-hour", plain)
         self.assertNotIn("Fable", plain)
