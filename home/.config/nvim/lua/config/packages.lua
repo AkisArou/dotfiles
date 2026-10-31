@@ -56,7 +56,6 @@ vim.pack.add({
   gh("j-hui/fidget.nvim"),
   gh("nvim-lua/plenary.nvim"),
   gh("nvim-lualine/lualine.nvim"),
-  gh("arnamak/stay-centered.nvim"),
   gh("fei6409/log-highlight.nvim"),
   gh("3rd/image.nvim"),
   gh("max397574/better-escape.nvim"),
@@ -150,7 +149,7 @@ require("plugins.fzf")
 -- Deferred load
 vim.schedule(function()
   require("plugins.treesitter")
-  require("plugins.stay-centered")
+  require("custom.centered").setup({ allow_scroll_move = false, no_bottom_padding = { "vim-view" } })
   require("plugins.better-escape")
   require("plugins.vim-tmux-navigator")
   require("plugins.oil")

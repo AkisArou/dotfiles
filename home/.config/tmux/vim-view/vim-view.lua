@@ -250,7 +250,6 @@ local function insert_history(out, last_row)
   local added = tonumber(C.vv_parse(out, #out, 0, 1))
   set_lines(0, 0, texts(0, added))
   view.first = view.first + added
-  view.entry[1] = view.entry[1] + added
   log('history loaded:', added, 'lines')
   colour_history(added, last_row + 1)
 end
@@ -325,7 +324,6 @@ function M.enter(target, float, restore)
   view.anchor = tonumber(number_out[0])
   api.nvim_win_set_buf(0, buf)
   window_options(0)
-  view.entry = { 1, 0 }
 
   if restore and not restore.follow then
     -- tmux wraps the history again at the new width, but its lines stay the
@@ -347,27 +345,6 @@ function M.enter(target, float, restore)
     -- Lines don't wrap, so the last line goes at the bottom, as in the pane.
     local top = math.max(1, count - api.nvim_win_get_height(0) + 1)
     vim.fn.winrestview({ topline = math.min(top, line), lnum = line, col = math.max(0, byte - 1), leftcol = 0 })
-  end
-  -- History loading and following output move it too; they keep this current.
-  view.entry = api.nvim_win_get_cursor(0)
-
-  -- Show the pane exactly as it was. Like tmux copy mode with centering
-  -- bindings, the first movement centres the cursor, not the entry itself.
-  local centered = package.loaded['stay-centered']
-  if centered and not restore then
-    centered.disable()
-    api.nvim_create_autocmd('CursorMoved', {
-      buffer = buf,
-      callback = function()
-        local now = api.nvim_win_get_cursor(0)
-        if now[1] == view.entry[1] and now[2] == view.entry[2] then
-          return
-        end
-        centered.enable()
-        vim.cmd('normal! zz')
-        return true
-      end,
-    })
   end
   vim.cmd('redraw')
   view.ready = true
@@ -470,9 +447,6 @@ local function finish()
            unpack(view.piped and { ';', 'pipe-pane', '-t', target } or {}) })
   end
   view.piped = nil
-  if package.loaded['stay-centered'] then
-    package.loaded['stay-centered'].enable()
-  end
   C.vv_clear(view.width or 80, view.text_width or 80)
   set_lines(0, -1, {})
   os.remove(pool .. '/busy/' .. name)
@@ -583,11 +557,7 @@ function M.update()
     end
     local count = tonumber(C.vv_count())
     if follow and count ~= last_line then
-      local entered = view.entry[1] == last_line
       api.nvim_win_set_cursor(win, { count, 0 })
-      if entered then
-        view.entry = api.nvim_win_get_cursor(win)
-      end
     end
     -- Keep the re-read tail about one screen long.
     if count - view.first > 4 * vim.o.lines then
