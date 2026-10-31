@@ -25,7 +25,7 @@ for output, source, shared in ((LIBRARY, 'vim-view.c', ['-fPIC', '-shared']), (S
                     '-o', str(output), str(HERE / source)], check=True)
 COPIES = itertools.count()
 FILL = 0xFFFFFFFF
-BOLD, ITALIC, REVERSE, STRIKETHROUGH, UNDERLINE_SHIFT = 1, 2, 4, 8, 4
+BOLD, ITALIC, REVERSE, STRIKETHROUGH, UNDERLINE_SHIFT, DIM = 1, 2, 4, 8, 4, 128
 TRUE_COLOUR = 0x1000000
 
 
@@ -135,6 +135,12 @@ class Parse(unittest.TestCase):
         self.assertEqual(v.attr(v.spans(1)[0][2]), (-1, 236, -1, 0))
         self.assertEqual(v.attr(v.spans(2)[0][2]), (-1, 236, -1, BOLD))
         self.assertEqual(v.spans(3), [])
+
+    def test_dim(self):
+        v = self.v
+        v.capture(['\x1b[2;38;5;231m8\x1b[0m \x1b[1;2mboth\x1b[22mnone'], width=80, text_width=75)
+        self.assertEqual([v.attr(a) for _, _, a in v.spans(0)], [(231, -1, -1, DIM), (-1, -1, -1, BOLD | DIM)])
+        self.assertEqual(v.spans(0)[1][:2], (2, 6))
 
     def test_same_attributes_share_an_id(self):
         v = self.v

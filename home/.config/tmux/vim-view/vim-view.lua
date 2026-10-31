@@ -88,8 +88,33 @@ local XTERM = { '#000000', '#cd0000', '#00cd00', '#cdcd00', '#0000ee', '#cd00cd'
                 '#7f7f7f', '#ff0000', '#00ff00', '#ffff00', '#5c5cff', '#ff00ff', '#00ffff', '#ffffff' }
 local UNDERLINES = { 'underline', 'underdouble', 'undercurl', 'underdotted', 'underdashed' }
 
+-- The terminal decides what a palette colour looks like; tmux passes on only
+-- its number. foot's palette, from its config, matches the pane exactly, and
+-- so does the way foot dims: towards black, by dim-amount.
+local foot = { dim = 1.5 }
+do
+  local path = (vim.env.XDG_CONFIG_HOME or (vim.env.HOME .. '/.config')) .. '/foot/foot.ini'
+  local ok, lines = pcall(io.lines, path)
+  local section
+  for line in ok and lines or function() end do
+    section = line:match('^%s*%[(.-)%]') or section
+    local key, value = line:match('^%s*([%w-]+)%s*=%s*([^%s#]+)')
+    if key == 'dim-amount' then
+      foot.dim = tonumber(value) or foot.dim
+    elseif key and (section == 'colors' or section == 'colors-dark') and value:match('^%x%x%x%x%x%x$') then
+      local regular, bright = tonumber(key:match('^regular(%d)$')), tonumber(key:match('^bright(%d)$'))
+      local n = regular or bright and bright + 8 or tonumber(key:match('^%d+$'))
+      if n and n < 256 then
+        foot[n] = '#' .. value:lower()
+      end
+    end
+  end
+end
+
 local function palette(n)
-  if n < 16 then
+  if foot[n] then
+    return foot[n]
+  elseif n < 16 then
     return vim.g['terminal_color_' .. n] or XTERM[n + 1]
   elseif n < 232 then
     local steps, i = { 0, 95, 135, 175, 215, 255 }, n - 16
@@ -109,12 +134,24 @@ end
 
 local groups = {} -- Highlight group names by vim-view.c's attribute ids.
 
+-- Dimmed text darkens its colour, or the default one.
+local function dimmed(fg)
+  local rgb = fg and tonumber(fg:sub(2), 16) or api.nvim_get_hl(0, { name = 'Normal', link = false }).fg or 0xffffff
+  local channel = function(shift)
+    return math.floor(bit.band(bit.rshift(rgb, shift), 0xff) / foot.dim)
+  end
+  return ('#%02x%02x%02x'):format(channel(16), channel(8), channel(0))
+end
+
 local function group(id)
   local a = C.vv_attribute(id)
   local flags, style = a.flags, bit.band(bit.rshift(a.flags, 4), 7)
   local hl = { fg = colour(a.fg), bg = colour(a.bg), sp = colour(a.sp), bold = bit.band(flags, 1) ~= 0,
                italic = bit.band(flags, 2) ~= 0, reverse = bit.band(flags, 4) ~= 0,
                strikethrough = bit.band(flags, 8) ~= 0 }
+  if bit.band(flags, 128) ~= 0 then
+    hl.fg = dimmed(hl.fg)
+  end
   if style > 0 then
     hl[UNDERLINES[style]] = true
   end

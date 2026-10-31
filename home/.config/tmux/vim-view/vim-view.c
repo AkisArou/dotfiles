@@ -22,7 +22,7 @@
 #define FILL UINT32_MAX /* A span's stop: highlight to the window's edge. */
 #define TRUE_COLOUR 0x1000000 /* Colours: -1 default, 0-255 palette, or this | rgb. */
 
-enum { BOLD = 1, ITALIC = 2, REVERSE = 4, STRIKETHROUGH = 8, UNDERLINE_SHIFT = 4 };
+enum { BOLD = 1, ITALIC = 2, REVERSE = 4, STRIKETHROUGH = 8, UNDERLINE_SHIFT = 4, DIM = 128 };
 
 typedef struct { uint32_t start, stop; int32_t attr; } vv_span;
 typedef struct { int32_t fg, bg, sp; uint32_t flags; } vv_attr;
@@ -333,6 +333,8 @@ static void sgr(vv_attr *a, const char *params, long length) {
             *a = (vv_attr){ -1, -1, -1, 0 };
         } else if (code == 1) {
             a->flags |= BOLD;
+        } else if (code == 2) {
+            a->flags |= DIM;
         } else if (code == 3) {
             a->flags |= ITALIC;
         } else if (code == 4 || code == 21) {
@@ -343,7 +345,7 @@ static void sgr(vv_attr *a, const char *params, long length) {
         } else if (code == 9) {
             a->flags |= STRIKETHROUGH;
         } else if (code == 22) {
-            a->flags &= ~BOLD;
+            a->flags &= ~(BOLD | DIM);
         } else if (code == 23) {
             a->flags &= ~ITALIC;
         } else if (code == 24) {
