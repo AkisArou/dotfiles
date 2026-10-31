@@ -439,7 +439,7 @@ def provider_tooltip(entry, label):
             filled = round(left * BAR_WIDTH / 100)
             bar = (
                 f"<span foreground='#569CD6'>{'█' * filled}</span>"
-                f"<span foreground='#444444'>{'░' * (BAR_WIDTH - filled)}</span>"
+                f"<span foreground='#777777'>{'░' * (BAR_WIDTH - filled)}</span>"
             )
             table.append(
                 f"{html.escape(name.ljust(label_width))}  {bar}  "
