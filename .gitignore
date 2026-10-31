@@ -23,6 +23,7 @@ dwm/dwm
 dwm/config.h
 mtwm/mtwm
 home/.config/tmux/vim-view/vim-view.so
+home/.config/tmux/vim-view/vim-view-signal
 emacs/*
 !emacs/init.el
 !emacs/lisp/

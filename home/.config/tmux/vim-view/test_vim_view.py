@@ -12,14 +12,17 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 
 HERE = Path(__file__).resolve().parent
 BUILD = tempfile.TemporaryDirectory(prefix='test-vim-view-build-')
 LIBRARY = Path(BUILD.name) / 'vim-view.so'
 # CC may carry flags, such as -fsanitize=undefined.
-subprocess.run([*shlex.split(os.environ.get('CC', 'cc')), '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror', '-fPIC',
-                '-shared', '-o', str(LIBRARY), str(HERE / 'vim-view.c')], check=True)
+SIGNAL = Path(BUILD.name) / 'vim-view-signal'
+for output, source, shared in ((LIBRARY, 'vim-view.c', ['-fPIC', '-shared']), (SIGNAL, 'vim-view-signal.c', [])):
+    subprocess.run([*shlex.split(os.environ.get('CC', 'cc')), '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror', *shared,
+                    '-o', str(output), str(HERE / source)], check=True)
 COPIES = itertools.count()
 FILL = 0xFFFFFFFF
 BOLD, ITALIC, REVERSE, STRIKETHROUGH, UNDERLINE_SHIFT = 1, 2, 4, 8, 4
@@ -257,6 +260,41 @@ class Parse(unittest.TestCase):
         # With the writer gone, the FIFO still has a writer: itself.
         self.assertEqual(self.v.lib.vv_drain(fd), 0)
         os.close(fd)
+
+    def test_signal_helper_tells_changes_not_bytes(self):
+        lib = self.v.lib
+        path = Path(BUILD.name) / f'fifo-{next(COPIES)}'
+        fd = lib.vv_open_fifo(str(path).encode())
+        helper = subprocess.Popen([str(SIGNAL), str(path)], stdin=subprocess.PIPE)
+        def told(within):
+            deadline, total = time.monotonic() + within, 0
+            while time.monotonic() < deadline:
+                total += lib.vv_drain(fd)
+                time.sleep(0.002)
+            return total
+        start = time.monotonic()
+        helper.stdin.write(b'x'); helper.stdin.flush()
+        while not lib.vv_drain(fd):
+            self.assertLess(time.monotonic() - start, 0.05, 'the first output is told at once')
+            time.sleep(0.001)
+        # A flood is told a few times, and once more after it ends.
+        start = time.monotonic()
+        for _ in range(200):
+            helper.stdin.write(b'y' * 65536)
+        helper.stdin.flush()
+        seconds = time.monotonic() - start
+        bytes_told = told(0.1)
+        self.assertGreaterEqual(bytes_told, 1)
+        self.assertLessEqual(bytes_told, seconds / 0.02 + 3)
+        self.assertEqual(told(0.1), 0)
+        helper.stdin.close()
+        self.assertEqual(helper.wait(timeout=2), 0)
+        os.close(fd)
+
+    def test_signal_helper_needs_a_viewer(self):
+        path = Path(BUILD.name) / f'fifo-{next(COPIES)}'
+        os.mkfifo(path)
+        self.assertEqual(subprocess.run([str(SIGNAL), str(path)], stdin=subprocess.DEVNULL).returncode, 1)
 
     def test_tail_and_locate_count_tmux_rows(self):
         v = self.v

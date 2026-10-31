@@ -24,7 +24,7 @@ pool=${TMUX%%,*}-vim-view
 # Start a waiting Neovim; it registers in idle/ once ready. setsid: closing
 # the floating pane that started it must not end it.
 spare() {
-  make -s -C "$here" vim-view.so >/dev/null
+  make -s -C "$here" vim-view.so vim-view-signal >/dev/null
   spare_name=$(date +%s%N)
   (cd "$pool" && VIM_VIEW_POOL=$pool VIM_VIEW_NAME=$spare_name setsid -f nvim --headless \
     --listen "./$spare_name.sock" -i NONE -c "luafile $here/vim-view.lua" </dev/null >/dev/null 2>&1)

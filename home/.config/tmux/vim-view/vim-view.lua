@@ -39,14 +39,15 @@ const vv_attr *vv_attribute(int id);
 long vv_tail(long from, long height, long total_rows, long *anchor);
 long vv_locate(long first, long anchor, long target, long *offset);
 ]])
-local C = ffi.load(vim.fs.dirname(debug.getinfo(1, 'S').source:sub(2)) .. '/vim-view.so')
+local here = vim.fs.dirname(debug.getinfo(1, 'S').source:sub(2))
+local C = ffi.load(here .. '/vim-view.so')
 local FILL = 0xFFFFFFFF
 local size, number_out, spans_out = ffi.new('size_t[1]'), ffi.new('long[1]'), ffi.new('const vv_span *[1]')
 local end_out = ffi.new('long[1]')
 
 -- The vim-view launcher's pool: see there.
 local pool, name = vim.env.VIM_VIEW_POOL, vim.env.VIM_VIEW_NAME
--- pipe-pane writes the viewed program's output here.
+-- vim-view-signal, run by pipe-pane, writes here when the viewed pane changed.
 local fifo_path = pool .. '/' .. name .. '.fifo'
 
 local ns = api.nvim_create_namespace('vim-view')
@@ -289,7 +290,7 @@ function M.enter(target, float, restore)
                          'set-option', '-p', '-t', float, '@vim-view-target', target, ';',
                          'display-message', '-p', '-t', target, INFO, ';',
                          'if-shell', '-F', '-t', target, '#{?pane_pipe,0,1}',
-                         ("pipe-pane -O -t %s \"exec cat > '%s'\""):format(target, fifo_path), ';',
+                         ("pipe-pane -O -t %s \"exec '%s/vim-view-signal' '%s'\""):format(target, here, fifo_path), ';',
                          'capture-pane', '-p', '-e', '-J', '-S', tostring(-FIRST_ROWS), '-E', '-', '-t', target })
   local newline = out:find('\n') or #out
   local width, height, cx, cy, history, collected, piped, path =
@@ -596,8 +597,8 @@ function M.update()
   end)
 end
 
--- The viewed program's output arrives through pipe-pane: any of it means the
--- pane changed. vim-view.c reads and drops it, without making Lua strings.
+-- A byte from vim-view-signal means the viewed pane changed. vim-view.c
+-- reads and drops them, without making Lua strings.
 local fifo = C.vv_open_fifo(fifo_path)
 uv.new_poll(fifo):start('r', function()
   if C.vv_drain(fifo) > 0 and view.pane then
