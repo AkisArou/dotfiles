@@ -4,11 +4,11 @@
 CFLAGS ?= -O2
 CFLAGS += -std=c11 -Wall -Wextra
 
-vim-view.so: vim-view.c vim-copy-unicode.h
+vim-view.so: vim-view.c unicode.h
 	$(CC) $(CFLAGS) -fPIC -shared $(LDFLAGS) -o $@.$$$$ vim-view.c && mv -f $@.$$$$ $@
 
-# Regenerate the character classes after a Python Unicode update.
+# Regenerate the cell widths after a Python Unicode update.
 unicode:
-	python3 vim_copy_unicode.py
+	python3 unicode.py
 
 .PHONY: unicode

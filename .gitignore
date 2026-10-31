@@ -22,7 +22,7 @@ src/st/config.h
 dwm/dwm
 dwm/config.h
 mtwm/mtwm
-home/.config/tmux/vim-view.so
+home/.config/tmux/vim-view/vim-view.so
 emacs/*
 !emacs/init.el
 !emacs/lisp/

@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "vim-copy-unicode.h"
+#include "unicode.h"
 
 #define LENGTH(a) ((long)(sizeof(a) / sizeof *(a)))
 #define FILL UINT32_MAX /* A span's stop: highlight to the window's edge. */
