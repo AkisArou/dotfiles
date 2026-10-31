@@ -1,70 +1,68 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
-local opt = vim.opt
+vim.o.spelllang = "en"
+vim.o.autowrite = true
+vim.o.autowriteall = true
+vim.o.cursorline = true -- highlight the current line
+vim.o.backup = false -- creates a backup file
+-- vim.o.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
+vim.opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+vim.o.cmdheight = 1 -- more space in the neovim command line for displaying messages
+vim.o.cmdwinheight = 20
+vim.o.completeopt = "menuone,noinsert,popup,fuzzy" -- mostly just for cmp
+vim.o.conceallevel = 0 -- so that `` is visible in markdown files
+vim.o.fileencoding = "utf-8" -- the encoding written to a file
+vim.o.hlsearch = true -- highlight all matches on previous search pattern
+vim.o.ignorecase = true -- ignore case in search patterns
+vim.o.pumheight = 10 -- pop up menu height
+vim.o.pumblend = 10 -- Popup blend
+vim.o.showmode = false -- we don't need to see things like -- INSERT -- anymore
+vim.o.showtabline = 1 -- show tabs when >1
+vim.o.smartcase = true -- smart case
+vim.o.smartindent = true -- make indenting smarter again
+vim.o.splitbelow = true -- force all horizontal splits to go below current window
+vim.o.splitright = true -- force all vertical splits to go to the right of current window
+vim.opt.shortmess:append("cC")
+vim.o.swapfile = false -- creates a swapfile
+vim.o.termguicolors = true -- set term gui colors (most terminals support this)
+vim.o.timeout = true
+vim.o.timeoutlen = 300 -- time to wait for a mapped sequence to complete (in milliseconds)
+vim.o.undofile = true -- enable persistent undo
+vim.o.undolevels = 10000
+vim.o.updatetime = 50 -- Save swap file and trigger CursorHold
+vim.o.writebackup = false -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
+vim.o.expandtab = true -- convert tabs to spaces
+vim.o.shiftround = true -- Round indent
+vim.o.shiftwidth = 2 -- the number of spaces inserted for each indentation
+vim.o.tabstop = 2 -- insert 2 spaces for a tab
+vim.o.softtabstop = 2
+vim.o.number = true -- set numbered lines
+vim.o.relativenumber = true
+vim.o.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
+vim.o.laststatus = 3 -- only the last window will always have a status line
+vim.o.showcmd = false -- hide (partial) command in the last line of the screen (for performance)
+vim.o.ruler = false -- hide the line and column number of the cursor position
+vim.o.numberwidth = 4 -- minimal number of columns to use for the line number {default 4}
+vim.o.signcolumn = "yes" -- always show the sign column, otherwise it would shift the text each time
+vim.o.wrap = false -- display lines as one long line
+-- vim.o.scrolloff = 25 -- minimal number of screen lines to keep above and below the cursor
+vim.o.sidescrolloff = 8 -- minimal number of screen columns to keep to the left and right of the cursor if wrap is `false`
+vim.o.winminwidth = 5 -- Minimum window width
+-- vim.o.termsync = true -- terminal synchronized output
+vim.o.guifont = "Hasklug Nerd Font Mono:h12" -- the font used in graphical neovim applications
+vim.opt.fillchars:append("eob: ") -- show empty lines at the end of a buffer as ` ` {default `~`}
+vim.opt.shortmess:append("c") -- hide all the completion messages, e.g. "-- XXX completion (YYY)", "match 1 of 2", "The only match", "Pattern not found"
+vim.opt.whichwrap:append("<,>,[,],h,l") -- keys allowed to move to the previous/next line when the beginning/end of line is reached
+vim.o.formatoptions = vim.o.formatoptions:gsub("[cro]", "") -- This is a sequence of letters which describes how automatic formatting is to be done
+vim.o.linebreak = true -- Wrap lines at convenient points
+vim.o.nrformats = "blank"
+vim.o.foldenable = false -- Disable folding by default
+vim.o.foldmethod = "manual"
 
-opt.spelllang = { "en" }
-opt.autowrite = true
-opt.autowriteall = true
-opt.cursorline = true -- highlight the current line
-opt.backup = false -- creates a backup file
--- opt.clipboard = vim.env.SSH_TTY and "" or "unnamedplus" -- Sync with system clipboard
-opt.clipboard:append("unnamedplus") -- use system clipboard as default register
-opt.cmdheight = 1 -- more space in the neovim command line for displaying messages
-opt.cmdwinheight = 20
-opt.completeopt = { "menuone", "noinsert", "popup", "fuzzy" } -- mostly just for cmp
-opt.conceallevel = 0 -- so that `` is visible in markdown files
-opt.fileencoding = "utf-8" -- the encoding written to a file
-opt.hlsearch = true -- highlight all matches on previous search pattern
-opt.ignorecase = true -- ignore case in search patterns
-opt.pumheight = 10 -- pop up menu height
-opt.pumblend = 10 -- Popup blend
-opt.showmode = false -- we don't need to see things like -- INSERT -- anymore
-opt.showtabline = 1 -- show tabs when >1
-opt.smartcase = true -- smart case
-opt.smartindent = true -- make indenting smarter again
-opt.splitbelow = true -- force all horizontal splits to go below current window
-opt.splitright = true -- force all vertical splits to go to the right of current window
-opt.shortmess:append({ c = true, C = true })
-opt.swapfile = false -- creates a swapfile
-opt.termguicolors = true -- set term gui colors (most terminals support this)
-opt.timeout = true
-opt.timeoutlen = 300 -- time to wait for a mapped sequence to complete (in milliseconds)
-opt.undofile = true -- enable persistent undo
-opt.undolevels = 10000
-opt.updatetime = 50 -- Save swap file and trigger CursorHold
-opt.writebackup = false -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
-opt.expandtab = true -- convert tabs to spaces
-opt.shiftround = true -- Round indent
-opt.shiftwidth = 2 -- the number of spaces inserted for each indentation
-opt.tabstop = 2 -- insert 2 spaces for a tab
-opt.softtabstop = 2
-opt.number = true -- set numbered lines
-opt.relativenumber = true
-opt.virtualedit = "block" -- Allow cursor to move where there is no text in visual block mode
-opt.laststatus = 3 -- only the last window will always have a status line
-opt.showcmd = false -- hide (partial) command in the last line of the screen (for performance)
-opt.ruler = false -- hide the line and column number of the cursor position
-opt.numberwidth = 4 -- minimal number of columns to use for the line number {default 4}
-opt.signcolumn = "yes" -- always show the sign column, otherwise it would shift the text each time
-opt.wrap = false -- display lines as one long line
--- opt.scrolloff = 25 -- minimal number of screen lines to keep above and below the cursor
-opt.sidescrolloff = 8 -- minimal number of screen columns to keep to the left and right of the cursor if wrap is `false`
-opt.winminwidth = 5 -- Minimum window width
--- vim.opt.termsync = true -- terminal synchronized output
-opt.guifont = "Hasklug Nerd Font Mono:h12" -- the font used in graphical neovim applications
-opt.fillchars.eob = " " -- show empty lines at the end of a buffer as ` ` {default `~`}
-opt.shortmess:append("c") -- hide all the completion messages, e.g. "-- XXX completion (YYY)", "match 1 of 2", "The only match", "Pattern not found"
-opt.whichwrap:append("<,>,[,],h,l") -- keys allowed to move to the previous/next line when the beginning/end of line is reached
-opt.formatoptions:remove({ "c", "r", "o" }) -- This is a sequence of letters which describes how automatic formatting is to be done
-opt.linebreak = true -- Wrap lines at convenient points
-opt.nrformats = "blank"
-opt.foldenable = false -- Disable folding by default
-opt.foldmethod = "manual"
-
-opt.grepprg = "rg --vimgrep --smart-case --hidden"
-opt.grepformat = "%f:%l:%c:%m"
-opt.exrc = true
+vim.o.grepprg = "rg --vimgrep --smart-case --hidden"
+vim.o.grepformat = "%f:%l:%c:%m"
+vim.o.exrc = true
 
 vim.cmd([[set mouse=]])
 
