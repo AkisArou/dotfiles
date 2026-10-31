@@ -1,0 +1,14 @@
+#!/bin/sh
+# Claude Code's status line command: the cursor follows the vim mode, a bar
+# in INSERT and a block otherwise. Prints nothing, so no status line shows.
+#
+# Claude Code reruns the status line when the vim mode changes, but leaves
+# the cursor shape alone (anthropics/claude-code#32469). It runs this
+# without a terminal, so the shape goes to the pane's terminal through tmux.
+mode=$(jq -r '.vim.mode // empty')
+[ -n "$TMUX_PANE" ] || exit 0
+tty=$(tmux display-message -p -t "$TMUX_PANE" '#{pane_tty}') || exit 0
+case "$mode" in
+INSERT) printf '\033[6 q' >"$tty" ;;
+NORMAL | VISUAL*) printf '\033[2 q' >"$tty" ;;
+esac
