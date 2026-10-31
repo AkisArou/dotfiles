@@ -4,15 +4,9 @@
 CFLAGS ?= -O2
 CFLAGS += -std=c11 -Wall -Wextra
 
-vim-view.so: vim-view.c unicode.h
+vim-view.so: vim-view.c
 	$(CC) $(CFLAGS) -fPIC -shared $(LDFLAGS) -o $@.$$$$ vim-view.c && mv -f $@.$$$$ $@
 
 # pipe-pane's command: tells a view that its pane changed.
 vim-view-signal: vim-view-signal.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@.$$$$ vim-view-signal.c && mv -f $@.$$$$ $@
-
-# Regenerate the cell widths after a Python Unicode update.
-unicode:
-	python3 unicode.py
-
-.PHONY: unicode
