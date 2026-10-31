@@ -6,10 +6,16 @@
  *
  * Build: make vim-view.so */
 
+#define _DEFAULT_SOURCE /* mkfifo and O_CLOEXEC under -std=c11. */
+
+#include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "unicode.h"
 
@@ -483,6 +489,82 @@ long vv_chunk(long stop, long most, long *taken) {
         total += rows(--first);
     *taken = total;
     return first;
+}
+
+static bool same_line(const Line *a, const Line *b) {
+    return a->length == b->length && a->cells == b->cells && a->count == b->count &&
+           !memcmp(a->text, b->text, a->length) && (!a->count || !memcmp(a->spans, b->spans, a->count * sizeof *a->spans));
+}
+
+static void free_line(Line *line) {
+    free(line->text);
+    free(line->spans);
+}
+
+/* Parse captured output as the lines from first on, keeping those that did
+ * not change, at either end: lines changed up to before *old_end became
+ * lines changed up to before *new_end. Returns changed. */
+long vv_replace(const char *data, size_t size, long first, long *old_end, long *new_end) {
+    static Line *fresh;
+    static long fresh_size;
+    const char *p = data, *end = data + size;
+    long n = count_lines(data, size);
+    vv_attr state = { -1, -1, -1, 0 };
+    int32_t id = 0;
+    first = first < 0 || first > line_count ? line_count : first;
+    fresh = grow(fresh, &fresh_size, n, sizeof *fresh);
+    for (long k = 0; k < n; k++) {
+        const char *newline = memchr(p, '\n', end - p);
+        newline = newline ? newline : end;
+        parse(&fresh[k], p, newline - p, &state, &id);
+        p = newline + 1;
+    }
+    long old = line_count - first, prefix = 0, suffix = 0;
+    while (prefix < old && prefix < n && same_line(&lines[first + prefix], &fresh[prefix]))
+        prefix++;
+    while (suffix < old - prefix && suffix < n - prefix &&
+           same_line(&lines[line_count - 1 - suffix], &fresh[n - 1 - suffix]))
+        suffix++;
+    /* The old lines stay at both ends; only the middle is new. */
+    for (long k = 0; k < prefix; k++)
+        free_line(&fresh[k]);
+    for (long k = n - suffix; k < n; k++)
+        free_line(&fresh[k]);
+    long changed = first + prefix, middle = n - prefix - suffix;
+    for (long i = changed; i < line_count - suffix; i++)
+        free_line(&lines[i]);
+    lines = grow(lines, &line_size, changed + middle + suffix, sizeof *lines);
+    if (suffix)
+        memmove(lines + changed + middle, lines + line_count - suffix, suffix * sizeof *lines);
+    if (middle)
+        memcpy(lines + changed, fresh + prefix, middle * sizeof *lines);
+    *old_end = line_count - suffix;
+    *new_end = changed + middle;
+    line_count = changed + middle + suffix;
+    return changed;
+}
+
+/* pipe-pane writes the viewed program's output to this FIFO. Opened for
+ * writing too, so that it never ends when a pipe closes. */
+int vv_open_fifo(const char *path) {
+    unlink(path);
+    if (mkfifo(path, 0600) && errno != EEXIST)
+        return -1;
+    return open(path, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+}
+
+/* Read and drop what the FIFO holds; only its arrival matters. Returns the
+ * bytes read. */
+long vv_drain(int fd) {
+    static char buffer[65536];
+    long total = 0;
+    for (;;) {
+        ssize_t n = read(fd, buffer, sizeof buffer);
+        if (n > 0)
+            total += n;
+        else if (n == 0 || errno != EINTR)
+            return total;
+    }
 }
 
 long vv_count(void) { return line_count; }

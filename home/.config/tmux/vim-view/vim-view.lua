@@ -27,6 +27,9 @@ typedef struct { uint32_t start, stop; int32_t attr; } vv_span;
 typedef struct { int32_t fg, bg, sp; uint32_t flags; } vv_attr;
 void vv_clear(long pane_width, long view_width);
 long vv_parse(const char *data, size_t size, long first, int prepend);
+long vv_replace(const char *data, size_t size, long first, long *old_end, long *new_end);
+int vv_open_fifo(const char *path);
+long vv_drain(int fd);
 long vv_colour(const char *data, size_t size, long first, long stop);
 long vv_chunk(long stop, long most, long *taken);
 long vv_count(void);
@@ -35,11 +38,11 @@ int vv_spans(long i, const vv_span **spans);
 const vv_attr *vv_attribute(int id);
 long vv_tail(long from, long height, long total_rows, long *anchor);
 long vv_locate(long first, long anchor, long target, long *offset);
-int mkfifo(const char *path, unsigned int mode);
 ]])
 local C = ffi.load(vim.fs.dirname(debug.getinfo(1, 'S').source:sub(2)) .. '/vim-view.so')
 local FILL = 0xFFFFFFFF
 local size, number_out, spans_out = ffi.new('size_t[1]'), ffi.new('long[1]'), ffi.new('const vv_span *[1]')
+local end_out = ffi.new('long[1]')
 
 -- The vim-view launcher's pool: see there.
 local pool, name = vim.env.VIM_VIEW_POOL, vim.env.VIM_VIEW_NAME
@@ -276,7 +279,7 @@ local updating, stale = false, false
 function M.enter(target, float, restore)
   local started = uv.hrtime()
   view.generation, updating, stale = view.generation + 1, false, false
-  view.pane, view.float, view.ready = target, float, false
+  view.pane, view.float, view.ready, view.waiting = target, float, false, false
   -- Tmux navigation and anything else run from here act on the floating pane.
   vim.env.TMUX_PANE = float
   -- pipe-pane shows the program's output, unless the pane already has a pipe:
@@ -504,29 +507,51 @@ api.nvim_create_autocmd('UILeave', {
 
 -- Live output ----------------------------------------------------------------
 
-local pending = false
+-- New output reads the pane at once, then at most every INTERVAL ms.
+local INTERVAL = 40
+local pending, last = false, 0
 local timer = uv.new_timer()
 
 local function schedule_update()
   if not pending then
     pending = true
-    timer:start(40, 0, vim.schedule_wrap(function()
+    timer:start(math.max(0, last + INTERVAL - uv.now()), 0, vim.schedule_wrap(function()
       pending = false
       M.update()
     end))
   end
 end
 
+-- An update re-reads the lines from the tail's first; while none of them is
+-- on screen, it waits until one is.
+local function tail_shown()
+  local win = vim.fn.bufwinid(view.buf)
+  return win ~= -1 and vim.fn.line('w$', win) > view.first
+end
+
+api.nvim_create_autocmd('WinScrolled', {
+  callback = function()
+    if view.waiting and view.ready and tail_shown() then
+      view.waiting = false
+      schedule_update()
+    end
+  end,
+})
+
 -- Re-read the tail, from the row where the screen started at entry.
 function M.update()
   if not view.pane then
+    return
+  end
+  if not tail_shown() then
+    view.waiting = true
     return
   end
   if updating then
     stale = true
     return
   end
-  updating = true
+  updating, last = true, uv.now()
   local generation = view.generation
   tmux({ 'display-message', '-p', '-t', view.pane, '#{history_size} #{history_collected}', ';',
          'capture-pane', '-p', '-e', '-J', '-t', view.pane, '-E', '-',
@@ -546,13 +571,18 @@ function M.update()
       return
     end
     local win = vim.fn.bufwinid(view.buf)
-    local last = api.nvim_buf_line_count(view.buf)
-    local follow = win ~= -1 and api.nvim_win_get_cursor(win)[1] == last
-    local count = tonumber(C.vv_parse(ffi.cast('const char *', out) + newline, #out - newline, view.first, 0))
-                  + view.first
-    set_lines(view.first, -1, texts(view.first, count))
-    if follow then
-      local entered = view.entry[1] == last
+    local last_line = api.nvim_buf_line_count(view.buf)
+    local follow = win ~= -1 and api.nvim_win_get_cursor(win)[1] == last_line
+    -- Only the lines that changed reach the buffer.
+    local changed = tonumber(C.vv_replace(ffi.cast('const char *', out) + newline, #out - newline, view.first,
+                                          number_out, end_out))
+    local old_end, new_end = tonumber(number_out[0]), tonumber(end_out[0])
+    if changed < old_end or changed < new_end then
+      set_lines(changed, old_end, texts(changed, new_end))
+    end
+    local count = tonumber(C.vv_count())
+    if follow and count ~= last_line then
+      local entered = view.entry[1] == last_line
       api.nvim_win_set_cursor(win, { count, 0 })
       if entered then
         view.entry = api.nvim_win_get_cursor(win)
@@ -566,14 +596,11 @@ function M.update()
   end)
 end
 
--- The viewed program's output: any data means the pane changed. Opened for
--- writing too, so it never ends when a pipe-pane closes.
-os.remove(fifo_path)
-C.mkfifo(fifo_path, tonumber('600', 8))
-local fifo = uv.new_pipe()
-fifo:open(uv.fs_open(fifo_path, 'r+', 0))
-fifo:read_start(function(_, data)
-  if data and view.pane then
+-- The viewed program's output arrives through pipe-pane: any of it means the
+-- pane changed. vim-view.c reads and drops it, without making Lua strings.
+local fifo = C.vv_open_fifo(fifo_path)
+uv.new_poll(fifo):start('r', function()
+  if C.vv_drain(fifo) > 0 and view.pane then
     schedule_update()
   end
 end)

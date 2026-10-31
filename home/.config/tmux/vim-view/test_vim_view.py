@@ -45,6 +45,9 @@ def load():
         ('vv_parse', ctypes.c_long, [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_long, ctypes.c_int]),
         ('vv_colour', ctypes.c_long, [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_long, ctypes.c_long]),
         ('vv_chunk', ctypes.c_long, [ctypes.c_long, ctypes.c_long, long_p]),
+        ('vv_replace', ctypes.c_long, [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_long, long_p, long_p]),
+        ('vv_open_fifo', ctypes.c_int, [ctypes.c_char_p]),
+        ('vv_drain', ctypes.c_long, [ctypes.c_int]),
         ('vv_count', ctypes.c_long, []),
         ('vv_text', ctypes.c_void_p, [ctypes.c_long, size_p]),
         ('vv_spans', ctypes.c_int, [ctypes.c_long, ctypes.POINTER(ctypes.POINTER(Span))]),
@@ -217,6 +220,43 @@ class Parse(unittest.TestCase):
         self.assertEqual((v.lib.vv_chunk(2, 2, ctypes.byref(taken)), taken.value), (1, 3))
         self.assertEqual((v.lib.vv_chunk(4, 100, ctypes.byref(taken)), taken.value), (0, 6))
         self.assertEqual((v.lib.vv_chunk(0, 100, ctypes.byref(taken)), taken.value), (0, 0))
+
+    def replace(self, rows, first):
+        data = ''.join(row + '\n' for row in rows).encode()
+        old_end, new_end = ctypes.c_long(), ctypes.c_long()
+        changed = self.v.lib.vv_replace(data, len(data), first, ctypes.byref(old_end), ctypes.byref(new_end))
+        return changed, old_end.value, new_end.value
+
+    def test_replace_keeps_unchanged_lines(self):
+        v = self.v
+        v.capture(['a', 'b', 'c', 'd', 'e'])
+        self.assertEqual(self.replace(['b', 'c', 'd', 'e'], 1), (5, 5, 5))
+        self.assertEqual(self.replace(['b', 'X', 'd', 'e'], 1), (2, 3, 3))
+        self.assertEqual(v.lines(), ['a', 'b', 'X', 'd', 'e'])
+        # Output appended, and a line that only changed colour.
+        self.assertEqual(self.replace(['b', 'X', 'd', '\x1b[31me\x1b[0m', 'f', 'g'], 1), (4, 5, 7))
+        self.assertEqual(v.lines(), ['a', 'b', 'X', 'd', 'e', 'f', 'g'])
+        self.assertEqual(len(v.spans(4)), 1)
+        # Lines inserted above a footer that stays.
+        self.assertEqual(self.replace(['b', 'X', 'd', 'new', '\x1b[31me\x1b[0m', 'f', 'g'], 1), (4, 4, 5))
+        self.assertEqual(v.lines(), ['a', 'b', 'X', 'd', 'new', 'e', 'f', 'g'])
+        self.assertEqual(self.replace(['b'], 1), (2, 8, 2))
+        self.assertEqual(v.lines(), ['a', 'b'])
+        self.assertEqual(self.replace([], 0), (0, 2, 0))
+        self.assertEqual(v.lines(), [])
+
+    def test_fifo_drains(self):
+        path = Path(BUILD.name) / f'fifo-{next(COPIES)}'
+        fd = self.v.lib.vv_open_fifo(str(path).encode())
+        self.assertGreaterEqual(fd, 0)
+        writer = os.open(path, os.O_WRONLY | os.O_NONBLOCK)
+        os.write(writer, b'x' * 50000)
+        self.assertEqual(self.v.lib.vv_drain(fd), 50000)
+        self.assertEqual(self.v.lib.vv_drain(fd), 0)
+        os.close(writer)
+        # With the writer gone, the FIFO still has a writer: itself.
+        self.assertEqual(self.v.lib.vv_drain(fd), 0)
+        os.close(fd)
 
     def test_tail_and_locate_count_tmux_rows(self):
         v = self.v
