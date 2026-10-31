@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import pty
+import random
 import re
 import signal
 import shutil
@@ -59,6 +60,26 @@ class Ranges(unittest.TestCase):
         with self.assertRaises(copy.NoMotion):
             copy.Document(text).motion(0, 'f', argument='!')
 
+    def test_backward_word_end_motions_and_inclusive_yanks(self):
+        document = copy.Document('alpha.beta gamma')
+        for position, count, big, target in [
+            (12, 1, False, 9), (12, 2, False, 5), (12, 3, False, 4),
+            (8, 1, False, 5), (8, 1, True, 0), (12, 2, True, 0),
+            (10, 1, False, 9), (9, 1, False, 5), (3, 10, False, 0),
+        ]:
+            with self.subTest(position=position, count=count, big=big):
+                self.assertEqual(document.previous_word_end(position, count, big), target)
+        self.yank(document.text, 12, 'ge', 'a ga')
+        self.yank(document.text, 12, 'ge', '.beta ga', 2)
+        self.yank(document.text, 8, 'gE', 'alpha.bet')
+        document = copy.Document('one\n\n\nsecond')
+        self.assertEqual(document.previous_word_end(document.starts[3] + 2), document.starts[2])
+        self.assertEqual(document.previous_word_end(document.starts[3] + 2, 2), document.starts[1])
+        self.assertEqual(copy.Document('one\n   \ntwo').previous_word_end(8), 2)
+        self.assertEqual(copy.Document('界 e\u0301 word').previous_word_end(7), 2)
+        with self.assertRaises(copy.NoMotion):
+            copy.Document('word').motion(0, 'ge')
+
     def test_linewise_motions_and_counts(self):
         text = 'one\ntwo\nthree\nfour'
         self.yank(text, 5, 'y', 'two\nthree\n', 2)
@@ -106,6 +127,27 @@ class Ranges(unittest.TestCase):
         self.object('before `one` after', 9, '`', 'one')
         with self.assertRaises(copy.NoMotion):
             copy.Document('no brackets').text_object(3, '(')
+
+    def test_bracket_queries_match_full_context_matching(self):
+        rng = random.Random(43)
+        for _ in range(400):
+            document = copy.Document(''.join(rng.choice([
+                'abc', ' ', '\n', '(', ')', '[', ']', '{', '}', '<', '>',
+                "'", '"', '`', '\\', '界',
+            ]) for _ in range(40)))
+            position = rng.randrange(len(document.text))
+            for key in '([{<':
+                count = rng.choice([1, 2, 3])
+                with self.subTest(text=document.text, position=position, key=key, count=count):
+                    try:
+                        expected = document.enclosing(document.brackets(key), position, count)
+                    except copy.NoMotion:
+                        expected = None
+                    try:
+                        actual = document.enclosing(document.brackets(key, position, count), position, count)
+                    except copy.NoMotion:
+                        actual = None
+                    self.assertEqual(actual, expected)
 
     def test_any_quote_object(self):
         for delimiter in '\'"`':
@@ -227,6 +269,64 @@ class Ranges(unittest.TestCase):
             copy.link_at('no link here', 4)
 
 
+class SnapshotRanges(unittest.TestCase):
+    def test_adaptive_reads_match_full_buffer_ranges(self):
+        class Slices(copy.Tmux):
+            def __init__(self, document, width):
+                self.document = document
+                self.layout = copy.Layout(document, width)
+                self.width = width
+                self.first_offset = 0
+
+            def snapshot(self, state, first=0, last=None):
+                last = len(self.layout.rows) - 1 if last is None else last
+                start, end = self.layout.rows[first][0], self.layout.rows[last][1]
+                # capture-pane emits a newline for the last physical row,
+                # including an empty row or a truncated wrapped line.
+                document = copy.Document(self.document.text[start:end] + '\n')
+                state['layout'] = copy.Layout(document, self.width, first)
+                self.first_offset = start
+                return document
+
+        rng = random.Random(30)
+        document = copy.Document('\n'.join(rng.choice([
+            'alpha.beta gamma', '', '   ', '"one two" rest', '(one [two]) tail',
+            'One. Two! Three?', '.IP item', '界 e\u0301 λέξη',
+        ]) for _ in range(180)))
+        for width in (17, 60):
+            tmux = Slices(document, width)
+            for _ in range(1200):
+                row = rng.randrange(len(tmux.layout.rows))
+                start, end = tmux.layout.rows[row]
+                position = rng.randrange(start, end) if end > start else start
+                while position > start and copy.cell_width(document.text[position]) == 0:
+                    position -= 1
+                _, column = tmux.layout.point(position)
+                key = rng.choice(['y', 'j', 'k', 'w', 'W', 'b', 'B', 'e', 'E', 'ge', 'gE',
+                                  '0', '^', '$', 'h', 'l', '{', '}', '(', ')', 'p', 's', 'q', '"', 't'])
+                obj = (rng.choice(['i', 'a']) if key in ('w', 'W', 'p', 's', 'q', '"', 't', '(')
+                       and rng.choice([True, False]) else None)
+                count = rng.choice([1, 2, 5, 20])
+                context = {'mode': 'yank', 'motion': key, 'object': obj, 'before': 1,
+                           'digits': str(count) if count > 1 else ''}
+                state = {'row': row, 'copy_cursor_x': column, 'history': len(tmux.layout.rows) - 12,
+                         'pane_height': 12, 'pane_width': width, 'selection_present': 0}
+                with self.subTest(width=width, row=row, key=key, object=obj, count=count):
+                    try:
+                        expected = (document.text_object(position, key, obj == 'a', count) if obj else
+                                    document.motion(position, key, count, explicit=count > 1))
+                    except copy.NoMotion:
+                        expected = None
+                    try:
+                        _, actual = tmux.operation_snapshot(state, context, count)
+                        actual = copy.Span(actual.start + tmux.first_offset, actual.end + tmux.first_offset,
+                                           actual.linewise, actual.cursor + tmux.first_offset
+                                           if actual.cursor is not None else None)
+                    except copy.NoMotion:
+                        actual = None
+                    self.assertEqual(actual, expected)
+
+
 @unittest.skipUnless(shutil.which('tmux'), 'tmux is required for terminal integration')
 class Terminal(unittest.TestCase):
     @classmethod
@@ -243,6 +343,8 @@ class Terminal(unittest.TestCase):
         centering = configuration.split('# ALWAYS CENTERED', 1)[1]
         config.write_text('set -g mode-keys vi\nset -g status off\nset -g escape-time 0\nset -g set-clipboard off\n'
                           'set -as terminal-features ",xterm-256color:RGB"\n'
+                          # Simulate tmux-open loading before our bindings.
+                          'bind -T copy-mode-vi o run-shell "xdg-open SHOULD_NOT_OPEN"\n'
                           'bind -T copy-mode-vi v send -X begin-selection\n' + numbering + '\n' + bindings + centering)
         cls.tm('-f', str(config), 'new-session', '-d', '-x', '60', '-y', '12', '-s', 'test', 'sleep 1000')
         # Exercise the real gx binding without launching a browser.
@@ -270,8 +372,9 @@ class Terminal(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.tm('kill-server')
-        cls.client.wait(timeout=3)
+        # A client flushing terminal output must not block on an unread PTY.
         os.close(cls.master)
+        cls.client.wait(timeout=3)
         cls.temporary.cleanup()
 
     @classmethod
@@ -366,6 +469,97 @@ class Terminal(unittest.TestCase):
             with self.subTest(sequence=sequence):
                 self.fixture('alpha.beta, gamma delta\nsecond\nthird\nfourth')
                 self.keys(sequence, expected)
+
+    def test_ge_and_gE_counts_wrapping_and_empty_lines(self):
+        for text, row, column, keys, target_row, target_column in [
+            ('alpha.beta gamma', 0, 12, 'ge', 0, 9),
+            ('alpha.beta gamma', 0, 12, '2ge', 0, 5),
+            ('alpha.beta gamma', 0, 12, '3ge', 0, 4),
+            ('alpha.beta gamma', 0, 8, 'gE', 0, 0),
+            ('alpha.beta gamma', 0, 12, '2gE', 0, 0),
+            ('first\n\n\nsecond', 3, 2, 'ge', 2, 0),
+            ('first\n\n\nsecond', 3, 2, '2ge', 1, 0),
+            ('one\n   \ntwo', 2, 0, 'ge', 0, 2),
+            ('  first', 0, 5, '99ge', 0, 0),
+            ('first', 0, 0, 'ge', 0, 0),
+            ('a' * 58 + ' bbb ccc', 0, 64, 'ge', 1, 1),
+            ('a' * 58 + ' bbb ccc', 0, 64, '2ge', 0, 57),
+            ('界 e\u0301 beta gamma', 0, 10, 'ge', 0, 8),
+            ('界 e\u0301 beta gamma', 0, 10, '2ge', 0, 3),
+        ]:
+            with self.subTest(keys=keys, text=text):
+                self.fixture(text, row=row, column=column)
+                self.keys(keys)
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'),
+                                 f'{target_column}:{target_row}')
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_ge_yanks_counts_and_visual_selections(self):
+        for text, row, column, keys, expected in [
+            ('alpha.beta gamma', 0, 12, 'yge', 'a ga'),
+            ('alpha.beta gamma', 0, 12, 'y2ge', '.beta ga'),
+            ('alpha.beta gamma', 0, 12, '2yge', '.beta ga'),
+            ('alpha.beta gamma', 0, 12, '2y2ge', 'alpha.beta ga'),
+            ('alpha.beta gamma', 0, 8, 'ygE', 'alpha.bet'),
+            ('alpha.beta gamma', 0, 12, 'vgey', 'a ga'),
+            ('alpha.beta gamma', 0, 12, 'v2gey', '.beta ga'),
+            ('alpha.beta gamma', 0, 8, 'vgEy', 'alpha.bet'),
+            ('one\n\ntwo', 2, 1, 'Vgey', '\ntwo\n'),
+            ('界 e\u0301 beta gamma', 0, 10, 'y2ge', 'e\u0301 beta ga'),
+        ]:
+            with self.subTest(keys=keys):
+                self.fixture(text, row=row, column=column)
+                self.keys(keys, expected)
+        self.fixture('first')
+        self.keys('yge')
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_ge_reads_nearby_history_and_keeps_the_viewport(self):
+        self.fixture('\n'.join(f'{i:04} alpha.beta gamma' for i in range(1800)), row=1500, column=17)
+        self.tm('send-keys', '-X', 'scroll-middle')
+        viewport = '#{scroll_position}:#{copy_cursor_y}'
+        before = self.tm('display-message', '-p', viewport)
+        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
+        tmux.command = self.base
+        calls, call = [], tmux.call
+        def record(*args, **kwargs):
+            calls.append(args)
+            return call(*args, **kwargs)
+        tmux.call = record
+        copy.perform(tmux, {'mode': 'move', 'motion': 'ge', 'before': 1})
+        captures = [args for args in calls if args[0] == 'capture-pane']
+        self.assertEqual(len(captures), 1)
+        capture = captures[0]
+        self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 4)
+        self.assertEqual(self.tm('display-message', '-p', viewport), before)
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '14')
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_local_yanks_capture_bounded_history(self):
+        self.fixture('\n'.join(f'{i:04} alpha.beta gamma "quoted text" 界e\u0301' for i in range(1800)),
+                     row=1500, column=8)
+        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
+        tmux.command = self.base
+        calls, call = [], tmux.call
+        def record(*args, **kwargs):
+            calls.append(args)
+            return call(*args, **kwargs)
+        tmux.call = record
+        for context, expected in [
+            ({'motion': 'y'}, '1500 alpha.beta gamma "quoted text" 界e\u0301\n'),
+            ({'motion': 'w', 'object': 'i'}, 'alpha'),
+            ({'motion': 'q', 'object': 'i'}, 'quoted text'),
+        ]:
+            with self.subTest(context=context):
+                calls.clear()
+                copy.perform(tmux, {'mode': 'yank', 'before': 1, **context})
+                captures = [args for args in calls if args[0] == 'capture-pane']
+                self.assertEqual(len(captures), 1)
+                capture = captures[0]
+                self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 8)
+                self.assertEqual(self.buffer(), expected)
+                self.drain()
+        self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
 
     def test_text_objects_and_visual_objects(self):
         for sequence, expected in [('yi(', 'outer (inner) tail'), ('ya(', '(outer (inner) tail)'),
@@ -484,6 +678,52 @@ class Terminal(unittest.TestCase):
         self.assertEqual(self.opened_links(), opened)
         self.assertEqual(self.tm('display-message', '-p', copy.SAVED_SELECTION), before)
         self.assertEqual(self.buffer(), 'UNCHANGED')
+
+    def test_o_swaps_visual_ends_without_opening_or_copying(self):
+        for keys, row, column, expected, target_row, target_column in [
+            ('vll', 0, 2, 'pha', 0, 2),
+            ('vhh', 0, 4, 'pha', 0, 4),
+            ('Vj', 0, 2, 'alpha beta\ngamma delta\n', 0, None),
+            ('\x16jll', 0, 2, 'pha\nmma', 0, 2),
+        ]:
+            with self.subTest(keys=keys):
+                self.fixture('alpha beta\ngamma delta\nlast line', row=row, column=column)
+                self.keys(keys)
+                cursor = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}')
+                opened = self.opened_links()
+                self.keys('o')
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_y}'), str(target_row))
+                if target_column is not None:
+                    self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), str(target_column))
+                self.assertEqual(self.tm('display-message', '-p', '#{pane_mode}:#{selection_active}'), 'copy-mode:1')
+                self.assertEqual(self.buffer(), 'UNCHANGED')
+                self.assertEqual(self.opened_links(), opened)
+                self.keys('o')
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), cursor)
+                self.keys('y', expected)
+        self.fixture('alpha beta', column=2)
+        self.keys('vlloh')
+        self.keys('y', 'lpha')
+
+    def test_o_without_a_visual_selection_or_during_yank_flash_is_harmless(self):
+        self.fixture('(https://neovim.io/doc/user/motion/)', column=10)
+        before = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}')
+        opened = self.opened_links()
+        self.keys('o')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'), before)
+        self.assertEqual(self.tm('display-message', '-p', '#{pane_mode}'), 'copy-mode')
+        self.assertEqual(self.opened_links(), opened)
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+        self.tm('set-option', '-g', '@vim-copy-highlight-ms', '1000')
+        try:
+            self.fixture('alpha beta', column=2)
+            self.keys('yiw', 'alpha')
+            self.keys('o')
+            self.assertEqual(self.tm('display-message', '-p', '#{pane_mode}:#{selection_active}'), 'copy-mode:0')
+            self.assertEqual(self.opened_links(), opened)
+            self.assertEqual(self.buffer(), 'alpha')
+        finally:
+            self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
 
     def test_gv_restores_character_line_block_and_reverse_selections(self):
         for sequence, row, column, expected, mode, rectangle in [
@@ -915,12 +1155,20 @@ class Terminal(unittest.TestCase):
             self.tm('send-keys', '-X', 'scroll-middle')
             self.drain()
             self.terminal_output.clear()
-            self.keys('yiw', 'TARGET')
-            self.until(lambda: b'48;2;18;52;86m' in self.terminal_output)
+            for index, char in enumerate('yiw'):
+                os.write(self.master, char.encode())
+                if index < 2:
+                    time.sleep(.025)
+            deadline = time.monotonic() + 3
+            while b'48;2;18;52;86m' not in self.terminal_output:
+                self.drain()
+                self.assertLess(time.monotonic(), deadline, 'The highlight was not painted')
+                time.sleep(.001)
             painted_at = time.monotonic()
             self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
             self.assertGreaterEqual(time.monotonic() - painted_at, .130,
                                     'The 150 ms flash expired before it was visibly displayed')
+            self.assertEqual(self.buffer(), 'TARGET')
         finally:
             self.tm('set-option', '-g', '@vim-copy-highlight-style', 'bg=#313131')
             fcntl.ioctl(self.master, termios.TIOCSWINSZ, struct.pack('HHHH', 12, 60, 0, 0))

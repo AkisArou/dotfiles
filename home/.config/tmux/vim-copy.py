@@ -6,6 +6,7 @@ buffer without moving the cursor or changing selections, buffers or clipboard.
 Only a successful yank writes a buffer. Esc cancels any pending input.
 The q object matches any quote type; successful yanks briefly highlight their
 range. gv restores the last visual selection; ( and ) move by sentences.
+ge and gE move backwards to word ends, including in visual mode and yanks.
 gx opens the hyperlink or URL under the copy cursor with the system opener.
 Configure @vim-copy-highlight-ms and @vim-copy-highlight-style in tmux.
 
@@ -14,17 +15,15 @@ Run `bindings` to emit the tmux bindings, or `python3 -m unittest discover
 """
 
 from bisect import bisect_left, bisect_right
-from dataclasses import dataclass
+from collections import namedtuple
 from functools import cached_property, lru_cache
 import json
 import os
-from pathlib import Path
 import re
 import shlex
 import subprocess
 import sys
 import unicodedata
-import uuid
 
 
 MAX_COUNT = 100000
@@ -60,12 +59,13 @@ class NoMotion(ValueError):
     """A failed motion must leave the selection and clipboard alone."""
 
 
-@dataclass(frozen=True)
-class Span:
-    start: int
-    end: int  # Exclusive; linewise spans include their last newline.
-    linewise: bool = False
-    cursor: int | None = None
+class IncompleteText(NoMotion):
+    """The requested motion needs text outside a captured fragment."""
+
+
+class Span(namedtuple('Span', 'start end linewise cursor', defaults=(False, None))):
+    """Immutable half-open range; linewise ranges include the final newline."""
+    __slots__ = ()
 
 
 @lru_cache(maxsize=4096)
@@ -97,6 +97,7 @@ def link_at(text, position):
 
 class Document:
     def __init__(self, text):
+        self.complete_start = self.complete_end = True
         self.text = text if text.endswith('\n') else text + '\n'
         self.lines = self.text.split('\n')[:-1]
         self.starts = [0]
@@ -168,6 +169,18 @@ class Document:
             end -= 1
         return Span(start, end)
 
+    def previous_word_end(self, position, count=1, big=False):
+        ends = []
+        for start, end in self.units(big):
+            end -= 1
+            while end > start and cell_width(self.text[end]) == 0:
+                end -= 1
+            ends.append(end)
+        index = bisect_left(ends, position) - count
+        if index < 0 and not self.complete_start:
+            raise IncompleteText('Need earlier words')
+        return ends[index] if index >= 0 else 0
+
     def motion(self, position, key, count=1, argument=None, explicit=False):
         text, row = self.text, self.line(position)
         start, end = self.starts[row], self.end(row)
@@ -206,6 +219,11 @@ class Document:
                 if target == end:
                     break
             return Span(position, target)
+        if key in ('ge', 'gE'):
+            target = self.previous_word_end(position, count, key == 'gE')
+            if target == position:
+                raise NoMotion('No previous word end')
+            return Span(target, position + 1)
         if key in 'wWbBeE':
             units = self.units(key.isupper(), empty=key.lower() != 'e')
             starts = [a for a, b in units]
@@ -213,14 +231,23 @@ class Document:
             if not units:
                 raise NoMotion('No words')
             if key.lower() == 'b':
-                index = max(0, bisect_left(starts, position) - count)
+                index = bisect_left(starts, position) - count
+                if index < 0 and not self.complete_start:
+                    raise IncompleteText('Need earlier words')
+                index = max(0, index)
                 return self.exclusive(position, starts[index])
             if key.lower() == 'e':
-                index = min(len(units) - 1, bisect_right(ends, position) + count - 1)
+                index = bisect_right(ends, position) + count - 1
+                if index >= len(units) and not self.complete_end:
+                    raise IncompleteText('Need more words')
+                index = min(len(units) - 1, index)
                 return Span(position, max(position, units[index][1]))
             index = bisect_right(starts, position) + count - 1
             target = starts[index] if index < len(starts) else len(text) - 1
             previous = position if count == 1 else starts[min(len(starts) - 1, index - 1)]
+            if (index >= len(starts) and not self.complete_end and
+                    (index > len(starts) or self.line(previous) == len(self.lines) - 1)):
+                raise IncompleteText('Need more words')
             # An operator followed by w stops at the end of its final line,
             # even when the next word is indented on a subsequent line.
             previous_row = self.line(previous)
@@ -283,11 +310,15 @@ class Document:
                 if not first and skipped and self.paragraph_boundary(row):
                     break
                 if not 0 <= row + direction < len(self.lines):
+                    if not (self.complete_end if direction > 0 else self.complete_start):
+                        raise IncompleteText('Need more paragraphs')
                     if remaining > 1:
                         raise NoMotion('Not enough paragraphs')
                     break
                 row += direction
                 first = False
+        if direction > 0 and row == len(self.lines) - 1 and not self.complete_end:
+            raise IncompleteText('Need the complete paragraph boundary')
         if direction > 0 and row == len(self.lines) - 1 and self.lines[row]:
             target = self.end(row) - 1
             while target > self.starts[row] and cell_width(self.text[target]) == 0:
@@ -326,8 +357,13 @@ class Document:
         starts = self.sentence_starts
         if key == '(':
             starts = self.backward_sentence_starts
-            return starts[max(0, bisect_left(starts, position) - count)]
+            index = bisect_left(starts, position) - count
+            if index < 0 and not self.complete_start:
+                raise IncompleteText('Need earlier sentences')
+            return starts[max(0, index)]
         index = bisect_right(starts, position) + count - 1
+        if index >= len(starts) and not self.complete_end:
+            raise IncompleteText('Need more sentences')
         return starts[index] if index < len(starts) else len(self.text)
 
     @cached_property
@@ -350,13 +386,17 @@ class Document:
             i -= 1
         return (position - i - 1) % 2 == 1
 
-    def brackets(self, key):
+    def brackets(self, key, position=None, count=1):
         aliases = {'b': '(', ')': '(', 'B': '{', '}': '{', ']': '[', '>': '<'}
         opening = aliases.get(key, key)
         closing = {'(': ')', '{': '}', '[': ']', '<': '>'}[opening]
         stack, pairs = [], []
         quote = None
-        for i, char in enumerate(self.text):
+        upcoming, enclosed = None, 0
+        # Scan significant characters in C instead of visiting every letter
+        # in Python. Preserve quote/escape state across the complete input.
+        for match in re.finditer('[' + re.escape('\n\'"`' + opening + closing) + ']', self.text):
+            i, char = match.start(), match.group()
             if char == '\n' and quote != '`':
                 quote = None
             if self.escaped(self.text, i):
@@ -371,8 +411,19 @@ class Document:
                     quote = char
             elif char == opening:
                 stack.append(i)
+                if position is not None and i > position and upcoming is None:
+                    upcoming = i
             elif char == closing and stack:
-                pairs.append((stack.pop(), i))
+                left = stack.pop()
+                if position is None or left > position or left <= position <= i:
+                    pairs.append((left, i))
+                if position is not None:
+                    if left <= position <= i:
+                        enclosed += 1
+                        if enclosed >= count or not stack:
+                            break
+                    elif left == upcoming and not stack and not enclosed:
+                        break
         return pairs
 
     @staticmethod
@@ -398,7 +449,6 @@ class Document:
             start -= 1
         while end < self.end(row) and self.kind(text[end], big) == kind:
             end += 1
-        units = self.units(big)
         if not around:
             # Inner counts include intervening whitespace as its own object:
             # 2iw on "one two" selects "one ", while 2aw selects two words.
@@ -413,10 +463,13 @@ class Document:
         remaining = count - 1
         if around and kind == 0:
             remaining += 1
-        for a, b in units:
-            if a >= end and remaining:
-                end = b
-                remaining -= 1
+        if remaining:
+            for a, b in self.units(big):
+                if a >= end:
+                    end = b
+                    remaining -= 1
+                    if not remaining:
+                        break
         if remaining:
             raise NoMotion('Not enough words')
         if around and kind:
@@ -503,8 +556,12 @@ class Document:
                         segments.append((b, self.sentences[i + 1][0]))
                 segment = next(i for i, (a, b) in enumerate(segments) if position < b)
                 start = segments[segment][0]
+                if segment + count > len(segments) and not self.complete_end:
+                    raise IncompleteText('Need more sentences')
                 end = segments[min(len(segments) - 1, segment + count - 1)][1]
                 return Span(start, end)
+            if index + count > len(self.sentences) and not self.complete_end:
+                raise IncompleteText('Need more sentences')
             start, end = self.sentences[index][0], self.sentences[min(len(self.sentences) - 1, index + count - 1)][1]
             if around:
                 old_end = end
@@ -515,7 +572,7 @@ class Document:
                         start -= 1
             return Span(start, end)
         if key in 'bB(){}[]<>':
-            left, right = self.enclosing(self.brackets(key), position, count)
+            left, right = self.enclosing(self.brackets(key, position, count), position, count)
             start, end = left + 1, right
             linewise = False
             if not around and key in 'B{}' and self.text[start:start + 1] == '\n':
@@ -584,13 +641,15 @@ class Tmux:
         names = ('copy_cursor_x', 'copy_cursor_y', 'scroll_position', 'copy_position_limit',
                  'pane_height', 'pane_width', 'selection_present', 'selection_active',
                  'selection_start_x', 'selection_start_y', 'selection_end_x', 'selection_end_y',
-                 'rectangle_toggle', 'copy_line_numbers', 'selection_mode', 'pane_mode', 'copy-mode-line-numbers')
+                 'rectangle_toggle', 'copy_line_numbers', 'selection_mode', 'pane_mode', 'copy-mode-line-numbers',
+                 '@vim-copy-highlight-ms')
         values = self.call('display-message', '-p', '-t', self.pane, '\t'.join('#{' + k + '}' for k in names)).rstrip('\n').split('\t')
         state = dict(zip(names, values))
         if state['pane_mode'] != 'copy-mode':
             raise NoMotion('Enter tmux copy mode first')
-        for name in names[:-3]:
+        for name in names[:-4]:
             state[name] = int(state[name] or 0)
+        state['highlight_ms'] = state.pop('@vim-copy-highlight-ms') or '150'
         # A mouse entry or line-numbers-off can hide the gutter even when the
         # window option requests numbers. That also changes goto-line units.
         numbering = state['copy-mode-line-numbers']
@@ -599,27 +658,53 @@ class Tmux:
         state['row'] = state['history'] - state['scroll_position'] + state['copy_cursor_y']
         return state
 
-    def move(self, row, column, state, top=None):
-        if top is None:
-            # Keep visible targets in their current viewport. Only scroll
-            # enough to reveal a target that has moved beyond either edge.
-            top = max(row - state['pane_height'] + 1,
-                      min(row, state['history'] - state['scroll_position']))
-        top = max(0, min(top, state['history']))
-        # Jump straight to the viewport. Walking through history redraws
-        # every intermediate row and can block tty updates for 100 ms,
-        # consuming most of a 150 ms yank flash before it is even painted.
-        line = top + 1 if state['absolute_line_numbers'] else state['history'] - top
-        commands = [self.x('goto-line', line)]
-        screen_row = row - top
-        anchors = [(0, 'top-line'), ((state['pane_height'] - 1) // 2, 'middle-line'),
-                   (state['pane_height'] - 1, 'bottom-line')]
-        anchor, motion = min(anchors, key=lambda item: abs(item[0] - screen_row))
-        commands.append(self.x(motion))
-        delta = screen_row - anchor
+    def move(self, row, column, state, top=None, relative=False):
+        if relative:
+            # Move monotonically while extending a selection. Visiting a
+            # screen anchor past the target can reverse tmux's line drag
+            # direction and lose its original anchor on the next redraw.
+            commands = []
+            delta = row - state['row']
+        else:
+            if top is None:
+                # Keep visible targets in their current viewport. Only scroll
+                # enough to reveal a target that has moved beyond either edge.
+                top = max(row - state['pane_height'] + 1,
+                          min(row, state['history'] - state['scroll_position']))
+            top = max(0, min(top, state['history']))
+            # Jump straight to the viewport. Walking through history redraws
+            # every intermediate row can consume most of a 150 ms yank flash.
+            line = top + 1 if state['absolute_line_numbers'] else state['history'] - top
+            commands = [self.x('goto-line', line)]
+            screen_row = row - top
+            anchors = [(0, 'top-line'), ((state['pane_height'] - 1) // 2, 'middle-line'),
+                       (state['pane_height'] - 1, 'bottom-line')]
+            anchor, motion = min(anchors, key=lambda item: abs(item[0] - screen_row))
+            commands.append(self.x(motion))
+            delta = screen_row - anchor
         if delta:
             commands.append(['send-keys', '-t', self.pane, '-X', '-N', str(abs(delta)),
                              'cursor-down' if delta > 0 else 'cursor-up'])
+        keep_row = False
+        if 'layout' in state:
+            layout = state['layout']
+            index = row - layout.first_row
+            if 0 <= index < len(layout.rows):
+                start, end = layout.rows[index]
+                logical = layout.document.line(start)
+                # start-of-line follows a soft wrap to its logical start.
+                # Skip the row positioning only for a complete unwrapped line.
+                keep_row = ((layout.first_row == 0 or logical > 0) and
+                            start == layout.document.starts[logical] and
+                            end == layout.document.end(logical))
+        if not relative and keep_row:
+            # Most local yanks only change the column. Check the actual tmux
+            # position when this batch executes: rebuilding the same viewport
+            # for every selection endpoint needlessly redraws the whole pane.
+            changed = ('#{||:#{!=:#{scroll_position},' + str(state['history'] - top) + '},'
+                       '#{!=:#{copy_cursor_y},' + str(row - top) + '}}')
+            body = '; '.join(' '.join(quote(arg) for arg in command) for command in commands)
+            commands = [['if-shell', '-F', '-t', self.pane, changed, body]]
         # At column zero, tmux's start-of-line walks to the previous wrapped
         # row. Only reset the column when it is actually nonzero.
         commands.append(['if-shell', '-F', '-t', self.pane, '#{!=:#{copy_cursor_x},0}',
@@ -682,7 +767,7 @@ class Tmux:
                       input=document.copy_text(span))
         else:
             self.call('send-keys', '-t', self.pane, '-X', 'copy-selection-no-clear')
-        self.flash()
+        self.flash(state['highlight_ms'])
 
     def open_link(self):
         state = self.state()
@@ -739,7 +824,8 @@ class Tmux:
         rows = (saved['selection_start_y'], saved['selection_end_y'], row)
         if removed < 0 or min(rows) < 0 or max(rows) >= state['history'] + state['pane_height']:
             raise NoMotion('Previous selection has left the scrollback')
-        self.snapshot(state)  # Supplies character/cell mapping for Unicode.
+        # Only the saved selection and cursor need character/cell mapping.
+        self.snapshot(state, min(rows), max(rows))
         self.call('source-file', '-', input=remember_selection(self.pane) + '\n')
         restored = {**state, **{name: saved[name] for name in SAVED_FIELDS
                                if name.startswith('selection_') or name == 'rectangle_toggle'},
@@ -766,6 +852,50 @@ class Tmux:
             raise NoMotion('Cannot map this terminal buffer to copy-mode rows')
         state['layout'] = layout
         return document
+
+    def operation_snapshot(self, state, context, count, argument=None):
+        """Read enough text to prove the result independent of the slice edges."""
+        key, object = context['motion'], context.get('object')
+        # These operations can depend on context anywhere in the document:
+        # nested delimiters, multiline quotes/tags, or absolute line numbers.
+        global_context = (object and key in 'bB(){}[]<>t') or (not object and key in ('%', 'G', 'gg'))
+        line_limited = (object and key in 'q\'"`') or (not object and key in 'fFtT0^hl')
+        first_row = last_row = state['row']
+        if object and key in 'wWps' and state['selection_present']:
+            first_row = min(first_row, state['selection_start_y'], state['selection_end_y'])
+            last_row = max(last_row, state['selection_start_y'], state['selection_end_y'])
+        limit = state['history'] + state['pane_height'] - 1
+        distance = 4
+        while True:
+            first = 0 if global_context else max(0, first_row - distance)
+            last = limit if global_context else min(limit, last_row + distance)
+            document = self.snapshot(state, first, last)
+            document.complete_start, document.complete_end = first == 0, last == limit
+            position = state['layout'].offset(state['row'], state['copy_cursor_x'])
+            row = document.line(position)
+            complete_line = ((first == 0 or row > 0) and
+                             (last == limit or row < len(document.lines) - 1))
+            if object and key in ('w', 'W') and not document.lines[row] and complete_line:
+                raise NoMotion('Empty line')
+            try:
+                span = (document.text_object(position, key, object == 'a', count) if object else
+                        document.motion(position, key, count, argument,
+                                        context.get('explicit', False) or context['before'] != 1 or
+                                        bool(context.get('digits'))))
+            except IncompleteText:
+                pass
+            except NoMotion:
+                if (first == 0 and last == limit) or (line_limited and complete_line):
+                    raise
+            else:
+                # An exclusive motion may omit its destination line. Keep
+                # two following lines as evidence that it did not merely
+                # stop at the artificial end of the captured fragment.
+                if ((line_limited and complete_line) or
+                        ((first == 0 or document.line(span.start) > 0) and
+                         (last == limit or document.line(max(span.start, span.end - 1)) < len(document.lines) - 2))):
+                    return document, span
+            distance *= 2
 
     def sentence_snapshot(self, state, key, count):
         # Most jumps need only the neighbouring lines. Grow the read only
@@ -796,6 +926,19 @@ class Tmux:
                 # its apparent sentence start is not a confirmed boundary.
                 complete = document.line(target) > 0 or first == 0
             if complete:
+                return document, target
+            distance *= 2
+
+    def word_end_snapshot(self, state, count, big=False):
+        # A backward motion needs only the current row and enough preceding
+        # rows to find its target, even with a large scrollback buffer.
+        distance = 4
+        while True:
+            first = max(0, state['row'] - distance)
+            document = self.snapshot(state, first, state['row'])
+            position = state['layout'].offset(state['row'], state['copy_cursor_x'])
+            target = document.previous_word_end(position, count, big)
+            if first == 0 or target > 0:
                 return document, target
             distance *= 2
 
@@ -908,37 +1051,46 @@ class Tmux:
             body = '; '.join(' '.join(quote(arg) for arg in command) for command in commands)
             self.call('if-shell', '-F', '-t', self.pane, condition, body)
 
-    def flash(self):
+    def flash(self, duration=None):
         """Freeze the copied range while keeping navigation and new selections live."""
-        duration = self.call('show-options', '-Aqv', '-t', self.pane,
-                             '@vim-copy-highlight-ms').strip() or '150'
+        if duration is None:
+            duration = self.call('show-options', '-Aqv', '-t', self.pane,
+                                 '@vim-copy-highlight-ms').strip() or '150'
         milliseconds = max(0, min(5000, int(duration)))
         if not milliseconds:
             self.commands([self.x('clear-selection')])
             return
-        token = uuid.uuid4().hex
+        token = os.urandom(16).hex()
         self.commands([
             self.x('stop-selection'),
             ['set-option', '-p', '-t', self.pane, '@vim-copy-flash', token],
             ['set-option', '-pF', '-t', self.pane, '@vim-copy-flash-selection', SELECTION_SIGNATURE],
             ['refresh-client', '-t', self.client],
             ['run-shell', '-b', '-d', str(milliseconds / 1000), '-t', self.pane,
-             shell_command('finish-flash', self.pane, self.client, token)],
+             self.flash_timer(token)],
         ])
 
-    def finish_flash(self, token):
-        # Check the token inside the same tmux command queue as cleanup. A
-        # separate read followed by cleanup could race with a newer yank.
+    def flash_cleanup(self, token):
         clear = ('if-shell -F -t ' + quote(self.pane) + ' ' + quote(
             '#{&&:#{==:#{pane_mode},copy-mode},' + FLASH_SELECTION + '}') +
-            ' { send-keys -t ' + quote(self.pane) + ' -X clear-selection }; ')
-        clear += ('set-option -pu -t ' + quote(self.pane) + ' @vim-copy-flash; '
-                  'set-option -pu -t ' + quote(self.pane) + ' @vim-copy-flash-selection')
-        self.call('if-shell', '-F', '-t', self.pane,
-                  '#{==:#{@vim-copy-flash},' + token + '}', clear)
-        # The originating client may have detached during the flash.
-        subprocess.run([*self.command, 'refresh-client', '-t', self.client],
-                       capture_output=True, timeout=10)
+            ' { send-keys -t ' + quote(self.pane) + ' -X clear-selection }; '
+            'set-option -pu -t ' + quote(self.pane) + ' @vim-copy-flash; '
+            'set-option -pu -t ' + quote(self.pane) + ' @vim-copy-flash-selection; '
+            'refresh-client -t ' + quote(self.client))
+        return ['if-shell', '-F', '-t', self.pane,
+                '#{==:#{@vim-copy-flash},' + token + '}', clear]
+
+    def flash_timer(self, token):
+        # The delayed cleanup is a single tmux client, not another Python
+        # interpreter. Keep formats literal until that client checks the token.
+        # A pane/client may disappear before the timer; cleanup then is a no-op.
+        command = [*self.command, *self.flash_cleanup(token)]
+        return shlex.join(command).replace('#', '##') + ' 2>/dev/null || :'
+
+    def finish_flash(self, token):
+        # Compatibility for a timer scheduled before a config reload. The
+        # token check and cleanup still execute atomically in tmux's queue.
+        self.call(*self.flash_cleanup(token))
 
 
 class Layout:
@@ -953,6 +1105,11 @@ class Layout:
             if line.isascii():
                 self.rows.extend((start + offset, start + min(len(line), offset + width))
                                  for offset in range(0, len(line) or 1, width))
+                continue
+            cells = len(line) + sum(cell_width(match.group()) - 1
+                                    for match in re.finditer(r'[^\x00-\x7f]', line))
+            if cells <= width:
+                self.rows.append((start, document.end(number)))
                 continue
             for i, char in enumerate(line):
                 cells = cell_width(char)
@@ -994,7 +1151,7 @@ def quote(value):
 
 def shell_command(*args):
     # tmux expands formats in run-shell, including text in shell quotes.
-    return shlex.join(['python3', str(Path(__file__).resolve()), *args]).replace('#', '##')
+    return shlex.join(['python3', os.path.realpath(__file__), *args]).replace('#', '##')
 
 
 def select_span(tmux, state, start, end, linewise=False):
@@ -1027,7 +1184,9 @@ def perform(tmux, context, argument=None):
     state = tmux.state()
     key = context['motion']
     if context['mode'] == 'move':
-        document, target = tmux.sentence_snapshot(state, key, count)
+        word_end = key in ('ge', 'gE')
+        document, target = (tmux.word_end_snapshot(state, count, key == 'gE') if word_end else
+                            tmux.sentence_snapshot(state, key, count))
         layout = state['layout']
         target = min(target, len(document.text) - 1)
         # A trailing newline is not a cursor cell on a nonempty final line.
@@ -1036,14 +1195,16 @@ def perform(tmux, context, argument=None):
         row, column = layout.point(target)
         top = max(row - state['pane_height'] + 1,
                   min(row, state['history'] - state['scroll_position']))
-        tmux.commands([*tmux.sentence_cache(state, document), *tmux.move(row, column, state, top)])
-        if not state['selection_active'] and not state['selection_present']:
+        cache = [] if word_end else tmux.sentence_cache(state, document)
+        tmux.commands([*cache, *tmux.move(row, column, state, top,
+                                        relative=word_end and bool(state['selection_active']))])
+        if not word_end and not state['selection_active'] and not state['selection_present']:
             tmux.call('send-keys', '-t', tmux.pane, '-X', 'scroll-middle')
         return
-    document = tmux.snapshot(state)
-    layout = state['layout']
-    position = layout.offset(state['row'], state['copy_cursor_x'])
     if key in ('/', '?', 'n', 'N'):
+        document = tmux.snapshot(state)
+        layout = state['layout']
+        position = layout.offset(state['row'], state['copy_cursor_x'])
         native = {'/': 'search-forward', '?': 'search-backward', 'n': 'search-again', 'N': 'search-reverse'}[key]
         args = [argument or ''] if key in '/?' else []
         if args == ['']:
@@ -1057,11 +1218,9 @@ def perform(tmux, context, argument=None):
         if position == end:
             raise NoMotion('No search match')
         span = document.exclusive(position, end)
-    elif context.get('object'):
-        span = document.text_object(position, key, context['object'] == 'a', count)
     else:
-        span = document.motion(position, key, count, argument,
-                               context.get('explicit', False) or context['before'] != 1 or bool(context.get('digits')))
+        document, span = tmux.operation_snapshot(state, context, count, argument)
+        layout = state['layout']
     if span.end <= span.start:
         raise NoMotion('Text object is empty')
     # A terminal cell can hold a base character plus combining marks. Keep
@@ -1092,7 +1251,7 @@ def perform(tmux, context, argument=None):
             tmux.x('stop-selection'),
             *tmux.move(row, column, state, top),
         ])
-        tmux.flash()
+        tmux.flash(state['highlight_ms'])
     else:
         start, end = span.start, span.end
         if key in ('w', 'W', 'p', 's') and state['selection_present']:
@@ -1142,7 +1301,7 @@ def bindings():
         return 'set-option -p @vim-copy-argument "%1"; ' + run if argument else run
 
     def enter(mode, before='0', object='-'):
-        table = 'copyVimYank' if mode == 'yank' else 'copyVimObject'
+        table = {'yank': 'copyVimYank', 'visual': 'copyVimObject', 'move': 'copyVimNormalG'}[mode]
         return ('set-option -p @vim-copy-mode ' + mode + '; '
                 'set-option -pF @vim-copy-before ' + quote(before) + '; '
                 'set-option -p @vim-copy-after 0; '
@@ -1204,6 +1363,12 @@ def bindings():
     for key, native in [('v', 'begin-selection'), ('Space', 'begin-selection'),
                         ('V', 'select-line'), ('C-v', 'begin-selection; send-keys -X rectangle-toggle')]:
         emit('copy-mode-vi', key, cancel_flash + remember + 'send-keys -X ' + native)
+    # Override tmux-open's `o`, which copies the selection and exits copy
+    # mode. Opening links belongs to gx; visual o changes the active end.
+    emit('copy-mode-vi', 'o', cancel_flash + 'if-shell -F ' + quote(VISUAL_SELECTION) +
+         ' { send-keys -N 1; if-shell -F "#{==:#{selection_mode},line}" '
+         '{ send-keys -X other-end; send-keys -X selection-mode line } '
+         '{ send-keys -X other-end } }')
 
     for table, before in [('copy-mode-vi', '0'), ('copyVimCount', '#{@vim-copy-count}')]:
         emit(table, 'y', cancel_flash + "if-shell -F '#{||:#{selection_present},#{selection_active}}' "
@@ -1212,8 +1377,10 @@ def bindings():
             emit(table, key, cancel_flash + "if-shell -F '#{||:#{selection_present},#{selection_active}}' { " + enter('visual', before, key) + ' }')
         for key in '(){}':
             emit(table, key, sentence(key, before))
-        emit(table, 'g', cancel_flash + 'switch-client -T copyVimNormalG')
+        emit(table, 'g', cancel_flash + enter('move', before))
     emit('copyVimNormalG', 'g', 'send-keys -X history-top')
+    for key in 'eE':
+        emit('copyVimNormalG', key, execute('g' + key))
     emit('copyVimNormalG', 'v', 'send-keys -N 1; run-shell ' + quote(
         shell_command('reselect') + ' #{q:pane_id} #{q:client_name}'))
     emit('copyVimNormalG', 'x', 'send-keys -N 1; run-shell ' + quote(
@@ -1234,6 +1401,8 @@ def bindings():
         emit('copyVimYank', key, 'command-prompt ' + flags + ' -p ' + quote('(y' + key + ')') + ' { ' + execute(key, True) + ' }')
     emit('copyVimYank', 'g', 'switch-client -T copyVimG')
     emit('copyVimG', 'g', execute('gg'))
+    for key in 'eE':
+        emit('copyVimG', key, execute('g' + key))
     for key in 'wWp sbB(){}[]<>tq\'"`'.replace(' ', ''):
         emit('copyVimObject', key, execute(key))
     for table in ('copyVimYank', 'copyVimG', 'copyVimObject'):
