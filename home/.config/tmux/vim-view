@@ -1,0 +1,119 @@
+#!/bin/sh
+# Show a tmux pane's scrollback in Neovim, floating over the pane.
+#   vim-view bind KEY   bind KEY in the root table: view the current pane, or
+#                       focus its view if it has one; views follow their panes
+#   vim-view prewarm    start a waiting Neovim unless one is waiting
+#   vim-view ui PANE    the floating pane's command: show PANE
+#
+# Waiting Neovims run headless, outside tmux, with your config; the floating
+# pane runs only a UI attached to one, so a view shows in milliseconds. Each
+# view claims a waiting Neovim and starts the next; when a view ends, its
+# Neovim waits again unless another already does. The pool lives next to the
+# tmux socket:
+#   idle/NAME   Neovim NAME is waiting; holds its process id
+#   busy/NAME   a view claimed NAME; holds the panes viewed and floating
+#   NAME.sock   NAME's socket, used relative to the pool: a socket's path
+#               must stay short
+# Experimental; see vim-view.lua.
+set -eu
+
+# Not resolved: make builds vim-view.so next to the vim-view.lua it runs.
+here=$(cd "$(dirname "$0")" && pwd)
+pool=${TMUX%%,*}-vim-view
+
+# Start a waiting Neovim; it registers in idle/ once ready. setsid: closing
+# the floating pane that started it must not end it.
+spare() {
+  make -s -C "$here" vim-view.so >/dev/null
+  spare_name=$(date +%s%N)
+  (cd "$pool" && VIM_VIEW_POOL=$pool VIM_VIEW_NAME=$spare_name setsid -f nvim --headless \
+    --listen "./$spare_name.sock" -i NONE -c "luafile $here/vim-view.lua" </dev/null >/dev/null 2>&1)
+}
+
+# Claim a waiting Neovim into $name. A rename is atomic, so two views never
+# take the same one; one whose process is gone is dropped.
+claim() {
+  for entry in "$pool"/idle/*; do
+    [ -e "$entry" ] || continue
+    name=${entry##*/}
+    mv "$entry" "$pool/busy/$name" 2>/dev/null || continue
+    pid=
+    read -r pid <"$pool/busy/$name" || true
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      return 0
+    fi
+    rm -f "$pool/busy/$name" "$pool/$name.sock"
+  done
+  return 1
+}
+
+# A Neovim is waiting. One of an earlier tmux server can be left listed.
+waiting() {
+  for entry in "$pool"/idle/*; do
+    [ -e "$entry" ] || continue
+    pid=
+    read -r pid <"$entry" || true
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      return 0
+    fi
+    rm -f "$entry" "$pool/${entry##*/}.sock" "$pool/${entry##*/}.fifo"
+  done
+  return 1
+}
+
+[ -d "$pool/busy" ] || mkdir -p "$pool/idle" "$pool/busy"
+case "${1:-}" in
+prewarm)
+  waiting || spare
+  ;;
+ui)
+  if ! claim; then
+    spare
+    tries=0
+    until claim; do
+      tries=$((tries + 1))
+      [ "$tries" -lt 300 ] || exit 1
+      sleep 0.01
+    done
+  fi
+  printf '%s %s\n' "$2" "$TMUX_PANE" >"$pool/busy/$name"
+  waiting || spare &
+  cd "$pool"
+  exec nvim --server "./$name.sock" --remote-ui
+  ;;
+bind)
+  # A view floats over its pane, borderless, at its place and size; the
+  # pane's @vim-view-geometry records them. run-shell -C expands formats
+  # without a shell; with separate arguments, new-pane starts the launcher
+  # without one too.
+  geometry='#{pane_width}x#{pane_height}+#{pane_left}+#{pane_top}'
+  float="new-pane -B none -x #{pane_width} -y #{pane_height} -X #{pane_left} -Y #{pane_top} '$here/vim-view' ui #{pane_id} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry"
+  # Floats follow their panes when the window's layout or size changes,
+  # including their own moves, which then find nothing to do. A zoomed
+  # window hides floats; unzoomed, they come back where their panes are.
+  follow="#{?window_zoomed_flag,,#{P:#{?#{&&:#{&&:#{@vim-view-float},#{m:*#{@vim-view-float}:*,#{P:#{pane_id}:}}},#{!=:#{@vim-view-geometry},$geometry}},resize-pane -t #{@vim-view-float} -x #{pane_width} -y #{pane_height} ; move-pane -t #{@vim-view-float} -X #{pane_left} -Y #{pane_top} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry ; ,}}}"
+  # In a view, nothing. On a pane whose view is open in this window, focus
+  # it. On a zoomed pane, the view zooms instead: a zoomed window hides
+  # floats, but not a zoomed float.
+  tmux source-file - <<EOF
+bind-key -n $2 if-shell -F '#{?#{@vim-view-target},0,1}' {
+  if-shell -F '#{&&:#{@vim-view-float},#{m:*#{@vim-view-float}:*,#{P:#{pane_id}:}}}' {
+    run-shell -C 'select-pane -t #{@vim-view-float}'
+  } {
+    if-shell -F '#{window_zoomed_flag}' {
+      resize-pane -Z
+      run-shell -C "$float ; resize-pane -Z"
+    } {
+      run-shell -C "$float"
+    }
+  }
+}
+set-hook -g 'window-layout-changed[100]' { run-shell -C "$follow" }
+set-hook -g 'window-resized[100]' { run-shell -C "$follow" }
+EOF
+  ;;
+*)
+  echo "usage: vim-view bind KEY | prewarm | ui PANE" >&2
+  exit 2
+  ;;
+esac

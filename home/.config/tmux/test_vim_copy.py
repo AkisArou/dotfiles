@@ -1,41 +1,181 @@
-"""Range tests and real terminal input against a separate tmux server."""
+"""Range tests and real terminal input against a separate tmux server.
 
-import importlib.util
+The helper is built into a temporary directory with its test probe, which
+answers the range tests below from the C text engine over a line protocol.
+"""
+
+import atexit
+from collections import namedtuple
 import json
 import os
 from pathlib import Path
 import pty
 import random
 import re
+import shlex
 import signal
 import shutil
 import struct
 import subprocess
-import sys
 import tempfile
 import time
 import unittest
 import fcntl
 import termios
 
+import vim_copy_unicode
 
-SCRIPT = Path(__file__).with_name('vim-copy.py')
-spec = importlib.util.spec_from_file_location('vim_copy', SCRIPT)
-copy = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = copy
-spec.loader.exec_module(copy)
+
+SOURCE = Path(__file__).with_name('vim-copy.c')
+BUILD = tempfile.TemporaryDirectory(prefix='test-vim-copy-build-')
+HELPER = Path(BUILD.name) / 'vim-copy'
+subprocess.run([os.environ.get('CC', 'cc'), '-std=c11', '-O2', '-Wall', '-Wextra', '-Werror',
+                '-DVIM_COPY_PROBE', '-o', str(HELPER), str(SOURCE)], check=True)
+
+SELECTION_SIGNATURE = ':'.join('#{' + name + '}' for name in (
+    'selection_start_x', 'selection_start_y', 'selection_end_x',
+    'selection_end_y', 'rectangle_toggle'))
+# Everything gv restores, for checking that a command left it alone.
+SAVED_SELECTION = ':'.join('#{' + name + '}' for name in (
+    'selection_start_x', 'selection_start_y', 'selection_end_x',
+    'selection_end_y', 'rectangle_toggle', 'selection_mode',
+    'copy_cursor_x', 'copy_cursor_y', 'scroll_position',
+    'copy_position_limit', 'pane_height', 'pane_width', 'copy_line_numbers'))
+
+
+class NoMotion(ValueError):
+    """A failed motion must leave the selection and clipboard alone."""
+
+
+class IncompleteText(NoMotion):
+    """The requested motion needs text outside a captured fragment."""
+
+
+class Span(namedtuple('Span', 'start end linewise cursor', defaults=(False, None))):
+    """Half-open range; linewise ranges include the final newline."""
+    __slots__ = ()
+
+
+def hexed(text):
+    return text.encode().hex()
+
+
+def unhexed(value):
+    return bytes.fromhex(value).decode()
+
+
+def probe(*fields):
+    """Ask one long-running probe; offsets are code points, like str indexes."""
+    if probe.process is None:
+        probe.process = subprocess.Popen([str(HELPER), 'probe'], stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE, text=True, encoding='utf-8')
+        atexit.register(lambda: (probe.process.stdin.close(), probe.process.wait()))
+    probe.process.stdin.write('\t'.join(map(str, fields)) + '\n')
+    probe.process.stdin.flush()
+    status, _, value = probe.process.stdout.readline().rstrip('\n').partition(' ')
+    if status == 'incomplete':
+        raise IncompleteText(value)
+    if status == 'nomotion':
+        raise NoMotion(value)
+    if status != 'ok':
+        raise RuntimeError(f'probe failed: {status} {value}')
+    return value
+
+
+probe.process = None
+
+
+def parse_span(value):
+    start, end, linewise, cursor = map(int, value.split())
+    return Span(start, end, bool(linewise), None if cursor < 0 else cursor)
+
+
+def cell_width(char):
+    return int(probe('width', ord(char)))
+
+
+def link_at(text, position):
+    return unhexed(probe('link', hexed(text), position))
+
+
+class Document:
+    """Captured text whose ranges come from the C engine."""
+
+    def __init__(self, text):
+        self.text = text if text.endswith('\n') else text + '\n'
+        self.lines = self.text.split('\n')[:-1]
+        self.starts = [0]
+        for line in self.lines:
+            self.starts.append(self.starts[-1] + len(line) + 1)
+
+    def line_span(self, first, last):
+        first, last = sorted((first, last))
+        return Span(self.starts[first], self.starts[last + 1], True)
+
+    def copy_text(self, span):
+        return unhexed(probe('copy', hexed(self.text), span.start, span.end, int(span.linewise)))
+
+    def motion(self, position, key, count=1, argument=None, explicit=False):
+        return parse_span(probe('motion', hexed(self.text), position, hexed(key), count,
+                                '-' if argument is None else hexed(argument), int(explicit)))
+
+    def text_object(self, position, key, around=False, count=1):
+        return parse_span(probe('object', hexed(self.text), position, hexed(key), int(around), count))
+
+    def previous_word_end(self, position, count=1, big=False):
+        return int(probe('wordend', hexed(self.text), position, count, int(big)))
+
+    def sentence_target(self, position, key, count=1):
+        return int(probe('sentence', hexed(self.text), position, hexed(key), count))
+
+    def paragraph_target(self, position, key, count=1):
+        return int(probe('paragraph', hexed(self.text), position, hexed(key), count))
+
+    def paragraph_boundary(self, row):
+        return probe('boundary', hexed(self.text), row) == '1'
+
+    @property
+    def sentence_starts(self):
+        return [int(start) for start in probe('starts', hexed(self.text)).split()]
+
+    def enclosing_brackets(self, key, position, count=1, full_context=False):
+        """The enclosing pair, from pairs of the whole text or only nearby ones."""
+        return tuple(map(int, probe('enclose', hexed(self.text), hexed(key), position, count,
+                                    int(full_context)).split()))
+
+    def operation(self, width, row, column, key, object=None, count=1):
+        """Yank through the helper's adaptive reads of growing row slices."""
+        return parse_span(probe('operation', hexed(self.text), width, row, column, hexed(key),
+                                hexed(object) if object else '-', count))
+
+
+class Layout:
+    def __init__(self, document, width):
+        self.document, self.width = document, width
+        values = list(map(int, probe('layout', hexed(document.text), width).split()))
+        self.rows = list(zip(values[::2], values[1::2]))
+
+    def point(self, offset):
+        return tuple(map(int, probe('point', hexed(self.document.text), self.width, offset).split()))
+
+    def offset(self, row, column):
+        return int(probe('offset', hexed(self.document.text), self.width, row, column))
 
 
 class Ranges(unittest.TestCase):
     def yank(self, text, column, motion, expected, count=1, argument=None, explicit=False):
-        document = copy.Document(text)
+        document = Document(text)
         span = document.motion(column, motion, count, argument, explicit)
         self.assertEqual(document.text[span.start:span.end], expected)
 
     def object(self, text, column, key, expected, around=False, count=1):
-        document = copy.Document(text)
+        document = Document(text)
         span = document.text_object(column, key, around, count)
         self.assertEqual(document.text[span.start:span.end], expected)
+
+    def test_unicode_tables_match_unicodedata(self):
+        self.assertEqual(vim_copy_unicode.HEADER.read_text(), vim_copy_unicode.generate(),
+                         'Run `make unicode` to regenerate vim-copy-unicode.h')
 
     def test_word_motions_and_endpoint_rules(self):
         for key, expected in [('w', 'alpha'), ('W', 'alpha.beta '), ('e', 'alpha'), ('E', 'alpha.beta')]:
@@ -57,11 +197,11 @@ class Ranges(unittest.TestCase):
             ('t', 0, 2, 'aa, bb'), ('F', 9, 1, ', cc'), ('T', 9, 1, ' cc')]:
             with self.subTest(key=key, count=count):
                 self.yank(text, column, key, expected, count, ',')
-        with self.assertRaises(copy.NoMotion):
-            copy.Document(text).motion(0, 'f', argument='!')
+        with self.assertRaises(NoMotion):
+            Document(text).motion(0, 'f', argument='!')
 
     def test_backward_word_end_motions_and_inclusive_yanks(self):
-        document = copy.Document('alpha.beta gamma')
+        document = Document('alpha.beta gamma')
         for position, count, big, target in [
             (12, 1, False, 9), (12, 2, False, 5), (12, 3, False, 4),
             (8, 1, False, 5), (8, 1, True, 0), (12, 2, True, 0),
@@ -72,13 +212,13 @@ class Ranges(unittest.TestCase):
         self.yank(document.text, 12, 'ge', 'a ga')
         self.yank(document.text, 12, 'ge', '.beta ga', 2)
         self.yank(document.text, 8, 'gE', 'alpha.bet')
-        document = copy.Document('one\n\n\nsecond')
+        document = Document('one\n\n\nsecond')
         self.assertEqual(document.previous_word_end(document.starts[3] + 2), document.starts[2])
         self.assertEqual(document.previous_word_end(document.starts[3] + 2, 2), document.starts[1])
-        self.assertEqual(copy.Document('one\n   \ntwo').previous_word_end(8), 2)
-        self.assertEqual(copy.Document('界 e\u0301 word').previous_word_end(7), 2)
-        with self.assertRaises(copy.NoMotion):
-            copy.Document('word').motion(0, 'ge')
+        self.assertEqual(Document('one\n   \ntwo').previous_word_end(8), 2)
+        self.assertEqual(Document('界 e\u0301 word').previous_word_end(7), 2)
+        with self.assertRaises(NoMotion):
+            Document('word').motion(0, 'ge')
 
     def test_linewise_motions_and_counts(self):
         text = 'one\ntwo\nthree\nfour'
@@ -91,10 +231,10 @@ class Ranges(unittest.TestCase):
         self.yank(text, 5, '$', 'wo\nthree', 2)
 
     def test_line_yanks_trim_right_padding_and_preserve_indentation(self):
-        document = copy.Document('  first   \n   \n  second \t\n')
+        document = Document('  first   \n   \n  second \t\n')
         self.assertEqual(document.copy_text(document.line_span(0, 2)), '  first\n   \n  second\n')
         # Explicit character selections can intentionally include spaces.
-        self.assertEqual(document.copy_text(copy.Span(0, 10)), '  first   ')
+        self.assertEqual(document.copy_text(Span(0, 10)), '  first   ')
 
     def test_word_objects_at_start_middle_whitespace_and_end(self):
         self.object('previous alpha.beta next', 9, 'W', 'alpha.beta')
@@ -125,13 +265,13 @@ class Ranges(unittest.TestCase):
         self.object('prefix "one \\" two" suffix', 10, '"', 'one \\" two')
         self.object("'one' 'two'", 8, "'", " 'two'", around=True)
         self.object('before `one` after', 9, '`', 'one')
-        with self.assertRaises(copy.NoMotion):
-            copy.Document('no brackets').text_object(3, '(')
+        with self.assertRaises(NoMotion):
+            Document('no brackets').text_object(3, '(')
 
     def test_bracket_queries_match_full_context_matching(self):
         rng = random.Random(43)
         for _ in range(400):
-            document = copy.Document(''.join(rng.choice([
+            document = Document(''.join(rng.choice([
                 'abc', ' ', '\n', '(', ')', '[', ']', '{', '}', '<', '>',
                 "'", '"', '`', '\\', '界',
             ]) for _ in range(40)))
@@ -140,14 +280,21 @@ class Ranges(unittest.TestCase):
                 count = rng.choice([1, 2, 3])
                 with self.subTest(text=document.text, position=position, key=key, count=count):
                     try:
-                        expected = document.enclosing(document.brackets(key), position, count)
-                    except copy.NoMotion:
+                        expected = document.enclosing_brackets(key, position, count, full_context=True)
+                    except NoMotion:
                         expected = None
                     try:
-                        actual = document.enclosing(document.brackets(key, position, count), position, count)
-                    except copy.NoMotion:
+                        actual = document.enclosing_brackets(key, position, count)
+                    except NoMotion:
                         actual = None
                     self.assertEqual(actual, expected)
+
+    def test_quotes_end_with_their_line(self):
+        # As in Vim, quotes are read a line at a time. A Markdown fence or a
+        # stray backtick must not hide every bracket in the scrollback below.
+        for text in ('```python\ncall(foo bar)\n```', 'it`s odd\ncall(foo bar)\n', 'a "b\n(foo bar)'):
+            with self.subTest(text=text):
+                self.object(text, text.index('foo'), 'b', 'foo bar')
 
     def test_any_quote_object(self):
         for delimiter in '\'"`':
@@ -165,8 +312,8 @@ class Ranges(unittest.TestCase):
         self.object(text, 0, 'q', "it's quoted")
         self.object(text, text.index('quoted'), 'q', "it's quoted")
         self.object('before "one \\" two" after', 12, 'q', 'one \\" two')
-        with self.assertRaises(copy.NoMotion):
-            copy.Document("don't match unmatched '").text_object(0, 'q')
+        with self.assertRaises(NoMotion):
+            Document("don't match unmatched '").text_object(0, 'q')
 
     def test_paragraphs_and_sentences(self):
         text = 'first\nparagraph\n\nsecond\n\n'
@@ -180,7 +327,7 @@ class Ranges(unittest.TestCase):
 
     def test_sentence_motion_boundaries_and_counts(self):
         text = '''  One sentence.")  Another!\tLast?\ncontinued\n\n\n  New paragraph'''
-        document = copy.Document(text)
+        document = Document(text)
         first, second, third = text.index('One'), text.index('Another'), text.index('Last')
         blank, paragraph = text.index('\n\n') + 1, text.index('New')
         for origin, key, count, expected in [
@@ -198,11 +345,11 @@ class Ranges(unittest.TestCase):
         self.yank('One.  Two! Three?', 8, '(', 'Tw')
         self.yank('One.\nTwo!', 0, ')', 'One.\n')
         self.yank('Last sentence.', 0, ')', 'Last sentence.')
-        self.assertEqual(copy.Document('version1.2 still going\n  \nnext').sentence_starts, [0])
+        self.assertEqual(Document('version1.2 still going\n  \nnext').sentence_starts, [0])
 
     def test_vim_paragraph_boundaries_counts_and_endpoints(self):
         text = '  alpha\n   \nbeta\n\n\n  gamma\n.IP list\nitem\n.SH title\nsection\n'
-        document = copy.Document(text)
+        document = Document(text)
         for row, column, key, count, target in [
             (0, 3, '}', 1, 3), (0, 3, '}', 2, 6),
             (3, 0, '}', 1, 6), (4, 0, '}', 1, 6),
@@ -219,13 +366,13 @@ class Ranges(unittest.TestCase):
                                ('.SH title', True), (' .IP', False), ('\fsection', True),
                                ('{', False), ('}', False)]:
             with self.subTest(line=line):
-                self.assertEqual(copy.Document(line).paragraph_boundary(0), boundary)
-        document = copy.Document('first\n界e\u0301')
+                self.assertEqual(Document(line).paragraph_boundary(0), boundary)
+        document = Document('first\n界e\u0301')
         self.assertEqual(document.paragraph_target(0, '}'), document.starts[1] + 1)
         self.yank('first\nlast', 0, '}', 'first\nlast')
         self.yank('first\n   \nlast\n\nnext', 0, '}', 'first\n   \nlast\n')
-        with self.assertRaises(copy.NoMotion):
-            copy.Document('one\ntwo').paragraph_target(0, '}', 3)
+        with self.assertRaises(NoMotion):
+            Document('one\ntwo').paragraph_target(0, '}', 3)
 
     def test_tags_handle_nesting_attributes_comments_and_void_elements(self):
         text = '<div title="a>b"><p>first <b>bold</b> tail</p><!-- </div> --><br></div>'
@@ -234,12 +381,22 @@ class Ranges(unittest.TestCase):
         self.object(text, text.index('tail'), 't', text, around=True, count=2)
 
     def test_layout_maps_wrapped_lines_wide_and_combining_characters(self):
-        document = copy.Document('1234567890abcdefghijX\n界e\u0301abc\n')
-        layout = copy.Layout(document, 10)
+        document = Document('1234567890abcdefghijX\n界e\u0301abc\n')
+        layout = Layout(document, 10)
         self.assertEqual(layout.rows, [(0, 10), (10, 20), (20, 21), (22, 28)])
         self.assertEqual(layout.point(20), (2, 0))
         self.assertEqual(layout.point(25), (3, 3))
         self.assertEqual(layout.offset(3, 3), 25)
+
+    def test_layout_counts_tab_stops(self):
+        # tmux keeps a tab as one character up to the next stop, every
+        # eight cells, but never past the last column.
+        document = Document('ab\tcd\n0123456789abcdef\tX\n')
+        layout = Layout(document, 20)
+        self.assertEqual(len(layout.rows), 2)
+        self.assertEqual(layout.point(document.text.index('c')), (0, 8))
+        self.assertEqual(layout.point(document.text.index('X')), (1, 19))
+        self.assertEqual(layout.offset(0, 8), document.text.index('c'))
 
     def test_link_at_handles_markup_punctuation_and_url_delimiters(self):
         for text, expected in [
@@ -257,72 +414,75 @@ class Ranges(unittest.TestCase):
         ]:
             with self.subTest(text=text):
                 position = text.index('example') if 'example' in text else text.index('8000')
-                self.assertEqual(copy.link_at(text, position), expected)
+                self.assertEqual(link_at(text, position), expected)
 
     def test_link_at_requires_cursor_inside_the_specific_link(self):
         text = 'https://one.test/a and https://two.test/b.'
-        self.assertEqual(copy.link_at(text, text.index('two')), 'https://two.test/b')
+        self.assertEqual(link_at(text, text.index('two')), 'https://two.test/b')
         for position in (text.index(' and ') + 1, len(text) - 1):
-            with self.assertRaises(copy.NoMotion):
-                copy.link_at(text, position)
-        with self.assertRaises(copy.NoMotion):
-            copy.link_at('no link here', 4)
+            with self.assertRaises(NoMotion):
+                link_at(text, position)
+        with self.assertRaises(NoMotion):
+            link_at('no link here', 4)
 
 
 class SnapshotRanges(unittest.TestCase):
     def test_adaptive_reads_match_full_buffer_ranges(self):
-        class Slices(copy.Tmux):
-            def __init__(self, document, width):
-                self.document = document
-                self.layout = copy.Layout(document, width)
-                self.width = width
-                self.first_offset = 0
-
-            def snapshot(self, state, first=0, last=None):
-                last = len(self.layout.rows) - 1 if last is None else last
-                start, end = self.layout.rows[first][0], self.layout.rows[last][1]
-                # capture-pane emits a newline for the last physical row,
-                # including an empty row or a truncated wrapped line.
-                document = copy.Document(self.document.text[start:end] + '\n')
-                state['layout'] = copy.Layout(document, self.width, first)
-                self.first_offset = start
-                return document
-
+        # The probe reads each slice of rows as if capture-pane had, in a
+        # 12-row pane, and reports offsets into the whole document.
         rng = random.Random(30)
-        document = copy.Document('\n'.join(rng.choice([
+        document = Document('\n'.join(rng.choice([
             'alpha.beta gamma', '', '   ', '"one two" rest', '(one [two]) tail',
             'One. Two! Three?', '.IP item', '界 e\u0301 λέξη',
+            # Brackets spanning lines, and backticks that must not hide them.
+            'call(first,', '    second)', '{', '}', '```', "it's `x` (y",
         ]) for _ in range(180)))
         for width in (17, 60):
-            tmux = Slices(document, width)
+            layout = Layout(document, width)
             for _ in range(1200):
-                row = rng.randrange(len(tmux.layout.rows))
-                start, end = tmux.layout.rows[row]
+                row = rng.randrange(len(layout.rows))
+                start, end = layout.rows[row]
                 position = rng.randrange(start, end) if end > start else start
-                while position > start and copy.cell_width(document.text[position]) == 0:
+                while position > start and cell_width(document.text[position]) == 0:
                     position -= 1
-                _, column = tmux.layout.point(position)
-                key = rng.choice(['y', 'j', 'k', 'w', 'W', 'b', 'B', 'e', 'E', 'ge', 'gE',
+                _, column = layout.point(position)
+                key = rng.choice(['y', 'j', 'k', 'w', 'W', 'b', 'B', 'e', 'E', 'ge', 'gE', '%', '[',
                                   '0', '^', '$', 'h', 'l', '{', '}', '(', ')', 'p', 's', 'q', '"', 't'])
-                obj = (rng.choice(['i', 'a']) if key in ('w', 'W', 'p', 's', 'q', '"', 't', '(')
+                obj = (rng.choice(['i', 'a']) if key in ('w', 'W', 'p', 's', 'q', '"', 't', '(', 'b', 'B', '[', '{')
                        and rng.choice([True, False]) else None)
+                if key == '[' and not obj:
+                    continue  # Not a motion.
                 count = rng.choice([1, 2, 5, 20])
-                context = {'mode': 'yank', 'motion': key, 'object': obj, 'before': 1,
-                           'digits': str(count) if count > 1 else ''}
-                state = {'row': row, 'copy_cursor_x': column, 'history': len(tmux.layout.rows) - 12,
-                         'pane_height': 12, 'pane_width': width, 'selection_present': 0}
                 with self.subTest(width=width, row=row, key=key, object=obj, count=count):
                     try:
                         expected = (document.text_object(position, key, obj == 'a', count) if obj else
                                     document.motion(position, key, count, explicit=count > 1))
-                    except copy.NoMotion:
+                    except NoMotion:
                         expected = None
                     try:
-                        _, actual = tmux.operation_snapshot(state, context, count)
-                        actual = copy.Span(actual.start + tmux.first_offset, actual.end + tmux.first_offset,
-                                           actual.linewise, actual.cursor + tmux.first_offset
-                                           if actual.cursor is not None else None)
-                    except copy.NoMotion:
+                        actual = document.operation(width, row, column, key, obj, count)
+                    except NoMotion:
+                        actual = None
+                    self.assertEqual(actual, expected)
+
+
+    def test_bracket_reads_never_trust_a_partial_first_line(self):
+        # A read can start inside a wrapped line whose backtick, before the
+        # read, quotes the brace at its end. That brace must not pair.
+        document = Document('{\n`' + 'x' * 60 + ' {\n' + 'inside\n' * 3 + '}')
+        layout = Layout(document, 17)
+        for row in range(len(layout.rows)):
+            for key, obj in (('B', 'i'), ('B', 'a'), ('%', None)):
+                with self.subTest(row=row, key=key, object=obj):
+                    position = layout.offset(row, 0)
+                    try:
+                        expected = (document.text_object(position, key, obj == 'a') if obj else
+                                    document.motion(position, key))
+                    except NoMotion:
+                        expected = None
+                    try:
+                        actual = document.operation(17, row, 0, key, obj)
+                    except NoMotion:
                         actual = None
                     self.assertEqual(actual, expected)
 
@@ -335,8 +495,8 @@ class Terminal(unittest.TestCase):
         cls.directory = Path(cls.temporary.name)
         cls.base = ['tmux', '-S', str(cls.directory / 'socket')]
         config = cls.directory / 'tmux.conf'
-        bindings = subprocess.check_output(['python3', str(SCRIPT), 'bindings'], text=True)
-        centering = SCRIPT.parents[1].parent / '.tmux.conf'
+        bindings = subprocess.check_output([str(HELPER), 'bindings'], text=True)
+        centering = SOURCE.parents[1].parent / '.tmux.conf'
         configuration = centering.read_text()
         numbering = next(line for line in configuration.splitlines()
                          if line.startswith('set -gw copy-mode-line-numbers '))
@@ -344,8 +504,8 @@ class Terminal(unittest.TestCase):
         config.write_text('set -g mode-keys vi\nset -g status off\nset -g escape-time 0\nset -g set-clipboard off\n'
                           'set -as terminal-features ",xterm-256color:RGB"\n'
                           # Simulate tmux-open loading before our bindings.
-                          'bind -T copy-mode-vi o run-shell "xdg-open SHOULD_NOT_OPEN"\n'
-                          'bind -T copy-mode-vi v send -X begin-selection\n' + numbering + '\n' + bindings + centering)
+                          'bind -T copy-mode-vi o run-shell "xdg-open SHOULD_NOT_OPEN"\n' +
+                          numbering + '\n' + bindings + centering)
         cls.tm('-f', str(config), 'new-session', '-d', '-x', '60', '-y', '12', '-s', 'test', 'sleep 1000')
         # Exercise the real gx binding without launching a browser.
         binaries = cls.directory / 'bin'
@@ -358,6 +518,13 @@ class Terminal(unittest.TestCase):
         opener.chmod(0o755)
         cls.tm('set-environment', '-g', 'PATH', str(binaries) + os.pathsep + os.environ['PATH'])
         cls.tm('set-environment', 'PATH', str(binaries) + os.pathsep + os.environ['PATH'])
+        # Record each tmux client a directly run helper starts.
+        cls.tracing = cls.directory / 'trace-bin'
+        cls.tracing.mkdir()
+        (cls.tracing / 'tmux').write_text(
+            '#!/bin/sh\nprintf "%s\\037" "$@" >> "$VIM_COPY_TRACE"\nprintf "\\036" >> "$VIM_COPY_TRACE"\n'
+            'exec ' + shlex.quote(shutil.which('tmux')) + ' "$@"\n')
+        (cls.tracing / 'tmux').chmod(0o755)
         cls.master, slave = pty.openpty()
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack('HHHH', 12, 60, 0, 0))
         env = os.environ.copy()
@@ -381,6 +548,32 @@ class Terminal(unittest.TestCase):
     def tm(cls, *args):
         return subprocess.run([*cls.base, *args], check=True, text=True,
                               capture_output=True, timeout=10).stdout.rstrip('\n')
+
+    def helper(self, *args):
+        """Run the helper as a binding would; return each tmux client's arguments."""
+        trace = self.directory / 'trace'
+        trace.unlink(missing_ok=True)
+        subprocess.run([str(HELPER), *args], check=True, timeout=10, env={
+            **os.environ, 'TMUX': f'{self.directory / "socket"},0,0', 'VIM_COPY_TRACE': str(trace),
+            'PATH': str(self.tracing) + os.pathsep + os.environ['PATH']})
+        calls = trace.read_text().split('\x1e')[:-1] if trace.exists() else []
+        return [call.split('\x1f')[:-1] for call in calls]
+
+    def captured_rows(self, calls):
+        """How many rows beyond the first each capture-pane read."""
+        rows = []
+        for args in calls:
+            for index in (i for i, arg in enumerate(args) if arg == 'capture-pane'):
+                command = args[index:]
+                # Bounds may be formats relative to the cursor; their
+                # difference does not depend on where the cursor is now.
+                first, last = (int(self.tm('display-message', '-p', '-t', '%0',
+                                           command[command.index(flag) + 1])) for flag in ('-S', '-E'))
+                rows.append(last - first)
+        return rows
+
+    def client_name(self):
+        return self.tm('list-clients', '-F', '#{client_name}')
 
     def drain(self):
         while True:
@@ -452,6 +645,16 @@ class Terminal(unittest.TestCase):
             messages = '\n'.join(line for line in self.tm('show-messages').splitlines() if 'save-buffer' not in line)
             self.assertEqual(self.buffer(), expected, messages[:3000])
 
+    def settle(self, quiet=.05):
+        """Read terminal output until tmux has stopped writing for a while."""
+        written = time.monotonic()
+        while time.monotonic() - written < quiet:
+            before = len(self.terminal_output)
+            self.drain()
+            if len(self.terminal_output) != before:
+                written = time.monotonic()
+            time.sleep(.002)
+
     def until(self, predicate, seconds=2):
         deadline = time.monotonic() + seconds
         while not predicate():
@@ -519,18 +722,11 @@ class Terminal(unittest.TestCase):
         self.tm('send-keys', '-X', 'scroll-middle')
         viewport = '#{scroll_position}:#{copy_cursor_y}'
         before = self.tm('display-message', '-p', viewport)
-        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-        tmux.command = self.base
-        calls, call = [], tmux.call
-        def record(*args, **kwargs):
-            calls.append(args)
-            return call(*args, **kwargs)
-        tmux.call = record
-        copy.perform(tmux, {'mode': 'move', 'motion': 'ge', 'before': 1})
-        captures = [args for args in calls if args[0] == 'capture-pane']
-        self.assertEqual(len(captures), 1)
-        capture = captures[0]
-        self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 4)
+        calls = self.helper('execute', '%0', self.client_name(), 'move', '1', '0', '-', 'ge')
+        # One client reads the state with nearby rows; another moves.
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(len(self.captured_rows(calls)), 1)
+        self.assertLessEqual(self.captured_rows(calls)[0], 4)
         self.assertEqual(self.tm('display-message', '-p', viewport), before)
         self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '14')
         self.assertEqual(self.buffer(), 'UNCHANGED')
@@ -538,28 +734,48 @@ class Terminal(unittest.TestCase):
     def test_local_yanks_capture_bounded_history(self):
         self.fixture('\n'.join(f'{i:04} alpha.beta gamma "quoted text" 界e\u0301' for i in range(1800)),
                      row=1500, column=8)
-        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-        tmux.command = self.base
-        calls, call = [], tmux.call
-        def record(*args, **kwargs):
-            calls.append(args)
-            return call(*args, **kwargs)
-        tmux.call = record
-        for context, expected in [
-            ({'motion': 'y'}, '1500 alpha.beta gamma "quoted text" 界e\u0301\n'),
-            ({'motion': 'w', 'object': 'i'}, 'alpha'),
-            ({'motion': 'q', 'object': 'i'}, 'quoted text'),
+        for operation, expected in [
+            (('-', 'y'), '1500 alpha.beta gamma "quoted text" 界e\u0301\n'),
+            (('i', 'w'), 'alpha'),
+            (('i', 'q'), 'quoted text'),
         ]:
-            with self.subTest(context=context):
-                calls.clear()
-                copy.perform(tmux, {'mode': 'yank', 'before': 1, **context})
-                captures = [args for args in calls if args[0] == 'capture-pane']
-                self.assertEqual(len(captures), 1)
-                capture = captures[0]
-                self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 8)
+            with self.subTest(operation=operation):
+                calls = self.helper('execute', '%0', self.client_name(), 'yank', '1', '0', *operation)
+                # The buffer, selection and highlight share the second client.
+                self.assertEqual(len(calls), 2)
+                self.assertEqual(len(self.captured_rows(calls)), 1)
+                self.assertLessEqual(self.captured_rows(calls)[0], 8)
                 self.assertEqual(self.buffer(), expected)
                 self.drain()
         self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
+
+    def test_brackets_and_searches_read_nearby_history(self):
+        self.fixture('\n'.join(f'{i:04} call(one two) then "needle" and more' for i in range(1800)),
+                     row=1500, column=11)
+        client = self.client_name()
+        for operation, argument, expected in [
+            (('i', 'b'), None, 'one two'),
+            (('a', 'b'), None, '(one two)'),
+            (('-', '/'), 'needle', 'ne two) then "'),
+        ]:
+            with self.subTest(operation=operation):
+                if argument:
+                    self.tm('set-option', '-p', '@vim-copy-argument', argument)
+                calls = self.helper('execute', '%0', client, 'yank', '1', '0', *operation)
+                self.assertEqual(len(self.captured_rows(calls)), 1)
+                self.assertLessEqual(self.captured_rows(calls)[0], 8)
+                self.assertEqual(self.buffer(), expected)
+                # The highlight ends through a tmux command, not a process.
+                timer = next(args for args in calls if 'run-shell' in args)
+                self.assertIn('-C', timer[timer.index('run-shell'):])
+                # Hiding the gutter for a long selection walk restores it.
+                self.assertEqual(self.tm('display-message', '-p', '#{copy_line_numbers}'), '1')
+                self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
+                self.tm('send-keys', '-X', 'history-top')
+                self.tm('send-keys', '-X', '-N', '1500', 'cursor-down')
+                self.tm('send-keys', '-X', 'start-of-line')
+                self.tm('send-keys', '-X', '-N', '11', 'cursor-right')
+                self.drain()
 
     def test_text_objects_and_visual_objects(self):
         for sequence, expected in [('yi(', 'outer (inner) tail'), ('ya(', '(outer (inner) tail)'),
@@ -658,9 +874,9 @@ class Terminal(unittest.TestCase):
             with self.subTest(text=text):
                 self.fixture(text, row=row, column=column)
                 self.tm('send-keys', '-X', 'begin-selection')
-                before = self.tm('display-message', '-p', copy.SAVED_SELECTION)
+                before = self.tm('display-message', '-p', SAVED_SELECTION)
                 self.open_link(expected)
-                self.assertEqual(self.tm('display-message', '-p', copy.SAVED_SELECTION), before)
+                self.assertEqual(self.tm('display-message', '-p', SAVED_SELECTION), before)
                 self.assertEqual(self.buffer(), 'UNCHANGED')
 
     def test_gx_opens_labelled_terminal_hyperlinks(self):
@@ -672,11 +888,11 @@ class Terminal(unittest.TestCase):
     def test_gx_with_no_link_preserves_selection_and_does_not_open_a_nearby_url(self):
         self.fixture('plain text https://example.test/', column=2)
         self.tm('send-keys', '-X', 'begin-selection')
-        before = self.tm('display-message', '-p', copy.SAVED_SELECTION)
+        before = self.tm('display-message', '-p', SAVED_SELECTION)
         opened = self.opened_links()
         self.keys('gx')
         self.assertEqual(self.opened_links(), opened)
-        self.assertEqual(self.tm('display-message', '-p', copy.SAVED_SELECTION), before)
+        self.assertEqual(self.tm('display-message', '-p', SAVED_SELECTION), before)
         self.assertEqual(self.buffer(), 'UNCHANGED')
 
     def test_o_swaps_visual_ends_without_opening_or_copying(self):
@@ -741,7 +957,7 @@ class Terminal(unittest.TestCase):
                 # Native line mode may represent EOL as either the final
                 # character or the following cell. Check its lines and mode;
                 # the copied text below verifies the actual selected range.
-                signature = (copy.SELECTION_SIGNATURE if mode != 'line' else
+                signature = (SELECTION_SIGNATURE if mode != 'line' else
                              '#{selection_start_y}:#{selection_end_y}:#{rectangle_toggle}')
                 before = self.tm('display-message', '-p', signature)
                 cursor = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}')
@@ -761,20 +977,20 @@ class Terminal(unittest.TestCase):
         self.until(lambda: self.tm('display-message', '-p', '#{selection_active}') == '0')
         self.assertEqual(self.buffer(), 'UNCHANGED')
         self.keys('wviw')
-        beta = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+        beta = self.tm('display-message', '-p', SELECTION_SIGNATURE)
         self.keys('gv')
-        self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), '0:0:4:0:0')
+        self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), '0:0:4:0:0')
         self.keys('gv')
-        self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), beta)
+        self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), beta)
         self.keys('y', 'beta')
 
     def test_gv_block_selection_past_short_line_end(self):
         self.fixture('alpha beta\nx\nlast line', column=4)
         self.keys('\x16jll')
-        signature = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+        signature = self.tm('display-message', '-p', SELECTION_SIGNATURE)
         self.keys('y', 'a b\n\n')
         self.keys('gv')
-        self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), signature)
+        self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), signature)
         self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}'), '6:1')
         self.tm('set-buffer', '--', 'UNCHANGED')
         self.keys('y', 'a b\n\n')
@@ -786,18 +1002,16 @@ class Terminal(unittest.TestCase):
             self.keys('viwy', 'alpha')
             token = self.tm('show-options', '-pqv', '@vim-copy-flash')
             self.keys('gv')
-            selected = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
-            tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-            tmux.command = self.base
-            tmux.finish_flash(token)
-            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), selected)
+            selected = self.tm('display-message', '-p', SELECTION_SIGNATURE)
+            self.helper('finish-flash', '%0', self.client_name(), token)
+            self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), selected)
             self.assertEqual(self.tm('display-message', '-p', '#{selection_active}'), '1')
             self.keys('\x1b')
             self.until(lambda: self.tm('display-message', '-p', '#{selection_active}') == '0')
             self.keys('w')
             self.keys('yiw', 'beta')
             self.keys('gv')
-            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), selected)
+            self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), selected)
         finally:
             self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
 
@@ -818,11 +1032,11 @@ class Terminal(unittest.TestCase):
             self.fixture(text, row=60, column=4)
             self.tm('send-keys', '-X', 'scroll-middle')
             self.keys('vll')
-            signature = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+            signature = self.tm('display-message', '-p', SELECTION_SIGNATURE)
             position = self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}')
             self.keys('y', '界e\u0301 ')
             self.keys('jjgv')
-            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), signature)
+            self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), signature)
             self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'), position)
         finally:
             self.tm('set-option', '-gw', 'copy-mode-line-numbers', 'hybrid')
@@ -892,11 +1106,10 @@ class Terminal(unittest.TestCase):
             with self.subTest(row=row, text=text[:15]):
                 self.fixture(text, row=row, column=column)
                 self.keys('V')
-                signature = copy.SELECTION_SIGNATURE + ':#{selection_mode}:#{selection_active}:#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'
+                signature = SELECTION_SIGNATURE + ':#{selection_mode}:#{selection_active}:#{copy_cursor_x}:#{copy_cursor_y}:#{scroll_position}'
                 before = self.tm('display-message', '-p', signature)
-                tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-                tmux.command = self.base
-                tmux.snapshot(tmux.state())
+                # Priming the sentence cache reads the state and nearby rows.
+                self.helper('prime-sentences', '%0', '-')
                 self.assertEqual(self.tm('display-message', '-p', signature), before)
                 self.assertEqual(self.buffer(), 'UNCHANGED')
                 self.keys('y', expected)
@@ -912,6 +1125,12 @@ class Terminal(unittest.TestCase):
                                    for i in range(1800)), row=1500, column=8)
             self.tm('send-keys', '-X', 'scroll-middle')
             self.until(lambda: bool(self.tm('show-options', '-pqv', '@vim-copy-sentence-frame')))
+            # Entering copy mode primes the cache around the bottom row,
+            # where copy mode starts, and can finish before the fixture
+            # moves the cursor. Prime again around the cursor's row.
+            self.tm('set-option', '-pu', '@vim-copy-sentence-frame')
+            self.helper('prime-sentences', '%0', '-')
+            self.assertTrue(self.tm('show-options', '-pqv', '@vim-copy-sentence-frame'))
             self.tm('display-message', '-p', 'native-motion-benchmark-start')
             timings = []
             for key, column in [(')', 19), (')', 37), ('(', 19), ('(', 0)] * 4:
@@ -935,6 +1154,19 @@ class Terminal(unittest.TestCase):
             os.kill(self.client.pid, signal.SIGWINCH)
             self.until(lambda: self.tm('display-message', '-p', '#{pane_width}x#{pane_height}') == '60x12')
 
+    def test_sentence_motions_cross_the_cached_range(self):
+        # The cache holds about 17 sentence starts each way. At its first
+        # start, ( must ask the helper for an earlier one, not stay put.
+        self.fixture('\n'.join(f'{i:03} One sentence. Another one!' for i in range(80)), row=79, column=4)
+        self.until(lambda: bool(self.tm('show-options', '-pqv', '@vim-copy-sentence-frame')))
+        where = lambda: self.tm('display-message', '-p', '#{copy_position}:#{copy_cursor_y}:#{copy_cursor_x}')
+        for index, key in enumerate('(' * 45 + ')' * 45):
+            with self.subTest(press=index, key=key):
+                before = where()
+                os.write(self.master, key.encode())
+                self.until(lambda: where() != before)
+        self.assertEqual(self.buffer(), 'UNCHANGED')
+
     def test_sentence_cache_handles_unicode_rows_and_refresh(self):
         self.fixture('界e\u0301 One. Two!\n  Three. Four?\n\nlast')
         self.keys(')')
@@ -949,18 +1181,9 @@ class Terminal(unittest.TestCase):
 
     def test_sentence_cache_miss_reads_nearby_rows_without_selection_commands(self):
         self.fixture('\n'.join(f'{i:04} One. Two! Three?' for i in range(1800)), row=1500, column=5)
-        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-        tmux.command = self.base
-        calls, call = [], tmux.call
-        def record(*args, **kwargs):
-            calls.append(args)
-            return call(*args, **kwargs)
-        tmux.call = record
-        copy.perform(tmux, {'mode': 'move', 'motion': ')', 'before': 1})
-        captures = [args for args in calls if args[0] == 'capture-pane']
-        self.assertEqual(len(captures), 1)
-        capture = captures[0]
-        self.assertLessEqual(int(capture[capture.index('-E') + 1]) - int(capture[capture.index('-S') + 1]), 64)
+        calls = self.helper('execute', '%0', self.client_name(), 'move', '1', '0', '-', ')')
+        self.assertEqual(len(self.captured_rows(calls)), 1)
+        self.assertLessEqual(self.captured_rows(calls)[0], 64)
         self.assertFalse(any('clear-selection' in args or 'begin-selection' in args or 'copy-pipe' in args for args in calls))
 
     def test_vim_paragraph_movements_counts_macros_and_whitespace(self):
@@ -1035,11 +1258,12 @@ class Terminal(unittest.TestCase):
     def test_cached_paragraph_jump_skips_intermediate_scrollback_rows(self):
         lines = [f'row {i:03}' if i not in (20, 60, 100) else '' for i in range(150)]
         self.fixture('\n'.join(lines), row=25, column=3)
-        tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-        tmux.command = self.base
-        state = tmux.state()
-        document = tmux.snapshot(state)
-        tmux.commands(tmux.sentence_cache(state, document))
+        # A helper movement caches the targets around the row it left.
+        self.helper('execute', '%0', self.client_name(), 'move', '1', '0', '-', '}')
+        self.tm('send-keys', '-X', 'history-top')
+        self.tm('send-keys', '-X', '-N', '25', 'cursor-down')
+        self.tm('send-keys', '-X', 'start-of-line')
+        self.tm('send-keys', '-X', '-N', '3', 'cursor-right')
         self.tm('display-message', '-p', 'native-paragraph-jump-start')
         self.keys('}')
         top = int(self.tm('display-message', '-p', '#{copy_position}')) - 1
@@ -1047,7 +1271,7 @@ class Terminal(unittest.TestCase):
         self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '0')
         messages = self.tm('show-messages').split('native-paragraph-jump-start', 1)[0]
         self.assertIn('send-keys -X goto-line 61', messages)
-        self.assertNotIn('key }: run-shell "python3 ', messages)
+        self.assertNotIn('key }: run-shell "' + str(HELPER), messages)
         self.assertEqual(self.buffer(), 'UNCHANGED')
 
     def test_cached_motion_compares_line_and_column_numbers_numerically(self):
@@ -1072,7 +1296,7 @@ class Terminal(unittest.TestCase):
         try:
             self.fixture('alpha beta')
             self.keys('yiw', 'alpha')
-            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), '0:0:4:0:0')
+            self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), '0:0:4:0:0')
             self.assertEqual(self.tm('display-message', '-p', '#{selection_active},#{copy_cursor_x}'), '0,0')
             # Selection is a terminal overlay, so capture-pane does not
             # include its colors. Verify the actual rendered terminal output.
@@ -1153,7 +1377,10 @@ class Terminal(unittest.TestCase):
                              ' beta gamma ' + 'abcdefgh ijklmnop ' * 8 for i in range(1800))
             self.fixture(text, row=1500, column=8)
             self.tm('send-keys', '-X', 'scroll-middle')
-            self.drain()
+            # Writing the fixture leaves a backlog of terminal output, and
+            # tmux defers redraws until it is read. A terminal would have
+            # read it long before anyone typed a yank.
+            self.settle()
             self.terminal_output.clear()
             for index, char in enumerate('yiw'):
                 os.write(self.master, char.encode())
@@ -1182,13 +1409,27 @@ class Terminal(unittest.TestCase):
             self.keys('viwy', 'alpha')
             self.assertTrue(self.tm('show-options', '-pqv', '@vim-copy-flash'))
             self.keys('vll')
-            selection = self.tm('display-message', '-p', copy.SELECTION_SIGNATURE)
+            selection = self.tm('display-message', '-p', SELECTION_SIGNATURE)
             self.assertEqual(self.tm('display-message', '-p', '#{selection_active}'), '1')
             self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
-            self.assertEqual(self.tm('display-message', '-p', copy.SELECTION_SIGNATURE), selection)
+            self.assertEqual(self.tm('display-message', '-p', SELECTION_SIGNATURE), selection)
             self.assertEqual(self.tm('display-message', '-p', '#{selection_active}'), '1')
         finally:
             self.tm('set-option', '-g', '@vim-copy-highlight-ms', '150')
+
+    def test_visual_yank_paints_the_highlight_style(self):
+        self.tm('set-option', '-g', '@vim-copy-highlight-style', 'bg=#123456')
+        try:
+            self.fixture('alpha beta')
+            self.keys('viw')
+            self.drain()
+            self.terminal_output.clear()
+            self.keys('y', 'alpha')
+            self.until(lambda: b'48;2;18;52;86m' in self.terminal_output)
+            self.until(lambda: not self.tm('show-options', '-pqv', '@vim-copy-flash'))
+            self.assertEqual(self.tm('show-options', '-pqv', 'copy-mode-selection-style'), '')
+        finally:
+            self.tm('set-option', '-g', '@vim-copy-highlight-style', 'bg=#313131')
 
     def test_repeated_yanks_ignore_old_flash_timers(self):
         self.tm('set-option', '-g', '@vim-copy-highlight-ms', '1000')
@@ -1202,9 +1443,7 @@ class Terminal(unittest.TestCase):
             self.keys('yw', 'beta')
             new = self.tm('show-options', '-pqv', '@vim-copy-flash')
             self.assertNotEqual(old, new)
-            tmux = copy.Tmux('%0', self.tm('list-clients', '-F', '#{client_name}'))
-            tmux.command = self.base
-            tmux.finish_flash(old)
+            self.helper('finish-flash', '%0', self.client_name(), old)
             self.assertEqual(self.tm('show-options', '-pqv', '@vim-copy-flash'), new)
             self.assertEqual(self.buffer(), 'beta')
         finally:
@@ -1267,6 +1506,9 @@ class Terminal(unittest.TestCase):
         self.keys('yn', 'start ')
         self.fixture('start needle middle needle end')
         self.keys('y2/needle\r', 'start needle middle ')
+        # tmux splits an argument that ends in a semicolon.
+        self.fixture('start one; two')
+        self.keys('y/one;\r', 'start ')
 
     def test_sentence_paragraph_and_visual_line_objects(self):
         self.fixture('One sentence.  Another! Last?', column=5)
@@ -1283,6 +1525,13 @@ class Terminal(unittest.TestCase):
                 self.keys('yf' + target, 'alpha' + target)
         self.fixture('alpha "one \\" two" omega', column=12)
         self.keys('yi"', 'one \\" two')
+
+    def test_tabs_keep_copy_columns(self):
+        # Five cursor steps cross the tab, which covers columns 3 to 7.
+        self.fixture('key\tvalue here', column=5)
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '9')
+        self.keys('yiw', 'value')
+        self.assertEqual(self.tm('display-message', '-p', '#{copy_cursor_x}'), '8')
 
     def test_frozen_snapshot_survives_new_pane_output(self):
         self.fixture('old copied text, rest', later='\n' + 'new live output\n' * 30)
