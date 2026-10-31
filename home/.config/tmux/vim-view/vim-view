@@ -82,30 +82,25 @@ ui)
   exec nvim --server "./$name.sock" --remote-ui
   ;;
 bind)
-  # A view floats over its pane, borderless, at its place and size; the
-  # pane's @vim-view-geometry records them. run-shell -C expands formats
-  # without a shell; with separate arguments, new-pane starts the launcher
-  # without one too.
+  # A view floats over its pane, borderless, at its size; the pane's
+  # @vim-view-geometry records its place and size. A new pane shows empty
+  # until its program draws, so the float starts outside the window and the
+  # view moves it in once drawn. Over a zoomed pane, -A keeps the window
+  # zoomed. run-shell -C expands formats without a shell; with separate
+  # arguments, new-pane starts the launcher without one too.
   geometry='#{pane_width}x#{pane_height}+#{pane_left}+#{pane_top}'
-  float="new-pane -B none -x #{pane_width} -y #{pane_height} -X #{pane_left} -Y #{pane_top} '$here/vim-view' ui #{pane_id} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry"
+  float="new-pane #{?window_zoomed_flag,-A ,}-B none -x #{pane_width} -y #{pane_height} -X #{window_width} -Y 0 '$here/vim-view' ui #{pane_id} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry"
   # Floats follow their panes when the window's layout or size changes,
   # including their own moves, which then find nothing to do. A zoomed
   # window hides floats; unzoomed, they come back where their panes are.
   follow="#{?window_zoomed_flag,,#{P:#{?#{&&:#{&&:#{@vim-view-float},#{m:*#{@vim-view-float}:*,#{P:#{pane_id}:}}},#{!=:#{@vim-view-geometry},$geometry}},resize-pane -t #{@vim-view-float} -x #{pane_width} -y #{pane_height} ; move-pane -t #{@vim-view-float} -X #{pane_left} -Y #{pane_top} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry ; ,}}}"
-  # In a view, nothing. On a pane whose view is open in this window, focus
-  # it. On a zoomed pane, the view zooms instead: a zoomed window hides
-  # floats, but not a zoomed float.
+  # In a view, nothing. On a pane whose view is open in this window, focus it.
   tmux source-file - <<EOF
 bind-key -n $2 if-shell -F '#{?#{@vim-view-target},0,1}' {
   if-shell -F '#{&&:#{@vim-view-float},#{m:*#{@vim-view-float}:*,#{P:#{pane_id}:}}}' {
     run-shell -C 'select-pane -t #{@vim-view-float}'
   } {
-    if-shell -F '#{window_zoomed_flag}' {
-      resize-pane -Z
-      run-shell -C "$float ; resize-pane -Z"
-    } {
-      run-shell -C "$float"
-    }
+    run-shell -C "$float"
   }
 }
 set-hook -g 'window-layout-changed[100]' { run-shell -C "$follow" }

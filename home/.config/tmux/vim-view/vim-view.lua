@@ -385,6 +385,12 @@ function M.enter(target, float, restore)
   end
   vim.cmd('redraw')
   view.ready = true
+  -- The floating pane started outside the window, so it appears only now,
+  -- already drawn.
+  if not restore then
+    tmux({ 'run-shell', '-t', target, '-C', ('move-pane -t %s -X #{pane_left} -Y #{pane_top}'):format(float) },
+         function() end)
+  end
   log('shown after', (uv.hrtime() - started) / 1e6, 'ms; first', view.first, 'anchor', view.anchor, 'lines',
       api.nvim_buf_line_count(buf), restore and 'again' or '')
 
