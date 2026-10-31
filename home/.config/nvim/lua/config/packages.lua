@@ -66,6 +66,7 @@ vim.pack.add({
   gh("arnamak/stay-centered.nvim"),
   gh("fei6409/log-highlight.nvim"),
   gh("3rd/image.nvim"),
+  gh("max397574/better-escape.nvim"),
 
   gh("Bilal2453/luvit-meta"),
 
@@ -157,6 +158,7 @@ require("plugins.fzf")
 vim.schedule(function()
   require("plugins.treesitter")
   require("plugins.stay-centered")
+  require("plugins.better-escape")
   require("plugins.vim-tmux-navigator")
   require("plugins.oil")
   require("plugins.lsp.conform")
