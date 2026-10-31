@@ -44,7 +44,7 @@ static void append(Buf *buffer, const char *data, long length) {
 }
 
 /* ---------------------------------------------------------------------- */
-/* Unicode, as vim-copy.c measures it */
+/* Unicode */
 
 static unsigned properties(uint32_t c) {
     if (c < 128)
