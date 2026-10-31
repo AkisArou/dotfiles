@@ -429,10 +429,13 @@ api.nvim_create_autocmd('VimResized', {
   end,
 })
 
--- q, i, a, I and A. tmux closes the floating pane when its UI goes, and
--- focus returns to the pane viewed.
+-- q, i, a, I and A. tmux closes the floating pane first: a UI leaving
+-- clears its screen, which would blank the pane before tmux closed it. Its
+-- UI then goes too, and focus returns to the pane viewed.
 function M.leave()
-  if not pcall(vim.cmd.detach) and view.chan then
+  if view.float then
+    tmux({ 'kill-pane', '-t', view.float }, function() end)
+  elseif not pcall(vim.cmd.detach) and view.chan then
     pcall(vim.fn.chanclose, view.chan)
   end
 end
