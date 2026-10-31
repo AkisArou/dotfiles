@@ -9,6 +9,11 @@ vim.filetype.add({
     ["tasks.json"] = "jsonc",
     [".yamlfmt"] = "yaml",
     ["librewolf.overrides.cfg"] = "javascript",
+    -- docker_compose_language_service attaches to this filetype.
+    ["compose.yaml"] = "yaml.docker-compose",
+    ["compose.yml"] = "yaml.docker-compose",
+    ["docker-compose.yaml"] = "yaml.docker-compose",
+    ["docker-compose.yml"] = "yaml.docker-compose",
   },
   pattern = {
     [".*/.vscode/.*.json"] = "jsonc",
@@ -20,5 +25,7 @@ vim.filetype.add({
     [".*/ssh/config"] = "sshconfig",
     [".*/.+%.tmux"] = "tmux",
     ["%.env%.[%w_.-]+"] = "dosini",
+    ["compose%..+%.ya?ml"] = "yaml.docker-compose",
+    ["docker%-compose%..+%.ya?ml"] = "yaml.docker-compose",
   },
 })

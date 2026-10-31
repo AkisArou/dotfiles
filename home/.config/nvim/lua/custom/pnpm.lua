@@ -8,7 +8,7 @@ function M.install()
   local term_buf = vim.api.nvim_get_current_buf()
   vim.cmd("terminal pnpm install")
   vim.cmd.wincmd("L")
-  vim.api.nvim_win_set_width(0, 40) -- set desired width
+  vim.api.nvim_win_resize(0, 40, -1, { anchor = "right" }) -- set desired width
 
   -- leave insert mode so Neovim doesn't stay in it
   vim.cmd("stopinsert")

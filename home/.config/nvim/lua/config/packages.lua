@@ -28,16 +28,9 @@ vim.api.nvim_create_autocmd("PackChanged", {
   end,
 })
 
+-- Delete the plugins no vim.pack.add() call adds any more.
 function Delete_unused_packs()
-  vim.pack.del(vim
-    .iter(vim.pack.get())
-    :filter(function(x)
-      return not x.active
-    end)
-    :map(function(x)
-      return x.spec.name
-    end)
-    :totable())
+  vim.cmd("packdel ++all")
 end
 
 ---@param value string|vim.pack.Spec
