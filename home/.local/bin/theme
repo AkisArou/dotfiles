@@ -17,7 +17,8 @@ between its colors-light and colors-dark; tmux and Neovim follow foot, and so
 do shells, through ~/.config/shell/zsh/color-theme. Configs with a light and
 a dark variant get a link to the one in use (VARIANTS), and waybar and dunst
 reload. The theme in use is kept in $XDG_STATE_HOME/theme/current, which
-foot's launcher and Doom Emacs read too.
+foot's launcher and Doom Emacs read too, and its wallpaper is linked from
+$XDG_STATE_HOME/theme/wallpaper for sway and i3.
 """
 
 from datetime import date, datetime, time, timedelta, timezone
@@ -42,12 +43,13 @@ VARIANTS = {
     '.config/gitui/theme.ron': 'theme-{}.ron',
     '.config/lazygit/theme.yml': 'theme-{}.yml',
     '.config/rofi/theme.rasi': 'theme-{}.rasi',
+    '.config/sway/theme': 'theme-{}',
     '.config/waybar/theme.css': 'theme-{}.css',
     '.config/waybar/theme.jsonc': 'theme-{}.jsonc',
 }
 GTK_THEMES = {'light': 'VSCode-Light', 'dark': 'VSCode-Dark'}
-# In ~/.local/share/backgrounds. forest-light.jpg: Chris Lawton, Unsplash.
-WALLPAPERS = {'light': 'forest-light.jpg', 'dark': 'forest.jpg'}
+# In ~/.local/share/backgrounds. forest-fog-pines.jpg: Markos Mant, Unsplash.
+WALLPAPERS = {'light': 'forest-fog-pines.jpg', 'dark': 'forest.jpg'}
 
 
 def read(name, allowed, default):
@@ -123,7 +125,16 @@ def apply(theme, force=False):
     run('gsettings', 'set', 'org.gnome.desktop.interface', 'color-scheme', f'prefer-{theme}')
     run('gsettings', 'set', 'org.gnome.desktop.interface', 'gtk-theme', GTK_THEMES[theme])
     wallpaper = Path.home() / '.local/share/backgrounds' / WALLPAPERS[theme]
+    # sway and i3 start with this link, so a reload or restart keeps it.
+    link(STATE / 'wallpaper', str(wallpaper))
     run('swaymsg', 'output', '*', 'bg', str(wallpaper), 'fill')
+    # Window colours: sway and i3 include the link on a reload; send them now.
+    colours = (Path.home() / f'.config/sway/theme-{theme}').read_text().splitlines()
+    colours = '; '.join(line for line in colours if line.startswith('client.'))
+    run('swaymsg', colours)
+    if os.environ.get('DISPLAY') and not os.environ.get('WAYLAND_DISPLAY'):
+        run('xwallpaper', '--zoom', str(wallpaper))
+        run('i3-msg', colours)
     # waybar reloads on SIGUSR2; SIGUSR1 would hide it.
     run('pkill', '-USR2', '-x', 'waybar')
     run('dunstctl', 'reload')
@@ -139,7 +150,8 @@ def watch():
     apply(wanted(), force=True)
     while True:
         clock.sleep(60 - clock.time() % 60)
-        apply(wanted())
+        # A new process each time, so edits to this script apply without a restart.
+        run(sys.executable, os.path.realpath(__file__), 'apply')
 
 
 def main(arguments):

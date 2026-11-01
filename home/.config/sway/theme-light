@@ -1,0 +1,8 @@
+# Window colours in the light theme, after VS Code's light palette. sway and i3
+# include them through theme, which ~/.local/bin/theme links and applies live.
+#                       border  bg      text    indicator child_border
+client.focused          #005fb8 #005fb8 #ffffff #0090f1   #005fb8
+client.focused_inactive #c8c8c8 #d0d0d0 #3b3b3b #c8c8c8   #c8c8c8
+client.unfocused        #d4d4d4 #e8e8e8 #616161 #d4d4d4   #d4d4d4
+client.urgent           #c4474b #c4474b #ffffff #c4474b   #c4474b
+client.placeholder      #ffffff #f3f3f3 #3b3b3b #ffffff   #f3f3f3

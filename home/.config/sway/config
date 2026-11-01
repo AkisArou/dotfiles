@@ -26,8 +26,8 @@ set $menu rofi -show drun
 #
 ### Output configuration
 #
-# Until ~/.local/bin/theme sets the wallpaper of the theme in use.
-output * bg /home/akisarou/.local/share/backgrounds/forest.jpg fill
+# The wallpaper of the light or dark theme in use, linked by ~/.local/bin/theme.
+output * bg /home/akisarou/.local/state/theme/wallpaper fill
 
 output "Samsung Electric Company LC49G95T H4ZR303132" {
   mode 5120x1440@129.999Hz
@@ -206,6 +206,9 @@ gaps inner 6
 hide_edge_borders smart
 
 for_window [class="^.*"] border pixel 3
+# Window colours, light or dark: ~/.local/bin/theme links theme to theme-light
+# or theme-dark.
+include ~/.config/sway/theme
 
 for_window [class="Xephyr"] floating disable
 for_window [shell="xwayland"] title_format "[XWayland] %title"

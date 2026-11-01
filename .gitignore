@@ -41,5 +41,6 @@ home/.config/git/theme.gitconfig
 home/.config/gitui/theme.ron
 home/.config/lazygit/theme.yml
 home/.config/rofi/theme.rasi
+home/.config/sway/theme
 home/.config/waybar/theme.css
 home/.config/waybar/theme.jsonc
