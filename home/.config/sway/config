@@ -6,6 +6,8 @@ exec systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DES
 exec dbus-update-activation-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK I3SOCK XCURSOR_SIZE XCURSOR_THEME
 exec --no-startup-id ~/.config/tmux/start
 exec --no-startup-id ~/.config/sway/listen-events
+# From sway, not systemd: the desktop's colour scheme must change on sway's bus.
+exec --no-startup-id ~/.local/bin/theme watch
 exec_always ~/.config/sway/gaps
 exec --no-startup-id flameshot
 exec --no-startup-id wl-clip-persist --clipboard both
@@ -24,6 +26,7 @@ set $menu rofi -show drun
 #
 ### Output configuration
 #
+# Until ~/.local/bin/theme sets the wallpaper of the theme in use.
 output * bg /home/akisarou/.local/share/backgrounds/forest.jpg fill
 
 output "Samsung Electric Company LC49G95T H4ZR303132" {
@@ -95,6 +98,7 @@ bindsym $mod+Shift+r reload
 bindsym $mod+Shift+b exec ~/.config/rofi/bluetooth
 bindsym $mod+Shift+e exec ~/.config/rofi/emulator
 bindsym $mod+Shift+q exec ~/.config/rofi/powermenu
+bindsym $mod+Shift+c exec ~/.config/rofi/theme
 
 bindsym $mod+Shift+g exec ~/.local/bin/start-genymotion-emulator
 bindsym $mod+less exec dunstctl close-all

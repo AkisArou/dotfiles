@@ -1,0 +1,20 @@
+#!/usr/bin/zsh
+
+# Choose light, dark, or auto, which follows the sun (~/.local/bin/theme).
+
+theme=~/.local/bin/theme
+mode=$($theme mode)
+next=(${(s: :)$($theme next)}) # dark 17:24
+
+modes=(auto light dark)
+entries=(
+  $'\Uf050e  auto, '"$($theme get) until $next[2]"
+  $'\Uf05a8  light'
+  $'\Uf0594  dark'
+)
+[[ $mode == auto ]] || entries[1]=$'\Uf050e  auto'
+
+current=$(( ${modes[(i)$mode]} - 1 ))
+choice=$(print -l -- $entries | rofi -dmenu -i -p theme -format i -a $current -selected-row $current) || exit
+
+$theme set $modes[choice+1]

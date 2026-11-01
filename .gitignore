@@ -34,3 +34,12 @@ spider-wm/.spider-wm/
 home/.local/bin/claude
 *.before-dotfiles
 *.before-dotfiles.*
+# The light or dark variant in use, linked by home/.local/bin/theme.
+home/.config/alacritty/theme.toml
+home/.config/dunst/dunstrc.d/
+home/.config/git/theme.gitconfig
+home/.config/gitui/theme.ron
+home/.config/lazygit/theme.yml
+home/.config/rofi/theme.rasi
+home/.config/waybar/theme.css
+home/.config/waybar/theme.jsonc

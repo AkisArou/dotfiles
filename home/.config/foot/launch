@@ -8,4 +8,9 @@ else
   FONT="$FONT"10
 fi
 
-foot --font="$FONT" "$@"
+# Open in the theme in use (~/.local/bin/theme); later switches signal foot.
+THEME_FILE=${XDG_STATE_HOME:-$HOME/.local/state}/theme/current
+[[ -r $THEME_FILE ]] && THEME=$(<$THEME_FILE)
+[[ $THEME == (light|dark) ]] || THEME=dark
+
+foot --font="$FONT" -o initial-color-theme=$THEME "$@"

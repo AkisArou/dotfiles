@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+"""Light or dark, for the desktop and the terminals.
+
+  theme [get]       print the theme in use: light or dark
+  theme mode        print the mode: auto, light or dark
+  theme set MODE    choose auto, light or dark, and apply it everywhere
+  theme next        in auto mode, the next switch: "dark 17:24"
+  theme apply       apply the mode's theme, if it is not the one in use
+  theme watch       apply, then keep auto mode following the sun; sway runs this
+
+Auto is light from sunrise to sunset in Athens; anywhere in Greece is within
+about a quarter of an hour of it.
+
+Applying sets the desktop's colour scheme, which browsers, VS Code, kitty and
+libadwaita apps follow, the GTK theme and the wallpaper. It switches every foot window
+between its colors-light and colors-dark; tmux and Neovim follow foot, and so
+do shells, through ~/.config/shell/zsh/color-theme. Configs with a light and
+a dark variant get a link to the one in use (VARIANTS), and waybar and dunst
+reload. The theme in use is kept in $XDG_STATE_HOME/theme/current, which
+foot's launcher and Doom Emacs read too.
+"""
+
+from datetime import date, datetime, time, timedelta, timezone
+from math import acos, cos, degrees, pi, radians, sin, tan
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time as clock
+
+LATITUDE, LONGITUDE = 37.98, 23.73  # Athens
+MODES = ('auto', 'light', 'dark')
+
+STATE = Path(os.environ.get('XDG_STATE_HOME') or Path.home() / '.local/state') / 'theme'
+
+# Links to the variant in use, beside configs that include them; programs read
+# them when they start or reload. They are not in the repository (.gitignore).
+VARIANTS = {
+    '.config/alacritty/theme.toml': 'theme-{}.toml',
+    '.config/dunst/dunstrc.d/theme.conf': '../theme-{}.conf',
+    '.config/git/theme.gitconfig': 'theme-{}.gitconfig',
+    '.config/gitui/theme.ron': 'theme-{}.ron',
+    '.config/lazygit/theme.yml': 'theme-{}.yml',
+    '.config/rofi/theme.rasi': 'theme-{}.rasi',
+    '.config/waybar/theme.css': 'theme-{}.css',
+    '.config/waybar/theme.jsonc': 'theme-{}.jsonc',
+}
+GTK_THEMES = {'light': 'VSCode-Light', 'dark': 'VSCode-Dark'}
+# In ~/.local/share/backgrounds. forest-light.jpg: Chris Lawton, Unsplash.
+WALLPAPERS = {'light': 'forest-light.jpg', 'dark': 'forest.jpg'}
+
+
+def read(name, allowed, default):
+    try:
+        value = (STATE / name).read_text().strip()
+    except OSError:
+        return default
+    return value if value in allowed else default
+
+
+def write(name, value):
+    STATE.mkdir(parents=True, exist_ok=True)
+    temporary = STATE / f'.{name}.tmp'
+    temporary.write_text(value + '\n')
+    temporary.replace(STATE / name)
+
+
+def sun(day):
+    """Sunrise and sunset on day, local time, by NOAA's approximation."""
+    year = 2 * pi / (366 if day.year % 4 == 0 else 365) * (day.timetuple().tm_yday - 1)
+    equation = 229.18 * (0.000075 + 0.001868 * cos(year) - 0.032077 * sin(year)
+                         - 0.014615 * cos(2 * year) - 0.040849 * sin(2 * year))
+    declination = (0.006918 - 0.399912 * cos(year) + 0.070257 * sin(year) - 0.006758 * cos(2 * year)
+                   + 0.000907 * sin(2 * year) - 0.002697 * cos(3 * year) + 0.00148 * sin(3 * year))
+    latitude = radians(LATITUDE)
+    angle = degrees(acos(cos(radians(90.833)) / (cos(latitude) * cos(declination))
+                         - tan(latitude) * tan(declination)))
+    midnight = datetime.combine(day, time(), timezone.utc)
+    return tuple((midnight + timedelta(minutes=720 - 4 * (LONGITUDE + sign * angle) - equation)).astimezone()
+                 for sign in (1, -1))
+
+
+def auto(now):
+    """The theme at now, and the next switch: (theme, (theme, when))."""
+    sunrise, sunset = sun(now.date())
+    if now < sunrise:
+        return 'dark', ('light', sunrise)
+    if now < sunset:
+        return 'light', ('dark', sunset)
+    return 'dark', ('light', sun(now.date() + timedelta(days=1))[0])
+
+
+def wanted():
+    mode = read('mode', MODES, 'auto')
+    return auto(datetime.now().astimezone())[0] if mode == 'auto' else mode
+
+
+def run(*command):
+    """Run a command; one missing or failing must not stop the others."""
+    try:
+        subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
+def link(path, target):
+    path = Path.home() / path
+    if path.is_symlink() and os.readlink(path) == target:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f'.{path.name}.tmp')
+    temporary.unlink(missing_ok=True)
+    temporary.symlink_to(target)
+    temporary.replace(path)
+
+
+def apply(theme, force=False):
+    if not force and read('current', ('light', 'dark'), None) == theme:
+        return
+    write('current', theme)
+    for path, target in VARIANTS.items():
+        link(path, target.format(theme))
+    run('gsettings', 'set', 'org.gnome.desktop.interface', 'color-scheme', f'prefer-{theme}')
+    run('gsettings', 'set', 'org.gnome.desktop.interface', 'gtk-theme', GTK_THEMES[theme])
+    wallpaper = Path.home() / '.local/share/backgrounds' / WALLPAPERS[theme]
+    run('swaymsg', 'output', '*', 'bg', str(wallpaper), 'fill')
+    # waybar reloads on SIGUSR2; SIGUSR1 would hide it.
+    run('pkill', '-USR2', '-x', 'waybar')
+    run('dunstctl', 'reload')
+    # tmux's fallback until a client reports its terminal's theme.
+    run('tmux', 'set', '-g', '@theme', theme)
+    # foot: SIGUSR1 for colors-dark, SIGUSR2 for colors-light.
+    signal = 'USR2' if theme == 'light' else 'USR1'
+    for program in ('foot', 'footclient'):
+        run('pkill', f'-{signal}', '-x', program)
+
+
+def watch():
+    apply(wanted(), force=True)
+    while True:
+        clock.sleep(60 - clock.time() % 60)
+        apply(wanted())
+
+
+def main(arguments):
+    command = arguments[0] if arguments else 'get'
+    if command == 'get' and len(arguments) <= 1:
+        print(read('current', ('light', 'dark'), None) or wanted())
+    elif command == 'mode' and len(arguments) == 1:
+        print(read('mode', MODES, 'auto'))
+    elif command == 'set' and len(arguments) == 2 and arguments[1] in MODES:
+        write('mode', arguments[1])
+        apply(wanted(), force=True)
+    elif command == 'next' and len(arguments) == 1:
+        if read('mode', MODES, 'auto') == 'auto':
+            theme, when = auto(datetime.now().astimezone())[1]
+            print(f'{theme} {when:%H:%M}')
+    elif command == 'apply' and len(arguments) == 1:
+        apply(wanted())
+    elif command == 'watch' and len(arguments) == 1:
+        watch()
+    else:
+        print(__doc__.strip(), file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except KeyboardInterrupt:
+        sys.exit(130)

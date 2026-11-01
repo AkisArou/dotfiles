@@ -1,6 +1,5 @@
 [org/gnome/desktop/interface]
 gtk-theme='VSCode-Dark'
-color-scheme='prefer-dark'
 icon-theme='Adwaita'
 
 [org/gnome/desktop/peripherals/keyboard]
