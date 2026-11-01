@@ -1,11 +1,13 @@
-/* waybar in the light theme; style.css imports it through theme.css. */
-@define-color bar-background #E8E8E8;
+/* waybar in the light theme, frosted like macOS's menu bar: translucent white
+   over the wallpaper. style.css imports it through theme.css. */
+@define-color bar-background rgba(255, 255, 255, 0.55);
 @define-color bar-foreground #3B3B3B;
-@define-color button-focused-background #D0D0D0;
+@define-color bar-border rgba(0, 0, 0, 0);
+@define-color button-focused-background rgba(0, 0, 0, 0.1);
 @define-color button-focused-color #000000;
 @define-color button-urgent-background #0000FF;
 @define-color button-urgent-color #FFFFFF;
-@define-color blink-background #E8E8E8;
+@define-color blink-background rgba(255, 255, 255, 0.55);
 @define-color critical-background rgba(205, 49, 49, 0.1);
 @define-color critical-color #CD3131;
 @define-color warning-background rgba(137, 85, 3, 0.1);

@@ -1,6 +1,7 @@
 /* waybar in the dark theme; style.css imports it through theme.css. */
 @define-color bar-background #18191A;
 @define-color bar-foreground #AEAFAD;
+@define-color bar-border #373737;
 @define-color button-focused-background #444444;
 @define-color button-focused-color #D4D4D4;
 @define-color button-urgent-background #569CD6;
