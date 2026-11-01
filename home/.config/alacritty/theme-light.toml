@@ -1,0 +1,32 @@
+# VS Code Light+ Theme
+[colors.primary]
+background = "#FFFFFF"
+foreground = "#000000"
+
+[colors.cursor]
+text = "#FFFFFF"
+cursor = "#000000"
+
+[colors.selection]
+text = "#000000"
+background = "#ADD6FF"
+
+[colors.normal]
+black = "#000000"
+red = "#CD3131"
+green = "#008000"
+yellow = "#795E26"
+blue = "#0000FF"
+magenta = "#AF00DB"
+cyan = "#267F99"
+white = "#555555"
+
+[colors.bright]
+black = "#6E6E6E"
+red = "#811F3F"
+green = "#098658"
+yellow = "#949800"
+blue = "#001080"
+magenta = "#AF00DB"
+cyan = "#0070C1"
+white = "#A5A5A5"

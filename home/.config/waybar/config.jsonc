@@ -1,6 +1,9 @@
 {
   "height": 17, // Waybar height (to be removed for auto height)
   "spacing": 8, // Gaps between modules (4px)
+  // Formats with coloured labels, light or dark: ~/.local/bin/theme links
+  // theme.jsonc to theme-light.jsonc or theme-dark.jsonc.
+  "include": ["~/.config/waybar/theme.jsonc"],
   "modules-left": [
     "sway/workspaces",
     "sway/scratchpad",
@@ -30,7 +33,6 @@
   },
   "pulseaudio": {
     "scroll-step": 1,
-    "format": "<span color='#569CD6'>{icon}</span> {volume}%",
     "format-bluetooth": "{volume}% {icon} {format_source}",
     "format-bluetooth-muted": " {icon} {format_source}",
     "format-muted": " {format_source}",
@@ -49,11 +51,9 @@
   },
   "memory": {
     "interval": 5,
-    "format": "<span color='#569CD6'>MEM</span> {}%",
   },
   "cpu": {
     "interval": 5,
-    "format": "<span color='#569CD6'>CPU</span> {usage}%",
     "tooltip": false,
   },
   "battery": {
@@ -61,8 +61,6 @@
       "warning": 15,
       "critical": 5,
     },
-    "format": "<span color='#569CD6'>BAT</span> {capacity}%",
-    "format-charging": "<span color='#569CD6'>BAT</span> {capacity}%",
     "format-plugged": "{capacity}%",
     "format-alt": "{time} {icon}",
     "format-icons": ["", "", "", "", ""],
@@ -77,7 +75,6 @@
     },
   },
   "backlight": {
-    "format": "<span color='#569CD6'>BRT</span> {percent}%",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
     "tooltip": false,
   },
@@ -87,7 +84,6 @@
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
   },
   "bluetooth": {
-    "format": "<span color='#569CD6'>BT</span> {status}",
     "format-connected": "{device_alias}",
     "format-connected-battery": "{device_alias} {device_battery_percentage}%",
     "format-device-preference": ["device1", "device2"], // preference list deciding the displayed device
@@ -117,7 +113,6 @@
   },
   "custom/aibar": {
     "exec": "python3 \"$HOME/.config/waybar/ai-usage.py\"",
-    "format": "<span color='#569CD6'>{text}</span>",
     "return-type": "json",
     "interval": 300,
     "tooltip": true,

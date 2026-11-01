@@ -1,0 +1,26 @@
+// waybar in the dark theme: formats whose labels are coloured; config.jsonc
+// includes it through theme.jsonc.
+{
+  "pulseaudio": {
+    "format": "<span color='#569CD6'>{icon}</span> {volume}%",
+  },
+  "memory": {
+    "format": "<span color='#569CD6'>MEM</span> {}%",
+  },
+  "cpu": {
+    "format": "<span color='#569CD6'>CPU</span> {usage}%",
+  },
+  "battery": {
+    "format": "<span color='#569CD6'>BAT</span> {capacity}%",
+    "format-charging": "<span color='#569CD6'>BAT</span> {capacity}%",
+  },
+  "backlight": {
+    "format": "<span color='#569CD6'>BRT</span> {percent}%",
+  },
+  "bluetooth": {
+    "format": "<span color='#569CD6'>BT</span> {status}",
+  },
+  "custom/aibar": {
+    "format": "<span color='#569CD6'>{text}</span>",
+  },
+}

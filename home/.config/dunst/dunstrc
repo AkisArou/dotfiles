@@ -55,17 +55,5 @@
     per_monitor_dpi = false
 
 
-[urgency_low]
-    background = "#222222"
-    foreground = "#d4d4d4"
-    frame_color = "#121212"
-
-[urgency_normal]
-    background = "#222222"
-    foreground = "#d4d4d4"
-    frame_color = "#121212"
-
-[urgency_critical]
-    background = "#222222"
-    foreground = "#d4d4d4"
-    frame_color = "#121212"
+# [urgency_*] colours, light or dark: ~/.local/bin/theme links dunstrc.d/theme.conf
+# to theme-light.conf or theme-dark.conf.

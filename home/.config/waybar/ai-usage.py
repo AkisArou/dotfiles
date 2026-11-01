@@ -29,6 +29,12 @@ CLAUDE_CACHE_TTL = 900
 CLAUDE_RATE_LIMIT_DELAY = 3600
 MAX_RATE_LIMIT_DELAY = 7200
 HTTP_TIMEOUT = 12
+# Tooltip colours for the light or dark theme in use (~/.local/bin/theme).
+THEME_FILE = Path(os.environ.get("XDG_STATE_HOME") or Path.home() / ".local/state") / "theme/current"
+TOOLTIP_COLORS = {
+    "dark": {"accent": "#569CD6", "dim": "#858585", "empty": "#777777", "good": "#6a9955"},
+    "light": {"accent": "#0000FF", "dim": "#767676", "empty": "#A0A0A0", "good": "#008000"},
+}
 
 
 class UsageError(Exception):
@@ -401,13 +407,22 @@ def local_datetime(value):
         return "—"
 
 
+def tooltip_colors():
+    try:
+        theme = THEME_FILE.read_text().strip()
+    except OSError:
+        theme = "dark"
+    return TOOLTIP_COLORS.get(theme, TOOLTIP_COLORS["dark"])
+
+
 def provider_tooltip(entry, label):
-    heading = f"<span foreground='#569CD6'><b>{html.escape(label)}</b></span>"
+    colors = tooltip_colors()
+    heading = f"<span foreground='{colors['accent']}'><b>{html.escape(label)}</b></span>"
     plan = entry.get("plan") or ""
     for prefix in ("Claude ", "ChatGPT ", "Muse Code "):
         plan = plan.removeprefix(prefix)
     if plan:
-        heading += f"  <span foreground='#858585'>{html.escape(plan)}</span>"
+        heading += f"  <span foreground='{colors['dim']}'>{html.escape(plan)}</span>"
     lines = [heading]
 
     if entry.get("stale"):
@@ -432,14 +447,14 @@ def provider_tooltip(entry, label):
     if rows:
         label_width = max(8, *(len(name) for name, _, _ in rows))
         header = f"{'Window':<{label_width}}  {'Usage':<{BAR_WIDTH}}  {'Left':>4}  Resets in"
-        table = [f"<span foreground='#858585'>{html.escape(header)}</span>"]
+        table = [f"<span foreground='{colors['dim']}'>{html.escape(header)}</span>"]
         for name, percent, reset_at in rows:
             # The allowance left; usage past the limit leaves none.
             left = max(0, min(100, 100 - percent))
             filled = round(left * BAR_WIDTH / 100)
             bar = (
-                f"<span foreground='#569CD6'>{'█' * filled}</span>"
-                f"<span foreground='#777777'>{'░' * (BAR_WIDTH - filled)}</span>"
+                f"<span foreground='{colors['accent']}'>{'█' * filled}</span>"
+                f"<span foreground='{colors['empty']}'>{'░' * (BAR_WIDTH - filled)}</span>"
             )
             table.append(
                 f"{html.escape(name.ljust(label_width))}  {bar}  "
@@ -447,21 +462,21 @@ def provider_tooltip(entry, label):
             )
             if reset_at is not None:
                 reset_date = f"{'Reset':<{label_width}}  {local_datetime(reset_at)}"
-                table.append(f"<span foreground='#858585'>{html.escape(reset_date)}</span>")
+                table.append(f"<span foreground='{colors['dim']}'>{html.escape(reset_date)}</span>")
         lines.append("<tt>" + "\n".join(table) + "</tt>")
 
     resets = entry.get("reset_credits")
     if resets is not None and resets["available"] > 0:
         count = resets["available"]
-        lines.append(f"<span foreground='#6a9955'><b>{count}</b> reset{'s' if count != 1 else ''} available</span>")
+        lines.append(f"<span foreground='{colors['good']}'><b>{count}</b> reset{'s' if count != 1 else ''} available</span>")
         if count:
             for credit in resets["credits"]:
                 detail = credit["title"]
                 if credit["expires_at"] is not None:
                     detail += f" · expires {local_datetime(credit['expires_at'])}"
-                lines.append(f"<span foreground='#858585'>{html.escape(detail)}</span>")
+                lines.append(f"<span foreground='{colors['dim']}'>{html.escape(detail)}</span>")
             if not resets["credits"]:
-                lines.append("<span foreground='#858585'>Expiry unavailable</span>")
+                lines.append(f"<span foreground='{colors['dim']}'>Expiry unavailable</span>")
 
     if not rows and not entry.get("error") and not entry.get("note"):
         lines.append("Usage unavailable")

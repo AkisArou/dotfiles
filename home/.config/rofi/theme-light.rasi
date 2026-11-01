@@ -1,0 +1,15 @@
+// rofi in the light theme; config.rasi imports it through theme.rasi.
+* {
+    foreground: #000000;
+    background-color: #F8F8F8;
+    active-background: #D7EAFE;
+    active-foreground: var(foreground);
+    urgent-background: #E51400;
+    urgent-foreground: #FFFFFF;
+    selected-background: var(active-background);
+    selected-foreground: var(foreground);
+    selected-urgent-background: var(urgent-background);
+    selected-active-background: var(active-background);
+    separatorcolor: var(active-background);
+    bordercolor: #CECECE;
+}

@@ -1,0 +1,12 @@
+/* waybar in the light theme; style.css imports it through theme.css. */
+@define-color bar-background #E8E8E8;
+@define-color bar-foreground #3B3B3B;
+@define-color button-focused-background #D0D0D0;
+@define-color button-focused-color #000000;
+@define-color button-urgent-background #0000FF;
+@define-color button-urgent-color #FFFFFF;
+@define-color blink-background #E8E8E8;
+@define-color critical-background rgba(205, 49, 49, 0.1);
+@define-color critical-color #CD3131;
+@define-color warning-background rgba(137, 85, 3, 0.1);
+@define-color warning-color #895503;

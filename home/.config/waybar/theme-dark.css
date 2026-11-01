@@ -1,0 +1,23 @@
+/* waybar in the dark theme; style.css imports it through theme.css. */
+@define-color bar-background #18191A;
+@define-color bar-foreground #AEAFAD;
+@define-color button-focused-background #444444;
+@define-color button-focused-color #D4D4D4;
+@define-color button-urgent-background #569CD6;
+@define-color button-urgent-color #18191A;
+@define-color blink-background #18191A;
+@define-color critical-background rgba(244, 71, 71, 0.1);
+@define-color critical-color #E4676B;
+@define-color warning-background rgba(226, 192, 141, 0.1);
+@define-color warning-color #d7ba7d;
+
+/* Dimmed on the dark background; the light theme keeps them at full strength. */
+window#waybar #window {
+  opacity: 0.7;
+}
+
+#pulseaudio,
+#bluetooth,
+#network {
+  opacity: 0.8;
+}
