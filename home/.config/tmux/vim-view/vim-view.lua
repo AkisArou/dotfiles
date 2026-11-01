@@ -90,8 +90,9 @@ local UNDERLINES = { 'underline', 'underdouble', 'undercurl', 'underdotted', 'un
 
 -- The terminal decides what a palette colour looks like; tmux passes on only
 -- its number. foot's palette, from its config, matches the pane exactly, and
--- so does the way foot dims: towards black, by dim-amount.
-local foot = { dim = 1.5 }
+-- so does the way foot dims: by dim-amount, towards black in its dark theme
+-- and white in its light one. 'background' says which theme foot is in.
+local foot = { dim = 1.5, dark = {}, light = {} }
 do
   local path = (vim.env.XDG_CONFIG_HOME or (vim.env.HOME .. '/.config')) .. '/foot/foot.ini'
   local ok, lines = pcall(io.lines, path)
@@ -99,21 +100,23 @@ do
   for line in ok and lines or function() end do
     section = line:match('^%s*%[(.-)%]') or section
     local key, value = line:match('^%s*([%w-]+)%s*=%s*([^%s#]+)')
+    local theme = (section == 'colors' or section == 'colors-dark') and 'dark' or section == 'colors-light' and 'light'
     if key == 'dim-amount' then
       foot.dim = tonumber(value) or foot.dim
-    elseif key and (section == 'colors' or section == 'colors-dark') and value:match('^%x%x%x%x%x%x$') then
+    elseif key and theme and value:match('^%x%x%x%x%x%x$') then
       local regular, bright = tonumber(key:match('^regular(%d)$')), tonumber(key:match('^bright(%d)$'))
       local n = regular or bright and bright + 8 or tonumber(key:match('^%d+$'))
       if n and n < 256 then
-        foot[n] = '#' .. value:lower()
+        foot[theme][n] = '#' .. value:lower()
       end
     end
   end
 end
 
 local function palette(n)
-  if foot[n] then
-    return foot[n]
+  local colours = vim.o.background == 'light' and foot.light or foot.dark
+  if colours[n] then
+    return colours[n]
   elseif n < 16 then
     return vim.g['terminal_color_' .. n] or XTERM[n + 1]
   elseif n < 232 then
@@ -134,11 +137,14 @@ end
 
 local groups = {} -- Highlight group names by vim-view.c's attribute ids.
 
--- Dimmed text darkens its colour, or the default one.
+-- Dimmed text fades its colour, or the default one, into the background.
 local function dimmed(fg)
-  local rgb = fg and tonumber(fg:sub(2), 16) or api.nvim_get_hl(0, { name = 'Normal', link = false }).fg or 0xffffff
+  local light = vim.o.background == 'light'
+  local rgb = fg and tonumber(fg:sub(2), 16) or api.nvim_get_hl(0, { name = 'Normal', link = false }).fg
+    or (light and 0x000000 or 0xffffff)
   local channel = function(shift)
-    return math.floor(bit.band(bit.rshift(rgb, shift), 0xff) / foot.dim)
+    local value = bit.band(bit.rshift(rgb, shift), 0xff)
+    return light and 255 - math.floor((255 - value) / foot.dim) or math.floor(value / foot.dim)
   end
   return ('#%02x%02x%02x'):format(channel(16), channel(8), channel(0))
 end

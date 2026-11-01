@@ -20,8 +20,9 @@
 # so awk's %d becomes the day of the month, and it mangles #[...] colour tags
 # inside #(), which silently empties the output.
 
-LABEL="#[fg=#569CD6]"
-VALUE="#[fg=#AEAFAD]"
+# tmux's theme blue, and the status line's own colour.
+LABEL="#[fg=themeblue]"
+VALUE="#[fg=default]"
 
 cpu=$(~/.tmux/plugins/tmux-mem-cpu-load/tmux-mem-cpu-load -i 5 -m 2 -g 0 -a 0 |
   awk '{ gsub(/%/, ""); printf "%d", $2 }')
