@@ -2,9 +2,55 @@
 
 ;;; Appearance
 
-(setq doom-theme 'vscode-dark-plus)
+;; Light or dark, as ~/.local/bin/theme last applied it: each pairs a Doom
+;; theme with the colours laid over it, after vscode.nvim's palettes. Emacs
+;; watches the theme script's state and switches with it.
+(defconst akisarou/theme-file
+  (expand-file-name "theme/current"
+                    (or (getenv "XDG_STATE_HOME") (expand-file-name "~/.local/state"))))
 
-(defconst akisarou/editor-bg "#18191A")
+(defconst akisarou/themes
+  '((dark
+     :doom-theme vscode-dark-plus
+     :bg "#18191A" :fg "#D4D4D4" :ui-fg "#AEAFAD" :cursor "#AEAFAD"
+     :subtle-bg "#222222" :line-number "#5A5A5A" :current-line-number "#BBBBBB"
+     :comment "#6A9955" :keyword "#569CD6" :control "#C586C0" :type "#4EC9B0"
+     :function "#DCDCAA" :variable "#9CDCFE" :constant "#4FC1FF" :number "#B5CEA8"
+     :string "#C48081" :tag-delimiter "#808080" :inactive-code "#51504F"
+     :region "#313131" :search "#2a4856" :search-current "#444444" :tint "#17262d"
+     :occurrence "#1a2d38" :popup-bg "#202020" :popup-dim "#BBBBBB"
+     :popup-selection "#343B41" :faint "#343B41" :border "#444444"
+     :error "#E4676B" :warning "#DCDCAA" :success "#4EC9B0" :error-underline "#A0484B"
+     :git-added "#81b88b" :git-modified "#e2c08d" :delete "#F44747"
+     :diff-added "#4B5632" :diff-removed "#6F1313" :diff-changed "#4B1818")
+    (light
+     :doom-theme doom-one-light
+     :bg "#FFFFFF" :fg "#343434" :ui-fg "#616161" :cursor "#000000"
+     :subtle-bg "#F3F3F3" :line-number "#237893" :current-line-number "#0B216F"
+     :comment "#008000" :keyword "#0000FF" :control "#AF00DB" :type "#267F99"
+     :function "#795E26" :variable "#001080" :constant "#0070C1" :number "#098658"
+     :string "#A31515" :tag-delimiter "#000000" :inactive-code "#A0A0A0"
+     :region "#ADD6FF" :search "#B8D7EE" :search-current "#C1C1C1" :tint "#E8F2F9"
+     :occurrence "#E1EEF8" :popup-bg "#F8F8F8" :popup-dim "#767676"
+     :popup-selection "#E4E6F1" :faint "#CDD0D4" :border "#DDDDDD"
+     :error "#CD3131" :warning "#795E26" :success "#267F99" :error-underline "#DC6F6F"
+     :git-added "#587C0C" :git-modified "#895503" :delete "#E51400"
+     :diff-added "#DBE6C2" :diff-removed "#FFA3A3" :diff-changed "#FFCCCC")))
+
+(defun akisarou/system-theme ()
+  (if (and (file-readable-p akisarou/theme-file)
+           (with-temp-buffer
+             (insert-file-contents akisarou/theme-file)
+             (string-prefix-p "light" (buffer-string))))
+      'light
+    'dark))
+
+(defvar akisarou/theme (akisarou/system-theme))
+
+(defun akisarou/color (key)
+  (plist-get (alist-get akisarou/theme akisarou/themes) key))
+
+(setq doom-theme (akisarou/color :doom-theme))
 
 (defface akisarou-control-flow-face '((t :inherit font-lock-keyword-face))
   "Control-flow keywords, separate from declarations and type keywords."
@@ -16,117 +62,118 @@
   "JSX tag delimiters, separate from expression brackets."
   :group 'font-lock-faces)
 
+;; Replaced, not stacked, when the theme switches.
+(defvar-local akisarou/bg-remaps nil)
+
 (defun akisarou/remap-command-line-bg-h ()
-  (face-remap-add-relative 'default :background akisarou/editor-bg)
-  (face-remap-add-relative 'fringe :background akisarou/editor-bg)
-  (face-remap-add-relative 'minibuffer-prompt :background akisarou/editor-bg))
+  (mapc #'face-remap-remove-relative akisarou/bg-remaps)
+  (setq akisarou/bg-remaps
+        (mapcar (lambda (face)
+                  (face-remap-add-relative face :background (akisarou/color :bg)))
+                '(default fringe minibuffer-prompt))))
 
 (defun akisarou/apply-vscode-theme-overrides-h ()
-  (let ((bg akisarou/editor-bg)
-        (fg "#AEAFAD")
-        (orange "#C48081")
-        (subtle-bg "#222222")
-        (line-number-fg "#5A5A5A")
-        (current-line-number-fg "#BBBBBB"))
+  (let ((bg (akisarou/color :bg))
+        (fg (akisarou/color :ui-fg)))
     (custom-set-faces!
-      `(default :background ,bg :foreground "#D4D4D4")
+      `(default :background ,bg :foreground ,(akisarou/color :fg))
       `(fringe :background ,bg)
-      `(hl-line :background ,subtle-bg)
-      '(cursor :background "#AEAFAD")
+      `(hl-line :background ,(akisarou/color :subtle-bg))
+      `(cursor :background ,(akisarou/color :cursor))
       ;; vscode.nvim: map semantic groups as well as the shared palette.
-      '(font-lock-comment-face :foreground "#6A9955" :slant normal :weight normal)
-      '(font-lock-doc-face :inherit font-lock-comment-face :foreground "#6A9955")
-      '(font-lock-keyword-face :foreground "#569CD6" :weight normal)
-      '(font-lock-preprocessor-face :foreground "#C586C0")
-      '(akisarou-control-flow-face :foreground "#C586C0")
-      '(font-lock-type-face :foreground "#4EC9B0")
-      '(akisarou-builtin-type-face :foreground "#569CD6")
-      '(font-lock-function-name-face :foreground "#DCDCAA" :weight normal)
+      `(font-lock-comment-face :foreground ,(akisarou/color :comment) :slant normal :weight normal)
+      `(font-lock-doc-face :inherit font-lock-comment-face :foreground ,(akisarou/color :comment))
+      `(font-lock-keyword-face :foreground ,(akisarou/color :keyword) :weight normal)
+      `(font-lock-preprocessor-face :foreground ,(akisarou/color :control))
+      `(akisarou-control-flow-face :foreground ,(akisarou/color :control))
+      `(font-lock-type-face :foreground ,(akisarou/color :type))
+      `(akisarou-builtin-type-face :foreground ,(akisarou/color :keyword))
+      `(font-lock-function-name-face :foreground ,(akisarou/color :function) :weight normal)
       '(font-lock-function-call-face :inherit font-lock-function-name-face)
-      '(font-lock-builtin-face :foreground "#DCDCAA")
-      '(font-lock-variable-name-face :foreground "#9CDCFE")
+      `(font-lock-builtin-face :foreground ,(akisarou/color :function))
+      `(font-lock-variable-name-face :foreground ,(akisarou/color :variable))
       '(font-lock-variable-use-face :inherit font-lock-variable-name-face)
       '(font-lock-property-name-face :inherit font-lock-variable-name-face)
       '(font-lock-property-use-face :inherit font-lock-variable-name-face)
-      '(font-lock-constant-face :foreground "#4FC1FF")
-      '(font-lock-number-face :foreground "#B5CEA8")
-      '(font-lock-escape-face :foreground "#D4D4D4")
-      '(font-lock-operator-face :foreground "#D4D4D4")
-      '(font-lock-negation-char-face :foreground "#D4D4D4")
-      '(font-lock-punctuation-face :foreground "#D4D4D4")
-      '(typescript-ts-jsx-tag-face :foreground "#569CD6")
-      '(typescript-ts-jsx-attribute-face :foreground "#9CDCFE")
-      '(akisarou-jsx-delimiter-face :foreground "#808080")
+      `(font-lock-constant-face :foreground ,(akisarou/color :constant))
+      `(font-lock-number-face :foreground ,(akisarou/color :number))
+      `(font-lock-escape-face :foreground ,(akisarou/color :fg))
+      `(font-lock-operator-face :foreground ,(akisarou/color :fg))
+      `(font-lock-negation-char-face :foreground ,(akisarou/color :fg))
+      `(font-lock-punctuation-face :foreground ,(akisarou/color :fg))
+      `(typescript-ts-jsx-tag-face :foreground ,(akisarou/color :keyword))
+      `(typescript-ts-jsx-attribute-face :foreground ,(akisarou/color :variable))
+      `(akisarou-jsx-delimiter-face :foreground ,(akisarou/color :tag-delimiter))
       '(lsp-face-semhl-macro :inherit font-lock-constant-face)
       '(lsp-face-semhl-operator :inherit font-lock-operator-face)
       '(lsp-face-semhl-number :inherit font-lock-number-face)
       '(lsp-face-semhl-namespace :inherit font-lock-type-face :weight normal)
       ;; clangd marks inactive preprocessor branches as semantic comments.
-      '(lsp-face-semhl-comment :foreground "#51504F")
-      '(hl-todo :foreground "#18191A" :weight bold :inverse-video nil)
+      `(lsp-face-semhl-comment :foreground ,(akisarou/color :inactive-code))
+      `(hl-todo :foreground ,bg :weight bold :inverse-video nil)
       ;; colorscheme.lua: vscOrange, Visual, Search, IncSearch, CurSearch.
-      `(font-lock-string-face :foreground ,orange)
-      `(web-mode-string-face :foreground ,orange)
-      `(web-mode-html-attr-value-face :foreground ,orange)
-      '(region :background "#313131" :foreground unspecified)
-      '(lazy-highlight :background "#2a4856" :foreground unspecified)
-      '(evil-ex-lazy-highlight :background "#2a4856" :foreground unspecified)
-      '(isearch :background "#444444" :foreground unspecified)
-      '(evil-ex-search :background "#17262d" :foreground unspecified)
+      `(font-lock-string-face :foreground ,(akisarou/color :string))
+      `(web-mode-string-face :foreground ,(akisarou/color :string))
+      `(web-mode-html-attr-value-face :foreground ,(akisarou/color :string))
+      `(region :background ,(akisarou/color :region) :foreground unspecified)
+      `(lazy-highlight :background ,(akisarou/color :search) :foreground unspecified)
+      `(evil-ex-lazy-highlight :background ,(akisarou/color :search) :foreground unspecified)
+      `(isearch :background ,(akisarou/color :search-current) :foreground unspecified)
+      `(evil-ex-search :background ,(akisarou/color :tint) :foreground unspecified)
       ;; Snippet fields and symbol occurrences use the same muted teal palette.
-      '(yas-field-highlight-face :background "#17262d")
-      '(match :background "#1a2d38" :foreground unspecified)
-      '(lsp-face-highlight-textual :background "#1a2d38" :underline nil)
-      '(lsp-face-highlight-read :background "#1a2d38" :underline nil)
-      '(lsp-face-highlight-write :background "#1a2d38" :underline nil)
-      '(highlight-thing :background "#17262d")
+      `(yas-field-highlight-face :background ,(akisarou/color :tint))
+      `(match :background ,(akisarou/color :occurrence) :foreground unspecified)
+      `(lsp-face-highlight-textual :background ,(akisarou/color :occurrence) :underline nil)
+      `(lsp-face-highlight-read :background ,(akisarou/color :occurrence) :underline nil)
+      `(lsp-face-highlight-write :background ,(akisarou/color :occurrence) :underline nil)
+      `(highlight-thing :background ,(akisarou/color :tint))
       ;; Match Neovim's delimiter highlight while preserving syntax foregrounds.
-      '(show-paren-match :background "#343B41" :foreground unspecified
+      `(show-paren-match :background ,(akisarou/color :popup-selection) :foreground unspecified
         :weight normal :extend nil)
-      '(show-paren-match-expression :background "#343B41" :foreground unspecified
-        :weight normal :extend nil)
+      `(show-paren-match-expression :background ,(akisarou/color :popup-selection)
+        :foreground unspecified :weight normal :extend nil)
       ;; Oil uses ordinary file text and blue directory names.
       '(grease-file-face :inherit default :foreground unspecified)
-      '(grease-directory-face :inherit default :foreground "#569cd6")
+      `(grease-directory-face :inherit default :foreground ,(akisarou/color :keyword))
       '(grease-hidden-face :inherit shadow :foreground unspecified)
-      '(akisarou/grease-ignored-face :foreground "#6a9955")
-      '(akisarou/grease-added-face :foreground "#81b88b")
-      '(akisarou/grease-modified-face :foreground "#e2c08d")
-      '(akisarou/grease-deleted-face :foreground "#E4676B")
+      `(akisarou/grease-ignored-face :foreground ,(akisarou/color :comment))
+      `(akisarou/grease-added-face :foreground ,(akisarou/color :git-added))
+      `(akisarou/grease-modified-face :foreground ,(akisarou/color :git-modified))
+      `(akisarou/grease-deleted-face :foreground ,(akisarou/color :error))
       ;; PmenuSel and the fzf picker border/header colors.
-      '(corfu-default :foreground "#D4D4D4" :background "#202020")
-      '(corfu-annotations :foreground "#BBBBBB")
-      '(corfu-current :background "#343B41" :foreground unspecified)
-      '(vertico-current :inherit nil :background unspecified :foreground "#569cd6"
+      `(corfu-default :foreground ,(akisarou/color :fg) :background ,(akisarou/color :popup-bg))
+      `(corfu-annotations :foreground ,(akisarou/color :popup-dim))
+      `(corfu-current :background ,(akisarou/color :popup-selection) :foreground unspecified)
+      `(vertico-current :inherit nil :background unspecified :foreground ,(akisarou/color :keyword)
         :weight bold :underline nil)
-      '(corfu-border :background "#444444" :foreground "#444444")
-      '(vertico-group-title :foreground "#343B41")
-      '(consult-key :foreground "#343B41")
+      `(corfu-border :background ,(akisarou/color :border) :foreground ,(akisarou/color :border))
+      `(vertico-group-title :foreground ,(akisarou/color :faint))
+      `(consult-key :foreground ,(akisarou/color :faint))
       ;; Keep diagnostic text and the underline separate, like Neovim's faces.
-      `(error :foreground "#E4676B" :background ,bg)
-      `(warning :foreground "#DCDCAA" :background ,bg)
-      '(success :foreground "#4EC9B0")
-      `(flycheck-fringe-error :foreground "#E4676B" :background ,bg)
-      `(flycheck-fringe-warning :foreground "#DCDCAA" :background ,bg)
-      `(flycheck-fringe-info :foreground "#569CD6" :background ,bg)
-      `(flycheck-error-list-error :foreground "#E4676B" :background ,bg)
-      '(flycheck-error :foreground unspecified :background unspecified
-        :underline (:style wave :color "#A0484B"))
-      '(flymake-error :foreground unspecified :background unspecified
-        :underline (:style wave :color "#A0484B"))
-      '(diff-added :foreground unspecified :background "#4B5632")
-      '(diff-removed :foreground unspecified :background "#6F1313")
-      '(diff-changed :foreground unspecified :background "#4B1818")
-      '(diff-hl-insert :foreground "#6A9955" :background unspecified)
-      '(diff-hl-change :foreground "#DCDCAA" :background unspecified)
-      '(diff-hl-delete :foreground "#F44747" :background unspecified)
-      `(line-number :foreground ,line-number-fg :background ,bg)
-      `(line-number-current-line :foreground ,current-line-number-fg :background ,bg)
+      `(error :foreground ,(akisarou/color :error) :background ,bg)
+      `(warning :foreground ,(akisarou/color :warning) :background ,bg)
+      `(success :foreground ,(akisarou/color :success))
+      `(flycheck-fringe-error :foreground ,(akisarou/color :error) :background ,bg)
+      `(flycheck-fringe-warning :foreground ,(akisarou/color :warning) :background ,bg)
+      `(flycheck-fringe-info :foreground ,(akisarou/color :keyword) :background ,bg)
+      `(flycheck-error-list-error :foreground ,(akisarou/color :error) :background ,bg)
+      `(flycheck-error :foreground unspecified :background unspecified
+        :underline (:style wave :color ,(akisarou/color :error-underline)))
+      `(flymake-error :foreground unspecified :background unspecified
+        :underline (:style wave :color ,(akisarou/color :error-underline)))
+      `(diff-added :foreground unspecified :background ,(akisarou/color :diff-added))
+      `(diff-removed :foreground unspecified :background ,(akisarou/color :diff-removed))
+      `(diff-changed :foreground unspecified :background ,(akisarou/color :diff-changed))
+      `(diff-hl-insert :foreground ,(akisarou/color :comment) :background unspecified)
+      `(diff-hl-change :foreground ,(akisarou/color :warning) :background unspecified)
+      `(diff-hl-delete :foreground ,(akisarou/color :delete) :background unspecified)
+      `(line-number :foreground ,(akisarou/color :line-number) :background ,bg)
+      `(line-number-current-line :foreground ,(akisarou/color :current-line-number) :background ,bg)
       `(minibuffer-prompt :background ,bg)
-      `(vertical-border :foreground "#444444" :background ,bg)
-      '(window-divider :foreground "#444444")
-      '(window-divider-first-pixel :foreground "#444444")
-      '(window-divider-last-pixel :foreground "#444444")
+      `(vertical-border :foreground ,(akisarou/color :border) :background ,bg)
+      `(window-divider :foreground ,(akisarou/color :border))
+      `(window-divider-first-pixel :foreground ,(akisarou/color :border))
+      `(window-divider-last-pixel :foreground ,(akisarou/color :border))
       ;; lualine's active and inactive sections share this background and text.
       `(mode-line :foreground ,fg :background ,bg)
       `(mode-line-inactive :foreground ,fg :background ,bg)
@@ -146,12 +193,27 @@
 (add-hook 'doom-load-theme-hook #'akisarou/apply-command-line-bg-h)
 (add-hook 'window-setup-hook #'akisarou/apply-command-line-bg-h)
 (add-hook 'minibuffer-inactive-mode-hook #'akisarou/remap-command-line-bg-h)
+;; Minibuffers such as vertico's appear later than the hooks above, and solaire
+;; tints them when they do: remap them on entry, after solaire.
+(add-hook 'minibuffer-setup-hook #'akisarou/remap-command-line-bg-h 90)
 (akisarou/apply-vscode-theme-overrides-h)
 (akisarou/apply-command-line-bg-h)
 
-(add-hook! '+dashboard-mode-hook
-  (face-remap-add-relative 'default :background akisarou/editor-bg)
-  (face-remap-add-relative 'fringe :background akisarou/editor-bg))
+(add-hook! '+dashboard-mode-hook #'akisarou/remap-command-line-bg-h)
+
+(defun akisarou/follow-system-theme (&optional _event)
+  "Switch to the theme ~/.local/bin/theme applied, if it changed."
+  (let ((theme (akisarou/system-theme)))
+    (unless (eq theme akisarou/theme)
+      (setq akisarou/theme theme
+            doom-theme (akisarou/color :doom-theme))
+      (mapc #'disable-theme custom-enabled-themes)
+      (load-theme doom-theme t))))
+
+;; The script replaces the file, so the watch is on its directory.
+(when (file-directory-p (file-name-directory akisarou/theme-file))
+  (file-notify-add-watch (file-name-directory akisarou/theme-file) '(change)
+                         #'akisarou/follow-system-theme))
 
 (defun akisarou/vscode-ts-font-lock-h ()
   "Match vscode.nvim's syntax categories using buffer-local parser rules."
@@ -235,16 +297,18 @@
                 typescript-ts-mode-hook tsx-ts-mode-hook))
   (add-hook hook #'akisarou/vscode-ts-font-lock-h))
 
+(defun akisarou/hl-todo-keyword-faces ()
+  `(("FIX\\|FIXME\\|BUG\\|FIXIT\\|ISSUE" . ,(akisarou/color :error))
+    ("TODO\\|NOTE\\|INFO" . ,(akisarou/color :keyword))
+    ("HACK\\|WARN\\|WARNING\\|XXX" . ,(akisarou/color :warning))
+    ("PERF\\|OPTIM\\|PERFORMANCE\\|OPTIMIZE\\|TEST\\|TESTING\\|PASSED\\|FAILED"
+     . ,(akisarou/color :variable))))
+
 (after! hl-todo
   ;; todo-comments.nvim: colored keyword backgrounds and matching body text.
   (setq hl-todo-color-background t
         hl-todo-require-punctuation t
-        hl-todo-keyword-faces
-        '(("FIX\\|FIXME\\|BUG\\|FIXIT\\|ISSUE" . "#E4676B")
-          ("TODO\\|NOTE\\|INFO" . "#569CD6")
-          ("HACK\\|WARN\\|WARNING\\|XXX" . "#DCDCAA")
-          ("PERF\\|OPTIM\\|PERFORMANCE\\|OPTIMIZE\\|TEST\\|TESTING\\|PASSED\\|FAILED"
-           . "#9CDCFE")))
+        hl-todo-keyword-faces (akisarou/hl-todo-keyword-faces))
 
   (defvar-local akisarou/todo-body-color nil)
   (defun akisarou/match-todo-body (limit)
@@ -280,7 +344,17 @@
       (if hl-todo-mode
           (font-lock-add-keywords nil keywords t)
         (font-lock-remove-keywords nil keywords))))
-  (add-hook 'hl-todo-mode-hook #'akisarou/todo-comment-style-h))
+  (add-hook 'hl-todo-mode-hook #'akisarou/todo-comment-style-h)
+
+  ;; hl-todo builds its keywords once per buffer, so a new theme restarts it.
+  (defun akisarou/hl-todo-recolor-h ()
+    (setq hl-todo-keyword-faces (akisarou/hl-todo-keyword-faces))
+    (dolist (buffer (buffer-list))
+      (with-current-buffer buffer
+        (when hl-todo-mode
+          (hl-todo-mode -1)
+          (hl-todo-mode 1)))))
+  (add-hook 'doom-load-theme-hook #'akisarou/hl-todo-recolor-h))
 
 ;; Free C-c for Evil escape and minibuffer quit. Doom's default config uses C-c
 ;; as an alternate leader key in `general-override-mode-map', which takes
