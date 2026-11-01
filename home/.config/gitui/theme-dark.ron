@@ -1,4 +1,4 @@
-// UI colors from the VSCode dark palette.
+// UI colors from the VSCode dark palette; ~/.local/bin/theme links theme.ron here.
 (
     selected_tab: Some("#569cd6"),
     command_fg: Some("#d4d4d4"),

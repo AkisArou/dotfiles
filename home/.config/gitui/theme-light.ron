@@ -1,0 +1,31 @@
+// UI colors from the VSCode light palette; ~/.local/bin/theme links theme.ron here.
+(
+    selected_tab: Some("#0000ff"),
+    command_fg: Some("#000000"),
+    selection_bg: Some("#add6ff"),
+    selection_fg: Some("#000000"),
+    // Keep Git status colors visible when selecting an item.
+    use_selection_fg: Some(false),
+    cmdbar_bg: Some("#e8e8e8"),
+    disabled_fg: Some("#8e8e8e"),
+
+    diff_line_add: Some("#587c0c"),
+    diff_line_delete: Some("#ad0707"),
+    diff_file_added: Some("#587c0c"),
+    diff_file_removed: Some("#ad0707"),
+    diff_file_moved: Some("#007100"),
+    diff_file_modified: Some("#895503"),
+
+    commit_hash: Some("#800000"),
+    commit_time: Some("#8e8e8e"),
+    commit_author: Some("#001080"),
+    danger_fg: Some("#cd3131"),
+    push_gauge_bg: Some("#e5e5e5"),
+    push_gauge_fg: Some("#0000ff"),
+    tag_fg: Some("#af00db"),
+    branch_fg: Some("#267f99"),
+    block_title_focused: Some("#0000ff"),
+
+    // vscode-light.tmTheme links to the shared theme in ../bat/themes/.
+    syntax: Some("vscode-light"),
+)

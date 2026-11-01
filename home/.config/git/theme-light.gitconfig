@@ -1,0 +1,24 @@
+# delta in the light theme; see theme.gitconfig in config.
+
+[delta]
+  light = true
+
+[delta "vscode"]
+  syntax-theme = vscode-light
+  hunk-header-decoration-style = "#e8e8e8 ul"
+  file-style = "#795e26"
+  file-decoration-style = "#f3f3f3 ul ol"
+  # minus
+  minus-style                   = syntax "#fbe6e6"
+  minus-non-emph-style          = syntax "#fbe6e6"
+  minus-emph-style              = syntax "#f5c6c6"
+  minus-empty-line-marker-style = syntax "#fbe6e6"
+  line-numbers-minus-style      = "#cd3131"
+  # plus
+  plus-style                    = syntax "#e7f5e7"
+  plus-non-emph-style           = syntax "#e7f5e7"
+  plus-emph-style               = syntax "#c6e9c6"
+  plus-empty-line-marker-style  = syntax "#e7f5e7"
+  line-numbers-plus-style       = "#587c0c"
+  # zero
+  line-numbers-zero-style       = "#237893"

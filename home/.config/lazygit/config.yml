@@ -2,37 +2,9 @@
 gui:
   nerdFontsVersion: "3"
   filterMode: "fuzzy"
-  theme:
-    # Borders
-    activeBorderColor:
-      - "#569CD6"
-      - "bold"
-    inactiveBorderColor:
-      - "#444444"
-    searchingActiveBorderColor:
-      - "#C586C0"
-      - "bold"
-    # Text / selections
-    optionsTextColor:
-      - "#569CD6"
-    defaultFgColor:
-      - "#D4D4D4"
-    selectedLineBgColor:
-      - "#264F78"
-    # Git states
-    unstagedChangesColor:
-      - "#e2c08d"
-    cherryPickedCommitFgColor:
-      - "#D4D4D4"
-    cherryPickedCommitBgColor:
-      - "#C586C0"
-    markedBaseCommitFgColor:
-      - "#121314"
-    markedBaseCommitBgColor:
-      - "#C48081"
 git:
   diffRenderers:
-    - command: delta --dark --paging=never
+    - command: delta --paging=never
 promptToReturnFromSubprocess: false
 os:
   edit: '[ -z "$NVIM" ] && (nvim -- {{filename}}) || (nvim --server "$NVIM" --remote-send "q" && nvim --server "$NVIM" --remote {{filename}})'

@@ -50,6 +50,8 @@ export EDGE_PATH=/usr/bin/brave
 export MANPAGER="nvim +Man!"
 export MANWIDTH=999
 export RIPGREP_CONFIG_PATH="$XDG_CONFIG_HOME/ripgrep/.ripgreprc"
+# theme.yml: the light or dark colours in use (~/.local/bin/theme).
+export LG_CONFIG_FILE="$XDG_CONFIG_HOME/lazygit/config.yml,$XDG_CONFIG_HOME/lazygit/theme.yml"
 if [[ -n $TTY ]]; then
   export GPG_TTY=$TTY
 elif [[ -t 0 ]]; then

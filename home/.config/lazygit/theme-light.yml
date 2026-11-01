@@ -1,0 +1,30 @@
+# lazygit in the light theme; LG_CONFIG_FILE adds theme.yml to config.yml.
+gui:
+  theme:
+    # Borders
+    activeBorderColor:
+      - "#0000FF"
+      - "bold"
+    inactiveBorderColor:
+      - "#D4D4D4"
+    searchingActiveBorderColor:
+      - "#AF00DB"
+      - "bold"
+    # Text / selections
+    optionsTextColor:
+      - "#0000FF"
+    defaultFgColor:
+      - "#000000"
+    selectedLineBgColor:
+      - "#ADD6FF"
+    # Git states
+    unstagedChangesColor:
+      - "#895503"
+    cherryPickedCommitFgColor:
+      - "#FFFFFF"
+    cherryPickedCommitBgColor:
+      - "#AF00DB"
+    markedBaseCommitFgColor:
+      - "#FFFFFF"
+    markedBaseCommitBgColor:
+      - "#A31515"

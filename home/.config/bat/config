@@ -1,2 +1,6 @@
---theme="vscode"
+# auto asks the terminal; when bat's output is not one, as in fzf's preview,
+# zsh's color-theme sets BAT_THEME to light or dark.
+--theme=auto
+--theme-dark="vscode"
+--theme-light="vscode-light"
 --style="changes,header-filename,numbers,snip"
