@@ -1,2 +1,4 @@
+/* Adwaita-dark, built into GTK, with the VSCode dark palette over it. */
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
 @import url("colors.css");
 @import url("rules.css");

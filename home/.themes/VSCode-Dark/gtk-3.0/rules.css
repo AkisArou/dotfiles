@@ -1,300 +1,100 @@
-/* VSCode-Dark and VSCode-Light share these rules; colors.css names the colours. */
+/* VSCode-Dark and VSCode-Light share these rules, laid over GTK's Adwaita:
+   Adwaita keeps every widget's shape and spacing, and these give the large
+   surfaces, the selection and the main button VS Code's colours, which
+   colors.css names. Selectors match Adwaita's own, so these win by order. */
 
-* {
-  -gtk-icon-theme: "Adwaita";
-  -gtk-secondary-caret-color: @vsc_accent_blue;
-  background-clip: padding-box;
-  color: @vsc_front;
-  outline-color: alpha(@vsc_accent_blue, 0.55);
-  outline-style: solid;
-  outline-width: 0;
-  outline-offset: -3px;
-  text-shadow: none;
-  -gtk-icon-shadow: none;
-}
-
-window,
-dialog,
-messagedialog,
-.background {
+.background,
+.background:backdrop {
   background-color: @vsc_back;
   color: @vsc_front;
 }
 
-.csd,
-.solid-csd {
-  border-radius: 0;
-  box-shadow: 0 0 0 1px @vsc_split_dark;
+.view,
+.view:backdrop,
+iconview,
+textview text,
+textview text:backdrop,
+treeview.view,
+treeview.view:backdrop {
+  background-color: @vsc_back;
+  color: @vsc_front;
 }
 
-headerbar,
-titlebar,
+treeview.view header button,
+treeview.view header button:hover,
+treeview.view header button:backdrop {
+  background-image: none;
+  background-color: @vsc_back;
+  border-color: @vsc_split_dark;
+  color: @vsc_popup_front;
+}
+
+.sidebar,
+.sidebar:backdrop,
 placessidebar,
-stacksidebar,
-paned > separator,
-notebook > header {
+stacksidebar {
   background-color: @vsc_tab_outside;
   color: @vsc_front;
-  border-color: @vsc_split_dark;
 }
 
 headerbar,
-titlebar {
-  min-height: 34px;
-  padding: 0 8px;
-  border-bottom: 1px solid @vsc_split_dark;
-}
-
 headerbar:backdrop,
-titlebar:backdrop,
-window:backdrop {
-  color: @vsc_popup_front;
-  background-color: @vsc_popup_back;
+.titlebar,
+.titlebar:backdrop {
+  background-image: none;
+  background-color: @vsc_tab_outside;
+  border-color: @vsc_split_dark;
+  box-shadow: none;
+  color: @vsc_front;
 }
 
-label,
-text,
-entry,
-button,
-treeview,
-iconview,
-rubberband,
-calendar,
-popover,
+popover.background,
+popover.background:backdrop,
 menu,
-menuitem,
-tooltip {
-  color: @vsc_front;
-}
-
-entry,
-spinbutton,
-combobox box,
-textview text,
-searchbar,
-toolbar,
-actionbar,
-infobar,
-viewport,
-list,
-row,
-treeview.view,
-iconview.view,
-.view {
-  background-color: @vsc_tab_current;
-  color: @vsc_front;
-}
-
-entry,
-spinbutton,
-combobox box,
-textview,
-treeview.view,
-iconview.view,
-.view {
-  border: 1px solid @vsc_split_dark;
-}
-
-entry,
-spinbutton {
-  min-height: 28px;
-  padding: 4px 8px;
-  border-radius: 3px;
-}
-
-entry:focus,
-spinbutton:focus,
-textview:focus,
-treeview.view:focus,
-iconview.view:focus {
-  border-color: @vsc_accent_blue;
-  box-shadow: inset 0 0 0 1px @vsc_accent_blue;
-}
-
-entry:disabled,
-spinbutton:disabled,
-button:disabled,
-label:disabled,
-.view:disabled {
-  color: @vsc_disabled;
+.menu,
+.context-menu {
   background-color: @vsc_popup_back;
-}
-
-button {
-  min-height: 28px;
-  min-width: 28px;
-  padding: 4px 10px;
-  border: 1px solid @vsc_split_dark;
-  border-radius: 3px;
-  background-color: @vsc_tab_other;
+  border-color: @vsc_split_dark;
   color: @vsc_front;
 }
 
-button:hover {
-  background-color: @vsc_left_mid;
-  border-color: @vsc_left_light;
+separator,
+paned > separator {
+  background-color: @vsc_split_dark;
 }
 
-button:active,
-button:checked {
+.view:selected,
+.view:selected:focus,
+iconview:selected,
+iconview:selected:focus,
+treeview.view:selected,
+treeview.view:selected:focus,
+row:selected,
+row:selected:focus,
+.sidebar row:selected,
+menuitem:hover,
+entry selection,
+textview text selection,
+label selection {
   background-color: @vsc_selection;
-  border-color: @vsc_blue;
+  color: @vsc_front;
 }
 
 button.suggested-action,
-button.default {
-  background-color: @vsc_popup_highlight_blue;
-  border-color: @vsc_blue;
-  color: @vsc_front;
+button.suggested-action:backdrop {
+  background-image: none;
+  background-color: @vsc_button_bg;
+  border-color: @vsc_button_bg;
+  box-shadow: none;
+  text-shadow: none;
+  color: @vsc_button_fg;
 }
 
-button.destructive-action {
-  background-color: @vsc_red;
-  border-color: @vsc_red;
-  color: @vsc_back;
-}
-
-selection,
-entry selection,
-textview text selection,
-treeview.view:selected,
-iconview.view:selected,
-row:selected,
-modelbutton:selected,
-menuitem:hover {
-  background-color: @vsc_selection;
-  color: @vsc_front;
-}
-
-row:hover,
-treeview.view:hover,
-iconview.view:hover,
-button.flat:hover {
-  background-color: @vsc_popup_highlight_gray;
-}
-
-notebook > header > tabs > tab {
-  min-height: 30px;
-  padding: 4px 10px;
-  background-color: @vsc_tab_other;
-  color: @vsc_popup_front;
-  border: 1px solid @vsc_split_dark;
-}
-
-notebook > header > tabs > tab:checked {
-  background-color: @vsc_tab_current;
-  color: @vsc_front;
-  border-bottom-color: @vsc_tab_current;
-}
-
-popover,
-menu,
-.menu,
-tooltip {
-  background-color: @vsc_popup_back;
-  border: 1px solid @vsc_split_dark;
-  color: @vsc_popup_front;
-}
-
-tooltip {
-  padding: 6px;
-  border-radius: 3px;
-}
-
-menubar,
-menubar > menuitem {
-  background-color: @vsc_tab_outside;
-  color: @vsc_front;
-}
-
-menubar > menuitem:hover,
-menuitem:hover {
-  background-color: @vsc_selection;
-  color: @vsc_front;
-}
-
-scrollbar {
-  background-color: @vsc_tab_outside;
-  border: none;
-}
-
-scrollbar slider {
-  min-width: 8px;
-  min-height: 8px;
-  border-radius: 0;
-  background-color: @vsc_split_dark;
-}
-
-scrollbar slider:hover {
-  background-color: @vsc_split_light;
-}
-
-progressbar trough,
-scale trough,
-levelbar trough {
-  background-color: @vsc_popup_back;
-  border: 1px solid @vsc_split_dark;
-  border-radius: 3px;
-}
-
-progressbar progress,
-scale highlight,
-levelbar block.filled {
-  background-color: @vsc_blue;
-  border-color: @vsc_blue;
-}
-
-check,
-radio {
-  min-width: 16px;
-  min-height: 16px;
-  border: 1px solid @vsc_split_light;
-  background-color: @vsc_tab_current;
-  color: @vsc_front;
-}
-
-radio {
-  border-radius: 999px;
-}
-
-check:checked,
-radio:checked,
-switch:checked {
-  background-color: @vsc_blue;
-  border-color: @vsc_blue;
-}
-
-switch {
-  background-color: @vsc_split_dark;
-  border: 1px solid @vsc_split_dark;
-  border-radius: 999px;
-}
-
-switch slider {
-  background-color: @vsc_front;
-  border-radius: 999px;
-}
-
-separator {
-  background-color: @vsc_split_dark;
-  min-width: 1px;
-  min-height: 1px;
-}
-
-.error,
-entry.error {
-  color: @vsc_red;
-  border-color: @vsc_red;
-}
-
-.warning {
-  color: @vsc_orange;
-}
-
-.success {
-  color: @vsc_green;
-}
-
-.dim-label {
-  color: @vsc_disabled;
+button.suggested-action:hover,
+button.suggested-action:active,
+button.suggested-action:checked {
+  background-image: none;
+  background-color: @vsc_button_hover;
+  border-color: @vsc_button_hover;
+  color: @vsc_button_fg;
 }

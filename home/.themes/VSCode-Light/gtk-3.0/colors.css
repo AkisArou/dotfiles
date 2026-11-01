@@ -20,3 +20,6 @@
 @define-color vsc_yellow #795e26;
 @define-color vsc_orange #bf8803;
 @define-color vsc_disabled #a0a0a0;
+@define-color vsc_button_bg #005fb8;
+@define-color vsc_button_hover #0258a8;
+@define-color vsc_button_fg #ffffff;

@@ -1,2 +1,5 @@
-@import url("../gtk-3.0/gtk.css");
+/* GTK 4's built-in dark theme with the VSCode dark palette over it. */
+@import url("resource:///org/gtk/libgtk/theme/Default/gtk-dark.css");
+@import url("../gtk-3.0/colors.css");
+@import url("../gtk-3.0/rules.css");
 @import url("rules.css");
