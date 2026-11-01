@@ -15,9 +15,11 @@ source "$HOME/.config/shell/zsh/history"
 source "$HOME/.config/shell/zsh/opts"
 source "$HOME/.config/shell/zsh/vim-mode"
 source "$HOME/.config/shell/zsh/p10k-focus-refresh"
+source "$HOME/.config/shell/zsh/color-theme"
 source "$HOME/.config/shell/common/functions"
 source "$HOME/.config/shell/zsh/zinit"
 source "$HOME/.config/shell/zsh/.p10k.zsh"
+_dotfiles_color_theme_fsh
 
 _dotfiles_update_java_home() {
   local java_path
@@ -33,13 +35,3 @@ if (($+commands[asdf])); then
   add-zsh-hook chpwd _dotfiles_update_java_home
   _dotfiles_update_java_home
 fi
-
-() {
-  local theme_file="${XDG_CONFIG_HOME:-$HOME/.config}/fsh/vscode.ini"
-  local compiled_theme="$FAST_WORK_DIR/current_theme.zsh"
-
-  if [[ ! -r $theme_file || $FAST_THEME_NAME != vscode ||
-    ! -r $compiled_theme || $theme_file -nt $compiled_theme ]]; then
-    fast-theme -q XDG:vscode
-  fi
-}

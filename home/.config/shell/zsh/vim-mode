@@ -2,7 +2,7 @@
 
 bindkey -v # enable vi mode
 
-zle_highlight=(region:bg="#292e42" paste:none)
+# zle_highlight, with the selection's colour, is set by color-theme.
 
 ###########
 # Options #

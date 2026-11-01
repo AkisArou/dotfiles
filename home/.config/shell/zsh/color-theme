@@ -1,0 +1,105 @@
+#!/usr/bin/zsh
+
+# fzf, bat, the vi-mode selection and syntax highlighting take the terminal's
+# light or dark theme, foot's colors-light or colors-dark; the prompt uses foot's
+# palette, so it follows by itself. In tmux the theme is the terminal's, which
+# tmux knows; elsewhere, the theme script's (~/.local/bin/theme).
+#
+# An idle shell follows a switch at once: while ZLE is active it asks for
+# theme reports (mode 2031), which tmux passes on. A shell busy with a command
+# misses them, so each prompt also checks whether the theme script switched.
+#
+# Sourced before zinit, like p10k-focus-refresh: ZLE hooks added after p10k
+# loads never run. .zshrc calls _dotfiles_color_theme_fsh once fsh is loaded.
+
+_dotfiles_theme_state=${XDG_STATE_HOME:-$HOME/.local/state}/theme/current
+
+_dotfiles_color_theme_detect() {
+  local theme
+  [[ -n $TMUX ]] && theme=$(tmux display -p '#{client_theme}' 2>/dev/null)
+  [[ $theme == (light|dark) || ! -r $_dotfiles_theme_state ]] || theme=$(<$_dotfiles_theme_state)
+  [[ $theme == (light|dark) ]] || theme=dark
+  print -r -- $theme
+}
+
+# Both fsh themes, compiled once each. fsh keys styles by theme name, so a
+# shell switches by FAST_THEME_NAME alone.
+_dotfiles_color_theme_fsh() {
+  local name ini compiled key
+  for key in ${(k)FAST_HIGHLIGHT_STYLES[(I)vscode*]}; do
+    unset "FAST_HIGHLIGHT_STYLES[$key]"
+  done
+  for name in vscode vscode-light; do
+    ini=${XDG_CONFIG_HOME:-$HOME/.config}/fsh/$name.ini
+    compiled=$FAST_WORK_DIR/theme-$name.zsh
+    if [[ ! -r $compiled || $ini -nt $compiled ]]; then
+      (fast-theme -q XDG:$name) && cp "$FAST_WORK_DIR/current_theme.zsh" "$compiled"
+    fi
+    source "$compiled"
+  done
+  _dotfiles_color_theme_fsh_name
+}
+
+_dotfiles_color_theme_fsh_name() {
+  FAST_THEME_NAME=vscode
+  [[ $COLOR_THEME == light ]] && FAST_THEME_NAME=vscode-light
+  zstyle :plugin:fast-syntax-highlighting theme $FAST_THEME_NAME
+}
+
+# Switch this shell's colours; fails if they are already the theme's.
+_dotfiles_color_theme_use() {
+  [[ $1 == $COLOR_THEME ]] && return 1
+  COLOR_THEME=$1
+  # bat asks the terminal itself, except when its output is not one.
+  export BAT_THEME=$COLOR_THEME
+  source "$HOME/.config/shell/common/fzf"
+  if [[ $COLOR_THEME == light ]]; then
+    zle_highlight=(region:bg="#add6ff" paste:none)
+  else
+    zle_highlight=(region:bg="#292e42" paste:none)
+  fi
+  _dotfiles_color_theme_fsh_name
+}
+
+# A terminal's report: CSI ? 997 ; 1 n for dark, 2 for light.
+_dotfiles_color_theme_report() {
+  local theme=dark
+  [[ $KEYS == *2n ]] && theme=light
+  _dotfiles_color_theme_use $theme || return 0
+  (($+functions[_zsh_highlight])) && _zsh_highlight
+  zle -R
+}
+
+_dotfiles_color_theme_reports_on() {
+  printf '\e[?2031h'
+}
+
+_dotfiles_color_theme_reports_off() {
+  printf '\e[?2031l'
+}
+
+_dotfiles_color_theme_precmd() {
+  local state
+  [[ -r $_dotfiles_theme_state ]] && state=$(<$_dotfiles_theme_state)
+  [[ $state == $_dotfiles_theme_seen ]] && return
+  _dotfiles_theme_seen=$state
+  _dotfiles_color_theme_use $(_dotfiles_color_theme_detect)
+}
+
+zle -N _dotfiles_color_theme_report
+zle -N _dotfiles_color_theme_reports_on
+zle -N _dotfiles_color_theme_reports_off
+
+autoload -Uz add-zle-hook-widget add-zsh-hook
+add-zle-hook-widget line-init _dotfiles_color_theme_reports_on
+add-zle-hook-widget line-finish _dotfiles_color_theme_reports_off
+add-zsh-hook precmd _dotfiles_color_theme_precmd
+
+for _dotfiles_color_theme_keymap in viins vicmd; do
+  bindkey -M "$_dotfiles_color_theme_keymap" $'\e[?997;1n' _dotfiles_color_theme_report
+  bindkey -M "$_dotfiles_color_theme_keymap" $'\e[?997;2n' _dotfiles_color_theme_report
+done
+unset _dotfiles_color_theme_keymap
+
+[[ -r $_dotfiles_theme_state ]] && _dotfiles_theme_seen=$(<$_dotfiles_theme_state)
+_dotfiles_color_theme_use $(_dotfiles_color_theme_detect)

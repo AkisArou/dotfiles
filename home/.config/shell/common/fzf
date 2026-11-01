@@ -2,11 +2,54 @@
 
 export FZF_DEFAULT_COMMAND="fd --type file --follow --hidden --exclude .git"
 
+# Light+ when zsh's color-theme found foot in colors-light, else Dark+.
+if [ "$COLOR_THEME" = light ]; then
+  _dotfiles_fzf_tab_colors='--color=fg:#767676,bg:#F3F3F3,fg+:#000000,bg+:#E8E8E8'
+  # The light base scheme, for what is not set here; the default is dark.
+  _dotfiles_fzf_colors="\
+  --color=light \
+  --color=bg:#ffffff \
+  --color=bg+:#e8e8e8 \
+  --color=border:#d4d4d4 \
+  --color=fg:#767676 \
+  --color=fg+:#000000 \
+  --color=gutter:#ffffff \
+  --color=header:#97979c \
+  --color=hl:#af00db \
+  --color=hl+:#af00db \
+  --color=info:#97979c \
+  --color=marker:#587c0c \
+  --color=pointer:#0000ff \
+  --color=prompt:#000000 \
+  --color=query:#000000 \
+  --color=scrollbar:#c1c1c1 \
+  --color=separator:#d4d4d4 \
+  --color=spinner:#af00db"
+else
+  _dotfiles_fzf_tab_colors='--color=fg:#808080,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F'
+  _dotfiles_fzf_colors="\
+  --color=bg:#18191a \
+  --color=bg+:#1f1f1f \
+  --color=border:#444444 \
+  --color=fg:#808080 \
+  --color=gutter:#18191a \
+  --color=header:#636369 \
+  --color=hl:#c586c0 \
+  --color=hl+:#c586c0 \
+  --color=info:#636369 \
+  --color=marker:#81b88b \
+  --color=pointer:#569cd6 \
+  --color=prompt:#d4d4d4 \
+  --color=query:#d4d4d4 \
+  --color=scrollbar:#424242 \
+  --color=separator:#444444 \
+  --color=spinner:#c586c0"
+fi
+
 if [ -n "$ZSH_VERSION" ]; then
   zstyle ':fzf-tab:*' use-fzf-default-opts yes
   zstyle ':fzf-tab:*' fzf-command 'ftb-tmux-popup'
-  zstyle ':fzf-tab:*' fzf-flags \
-    '--color=fg:#808080,bg:#121314,fg+:#D4D4D4,bg+:#1F1F1F'
+  zstyle ':fzf-tab:*' fzf-flags "$_dotfiles_fzf_tab_colors"
 fi
 
 export FZF_DEFAULT_OPTS="\
@@ -23,20 +66,6 @@ export FZF_DEFAULT_OPTS="\
   --border=none \
   --no-separator \
   --history='$HOME/.fzf_history' \
-  --color=bg:#18191a \
-  --color=bg+:#1f1f1f \
-  --color=border:#444444 \
-  --color=fg:#808080 \
-  --color=gutter:#18191a \
-  --color=header:#636369 \
-  --color=hl:#c586c0 \
-  --color=hl+:#c586c0 \
-  --color=info:#636369 \
-  --color=marker:#81b88b \
-  --color=pointer:#569cd6 \
-  --color=prompt:#d4d4d4 \
-  --color=query:#d4d4d4 \
-  --color=scrollbar:#424242 \
-  --color=separator:#444444 \
-  --color=spinner:#c586c0
+$_dotfiles_fzf_colors
 "
+unset _dotfiles_fzf_tab_colors _dotfiles_fzf_colors

@@ -8,17 +8,19 @@
 () {
   emulate -L zsh -o extended_glob
 
-  local BLUE="#569CD6"
-  local BLUE2="#9CDCFE"
-  local COMMENT="#6A9955"
-  local DARK5="#808080"
-  local FG="#D4D4D4"
-  local GREEN="#6A9955"
-  local MAGENTA="#C586C0"
-  local ORANGE="#C48081"
-  local YELLOW="#DCDCAA"
-  local PURPLE="#C586C0"
-  local RED="#E4676B"
+  # foot's palette numbers (foot.ini), so the prompt takes its colors-dark or
+  # colors-light values and changes with a live switch.
+  local BLUE=4
+  local BLUE2=12
+  local COMMENT=2
+  local DARK5=8
+  local FG=7
+  local GREEN=2
+  local MAGENTA=5
+  local ORANGE=16
+  local YELLOW=3
+  local PURPLE=5
+  local RED=1
 
   # Unset previous config
   unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
@@ -127,18 +129,19 @@
     fi
 
     local meta clean modified untracked conflicted
+    # FG, DARK5, YELLOW, BLUE and RED above.
     if (( $1 )); then
-      meta='%F{#D4D4D4}'
-      clean='%F{#808080}'
-      modified='%F{#DCDCAA}'
-      untracked='%F{#569CD6}'
-      conflicted='%F{#E4676B}'
+      meta='%F{7}'
+      clean='%F{8}'
+      modified='%F{3}'
+      untracked='%F{4}'
+      conflicted='%F{1}'
     else
-      meta='%F{#808080}'
-      clean='%F{#808080}'
-      modified='%F{#808080}'
-      untracked='%F{#808080}'
-      conflicted='%F{#808080}'
+      meta='%F{8}'
+      clean='%F{8}'
+      modified='%F{8}'
+      untracked='%F{8}'
+      conflicted='%F{8}'
     fi
     local reset='%f'
     local -i unstaged=$VCS_STATUS_NUM_UNSTAGED
