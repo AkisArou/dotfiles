@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=VSCode-Light
+Comment=GTK theme using the VSCode light palette
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=VSCode-Light
+MetacityTheme=VSCode-Light
+IconTheme=Adwaita
+CursorTheme=Adwaita
+ButtonLayout=close,minimize,maximize:menu

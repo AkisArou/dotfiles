@@ -1,0 +1,22 @@
+/* VSCode-Dark: the VSCode dark palette, as vscode.nvim names it. */
+@define-color vsc_front #d4d4d4;
+@define-color vsc_back #18191a;
+@define-color vsc_tab_current #18191a;
+@define-color vsc_tab_other #2d2d2d;
+@define-color vsc_tab_outside #252526;
+@define-color vsc_left_mid #373737;
+@define-color vsc_left_light #636369;
+@define-color vsc_popup_front #bbbbbb;
+@define-color vsc_popup_back #202020;
+@define-color vsc_popup_highlight_blue #04395e;
+@define-color vsc_popup_highlight_gray #343b41;
+@define-color vsc_split_light #898989;
+@define-color vsc_split_dark #444444;
+@define-color vsc_selection #264f78;
+@define-color vsc_blue #569cd6;
+@define-color vsc_accent_blue #4fc1ff;
+@define-color vsc_red #f44747;
+@define-color vsc_green #6a9955;
+@define-color vsc_yellow #dcdcaa;
+@define-color vsc_orange #f28b25;
+@define-color vsc_disabled #808080;

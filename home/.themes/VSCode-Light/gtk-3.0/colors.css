@@ -1,0 +1,22 @@
+/* VSCode-Light: the VSCode light palette, under the names VSCode-Dark uses. */
+@define-color vsc_front #3b3b3b;
+@define-color vsc_back #ffffff;
+@define-color vsc_tab_current #ffffff;
+@define-color vsc_tab_other #ececec;
+@define-color vsc_tab_outside #f3f3f3;
+@define-color vsc_left_mid #e0e0e0;
+@define-color vsc_left_light #b0b0b0;
+@define-color vsc_popup_front #616161;
+@define-color vsc_popup_back #f8f8f8;
+@define-color vsc_popup_highlight_blue #d7eafe;
+@define-color vsc_popup_highlight_gray #e4e6f1;
+@define-color vsc_split_light #919191;
+@define-color vsc_split_dark #d4d4d4;
+@define-color vsc_selection #add6ff;
+@define-color vsc_blue #005fb8;
+@define-color vsc_accent_blue #0090f1;
+@define-color vsc_red #e51400;
+@define-color vsc_green #008000;
+@define-color vsc_yellow #795e26;
+@define-color vsc_orange #bf8803;
+@define-color vsc_disabled #a0a0a0;
