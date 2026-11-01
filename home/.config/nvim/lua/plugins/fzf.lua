@@ -3,6 +3,23 @@ local fzf_lua = require("fzf-lua")
 
 local img_previewer = { "ueberzugpp" }
 
+-- fzf's colours come from FZF_DEFAULT_OPTS, which the shell sets for its light
+-- or dark theme (shell/common/fzf). Neovim keeps the shell's at startup, so
+-- when 'background' follows the terminal, ask the shell for the other set.
+vim.api.nvim_create_autocmd("OptionSet", {
+  pattern = "background",
+  callback = function()
+    local script = 'COLOR_THEME=$1; source "$HOME/.config/shell/common/fzf"; print -rn -- "$FZF_DEFAULT_OPTS"'
+    vim.system({ "zsh", "-c", script, "zsh", vim.o.background }, { text = true }, function(result)
+      if result.code == 0 then
+        vim.schedule(function()
+          vim.env.FZF_DEFAULT_OPTS = result.stdout
+        end)
+      end
+    end)
+  end,
+})
+
 fzf_lua.setup({
   "hide",
   winopts = {

@@ -1,9 +1,10 @@
 require("codediff").setup({
+  -- Groups from colorscheme.lua, so the colours follow 'background'.
   highlights = {
-    line_insert = "#373d29",
-    char_insert = "#4b5632",
-    line_delete = "#4b1818",
-    char_delete = "#6f1313",
+    line_insert = "DiffLineInsert",
+    char_insert = "DiffCharInsert",
+    line_delete = "DiffLineDelete",
+    char_delete = "DiffCharDelete",
   },
 })
 

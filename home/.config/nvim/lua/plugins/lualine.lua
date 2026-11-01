@@ -5,7 +5,7 @@ end
 
 require("lualine").setup({
   options = {
-    theme = vim.g.lualine_theme_override or "vscode",
+    theme = require("plugins.colorscheme").lualine_theme,
     disabled_filetypes = { "man" },
     component_separators = "",
     icons_enabled = true,
