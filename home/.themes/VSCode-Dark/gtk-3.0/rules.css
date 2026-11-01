@@ -58,6 +58,16 @@ menu,
   color: @vsc_front;
 }
 
+tooltip.background,
+tooltip.background:backdrop {
+  background-color: @vsc_popup_back;
+  border-color: @vsc_split_dark;
+}
+
+tooltip * {
+  color: @vsc_front;
+}
+
 separator,
 paned > separator {
   background-color: @vsc_split_dark;
