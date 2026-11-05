@@ -211,6 +211,7 @@
       (load-theme doom-theme t))))
 
 ;; The script replaces the file, so the watch is on its directory.
+(require 'filenotify)
 (when (file-directory-p (file-name-directory akisarou/theme-file))
   (file-notify-add-watch (file-name-directory akisarou/theme-file) '(change)
                          #'akisarou/follow-system-theme))
@@ -1659,14 +1660,136 @@ With BIG-WORD, use the whitespace-delimited WORD instead of a symbol."
   (map! :map vertico-map
         :desc "Export results" "C-q" #'embark-export))
 
-;;; Git history and temporary worktrees
+;;; Git hunks, history, and temporary worktrees
+
+(defun akisarou/git-hunk-action (action &optional whole-file)
+  "Apply Magit ACTION to the source hunk at point.
+With WHOLE-FILE, act on all unstaged changes in the current file.
+An active source region opens the corresponding Magit selection for review;
+Magit's s, u, and x apply staging, unstaging, and discarding respectively."
+  (require 'magit)
+  (unless buffer-file-name (user-error "Not visiting a working-tree file"))
+  (let* ((source (current-buffer))
+         (file (magit-file-relative-name))
+         (root (or (magit-toplevel) (user-error "Not in a Git repository")))
+         (region (and (not whole-file) (use-region-p) (magit-file-region-line-numbers)))
+         (line (line-number-at-pos))
+         (column (current-column))
+         (unstage (eq action 'magit-unstage)))
+    ;; Git acts on this buffer's text; asynchronous formatting belongs to the
+    ;; ordinary save workflow and must not race with hunk/line selection here.
+    (when (buffer-modified-p)
+      (let ((apheleia-mode nil)) (save-buffer)))
+    (let* ((default-directory root)
+           ;; A staged diff uses index line numbers. Translate from the working
+           ;; tree first so unrelated unstaged insertions do not move the target.
+           (line (if unstage
+                     (magit-diff-visit--offset line file "--reverse")
+                   line))
+           (open-diff
+            (lambda ()
+              (magit-diff-setup-buffer nil (and unstage "--cached") nil
+                                       (list file) (if unstage 'staged 'unstaged)))))
+      (if region
+          (progn
+            (funcall open-diff)
+            (let* ((beg (if unstage
+                            (magit-diff-visit--offset (car region) file "--reverse")
+                          (car region)))
+                   (end (if unstage
+                            (magit-diff-visit--offset (cadr region) file "--reverse")
+                          (cadr region))))
+              (magit-diff--goto-file-position file beg 0)
+              (push-mark (line-beginning-position) t t)
+              (magit-diff--goto-file-position file end 0)
+              (end-of-line)
+              (evil-visual-select (mark) (point) 'line))
+            (message "Review the selected diff: s stages, u unstages, x discards"))
+        (save-window-excursion
+          (with-current-buffer (funcall open-diff)
+            (deactivate-mark)
+            (if whole-file
+                (progn
+                  (magit-diff--goto-file-position file line column)
+                  (when (magit-section-match 'hunk) (magit-section-up)))
+              (let ((location (magit-diff--locate-file-position file line column)))
+                (unless (memq (cadr location) '(line hunk))
+                  (user-error "No %shunk at point" (if unstage "staged " "")))
+                (goto-char (car location))
+                (magit-section-reveal (magit-current-section))))
+            ;; Never fall through to Magit's file-wide action when the source
+            ;; position has no matching hunk (or only a binary/mode change).
+            (unless (eq (magit-diff-scope) (if whole-file 'file 'hunk))
+              (user-error "No %shunk at point" (if unstage "staged " "")))
+            (let ((this-command action)) (call-interactively action))))
+        (with-current-buffer source
+          (when (eq action 'magit-discard) (revert-buffer t t))
+          (when (bound-and-true-p diff-hl-mode) (diff-hl-update)))))))
+
+(defun akisarou/git-stage-hunk ()
+  "Stage the current hunk, or review the active region in Magit."
+  (interactive)
+  (akisarou/git-hunk-action 'magit-stage))
+
+(defun akisarou/git-unstage-hunk ()
+  "Unstage the current hunk, preserving other staged files and hunks."
+  (interactive)
+  (akisarou/git-hunk-action 'magit-unstage))
+
+(defun akisarou/git-reset-hunk ()
+  "Discard the current hunk, or review the active region in Magit."
+  (interactive)
+  (akisarou/git-hunk-action 'magit-discard))
+
+(defun akisarou/git-reset-file ()
+  "Discard unstaged file changes while preserving the staging area."
+  (interactive)
+  (akisarou/git-hunk-action 'magit-discard t))
+
+(after! evil
+  (evil-define-text-object akisarou/inner-git-hunk (_count &optional _beg _end _type)
+    "Select the changed lines of the current Git hunk."
+    (require 'diff-hl)
+    (unless (bound-and-true-p diff-hl-mode) (diff-hl-mode 1))
+    (let ((diff-hl-update-async nil)) (diff-hl-update))
+    (save-excursion
+      (diff-hl-mark-hunk)
+      (evil-range (region-beginning) (region-end) 'line :expanded t)))
+  (map! :n "]h" #'diff-hl-next-hunk
+        :n "[h" #'diff-hl-previous-hunk
+        :map evil-inner-text-objects-map "h" #'akisarou/inner-git-hunk))
+
+(defun akisarou/git-range-history ()
+  "Show the Git history of the current line or selected line range."
+  (interactive)
+  (require 'magit)
+  (let* ((region (magit-file-region-line-numbers))
+         (beg (or (car region) (line-number-at-pos)))
+         (end (or (cadr region) beg)))
+    (magit-log-buffer-file nil beg end)))
+
+(defun akisarou/git-show-at-point ()
+  "Visit a diff source, inspect a commit, or show the current line's history."
+  (interactive)
+  (require 'magit)
+  (cond
+   ((and (derived-mode-p 'magit-mode) (magit-section-match '(hunk file)))
+    (magit-diff-visit-file))
+   ((derived-mode-p 'diff-mode) (diff-goto-source))
+   ((magit-commit-at-point) (magit-show-commit (magit-commit-at-point)))
+   (t (akisarou/git-range-history))))
 
 (after! magit
   ;; Magit's revision-navigation g prefix shadows Evil's global gg motion.
   (map! :map magit-blob-mode-map :nv "gg" #'evil-goto-first-line)
   (map! :map magit-log-mode-map :n
         "C-g" #'akisarou/git-log-diff
-        :n "C-w" #'akisarou/git-view))
+        :n "C-w" #'akisarou/git-view)
+  (map! :map (magit-diff-mode-map magit-revision-mode-map magit-log-mode-map)
+        :n "C-]" #'akisarou/git-show-at-point))
+
+(after! diff-mode
+  (map! :map diff-mode-map :n "C-]" #'diff-goto-source))
 
 (defvar akisarou/git-history-action 'visit
   "Dynamically bound action for the current file history picker.")
@@ -1701,6 +1824,30 @@ With BIG-WORD, use the whitespace-delimited WORD instead of a symbol."
 
 (defvar akisarou/git-views nil
   "Temporary worktrees owned by this Emacs session, newest first.")
+
+(defun akisarou/git-current-view ()
+  "Return the owned temporary worktree containing the current directory."
+  (seq-find (lambda (view)
+              (string-prefix-p (plist-get view :directory)
+                               (expand-file-name default-directory)))
+            akisarou/git-views))
+
+(defun akisarou/git-view-copy-entry ()
+  "Copy the selected Grease entry back to its original repository.
+Dired handles file, symlink, directory, and overwrite semantics."
+  (interactive)
+  (unless (derived-mode-p 'grease-mode) (user-error "Select an entry in Grease"))
+  (require 'dired-aux)
+  (let* ((view (or (akisarou/git-current-view)
+                   (user-error "Not browsing a temporary Git worktree")))
+         (source (akisarou/entry-path t))
+         (relative (file-relative-name source (plist-get view :directory)))
+         (target (expand-file-name relative (plist-get view :root))))
+    (when (string-prefix-p "../" relative) (user-error "Entry is outside this worktree"))
+    (make-directory (file-name-directory target) t)
+    (dired-copy-file source target 1)
+    (let ((default-directory (plist-get view :root))) (magit-refresh))
+    (message "Copied %s to %s" relative (plist-get view :root))))
 
 (defun akisarou/git-view-buffers (view)
   "Return buffers visiting files or directories in VIEW."
@@ -1758,16 +1905,16 @@ Use `akisarou/git-view-return' to return and remove the clean worktree."
         (user-error "Could not create a worktree for %s" revision)))
     (push view akisarou/git-views)
     (grease-open directory)
+    (let ((map (make-sparse-keymap)))
+      (set-keymap-parent map doom-leader-map)
+      (define-key map (kbd "r") #'akisarou/git-view-copy-entry)
+      (general-define-key :keymaps 'local :states 'normal doom-leader-key map))
     (message "Browsing %s; SPC g v r returns to the original view" (substring commit 0 10))))
 
 (defun akisarou/git-view-return ()
   "Return from the current temporary worktree and remove it when clean."
   (interactive)
-  (let ((view (or (seq-find
-                   (lambda (view)
-                     (string-prefix-p (plist-get view :directory)
-                                      (expand-file-name default-directory)))
-                   akisarou/git-views)
+  (let ((view (or (akisarou/git-current-view)
                   (car akisarou/git-views)
                   (user-error "No temporary worktree to return from"))))
     (set-window-configuration (plist-get view :windows))
@@ -1939,6 +2086,10 @@ C-g diffs against HEAD; C-o restores a file; C-w browses a temporary worktree."
 (define-key doom-leader-map (kbd "u") nil)
 (define-key doom-leader-map (kbd "x") nil)
 
+;; Start with Doom's Git map on every load, then overlay Neovim bindings.
+;; Copying its named map keeps the defaults intact and makes reloads repeatable.
+(define-key doom-leader-map (kbd "g") (copy-keymap doom-leader-git-map))
+
 (map! :leader
       :desc "Help" "H" help-map
       :desc "Clear search highlights" "h" #'evil-ex-nohighlight
@@ -1961,12 +2112,38 @@ C-g diffs against HEAD; C-o restores a file; C-w browses a temporary worktree."
        :desc "Save and close buffer" "d" #'akisarou/close-buffer
        :desc "Close other file buffers" "o" #'akisarou/close-other-file-buffers
        :desc "Save and close file buffers" "a" #'akisarou/close-all-file-buffers)
-      (:prefix ("g" . "git")
+      (:prefix "g"
+       ;; Relocate the three default prefixes claimed by Neovim commands.
+       :desc "Create / commit" "n" (copy-keymap (lookup-key doom-leader-git-map (kbd "c")))
+       :desc "Lists" "i" (copy-keymap (lookup-key doom-leader-git-map (kbd "l")))
+       :desc "Visit" "v" (copy-keymap (lookup-key doom-leader-git-map (kbd "f")))
+       :desc "Status" "s" #'magit-status
+       :desc "Diff changes" "d" #'magit-diff-dwim
+       :desc "Git commands" "l" #'magit-dispatch
        :desc "Branches" "b" #'magit-branch-checkout
        :desc "Commit history" "c" #'magit-log-current
        :desc "File history" "f" #'akisarou/git-file-history
-       (:prefix ("v" . "revision worktree")
+       (:prefix ("h" . "hunks")
+        :desc "Stage hunk / review region" "s" #'akisarou/git-stage-hunk
+        :desc "Reset hunk / review region" "r" #'akisarou/git-reset-hunk
+        :desc "Unstage hunk" "u" #'akisarou/git-unstage-hunk
+        :desc "Stage file" "S" #'magit-file-stage
+        :desc "Reset unstaged file changes" "R" #'akisarou/git-reset-file
+        :desc "Preview hunk inline" "p" #'diff-hl-show-hunk
+        :desc "Line blame" "b" #'magit-blame-echo
+        :desc "File blame" "B" #'magit-blame-addition
+        :desc "Diff file against index" "d" (cmd! (magit-diff-buffer-file t))
+        :desc "Diff file against previous revision" "D"
+        (cmd! (require 'magit)
+              (magit-diff-range "HEAD~1" nil
+                               (list (or (magit-file-relative-name)
+                                         (user-error "Not visiting a Git file"))))))
+       (:prefix ("m" . "history at point")
+        :desc "Show Git object at point" "c" #'akisarou/git-show-at-point
+        :desc "Line / range history" "r" #'akisarou/git-range-history)
+       (:prefix "v"
         :desc "Browse revision" "v" #'akisarou/git-view
+        :desc "Copy revision entry to original repository" "y" #'akisarou/git-view-copy-entry
         :desc "Return from revision" "r" #'akisarou/git-view-return))
       "p f" nil
       (:prefix ("u" . "undo")
