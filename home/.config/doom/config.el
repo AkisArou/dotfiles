@@ -1099,9 +1099,6 @@ leaves the buffer open and its unformatted edits saved on disk."
     (unless (member directory (split-string (getenv "PATH") (regexp-quote path-separator) t))
       (setenv "PATH" (concat (getenv "PATH") path-separator directory)))))
 
-;; Load the client API before defining helpers that extend its typed records.
-(require 'lsp-mode)
-
 (defconst akisarou/language-servers
   '(tsgo lua-language-server json-ls html-ls css-ls tailwindcss cssmodules-ls
     dockerfile-ls docker-compose-ls yamlls mdx-analyzer npm-workspaces-ls
@@ -1162,18 +1159,21 @@ leaves the buffer open and its unformatted edits saved on disk."
                       (insert-file-contents package)
                       (plist-get (json-parse-buffer :object-type 'plist) :workspaces))))))))))
 
-(defun akisarou/add-language-server-installer (id dependency arguments)
-  "Extend the maintained client ID with a DEPENDENCY installer and ARGUMENTS."
-  (let ((client (copy-lsp--client (gethash id lsp-clients))))
-    (setf (lsp--client-new-connection client)
-          (lsp-stdio-connection
-           (lambda () (cons (lsp-package-path dependency) arguments)))
-          (lsp--client-download-server-fn client)
-          (lambda (_client callback error-callback _update?)
-            (lsp-package-ensure dependency callback error-callback)))
-    (lsp-register-client client)))
-
 (after! lsp-mode
+  ;; Emacs 32 eagerly expands deferred lambdas too. Evaluate typed-record
+  ;; definitions after LSP loads so its record accessors are available then.
+  (eval
+   '(defun akisarou/add-language-server-installer (id dependency arguments)
+      "Extend the maintained client ID with a DEPENDENCY installer and ARGUMENTS."
+      (let ((client (copy-lsp--client (gethash id lsp-clients))))
+        (setf (lsp--client-new-connection client)
+              (lsp-stdio-connection
+               (lambda () (cons (lsp-package-path dependency) arguments)))
+              (lsp--client-download-server-fn client)
+              (lambda (_client callback error-callback _update?)
+                (lsp-package-ensure dependency callback error-callback)))
+        (lsp-register-client client)))
+   t)
   (akisarou/register-npm-language-server
    'cssmodules-ls "cssmodules-language-server" "cssmodules-language-server" nil
    (let ((javascript-p (lsp-activate-on "javascript" "javascriptreact"
@@ -1237,42 +1237,19 @@ leaves the buffer open and its unformatted edits saved on disk."
      ("scss.lint.unknownAtRules" lsp-css-lint-unknown-at-rules))))
 
 (after! lsp-html
-  (setf (lsp--client-initialization-options (gethash 'html-ls lsp-clients))
-        (lambda ()
-          (list :dataPaths lsp-html-custom-data :provideFormatter t
-                :embeddedLanguages '(:css t :javascript t)
-                :configurationSection ["html" "css" "javascript"]))))
+  (eval
+   '(setf (lsp--client-initialization-options (gethash 'html-ls lsp-clients))
+          (lambda ()
+            (list :dataPaths lsp-html-custom-data :provideFormatter t
+                  :embeddedLanguages '(:css t :javascript t)
+                  :configurationSection ["html" "css" "javascript"])))
+   t))
 
 (defconst akisarou/extra-json-schemas
   '((:fileMatch ["eas.json"]
      :url "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json")
     (:fileMatch ["launch.json"]
      :url "https://codeberg.org/mfussenegger/dapconfig-schema/raw/branch/master/dapconfig-schema.json")))
-
-(defun akisarou/load-json-schema-catalog ()
-  "Load the cached SchemaStore catalog and update active JSON workspaces."
-  (when-let ((file (lsp-package-path 'json-schema-store)))
-    (let ((catalog (condition-case error
-                       (with-temp-buffer
-                         (insert-file-contents file)
-                         (json-parse-buffer :object-type 'plist :array-type 'array))
-                     (json-error
-                      (delete-file file)
-                      (lsp--warn "Discarding invalid SchemaStore cache: %s" error)
-                      nil)))
-          workspaces)
-      (setq lsp-json-schemas
-            (vconcat (seq-filter (lambda (schema) (plist-get schema :fileMatch))
-                                 (plist-get catalog :schemas))
-                     akisarou/extra-json-schemas))
-      (dolist (buffer (buffer-list))
-        (with-current-buffer buffer
-          (dolist (workspace (lsp-workspaces))
-            (when (eq (lsp--workspace-server-id workspace) 'json-ls)
-              (cl-pushnew workspace workspaces)))))
-      (dolist (workspace workspaces)
-        (with-lsp-workspace workspace
-          (lsp--set-configuration (lsp-configuration-section "json")))))))
 
 (defun akisarou/ensure-json-schemas ()
   "Download SchemaStore once through lsp-mode's dependency manager."
@@ -1282,6 +1259,31 @@ leaves the buffer open and its unformatted edits saved on disk."
                         (lambda (error) (lsp--warn "SchemaStore: %s" error)))))
 
 (after! lsp-json
+  (defun akisarou/load-json-schema-catalog ()
+    "Load the cached SchemaStore catalog and update active JSON workspaces."
+    (when-let ((file (lsp-package-path 'json-schema-store)))
+      (let ((catalog (condition-case error
+                         (with-temp-buffer
+                           (insert-file-contents file)
+                           (json-parse-buffer :object-type 'plist :array-type 'array))
+                       (json-error
+                        (delete-file file)
+                        (lsp--warn "Discarding invalid SchemaStore cache: %s" error)
+                        nil)))
+            workspaces)
+        (setq lsp-json-schemas
+              (vconcat (seq-filter (lambda (schema) (plist-get schema :fileMatch))
+                                   (plist-get catalog :schemas))
+                       akisarou/extra-json-schemas))
+        (dolist (buffer (buffer-list))
+          (with-current-buffer buffer
+            (dolist (workspace (lsp-workspaces))
+              (when (eq (lsp--workspace-server-id workspace) 'json-ls)
+                (cl-pushnew workspace workspaces)))))
+        (dolist (workspace workspaces)
+          (with-lsp-workspace workspace
+            (lsp--set-configuration (lsp-configuration-section "json")))))))
+
   (lsp-dependency
    'json-schema-store
    `(:download :url "https://www.schemastore.org/api/json/catalog.json"
@@ -1469,20 +1471,21 @@ leaves the buffer open and its unformatted edits saved on disk."
     (lambda (_client callback error-callback _update?)
       (lsp-package-ensure 'tsgo callback error-callback)))))
 
-(cl-defun akisarou/format-with-oxfmt-lsp (&key buffer scratch callback &allow-other-keys)
-  (with-current-buffer buffer
-    (if-let ((workspace (and buffer-file-name
-                             (lsp-find-workspace 'oxfmt buffer-file-name))))
-        (with-lsp-workspace workspace
-                            (if (lsp-feature? "textDocument/formatting")
-                                (let ((edits (lsp-request "textDocument/formatting"
-                                                          (lsp--make-document-formatting-params))))
-                                  (unless (seq-empty-p edits)
-                                    (with-current-buffer scratch
-                                      (lsp--apply-text-edits edits 'format)))
-                                  (funcall callback))
-                              (funcall callback "oxfmt LSP does not support document formatting")))
-      (funcall callback "oxfmt LSP is not running for this buffer"))))
+(after! lsp-mode
+  (cl-defun akisarou/format-with-oxfmt-lsp (&key buffer scratch callback &allow-other-keys)
+    (with-current-buffer buffer
+      (if-let ((workspace (and buffer-file-name
+                               (lsp-find-workspace 'oxfmt buffer-file-name))))
+          (with-lsp-workspace workspace
+                              (if (lsp-feature? "textDocument/formatting")
+                                  (let ((edits (lsp-request "textDocument/formatting"
+                                                            (lsp--make-document-formatting-params))))
+                                    (unless (seq-empty-p edits)
+                                      (with-current-buffer scratch
+                                        (lsp--apply-text-edits edits 'format)))
+                                    (funcall callback))
+                                (funcall callback "oxfmt LSP does not support document formatting")))
+        (funcall callback "oxfmt LSP is not running for this buffer")))))
 
 (set-formatter! 'oxfmt-lsp #'akisarou/format-with-oxfmt-lsp
   :modes akisarou/oxfmt-modes)
@@ -1599,6 +1602,8 @@ C-g toggles ignored files; C-h toggles dotfiles.  C-c cancels."
          (fd-builder (consult--fd-make-builder '(".")))
          ;; Query-only caches cannot track candidates arriving from fd.
          (fussy-use-cache nil)
+         ;; Show fd results promptly; Doom's default batches UI updates for 150ms.
+         (consult-async-refresh-delay 0.03)
          (consult-async-split-style 'akisarou-files)
          (consult-async-split-styles-alist
           (cons '(akisarou-files :function akisarou/file-finder-split)
@@ -2194,12 +2199,3 @@ C-g diffs against HEAD; C-o restores a file; C-w browses a temporary worktree."
       :n "[e" (cmd! (akisarou/jump-diagnostic (- (or evil-count 1)) 'error))
       :n "]w" (cmd! (akisarou/jump-diagnostic (or evil-count 1) 'warning))
       :n "[w" (cmd! (akisarou/jump-diagnostic (- (or evil-count 1)) 'warning)))
-
-;;; Agent commands
-
-(use-package! codex
-  :config
-  (define-key doom-leader-map (kbd "a") nil)
-  (map! :leader
-        (:prefix ("a" . "ai")
-         :desc "Codex" "a" codex-command-map)))

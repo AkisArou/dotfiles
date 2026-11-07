@@ -13,9 +13,6 @@
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;; (package! some-package)
 
-(package! codex
-  :recipe (:host github :repo "benthamite/codex"))
-
 (package! vscode-dark-plus-theme
   :recipe (:host github :repo "ianyepan/vscode-dark-plus-emacs-theme"))
 
