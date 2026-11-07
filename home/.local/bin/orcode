@@ -1,0 +1,14 @@
+#!/bin/sh
+# orcode is npm-linked into the global Node version, so asdf's shim finds it
+# only where .tool-versions selects that version. Run it with the global Node
+# so it works in every project, whatever Node the project pins.
+
+version=$(awk '$1 == "nodejs" { print $2; exit }' "$HOME/.tool-versions")
+node_home="$HOME/.asdf/installs/nodejs/$version"
+
+if [ ! -x "$node_home/bin/orcode" ]; then
+  echo "orcode: not linked into the global Node ($version); run npm link in ~/Projects/orcode" >&2
+  exit 127
+fi
+
+exec "$node_home/bin/node" "$node_home/bin/orcode" "$@"
