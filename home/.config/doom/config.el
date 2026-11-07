@@ -1,5 +1,15 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
+;;; Startup
+
+;; Warm the frequently used file tools before the longer Org/Magit idle queue.
+;; Doom's incremental loader yields when input arrives; startup stays deferred.
+(setq doom-incremental-first-idle-timer (if (daemonp) 0 0.5)
+      doom-incremental-packages
+      (cons t (delete-dups
+               (append '(vertico marginalia consult recentf grease)
+                       (cdr doom-incremental-packages)))))
+
 ;;; Appearance
 
 ;; Light or dark, as ~/.local/bin/theme last applied it: each pairs a Doom
@@ -458,8 +468,11 @@
              (executable-find "git"))
     (require 'vc-git)
     (when-let* ((root (vc-git-root grease--root-dir))
+                ;; Source visibility is only consulted for dot entries. Avoid
+                ;; listing every ordinary source file in a large repository.
                 (sources (akisarou/grease-git-output
-                          "ls-files" "--cached" "--others" "--exclude-standard" "-z"))
+                          "ls-files" "--cached" "--others" "--exclude-standard"
+                          "--directory" "-z" "--" ".?*"))
                 (output (akisarou/grease-git-output
                          "--no-optional-locks" "status" "--porcelain=v1" "-z"
                          "--ignored=matching" "--untracked-files=normal" "--" ".")))
@@ -469,7 +482,7 @@
             (prefix (file-relative-name grease--root-dir root))
             (records (split-string output "\0" t)))
         (dolist (path (split-string sources "\0" t))
-          (puthash (car (split-string path "/")) t visible))
+          (puthash (substring path 0 (string-search "/" path)) t visible))
         (when (equal prefix "./") (setq prefix ""))
         (while records
           (let* ((record (pop records))
@@ -1103,10 +1116,22 @@ leaves the buffer open and its unformatted edits saved on disk."
     (lsp-ensure-server server))
   (akisarou/ensure-json-schemas))
 
-(add-hook 'doom-first-input-hook
-          (defun akisarou/ensure-language-servers-h ()
-            (unless noninteractive (akisarou/ensure-language-servers)))
-          t)
+(defvar akisarou/language-server-check-timer nil
+  "Idle timer for provisioning the configured language servers.")
+
+(defun akisarou/schedule-language-server-checks ()
+  "Check language servers after five idle seconds, yielding to user input."
+  (when (timerp akisarou/language-server-check-timer)
+    (cancel-timer akisarou/language-server-check-timer))
+  (setq akisarou/language-server-check-timer
+        (run-with-idle-timer
+         5 nil
+         (lambda ()
+           (setq akisarou/language-server-check-timer nil)
+           (unless (eq 'done (while-no-input (akisarou/ensure-language-servers) 'done))
+             (akisarou/schedule-language-server-checks))))))
+
+(add-hook 'doom-after-init-hook #'akisarou/schedule-language-server-checks t)
 
 (defun akisarou/register-npm-language-server (id package binary arguments activation)
   "Register an add-on server ID with native npm provisioning and ACTIVATION."
@@ -1498,7 +1523,7 @@ leaves the buffer open and its unformatted edits saved on disk."
 
 (defun akisarou/file-finder-split (_input _style)
   "List all files once; let the completion style filter the entire input."
-  '("." 0))
+  '("" 0))
 
 (defun akisarou/file-finder-toggle-ignored ()
   "Toggle ignored files, retaining the current file query."
@@ -1571,6 +1596,9 @@ C-g toggles ignored files; C-h toggles dotfiles.  C-c cancels."
                 "--color=never" "--type=file" "--follow"
                 "--exclude=.git" "--exclude=node_modules" "--full-path"
                 (and hidden "--hidden") (and ignored "--no-ignore")))
+         (fd-builder (consult--fd-make-builder '(".")))
+         ;; Query-only caches cannot track candidates arriving from fd.
+         (fussy-use-cache nil)
          (consult-async-split-style 'akisarou-files)
          (consult-async-split-styles-alist
           (cons '(akisarou-files :function akisarou/file-finder-split)
@@ -1584,7 +1612,9 @@ C-g toggles ignored files; C-h toggles dotfiles.  C-c cancels."
             :history 'file-name-history :state #'consult--file-state :preview-key "C-SPC")
       (list :name "Project files" :category 'file
             :history 'file-name-history :state #'consult--file-state :preview-key "C-SPC"
-            :async (consult--process-collection (consult--fd-make-builder '("."))
+            ;; Keep the fixed fd regexp out of the shared async input. Consult
+            ;; would otherwise highlight every recent filename as a `.' match.
+            :async (consult--process-collection (lambda (_input) (funcall fd-builder "."))
                      :min-input 0 :debounce 0 :throttle 0 :file-handler t
                      :transform
                      (consult--async-transform
