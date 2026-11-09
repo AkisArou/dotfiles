@@ -51,14 +51,38 @@ export interface LedgerStatus {
   /** What admitted jobs may still take, and what the queue has to work with. */
   readonly pending_bytes: number;
   readonly room_bytes: number;
-  readonly admitted: readonly { readonly id: string; readonly what: string; readonly priority: string; readonly bytes: number; readonly used_bytes: number; readonly owner_pid: number; readonly since: string; readonly live: boolean }[];
-  /** In queue order. */
-  readonly waiting: readonly { readonly id: string; readonly what: string; readonly priority: string; readonly bytes: number; readonly grows: boolean; readonly owner_pid: number; readonly waiter_pid: number; readonly since: string; readonly waited_s: number; readonly live: boolean }[];
+  /**
+   * `unmeasured`: the steps or jobs it sized with no measurement of their own;
+   * `over`: those that held more than they reserved. Both are absent from an
+   * nts older than #590.
+   */
+  readonly admitted: readonly {
+    readonly id: string;
+    readonly what: string;
+    readonly priority: string;
+    readonly bytes: number;
+    readonly used_bytes: number;
+    readonly owner_pid: number;
+    readonly since: string;
+    readonly live: boolean;
+    readonly unmeasured?: readonly string[];
+    readonly over?: readonly string[];
+  }[];
+  /** In queue order. A request to grow an admitted reservation names it in `grows`; its `bytes` are what it grows by. */
+  readonly waiting: readonly { readonly id: string; readonly what: string; readonly priority: string; readonly bytes: number; readonly grows: string | null; readonly owner_pid: number; readonly waiter_pid: number; readonly since: string; readonly waited_s: number; readonly live: boolean }[];
 }
 
 /** The ledger's limits (MainClaude, 11-09): a landing kept waiting past two minutes is red, anything past fifteen amber. */
 const LANDING_WAIT_S = 120;
 const ANY_WAIT_S = 900;
+
+/** How a reservation was sized: the keys it held past their size (its history takes the peak for next time), and those it had no measurement for. */
+function sizing(entry: LedgerStatus["admitted"][number]): TableCell {
+  const over = entry.over ?? [];
+  const unmeasured = entry.unmeasured ?? [];
+  const said = [...(over.length ? [`held more than reserved: ${over.join(" ")}`] : []), ...(unmeasured.length ? [`unmeasured: ${unmeasured.join(" ")}`] : [])].join("; ");
+  return over.length ? { text: said, color: "red" } : unmeasured.length ? { text: said, color: "yellow" } : "";
+}
 
 /** The memory ledger as a table: what is admitted, then what waits, in its order. */
 export function ledgerTable(status: LedgerStatus, nowMs: number): Table {
@@ -73,6 +97,7 @@ export function ledgerTable(status: LedgerStatus, nowMs: number): Table {
       { key: "used", label: "uses", align: "right" },
       { key: "since", label: "for", align: "right" },
       { key: "what", label: "what" },
+      { key: "sizing", label: "sizing" },
     ],
     rows: [
       ...status.admitted.map((entry) => ({
@@ -83,6 +108,7 @@ export function ledgerTable(status: LedgerStatus, nowMs: number): Table {
         used: gib(entry.used_bytes),
         since: ago((nowMs - Date.parse(entry.since)) / 1000),
         what: entry.what,
+        sizing: sizing(entry),
       })),
       ...status.waiting.map((entry, place) => {
         const late = (entry.priority === "landing" && entry.waited_s > LANDING_WAIT_S) || entry.waited_s > ANY_WAIT_S;
@@ -90,10 +116,11 @@ export function ledgerTable(status: LedgerStatus, nowMs: number): Table {
           id: entry.id,
           state: entry.live ? { text: `waiting, ${place + 1} of ${status.waiting.length}`, color: late ? ("red" as const) : ("yellow" as const) } : { text: "gone", color: "gray" as const },
           priority: entry.priority,
-          bytes: `${gib(entry.bytes)}${entry.grows ? " and growing" : ""}`,
+          bytes: entry.grows === null ? gib(entry.bytes) : `grows by ${gib(entry.bytes)}`,
           used: "",
           since: ago(entry.waited_s),
           what: entry.what,
+          sizing: "",
         };
       }),
     ],

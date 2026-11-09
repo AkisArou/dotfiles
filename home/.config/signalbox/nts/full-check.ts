@@ -22,12 +22,20 @@ interface RunRecord {
   readonly listed?: { readonly pending: number; readonly accepted: number } | null;
 }
 
-/** A records commit: what it recorded, when, and what came of it. */
+/** A part's last records run: what it recorded, when, and what came of it. */
 interface RecordsCommit {
   readonly commit: string;
   readonly at: string;
   readonly submitted: string | null;
   readonly result: string;
+  /** The green run whose checks listed the rows. */
+  readonly run?: string;
+  /** The records unit that records them, while it runs and after. */
+  readonly job?: { readonly unit: string; readonly outcome: string; readonly at: string; readonly starts: number; readonly ended?: string };
+  /** How many times its rows were applied on main. */
+  readonly attempts?: number;
+  /** When the full check stopped following it: landed, withdrawn, nothing to apply, or given up. */
+  readonly settled?: string;
 }
 
 interface PartStatus {
@@ -159,7 +167,7 @@ export function fullCheckReport(status: FullCheckStatus, now = Date.now()): Repo
         part: name,
         pending: listed?.pending ?? "",
         accepted: listed?.accepted ?? "",
-        last: last ? { text: `${short(last.commit)}, ${since(last.at, now)} ago: ${last.result}`, ...(last.result.startsWith("failed") ? { color: "red" as const } : {}) } : "none yet",
+        last: last ? { text: `${short(last.commit)}, ${since(last.at, now)} ago: ${last.result}`, ...(RECORDS_COLOR[recordsPhase(last)] ? { color: RECORDS_COLOR[recordsPhase(last)] } : {}) } : "none yet",
       };
     }),
   };
@@ -184,8 +192,19 @@ export function fullCheckReport(status: FullCheckStatus, now = Date.now()): Repo
   return { tables: [state, parts, culprits, records, count, tasks], runs, decisions, gauges: fullCheckGauges(status, now), events: fullCheckEvents(status) };
 }
 
-/** A records commit that failed, rather than was submitted or had nothing to record. */
-const recordsFailed = (last: RecordsCommit | null) => last !== null && /^(failed|record-pending\.ts --apply exited)/.test(last.result);
+/**
+ * Where a part's last records run stands, as its result says: under way
+ * (recording, or submitted to the landing check), done (landed, or nothing to
+ * land), failing now, or given up without landing (its rows stay pending for
+ * the next records run).
+ */
+type RecordsPhase = "under way" | "done" | "failed" | "not landed";
+function recordsPhase(last: RecordsCommit): RecordsPhase {
+  if (/^(failed|record-pending\.ts --apply exited|wrote \d+ record file)/.test(last.result) || / did not start: /.test(last.result)) return "failed";
+  if (/^(landed as|nothing left to commit|recorded nothing)/.test(last.result)) return "done";
+  return last.settled ? "not landed" : "under way";
+}
+const RECORDS_COLOR: Partial<Record<RecordsPhase, "red" | "yellow">> = { failed: "red", "not landed": "yellow" };
 
 /**
  * The full check's gauges: landing to verified (amber past an hour, red past
@@ -214,14 +233,15 @@ export function fullCheckGauges(status: FullCheckStatus, now = Date.now()): Gaug
     const pending = listed?.pending ?? 0;
     const lastAt = last ? Date.parse(last.at) : undefined;
     const late = pending > 0 && (lastAt === undefined || now - lastAt > 86_400_000);
+    const phase = last ? recordsPhase(last) : undefined;
     return {
       id: `records.${part}`,
       label: `${part} records`,
       section,
       value: pending,
       text: `${pending} pending${last ? `; last written ${since(last.at, now)} ago` : ""}`,
-      state: recordsFailed(last) ? "red" : late ? "amber" : "ok",
-      ...(recordsFailed(last) ? { why: last?.result } : late ? { why: "listed and not written within a day" } : {}),
+      state: phase === "failed" ? "red" : phase === "not landed" || late ? "amber" : "ok",
+      ...(phase === "failed" || phase === "not landed" ? { why: last?.result } : late ? { why: "listed and not written within a day" } : {}),
     };
   });
   return [
@@ -288,14 +308,18 @@ export function fullCheckEvents(status: FullCheckStatus): ReportedEvent[] {
       body: [`- **run:** ${culprit.run}`, ...(culprit.reason ? [`- **why:** ${culprit.reason}`] : [])].join("\n"),
     });
   }
+  // A records run is an event as it starts, as each attempt fails, and as it ends.
   for (const part of ["core", "wide"] as const) {
     const last = status[part].records.last;
     if (!last) continue;
+    const phase = recordsPhase(last);
+    const step = phase === "under way" ? "" : phase === "failed" ? `:failed:${last.attempts ?? 1}` : `:${phase}`;
     events.push({
-      id: `records:${part}:${last.commit}:${last.at}`,
-      time: Date.parse(last.at),
-      level: recordsFailed(last) ? "error" : "info",
-      ...(recordsFailed(last) ? { outcome: "failed" as const } : {}),
+      id: `records:${part}:${last.commit}:${last.at}${step}`,
+      // A failed attempt says no time of its own: it is when it was seen.
+      ...(phase === "failed" ? {} : { time: Date.parse(phase === "under way" ? last.at : (last.settled ?? last.at)) }),
+      level: phase === "failed" ? "error" : phase === "not landed" ? "warning" : "info",
+      ...(phase === "failed" ? { outcome: "failed" as const } : {}),
       kind: "full-check.records",
       summary: `${part} records at ${short(last.commit)}: ${last.result}`,
     });
