@@ -40,6 +40,17 @@ interface RecordsCommit {
   readonly outcome?: "recording" | "submitted" | "failed" | "landed" | "nothing" | "given-up" | "withdrawn";
 }
 
+/** The last night's benchmarks: what they measured, and then their results commit's way through the landing. */
+interface BenchmarksRun {
+  readonly commit: string;
+  readonly at: string;
+  readonly result: string;
+  /** Whether the run kept a record. */
+  readonly measured: boolean;
+  /** How the night ended (`record`, `no-record`, `interrupted`, `not-run`), then, with #604, where its results commit stands. */
+  readonly outcome?: "record" | "no-record" | "interrupted" | "not-run" | "submitted" | "failed" | "landed" | "nothing" | "given-up" | "withdrawn";
+}
+
 interface PartStatus {
   readonly last_run: RunRecord | null;
   readonly last_green: RunRecord | null;
@@ -56,7 +67,7 @@ export interface FullCheckStatus {
   readonly core: PartStatus;
   readonly wide: PartStatus & { readonly slot: string | null };
   readonly culprits: readonly { readonly commit: string; readonly part: string; readonly steps: readonly string[]; readonly run: string; readonly found_at: string; readonly revert: string | null; readonly reason?: string }[];
-  readonly benchmarks: { readonly last: { readonly commit: string; readonly at: string; readonly result: string; readonly measured: boolean } | null; readonly slower: readonly string[]; readonly due: { readonly since: string; readonly until: string } | null };
+  readonly benchmarks: { readonly last: BenchmarksRun | null; readonly slower: readonly string[]; readonly due: { readonly since: string; readonly until: string } | null };
   readonly count: { readonly at: string; readonly verdict: string; readonly lines: readonly string[] } | null;
   readonly tasks: readonly { readonly at: string; readonly line: string }[];
 }
@@ -75,6 +86,11 @@ const two = (id: string, title: string, rows: readonly (readonly [string, TableC
   columns: [{ key: "what", label: "" }, { key: "state", label: "" }],
   rows: rows.map(([what, state]) => ({ what, state })),
 });
+
+function benchmarksCell(bench: BenchmarksRun, now: number): TableCell {
+  const color = RECORDS_COLOR[benchmarksPhase(bench)];
+  return { text: `${short(bench.commit)}, ${since(bench.at, now)} ago: ${bench.result}`, ...(color ? { color } : {}) };
+}
 
 function partRun(part: "core" | "wide", record: RunRecord): Run {
   return {
@@ -102,7 +118,7 @@ export function fullCheckReport(status: FullCheckStatus, now = Date.now()): Repo
     ["main", short(status.main)],
     ["verified", `${short(status.verified.commit)}${status.verified.pushed === status.verified.commit ? ", pushed" : status.verified.pushed ? `, pushed ${short(status.verified.pushed)}` : ""}`],
     ["behind", behind],
-    ["benchmarks", status.benchmarks.last ? `${short(status.benchmarks.last.commit)}, ${since(status.benchmarks.last.at, now)} ago: ${status.benchmarks.last.result}` : "none run yet"],
+    ["benchmarks", status.benchmarks.last ? benchmarksCell(status.benchmarks.last, now) : "none run yet"],
     ...(status.benchmarks.due ? ([["benchmarks due", `${status.benchmarks.due.since.slice(11, 16)} to ${status.benchmarks.due.until.slice(11, 16)}`]] as const) : []),
     ["count", status.count ? (status.count.verdict === "PASS" ? { text: "PASS", color: "green" } : { text: `${status.count.verdict}: ${status.count.lines.length} lines`, color: "red" }) : "not run yet"],
   ]);
@@ -217,7 +233,14 @@ function recordsPhase(last: RecordsCommit): RecordsPhase {
   if (/^(landed as|nothing left to commit|recorded nothing)/.test(last.result)) return "done";
   return last.settled ? "not landed" : "under way";
 }
-const RECORDS_COLOR: Partial<Record<RecordsPhase, "red" | "yellow">> = { failed: "red", "not landed": "yellow" };
+const RECORDS_COLOR: Partial<Record<RecordsPhase | "unmeasured", "red" | "yellow">> = { failed: "red", "not landed": "yellow", unmeasured: "yellow" };
+
+/** Where the last night's benchmarks stand: their results commit's phase, as a records run's, or a night that kept no record. */
+function benchmarksPhase(bench: BenchmarksRun): RecordsPhase | "unmeasured" {
+  const outcome = bench.outcome;
+  if (outcome && outcome in PHASE) return PHASE[outcome as keyof typeof PHASE];
+  return bench.measured ? "under way" : "unmeasured";
+}
 
 /**
  * The full check's gauges: landing to verified (amber past an hour, red past
@@ -337,12 +360,16 @@ export function fullCheckEvents(status: FullCheckStatus): ReportedEvent[] {
       summary: `${part} records at ${short(last.commit)}: ${last.result}`,
     });
   }
+  // The night is an event as it ends, and its results commit as it fails, lands or is given up.
   const bench = status.benchmarks.last;
   if (bench) {
+    const phase = benchmarksPhase(bench);
+    const step = phase === "under way" || phase === "unmeasured" ? "" : `:${phase}`;
     events.push({
-      id: `benchmarks:${bench.commit}:${bench.at}`,
-      time: Date.parse(bench.at),
-      level: bench.measured ? "notice" : "warning",
+      id: `benchmarks:${bench.commit}:${bench.at}${step}`,
+      ...(step ? {} : { time: Date.parse(bench.at) }),
+      level: phase === "failed" ? "error" : phase === "unmeasured" || phase === "not landed" ? "warning" : "notice",
+      ...(phase === "failed" ? { outcome: "failed" as const } : {}),
       kind: "full-check.benchmarks",
       summary: `benchmarks on ${short(bench.commit)}: ${bench.result}${status.benchmarks.slower.length ? `; ${status.benchmarks.slower.length} rows slower than their best` : ""}`,
     });
