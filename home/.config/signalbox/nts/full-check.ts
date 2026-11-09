@@ -36,6 +36,8 @@ interface RecordsCommit {
   readonly attempts?: number;
   /** When the full check stopped following it: landed, withdrawn, nothing to apply, or given up. */
   readonly settled?: string;
+  /** Where it stands, kept at each step (with #604; absent from an older controller). */
+  readonly outcome?: "recording" | "submitted" | "failed" | "landed" | "nothing" | "given-up" | "withdrawn";
 }
 
 interface PartStatus {
@@ -193,13 +195,24 @@ export function fullCheckReport(status: FullCheckStatus, now = Date.now()): Repo
 }
 
 /**
- * Where a part's last records run stands, as its result says: under way
- * (recording, or submitted to the landing check), done (landed, or nothing to
- * land), failing now, or given up without landing (its rows stay pending for
- * the next records run).
+ * Where a part's last records run stands: under way (recording, or submitted
+ * to the landing check), done (landed, or nothing to land), failing now, or
+ * given up or withdrawn without landing (its rows stay pending for the next
+ * records run).
  */
 type RecordsPhase = "under way" | "done" | "failed" | "not landed";
+const PHASE: Record<NonNullable<RecordsCommit["outcome"]>, RecordsPhase> = {
+  recording: "under way",
+  submitted: "under way",
+  failed: "failed",
+  landed: "done",
+  nothing: "done",
+  "given-up": "not landed",
+  withdrawn: "not landed",
+};
 function recordsPhase(last: RecordsCommit): RecordsPhase {
+  if (last.outcome) return PHASE[last.outcome] ?? "under way";
+  // A controller older than #604 says it only in its result.
   if (/^(failed|record-pending\.ts --apply exited|wrote \d+ record file)/.test(last.result) || / did not start: /.test(last.result)) return "failed";
   if (/^(landed as|nothing left to commit|recorded nothing)/.test(last.result)) return "done";
   return last.settled ? "not landed" : "under way";
