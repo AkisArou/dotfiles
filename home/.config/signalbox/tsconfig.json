@@ -1,0 +1,23 @@
+{
+  // Your signalbox configuration, checked as signalbox runs it: TypeScript that node loads as it is.
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "lib": ["es2024"],
+    "types": ["node"],
+    "typeRoots": ["./node_modules/signalbox/node_modules/@types"],
+    // Views in JSX (.tsx), with the React signalbox renders them with.
+    "jsx": "react-jsx",
+    "paths": {
+      "react": ["./node_modules/signalbox/node_modules/@types/react"],
+      "react/*": ["./node_modules/signalbox/node_modules/@types/react/*.d.ts"]
+    },
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

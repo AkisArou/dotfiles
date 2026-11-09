@@ -72,6 +72,14 @@ corepack enable pnpm
 corepack enable yarn
 asdf reshim nodejs
 
+print_info "Linking signalbox's types into its configuration..."
+# The configuration is in home/.config/signalbox; only node_modules/signalbox is the machine's own.
+if [ -f "$HOME/Projects/signalbox/dist/cli.js" ]; then
+  "$HOME/.local/bin/signalbox" setup
+else
+  echo "signalbox isn't built in ~/Projects/signalbox yet: run 'signalbox setup' once it is"
+fi
+
 print_info "Setting xdg default web browser..."
 ORIGINAL_BROWSER=$BROWSER
 unset BROWSER
