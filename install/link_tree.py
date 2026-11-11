@@ -29,6 +29,8 @@ DEPLOYMENT_RULES = {
     },
     'root': {
         'copy': {
+            'etc/locale.gen': 0o644,
+            'etc/pacman.conf': 0o644,
             'etc/strongswan.d': 0o644,
             'etc/systemd/network': 0o644,
             'etc/sudoers.d': 0o440,

@@ -110,10 +110,12 @@ class DeploymentTests(unittest.TestCase):
     def test_root_copy_rules_are_applied_from_the_table(self):
         network = self.write(self.repo / 'root/etc/systemd/network/20-test.network', '[Match]\nName=en*\n')
         vpn = self.write(self.repo / 'root/etc/strongswan.d/charon/resolve.conf', 'resolve { load = no }\n')
+        locales = self.write(self.repo / 'root/etc/locale.gen', 'en_US.UTF-8 UTF-8\n')
+        pacman = self.write(self.repo / 'root/etc/pacman.conf', '[options]\nColor\n')
         environment = self.write(self.repo / 'root/etc/environment', 'EDITOR=vim\n')
         destination = self.base / 'filesystem'
         deploy(self.repo / 'root', destination)
-        for source in (network, vpn):
+        for source in (network, vpn, locales, pacman):
             copied = destination / source.relative_to(self.repo / 'root')
             self.assertFalse(copied.is_symlink())
             self.assertEqual(copied.read_bytes(), source.read_bytes())

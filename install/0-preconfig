@@ -14,7 +14,11 @@ sudo usermod -aG wheel akisarou
 sudo cp "/home/akisarou/dotfiles/root/etc/sudoers.d/sudoers" /etc/sudoers.d/sudoers
 sudo chown root:root /etc/sudoers.d/sudoers
 
-sudo pacman -S --needed zsh
+sudo pacman -S --needed zsh python
+
+# Apply pacman preferences before step 1 syncs repositories and installs packages.
+sudo python3 "$HOME/dotfiles/install/link_tree.py" \
+  "$HOME/dotfiles/root/etc/pacman.conf" /etc/pacman.conf
 
 # Check if the current shell is zsh
 if [[ "$SHELL" != */zsh ]]; then

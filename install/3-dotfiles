@@ -20,6 +20,9 @@ python3 "$repo_directory/install/deploy-home"
 
 sudo python3 "$repo_directory/install/link-root"
 
+print_info "Generating system locales..."
+sudo locale-gen
+
 sudo sysctl --system >/dev/null
 if [[ -e /sys/module/zswap/parameters/enabled ]]; then
   printf '0\n' | sudo tee /sys/module/zswap/parameters/enabled >/dev/null

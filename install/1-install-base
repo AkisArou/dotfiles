@@ -8,8 +8,9 @@ echo "Installing base packages and applying base config..."
 echo "----------------------------------------------------"
 echo ""
 
+# Sync the repositories enabled in step 0 and upgrade before installing packages.
 # Ensure rustup is installed for paru, because rust conflicts with rustup which I have a dep
-sudo pacman -S rustup
+sudo pacman -Syu --needed rustup
 rustup default stable
 
 # Paru
