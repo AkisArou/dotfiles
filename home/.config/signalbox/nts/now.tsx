@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { defineView, gaugeState, showGauge, type FreeView, type Run, type TableCell, type Task, type ViewContext } from "signalbox";
 import { Row, Spacer, Stack, Text } from "signalbox/blocks";
 import { GOAL_MIN, LANDING } from "./landing.ts";
-import { streamOrder } from "./streams.ts";
+import { isGroup, leaves, placeOf, streamOrder } from "./streams.ts";
 
 const cellText = (cell: TableCell | undefined) => (cell === undefined ? "" : typeof cell === "object" ? cell.text : String(cell));
 const cellColor = (cell: TableCell | undefined) => (typeof cell === "object" ? cell.color : undefined);
@@ -158,13 +158,31 @@ function Agents({ context }: { readonly context: ViewContext }) {
 
 function Streams({ context }: { readonly context: ViewContext }) {
   const order = streamOrder(context);
-  const streams = new Map<string, { title: string; done: number; total: number; open: number; working: number }>();
-  for (const task of context.snapshot.tasks as readonly Task[]) {
-    if (!task.parent) continue;
-    const stream = streams.get(task.parent.id) ?? { title: task.parent.title, done: task.parent.progress?.done ?? 0, total: task.parent.progress?.total ?? 0, open: 0, working: 0 };
+  const all = context.snapshot.tasks as readonly Task[];
+  const byId = new Map(all.map((task) => [task.id, task] as const));
+  // A stream's progress is its groups' tasks: each group's sub-issues closed, of all of them, counted once.
+  const streams = new Map<string, { title: string; done: number; total: number; open: number; working: number; groups: Set<string> }>();
+  for (const task of leaves(all)) {
+    const place = placeOf(task, byId);
+    if (!place.stream) continue;
+    const stream = streams.get(place.stream.id) ?? { title: place.stream.title, done: 0, total: 0, open: 0, working: 0, groups: new Set<string>() };
     stream.open += 1;
     if (task.status === "in_progress") stream.working += 1;
-    streams.set(task.parent.id, stream);
+    if (place.group && !stream.groups.has(place.group.id)) {
+      stream.groups.add(place.group.id);
+      stream.done += place.group.progress?.done ?? 0;
+      stream.total += place.group.progress?.total ?? 0;
+    }
+    streams.set(place.stream.id, stream);
+  }
+  // A group with no open leaf still counts toward its stream's progress.
+  for (const group of all.filter(isGroup)) {
+    const stream = group.parent && streams.get(group.parent.id);
+    if (!stream || stream.groups.has(group.id) || !group.data) continue;
+    const sub = (group.data as { subIssues?: { total: number; completed: number } }).subIssues;
+    stream.groups.add(group.id);
+    stream.done += sub?.completed ?? 0;
+    stream.total += sub?.total ?? 0;
   }
   const shown = [...streams].sort(([a], [b]) => (order.get(a) ?? order.size) - (order.get(b) ?? order.size));
   const widest = Math.max(0, ...shown.map(([, stream]) => stream.title.length));

@@ -37,6 +37,9 @@ const landable = requires({
 /** A defect is reported as a gated fixture, with a control that differs in one thing and agrees with node. */
 const fixture = requires({ fixture: "the path of the gated fixture", control: "the path of its control, which agrees with node" });
 
+/** A leaf ready to take: labelled `task` (docs/workflow.md, Tasks). Groups and unscoped leaves never are. */
+const ready = take.labelled("task");
+
 /** What every agent that builds shares: a tree from nts's pool, and a landable result. */
 const builder = { workspace: ntsPool(), results: { review: landable } };
 
@@ -54,11 +57,13 @@ const conformance = views.tables(CONFORMANCE_TABLES, { id: "conformance", label:
 const plan = views.document("docs/plan.md", { id: "plan", label: "Plan" });
 
 export const nts = defineConfig(
-  // Tasks: issues labelled `task` (.github/labels.json); one held or parked is listed under its state, and no
-  // agent takes it. Needs you: those waiting on you.
+  // Tasks: every open issue but the streams (`kind:parent`): the groups (`kind:group`), which the Tasks tab
+  // shows as headings, and their leaves. Only a leaf labelled `task` is ready, and only such a leaf is taken
+  // (the agents' `takes` below); one held or parked is listed under its state. Needs you: those waiting on you.
   github("AkisArou/nts", {
     name: "nts",
-    isTask: take.labelled("task"),
+    isTask: (issue) => !issue.labels.includes("kind:parent"),
+    limit: 400,
     needsYou: take.labelled("state:needs-user"),
     states: { "state:held": "held", "state:parked": "parked" },
     newTaskLabels: ["task"],
@@ -99,10 +104,10 @@ export const nts = defineConfig(
       analyst: { programs: [programs.claude({ model: "claude-sonnet-5-5" })], instructions: instructions("analyst") },
       // Foundations and performance: an agent stays in its area from task to task, and hands over at a
       // boundary it chooses once its context passes the budget.
-      compiler: { ...builder, instructions: instructions("compiler"), takes: take.labelled("area:compiler"), max: 2, session: { keep: "area", budget: 400_000 } },
-      runtime: { ...builder, instructions: instructions("runtime"), takes: take.labelled("area:runtime"), session: { keep: "area", budget: 400_000 } },
+      compiler: { ...builder, instructions: instructions("compiler"), takes: take.all(ready, take.labelled("area:compiler")), max: 2, session: { keep: "area", budget: 400_000 } },
+      runtime: { ...builder, instructions: instructions("runtime"), takes: take.all(ready, take.labelled("area:runtime")), session: { keep: "area", budget: 400_000 } },
       // A wrong answer or a crash becomes a gated fixture with its control, then a fix.
-      fixer: { ...builder, instructions: instructions("fixer"), takes: take.labelled("kind:wrong-answer", "kind:abort"), max: 2, results: { review: landable, done: fixture } },
+      fixer: { ...builder, instructions: instructions("fixer"), takes: take.all(ready, take.labelled("kind:wrong-answer", "kind:abort")), max: 2, results: { review: landable, done: fixture } },
       // Every change to compiler/ or runtime/c/ is reviewed, on a program other than its author's.
       reviewer: { instructions: instructions("reviewer"), reviews: review.touches("compiler/**", "runtime/c/**"), max: 2 },
     },
