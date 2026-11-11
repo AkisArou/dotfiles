@@ -50,22 +50,9 @@ map("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 -- qflist
 map("n", "<leader>xq", "<cmd>copen<CR>", opts)
 
--- Keybinding for saving and closing the current buffer
-local function format_and_switch_buffer(cmd)
-  if vim.bo.modifiable then
-    vim.cmd("lua require('conform').format()")
-  end
-
-  vim.cmd(cmd)
-end
-
-map("n", "[b", function()
-  format_and_switch_buffer("bprevious")
-end, opts)
-
-map("n", "]b", function()
-  format_and_switch_buffer("bnext")
-end, opts)
+-- Switch buffers; autosave writes the one left, and writing formats it
+map("n", "[b", "<cmd>bprevious<CR>", opts)
+map("n", "]b", "<cmd>bnext<CR>", opts)
 
 map("n", "<leader>uu", function()
   vim.cmd([[
@@ -96,7 +83,7 @@ map("n", "<leader>gl", function()
 end, { desc = "Lazygit" })
 
 map("n", "<leader>bd", function()
-  util.write_format()
+  util.write()
   Snacks.bufdelete()
 end, { desc = "Buffer delete current" })
 
@@ -105,6 +92,6 @@ map("n", "<leader>bo", function()
 end, { desc = "Buffer delete others" })
 
 map("n", "<leader>ba", function()
-  util.write_format_all()
+  util.write_all()
   Snacks.bufdelete.all()
 end, { desc = "Buffer delete all" })

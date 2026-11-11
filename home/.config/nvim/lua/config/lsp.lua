@@ -111,7 +111,6 @@ local function on_attach(client, bufnr)
         apply = true,
       })
 
-      require("conform").format({ bufnr = bufnr, async = false })
       vim.cmd("silent! w")
     end, "Remove unused imports")
   end

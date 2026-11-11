@@ -4,18 +4,14 @@ local util = require("conform.util")
 local root_file = util.root_file({ ".git" })
 local conform = require("conform")
 
-local prettier_compatible_formatter = (function()
-  local has_oxfmt = util.root_file({
-    ".oxfmtrc.json",
-    ".oxfmtrc.jsonc",
-  })
-
-  if has_oxfmt then
-    return {} -- use LSP only
-  else
-    return { "prettierd" }
+---@param bufnr integer
+local function prettier_compatible_formatter(bufnr)
+  if vim.fs.root(bufnr, { ".oxfmtrc.json", ".oxfmtrc.jsonc", "oxfmt.config.ts" }) then
+    return { name = "oxfmt" } -- oxfmt formats through its LSP, without other LSP formatters
   end
-end)()
+
+  return { "prettierd" }
+end
 
 conform.setup({
   notify_on_error = false,
@@ -34,9 +30,9 @@ conform.setup({
     ["markdown.mdx"] = prettier_compatible_formatter,
     zsh = { "shfmt", "shellcheck" },
     sh = { "shfmt", "shellcheck" },
-    rust = { "rustfmt", lsp_format = "fallback" },
+    rust = { "rustfmt" },
   },
-  format_on_save = {
+  default_format_opts = {
     lsp_format = "fallback",
     timeout_ms = 1000,
   },

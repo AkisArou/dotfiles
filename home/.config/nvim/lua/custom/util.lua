@@ -1,26 +1,20 @@
 local M = {}
 
-local ok, conform = pcall(require, "conform")
-
 ---@param cmd "w" | "wall"
-local function format_and_write(cmd)
+local function write(cmd)
   if not vim.bo.modifiable then
     return
-  end
-
-  if ok then
-    conform.format()
   end
 
   vim.cmd("silent " .. cmd)
 end
 
-M.write_format = function()
-  format_and_write("w")
+M.write = function()
+  write("w")
 end
 
-M.write_format_all = function()
-  format_and_write("wall")
+M.write_all = function()
+  write("wall")
 end
 
 return M

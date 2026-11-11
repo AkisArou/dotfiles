@@ -154,6 +154,15 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
+-- Fix and format on save: lint fixes first, so the formatter formats their result
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = augroup("fix_and_format"),
+  callback = function(event)
+    require("custom.oxlint").fix_all(event.buf)
+    require("conform").format({ bufnr = event.buf })
+  end,
+})
+
 -- Autosave (only for existing files that have been modified)
 vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost" }, {
   group = augroup("autowrite"),
