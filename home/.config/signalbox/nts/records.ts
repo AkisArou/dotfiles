@@ -52,7 +52,12 @@ export interface ConformanceSummary {
     Record<
       Backend,
       {
-        readonly test262?: Outcomes & { readonly slices: Readonly<Record<string, Outcomes & { readonly under: string }>> };
+        readonly test262?: Outcomes & {
+          readonly slices: Readonly<Record<string, Outcomes & { readonly under: string }>>;
+          /** The cases a backend runs, and the parse and resolution negatives the frontend judges once, on C; absent without the test262 checkout. */
+          readonly runtime?: Outcomes;
+          readonly frontend?: Outcomes;
+        };
         readonly typescript?: Outcomes;
         readonly benchmarks?: Outcomes & { readonly scopes: Readonly<Record<string, Outcomes>> };
         readonly benchmarkRuns?: Outcomes;
@@ -60,12 +65,33 @@ export interface ConformanceSummary {
       }
     >
   >;
+  /** The whole test262 suite, from the census reports of the full check's last green wide run; absent before one kept a report. */
+  readonly census?: {
+    readonly run: string;
+    readonly commit: string;
+    readonly at: string;
+    readonly backends: Readonly<Partial<Record<Backend, CensusTotals & { readonly slices: Readonly<Record<string, CensusTotals & { readonly under: string }>> }>>>;
+    /** The test262 directories no report covers, with their file counts: `test/intl402`. */
+    readonly unmeasured: Readonly<Record<string, number>>;
+  };
+}
+
+/** A census report's counts, or a backend's directories' together (tooling/census/census-report.ts). */
+interface CensusTotals {
+  readonly selected: number;
+  readonly cases: number;
+  readonly attempted: number;
+  readonly outcomes: Readonly<Record<"pass" | "fail" | "refused" | "unsupported" | "no-verdict", number>>;
+  readonly negativesAccepted: number;
+  readonly notAttempted: Readonly<Record<string, number>>;
+  readonly refused: Readonly<Record<string, number>>;
+  readonly degraded: boolean;
 }
 
 export const BENCHMARKS = "nts-benchmarks";
 export const CONFORMANCE = "nts-conformance";
 export const BENCHMARK_TABLES = ["bench-run", "bench-counts", "bench-rows"];
-export const CONFORMANCE_TABLES = ["conformance"];
+export const CONFORMANCE_TABLES = ["conformance-suite", "conformance"];
 
 const DAY = 86_400_000;
 const short = (commit: string | null | undefined) => commit?.slice(0, 12) ?? "?";
@@ -200,6 +226,97 @@ const failing = (outcomes: Readonly<Record<string, number>> | undefined) =>
 
 const total = (outcomes: Readonly<Record<string, number>> | undefined) => Object.values(outcomes ?? {}).reduce((sum, count) => sum + count, 0);
 
+/** Why a case was not attempted, in a word: the census's harness cause (`scope:initial-lane:no-strict`) as the tab names it. */
+function unattempted(cause: string): string {
+  if (cause === "scope:initial-lane:no-strict") return "sloppy-only";
+  if (cause === "scope:initial-lane:raw") return "raw";
+  if (cause === "harness:$262") return "$262";
+  if (cause.startsWith("include:")) return "missing include";
+  return "harness gap";
+}
+
+/** A refused case's family, in a word: what stopped it building. */
+const REFUSED: Readonly<Record<string, string>> = {
+  "lowering (NTS1xxx)": "lowering",
+  "checker (TS)": "checker",
+  "backend/verifier (NTS2xxx)": "backend",
+  "negative test, rejected by no evidence code": "negative, no evidence code",
+};
+
+/** Counts regrouped under shorter names, largest first: `2687 sloppy-only · 450 $262`. */
+function grouped(counts: Readonly<Record<string, number>>, name: (key: string) => string): string {
+  const by = new Map<string, number>();
+  for (const [key, n] of Object.entries(counts)) by.set(name(key), (by.get(name(key)) ?? 0) + n);
+  return [...by].sort(([a, m], [b, n]) => n - m || a.localeCompare(b)).map(([key, n]) => `${n} ${key}`).join(" · ");
+}
+
+/**
+ * The whole test262 suite, every case once, as the full check's last green
+ * wide census counted it: each backend's directories together, then one by
+ * one, by outcome, with why the refused ones did not build and why the rest
+ * were not attempted; and the directories no census runs.
+ */
+function suiteTable(summary: ConformanceSummary, behind: ReadonlyMap<string, number>): Table {
+  const columns = [
+    { key: "record", label: "test262" },
+    { key: "cases", label: "cases", align: "right" as const },
+    { key: "pass", label: "pass", align: "right" as const },
+    { key: "fail", label: "fail", align: "right" as const },
+    { key: "refused", label: "refused", align: "right" as const },
+    { key: "unattempted", label: "not attempted", align: "right" as const },
+    { key: "noVerdict", label: "no verdict", align: "right" as const },
+    { key: "why", label: "why not run" },
+  ];
+  const title = "The whole test262 suite, each case once: refused cases did not build, unattempted ones the strict lane or the harness leave out";
+  const census = summary.census;
+  if (!census) return { id: "conformance-suite", title, key: "record", columns, rows: [{ record: "no census report yet: the full check's next green wide run writes one" }] };
+  const share = (n: number, of: number) => (of ? `${n} (${((100 * n) / of).toFixed(1)}%)` : String(n));
+  const row = (record: string, counts: CensusTotals, why: string) => ({
+    record,
+    cases: counts.cases,
+    pass: share(counts.outcomes.pass, counts.cases),
+    fail: counts.outcomes.fail || "",
+    refused: counts.outcomes.refused ? share(counts.outcomes.refused, counts.cases) : "",
+    unattempted: counts.outcomes.unsupported || "",
+    noVerdict: counts.outcomes["no-verdict"] ? { text: String(counts.outcomes["no-verdict"]), ...(counts.degraded ? { color: "yellow" as const } : {}) } : "",
+    why,
+  });
+  const why = (counts: CensusTotals) =>
+    [
+      counts.outcomes.refused ? `refused: ${grouped(counts.refused, (family) => REFUSED[family] ?? family)}` : "",
+      counts.outcomes.unsupported ? `not attempted: ${grouped(counts.notAttempted, unattempted)}` : "",
+      counts.selected > counts.cases ? `${counts.selected - counts.cases} frontend negatives left to C` : "",
+      counts.negativesAccepted ? `${counts.negativesAccepted} negatives accepted` : "",
+      counts.degraded ? "a degraded run: no verdict may hold load timeouts" : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
+  const rows = BACKENDS.flatMap((backend) => {
+    const totals = census.backends[backend];
+    if (!totals) return [];
+    return [
+      { ...row(`${NAME[backend]} all`, totals, why(totals)), record: { text: `${NAME[backend]} all`, bold: true } },
+      ...Object.values(totals.slices).map((slice) => row(`${NAME[backend]} ${slice.under.slice("test/".length)}`, slice, why(slice))),
+    ];
+  });
+  for (const [directory, files] of Object.entries(census.unmeasured)) {
+    rows.push({ record: directory.slice("test/".length), cases: files, pass: "", fail: "", refused: "", unattempted: "", noVerdict: "", why: directory === "test/intl402" ? "ECMA-402 (Intl): no census runs it yet" : "no census runs it" });
+  }
+  const age = behind.get(census.commit);
+  return {
+    id: "conformance-suite",
+    title,
+    key: "record",
+    columns,
+    rows,
+    facts: [
+      ["census", `the full check's last green wide run, at ${census.commit.slice(0, 12)}${age === undefined ? "" : `, ${age} compiler commits ago`}`],
+      ["pass", "strict-pass: one strict variant per file; sloppy-only files are counted and not run"],
+    ],
+    at: Date.parse(census.at),
+  };
+}
+
 /** The records each backend is held to, a row each: how many pass, what the rest are, what is pending, and how old the record is. */
 function conformanceTable(summary: ConformanceSummary, behind: ReadonlyMap<string, number>): Table {
   const age = (commits: readonly (string | null | undefined)[]): TableCell => {
@@ -223,8 +340,17 @@ function conformanceTable(summary: ConformanceSummary, behind: ReadonlyMap<strin
         written: age(commits),
       };
     };
+    // test262 as the cases a backend runs, so the backends compare like for like, and the frontend's negatives (C's alone) beside them.
+    const test262 = (test262: NonNullable<typeof records.test262>) => {
+      const commits = Object.values(test262.slices).map((slice) => slice.commit);
+      if (!test262.runtime || !test262.frontend) return [row("test262", test262.outcomes, undefined, commits)];
+      return [
+        row("test262 runtime", test262.runtime.outcomes, undefined, commits),
+        ...(test262.frontend.cases ? [row("test262 frontend negatives", test262.frontend.outcomes, undefined, commits)] : []),
+      ];
+    };
     return [
-      ...(records.test262 ? [row("test262", records.test262.outcomes, undefined, Object.values(records.test262.slices).map((slice) => slice.commit))] : []),
+      ...(records.test262 ? test262(records.test262) : []),
       ...(records.typescript ? [row("TypeScript", records.typescript.outcomes, records.typescript.pending, [records.typescript.commit])] : []),
       ...(records.benchmarks ? Object.entries(records.benchmarks.scopes).map(([scope, outcomes]) => row(`benchmarks ${scope}`, outcomes.outcomes, records.benchmarks?.pending, [records.benchmarks?.commit])) : []),
       ...(records.benchmarkRuns ? [row("benchmark runs", records.benchmarkRuns.outcomes, records.benchmarkRuns.pending, [records.benchmarkRuns.commit])] : []),
@@ -289,7 +415,7 @@ export function ntsBenchmarks(): Provider {
   };
 }
 
-/** The Conformance tab's table, read every five minutes. */
+/** The Conformance tab's tables, the whole test262 suite and the records, read every five minutes. */
 export function ntsConformance(): Provider {
   return {
     id: CONFORMANCE,
@@ -306,9 +432,9 @@ export function ntsConformance(): Provider {
           records?.benchmarkRuns?.commit,
           records?.dex?.commit,
         ];
-      }).filter((commit): commit is string => Boolean(commit));
+      }).concat(summary.census?.commit).filter((commit): commit is string => Boolean(commit));
       const behind = await compilerCommitsSince(context, commits);
-      return { tables: [conformanceTable(summary, behind)], gauges: conformanceGauges(summary, behind) };
+      return { tables: [suiteTable(summary, behind), conformanceTable(summary, behind)], gauges: conformanceGauges(summary, behind) };
     },
   };
 }
