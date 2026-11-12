@@ -63,14 +63,15 @@ bindsym $mod+p exec flameshot gui
 
 floating_modifier $mod
 
-# reload the configuration file
-bindsym $mod+Shift+c reload
+# Reload; Super+Shift+C opens the theme picker, as in sway.
+bindsym $mod+Control+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 
 bindsym $mod+Shift+b exec ~/.config/rofi/bluetooth
 bindsym $mod+Shift+e exec ~/.config/rofi/emulator
 bindsym $mod+Shift+q exec ~/.config/rofi/powermenu
+bindsym $mod+Shift+c exec ~/.config/rofi/theme
 
 bindsym $mod+Shift+g exec ~/.local/bin/start-genymotion-emulator
 bindsym $mod+less exec dunstctl close-all
