@@ -13,5 +13,9 @@ fi
 export POLY_FONT
 export POLY_BAR_HEIGHT
 
+# Bootstrap the theme include on first launch, before the theme watcher runs.
+BAR_THEME=$(~/.local/bin/theme get)
+ln -sfn "theme-${BAR_THEME:-dark}.ini" ~/.config/polybar/theme.ini
+
 killall polybar
 polybar default &

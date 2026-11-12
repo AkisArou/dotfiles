@@ -15,7 +15,7 @@ Applying sets the desktop's colour scheme, which browsers, VS Code, kitty and
 libadwaita apps follow, the GTK theme and the wallpaper. It switches every foot window
 between its colors-light and colors-dark; tmux and Neovim follow foot, and so
 do shells, through ~/.config/shell/zsh/color-theme. Configs with a light and
-a dark variant get a link to the one in use (VARIANTS), and waybar and dunst
+a dark variant get a link to the one in use (VARIANTS), and waybar, polybar and dunst
 reload. The theme in use is kept in $XDG_STATE_HOME/theme/current, which
 foot's launcher and Doom Emacs read too, and its wallpaper is linked from
 $XDG_STATE_HOME/theme/wallpaper for sway and i3.
@@ -42,6 +42,7 @@ VARIANTS = {
     '.config/git/theme.gitconfig': 'theme-{}.gitconfig',
     '.config/gitui/theme.ron': 'theme-{}.ron',
     '.config/lazygit/theme.yml': 'theme-{}.yml',
+    '.config/polybar/theme.ini': 'theme-{}.ini',
     '.config/rofi/theme.rasi': 'theme-{}.rasi',
     '.config/sway/theme': 'theme-{}',
     '.config/waybar/theme.css': 'theme-{}.css',
@@ -137,6 +138,7 @@ def apply(theme, force=False):
         run('i3-msg', colours)
     # waybar reloads on SIGUSR2; SIGUSR1 would hide it.
     run('pkill', '-USR2', '-x', 'waybar')
+    run('polybar-msg', 'cmd', 'restart')
     run('dunstctl', 'reload')
     # tmux's fallback until a client reports its terminal's theme.
     run('tmux', 'set', '-g', '@theme', theme)
