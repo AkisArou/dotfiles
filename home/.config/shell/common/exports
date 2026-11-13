@@ -62,6 +62,9 @@ fi
 export NODE_OPTIONS="--max-old-space-size=8192 --disable-warning=ExperimentalWarning"
 export NODE_COMPILE_CACHE="$HOME/.cache/node-compile-cache"
 
+# https://github.com/GoogleChrome/modern-web-guidance-src#-telemetry--privacy
+export DISABLE_TELEMETRY=1
+
 export DESKTOP="192.168.1.2"
 export LAPTOP="192.168.1.3"
 
