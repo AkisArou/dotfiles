@@ -8,7 +8,7 @@ clear
 echo "Applying system config..."
 echo "-------------------------"
 
-sudo usermod -aG wheel,audio,video,docker,network,adm,input,storage,wireshark "$USER"
+sudo usermod -aG wheel,audio,video,docker,network,adm,input,storage,wireshark,libvirt,kvm "$USER"
 
 print_info "Setting system timezone..."
 sudo timedatectl set-timezone Europe/Athens
@@ -26,6 +26,7 @@ sudo systemctl enable --now power-profiles-daemon
 sudo systemctl enable --now performance.service
 sudo systemctl enable --now paccache.timer
 sudo systemctl enable --now fstrim.timer
+sudo systemctl enable --now libvirtd
 
 print_info "Setting up tmux..."
 if [[ -e "$HOME/.tmux/plugins/tpm/.git" ]]; then
@@ -64,7 +65,6 @@ print_info "Configuring java... (for the current session only)"
 
 print_info "Setting up docker..."
 ls -al /dev/kvm
-sudo usermod -aG kvm $USER
 sudo usermod -aG docker $USER
 docker --version
 # .socket instead of .service to start docker deamon only when needed

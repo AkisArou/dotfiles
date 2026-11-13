@@ -50,6 +50,7 @@ packages=(
   "cmake"
   "curl"
   "dconf"
+  "dnsmasq"
   "docker"
   "docker-compose"
   "dunst"
@@ -89,6 +90,7 @@ packages=(
   "libreoffice-still"
   "libva-utils"
   "libvdpau-va-gl"
+  "libvirt"
   "linux-headers"
   "lld"
   "man-pages"
@@ -117,6 +119,7 @@ packages=(
   "python-gobject"
   "python-pip"
   "python-pipx"
+  "qemu-full"
   "qt6ct"
   "qt6-wayland"
   "ripgrep"
@@ -136,6 +139,7 @@ packages=(
   "unzip" # Needed by asdf
   "update-grub"
   "vdpauinfo"
+  "virt-manager"
   "visual-studio-code-bin"
   "vulkan-tools"
   "wget"
@@ -177,7 +181,7 @@ fi
 install_packages "${packages[@]}"
 
 # AI Agents
-curl -fsSL https://chatgpt.com/codex/install.sh | \
+curl -fsSL https://chatgpt.com/codex/install.sh |
   CODEX_INSTALL_DIR="$HOME/.local/libexec" CODEX_NON_INTERACTIVE=1 PATH="$HOME/.local/libexec:$PATH" sh
 curl -fsSL https://claude.ai/install.sh | bash
 curl -fsSL https://dev.meta.ai/install.sh | sh
