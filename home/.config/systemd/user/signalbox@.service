@@ -1,0 +1,26 @@
+[Unit]
+Description=Signalbox host for %i (API, browser UI and orchestration)
+Documentation=file://%h/.config/signalbox/%i/README.md
+After=default.target
+
+[Service]
+Type=simple
+# One folder per project under ~/.config/signalbox; its project.json names the
+# project's roots, ports and whether its coordinator runs.
+WorkingDirectory=%h/.config/signalbox/%i
+# Agents inherit the host's environment, and a project's tools may need host
+# variables by name (NTS's gate requires ANDROID_HOME and JAVA_HOME). A unit's
+# environment is minimal, so the host runs in a zsh login shell. JAVA_HOME is
+# set by .zshrc (interactive only) from asdf's current java, so the same
+# derivation runs here.
+ExecStart=/usr/bin/zsh -lc 'java=$$(asdf which java) && export JAVA_HOME=$${java:A:h:h} JDK_HOME=$${java:A:h:h}; exec node server.ts'
+# Agent sessions run in their own systemd scope (tmux), so stopping or
+# restarting this unit never ends them; the host recovers them on start.
+Restart=on-failure
+RestartSec=10
+# CPUs 4-5 are NTS's measurement cores.
+CPUAffinity=0-3 6-31
+Nice=5
+
+[Install]
+WantedBy=default.target

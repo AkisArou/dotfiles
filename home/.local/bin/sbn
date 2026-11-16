@@ -1,0 +1,3 @@
+#!/bin/sh
+# sbn: Signalbox for the project of the current directory (~/.config/signalbox/sbn.ts).
+exec node "$HOME/.config/signalbox/sbn.ts" "$@"

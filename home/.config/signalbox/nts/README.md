@@ -4,26 +4,28 @@ The NTS application on the [Signalbox SDK](../../../../Projects/signalbox/signal
 
 ## Run
 
-Requires Node 26.4+, pnpm, tmux, a GitHub CLI login with access to `AkisArou/nts`, and an authenticated Claude Code (Codex optional). From this directory (`~/.config/signalbox`, a link to the dotfiles project):
+Requires Node 26.4+, pnpm, tmux, a GitHub CLI login with access to `AkisArou/nts`, and an authenticated Claude Code (Codex optional). From anywhere inside `~/Projects/nts` or a pool tree:
 
 ```sh
-pnpm install
-pnpm doctor          # read-only prerequisites
-pnpm dev             # host, API and browser UI on http://127.0.0.1:4310
-pnpm tui             # the terminal UI, in another terminal
+sbn enable          # the host (signalbox@nts) at login, and now
+sbn                 # the TUI
+sbn web             # the browser UI, http://127.0.0.1:4310
+sbn status          # host and assignments
+sbn doctor          # read-only prerequisites
 ```
 
-`pnpm sdk` rebuilds the SDK from `~/Projects/signalbox/signalbox` and refreshes this project's injected copy of it; every other script runs it first. `pnpm check` type-checks and `pnpm test` runs the application tests, which use isolated fixtures and never touch the NTS checkout, GitHub or running agents.
+Settings: [`project.json`](project.json) holds the roots, ports (4310 browser, 4311 API) and whether the coordinator runs; [`config.ts`](config.ts) holds the rest (pool, polling, terminal programs, initial profiles). Environment variables override for one host: `NTS_ROOT`, `SIGNALBOX_NTS_PORT`, `SIGNALBOX_NTS_API_PORT`, `SIGNALBOX_NTS_STATE`, `SIGNALBOX_NTS_COORDINATOR=0|1`. State lives in `~/.local/state/signalbox/nts/<project-id>`; one host owns it at a time.
 
-Settings live in [`config.ts`](config.ts): the checkout (`NTS_ROOT`), pool (`NTS_POOL_ROOT`), GitHub repository (`NTS_GITHUB_REPO`), ports (`SIGNALBOX_NTS_PORT`, `SIGNALBOX_NTS_API_PORT`) and state (`SIGNALBOX_NTS_STATE`, default `~/.local/state/signalbox/nts/<project-id>`). One host owns a state directory at a time.
+`pnpm sdk` rebuilds the SDK and refreshes the workspace's injected copy; `pnpm check` type-checks; `pnpm test` and `pnpm test:tui` run the tests, which use isolated fixtures and never touch the NTS checkout, GitHub or running agents.
 
 ## Layout
 
 | Path             | Responsibility                                                                     |
 | ---------------- | ---------------------------------------------------------------------------------- |
-| `config.ts`      | Settings: paths, ports, polling, state, terminal programs and default profiles     |
+| `project.json`   | The project's identity, shared with sbn: roots, ports, coordinator                 |
+| `config.ts`      | Settings: pool, polling, state, terminal programs and initial profiles             |
 | `host/`          | Host wiring: access gate, GitHub issue mapping, native terminals and discovery     |
-| `nts/`           | NTS status contracts and readers: landing, full check, pool, machine, records      |
+| `status/`        | NTS status contracts and readers: landing, full check, pool, machine, records      |
 | `orchestration/` | Agent profiles, the task and review routes, the coordinator, its tools and wakeups |
 | `shared/`        | DTOs and endpoint references shared by the host and both clients                   |
 | `tui/`, `web/`   | The OpenTUI and React DOM clients                                                  |
@@ -70,5 +72,6 @@ In **Agents**, launch a Codex, Claude Code or shell session on request (`n` in t
 | Enter/right, Esc/left/`h`                | Details, then back to the list                         |
 | `/`                                      | Find in the current list with fzf                      |
 | `f`, `F`                                 | Select task filters; clear filters                     |
+| `e` (Agents)                             | Show or hide ended sessions                            |
 | `l`, `L`                                 | lazygit in the selected workspace; in the NTS checkout |
 | `?`, `q` / Ctrl+Q                        | Help; quit the viewer                                  |
