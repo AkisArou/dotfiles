@@ -15,7 +15,9 @@ import type { FullCheckStatus } from "../nts/full-check.ts";
 import { managedAgents } from "./agents.ts";
 import { coordinator } from "./coordinator.ts";
 import { profiles } from "./profiles.ts";
-import type { ProfileSettings } from "./profiles.ts";
+import type { ProfileSettings, Profiles } from "./profiles.ts";
+import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
+import { current } from "./current.ts";
 import { taskRoute } from "./task.ts";
 import { coordinatorTools, Late, reviewerTools, userAnswer, userQuestion, workerTools } from "./tools.ts";
 import type { Wiring } from "./tools.ts";
@@ -38,6 +40,32 @@ function statusSource<T>(id: string, interval: number, read: (signal: AbortSigna
     },
   };
   return { key, extension };
+}
+
+/**
+ * Claude Code's messaging rests on CLI features that an upgrade can change. The
+ * host checks them at start and every few hours; a failure marks the harness
+ * unavailable with the exact reason, and a later pass clears only that mark.
+ */
+function claudeMessagingProbe(root: string, profilesKey: Capability<Profiles>): Extension {
+  const PREFIX = "messaging probe failed: ";
+  return {
+    id: "nts-claude-messaging-probe",
+    requires: [profilesKey],
+    start(context) {
+      const store = context.get(profilesKey);
+      const check = async () => {
+        const result = await probeClaudeMessaging({ cwd: root, signal: context.signal });
+        const marked = current(store.settings)?.unavailable.claude?.reason.startsWith(PREFIX);
+        if (!result.ok) await store.setAvailability("claude", { reason: PREFIX + result.reason });
+        else if (marked) await store.setAvailability("claude", null);
+      };
+      context.afterStart(() => {
+        const loop = poll(check, 6 * 3_600_000, context.signal, (error) => context.log.error("claude probe", error));
+        context.onStop(() => loop);
+      });
+    },
+  };
 }
 
 export interface OrchestrationSettings {
@@ -134,6 +162,7 @@ export function ntsOrchestration(options: {
     extensions: [
       engine.extension,
       profileStore.extension,
+      claudeMessagingProbe(options.root, profileStore.service),
       decisions.extension,
       landing.extension,
       fullCheck.extension,
