@@ -1,6 +1,6 @@
 // NTS's observed work, not a Signalbox assignment or ownership policy.
 import type { Agent, Issue } from "./model.ts";
-import type { WorkClaim } from "../nts/model.ts";
+import type { WorkClaim } from "../status/model.ts";
 
 export function claimedIssues(
   issues: readonly Issue[],

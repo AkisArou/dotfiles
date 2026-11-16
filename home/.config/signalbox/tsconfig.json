@@ -19,7 +19,7 @@
     "server.ts",
     "host/**/*.ts",
     "orchestration/**/*.ts",
-    "nts/**/*.ts",
+    "status/**/*.ts",
     "shared/**/*.ts",
     "web/**/*.tsx",
     "web/**/*.ts",

@@ -1,6 +1,6 @@
 import type { Project } from "../../shared/use-project.ts";
 import type { Tab } from "../../shared/model.ts";
-import { gaugeState } from "../../nts/model.ts";
+import { gaugeState } from "../../status/model.ts";
 import { Button } from "@astryxdesign/core/Button";
 import { Badge, Empty, Section } from "../components.tsx";
 

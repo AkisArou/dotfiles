@@ -9,7 +9,7 @@ test("live NTS readers execute status commands, reject changed formats and suppo
   const root = await mkdtemp(join(tmpdir(), "signalbox-nts-readers-"));
   try {
     await mkdir(join(root, "tooling/records"), { recursive: true });
-    const fixture = { version: 1, kind: "benchmarks", run: null, counts: null, rows: [] };
+    const fixture = { version: 2, kind: "benchmarks", run: null, counts: null, rows: [] };
     await writeFile(join(root, "benchmarks.json"), JSON.stringify(fixture));
     await writeFile(
       join(root, "conformance.json"),

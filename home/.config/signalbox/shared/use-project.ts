@@ -3,7 +3,7 @@ import { useCommand, useConnection, useSource } from "signalbox/client/react";
 import type { RemoteReading } from "signalbox/core/remote";
 import { claimedIssues } from "./claims.ts";
 import * as refs from "./model.ts";
-import { useNts } from "../nts/use-nts.ts";
+import { useNts } from "../status/use-nts.ts";
 
 export function current<T>(reading: RemoteReading<T>): T | undefined {
   return reading.status === "ready"

@@ -9,10 +9,10 @@ import { TerminalApp } from "./app.tsx";
 import type { Overview, Agent } from "../shared/model.ts";
 import { colors } from "./theme.ts";
 import { TerminalTheme } from "./selection.tsx";
-import { ntsPages, ntsSources } from "../nts/model.ts";
-import { sampleReports } from "../nts/tests/fixtures.ts";
+import { ntsPages, ntsSources } from "../status/model.ts";
+import { sampleReports } from "../status/tests/fixtures.ts";
 import type { RemoteReading } from "signalbox/core/remote";
-import type { Reading } from "../nts/model.ts";
+import type { Reading } from "../status/model.ts";
 
 test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without simulated commands", async () => {
   const calls: string[] = [],

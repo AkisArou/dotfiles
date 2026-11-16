@@ -16,7 +16,7 @@ export type Issue = {
   owner: string | null;
   blockedBy: number[];
   workspace?: string;
-  claims?: readonly import("../nts/model.ts").WorkClaim[];
+  claims?: readonly import("../status/model.ts").WorkClaim[];
   parent: { number: number; title: string } | null;
   progress: { total: number; completed: number } | null;
 };

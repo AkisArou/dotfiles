@@ -14,7 +14,7 @@ import { Heading, Line, ListDetail, ListRow, ScrollPane, Section } from "./compo
 import { AgentDetail, NowView, TaskDetail, stateColor, stateMark } from "./views.tsx";
 import { colors as c } from "./theme.ts";
 import { useSelection } from "./selection.tsx";
-import { isNtsPage, tableRows, cellText } from "../nts/model.ts";
+import { isNtsPage, tableRows, cellText } from "../status/model.ts";
 import { NtsContent } from "./nts.tsx";
 import { tabLabels } from "./navigation.ts";
 import { navigationKey } from "./keyboard.ts";

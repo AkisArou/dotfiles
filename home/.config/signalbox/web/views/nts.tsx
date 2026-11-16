@@ -1,6 +1,6 @@
-import { ntsPages, gaugeState, cellText } from "../../nts/model.ts";
-import type { NtsPage, Reading, TableCell } from "../../nts/model.ts";
-import { reportOf } from "../../nts/use-nts.ts";
+import { ntsPages, gaugeState, cellText } from "../../status/model.ts";
+import type { NtsPage, Reading, TableCell } from "../../status/model.ts";
+import { reportOf } from "../../status/use-nts.ts";
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, Section } from "../components.tsx";
 

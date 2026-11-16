@@ -10,7 +10,7 @@ import { exposeSource, exposeOperation, webListener } from "signalbox/host";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import * as refs from "../shared/model.ts";
 import type { NtsConfig } from "../config.ts";
-import { ntsObservations } from "../nts/host.ts";
+import { ntsObservations } from "../status/host.ts";
 import { nativeTerminals } from "./terminals.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";

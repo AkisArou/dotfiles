@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import { TextAttributes } from "@opentui/core";
-import { cellText, isNtsPage, tableRows } from "../nts/model.ts";
-import type { Color, Table } from "../nts/model.ts";
+import { cellText, isNtsPage, tableRows } from "../status/model.ts";
+import type { Color, Table } from "../status/model.ts";
 import type { Project } from "../shared/use-project.ts";
 import type { Tab } from "../shared/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
