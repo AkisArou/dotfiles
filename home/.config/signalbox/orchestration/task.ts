@@ -18,7 +18,7 @@ import { landingFor, landingStatus, poolStatus, runNts, treeForIssue } from "../
 import type { ManagedAgents } from "./agents.ts";
 import type { Profiles } from "./profiles.ts";
 import { profileSchema } from "./profiles.ts";
-import { reviewerBrief, workerBrief, workerInstructions, reviewerInstructions } from "./briefs.ts";
+import { reviewerBrief, workerBrief, workerInstructions, workerResumeBrief, reviewerInstructions } from "./briefs.ts";
 
 const run = promisify(execFile);
 const sha = z.string().regex(/^[0-9a-f]{40}$/);
@@ -76,6 +76,13 @@ export const taskState = z.object({
   landedMain: sha.nullable(),
   help: z.string().nullable(),
   outcome: z.string().nullable(),
+  /** Worker launches so far; a replacement after a proven-ended session is a new generation. */
+  // Defaults keep state written before these fields readable; a pre-existing
+  // assignment counts as generation 1, so its replacement gets a fresh launch key.
+  generation: z.number().int().nonnegative().default(1),
+  /** The phase a replacement worker resumes, and the latest instruction it must see. */
+  resumeTo: z.enum(phases).nullable().default(null),
+  note: z.string().default(""),
 });
 export type TaskState = z.infer<typeof taskState>;
 
@@ -153,6 +160,9 @@ export function taskRoute(options: {
         landedMain: null,
         help: null,
         outcome: null,
+        generation: 0,
+        resumeTo: null,
+        note: "",
       }),
       async reconcile(ctx) {
         const state = ctx.assignment.state;
@@ -167,7 +177,13 @@ export function taskRoute(options: {
           reason,
           ...(retryAt === undefined ? {} : { retryAt }),
         });
+        // A session is replaced only when it has provably ended; unknown state waits.
+        const ended = (id: string) =>
+          (current(runtime.instances) ?? []).some(
+            (instance) => instance.id === id && (instance.state === "ended" || instance.state === "exited"),
+          );
         const tell = async (to: string, key: string, text: string) => {
+          if (ended(to)) return;
           const send = runtime.capability(to, messaging);
           if (!send) throw new Error(`Agent ${to} cannot receive messages`);
           await ctx.effect({
@@ -198,6 +214,13 @@ export function taskRoute(options: {
           ctx.consumeReports(help.id);
           return next({ help: help.data.message });
         }
+
+        if (
+          state.worker &&
+          (state.phase === "design" || state.phase === "approve" || state.phase === "build") &&
+          ended(state.worker.id)
+        )
+          return next({ phase: "start", resumeTo: state.phase });
 
         if (state.phase === "prepare") {
           const found = issue(current(ctx.get(options.issues)) ?? [], ctx.input.issue);
@@ -238,9 +261,23 @@ export function taskRoute(options: {
           if ("wait" in resolved) return wait(resolved.wait, {}, resolved.retryAt);
           const found = issue(current(ctx.get(options.issues)) ?? [], ctx.input.issue);
           if (!found) return wait(`Issue #${ctx.input.issue} is not available`);
+          const generation = state.generation + 1;
+          const resume = state.resumeTo
+            ? workerResumeBrief({
+                assignment: ctx.assignment.id,
+                issue: found,
+                branch: state.branch!,
+                tree: state.tree!,
+                phase: state.resumeTo,
+                design: state.design,
+                commit: state.commit,
+                note: state.note,
+              })
+            : undefined;
           const started = await ctx.effect<{ id: string }>({
-            key: "start-worker",
-            input: { tree: state.tree, profile: resolved.profile },
+            // The first launch keeps its original key, so receipts from before generations recover.
+            key: generation === 1 ? "start-worker" : `start-worker/${generation}`,
+            input: { tree: state.tree, profile: resolved.profile, generation },
             idempotent: true,
             run: async ({ requestId, signal }) => {
               const instance = await options.agents.start(
@@ -250,13 +287,15 @@ export function taskRoute(options: {
                   label: `#${ctx.input.issue} worker`,
                   cwd: state.tree!,
                   instructions: workerInstructions(),
-                  brief: workerBrief({
-                    assignment: ctx.assignment.id,
-                    issue: found,
-                    branch: state.branch!,
-                    tree: state.tree!,
-                    instructions: ctx.input.instructions,
-                  }),
+                  brief:
+                    resume ??
+                    workerBrief({
+                      assignment: ctx.assignment.id,
+                      issue: found,
+                      branch: state.branch!,
+                      tree: state.tree!,
+                      instructions: ctx.input.instructions,
+                    }),
                   tools: [options.workerTools],
                   requestId,
                 },
@@ -265,7 +304,12 @@ export function taskRoute(options: {
               return { id: instance.id };
             },
           });
-          return next({ phase: "design", worker: { id: started.id, profile: resolved.profile } });
+          return next({
+            phase: state.resumeTo ?? "design",
+            worker: { id: started.id, profile: resolved.profile },
+            generation,
+            resumeTo: null,
+          });
         }
         if (state.phase === "design") {
           const report = ctx.reports.find((report) => report.data.kind === "design");
@@ -278,14 +322,11 @@ export function taskRoute(options: {
           if (!report || report.data.kind !== "design_decision")
             return wait("Waiting for the coordinator to approve the design");
           ctx.consumeReports(report.id);
-          await tell(
-            state.worker!.id,
-            `design/${report.id}`,
-            report.data.accept
-              ? `Design approved. ${report.data.notes}\nBuild it, prove it (focused tests, inner.ts, check.ts --here), commit, then report_ready.`
-              : `Design returned. ${report.data.notes}\nRevise it and report_design again.`,
-          );
-          return next({ phase: report.data.accept ? "build" : "design" });
+          const decision = report.data.accept
+            ? `Design approved. ${report.data.notes}\nBuild it, prove it (focused tests, inner.ts, check.ts --here), commit, then report_ready.`
+            : `Design returned. ${report.data.notes}\nRevise it and report_design again.`;
+          await tell(state.worker!.id, `design/${report.id}`, decision);
+          return next({ phase: report.data.accept ? "build" : "design", note: decision });
         }
         if (state.phase === "build") {
           const report = ctx.reports.find((report) => report.data.kind === "ready");
@@ -342,14 +383,11 @@ export function taskRoute(options: {
           await stop(state.reviewer!.id, `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`);
           if (report.data.verdict === "accept") return next({ phase: "queue", reviewer: null });
           const rounds = state.rounds + 1;
-          await tell(
-            state.worker!.id,
-            `review/${report.id}`,
-            `The review of ${state.commit} asks for changes:\n${report.data.findings}\nFix them, prove the change again, commit and report_ready.`,
-          );
+          const findings = `The review of ${state.commit} asks for changes:\n${report.data.findings}\nFix them, prove the change again, commit and report_ready.`;
+          await tell(state.worker!.id, `review/${report.id}`, findings);
           return rounds > options.maxRounds
-            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", reviewer: null, rounds })
-            : next({ phase: "build", reviewer: null, rounds });
+            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", reviewer: null, rounds, note: findings })
+            : next({ phase: "build", reviewer: null, rounds, note: findings });
         }
         if (state.phase === "queue") {
           const commit = state.commit!;
@@ -384,14 +422,11 @@ export function taskRoute(options: {
           if (answer.state === "held") return wait(`Landing held: ${answer.message}`);
           if (answer.state === "withdrawn") return next({ phase: "retire", outcome: "withdrawn" });
           const rounds = state.rounds + 1;
-          await tell(
-            state.worker!.id,
-            `refused/${answer.id}`,
-            `The landing check refused ${state.commit}: ${answer.message}\nLogs: ${answer.run ?? "none"}\nFind the cause, fix it where it lives, prove it again, commit and report_ready.`,
-          );
+          const refusal = `The landing check refused ${state.commit}: ${answer.message}\nLogs: ${answer.run ?? "none"}\nFind the cause, fix it where it lives, prove it again, commit and report_ready.`;
+          await tell(state.worker!.id, `refused/${answer.id}`, refusal);
           return rounds > options.maxRounds
-            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", rounds })
-            : next({ phase: "build", rounds });
+            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", rounds, note: refusal })
+            : next({ phase: "build", rounds, note: refusal });
         }
         if (state.phase === "verify") {
           const verified = current(ctx.get(options.fullCheck))?.verified.commit;

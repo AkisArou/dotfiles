@@ -224,6 +224,24 @@ test("a task goes from tree to verified through design approval, review and land
   const building = await phase("build");
   assert.match(messages.at(-1)!.text, /^Design approved\./);
 
+  // The worker's session ends mid-build: a fresh worker takes over with a handoff.
+  const first = [...byRequest.entries()].find(([, instance]) => instance.id === building.worker!.id)!;
+  byRequest.set(first[0], { ...first[1], state: "ended" });
+  instances.set([...byRequest.values()]);
+  const resumed = await (async () => {
+    const deadline = Date.now() + 20_000;
+    for (;;) {
+      const state = taskState.parse(read().state);
+      if (state.phase === "build" && state.worker!.id !== building.worker!.id) return state;
+      if (Date.now() > deadline) throw new Error(`no replacement worker (${state.phase})`);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  })();
+  assert.equal(resumed.generation, 2);
+  assert.match(started.at(-1)!.brief, /You replace a worker whose session ended/);
+  assert.match(started.at(-1)!.brief, /The latest instruction it received:\nDesign approved\./);
+  assert.match(started.at(-1)!.brief, /thing\.ts owns it\./);
+
   // A report naming a commit that is not the tree's clean HEAD faults loudly, never lands.
   await writeFile(join(building.tree!, "thing.txt"), "done");
   await git(building.tree!, "add", "thing.txt");
@@ -232,12 +250,12 @@ test("a task goes from tree to verified through design approval, review and land
   await report({ kind: "ready", commit, summary: "focused, inner and supported green" }, "ready-1");
   const reviewing = await phase("reviewing");
   assert.equal(reviewing.reviewer!.commit, commit);
-  assert.equal(started.length, 2);
-  assert.match(started[1]!.brief, new RegExp(`review commit ${commit}`));
+  assert.equal(started.length, 3);
+  assert.match(started[2]!.brief, new RegExp(`review commit ${commit}`));
 
   await report({ kind: "review", commit, verdict: "changes", findings: "thing.txt:1 needs a newline" }, "review-1");
   await phase("build");
-  assert.deepEqual(stopped, ["fake/1"]);
+  assert.deepEqual(stopped, ["fake/2"]);
   assert.match(messages.at(-1)!.text, /needs a newline/);
   await report({ kind: "ready", commit, summary: "fixed" }, "ready-2");
   await phase("reviewing");
@@ -266,6 +284,6 @@ test("a task goes from tree to verified through design approval, review and land
   while (read().status !== "finished" && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(read().status, "finished");
   assert.equal(taskState.parse(read().state).outcome, "verified");
-  assert.deepEqual(stopped.sort(), ["fake/0", "fake/1", "fake/2"]);
+  assert.deepEqual(stopped.sort(), ["fake/1", "fake/2", "fake/3"]);
   assert.deepEqual(read().heldResources, []);
 });

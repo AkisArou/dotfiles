@@ -37,6 +37,33 @@ export function workerBrief(task: {
     .join("\n");
 }
 
+/** A replacement worker's first message: everything it needs comes from durable state. */
+export function workerResumeBrief(task: {
+  assignment: string;
+  issue: Issue;
+  branch: string;
+  tree: string;
+  phase: string;
+  design: string;
+  commit: string | null;
+  note: string;
+}): string {
+  return [
+    `Assignment ${task.assignment}: issue #${task.issue.number}, ${task.issue.title}`,
+    `You replace a worker whose session ended. Your tree: ${task.tree} (branch ${task.branch}); its files and commits are the previous worker's work, kept as they were.`,
+    `Where the task stands: ${task.phase}.`,
+    task.design ? `The design it sent:\n${task.design}` : "No design was sent yet.",
+    task.commit ? `Its last reported commit: ${task.commit}.` : "",
+    task.note ? `The latest instruction it received:\n${task.note}` : "",
+    "",
+    task.issue.body,
+    "",
+    "Read the tree's state (git status, git log main..HEAD) before acting. Continue from where it stands, using report_design or report_ready as that phase needs.",
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
+}
+
 export function reviewerInstructions(): string[] {
   return [
     [

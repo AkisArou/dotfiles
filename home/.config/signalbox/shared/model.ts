@@ -63,6 +63,8 @@ export type AssignmentView = {
   rounds: number;
   commit: string | null;
   tree: string | null;
+  design: string;
+  summary: string;
   worker: string | null;
   reviewer: string | null;
   error: string | null;

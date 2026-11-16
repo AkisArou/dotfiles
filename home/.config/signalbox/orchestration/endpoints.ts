@@ -32,6 +32,8 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     rounds: state?.rounds ?? 0,
     commit: state?.commit ?? null,
     tree: state?.tree ?? null,
+    design: state?.design ?? "",
+    summary: state?.summary ?? "",
     worker: state?.worker?.id ?? null,
     reviewer: state?.reviewer?.id ?? null,
     error: assignment.error ? `${assignment.error.code}: ${assignment.error.message}` : null,

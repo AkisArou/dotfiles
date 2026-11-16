@@ -13,6 +13,8 @@ import { fullCheckStatus, landingStatus } from "../nts/commands.ts";
 import type { LandingStatus } from "../nts/landing.ts";
 import type { FullCheckStatus } from "../nts/full-check.ts";
 import { managedAgents } from "./agents.ts";
+import type { ManagedAgents } from "./agents.ts";
+import type { AgentToolset } from "signalbox/ext/agents/tools";
 import { coordinator } from "./coordinator.ts";
 import { profiles } from "./profiles.ts";
 import type { ProfileSettings, Profiles } from "./profiles.ts";
@@ -84,6 +86,8 @@ export function ntsOrchestration(options: {
   readonly state: Capability<WorkflowStore>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly settings: OrchestrationSettings;
+  /** Tests supply stand-in agents; production uses Claude Code and Codex in tmux. */
+  readonly agents?: (toolsets: readonly AgentToolset[]) => ManagedAgents;
 }) {
   const engine = openWorkflowSqlite({ path: join(options.directory, "workflows.sqlite") });
   const profileStore = profiles({ state: options.state, initial: options.settings.profiles });
@@ -109,11 +113,10 @@ export function ntsOrchestration(options: {
     decisions: decisions.service,
   };
   const tools = { worker: workerTools(wiring), reviewer: reviewerTools(wiring), coordinator: coordinatorTools(wiring) };
-  const agents = managedAgents({
-    state: options.state,
-    directory: options.directory,
-    toolsets: [tools.worker, tools.reviewer, tools.coordinator],
-  });
+  const toolsets = [tools.worker, tools.reviewer, tools.coordinator];
+  const agents = options.agents
+    ? options.agents(toolsets)
+    : managedAgents({ state: options.state, directory: options.directory, toolsets });
   wiring.runtime.set(agents.runtime);
   const route = taskRoute({
     root: options.root,
@@ -162,7 +165,8 @@ export function ntsOrchestration(options: {
     extensions: [
       engine.extension,
       profileStore.extension,
-      claudeMessagingProbe(options.root, profileStore.service),
+      // Probe only the real Claude Code; stand-in agents have nothing to probe.
+      ...(options.agents ? [] : [claudeMessagingProbe(options.root, profileStore.service)]),
       decisions.extension,
       landing.extension,
       fullCheck.extension,
