@@ -42,7 +42,8 @@ export function liveReaders(
         checked<BenchmarksSummary>(
           await json(["tooling/records/summary.ts", "benchmarks"]),
           "benchmarks",
-          [1],
+          // Version 2 added fields this projection does not read (references, ownBest).
+          [2],
           "benchmarks",
         ),
       );
