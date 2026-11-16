@@ -1495,3 +1495,11 @@
 .decision textarea {
   min-height: 5em;
 }
+
+.show-ended {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+  color: var(--color-text-subtle, inherit);
+}

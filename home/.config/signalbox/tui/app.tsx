@@ -37,7 +37,13 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     afterG = useRef(false);
   const listScroll = useRef<ScrollBoxRenderable>(null),
     detail = useRef<ScrollBoxRenderable>(null);
-  const { overview, agents } = project.data;
+  const { overview } = project.data;
+  // Ended sessions stay in the host's record; the list hides them until `e` shows them.
+  const [showEnded, setShowEnded] = useState(false);
+  const ended = project.data.agents.filter((item) => item.state === "ended").length;
+  const agents = showEnded
+    ? project.data.agents
+    : project.data.agents.filter((item) => item.state !== "ended");
   const readings = {
     Overview: project.overview,
     Tasks: project.issues,
@@ -259,6 +265,10 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       newTerminal();
       return;
     }
+    if (key.name === "e" && tab === "Agents") {
+      setShowEnded((value) => !value);
+      return;
+    }
     if (key.name === "/") {
       find();
       return;
@@ -312,7 +322,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       <Line color={c.muted}>
         {taskTab
           ? `${tasks.length} of ${project.data.issues.length}${label ? ` · ${label}` : ""}`
-          : `${items.length} agents`}
+          : `${items.length} agents${ended ? ` · ${ended} ended ${showEnded ? "shown" : "hidden"} (e)` : ""}`}
       </Line>
       {taskTab &&
         [...new Set(tasks.map(groupOf))].map((group) => (
@@ -404,7 +414,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     "Ctrl+D/U half pane",
     "/ find",
     ...(taskTab ? ["f filter", "F clear"] : []),
-    ...(tab === "Agents" ? ["n new", "Enter type", "Ctrl+] back"] : ["Enter details"]),
+    ...(tab === "Agents" ? ["n new", "e ended", "Enter type", "Ctrl+] back"] : ["Enter details"]),
     "l git",
     "? help",
   ];

@@ -8,8 +8,10 @@ import { Orchestration } from "./orchestration.tsx";
 
 export function Agents({ project }: { project: Project }) {
   const [selected, setSelected] = useState<string>();
+  const [showEnded, setShowEnded] = useState(false);
   const details = useRef<HTMLDivElement>(null);
-  const agents = project.data.agents.filter((agent) => agent.state !== "ended" || agent.terminal),
+  const ended = project.data.agents.filter((agent) => agent.state === "ended").length;
+  const agents = project.data.agents.filter((agent) => showEnded || agent.state !== "ended"),
     agent = agents.find((agent) => agent.id === selected) ?? agents[0];
   useEffect(() => {
     if (selected && agent?.id === selected && window.innerWidth <= 1150)
@@ -30,6 +32,12 @@ export function Agents({ project }: { project: Project }) {
           >{`New ${program.label}`}</Action>
         ))}
       </div>
+      {ended > 0 && (
+        <label className="show-ended">
+          <input type="checkbox" checked={showEnded} onChange={(event) => setShowEnded(event.target.checked)} />
+          {` Show ${ended} ended session${ended === 1 ? "" : "s"}`}
+        </label>
+      )}
       <div className="agents-layout">
         <div className="agent-list">
           {agents.map((item) => (

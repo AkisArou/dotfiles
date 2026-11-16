@@ -66,6 +66,14 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         path: "/pool/1",
         issue: 807,
       },
+      {
+        id: "gone",
+        name: "Finished reviewer",
+        role: "reviewer",
+        state: "ended",
+        path: null,
+        issue: 807,
+      },
     ],
     "nts.plan": "# Plan",
     "nts.terminal-programs": [],
@@ -161,6 +169,12 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await setup.renderOnce();
     assert.match(setup.captureCharFrame(), /Drain owned work/);
     assert.equal(calls.length, 0);
+    // Ended sessions are hidden in Agents until `e` shows them.
+    await keys("escape", "3");
+    assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
+    assert.match(setup.captureCharFrame(), /1 ended hidden \(e\)/);
+    await keys("e");
+    assert.match(setup.captureCharFrame(), /Finished reviewer/);
   } finally {
     await act(async () => {
       client.close();
