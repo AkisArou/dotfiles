@@ -12,9 +12,21 @@ import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import { current } from "./current.ts";
 import { taskState } from "./task.ts";
+import type { TaskState } from "./task.ts";
 import type { UserDecisions } from "./tools.ts";
 
 export type Wakeup = { readonly id: string; readonly text: string };
+
+/** How long a phase may take before the coordinator hears of it, once per phase entry. */
+export const PHASE_BUDGET: Partial<Record<TaskState["phase"], number>> = {
+  design: 2 * 3_600_000,
+  approve: 3_600_000,
+  build: 8 * 3_600_000,
+  reviewing: 2 * 3_600_000,
+  queue: 30 * 60_000,
+  landing: 3 * 3_600_000,
+  verify: 12 * 3_600_000,
+};
 
 /** The events in one observation. Pure, so it can be tested on recorded statuses. */
 export function wakeups(observed: {
@@ -22,6 +34,8 @@ export function wakeups(observed: {
   readonly landing: LandingStatus | undefined;
   readonly fullCheck: FullCheckStatus | undefined;
   readonly decided: readonly { id: string; answer: string }[];
+  /** The observation's time, for phase budgets. */
+  readonly now: number;
 }): Wakeup[] {
   const events: Wakeup[] = [];
   for (const assignment of observed.assignments) {
@@ -39,6 +53,19 @@ export function wakeups(observed: {
       events.push({
         id: `help/${assignment.id}/${hash(task.help).slice(0, 16)}`,
         text: `The worker of ${name} asks: ${task.help}\nAnswer with message_worker.`,
+      });
+    if (task.stalled && task.watch)
+      events.push({
+        id: `stalled/${assignment.id}/${task.watch.key}`,
+        text: `${name} is stalled: ${task.stalled}`,
+      });
+    const budget = PHASE_BUDGET[task.phase];
+    if (assignment.status === "active" && budget && task.phaseSince !== null && observed.now - task.phaseSince > budget)
+      events.push({
+        id: `overdue/${assignment.id}/${task.phase}/${task.phaseSince}`,
+        text:
+          `${name} has been in ${task.phase} for ${Math.round((observed.now - task.phaseSince) / 60_000)} min (budget ${budget / 60_000}).` +
+          ` Now: ${assignment.wait?.reason ?? "working"}${task.progress ? `; progress: ${task.progress.note}` : ""}. Decide whether it needs you.`,
       });
     if (assignment.wait?.reason.startsWith("Escalated"))
       events.push({
@@ -91,6 +118,7 @@ export function wakeupFeed(options: {
           decided: (current(context.get(options.decisions).requests) ?? [])
             .filter((request) => request.status === "decided" && request.result)
             .map((request) => ({ id: request.id, answer: request.result!.decision.answer })),
+          now: Date.now(),
         });
         // The first observation of a fresh state seeds the cursor: history before
         // the coordinator existed is not news.

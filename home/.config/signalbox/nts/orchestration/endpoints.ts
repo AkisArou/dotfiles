@@ -7,11 +7,7 @@ import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments/index";
 import type { Assignment } from "signalbox/ext/assignments/index";
 import type { AgentInstance } from "signalbox/ext/agents/index";
-import { textInput } from "signalbox/ext/agents/index";
-import { messaging } from "signalbox/ext/agents/features";
-import { current } from "./current.ts";
-import { sessionOf } from "./activity.ts";
-import type { ClaudeActivity } from "./activity.ts";
+import type { AgentActivity } from "./activity.ts";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
@@ -34,6 +30,9 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     rounds: state?.rounds ?? 0,
     commit: state?.commit ?? null,
     tree: state?.tree ?? null,
+    phaseSince: state?.phaseSince ?? null,
+    progress: state?.progress?.note ?? null,
+    stalled: state?.stalled ?? null,
     design: state?.design ?? "",
     summary: state?.summary ?? "",
     worker: state?.worker?.id ?? null,
@@ -46,7 +45,7 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
 /** Managed sessions as Agents rows: role and issue come from the label the routes give them. */
 export function managedAgentViews(
   instances: readonly AgentInstance[],
-  activity: ClaudeActivity = {},
+  activity: AgentActivity = {},
 ): refs.Agent[] {
   return instances.map((instance) => ({
     id: instance.id,
@@ -54,7 +53,7 @@ export function managedAgentViews(
     role: /coordinator/i.test(instance.label) ? "coordinator" : /review/i.test(instance.label) ? "reviewer" : "worker",
     // A live session shows what it is doing (busy, idle), not only that it is alive.
     state:
-      instance.state === "running" ? (activity[sessionOf(instance.id) ?? ""] ?? instance.state) : instance.state,
+      instance.state === "running" ? (activity[instance.id] ?? instance.state) : instance.state,
     path: null,
     issue: Number(/^#(\d+)/.exec(instance.label)?.[1]) || null,
     terminal: instance.id,
@@ -62,7 +61,7 @@ export function managedAgentViews(
 }
 
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
-  const { profiles, work, assignments, decisions, route, agents } = orchestration;
+  const { profiles, work, assignments, decisions, route } = orchestration;
   return [
     exposeSource({
       ref: refs.profileSettings,
@@ -203,18 +202,16 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
     }),
     exposeOperation({
       ref: refs.messageWorker,
-      requires: [work, agents.runtime],
+      requires: [work],
       input: z.object({ assignment: z.string(), text: z.string().min(1) }),
       output: z.object({ ok: z.literal(true) }),
+      // Through the route: delivered once, recorded, and it answers the worker's open question.
       run: async (input, context) => {
-        const assignment = (current(context.get(work).assignments) ?? []).find(
-          (candidate) => candidate.id === input.assignment,
-        );
-        const worker = assignment && assignmentView(assignment).worker;
-        if (!worker) throw new Error("That assignment has no current worker");
-        const send = context.get(agents.runtime).capability(worker, messaging);
-        if (!send) throw new Error("The worker cannot receive messages");
-        await send.submit(textInput(`From the user: ${input.text}`), { requestId: context.requestId });
+        await context.get(work).report({
+          assignmentId: input.assignment,
+          data: { kind: "message", from: "user", text: input.text },
+          requestId: context.requestId,
+        });
         return { ok: true as const };
       },
     }),

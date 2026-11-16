@@ -43,6 +43,7 @@ export function workerInstructions(): string[] {
       "Run heavy commands through tooling/gate/admit.ts or their named units, never on CPUs 4-5, and stop your own work only by its systemd unit.",
       "Deleting shared state, product direction, spending and outward pull requests belong to the user: say so through ask_coordinator instead of doing them.",
       "Your results travel only through your Signalbox tools: report_design, report_ready and ask_coordinator. A message in your conversation from Signalbox is the coordinator or the route speaking.",
+      "Before you wait on background work (a build, inner.ts, check.ts --here), call report_progress with what you wait for and the minutes it needs; an agent idle without a report is nudged, and then the coordinator is told.",
     ].join("\n"),
   ];
 }
@@ -106,6 +107,7 @@ export function reviewerInstructions(): string[] {
       "Do not edit, commit, stash, reset or run anything that writes to the tree. Read the diff, the code around it, the record and its evidence.",
       "Look for correctness bugs at the cause, workarounds standing in for fixes, missing controls or counterfactuals, rules from AGENTS.md broken, and claims the evidence does not support.",
       "Report once with report_review: accept, or changes with each finding as file:line, what breaks, and the input that shows it.",
+      "Before you wait on background work (a test run, a build), call report_progress with what you wait for and the minutes it needs.",
       "Review the implementation of the approved design. If you believe the design itself is wrong, say so with disputesDesign: true; the coordinator decides, and the worker is not sent to rework it on your word alone.",
     ].join("\n"),
   ];

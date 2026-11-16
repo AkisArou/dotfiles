@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Project } from "../../shared/use-project.ts";
 import type { AgentRole, Harness } from "../../shared/model.ts";
+import { assignmentPhase, assignmentSays } from "../../shared/model.ts";
 import { Action, Badge, Empty, Section } from "../components.tsx";
 
 const roleNames: Record<AgentRole, string> = { coordinator: "Coordinator", worker: "Workers", reviewer: "Reviewers" };
@@ -137,10 +138,10 @@ export function Orchestration({ project }: { project: Project }) {
                   <td>{assignment.issue ? `#${assignment.issue}` : assignment.key}</td>
                   <td>
                     <Badge state={assignment.error ? "error" : assignment.status}>
-                      {assignment.error ? "faulted" : (assignment.phase ?? assignment.status)}
+                      {assignmentPhase(assignment)}
                     </Badge>
                   </td>
-                  <td>{assignment.error ?? assignment.help ?? assignment.wait ?? ""}</td>
+                  <td>{assignmentSays(assignment)}</td>
                   <td>{assignment.rounds}</td>
                   <td className="mono">{assignment.commit?.slice(0, 12) ?? ""}</td>
                   <td>

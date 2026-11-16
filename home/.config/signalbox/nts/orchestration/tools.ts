@@ -6,9 +6,6 @@ import type { Capability, Readable } from "signalbox/core";
 import { current } from "./current.ts";
 import type { Json } from "signalbox/core/remote";
 import { toJson } from "signalbox/core/utils";
-import { textInput } from "signalbox/ext/agents/index";
-import type { AgentRuntime } from "signalbox/ext/agents/index";
-import { messaging } from "signalbox/ext/agents/features";
 import { agentTool, agentToolset } from "signalbox/ext/agents/tools";
 import type { AgentToolContext } from "signalbox/ext/agents/tools";
 import { assignmentRequest } from "signalbox/ext/assignments/index";
@@ -42,7 +39,6 @@ export interface Wiring {
   readonly route: Late<TaskRoute>;
   readonly coordinator: Late<Capability<ManagedAgentService>>;
   readonly mailbox: Late<Capability<Mailbox>>;
-  readonly runtime: Late<Capability<AgentRuntime>>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly decisions: Capability<UserDecisions>;
 }
@@ -65,6 +61,25 @@ function callerTask(context: AgentToolContext, wiring: Wiring, role: "worker" | 
     if (state?.[role]?.id === context.caller.instanceId) return { assignment, state };
   }
   throw new Error(`This session is not the ${role} of an active NTS task`);
+}
+
+/** Say what you wait for: the task expects you idle until then and does not nudge you. */
+function progressTool(wiring: Wiring, role: "worker" | "reviewer") {
+  return agentTool({
+    name: "report_progress",
+    description:
+      "Before you wait on background work (a build, inner.ts, a landing check), say what you wait for and the minutes it needs; the task then leaves you idle until then instead of nudging you.",
+    input: toolInput(z.object({ note: z.string().min(1), minutes: z.number().int().min(1).max(480) })),
+    output: ok,
+    async run(input, context) {
+      const { assignment } = callerTask(context, wiring, role);
+      await context.get(wiring.work.get()).report(
+        { assignmentId: assignment.id, data: { kind: "progress", role, ...input }, requestId: context.requestId },
+        context.signal,
+      );
+      return { ok: true as const };
+    },
+  });
 }
 
 export function workerTools(wiring: Wiring) {
@@ -95,6 +110,7 @@ export function workerTools(wiring: Wiring) {
         output: ok,
         run: report("ready"),
       }),
+      progressTool(wiring, "worker"),
       agentTool({
         name: "ask_coordinator",
         description: "Ask the coordinator for a decision or help; it answers by message.",
@@ -110,6 +126,7 @@ export function reviewerTools(wiring: Wiring) {
   return agentToolset({
     id: "nts-reviewer",
     tools: [
+      progressTool(wiring, "reviewer"),
       agentTool({
         name: "report_review",
         description:
@@ -268,17 +285,17 @@ export function coordinatorTools(wiring: Wiring) {
         description: "Send a message to a task's current worker.",
         input: toolInput(z.object({ assignment: z.string(), text: z.string().min(1) })),
         output: ok,
+        // Through the route: delivered once, recorded, and it answers the worker's open question.
         run: (input, context) =>
           authorized(context, async () => {
-            const assignment = tasks(context, wiring).find((candidate) => candidate.id === input.assignment);
-            const worker = assignment && taskOf(assignment)?.worker;
-            if (!worker) throw new Error("That assignment has no current worker");
-            const send = context.get(wiring.runtime.get()).capability(worker.id, messaging);
-            if (!send) throw new Error("The worker cannot receive messages");
-            await send.submit(textInput(`From the coordinator: ${input.text}`), {
-              requestId: context.requestId,
-              signal: context.signal,
-            });
+            await context.get(wiring.work.get()).report(
+              {
+                assignmentId: input.assignment,
+                data: { kind: "message", from: "coordinator", text: input.text },
+                requestId: context.requestId,
+              },
+              context.signal,
+            );
             return { ok: true as const };
           }),
       }),

@@ -19,6 +19,7 @@ import type { ManagedAgents } from "./agents.ts";
 import type { Profiles } from "./profiles.ts";
 import { profileSchema } from "./profiles.ts";
 import { reviewerBrief, workerBrief, workerInstructions, workerResumeBrief, reviewerInstructions } from "./briefs.ts";
+import { progressed, stallStep, STALL, watchState } from "./stall.ts";
 
 const run = promisify(execFile);
 const sha = z.string().regex(/^[0-9a-f]{40}$/);
@@ -45,6 +46,15 @@ export const taskReport = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("help"), message: z.string().min(1) }),
   /** The coordinator (or user) sends a held or landed-but-wrong change back to build. */
   z.object({ kind: z.literal("rework"), notes: z.string().min(1) }),
+  /** An agent says what it waits for and for how long; idle until then is expected. */
+  z.object({
+    kind: z.literal("progress"),
+    role: z.enum(["worker", "reviewer"]),
+    note: z.string().min(1),
+    minutes: z.number().int().min(1).max(480),
+  }),
+  /** The coordinator's message to the worker: delivered once, and it answers any open help. */
+  z.object({ kind: z.literal("message"), from: z.enum(["coordinator", "user"]), text: z.string().min(1) }),
 ]);
 export type TaskReport = z.infer<typeof taskReport>;
 
@@ -91,6 +101,14 @@ export const taskState = z.object({
   reviews: z.array(z.object({ commit: sha, findings: z.string() })).default([]),
   /** When this round queued its commit; only landing answers after it count. */
   queuedAt: z.number().nullable().default(null),
+  /** When the current phase began (ms); the coordinator hears of a phase past its budget. */
+  phaseSince: z.number().nullable().default(null),
+  /** The awaited agent's idle watch (stall.ts). */
+  watch: watchState.nullable().default(null),
+  /** The awaited agent's latest progress note. */
+  progress: z.object({ note: z.string(), at: z.number(), until: z.number() }).nullable().default(null),
+  /** Set when an awaited agent stayed idle through its nudges; the coordinator decides. */
+  stalled: z.string().nullable().default(null),
 });
 export type TaskState = z.infer<typeof taskState>;
 
@@ -100,6 +118,15 @@ export function cardPaths(body: string): string[] {
   if (!line) return [];
   const tokens = line.replace(/^\s*\*\*Paths:\*\*/, "").match(/[\w.@-]+(?:\/[\w.@*{}-]+)+/g) ?? [];
   return [...new Set(tokens.map((token) => token.replace(/[.,;:]+$/, "")))].sort();
+}
+
+/** The agent whose report the task waits for, if any. A worker with an open question waits on the coordinator. */
+export function awaitedAgent(state: TaskState): { role: "worker" | "reviewer"; id: string; key: string } | undefined {
+  if ((state.phase === "design" || state.phase === "build") && state.worker && !state.help)
+    return { role: "worker", id: state.worker.id, key: `${state.phase}/${state.worker.id}/${state.rounds}` };
+  if (state.phase === "reviewing" && state.reviewer)
+    return { role: "reviewer", id: state.reviewer.id, key: `reviewing/${state.reviewer.id}/${state.reviewer.round}` };
+  return undefined;
 }
 
 export function taskRoute(options: {
@@ -113,7 +140,11 @@ export function taskRoute(options: {
   readonly reviewerTools: AgentToolset;
   /** Returns to build before the task escalates instead of looping. */
   readonly maxRounds: number;
+  /** The route's clock for phase times, progress and stalls; tests advance their own. */
+  readonly clock?: () => number;
 }) {
+  const activity = options.agents.activity;
+  const clock = options.clock ?? Date.now;
   const issue = (issues: readonly Issue[], number: number) =>
     issues.find((candidate) => candidate.number === number);
   return assignmentRoute({
@@ -148,8 +179,13 @@ export function taskRoute(options: {
       },
     ],
     lifecycle: {
-      requires: [options.issues, options.landing, options.fullCheck, options.profiles, options.agents.runtime],
-      watch: (ctx) => [ctx.get(options.landing), ctx.get(options.fullCheck), ctx.get(options.agents.runtime).instances],
+      requires: [options.issues, options.landing, options.fullCheck, options.profiles, options.agents.runtime, activity],
+      watch: (ctx) => [
+        ctx.get(options.landing),
+        ctx.get(options.fullCheck),
+        ctx.get(options.agents.runtime).instances,
+        ctx.get(activity),
+      ],
       state: taskState,
       report: taskReport,
       initial: () => ({
@@ -173,16 +209,25 @@ export function taskRoute(options: {
         note: "",
         reviews: [],
         queuedAt: null,
+        phaseSince: null,
+        watch: null,
+        progress: null,
+        stalled: null,
       }),
       async reconcile(ctx) {
         const state = ctx.assignment.state;
         const runtime = ctx.get(options.agents.runtime);
+        // A new phase restarts its clock and forgets the previous phase's watch.
+        const moved = (patch: Partial<TaskState>): TaskState =>
+          patch.phase !== undefined && patch.phase !== state.phase
+            ? { ...state, phaseSince: clock(), watch: null, progress: null, stalled: null, ...patch }
+            : { ...state, ...patch };
         const next = (patch: Partial<TaskState>) => ({
-          state: { ...state, ...patch },
+          state: moved(patch),
           next: "continue" as const,
         });
         const wait = (reason: string, patch: Partial<TaskState> = {}, retryAt?: number) => ({
-          state: { ...state, ...patch },
+          state: moved(patch),
           next: "wait" as const,
           reason,
           ...(retryAt === undefined ? {} : { retryAt }),
@@ -218,6 +263,59 @@ export function taskRoute(options: {
             },
           });
         };
+        // Progress: the awaited agent's own estimate holds nudges until then.
+        const progress = ctx.reports.find((report) => report.data.kind === "progress");
+        if (progress && progress.data.kind === "progress") {
+          ctx.consumeReports(progress.id);
+          const awaited = awaitedAgent(state);
+          const now = clock();
+          const until = now + progress.data.minutes * 60_000;
+          return next({
+            progress: { note: progress.data.note, at: now, until },
+            ...(awaited ? { watch: progressed(awaited.key, until), stalled: null } : {}),
+          });
+        }
+        // The coordinator's message reaches the worker once and answers its open question.
+        const message = ctx.reports.find((report) => report.data.kind === "message");
+        if (message && message.data.kind === "message") {
+          ctx.consumeReports(message.id);
+          if (!state.worker) throw new Conflict("This task has no current worker to message");
+          const text = `From the ${message.data.from}: ${message.data.text}`;
+          await tell(state.worker.id, `message/${message.id}`, text);
+          return next({ help: null, stalled: null, note: text });
+        }
+
+        // Waiting on an agent's report: watch it for a stall (stall.ts).
+        const awaiting = async (reason: string, ask: string) => {
+          const awaited = awaitedAgent(state);
+          if (!awaited) return wait(reason);
+          const now = clock();
+          const step = stallStep({
+            key: awaited.key,
+            status: current(ctx.get(activity))?.[awaited.id],
+            watch: state.watch,
+            now,
+          });
+          if (step.action === "nudge")
+            await tell(
+              awaited.id,
+              // One nudge per idle stretch: its start is persisted, so a retried reconcile reuses it.
+              `nudge/${awaited.key}/${state.watch?.idleSince ?? now}`,
+              `Task #${ctx.input.issue} waits for ${ask}. You have been idle ${Math.round(STALL.idle / 60_000)} minutes. ` +
+                `If it is done, call that tool now. If you are waiting for background work, call report_progress with what you wait for and the minutes it needs. ` +
+                (awaited.role === "worker"
+                  ? "If something blocks you, call ask_coordinator."
+                  : "If something blocks the review, say so in report_review."),
+            );
+          const stalled =
+            step.action === "escalate"
+              ? `The ${awaited.role} (${awaited.id}) has stayed idle without ${ask} through ${STALL.nudges} nudges` +
+                (state.progress ? `; its last progress: ${state.progress.note}` : "") +
+                ". Look at its terminal, message it, or cancel the task."
+              : state.stalled;
+          return wait(reason, { watch: step.watch, stalled }, step.retryAt);
+        };
+
         // Help is answered by the coordinator; it never blocks a report that follows it.
         const help = ctx.reports.find((report) => report.data.kind === "help");
         if (help && help.data.kind === "help") {
@@ -350,7 +448,8 @@ export function taskRoute(options: {
         }
         if (state.phase === "design") {
           const report = ctx.reports.find((report) => report.data.kind === "design");
-          if (!report || report.data.kind !== "design") return wait("Waiting for the worker's design");
+          if (!report || report.data.kind !== "design")
+            return awaiting("Waiting for the worker's design", "your design (report_design)");
           ctx.consumeReports(report.id);
           return next({ phase: "approve", design: report.data.summary, help: null });
         }
@@ -367,7 +466,8 @@ export function taskRoute(options: {
         }
         if (state.phase === "build") {
           const report = ctx.reports.find((report) => report.data.kind === "ready");
-          if (!report || report.data.kind !== "ready") return wait("Waiting for the worker's proved commit");
+          if (!report || report.data.kind !== "ready")
+            return awaiting("Waiting for the worker's proved commit", "your proved commit (report_ready)");
           ctx.consumeReports(report.id);
           const git = async (args: string[]) =>
             (await run("git", ["--no-optional-locks", ...args], { cwd: state.tree!, timeout: 30_000 })).stdout.trim();
@@ -417,7 +517,8 @@ export function taskRoute(options: {
           const report = ctx.reports.find(
             (report) => report.data.kind === "review" && report.data.commit === state.commit,
           );
-          if (!report || report.data.kind !== "review") return wait("Waiting for the review of the exact commit");
+          if (!report || report.data.kind !== "review")
+            return awaiting("Waiting for the review of the exact commit", `your review of ${state.commit} (report_review)`);
           ctx.consumeReports(report.id);
           await stop(state.reviewer!.id, `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`);
           if (report.data.verdict === "accept") return next({ phase: "queue", reviewer: null });
@@ -447,7 +548,7 @@ export function taskRoute(options: {
             async recover({ signal }) {
               const found = landingFor(await landingStatus(options.root, signal), commit);
               return found.checking || found.waiting || found.held
-                ? { status: "completed" as const, value: Date.now() }
+                ? { status: "completed" as const, value: clock() }
                 : { status: "absent" as const };
             },
             async run({ signal }) {
@@ -457,7 +558,7 @@ export function taskRoute(options: {
               });
               if (queued.code !== 0)
                 throw new Error(`check.ts ${commit} exited ${queued.code}: ${(queued.stderr || queued.stdout).trim()}`);
-              return Date.now();
+              return clock();
             },
           });
           return next({ phase: "landing", queuedAt });

@@ -1,6 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, Issue } from "../shared/model.ts";
+import { assignmentPhase, assignmentSays } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
@@ -60,9 +61,7 @@ export function NowView({ project }: { project: Project }) {
         {project.data.assignments
           .filter((a) => a.status === "active" || a.status === "queued")
           .map((a) => (
-            <Line key={a.id} color={a.error || a.help ? c.warning : c.text}>{`#${a.issue ?? "?"}  ${
-              a.error ? "faulted" : (a.phase ?? a.status)
-            } · ${a.error ?? a.help ?? a.wait ?? ""}`}</Line>
+            <Line key={a.id} color={a.error || a.stalled || a.help ? c.warning : c.text}>{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
           ))}
         {project.data.profiles && (
           <Line color={c.muted}>{`workers ${project.data.profiles.roles.worker.profile} · reviewers ${project.data.profiles.roles.reviewer.profile} · coordinator ${project.data.profiles.roles.coordinator.profile}`}</Line>

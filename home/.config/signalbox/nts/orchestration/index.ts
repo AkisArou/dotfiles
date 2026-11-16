@@ -108,7 +108,6 @@ export function ntsOrchestration(options: {
     route: new Late(),
     coordinator: new Late(),
     mailbox: new Late(),
-    runtime: new Late(),
     issues: options.issues,
     decisions: decisions.service,
   };
@@ -117,7 +116,6 @@ export function ntsOrchestration(options: {
   const agents = options.agents
     ? options.agents(toolsets)
     : managedAgents({ state: options.state, directory: options.directory, toolsets });
-  wiring.runtime.set(agents.runtime);
   const route = taskRoute({
     root: options.root,
     issues: options.issues,

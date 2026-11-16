@@ -14,6 +14,7 @@ import { messaging } from "signalbox/ext/agents/features";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { Issue } from "../shared/model.ts";
 import type { ManagedAgents } from "./agents.ts";
+import { activitySource } from "./activity.ts";
 import { ntsOrchestration } from "./index.ts";
 
 async function until<T>(read: () => T | undefined, timeout = 30_000): Promise<T> {
@@ -59,10 +60,12 @@ test("the coordinator starts with its brief and receives each event once through
     }),
   });
   const runtime = agentRuntime({ id: "agents", programs: [fake] });
+  const activity = activitySource({ id: "test" });
   const agents = {
     runtime: runtime.runtime,
     instances: runtime.instances,
-    extensions: [runtime.extension],
+    activity: activity.key,
+    extensions: [runtime.extension, activity.extension],
     start: (agentsRuntime, request, signal) =>
       agentsRuntime.start(
         {

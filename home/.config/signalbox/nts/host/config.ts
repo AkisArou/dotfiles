@@ -16,7 +16,6 @@ import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
 import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
 import { combineReadables } from "../orchestration/current.ts";
-import { claudeActivity } from "../orchestration/activity.ts";
 import { nativeAttachment } from "signalbox/ext/agents/features";
 import type { TerminalTarget } from "signalbox/ext/terminals/index";
 
@@ -70,7 +69,6 @@ export function createNtsProject(settings: NtsConfig) {
     });
     return projectIssues(listed, plan);
   });
-  const activity = claudeActivity();
   const orchestration = ntsOrchestration({
     root: settings.root,
     directory: settings.state,
@@ -102,7 +100,6 @@ export function createNtsProject(settings: NtsConfig) {
       ),
       observe(refs.plan, 30_000, () => readFile(planPath, "utf8")),
       issues,
-      activity.extension,
       ...orchestration.extensions,
       ...orchestrationEndpoints(orchestration),
       {
@@ -115,7 +112,7 @@ export function createNtsProject(settings: NtsConfig) {
       },
       exposeSource({
         ref: refs.agents,
-        requires: [native.service, orchestration.agents.runtime, activity.key],
+        requires: [native.service, orchestration.agents.runtime, orchestration.agents.activity],
         output: z.custom<refs.Agent[]>(),
         resolve: (context) =>
           combineReadables(
@@ -124,7 +121,7 @@ export function createNtsProject(settings: NtsConfig) {
               context.get(orchestration.agents.runtime).instances,
               (terminals, managed) => ({ terminals, managed }),
             ),
-            context.get(activity.key),
+            context.get(orchestration.agents.activity),
             ({ terminals, managed }, sessions) => [...managedAgentViews(managed, sessions), ...terminals],
           ),
       }),

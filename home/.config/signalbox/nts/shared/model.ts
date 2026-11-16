@@ -63,6 +63,12 @@ export type AssignmentView = {
   rounds: number;
   commit: string | null;
   tree: string | null;
+  /** When the current phase began (ms since epoch). */
+  phaseSince: number | null;
+  /** The awaited agent's latest progress note. */
+  progress: string | null;
+  /** The awaited agent stayed idle through its nudges. */
+  stalled: string | null;
   design: string;
   summary: string;
   worker: string | null;
@@ -105,6 +111,16 @@ export const answerDecision = operation<{ id: string; revision: number; answer: 
 export const reworkAssignment = operation<{ assignment: string; notes: string }, { ok: true }>(
   "nts.assignments.rework",
 );
+/** What an assignment says now: its fault, stall, open question or wait, and its latest progress. */
+export function assignmentSays(a: AssignmentView): string {
+  const said = a.error ?? (a.stalled && `stalled: ${a.stalled}`) ?? (a.help && `asks: ${a.help}`) ?? a.wait ?? "";
+  return a.progress && !a.error ? `${said} · ${a.progress}` : said;
+}
+/** The phase and how long it has run, e.g. "build 42 min". */
+export function assignmentPhase(a: AssignmentView, now = Date.now()): string {
+  const phase = a.error ? "faulted" : (a.phase ?? a.status);
+  return a.phaseSince === null ? phase : `${phase} ${Math.max(0, Math.round((now - a.phaseSince) / 60_000))} min`;
+}
 export const retryAssignment = operation<{ assignment: string }, { ok: true }>("nts.assignments.retry");
 export const decideDesign = operation<
   { assignment: string; accept: boolean; notes: string },

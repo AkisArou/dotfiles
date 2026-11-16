@@ -23,6 +23,9 @@ import type { FullCheckStatus } from "../status/full-check.ts";
 import type { ManagedAgents } from "./agents.ts";
 import { profiles } from "./profiles.ts";
 import { taskRoute, taskState } from "./task.ts";
+import { activitySource } from "./activity.ts";
+import type { AgentActivity } from "./activity.ts";
+import { STALL } from "./stall.ts";
 
 const run = promisify(execFile);
 const git = (cwd: string, ...args: string[]) =>
@@ -97,10 +100,15 @@ test("a task goes from tree to verified through design approval, review and land
     }),
   });
   const runtime = agentRuntime({ id: "agents", programs: [fake] });
+  // The test's own clock and agent activity: stalls are decided on them.
+  let now = Date.now();
+  const activityCell = new Cell<AgentActivity>({});
+  const activity = activitySource({ id: "test", cell: activityCell });
   const agents = {
     runtime: runtime.runtime,
     instances: runtime.instances,
-    extensions: [runtime.extension],
+    activity: activity.key,
+    extensions: [runtime.extension, activity.extension],
     start: (agentsRuntime, request, signal) =>
       agentsRuntime.start(
         {
@@ -160,6 +168,7 @@ test("a task goes from tree to verified through design approval, review and land
     workerTools: tools,
     reviewerTools: tools,
     maxRounds: 4,
+    clock: () => now,
   });
   const work = assignmentService({ id: "work", state: state.state, engine: engine.engine, routes: [route] });
   const app = await startExtensions(
@@ -243,6 +252,50 @@ test("a task goes from tree to verified through design approval, review and land
   assert.match(started.at(-1)!.brief, /The latest instruction it received:\nDesign approved\./);
   assert.match(started.at(-1)!.brief, /thing\.ts owns it\./);
 
+  // An idle worker is nudged; its progress report holds nudges until its time;
+  // after the nudges the coordinator is told; a coordinator message answers it.
+  const worker = resumed.worker!.id;
+  const until = async (check: (state: ReturnType<typeof taskState.parse>) => boolean, what: string) => {
+    const deadline = Date.now() + 20_000;
+    for (;;) {
+      const state = taskState.parse(read().state);
+      if (check(state)) return state;
+      if (Date.now() > deadline) throw new Error(`never ${what}: ${JSON.stringify(state.watch)}`);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  };
+  // Each observation differs (a tick), as a real reading after time passes would wake
+  // the route through its retryAt; the test's clock jumps instead of waiting.
+  let tick = 0;
+  const observe = (status: string) => activityCell.set({ [worker]: status, [`tick/${++tick}`]: "" });
+  const nudges = () => messages.filter((message) => message.to === worker && /waits for your proved commit/.test(message.text)).length;
+  observe("idle");
+  await until((state) => state.watch?.idleSince === now, "watched");
+  now += STALL.idle;
+  observe("idle");
+  await until(() => nudges() === 1, "nudged");
+  assert.match(messages.at(-1)!.text, /report_progress/);
+  await report({ kind: "progress", role: "worker", note: "inner.ts runs", minutes: 30 }, "progress-1");
+  await until((state) => state.progress?.note === "inner.ts runs", "progressed");
+  now += 20 * 60_000;
+  observe("idle");
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  assert.equal(nudges(), 1, "idle within the reported time is expected");
+  now += 10 * 60_000;
+  observe("idle");
+  await until(() => nudges() === 2, "nudged after the progress ran out");
+  now += STALL.idle;
+  observe("idle");
+  await until(() => nudges() === 3, "nudged again");
+  now += STALL.idle;
+  observe("idle");
+  const stalled = await until((state) => state.stalled !== null, "stalled");
+  assert.match(stalled.stalled!, /stayed idle without your proved commit \(report_ready\) through 2 nudges; its last progress: inner\.ts runs/);
+  await report({ kind: "message", from: "coordinator", text: "Commit what you have." }, "message-1");
+  await until((state) => state.stalled === null && state.note === "From the coordinator: Commit what you have.", "answered");
+  assert.equal(messages.at(-1)!.text, "From the coordinator: Commit what you have.");
+  observe("busy");
+
   // A report naming a commit that is not the tree's clean HEAD faults loudly, never lands.
   await writeFile(join(building.tree!, "thing.txt"), "done");
   await git(building.tree!, "add", "thing.txt");
@@ -287,7 +340,7 @@ test("a task goes from tree to verified through design approval, review and land
       held: [],
       day: { landed: 0, refused: 0, held: 0, withdrawn: 0, median_wall_s: null, max_wall_s: null },
       recent: [
-        { id: `${commit.slice(0, 12)}-1`, sha: commit, state, at: new Date().toISOString(), message: state, branch: "900", issue: 900, run: "/logs",
+        { id: `${commit.slice(0, 12)}-1`, sha: commit, state, at: new Date(now).toISOString(), message: state, branch: "900", issue: 900, run: "/logs",
           wall_s: 1, estimate_s: 1, landing: [], deferred: [], pending: 0 },
       ],
       main: { commit, pushed: true },

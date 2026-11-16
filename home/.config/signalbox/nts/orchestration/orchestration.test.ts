@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cardPaths } from "./task.ts";
-import { wakeups } from "./wakeups.ts";
+import { PHASE_BUDGET, wakeups } from "./wakeups.ts";
 import type { Assignment } from "signalbox/ext/assignments/index";
 
 test("a card's Paths line names the files a task reserves, and nothing else", () => {
@@ -51,13 +51,21 @@ const task = (patch: object, assignment: Partial<Assignment> = {}): Assignment =
 
 test("wake-ups have stable identities derived from what they announce", () => {
   const observe = (assignments: Assignment[]) =>
-    wakeups({ assignments, landing: undefined, fullCheck: undefined, decided: [] }).map((event) => event.id);
+    wakeups({ assignments, landing: undefined, fullCheck: undefined, decided: [], now: 0 }).map((event) => event.id);
   const design = observe([task({ phase: "approve", design: "fix it at the cause" })]);
   assert.equal(design.length, 1);
   assert.match(design[0]!, /^design\/a1\//);
   // The same design observed again is the same event; a revised design is a new one.
   assert.deepEqual(observe([task({ phase: "approve", design: "fix it at the cause" })]), design);
   assert.notDeepEqual(observe([task({ phase: "approve", design: "a better design" })]), design);
+  // A stalled agent is announced once per watched report; a phase past its budget once per entry.
+  const watch = { key: "build/claude/x/0", idleSince: 0, until: null, nudges: 2, escalated: true };
+  assert.deepEqual(observe([task({ phase: "build", stalled: "idle", watch })]), ["stalled/a1/build/claude/x/0"]);
+  const late = (now: number, phaseSince: number) =>
+    wakeups({ assignments: [task({ phase: "build", phaseSince })], landing: undefined, fullCheck: undefined, decided: [], now })
+      .map((event) => event.id);
+  assert.deepEqual(late(PHASE_BUDGET.build!, 0), []);
+  assert.deepEqual(late(PHASE_BUDGET.build! + 1, 0), ["overdue/a1/build/0"]);
   assert.deepEqual(observe([task({ help: "which owner?" })]).length, 1);
   assert.deepEqual(
     observe([task({ rounds: 5 }, { wait: { reason: "Escalated after 5 rounds; the coordinator decides" } })]),
@@ -86,6 +94,7 @@ test("each area's reading list names workflow sections and lessons that exist", 
 test("a live Claude session shows Claude Code's own status; others keep theirs", async () => {
   const { parseClaudeAgents } = await import("./activity.ts");
   const { managedAgentViews } = await import("./endpoints.ts");
+  // Keyed by instance ID: Claude's sessions are "claude/<session id>".
   const activity = parseClaudeAgents(
     JSON.stringify([
       { sessionId: "a2494288-4abb-4e6a-967e-5a39d904f7c0", status: "busy" },
