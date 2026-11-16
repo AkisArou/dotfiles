@@ -49,6 +49,14 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         state: "held",
       },
     ],
+    "nts.profiles": {
+      revision: 0,
+      profiles: [{ id: "opus-high", label: "Opus high", harness: "claude", model: "claude-opus-5-5", effort: "high" }],
+      roles: { coordinator: { profile: "opus-high" }, worker: { profile: "opus-high" }, reviewer: { profile: "opus-high" } },
+      unavailable: {},
+    },
+    "nts.assignments": [],
+    "nts.user-decisions": [],
     "nts.agents": [
       {
         id: "worker",
@@ -176,6 +184,14 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
   const values: Record<string, unknown> = {
     "nts.overview": overview,
     "nts.issues": [],
+    "nts.profiles": {
+      revision: 0,
+      profiles: [{ id: "opus-high", label: "Opus high", harness: "claude", model: "claude-opus-5-5", effort: "high" }],
+      roles: { coordinator: { profile: "opus-high" }, worker: { profile: "opus-high" }, reviewer: { profile: "opus-high" } },
+      unavailable: {},
+    },
+    "nts.assignments": [],
+    "nts.user-decisions": [],
     "nts.agents": agents,
     "nts.plan": "# Plan",
   };

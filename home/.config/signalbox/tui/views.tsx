@@ -45,6 +45,25 @@ export function NowView({ project }: { project: Project }) {
           <Line color={c.muted}>Open or attach a native terminal in Agents.</Line>
         )}
       </Section>
+      <Section
+        title={`Assignments: ${project.data.assignments.filter((a) => a.status === "active" || a.status === "queued").length}`}
+      >
+        {project.data.assignments
+          .filter((a) => a.status === "active" || a.status === "queued")
+          .map((a) => (
+            <Line key={a.id} color={a.error || a.help ? c.warning : c.text}>{`#${a.issue ?? "?"}  ${
+              a.error ? "faulted" : (a.phase ?? a.status)
+            } · ${a.error ?? a.help ?? a.wait ?? ""}`}</Line>
+          ))}
+        {project.data.profiles && (
+          <Line color={c.muted}>{`workers ${project.data.profiles.roles.worker.profile} · reviewers ${project.data.profiles.roles.reviewer.profile} · coordinator ${project.data.profiles.roles.coordinator.profile}`}</Line>
+        )}
+        {project.data.decisions
+          .filter((d) => d.status === "pending")
+          .map((d) => (
+            <Line key={d.id} color={c.warning}>{`? ${d.question} (answer in the browser's Needs you)`}</Line>
+          ))}
+      </Section>
       <Section title="Streams">
         {[...new Set(project.data.issues.map((issue) => issue.stream))].map((stream) => {
           const issues = project.data.issues.filter((issue) => issue.stream === stream);
