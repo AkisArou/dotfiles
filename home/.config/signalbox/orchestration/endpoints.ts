@@ -156,6 +156,17 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       },
     }),
     exposeOperation({
+      ref: refs.retryAssignment,
+      requires: [work],
+      input: z.object({ assignment: z.string() }),
+      output: z.object({ ok: z.literal(true) }),
+      // Re-runs a held step; its effect recovers from NTS's own state before acting.
+      run: async (input, context) => {
+        await context.get(work).retry(input.assignment);
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
       ref: refs.decideDesign,
       requires: [work],
       input: z.object({ assignment: z.string(), accept: z.boolean(), notes: z.string() }),
