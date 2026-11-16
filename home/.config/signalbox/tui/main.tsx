@@ -1,0 +1,47 @@
+/** @jsxImportSource @opentui/react */
+import { createCliRenderer } from "@opentui/core";
+import { createRoot } from "@opentui/react";
+import { createClient, webSocketConnection } from "signalbox/client";
+import { SignalboxProvider } from "signalbox/client/react";
+import { TerminalApp } from "./app.tsx";
+import { colors } from "./theme.ts";
+import { terminalConfig } from "./config.ts";
+import { createTerminalTools } from "./tools.ts";
+import { TerminalTheme } from "./selection.tsx";
+import { TerminalProvider } from "../shared/terminal.ts";
+import { terminalUrl } from "signalbox/client/terminal";
+
+const api = process.env.SIGNALBOX_NTS_API_URL ?? "ws://127.0.0.1:4311/rpc";
+const client = createClient({ connect: webSocketConnection(api) });
+let finish!: () => void;
+const ended = new Promise<void>((resolve) => {
+  finish = resolve;
+});
+const renderer = await createCliRenderer({
+  screenMode: "alternate-screen",
+  backgroundColor: colors.background,
+  exitOnCtrlC: false,
+  onDestroy() {
+    client.close();
+    finish();
+  },
+});
+const tools = createTerminalTools(renderer, terminalConfig.finder);
+createRoot(renderer).render(
+  <SignalboxProvider client={client}>
+    <TerminalTheme>
+      <TerminalProvider url={terminalUrl(api)}>
+        <TerminalApp tools={tools} onExit={() => renderer.destroy()} />
+      </TerminalProvider>
+    </TerminalTheme>
+  </SignalboxProvider>,
+);
+client.start();
+const stop = () => renderer.destroy();
+process.once("SIGTERM", stop);
+process.once("SIGINT", stop);
+await ended;
+await tools.close();
+await renderer.closed;
+process.off("SIGTERM", stop);
+process.off("SIGINT", stop);

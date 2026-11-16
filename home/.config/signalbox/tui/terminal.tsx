@@ -1,0 +1,113 @@
+/** @jsxImportSource @opentui/react */
+import { useEffect, useRef, useState } from "react";
+import { extend } from "@opentui/react";
+import { EmbeddedTerminalRenderable } from "@opentui/core";
+import { connectTerminal } from "signalbox/client/terminal";
+import type { TerminalClient, TerminalState } from "signalbox/client/terminal";
+import { useTerminalEndpoint } from "../shared/terminal.ts";
+import { colors as c } from "./theme.ts";
+
+extend({ "agent-terminal": EmbeddedTerminalRenderable });
+declare module "@opentui/react" {
+  interface OpenTUIComponents {
+    "agent-terminal": typeof EmbeddedTerminalRenderable;
+  }
+}
+
+export function NativeTerminal({
+  id,
+  interactive,
+  controlRequest,
+  onControl,
+}: {
+  id: string;
+  interactive: boolean;
+  controlRequest: number;
+  onControl(owned: boolean): void;
+}) {
+  const url = useTerminalEndpoint();
+  const terminal = useRef<EmbeddedTerminalRenderable>(null);
+  const client = useRef<TerminalClient>(undefined);
+  const pending = useRef(false),
+    notify = useRef(onControl);
+  notify.current = onControl;
+  const [state, setState] = useState<TerminalState>({
+    status: "connecting",
+    owned: false,
+    busy: false,
+  });
+  useEffect(() => {
+    if (!url || !terminal.current) return;
+    const view = terminal.current;
+    const connection = (client.current = connectTerminal({
+      url,
+      id,
+      size: { cols: Math.max(2, view.width), rows: Math.max(2, view.height) },
+      output(data) {
+        view.write(data);
+      },
+      reset() {
+        view.write("\x1bc");
+      },
+    }));
+    setState(connection.getSnapshot());
+    const unsubscribe = connection.subscribe(() => {
+      const value = connection.getSnapshot();
+      setState(value);
+      notify.current(value.owned);
+      if (value.owned) view.focus();
+      else view.blur();
+      if (value.status === "disconnected") pending.current = false;
+      if (value.status === "ready" && pending.current) {
+        pending.current = false;
+        connection.claim();
+      }
+    });
+    return () => {
+      unsubscribe();
+      connection.close();
+      client.current = undefined;
+      notify.current(false);
+    };
+  }, [id, url]);
+  useEffect(() => {
+    pending.current = interactive && controlRequest > 0;
+    if (!interactive) {
+      terminal.current?.blur();
+      notify.current(false);
+      client.current?.release();
+    } else if (client.current?.getSnapshot().status === "ready") {
+      pending.current = false;
+      client.current.claim();
+    }
+  }, [interactive, controlRequest]);
+  return (
+    <box flexDirection="column" flexGrow={1} minHeight={0} minWidth={0}>
+      <text height={1} fg={state.owned ? c.accent : c.muted} wrapMode="none" truncate>
+        {!url
+          ? "No terminal endpoint configured"
+          : (state.message ??
+            (state.owned
+              ? "INPUT · Ctrl+] returns to Signalbox; Ctrl+C goes to the program"
+              : `${state.status} · ${state.busy ? "controlled in another viewer" : "Enter to type"}`))}
+      </text>
+      <agent-terminal
+        ref={terminal}
+        flexGrow={1}
+        minWidth={0}
+        minHeight={0}
+        transparentBackground
+        maxScrollback={5000}
+        selectable
+        onTerminalResize={(cols, rows) => {
+          if (cols >= 2 && rows >= 2) client.current?.resize({ cols, rows });
+        }}
+        onData={(bytes, source) => {
+          const text = new TextDecoder().decode(bytes);
+          if (source === "response") client.current?.response(text);
+          else client.current?.input(text);
+        }}
+      />
+    </box>
+  );
+}

@@ -1,13 +1,5 @@
-// What nts measured, for signalbox's Benchmarks and Conformance tabs, read
-// from `node tooling/records/summary.ts benchmarks|conformance` (version 1):
-// the newest complete benchmark run held to the bar against node, Bun's JIT,
-// Bun's ahead-of-time compiler and ScriptC, and the records each backend is
-// held to. Each tab says first how old what it shows is: a run's date and
-// the node it ran against, a record's age in compiler commits. Read every
-// five minutes; nothing here watches a file.
-
-import type { Gauge, Provider, ProviderContext, Table, TableCell } from "signalbox";
-import { checked } from "./status.ts";
+// NTS benchmark and conformance projections, ported from ~/.config/signalbox/nts/records.ts.
+import type { Gauge, Report, Table, TableCell } from "./model.ts";
 
 type Backend = "c" | "llvm" | "jvm";
 const BACKENDS: readonly Backend[] = ["c", "llvm", "jvm"];
@@ -29,13 +21,28 @@ export interface BenchmarksSummary {
     readonly startedAt: string;
     readonly finishedAt: string;
     readonly compiler: { readonly commit: string };
-    readonly machine: { readonly conditions: { readonly cpu?: string; readonly sibling?: number; readonly start?: { readonly load?: string; readonly memoryAvailableBytes?: number } } };
-    readonly comparators: Readonly<Record<string, { readonly version: string; readonly commit: string | null } | null>>;
+    readonly machine: {
+      readonly conditions: {
+        readonly cpu?: string;
+        readonly sibling?: number;
+        readonly start?: { readonly load?: string; readonly memoryAvailableBytes?: number };
+      };
+    };
+    readonly comparators: Readonly<
+      Record<string, { readonly version: string; readonly commit: string | null } | null>
+    >;
   } | null;
-  readonly counts: Readonly<Record<Backend, Readonly<Record<Comparator, Readonly<Partial<Record<Kind, number>>>>>>> | null;
+  readonly counts: Readonly<
+    Record<Backend, Readonly<Record<Comparator, Readonly<Partial<Record<Kind, number>>>>>>
+  > | null;
   readonly rows: readonly {
     readonly name: string;
-    readonly backends: Readonly<Record<Backend, { readonly versus: Readonly<Record<Comparator, Verdict>>; readonly slowerThanBest: boolean }>>;
+    readonly backends: Readonly<
+      Record<
+        Backend,
+        { readonly versus: Readonly<Record<Comparator, Verdict>>; readonly slowerThanBest: boolean }
+      >
+    >;
   }[];
 }
 
@@ -70,7 +77,16 @@ export interface ConformanceSummary {
     readonly run: string;
     readonly commit: string;
     readonly at: string;
-    readonly backends: Readonly<Partial<Record<Backend, CensusTotals & { readonly slices: Readonly<Record<string, CensusTotals & { readonly under: string }>> }>>>;
+    readonly backends: Readonly<
+      Partial<
+        Record<
+          Backend,
+          CensusTotals & {
+            readonly slices: Readonly<Record<string, CensusTotals & { readonly under: string }>>;
+          }
+        >
+      >
+    >;
     /** The test262 directories no report covers, with their file counts: `test/intl402`. */
     readonly unmeasured: Readonly<Record<string, number>>;
   };
@@ -81,7 +97,9 @@ interface CensusTotals {
   readonly selected: number;
   readonly cases: number;
   readonly attempted: number;
-  readonly outcomes: Readonly<Record<"pass" | "fail" | "refused" | "unsupported" | "no-verdict", number>>;
+  readonly outcomes: Readonly<
+    Record<"pass" | "fail" | "refused" | "unsupported" | "no-verdict", number>
+  >;
   readonly negativesAccepted: number;
   readonly notAttempted: Readonly<Record<string, number>>;
   readonly refused: Readonly<Record<string, number>>;
@@ -95,32 +113,72 @@ export const CONFORMANCE_TABLES = ["conformance-suite", "conformance"];
 
 const DAY = 86_400_000;
 const short = (commit: string | null | undefined) => commit?.slice(0, 12) ?? "?";
-const days = (ms: number) => (ms < DAY ? `${Math.round(ms / 3_600_000)} h` : `${(ms / DAY).toFixed(1)} days`);
-const VERDICT_COLOR: Readonly<Partial<Record<Kind, "green" | "yellow" | "red" | "gray">>> = { WON: "green", SHORT: "yellow", LOSS: "red", UNAVAILABLE: "gray", NOT_COMPARABLE: "gray" };
+const days = (ms: number) =>
+  ms < DAY ? `${Math.round(ms / 3_600_000)} h` : `${(ms / DAY).toFixed(1)} days`;
+const VERDICT_COLOR: Readonly<Partial<Record<Kind, "green" | "yellow" | "red" | "gray">>> = {
+  WON: "green",
+  SHORT: "yellow",
+  LOSS: "red",
+  UNAVAILABLE: "gray",
+  NOT_COMPARABLE: "gray",
+};
 
 /** A ratio with its verdict's color: below 1 is faster than the comparator. */
 function ratioCell(verdict: Verdict | undefined): TableCell {
-  if (!verdict || verdict.ratio === null) return { text: verdict?.kind === "NOT_COMPARABLE" ? "n/c" : "—", color: "gray" };
+  if (!verdict || verdict.ratio === null)
+    return { text: verdict?.kind === "NOT_COMPARABLE" ? "n/c" : "—", color: "gray" };
   const color = VERDICT_COLOR[verdict.kind];
-  return { text: verdict.ratio.toFixed(2), ...(color ? { color } : {}), ...(verdict.kind === "LOSS" ? { bold: true } : {}) };
+  return {
+    text: verdict.ratio.toFixed(2),
+    ...(color ? { color } : {}),
+    ...(verdict.kind === "LOSS" ? { bold: true } : {}),
+  };
 }
 
 /** The run's identity and conditions: what the numbers are of, and how old they are. */
 function runTable(summary: BenchmarksSummary, now: number): Table {
   const run = summary.run;
-  if (!run) return { id: "bench-run", title: "No complete benchmark run is kept", columns: [{ key: "what", label: "" }, { key: "state", label: "" }], rows: [] };
+  if (!run)
+    return {
+      id: "bench-run",
+      title: "No complete benchmark run is kept",
+      columns: [
+        { key: "what", label: "" },
+        { key: "state", label: "" },
+      ],
+      rows: [],
+    };
   const age = now - Date.parse(run.finishedAt);
   const conditions = run.machine.conditions;
   const comparator = (name: string) => run.comparators[name]?.version ?? "not run";
   return {
     id: "bench-run",
     title: "The newest complete run",
-    columns: [{ key: "what", label: "" }, { key: "state", label: "" }],
+    columns: [
+      { key: "what", label: "" },
+      { key: "state", label: "" },
+    ],
     rows: [
-      { what: "finished", state: { text: `${run.finishedAt.slice(0, 16).replace("T", " ")} UTC, ${days(age)} ago`, ...(age > 7 * DAY ? { color: "red" as const } : age > 2 * DAY ? { color: "yellow" as const } : {}) } },
+      {
+        what: "finished",
+        state: {
+          text: `${run.finishedAt.slice(0, 16).replace("T", " ")} UTC, ${days(age)} ago`,
+          ...(age > 7 * DAY
+            ? { color: "red" as const }
+            : age > 2 * DAY
+              ? { color: "yellow" as const }
+              : {}),
+        },
+      },
       { what: "compiler", state: short(run.compiler.commit) },
-      { what: "against", state: COMPARATORS.map((name) => `${name} ${comparator(name)}`).join(" · ") },
-      { what: "conditions", state: `CPU ${conditions.cpu ?? "?"} with sibling ${conditions.sibling ?? "?"} idle; load at the start ${conditions.start?.load?.split(" ").slice(0, 3).join(" ") ?? "?"}` },
+      {
+        what: "against",
+        state: COMPARATORS.map((name) => `${name} ${comparator(name)}`).join(" · "),
+      },
+      {
+        what: "conditions",
+        state: `CPU ${conditions.cpu ?? "?"} with sibling ${conditions.sibling ?? "?"} idle; load at the start ${conditions.start?.load?.split(" ").slice(0, 3).join(" ") ?? "?"}`,
+      },
     ],
     at: Date.parse(run.finishedAt),
   };
@@ -129,7 +187,8 @@ function runTable(summary: BenchmarksSummary, now: number): Table {
 /** Each backend against each comparator: how many rows it won, tied, fell short on, lost. */
 function countsTable(summary: BenchmarksSummary): Table {
   const counts = summary.counts;
-  const number = (value: number | undefined, color?: "red" | "green"): TableCell => (value ? (color ? { text: String(value), color } : value) : "");
+  const number = (value: number | undefined, color?: "red" | "green"): TableCell =>
+    value ? (color ? { text: String(value), color } : value) : "";
   return {
     id: "bench-counts",
     title: "Against the comparators: rows won, tied, short (not 0.8× node or Bun JIT), lost",
@@ -163,14 +222,19 @@ function countsTable(summary: BenchmarksSummary): Table {
 
 /** Every case, worst first: each backend's ratio to node, C's to Bun AOT and ScriptC, and which are slower than their own best. */
 function rowsTable(summary: BenchmarksSummary): Table {
-  const worst = (row: BenchmarksSummary["rows"][number]) => Math.max(...BACKENDS.map((backend) => row.backends[backend]?.versus.node?.ratio ?? 0));
+  const worst = (row: BenchmarksSummary["rows"][number]) =>
+    Math.max(...BACKENDS.map((backend) => row.backends[backend]?.versus.node?.ratio ?? 0));
   return {
     id: "bench-rows",
     title: "Each case, worst against node first: a backend's time over the comparator's",
     key: "case",
     columns: [
       { key: "case", label: "case" },
-      ...BACKENDS.map((backend) => ({ key: backend, label: `${NAME[backend]}/node`, align: "right" as const })),
+      ...BACKENDS.map((backend) => ({
+        key: backend,
+        label: `${NAME[backend]}/node`,
+        align: "right" as const,
+      })),
       { key: "aot", label: "C/Bun AOT", align: "right" },
       { key: "scriptc", label: "C/ScriptC", align: "right" },
       { key: "slower", label: "slower than its best" },
@@ -178,10 +242,14 @@ function rowsTable(summary: BenchmarksSummary): Table {
     rows: [...summary.rows]
       .sort((a, b) => worst(b) - worst(a))
       .map((row) => {
-        const slower = BACKENDS.filter((backend) => row.backends[backend]?.slowerThanBest).map((backend) => NAME[backend]);
+        const slower = BACKENDS.filter((backend) => row.backends[backend]?.slowerThanBest).map(
+          (backend) => NAME[backend],
+        );
         return {
           case: row.name,
-          ...Object.fromEntries(BACKENDS.map((backend) => [backend, ratioCell(row.backends[backend]?.versus.node)])),
+          ...Object.fromEntries(
+            BACKENDS.map((backend) => [backend, ratioCell(row.backends[backend]?.versus.node)]),
+          ),
           aot: ratioCell(row.backends.c?.versus["Bun AOT"]),
           scriptc: ratioCell(row.backends.c?.versus.ScriptC),
           slower: slower.length ? { text: slower.join(", "), color: "yellow" } : "",
@@ -198,9 +266,26 @@ function rowsTable(summary: BenchmarksSummary): Table {
 export function benchmarkGauges(summary: BenchmarksSummary, now: number): Gauge[] {
   const section = "benchmarks";
   const run = summary.run;
-  if (!run) return [{ id: "run", label: "the newest complete run", section, value: 0, text: "none kept", state: "red", why: "results/benchmarks/runs/ holds no complete run" }];
-  const slower = summary.rows.flatMap((row) => BACKENDS.filter((backend) => row.backends[backend]?.slowerThanBest).map((backend) => `${row.name} (${NAME[backend]})`));
-  const lost = BACKENDS.map((backend) => [backend, summary.counts?.[backend]?.node?.LOSS ?? 0] as const);
+  if (!run)
+    return [
+      {
+        id: "run",
+        label: "the newest complete run",
+        section,
+        value: 0,
+        text: "none kept",
+        state: "red",
+        why: "results/benchmarks/runs/ holds no complete run",
+      },
+    ];
+  const slower = summary.rows.flatMap((row) =>
+    BACKENDS.filter((backend) => row.backends[backend]?.slowerThanBest).map(
+      (backend) => `${row.name} (${NAME[backend]})`,
+    ),
+  );
+  const lost = BACKENDS.map(
+    (backend) => [backend, summary.counts?.[backend]?.node?.LOSS ?? 0] as const,
+  );
   return [
     {
       id: "run",
@@ -211,8 +296,22 @@ export function benchmarkGauges(summary: BenchmarksSummary, now: number): Gauge[
       limits: { amber: 2, red: 7 },
       why: `run ${run.id}, against node ${run.comparators["node"]?.version ?? "?"}: every number on the tab is from it`,
     },
-    { id: "slower", label: "rows slower than their own best", section, value: slower.length, limits: { amber: 1 }, ...(slower.length ? { why: slower.join(", ") } : {}) },
-    { id: "lost", label: "rows lost to node", section, value: lost.reduce((sum, [, count]) => sum + count, 0), text: lost.map(([backend, count]) => `${NAME[backend]} ${count}`).join(", "), why: "the goal is to beat node on every row" },
+    {
+      id: "slower",
+      label: "rows slower than their own best",
+      section,
+      value: slower.length,
+      limits: { amber: 1 },
+      ...(slower.length ? { why: slower.join(", ") } : {}),
+    },
+    {
+      id: "lost",
+      label: "rows lost to node",
+      section,
+      value: lost.reduce((sum, [, count]) => sum + count, 0),
+      text: lost.map(([backend, count]) => `${NAME[backend]} ${count}`).join(", "),
+      why: "the goal is to beat node on every row",
+    },
   ];
 }
 
@@ -224,7 +323,8 @@ const failing = (outcomes: Readonly<Record<string, number>> | undefined) =>
     .map(([kind, count]) => `${kind} ${count}`)
     .join(" · ");
 
-const total = (outcomes: Readonly<Record<string, number>> | undefined) => Object.values(outcomes ?? {}).reduce((sum, count) => sum + count, 0);
+const total = (outcomes: Readonly<Record<string, number>> | undefined) =>
+  Object.values(outcomes ?? {}).reduce((sum, count) => sum + count, 0);
 
 /** Why a case was not attempted, in a word: the census's harness cause (`scope:initial-lane:no-strict`) as the tab names it. */
 function unattempted(cause: string): string {
@@ -247,7 +347,10 @@ const REFUSED: Readonly<Record<string, string>> = {
 function grouped(counts: Readonly<Record<string, number>>, name: (key: string) => string): string {
   const by = new Map<string, number>();
   for (const [key, n] of Object.entries(counts)) by.set(name(key), (by.get(name(key)) ?? 0) + n);
-  return [...by].sort(([a, m], [b, n]) => n - m || a.localeCompare(b)).map(([key, n]) => `${n} ${key}`).join(" · ");
+  return [...by]
+    .sort(([a, m], [b, n]) => n - m || a.localeCompare(b))
+    .map(([key, n]) => `${n} ${key}`)
+    .join(" · ");
 }
 
 /**
@@ -267,10 +370,19 @@ function suiteTable(summary: ConformanceSummary, behind: ReadonlyMap<string, num
     { key: "noVerdict", label: "no verdict", align: "right" as const },
     { key: "why", label: "why not run" },
   ];
-  const title = "The whole test262 suite, each case once: refused cases did not build, unattempted ones the strict lane or the harness leave out";
+  const title =
+    "The whole test262 suite, each case once: refused cases did not build, unattempted ones the strict lane or the harness leave out";
   const census = summary.census;
-  if (!census) return { id: "conformance-suite", title, key: "record", columns, rows: [{ record: "no census report yet: the full check's next green wide run writes one" }] };
-  const share = (n: number, of: number) => (of ? `${n} (${((100 * n) / of).toFixed(1)}%)` : String(n));
+  if (!census)
+    return {
+      id: "conformance-suite",
+      title,
+      key: "record",
+      columns,
+      rows: [{ record: "no census report yet: the full check's next green wide run writes one" }],
+    };
+  const share = (n: number, of: number) =>
+    of ? `${n} (${((100 * n) / of).toFixed(1)}%)` : String(n);
   const row = (record: string, counts: CensusTotals, why: string) => ({
     record,
     cases: counts.cases,
@@ -278,14 +390,25 @@ function suiteTable(summary: ConformanceSummary, behind: ReadonlyMap<string, num
     fail: counts.outcomes.fail || "",
     refused: counts.outcomes.refused ? share(counts.outcomes.refused, counts.cases) : "",
     unattempted: counts.outcomes.unsupported || "",
-    noVerdict: counts.outcomes["no-verdict"] ? { text: String(counts.outcomes["no-verdict"]), ...(counts.degraded ? { color: "yellow" as const } : {}) } : "",
+    noVerdict: counts.outcomes["no-verdict"]
+      ? {
+          text: String(counts.outcomes["no-verdict"]),
+          ...(counts.degraded ? { color: "yellow" as const } : {}),
+        }
+      : "",
     why,
   });
   const why = (counts: CensusTotals) =>
     [
-      counts.outcomes.refused ? `refused: ${grouped(counts.refused, (family) => REFUSED[family] ?? family)}` : "",
-      counts.outcomes.unsupported ? `not attempted: ${grouped(counts.notAttempted, unattempted)}` : "",
-      counts.selected > counts.cases ? `${counts.selected - counts.cases} frontend negatives left to C` : "",
+      counts.outcomes.refused
+        ? `refused: ${grouped(counts.refused, (family) => REFUSED[family] ?? family)}`
+        : "",
+      counts.outcomes.unsupported
+        ? `not attempted: ${grouped(counts.notAttempted, unattempted)}`
+        : "",
+      counts.selected > counts.cases
+        ? `${counts.selected - counts.cases} frontend negatives left to C`
+        : "",
       counts.negativesAccepted ? `${counts.negativesAccepted} negatives accepted` : "",
       counts.degraded ? "a degraded run: no verdict may hold load timeouts" : "",
     ]
@@ -295,12 +418,29 @@ function suiteTable(summary: ConformanceSummary, behind: ReadonlyMap<string, num
     const totals = census.backends[backend];
     if (!totals) return [];
     return [
-      { ...row(`${NAME[backend]} all`, totals, why(totals)), record: { text: `${NAME[backend]} all`, bold: true } },
-      ...Object.values(totals.slices).map((slice) => row(`${NAME[backend]} ${slice.under.slice("test/".length)}`, slice, why(slice))),
+      {
+        ...row(`${NAME[backend]} all`, totals, why(totals)),
+        record: { text: `${NAME[backend]} all`, bold: true },
+      },
+      ...Object.values(totals.slices).map((slice) =>
+        row(`${NAME[backend]} ${slice.under.slice("test/".length)}`, slice, why(slice)),
+      ),
     ];
   });
   for (const [directory, files] of Object.entries(census.unmeasured)) {
-    rows.push({ record: directory.slice("test/".length), cases: files, pass: "", fail: "", refused: "", unattempted: "", noVerdict: "", why: directory === "test/intl402" ? "ECMA-402 (Intl): no census runs it yet" : "no census runs it" });
+    rows.push({
+      record: directory.slice("test/".length),
+      cases: files,
+      pass: "",
+      fail: "",
+      refused: "",
+      unattempted: "",
+      noVerdict: "",
+      why:
+        directory === "test/intl402"
+          ? "ECMA-402 (Intl): no census runs it yet"
+          : "no census runs it",
+    });
   }
   const age = behind.get(census.commit);
   return {
@@ -310,8 +450,14 @@ function suiteTable(summary: ConformanceSummary, behind: ReadonlyMap<string, num
     columns,
     rows,
     facts: [
-      ["census", `the full check's last green wide run, at ${census.commit.slice(0, 12)}${age === undefined ? "" : `, ${age} compiler commits ago`}`],
-      ["pass", "strict-pass: one strict variant per file; sloppy-only files are counted and not run"],
+      [
+        "census",
+        `the full check's last green wide run, at ${census.commit.slice(0, 12)}${age === undefined ? "" : `, ${age} compiler commits ago`}`,
+      ],
+      [
+        "pass",
+        "strict-pass: one strict variant per file; sloppy-only files are counted and not run",
+      ],
     ],
     at: Date.parse(census.at),
   };
@@ -322,13 +468,23 @@ function conformanceTable(summary: ConformanceSummary, behind: ReadonlyMap<strin
   const age = (commits: readonly (string | null | undefined)[]): TableCell => {
     const known = [...new Set(commits.filter((commit): commit is string => Boolean(commit)))];
     if (!known.length) return "";
+    if (known.some((commit) => !behind.has(commit)))
+      return { text: "age unknown", color: "yellow" };
     const oldest = Math.max(...known.map((commit) => behind.get(commit) ?? 0));
-    return { text: `${oldest} compiler commits ago${known.length > 1 ? ` (oldest of ${known.length})` : ""}`, ...(oldest >= 100 ? { color: "yellow" as const } : {}) };
+    return {
+      text: `${oldest} compiler commits ago${known.length > 1 ? ` (oldest of ${known.length})` : ""}`,
+      ...(oldest >= 100 ? { color: "yellow" as const } : {}),
+    };
   };
   const rows = BACKENDS.flatMap((backend) => {
     const records = summary.backends[backend];
     if (!records) return [];
-    const row = (record: string, outcomes: Readonly<Record<string, number>> | undefined, pending: number | undefined, commits: readonly (string | null | undefined)[]) => {
+    const row = (
+      record: string,
+      outcomes: Readonly<Record<string, number>> | undefined,
+      pending: number | undefined,
+      commits: readonly (string | null | undefined)[],
+    ) => {
       const cases = total(outcomes);
       const pass = outcomes?.["pass"] ?? 0;
       return {
@@ -343,23 +499,47 @@ function conformanceTable(summary: ConformanceSummary, behind: ReadonlyMap<strin
     // test262 as the cases a backend runs, so the backends compare like for like, and the frontend's negatives (C's alone) beside them.
     const test262 = (test262: NonNullable<typeof records.test262>) => {
       const commits = Object.values(test262.slices).map((slice) => slice.commit);
-      if (!test262.runtime || !test262.frontend) return [row("test262", test262.outcomes, undefined, commits)];
+      if (!test262.runtime || !test262.frontend)
+        return [row("test262", test262.outcomes, undefined, commits)];
       return [
         row("test262 runtime", test262.runtime.outcomes, undefined, commits),
-        ...(test262.frontend.cases ? [row("test262 frontend negatives", test262.frontend.outcomes, undefined, commits)] : []),
+        ...(test262.frontend.cases
+          ? [row("test262 frontend negatives", test262.frontend.outcomes, undefined, commits)]
+          : []),
       ];
     };
     return [
       ...(records.test262 ? test262(records.test262) : []),
-      ...(records.typescript ? [row("TypeScript", records.typescript.outcomes, records.typescript.pending, [records.typescript.commit])] : []),
-      ...(records.benchmarks ? Object.entries(records.benchmarks.scopes).map(([scope, outcomes]) => row(`benchmarks ${scope}`, outcomes.outcomes, records.benchmarks?.pending, [records.benchmarks?.commit])) : []),
-      ...(records.benchmarkRuns ? [row("benchmark runs", records.benchmarkRuns.outcomes, records.benchmarkRuns.pending, [records.benchmarkRuns.commit])] : []),
-      ...(records.dex ? [row("dex", records.dex.outcomes, records.dex.pending, [records.dex.commit])] : []),
+      ...(records.typescript
+        ? [
+            row("TypeScript", records.typescript.outcomes, records.typescript.pending, [
+              records.typescript.commit,
+            ]),
+          ]
+        : []),
+      ...(records.benchmarks
+        ? Object.entries(records.benchmarks.scopes).map(([scope, outcomes]) =>
+            row(`benchmarks ${scope}`, outcomes.outcomes, records.benchmarks?.pending, [
+              records.benchmarks?.commit,
+            ]),
+          )
+        : []),
+      ...(records.benchmarkRuns
+        ? [
+            row("benchmark runs", records.benchmarkRuns.outcomes, records.benchmarkRuns.pending, [
+              records.benchmarkRuns.commit,
+            ]),
+          ]
+        : []),
+      ...(records.dex
+        ? [row("dex", records.dex.outcomes, records.dex.pending, [records.dex.commit])]
+        : []),
     ];
   });
   return {
     id: "conformance",
-    title: "The records each backend is held to; pending cases are written by the full check after landing",
+    title:
+      "The records each backend is held to; pending cases are written by the full check after landing",
     key: "record",
     columns: [
       { key: "record", label: "record" },
@@ -374,9 +554,26 @@ function conformanceTable(summary: ConformanceSummary, behind: ReadonlyMap<strin
 }
 
 /** The conformance gauges: how many compiler commits old the test262 records are, since they understate what passes once main moves on. */
-export function conformanceGauges(summary: ConformanceSummary, behind: ReadonlyMap<string, number>): Gauge[] {
-  const commits = BACKENDS.flatMap((backend) => Object.values(summary.backends[backend]?.test262?.slices ?? {}).map((slice) => slice.commit)).filter((commit): commit is string => Boolean(commit));
+export function conformanceGauges(
+  summary: ConformanceSummary,
+  behind: ReadonlyMap<string, number>,
+): Gauge[] {
+  const commits = BACKENDS.flatMap((backend) =>
+    Object.values(summary.backends[backend]?.test262?.slices ?? {}).map((slice) => slice.commit),
+  ).filter((commit): commit is string => Boolean(commit));
   if (!commits.length) return [];
+  if (commits.some((commit) => !behind.has(commit)))
+    return [
+      {
+        id: "test262.age",
+        label: "the test262 records' age",
+        section: "conformance",
+        value: 0,
+        text: "unknown",
+        state: "amber",
+        why: "One or more record commits could not be counted against main.",
+      },
+    ];
   const oldest = Math.max(...commits.map((commit) => behind.get(commit) ?? 0));
   return [
     {
@@ -391,39 +588,25 @@ export function conformanceGauges(summary: ConformanceSummary, behind: ReadonlyM
   ];
 }
 
-/** How many commits to compiler/ and runtime/ main has made since each commit. */
-async function compilerCommitsSince(context: ProviderContext, commits: readonly string[]): Promise<Map<string, number>> {
-  const counted = await Promise.all(
-    [...new Set(commits)].map(async (commit) => [commit, Number((await context.run(["git", "rev-list", "--count", `${commit}..main`, "--", "compiler", "runtime"], { cwd: context.roots[0], timeoutMs: 30_000 })).trim())] as const),
-  );
-  return new Map(counted);
-}
-
-const SUMMARY = (kind: string) => ["node", "tooling/records/summary.ts", kind];
-
-/** The Benchmarks tab's tables, read every five minutes. */
-export function ntsBenchmarks(): Provider {
+export function benchmarkReport(summary: BenchmarksSummary, now = Date.now()): Report {
   return {
-    id: BENCHMARKS,
-    label: "Benchmarks",
-    intervalMs: 300_000,
-    read: async (context) => {
-      const summary = checked<BenchmarksSummary>(JSON.parse(await context.run(SUMMARY("benchmarks"), { cwd: context.roots[0], timeoutMs: 60_000 })), "benchmarks", [1], "benchmarks");
-      const now = Date.now();
-      return { tables: [runTable(summary, now), countsTable(summary), rowsTable(summary)], gauges: benchmarkGauges(summary, now) };
-    },
+    tables: [runTable(summary, now), countsTable(summary), rowsTable(summary)],
+    gauges: benchmarkGauges(summary, now),
   };
 }
-
-/** The Conformance tab's tables, the whole test262 suite and the records, read every five minutes. */
-export function ntsConformance(): Provider {
+export function conformanceReport(
+  summary: ConformanceSummary,
+  behind: ReadonlyMap<string, number>,
+): Report {
   return {
-    id: CONFORMANCE,
-    label: "Conformance",
-    intervalMs: 300_000,
-    read: async (context) => {
-      const summary = checked<ConformanceSummary>(JSON.parse(await context.run(SUMMARY("conformance"), { cwd: context.roots[0], timeoutMs: 60_000 })), "conformance", [1], "conformance");
-      const commits = BACKENDS.flatMap((backend) => {
+    tables: [suiteTable(summary, behind), conformanceTable(summary, behind)],
+    gauges: conformanceGauges(summary, behind),
+  };
+}
+export function conformanceCommits(summary: ConformanceSummary): string[] {
+  return [
+    ...new Set(
+      BACKENDS.flatMap((backend) => {
         const records = summary.backends[backend];
         return [
           ...Object.values(records?.test262?.slices ?? {}).map((slice) => slice.commit),
@@ -432,9 +615,9 @@ export function ntsConformance(): Provider {
           records?.benchmarkRuns?.commit,
           records?.dex?.commit,
         ];
-      }).concat(summary.census?.commit).filter((commit): commit is string => Boolean(commit));
-      const behind = await compilerCommitsSince(context, commits);
-      return { tables: [suiteTable(summary, behind), conformanceTable(summary, behind)], gauges: conformanceGauges(summary, behind) };
-    },
-  };
+      })
+        .concat(summary.census?.commit)
+        .filter((commit): commit is string => Boolean(commit)),
+    ),
+  ];
 }

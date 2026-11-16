@@ -1,23 +1,29 @@
 {
-  // Your signalbox configuration, checked as signalbox runs it: TypeScript that node loads as it is.
   "compilerOptions": {
-    "target": "es2024",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "lib": ["es2024"],
-    "types": ["node"],
-    "typeRoots": ["./node_modules/signalbox/node_modules/@types"],
-    // Views in JSX (.tsx), with the React signalbox renders them with.
-    "jsx": "react-jsx",
-    "paths": {
-      "react": ["./node_modules/signalbox/node_modules/@types/react"],
-      "react/*": ["./node_modules/signalbox/node_modules/@types/react/*.d.ts"]
-    },
+    "target": "ES2024",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "verbatimModuleSyntax": true,
-    "skipLibCheck": true
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "types": ["node", "react", "react-dom"],
+    "lib": ["ES2024", "DOM"]
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": [
+    "server.ts",
+    "host/**/*.ts",
+    "nts/**/*.ts",
+    "shared/**/*.ts",
+    "web/**/*.tsx",
+    "web/**/*.ts",
+    "config.ts",
+    "scripts/doctor.ts"
+  ],
+  "exclude": ["node_modules", ".signalbox", ".cache"]
 }
