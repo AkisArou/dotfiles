@@ -40,6 +40,17 @@ export function NativeTerminal({
     owned: false,
     busy: false,
   });
+  // A layout equal to the renderable's default size reports no resize; take the
+  // measured size after the first frames instead, once it is a real size.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const view = terminal.current;
+      if (size.current || !view || view.width < 2 || view.height < 2) return;
+      size.current = { cols: Math.floor(view.width), rows: Math.floor(view.height) };
+      setLaidOut(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
   useEffect(() => {
     if (!url || !terminal.current || !laidOut || !size.current) return;
     const view = terminal.current;
