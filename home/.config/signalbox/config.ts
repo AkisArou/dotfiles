@@ -5,6 +5,7 @@ import { ntsStateDirectory } from "./host/state-directory.ts";
 import { expandPath } from "signalbox/core/utils";
 import type { CommandSpec } from "signalbox/ext/execution/index";
 import type { TerminalTarget } from "signalbox/ext/terminals/index";
+import type { OrchestrationSettings } from "./orchestration/index.ts";
 
 const directory = fileURLToPath(new URL("./", import.meta.url));
 const path = (value: string) => resolve(expandPath(value));
@@ -23,6 +24,7 @@ export interface NtsConfig {
   readonly apiUrl?: string;
   readonly terminalPrograms: readonly (CommandSpec & { id: string; label: string })[];
   readonly discoverTerminals: boolean;
+  readonly orchestration: OrchestrationSettings;
   readonly attachedTerminals: readonly {
     id: string;
     label: string;
@@ -60,4 +62,24 @@ export const ntsConfig: NtsConfig = {
   // Use tmuxTerminal({target, pane, server}) for nondefault tmux servers,
   // or supply any other TerminalTarget. Targets stay on the host.
   attachedTerminals: [],
+  orchestration: {
+    // The coordinator starts with the host only when asked: SIGNALBOX_NTS_COORDINATOR=1.
+    coordinator: process.env.SIGNALBOX_NTS_COORDINATOR === "1",
+    workerSlots: 2,
+    maxRounds: 4,
+    // Initial profiles for a fresh state. Later changes live in the host's state
+    // (Agents view or the profiles operations) and need no restart.
+    profiles: {
+      profiles: [
+        { id: "opus-high", label: "Claude Opus 5.5, high effort", harness: "claude", model: "claude-opus-5-5", effort: "high" },
+        { id: "opus-medium", label: "Claude Opus 5.5, medium effort", harness: "claude", model: "claude-opus-5-5", effort: "medium" },
+        { id: "codex", label: "Codex, configured model", harness: "codex" },
+      ],
+      roles: {
+        coordinator: { profile: "opus-high" },
+        worker: { profile: "opus-high" },
+        reviewer: { profile: "opus-high" },
+      },
+    },
+  },
 };

@@ -1,85 +1,70 @@
-# NTS application
+# NTS on Signalbox
 
-The NTS configuration and clients for Signalbox. This application reads your **real NTS checkout**, **AkisArou/nts GitHub issues**, and NTS's status commands. It has no simulator, seeded task board or sample-data mode.
+The NTS application on the [Signalbox SDK](../../../../Projects/signalbox/signalbox/README.md). It reads the real NTS checkout, the `AkisArou/nts` GitHub issues and NTS's status commands, hosts native agent sessions, and orchestrates NTS's task workflow. NTS policy lives here; the SDK supplies mechanisms only.
 
-## Run on your NTS desktop
+## Run
 
-Requires **Node 26.4+**, pnpm and a GitHub CLI login with access to `AkisArou/nts`. Native terminals require tmux and installed/authenticated Codex or Claude Code. The TUI finder uses fzf; the Git view uses lazygit.
-
-From the Signalbox repository root:
+Requires Node 26.4+, pnpm, tmux, a GitHub CLI login with access to `AkisArou/nts`, and an authenticated Claude Code (Codex optional). From this directory (`~/.config/signalbox`, a link to the dotfiles project):
 
 ```sh
 pnpm install
-pnpm run doctor
-pnpm dev
+pnpm doctor          # read-only prerequisites
+pnpm dev             # host, API and browser UI on http://127.0.0.1:4310
+pnpm tui             # the terminal UI, in another terminal
 ```
 
-Open **http://127.0.0.1:4310**. In another terminal:
+`pnpm sdk` rebuilds the SDK from `~/Projects/signalbox/signalbox` and refreshes this project's injected copy of it; every other script runs it first. `pnpm check` type-checks and `pnpm test` runs the application tests, which use isolated fixtures and never touch the NTS checkout, GitHub or running agents.
 
-```sh
-pnpm tui
-```
+Settings live in [`config.ts`](config.ts): the checkout (`NTS_ROOT`), pool (`NTS_POOL_ROOT`), GitHub repository (`NTS_GITHUB_REPO`), ports (`SIGNALBOX_NTS_PORT`, `SIGNALBOX_NTS_API_PORT`) and state (`SIGNALBOX_NTS_STATE`, default `~/.local/state/signalbox/nts/<project-id>`). One host owns a state directory at a time.
 
-The default checkout is `~/Projects/nts`, and the default pool is `~/.cache/nts-pool`. Change [`config.ts`](config.ts), or set `NTS_ROOT`, `NTS_POOL_ROOT` and `NTS_GITHUB_REPO`. GitHub access uses `gh`'s existing login or `GH_TOKEN`. The issue reader needs a recent `gh` that supports the `parent` and `subIssuesSummary` JSON fields, matching NTS’s issue hierarchy conventions.
+## Layout
 
-The prerequisite command only inspects the checkout, tool availability and GitHub access. It does not start NTS services or agents. The server rejects a missing checkout with an actionable error. Individual reader failures stay visible, retaining the last good reading when available.
+| Path             | Responsibility                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| `config.ts`      | Settings: paths, ports, polling, state, terminal programs and default profiles     |
+| `host/`          | Host wiring: access gate, GitHub issue mapping, native terminals and discovery     |
+| `nts/`           | NTS status contracts and readers: landing, full check, pool, machine, records      |
+| `orchestration/` | Agent profiles, the task and review routes, the coordinator, its tools and wakeups |
+| `shared/`        | DTOs and endpoint references shared by the host and both clients                   |
+| `tui/`, `web/`   | The OpenTUI and React DOM clients                                                  |
 
-## Configuration and ownership
+## Orchestration
 
-| Path        | Responsibility                                                                                            |
-| ----------- | --------------------------------------------------------------------------------------------------------- |
-| `config.ts` | Checkout, GitHub repository, pool, polling, ports, persistent state and native program/attachment choices |
-| `host/`     | NTS source wiring, GitHub issue mapping and native terminal catalog/discovery                             |
-| `nts/`      | NTS tool contracts, status readers, benchmark/conformance projections and health thresholds               |
-| `shared/`   | Application DTOs, endpoint references and shared React hooks                                              |
-| `tui/`      | OpenTUI components, terminal palette, Vim navigation, fzf filters and lazygit                             |
-| `web/`      | React DOM components, Astryx Neutral theme, mobile navigation and installable PWA                         |
+NTS's workflow (AGENTS.md, `docs/workflow.md`) is enforced by durable routes, not by an agent's memory. Signalbox records each accepted assignment, its phase and every external action, so a host restart or a power cut resumes where it stopped and never repeats an action whose outcome is unknown.
 
-The SDK lives in [`../signalbox/`](../signalbox/README.md). NTS labels, streams, thresholds and tooling are application code, not Signalbox defaults.
+**Profiles** are live data, not code. A profile names a harness (`claude` or `codex`), a model, an effort and extra arguments. Each role (`coordinator`, `worker`, `reviewer`) selects a profile. Profiles and role selections are stored in the host's state and changed through the `profiles.set` and `roles.set` operations (UI or coordinator tool), with no restart. A route resolves its role's profile when it launches an agent and records the resolved profile with the launch, so recovery relaunches the same thing. A running agent keeps its profile; a change applies to the next launch. `config.ts` supplies the initial profiles.
 
-GitHub tasks preserve stream/group ancestry, sub-issue progress, assignees, `agent:*` owners and textual blockers. The plan orders streams. `state:needs-user` issues appear in **Needs you**; `in-progress`, `state:held` and `state:parked` retain their existing meanings. Empty groups and unscoped issues stay visible. Parent stream issues and the coordinator's `signalbox:state` issue are excluded from the task list. Pool and landing observations retain their claims on issues, mark ready work as in progress, and show its workspace/owner when known. These are observed NTS claims, not new Signalbox assignments. The configured issue limit is checked explicitly rather than silently truncating the board.
+**One fresh agent per task.** The `nts/task` route owns one GitHub issue, keyed `issue/<N>`. Its admission requires an open task issue that is not `state:needs-user`, `state:held` or `state:parked`. It reserves one `worker` slot, and one `file:<path>` resource per path in the card's **Paths:** line, so two tasks never edit one file concurrently. Its phases:
 
-**Landing**, **Full check**, **Benchmarks**, **Conformance**, **Machine** and **Health** read NTS's existing tooling. **Plan** reads `docs/plan.md`. NTS owns its worktree pool and landing service. This dashboard does not install an automatic dispatcher, start a coordinator, claim tasks or merge changes. Existing coordinators and workers continue using their native tools and communication; connecting autonomous coordination is a separate integration step.
+1. **workspace**: `pool.ts take --issue N`, recovered from `pool.ts status --json` by the task's branch.
+2. **design**: a worker launched in the tree with the issue card and the rules; it reports a design.
+3. **approve**: the coordinator accepts or returns the design through its tools.
+4. **build**: the worker implements and proves the change (focused tests, `inner.ts`, the landing check `--here`), then reports the commit and its record.
+5. **review**: a fresh reviewer agent (`nts/review`, keyed by commit) reads the diff and the evidence and reports accept or findings. Findings return to build.
+6. **queue**: one `check.ts <commit>` submission per commit, recovered from `check.ts status --json`.
+7. **land**: a refusal returns to build with its failing steps and logs; a hold waits.
+8. **verify**: the full check's `verified` reaches the commit; the worker is retired and the assignment finishes.
 
-## Native agents
+**The coordinator** is one Claude Code session maintained by `agentService`. Each generation starts from a short brief, its last accepted checkpoint and a small status summary; it queries details through tools rather than receiving every issue up front. Its tools submit and steer assignments, approve designs, message workers, save checkpoints and ask the user. It has no tool for anything the user decides: deletions of shared state, product direction, spending or outward pull requests go to the user as decision requests (**Needs you**).
 
-In **Agents**, press **n** in the TUI or choose **New Codex / New Claude Code / New Shell** in the browser. Commands and argv are configured in `config.ts`; they run in the NTS checkout only after your explicit action.
+**Wakeups are events**, never a timer. Worker reports, review verdicts, landing answers, full-check verdicts and reverts, `verified` advances and machine holds reach the coordinator's durable mailbox. Until NTS publishes its event journal (#815), these are derived from changes in NTS's status outputs.
 
-Existing foreground Codex/Claude panes in the default tmux server are discovered under the checkout and pool roots. This is attachment discovery, not conversation/session import. Wrappers or nondefault tmux servers can be attached explicitly using `config.ts`'s `attachedTerminals` array and the SDK's `tmuxTerminal({ target, pane, server })` adapter, or any other `TerminalTarget`. Explicit attachments should not also be selected by discovery; disable `discoverTerminals` if you manage the whole list yourself.
+**Usage.** A harness whose usage is exhausted is marked unavailable; routes launching that role wait or use the role's fallback profile, and `pauseNewAssignments` stops admission when no harness is available.
 
-Views start read-only. **Enter** in the TUI or **Take input** in the browser requests exclusive input. **Ctrl+]** releases input. Native keys and paste, including Ctrl+C, go to the agent while it owns input. Reconnection returns read-only and never replays input. Closing the viewer or stopping the host detaches; it does not terminate the native program. Sessions persist through host restart, but not necessarily a reboot or tmux-server failure.
+## Native agents and terminals
 
-Native terminal transport uses a live channel, not dashboard snapshots or saved transcripts. Harness conversations, skills, permissions and memory remain owned by Codex/Claude and your existing setup.
+In **Agents**, launch a Codex, Claude Code or shell session on request (`n` in the TUI). Existing foreground Codex/Claude panes in the default tmux server under the checkout and pool roots are discovered read-only. Views start read-only; **Enter** (TUI) or **Take input** (browser) takes exclusive input and **Ctrl+]** releases it. Closing a viewer or stopping the host detaches; it never terminates a native program.
 
-## TUI controls
-
-The TUI inherits your terminal foreground, background, transparency and ANSI palette. The browser independently uses Astryx's default Neutral theme. The TUI works inside or outside tmux.
+## TUI keys
 
 | Keys                                     | Behavior                                               |
 | ---------------------------------------- | ------------------------------------------------------ |
 | `1`–`9`, `0`, Tab/Shift+Tab or `gt`/`gT` | Switch views, retaining selections                     |
 | `j`/`k`, arrows                          | Move in a list or scroll focused details               |
-| Ctrl+D/U                                 | Half a focused pane; accounts for row height           |
-| Ctrl+F/B, PageDown/Up                    | Full focused pane                                      |
-| `gg`/`G`, Home/End                       | First/last item or top/bottom of content               |
+| Ctrl+D/U, Ctrl+F/B                       | Half or full focused pane                              |
+| `gg`/`G`                                 | First/last item or top/bottom of content               |
 | Enter/right, Esc/left/`h`                | Details, then back to the list                         |
 | `/`                                      | Find in the current list with fzf                      |
 | `f`, `F`                                 | Select task filters; clear filters                     |
 | `l`, `L`                                 | lazygit in the selected workspace; in the NTS checkout |
 | `?`, `q` / Ctrl+Q                        | Help; quit the viewer                                  |
-
-Filters support area, stream, kind, state, labels and ownership. Values within a facet are OR; different facets are AND. Tool argv and facets live in `tui/config.ts`. fzf inherits your environment and color options. Local tools run on the TUI machine, so their workspace paths must exist there.
-
-## State and deployment
-
-Fresh state lives under `$XDG_STATE_HOME/signalbox/nts/<project-id>` (default `~/.local/state/signalbox/nts/<project-id>`), independent of the application source checkout. Existing NTS installations reuse `v2/playground/.signalbox/nts/` in place to preserve native executor receipts and tmux socket identity. Old `nts-lab` sandbox state is left intact and is not loaded as NTS. `SIGNALBOX_NTS_STATE` overrides the location. Stop an old host before starting its replacement; only one host may own a state directory. See [migration notes](../signalbox/docs/migration.md) before moving existing state.
-
-`SIGNALBOX_NTS_PORT` and `SIGNALBOX_NTS_API_PORT` override ports 4310 and 4311. `SIGNALBOX_NTS_API_URL` selects the TUI API or public browser API; `SIGNALBOX_NTS_ORIGIN` selects the browser origin behind a proxy. Listeners and the application gate currently accept local connections. A VPS deployment needs deliberate proxy/access configuration in `host/config.ts`. PWA installation works on localhost or HTTPS; it caches the application shell, not task mutations or terminal input.
-
-```sh
-pnpm --dir playground check
-pnpm --dir playground test
-pnpm --dir playground test:tui
-```
-
-Tests use isolated data under test-only fixtures. No tests modify your NTS checkout, GitHub issues or existing agent sessions.

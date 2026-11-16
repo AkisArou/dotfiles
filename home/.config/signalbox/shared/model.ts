@@ -36,6 +36,70 @@ export const agents = source<Agent[]>("nts.agents");
 export const plan = source<string>("nts.plan");
 export const terminalPrograms = source<{ id: string; label: string }[]>("nts.terminal-programs");
 export const startTerminal = operation<{ program: string }, { id: string }>("nts.start-terminal");
+// Orchestration: browser-safe views of host state, and the owner operations on it.
+export type Harness = "claude" | "codex";
+export type AgentRole = "coordinator" | "worker" | "reviewer";
+export type ProfileView = {
+  id: string;
+  label: string;
+  harness: Harness;
+  model?: string;
+  effort?: string;
+};
+export type ProfileSettingsView = {
+  revision: number;
+  profiles: ProfileView[];
+  roles: Record<AgentRole, { profile: string; fallback?: string }>;
+  unavailable: Partial<Record<Harness, { reason: string; until?: number }>>;
+};
+export type AssignmentView = {
+  id: string;
+  key: string;
+  status: string;
+  issue: number | null;
+  phase: string | null;
+  wait: string | null;
+  help: string | null;
+  rounds: number;
+  commit: string | null;
+  tree: string | null;
+  worker: string | null;
+  reviewer: string | null;
+  error: string | null;
+  acceptedAt: number;
+};
+export type UserDecisionView = {
+  id: string;
+  status: string;
+  revision: number;
+  question: string;
+  context: string;
+  answer: string | null;
+  requestedAt: number;
+};
+export const profileSettings = source<ProfileSettingsView>("nts.profiles");
+export const assignments = source<AssignmentView[]>("nts.assignments");
+export const userDecisions = source<UserDecisionView[]>("nts.user-decisions");
+export const setProfile = operation<{ profile: ProfileView; revision: number }, { revision: number }>(
+  "nts.profiles.set",
+);
+export const setRole = operation<
+  { role: AgentRole; profile: string; fallback?: string; revision: number },
+  { revision: number }
+>("nts.roles.set");
+export const setAvailability = operation<
+  { harness: Harness; unavailable: { reason: string; until?: number } | null },
+  { revision: number }
+>("nts.harness.availability");
+export const assignTask = operation<{ issue: number; instructions: string }, { id: string }>(
+  "nts.tasks.assign",
+);
+export const cancelAssignment = operation<{ assignment: string; reason: string }, { ok: true }>(
+  "nts.assignments.cancel",
+);
+export const answerDecision = operation<{ id: string; revision: number; answer: string }, { ok: true }>(
+  "nts.user-decisions.answer",
+);
 export const tabs = [
   "Now",
   "Tasks",

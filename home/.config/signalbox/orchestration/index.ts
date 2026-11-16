@@ -1,0 +1,157 @@
+// Composes NTS orchestration from its parts. Wiring order matters only for the
+// late references the tools hold; everything else is declared by capability.
+import { join } from "node:path";
+import { capability, Cell, provide } from "signalbox/core";
+import type { Capability, Extension, Readable } from "signalbox/core";
+import { poll } from "signalbox/core/utils";
+import type { WorkflowStore } from "signalbox/ext/assignments/index";
+import { assignmentService } from "signalbox/ext/assignments/index";
+import { decisionRequests } from "signalbox/ext/decisions/index";
+import { openWorkflowSqlite } from "signalbox/ext/integrations/openworkflow";
+import type { Issue } from "../shared/model.ts";
+import { fullCheckStatus, landingStatus } from "../nts/commands.ts";
+import type { LandingStatus } from "../nts/landing.ts";
+import type { FullCheckStatus } from "../nts/full-check.ts";
+import { managedAgents } from "./agents.ts";
+import { coordinator } from "./coordinator.ts";
+import { profiles } from "./profiles.ts";
+import type { ProfileSettings } from "./profiles.ts";
+import { taskRoute } from "./task.ts";
+import { coordinatorTools, Late, reviewerTools, userAnswer, userQuestion, workerTools } from "./tools.ts";
+import type { Wiring } from "./tools.ts";
+import { wakeupFeed } from "./wakeups.ts";
+
+/** A polled NTS status as a capability other extensions can watch. */
+function statusSource<T>(id: string, interval: number, read: (signal: AbortSignal) => Promise<T>) {
+  const key = capability<Readable<T>>(id);
+  const cell = new Cell<T>();
+  const extension: Extension = {
+    id,
+    provides: [provide(key, cell)],
+    start(context) {
+      context.afterStart(() => {
+        const loop = poll(async () => cell.set(await read(context.signal)), interval, context.signal, (error) =>
+          cell.fail(error),
+        );
+        context.onStop(() => loop);
+      });
+    },
+  };
+  return { key, extension };
+}
+
+export interface OrchestrationSettings {
+  /** Install the coordinator and its wake-ups. Off, the routes still run assignments submitted by hand. */
+  readonly coordinator: boolean;
+  /** Tasks with a worker at once; the memory ledger still guards each heavy command. */
+  readonly workerSlots: number;
+  /** Returns to build (review findings, landing refusals) before a task escalates. */
+  readonly maxRounds: number;
+  readonly profiles: Omit<ProfileSettings, "revision" | "unavailable">;
+}
+
+export function ntsOrchestration(options: {
+  readonly root: string;
+  readonly directory: string;
+  readonly state: Capability<WorkflowStore>;
+  readonly issues: Capability<Readable<Issue[]>>;
+  readonly settings: OrchestrationSettings;
+}) {
+  const engine = openWorkflowSqlite({ path: join(options.directory, "workflows.sqlite") });
+  const profileStore = profiles({ state: options.state, initial: options.settings.profiles });
+  const decisions = decisionRequests({
+    id: "nts-user",
+    state: options.state,
+    input: userQuestion,
+    decision: userAnswer,
+  });
+  const landing = statusSource<LandingStatus>("nts/landing-status", 10_000, (signal) =>
+    landingStatus(options.root, signal),
+  );
+  const fullCheck = statusSource<FullCheckStatus>("nts/full-check-status", 30_000, (signal) =>
+    fullCheckStatus(options.root, signal),
+  );
+  const wiring: Wiring = {
+    work: new Late(),
+    route: new Late(),
+    coordinator: new Late(),
+    mailbox: new Late(),
+    runtime: new Late(),
+    issues: options.issues,
+    decisions: decisions.service,
+  };
+  const tools = { worker: workerTools(wiring), reviewer: reviewerTools(wiring), coordinator: coordinatorTools(wiring) };
+  const agents = managedAgents({
+    state: options.state,
+    directory: options.directory,
+    toolsets: [tools.worker, tools.reviewer, tools.coordinator],
+  });
+  wiring.runtime.set(agents.runtime);
+  const route = taskRoute({
+    root: options.root,
+    issues: options.issues,
+    landing: landing.key,
+    fullCheck: fullCheck.key,
+    profiles: profileStore.service,
+    agents,
+    workerTools: tools.worker,
+    reviewerTools: tools.reviewer,
+    maxRounds: options.settings.maxRounds,
+  });
+  wiring.route.set(route);
+  const work = assignmentService({
+    id: "nts-work",
+    state: options.state,
+    engine: engine.engine,
+    routes: [route],
+    capacity: (resource) => (resource === "worker" ? options.settings.workerSlots : 1),
+  });
+  wiring.work.set(work.service);
+  const lead = options.settings.coordinator
+    ? coordinator({
+        root: options.root,
+        state: options.state,
+        engine: engine.engine,
+        agents,
+        profiles: profileStore.service,
+        issues: options.issues,
+        work: work.service,
+        tools: tools.coordinator,
+      })
+    : undefined;
+  if (lead) {
+    wiring.coordinator.set(lead.service);
+    wiring.mailbox.set(lead.mailbox);
+  }
+  return {
+    route,
+    work: work.service,
+    assignments: work.assignments,
+    profiles: profileStore.service,
+    decisions: decisions.service,
+    agents,
+    coordinator: lead?.service,
+    extensions: [
+      engine.extension,
+      profileStore.extension,
+      decisions.extension,
+      landing.extension,
+      fullCheck.extension,
+      ...agents.extensions,
+      work.extension,
+      ...(lead
+        ? [
+            ...lead.extensions,
+            wakeupFeed({
+              state: options.state,
+              mailbox: lead.mailbox,
+              work: work.service,
+              landing: landing.key,
+              fullCheck: fullCheck.key,
+              decisions: decisions.service,
+            }),
+          ]
+        : []),
+    ],
+  };
+}

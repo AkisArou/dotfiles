@@ -2,8 +2,8 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { IncomingMessage } from "node:http";
 import { z } from "zod";
-import { Cell, defineConfig } from "signalbox/core";
-import type { Extension, Readable } from "signalbox/core";
+import { Cell, capability, defineConfig, provide } from "signalbox/core";
+import type { Capability, Extension, Readable } from "signalbox/core";
 import type { Json, SourceRef } from "signalbox/core/remote";
 import { poll } from "signalbox/core/utils";
 import { exposeSource, exposeOperation, webListener } from "signalbox/host";
@@ -13,6 +13,8 @@ import type { NtsConfig } from "../config.ts";
 import { ntsObservations } from "../nts/host.ts";
 import { nativeTerminals } from "./terminals.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
+import { ntsOrchestration } from "../orchestration/index.ts";
+import { orchestrationEndpoints } from "../orchestration/endpoints.ts";
 
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
 // of workspaces and landing; coordinator sessions stay native.
@@ -31,10 +33,13 @@ export function createNtsProject(settings: NtsConfig) {
     ref: SourceRef<T>,
     interval: number,
     read: (signal: AbortSignal) => Promise<T>,
-  ): Extension {
+  ): Extension & { readonly key: Capability<Readable<T>> } {
     const cell = new Cell<T>();
+    const key = capability<Readable<T>>(`${ref.id}/reading`);
     return {
       id: `${ref.id}/reader`,
+      key,
+      provides: [provide(key, cell)],
       extensions: [expose(ref, cell)],
       start(context) {
         context.afterStart(() => {
@@ -50,6 +55,22 @@ export function createNtsProject(settings: NtsConfig) {
     };
   }
   const planPath = join(settings.root, settings.plan);
+  const issues = observe(refs.issues, settings.issueIntervalMs, async (signal) => {
+    const listed = await readIssues(settings.repo, settings.issueLimit, signal);
+    // The plan has its own failure reporting; issue visibility doesn't depend on it.
+    const plan = await readFile(planPath, "utf8").catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return "";
+      throw error;
+    });
+    return projectIssues(listed, plan);
+  });
+  const orchestration = ntsOrchestration({
+    root: settings.root,
+    directory: settings.state,
+    state: state.state,
+    issues: issues.key,
+    settings: settings.orchestration,
+  });
   const origin = settings.origin ?? `http://127.0.0.1:${settings.webPort}`;
   return defineConfig({
     id: "nts",
@@ -73,15 +94,9 @@ export function createNtsProject(settings: NtsConfig) {
         new Cell({ name: "nts", root: settings.root, repo: settings.repo, startedAt }),
       ),
       observe(refs.plan, 30_000, () => readFile(planPath, "utf8")),
-      observe(refs.issues, settings.issueIntervalMs, async (signal) => {
-        const listed = await readIssues(settings.repo, settings.issueLimit, signal);
-        // The plan has its own failure reporting; issue visibility doesn't depend on it.
-        const plan = await readFile(planPath, "utf8").catch((error: NodeJS.ErrnoException) => {
-          if (error.code === "ENOENT") return "";
-          throw error;
-        });
-        return projectIssues(listed, plan);
-      }),
+      issues,
+      ...orchestration.extensions,
+      ...orchestrationEndpoints(orchestration),
       exposeSource({
         ref: refs.agents,
         requires: [native.service],

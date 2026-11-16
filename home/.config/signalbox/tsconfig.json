@@ -18,6 +18,7 @@
   "include": [
     "server.ts",
     "host/**/*.ts",
+    "orchestration/**/*.ts",
     "nts/**/*.ts",
     "shared/**/*.ts",
     "web/**/*.tsx",
