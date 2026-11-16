@@ -154,6 +154,10 @@ test("the embedded native terminal owns keys and paste; Ctrl+] returns to naviga
         /NATIVE_TUI_READY/.test(screen.captureCharFrame()) &&
         /INPUT/.test(screen.captureCharFrame()),
     );
+    // The agent's window fits the terminal's laid-out width (the 90-column
+    // screen less its frame), not the renderable's default 80 columns.
+    const width = Number((await tmux(["display-message", "-p", "-t", "agent", "#{window_width}"])).stdout.trim());
+    assert.ok(width > 80 && width <= 90, `agent window should span the terminal view, got ${width} columns`);
     const paste = `pasted c456 ${"abc🧪".repeat(4000)}END_PASTE`;
     await act(async () => {
       await screen.mockInput.typeText("q123gg");

@@ -31,18 +31,22 @@ export function NativeTerminal({
   const pending = useRef(false),
     notify = useRef(onControl);
   notify.current = onControl;
+  // The terminal's laid-out size. Connecting before layout would report a
+  // placeholder size and resize the agent's window to it.
+  const size = useRef<{ cols: number; rows: number }>(undefined);
+  const [laidOut, setLaidOut] = useState(false);
   const [state, setState] = useState<TerminalState>({
     status: "connecting",
     owned: false,
     busy: false,
   });
   useEffect(() => {
-    if (!url || !terminal.current) return;
+    if (!url || !terminal.current || !laidOut || !size.current) return;
     const view = terminal.current;
     const connection = (client.current = connectTerminal({
       url,
       id,
-      size: { cols: Math.max(2, view.width), rows: Math.max(2, view.height) },
+      size: size.current,
       output(data) {
         view.write(data);
       },
@@ -69,7 +73,7 @@ export function NativeTerminal({
       client.current = undefined;
       notify.current(false);
     };
-  }, [id, url]);
+  }, [id, url, laidOut]);
   useEffect(() => {
     pending.current = interactive && controlRequest > 0;
     if (!interactive) {
@@ -94,13 +98,19 @@ export function NativeTerminal({
       <agent-terminal
         ref={terminal}
         flexGrow={1}
+        // flexGrow stretches only the column's height; without an explicit width
+        // the renderable keeps its default 80 columns and reports that size.
+        width="100%"
         minWidth={0}
         minHeight={0}
         transparentBackground
         maxScrollback={5000}
         selectable
         onTerminalResize={(cols, rows) => {
-          if (cols >= 2 && rows >= 2) client.current?.resize({ cols, rows });
+          if (cols < 2 || rows < 2) return;
+          size.current = { cols, rows };
+          if (client.current) client.current.resize({ cols, rows });
+          else setLaidOut(true);
         }}
         onData={(bytes, source) => {
           const text = new TextDecoder().decode(bytes);
