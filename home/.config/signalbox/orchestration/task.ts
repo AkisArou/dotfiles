@@ -369,6 +369,7 @@ export function taskRoute(options: {
                     design: state.design,
                     summary: state.summary,
                     previous: state.reviews,
+                    labels: current(ctx.get(options.issues))?.find((issue) => issue.number === ctx.input.issue)?.labels ?? [],
                   }),
                   tools: [options.reviewerTools],
                   requestId,

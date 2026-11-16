@@ -3,11 +3,42 @@
 // say what this session is for and which Signalbox tools carry its results.
 import type { Issue } from "../shared/model.ts";
 
+/** docs/workflow.md sections and docs/contributing/lessons/ topics for a card's area.
+ * Every agent already has AGENTS.md (CLAUDE.md loads it). */
+const READING: Record<string, { sections: readonly string[]; lessons: readonly string[] }> = {
+  tooling: { sections: ["The machine", "Records"], lessons: ["concurrency", "fixtures", "machine"] },
+  compiler: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
+  runtime: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
+  jvm: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
+  wasm: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
+  node: { sections: ["Records", "Node"], lessons: ["soundness", "backends", "memory", "fixtures"] },
+  benchmarks: { sections: ["Benchmarks"], lessons: ["measurement"] },
+  chromium: { sections: [], lessons: ["backends", "measurement"] },
+  docs: { sections: [], lessons: [] },
+};
+const ALWAYS = ["The loop", "Tasks", "Agents", "Landing: the landing check"];
+
+/** What this agent reads before acting: chosen by the card's area, not the whole of workflow.md. */
+export function readingList(labels: readonly string[]): string {
+  const areas = labels.filter((label) => label.startsWith("area:")).map((label) => label.slice(5));
+  const sections = [...new Set([...ALWAYS, ...areas.flatMap((area) => READING[area]?.sections ?? [])])];
+  const lessons = [...new Set(areas.flatMap((area) => READING[area]?.lessons ?? []))];
+  return [
+    "Read before acting (AGENTS.md is already loaded):",
+    `- docs/workflow.md, only these sections: ${sections.map((name) => `"## ${name}"`).join(", ")}. Read a section with sed between its heading and the next "## ".`,
+    lessons.length ? `- docs/contributing/lessons/: ${lessons.map((topic) => `${topic}.md`).join(", ")}.` : "",
+    "- docs/workflow.md \"## Decisions\": only the entries about the files you change (grep for their paths), not the whole section.",
+    "Read more only when the task reaches it.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function workerInstructions(): string[] {
   return [
     [
       "You are an NTS worker: one task, in your own pool tree, start to finish.",
-      "Read AGENTS.md and docs/workflow.md first; they are binding. Read docs/contributing/lessons/ for the area you touch.",
+      "AGENTS.md and docs/workflow.md are binding. Your brief names the workflow sections and lessons for this task; read those first.",
       "Work only in your tree. Never edit ~/Projects/nts (main), another task's tree, or a gate script while a run uses it.",
       "Run heavy commands through tooling/gate/admit.ts or their named units, never on CPUs 4-5, and stop your own work only by its systemd unit.",
       "Deleting shared state, product direction, spending and outward pull requests belong to the user: say so through ask_coordinator instead of doing them.",
@@ -29,6 +60,8 @@ export function workerBrief(task: {
     task.instructions ? `Coordinator's note: ${task.instructions}` : "",
     "",
     task.issue.body,
+    "",
+    readingList(task.issue.labels),
     "",
     "Now: read what the card points at, then send your design with report_design: the cause, the change at that cause, the files, and the controls that prove it. Do not edit code until the design is approved.",
     `After approval: build it, prove it (focused tests, node tooling/gate/inner.ts, node tooling/landing/check.ts <commit> --here), commit everything, and call report_ready with the commit and what the proof showed. Do not queue the landing yourself; Signalbox queues the exact commit after review.`,
@@ -58,6 +91,7 @@ export function workerResumeBrief(task: {
     "",
     task.issue.body,
     "",
+    readingList(task.issue.labels),
     "Read the tree's state (git status, git log main..HEAD) before acting. Continue from where it stands, using report_design or report_ready as that phase needs.",
   ]
     .filter((line) => line !== "")
@@ -68,7 +102,7 @@ export function reviewerInstructions(): string[] {
   return [
     [
       "You are an NTS reviewer: one commit, read-only.",
-      "Read AGENTS.md and docs/workflow.md; review against them and against the task's design.",
+      "Review against AGENTS.md, the workflow sections and lessons your brief names, and the task's approved design.",
       "Do not edit, commit, stash, reset or run anything that writes to the tree. Read the diff, the code around it, the record and its evidence.",
       "Look for correctness bugs at the cause, workarounds standing in for fixes, missing controls or counterfactuals, rules from AGENTS.md broken, and claims the evidence does not support.",
       "Report once with report_review: accept, or changes with each finding as file:line, what breaks, and the input that shows it.",
@@ -86,10 +120,12 @@ export function reviewerBrief(task: {
   design: string;
   summary: string;
   previous: readonly { commit: string; findings: string }[];
+  labels: readonly string[];
 }): string {
   const last = task.previous.at(-1);
   return [
     `Assignment ${task.assignment}: review commit ${task.commit} for issue #${task.issue}, ${task.title}.`,
+    readingList(task.labels),
     `Tree: ${task.tree}. Compare against main with: git -C ${task.tree} --no-optional-locks diff main...${task.commit}`,
     "",
     "The approved design:",
