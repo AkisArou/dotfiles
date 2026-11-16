@@ -119,6 +119,7 @@ export function reviewerTools(wiring: Wiring) {
             commit: z.string().regex(/^[0-9a-f]{40}$/),
             verdict: z.enum(["accept", "changes"]),
             findings: z.string(),
+            disputesDesign: z.boolean().default(false),
           }),
         ),
         output: ok,

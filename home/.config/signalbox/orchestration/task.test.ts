@@ -259,6 +259,9 @@ test("a task goes from tree to verified through design approval, review and land
   assert.match(messages.at(-1)!.text, /needs a newline/);
   await report({ kind: "ready", commit, summary: "fixed" }, "ready-2");
   await phase("reviewing");
+  // The second round's fresh reviewer gets the first round's findings to check first.
+  assert.match(started.at(-1)!.brief, /This is review round 2\. Earlier rounds asked for:/);
+  assert.match(started.at(-1)!.brief, /thing\.txt:1 needs a newline/);
   await report({ kind: "review", commit, verdict: "accept", findings: "" }, "review-2");
   await phase("landing");
   assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), [commit]);

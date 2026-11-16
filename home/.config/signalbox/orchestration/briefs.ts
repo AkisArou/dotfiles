@@ -72,6 +72,7 @@ export function reviewerInstructions(): string[] {
       "Do not edit, commit, stash, reset or run anything that writes to the tree. Read the diff, the code around it, the record and its evidence.",
       "Look for correctness bugs at the cause, workarounds standing in for fixes, missing controls or counterfactuals, rules from AGENTS.md broken, and claims the evidence does not support.",
       "Report once with report_review: accept, or changes with each finding as file:line, what breaks, and the input that shows it.",
+      "Review the implementation of the approved design. If you believe the design itself is wrong, say so with disputesDesign: true; the coordinator decides, and the worker is not sent to rework it on your word alone.",
     ].join("\n"),
   ];
 }
@@ -84,7 +85,9 @@ export function reviewerBrief(task: {
   tree: string;
   design: string;
   summary: string;
+  previous: readonly { commit: string; findings: string }[];
 }): string {
+  const last = task.previous.at(-1);
   return [
     `Assignment ${task.assignment}: review commit ${task.commit} for issue #${task.issue}, ${task.title}.`,
     `Tree: ${task.tree}. Compare against main with: git -C ${task.tree} --no-optional-locks diff main...${task.commit}`,
@@ -94,6 +97,15 @@ export function reviewerBrief(task: {
     "",
     "The worker's account of the proof:",
     task.summary,
+    ...(last
+      ? [
+          "",
+          `This is review round ${task.previous.length + 1}. Earlier rounds asked for:`,
+          ...task.previous.map((round, index) => `Round ${index + 1} (${round.commit.slice(0, 12)}):\n${round.findings}`),
+          "",
+          `First check each earlier finding against what changed since: git -C ${task.tree} --no-optional-locks diff ${last.commit}..${task.commit}. Say which are fixed and which are not. Then review the whole change. Do not raise again a point an earlier round accepted.`,
+        ]
+      : []),
   ].join("\n");
 }
 

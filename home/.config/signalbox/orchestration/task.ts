@@ -39,6 +39,8 @@ export const taskReport = z.discriminatedUnion("kind", [
     commit: sha,
     verdict: z.enum(["accept", "changes"]),
     findings: z.string(),
+    /** The reviewer disputes the approved design itself; the coordinator decides. */
+    disputesDesign: z.boolean().default(false),
   }),
   z.object({ kind: z.literal("help"), message: z.string().min(1) }),
 ]);
@@ -83,6 +85,8 @@ export const taskState = z.object({
   /** The phase a replacement worker resumes, and the latest instruction it must see. */
   resumeTo: z.enum(phases).nullable().default(null),
   note: z.string().default(""),
+  /** Every earlier review round's findings, so each fresh reviewer checks them first. */
+  reviews: z.array(z.object({ commit: sha, findings: z.string() })).default([]),
 });
 export type TaskState = z.infer<typeof taskState>;
 
@@ -163,6 +167,7 @@ export function taskRoute(options: {
         generation: 0,
         resumeTo: null,
         note: "",
+        reviews: [],
       }),
       async reconcile(ctx) {
         const state = ctx.assignment.state;
@@ -363,6 +368,7 @@ export function taskRoute(options: {
                     tree: state.tree!,
                     design: state.design,
                     summary: state.summary,
+                    previous: state.reviews,
                   }),
                   tools: [options.reviewerTools],
                   requestId,
@@ -382,12 +388,22 @@ export function taskRoute(options: {
           ctx.consumeReports(report.id);
           await stop(state.reviewer!.id, `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`);
           if (report.data.verdict === "accept") return next({ phase: "queue", reviewer: null });
+          const reviews = [...state.reviews, { commit: state.commit!, findings: report.data.findings }];
+          // A dispute of the approved design is the coordinator's call, not a
+          // round of rework the worker should start on its own.
+          if (report.data.disputesDesign)
+            return wait("The reviewer disputes the approved design; the coordinator decides", {
+              phase: "build",
+              reviewer: null,
+              reviews,
+              help: `The reviewer of ${state.commit} disputes the approved design:\n${report.data.findings}\nDecide: message the worker to change course, or to keep the design and answer the finding.`,
+            });
           const rounds = state.rounds + 1;
           const findings = `The review of ${state.commit} asks for changes:\n${report.data.findings}\nFix them, prove the change again, commit and report_ready.`;
           await tell(state.worker!.id, `review/${report.id}`, findings);
           return rounds > options.maxRounds
-            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", reviewer: null, rounds, note: findings })
-            : next({ phase: "build", reviewer: null, rounds, note: findings });
+            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", reviewer: null, rounds, note: findings, reviews })
+            : next({ phase: "build", reviewer: null, rounds, note: findings, reviews });
         }
         if (state.phase === "queue") {
           const commit = state.commit!;
