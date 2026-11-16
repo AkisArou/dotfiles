@@ -6,13 +6,12 @@ After=default.target
 [Service]
 Type=simple
 WorkingDirectory=%h/.config/signalbox
-# Agents launched by the host find their tools on this PATH (node via asdf,
-# claude and codex in ~/.local/bin, pnpm's standalone install).
-Environment=PATH=%h/.asdf/shims:%h/.local/bin:%h/.local/share/pnpm/bin:/usr/local/bin:/usr/bin
-Environment=ASDF_NODEJS_VERSION=26.13.1
 # Start the coordinator with the host. Remove to run the routes without one.
 Environment=SIGNALBOX_NTS_COORDINATOR=1
-ExecStart=%h/.asdf/shims/node server.ts
+# Agents inherit the host's environment, and NTS's gate requires host tools by
+# name (ANDROID_HOME, JAVA_HOME, ...). A systemd unit's environment is minimal,
+# so the host runs inside a zsh login shell: agents see what a terminal sees.
+ExecStart=/usr/bin/zsh -lc 'exec node server.ts'
 # Agent sessions run in their own systemd scope (tmux), so stopping or
 # restarting this unit never ends them; the host recovers them on start.
 Restart=on-failure
