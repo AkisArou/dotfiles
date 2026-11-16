@@ -11,6 +11,7 @@ import { Empty, Icon } from "./components.tsx";
 import { Now } from "./views/now.tsx";
 import { Tasks } from "./views/tasks.tsx";
 import { Agents } from "./views/agents.tsx";
+import { UserDecisions } from "./views/orchestration.tsx";
 import { Plan } from "./views/plan.tsx";
 import { MobileNav } from "./mobile-nav.tsx";
 import { NtsView, NtsHealth } from "./views/nts.tsx";
@@ -99,7 +100,12 @@ export function App() {
   const pages: Record<Tab, ReactNode> = {
     Now: <Now project={project} navigate={setTab} />,
     Tasks: <Tasks project={project} />,
-    "Needs you": <Tasks project={project} needsYou />,
+    "Needs you": (
+      <>
+        <UserDecisions project={project} />
+        <Tasks project={project} needsYou />
+      </>
+    ),
     Agents: <Agents project={project} />,
     Landing: <NtsView project={project} page="Landing" />,
     Plan: <Plan project={project} />,

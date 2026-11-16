@@ -21,6 +21,14 @@ export function useProject() {
     plan = useSource(refs.plan);
   const terminalPrograms = useSource(refs.terminalPrograms);
   const startTerminal = useCommand(refs.startTerminal);
+  const profiles = useSource(refs.profileSettings),
+    assignments = useSource(refs.assignments),
+    decisions = useSource(refs.userDecisions);
+  const setRole = useCommand(refs.setRole),
+    setAvailability = useCommand(refs.setAvailability),
+    assignTask = useCommand(refs.assignTask),
+    cancelAssignment = useCommand(refs.cancelAssignment),
+    answerDecision = useCommand(refs.answerDecision);
   const [error, setError] = useState<string>();
   const perform = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
     setError(undefined);
@@ -47,12 +55,21 @@ export function useProject() {
       ]),
       agents: current(agents) ?? [],
       plan: current(plan),
+      profiles: current(profiles),
+      assignments: current(assignments) ?? [],
+      decisions: current(decisions) ?? [],
     },
-    commands: { startTerminal },
+    commands: { startTerminal, setRole, setAvailability, assignTask, cancelAssignment, answerDecision },
     perform,
     error,
     dismissError: () => setError(undefined),
-    busy: startTerminal.pending,
+    busy:
+      startTerminal.pending ||
+      setRole.pending ||
+      setAvailability.pending ||
+      assignTask.pending ||
+      cancelAssignment.pending ||
+      answerDecision.pending,
     online: connection.status === "connected",
   };
 }

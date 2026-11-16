@@ -14,16 +14,21 @@ import { ntsObservations } from "../nts/host.ts";
 import { nativeTerminals } from "./terminals.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
-import { orchestrationEndpoints } from "../orchestration/endpoints.ts";
+import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
+import { combineReadables } from "../orchestration/current.ts";
+import { nativeAttachment } from "signalbox/ext/agents/features";
+import type { TerminalTarget } from "signalbox/ext/terminals/index";
 
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
 // of workspaces and landing; coordinator sessions stay native.
 export function createNtsProject(settings: NtsConfig) {
   const state = sqliteWorkflowState({ path: join(settings.state, "runtime.sqlite") });
+  let resolveManaged: ((id: string) => Promise<TerminalTarget | undefined>) | undefined;
   const native = nativeTerminals({
     state: state.state,
     directory: settings.state,
     config: settings,
+    fallback: (id) => resolveManaged?.(id) ?? Promise.resolve(undefined),
   });
   const startedAt = Date.now();
   function expose<T extends Json>(ref: SourceRef<T>, cell: Readable<T>) {
@@ -97,11 +102,24 @@ export function createNtsProject(settings: NtsConfig) {
       issues,
       ...orchestration.extensions,
       ...orchestrationEndpoints(orchestration),
+      {
+        id: "nts-managed-terminals",
+        requires: [orchestration.agents.runtime],
+        start(context) {
+          const runtime = context.get(orchestration.agents.runtime);
+          resolveManaged = async (id) => runtime.capability(id, nativeAttachment)?.terminal?.();
+        },
+      },
       exposeSource({
         ref: refs.agents,
-        requires: [native.service],
+        requires: [native.service, orchestration.agents.runtime],
         output: z.custom<refs.Agent[]>(),
-        resolve: (context) => context.get(native.service).agents,
+        resolve: (context) =>
+          combineReadables(
+            context.get(native.service).agents,
+            context.get(orchestration.agents.runtime).instances,
+            (terminals, managed) => [...managedAgentViews(managed), ...terminals],
+          ),
       }),
       expose(
         refs.terminalPrograms,

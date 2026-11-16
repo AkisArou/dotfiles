@@ -1451,3 +1451,47 @@
   min-width: 0;
   overflow: hidden;
 }
+
+/* Orchestration controls in Agents, and the coordinator's questions in Needs you. */
+.orchestration {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.orchestration select,
+.orchestration input,
+.decision textarea {
+  font: inherit;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border, #8884);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+}
+.harnesses,
+.assign {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+}
+.harness {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.assign input:first-child {
+  width: 9em;
+}
+.assign input:nth-child(2) {
+  flex: 1 1 16em;
+}
+.decision {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+}
+.decision textarea {
+  min-height: 5em;
+}

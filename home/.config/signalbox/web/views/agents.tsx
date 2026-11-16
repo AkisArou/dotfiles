@@ -4,6 +4,7 @@ import { ClickableCard } from "@astryxdesign/core/ClickableCard";
 import { Badge, Empty, Section } from "../components.tsx";
 import { Action } from "../components.tsx";
 import { NativeTerminal } from "../terminal.tsx";
+import { Orchestration } from "./orchestration.tsx";
 
 export function Agents({ project }: { project: Project }) {
   const [selected, setSelected] = useState<string>();
@@ -16,6 +17,7 @@ export function Agents({ project }: { project: Project }) {
   }, [selected, agent?.id]);
   return (
     <div className="agents-view">
+      <Orchestration project={project} />
       <div className="terminal-programs" aria-label="Open a native session">
         {project.terminalPrograms.map((program) => (
           <Action

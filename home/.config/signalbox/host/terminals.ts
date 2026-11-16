@@ -27,6 +27,8 @@ export function nativeTerminals(options: {
   state: Capability<WorkflowStore>;
   directory: string;
   config: NtsConfig;
+  /** Terminals this catalog doesn't own (managed agent sessions), resolved by their owner. */
+  fallback?: (id: string) => Promise<TerminalTarget | undefined>;
 }) {
   const { terminalPrograms } = options.config;
   let attachedTerminals = [...options.config.attachedTerminals];
@@ -125,8 +127,11 @@ export function nativeTerminals(options: {
     async resolve(id) {
       const attached = attachedTerminals.find((terminal) => `attached/${terminal.id}` === id);
       if (attached) return attached.target;
-      if (!(await records()).some((record) => record.id === id))
+      if (!(await records()).some((record) => record.id === id)) {
+        const managed = await options.fallback?.(id);
+        if (managed) return managed;
         throw new Error("Unknown native terminal");
+      }
       return backend.terminal!(id);
     },
   };

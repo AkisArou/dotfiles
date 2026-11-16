@@ -6,6 +6,7 @@ import type { Extension } from "signalbox/core";
 import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments/index";
 import type { Assignment } from "signalbox/ext/assignments/index";
+import type { AgentInstance } from "signalbox/ext/agents/index";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
@@ -33,6 +34,19 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     error: assignment.error ? `${assignment.error.code}: ${assignment.error.message}` : null,
     acceptedAt: assignment.acceptedAt,
   };
+}
+
+/** Managed sessions as Agents rows: role and issue come from the label the routes give them. */
+export function managedAgentViews(instances: readonly AgentInstance[]): refs.Agent[] {
+  return instances.map((instance) => ({
+    id: instance.id,
+    name: instance.label,
+    role: /coordinator/i.test(instance.label) ? "coordinator" : /review/i.test(instance.label) ? "reviewer" : "worker",
+    state: instance.state,
+    path: null,
+    issue: Number(/^#(\d+)/.exec(instance.label)?.[1]) || null,
+    terminal: instance.id,
+  }));
 }
 
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
