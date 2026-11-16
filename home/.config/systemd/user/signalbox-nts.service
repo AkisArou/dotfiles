@@ -1,0 +1,25 @@
+[Unit]
+Description=Signalbox host for NTS (API, browser UI and orchestration)
+Documentation=file://%h/.config/signalbox/README.md
+After=default.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.config/signalbox
+# Agents launched by the host find their tools on this PATH (node via asdf,
+# claude and codex in ~/.local/bin, pnpm's standalone install).
+Environment=PATH=%h/.asdf/shims:%h/.local/bin:%h/.local/share/pnpm/bin:/usr/local/bin:/usr/bin
+Environment=ASDF_NODEJS_VERSION=26.13.1
+# Start the coordinator with the host. Remove to run the routes without one.
+Environment=SIGNALBOX_NTS_COORDINATOR=1
+ExecStart=%h/.asdf/shims/node server.ts
+# Agent sessions run in their own systemd scope (tmux), so stopping or
+# restarting this unit never ends them; the host recovers them on start.
+Restart=on-failure
+RestartSec=10
+# CPUs 4-5 are NTS's measurement cores.
+CPUAffinity=0-3 6-31
+Nice=5
+
+[Install]
+WantedBy=default.target
