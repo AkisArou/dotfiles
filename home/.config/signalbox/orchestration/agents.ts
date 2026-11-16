@@ -51,7 +51,16 @@ export function managedAgents(options: {
     allowMountedTools: true,
   };
   const programs: Record<Harness, AgentProgram> = {
-    claude: claudeCode({ ...common, id: "claude", directory: join(options.directory, "agents/claude") }),
+    claude: claudeCode({
+      ...common,
+      id: "claude",
+      directory: join(options.directory, "agents/claude"),
+      // These sessions bypass permission prompts (the user's settings), so Claude
+      // Code would hold every Signalbox message for approval. Accepting inbound
+      // messages applies to Signalbox's own sessions only, not the user's others;
+      // it does trust every local session of this user to message them.
+      settings: { crossSessionInbound: "accept" },
+    }),
     codex: codex({ ...common, id: "codex", directory: join(options.directory, "agents/codex") }),
   };
   const runtime = agentRuntime({ id: "nts-agents", programs: Object.values(programs) });
