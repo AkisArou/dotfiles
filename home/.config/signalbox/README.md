@@ -51,6 +51,10 @@ NTS's workflow (AGENTS.md, `docs/workflow.md`) is enforced by durable routes, no
 
 **Usage.** A harness whose usage is exhausted is marked unavailable; routes launching that role wait or use the role's fallback profile, and `pauseNewAssignments` stops admission when no harness is available.
 
+**Sessions outlive the host.** Managed sessions run in a tmux server of their own (`sb-agents-<id>`), started in a transient systemd scope, so stopping or restarting the host (including a host running as a systemd unit) leaves every session running. A session whose tmux server or session tmux reports gone reads as ended, and the task route replaces its worker with a fresh one briefed from the assignment's state: the design, the last commit and the latest instruction.
+
+**Messages to Claude sessions.** Signalbox's Claude sessions bypass permission prompts (the user's settings), and Claude Code holds any cross-session message to such a session unless the sender identifies as bypassing. Signalbox therefore starts its own sessions with `--settings '{"crossSessionInbound":"accept"}'`. This applies to those sessions only; it means any local Claude session of this user can message them. The host checks at start that the installed Claude Code still offers `claude agents --json` and `claude mcp serve`'s `ListAgents` and `SendMessage`, and marks Claude unavailable with the reason when it does not.
+
 ## Native agents and terminals
 
 In **Agents**, launch a Codex, Claude Code or shell session on request (`n` in the TUI). Existing foreground Codex/Claude panes in the default tmux server under the checkout and pool roots are discovered read-only. Views start read-only; **Enter** (TUI) or **Take input** (browser) takes exclusive input and **Ctrl+]** releases it. Closing a viewer or stopping the host detaches; it never terminates a native program.
