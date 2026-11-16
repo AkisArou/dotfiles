@@ -7,6 +7,15 @@ import { colors as c } from "./theme.ts";
 
 export const stateMark = (state: string) =>
   state === "ready" ? "○" : state === "needs-user" ? "?" : "◐";
+/** Busy is working, idle waits for a message, ended is gone; anything else needs a look. */
+export const agentColor = (state: string) =>
+  state === "busy" || state === "running"
+    ? c.success
+    : state === "idle"
+      ? c.text
+      : state === "ended" || state === "exited"
+        ? c.muted
+        : c.warning;
 export const stateColor = (state: string) =>
   ["held", "parked", "needs-user", "unscoped"].includes(state) ? c.warning : c.text;
 

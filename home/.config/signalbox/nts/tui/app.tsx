@@ -11,7 +11,7 @@ import { describeFilters, filterOptions, matches, toggleFilter } from "./filters
 import type { Chosen } from "./filters.ts";
 import type { TerminalTools } from "./tools.ts";
 import { Heading, Line, ListDetail, ListRow, ScrollPane, Section } from "./components.tsx";
-import { AgentDetail, NowView, TaskDetail, stateColor, stateMark } from "./views.tsx";
+import { AgentDetail, NowView, TaskDetail, agentColor, stateColor, stateMark } from "./views.tsx";
 import { colors as c } from "./theme.ts";
 import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
@@ -353,7 +353,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
               focused={focus === "list"}
               label={`● ${item.name}`}
               end={item.state}
-              color={item.state === "ended" ? c.muted : c.success}
+              color={agentColor(item.state)}
               onSelect={() => choose(item.id)}
             />
             <text
