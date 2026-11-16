@@ -82,3 +82,33 @@ test("each area's reading list names workflow sections and lessons that exist", 
   assert.match(readingList(["area:tooling"]), /concurrency\.md, fixtures\.md, machine\.md/);
   assert.doesNotMatch(readingList(["area:docs"]), /lessons/);
 });
+
+test("a live Claude session shows Claude Code's own status; others keep theirs", async () => {
+  const { parseClaudeAgents } = await import("./activity.ts");
+  const { managedAgentViews } = await import("./endpoints.ts");
+  const activity = parseClaudeAgents(
+    JSON.stringify([
+      { sessionId: "a2494288-4abb-4e6a-967e-5a39d904f7c0", status: "busy" },
+      { sessionId: "45d08db6-4cd2-49f8-b05c-9b560324e0a4", status: "idle" },
+      { name: "no id" },
+    ]),
+  );
+  const views = managedAgentViews(
+    [
+      { id: "claude/a2494288-4abb-4e6a-967e-5a39d904f7c0", provider: "claude", label: "#802 worker", state: "running" },
+      { id: "claude/45d08db6-4cd2-49f8-b05c-9b560324e0a4", provider: "claude", label: "#816 review abc", state: "running" },
+      { id: "claude/11111111-2222-3333-4444-555555555555", provider: "claude", label: "#9 worker", state: "ended" },
+      { id: "codex/xyz", provider: "codex", label: "#7 worker", state: "running" },
+    ],
+    activity,
+  );
+  assert.deepEqual(
+    views.map((view) => [view.name, view.role, view.state, view.issue]),
+    [
+      ["#802 worker", "worker", "busy", 802],
+      ["#816 review abc", "reviewer", "idle", 816],
+      ["#9 worker", "worker", "ended", 9],
+      ["#7 worker", "worker", "running", 7],
+    ],
+  );
+});

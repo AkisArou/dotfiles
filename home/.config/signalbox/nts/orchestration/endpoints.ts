@@ -10,6 +10,8 @@ import type { AgentInstance } from "signalbox/ext/agents/index";
 import { textInput } from "signalbox/ext/agents/index";
 import { messaging } from "signalbox/ext/agents/features";
 import { current } from "./current.ts";
+import { sessionOf } from "./activity.ts";
+import type { ClaudeActivity } from "./activity.ts";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
@@ -42,12 +44,17 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
 }
 
 /** Managed sessions as Agents rows: role and issue come from the label the routes give them. */
-export function managedAgentViews(instances: readonly AgentInstance[]): refs.Agent[] {
+export function managedAgentViews(
+  instances: readonly AgentInstance[],
+  activity: ClaudeActivity = {},
+): refs.Agent[] {
   return instances.map((instance) => ({
     id: instance.id,
     name: instance.label,
     role: /coordinator/i.test(instance.label) ? "coordinator" : /review/i.test(instance.label) ? "reviewer" : "worker",
-    state: instance.state,
+    // A live session shows what it is doing (busy, idle), not only that it is alive.
+    state:
+      instance.state === "running" ? (activity[sessionOf(instance.id) ?? ""] ?? instance.state) : instance.state,
     path: null,
     issue: Number(/^#(\d+)/.exec(instance.label)?.[1]) || null,
     terminal: instance.id,

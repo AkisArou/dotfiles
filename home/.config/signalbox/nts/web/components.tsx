@@ -82,7 +82,7 @@ export function Badge({ children, state = "" }: { children: ReactNode; state?: s
       ? "bad"
       : /needs|held|parked|unscoped|amber/.test(state)
         ? "warn"
-        : /build|review|merg|start/.test(state)
+        : /build|review|merg|start|busy/.test(state)
           ? "active"
           : "neutral";
   return (
