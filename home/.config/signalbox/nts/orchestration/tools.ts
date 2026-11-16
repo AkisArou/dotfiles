@@ -249,6 +249,21 @@ export function coordinatorTools(wiring: Wiring) {
           }),
       }),
       agentTool({
+        name: "rework",
+        description:
+          "Send a held or wrong landing back to build: its queue entry is withdrawn and the worker gets your notes.",
+        input: toolInput(z.object({ assignment: z.string(), notes: z.string().min(1) })),
+        output: ok,
+        run: (input, context) =>
+          authorized(context, async () => {
+            await context.get(wiring.work.get()).report(
+              { assignmentId: input.assignment, data: { kind: "rework", notes: input.notes }, requestId: context.requestId },
+              context.signal,
+            );
+            return { ok: true as const };
+          }),
+      }),
+      agentTool({
         name: "message_worker",
         description: "Send a message to a task's current worker.",
         input: toolInput(z.object({ assignment: z.string(), text: z.string().min(1) })),

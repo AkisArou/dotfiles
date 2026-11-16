@@ -11,7 +11,8 @@ import { TerminalTheme } from "./selection.tsx";
 import { TerminalProvider } from "../shared/terminal.ts";
 import { terminalUrl } from "signalbox/client/terminal";
 
-const api = process.env.SIGNALBOX_NTS_API_URL ?? "ws://127.0.0.1:4311/rpc";
+// scripts/tui.ts passes this project's host (project.json), or sbn --api's.
+const api = process.env.SIGNALBOX_API_URL ?? process.env.SIGNALBOX_NTS_API_URL ?? "ws://127.0.0.1:4311/rpc";
 const client = createClient({ connect: webSocketConnection(api) });
 let finish!: () => void;
 const ended = new Promise<void>((resolve) => {

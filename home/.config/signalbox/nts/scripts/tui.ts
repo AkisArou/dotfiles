@@ -2,7 +2,7 @@ import { build } from "esbuild";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 
 const [major, minor] = process.versions.node.split(".").map(Number);
 if (major! < 26 || (major === 26 && minor! < 4))
@@ -31,6 +31,13 @@ await build({
   tsconfig: "tsconfig.tui.json",
   sourcemap: true,
 });
+// The TUI talks to this project's host unless SIGNALBOX_API_URL says otherwise.
+const project = JSON.parse(await readFile(resolve(root, "project.json"), "utf8")) as { apiPort: number };
+const env = {
+  ...process.env,
+  SIGNALBOX_API_URL:
+    process.env.SIGNALBOX_API_URL ?? process.env.SIGNALBOX_NTS_API_URL ?? `ws://127.0.0.1:${project.apiPort}/rpc`,
+};
 const child = spawn(
   process.execPath,
   [
@@ -38,7 +45,7 @@ const child = spawn(
     ...(testing ? ["--test"] : []),
     ...entries.map((entry) => resolve(output, entry.slice(4).replace(/\.tsx?$/, ".mjs"))),
   ],
-  { stdio: "inherit" },
+  { stdio: "inherit", env },
 );
 child.on("error", (error) => {
   console.error(error);

@@ -1,0 +1,8 @@
+{
+  "name": "nts",
+  "roots": ["~/Projects/nts", "~/.cache/nts-pool"],
+  "webPort": 4310,
+  "apiPort": 4311,
+  "coordinator": true,
+  "statusSource": "nts.assignments"
+}

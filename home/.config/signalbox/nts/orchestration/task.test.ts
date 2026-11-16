@@ -48,6 +48,7 @@ const queue = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : [];
 if (first === "status") console.log(JSON.stringify({ service: { running: true, state: "idle", since: "", message: null }, checking: null,
   waiting: queue.map((sha) => ({ id: sha.slice(0, 12), sha, branch: null, issue: null, by: "t", submitted_at: "", note: null })),
   held: [], day: { landed: 0, refused: 0, held: 0, withdrawn: 0, median_wall_s: null, max_wall_s: null }, recent: [], main: { commit: null, pushed: null } }));
+else if (first === "withdraw") { writeFileSync(file, JSON.stringify(queue.filter((sha) => sha !== process.argv[3]))); }
 else { queue.push(first); writeFileSync(file, JSON.stringify(queue)); }
 `;
 
@@ -266,6 +267,18 @@ test("a task goes from tree to verified through design approval, review and land
   await phase("landing");
   assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), [commit]);
 
+  // A held landing goes back to build on the coordinator's rework: the held entry
+  // is withdrawn, the worker is told why, and the same commit can queue again.
+  await report({ kind: "rework", notes: "the tooling step hung in worker-memory" }, "rework-1");
+  await phase("build");
+  assert.match(messages.at(-1)!.text, /^Rework [0-9a-f]{40}: the tooling step hung in worker-memory/);
+  assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), []);
+  await report({ kind: "ready", commit, summary: "the hang was the fixture's" }, "ready-3");
+  await phase("reviewing");
+  await report({ kind: "review", commit, verdict: "accept", findings: "" }, "review-3");
+  await phase("landing");
+  assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), [commit]);
+
   const answer = (state: "landed" | "refused") =>
     ({
       service: { running: true, state: "idle", since: "", message: null },
@@ -274,7 +287,7 @@ test("a task goes from tree to verified through design approval, review and land
       held: [],
       day: { landed: 0, refused: 0, held: 0, withdrawn: 0, median_wall_s: null, max_wall_s: null },
       recent: [
-        { id: `${commit.slice(0, 12)}-1`, sha: commit, state, at: "", message: state, branch: "900", issue: 900, run: "/logs",
+        { id: `${commit.slice(0, 12)}-1`, sha: commit, state, at: new Date().toISOString(), message: state, branch: "900", issue: 900, run: "/logs",
           wall_s: 1, estimate_s: 1, landing: [], deferred: [], pending: 0 },
       ],
       main: { commit, pushed: true },
@@ -287,6 +300,6 @@ test("a task goes from tree to verified through design approval, review and land
   while (read().status !== "finished" && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(read().status, "finished");
   assert.equal(taskState.parse(read().state).outcome, "verified");
-  assert.deepEqual(stopped.sort(), ["fake/1", "fake/2", "fake/3"]);
+  assert.deepEqual(stopped.sort(), ["fake/1", "fake/2", "fake/3", "fake/4"]);
   assert.deepEqual(read().heldResources, []);
 });

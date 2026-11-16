@@ -9,7 +9,9 @@ patchedDependencies:
 
 importers:
 
-  .:
+  .: {}
+
+  nts:
     dependencies:
       '@astryxdesign/core':
         specifier: 0.7.16

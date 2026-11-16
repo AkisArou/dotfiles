@@ -1,14 +1,14 @@
-# The NTS application installs the Signalbox SDK as an injected copy, so the SDK
-# and this application share one React and one dependency graph.
+# One folder per project; each is a Signalbox application with its own
+# project.json, host unit instance (signalbox@<folder>) and state.
 packages:
-  - "."
+  - "*"
 
 allowBuilds:
   "@astryxdesign/core": false
   esbuild: true
   node-pty: true
 
-# The SDK's workflow engine needs its database-close patch here too: an injected
-# dependency's dependencies are installed by this project, not by the SDK's workspace.
+# Projects install the Signalbox SDK as an injected copy; its workflow engine's
+# database-close patch is applied here, where its dependencies are installed.
 patchedDependencies:
   openworkflow@0.11.0: /home/akisarou/Projects/signalbox/patches/openworkflow@0.11.0.patch

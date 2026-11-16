@@ -156,6 +156,20 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       },
     }),
     exposeOperation({
+      ref: refs.reworkAssignment,
+      requires: [work],
+      input: z.object({ assignment: z.string(), notes: z.string().min(1) }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        await context.get(work).report({
+          assignmentId: input.assignment,
+          data: { kind: "rework", notes: input.notes },
+          requestId: context.requestId,
+        });
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
       ref: refs.retryAssignment,
       requires: [work],
       input: z.object({ assignment: z.string() }),

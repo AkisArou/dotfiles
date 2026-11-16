@@ -1,5 +1,5 @@
 // This is the NTS application's configuration. Signalbox contains no NTS policy.
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ntsStateDirectory } from "./host/state-directory.ts";
 import { expandPath } from "signalbox/core/utils";
@@ -7,9 +7,16 @@ import type { CommandSpec } from "signalbox/ext/execution/index";
 import type { TerminalTarget } from "signalbox/ext/terminals/index";
 import type { OrchestrationSettings } from "./orchestration/index.ts";
 
-const directory = fileURLToPath(new URL("./", import.meta.url));
+/** The project's identity, shared with sbn: its roots, ports and coordinator choice. */
+const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.url), "utf8")) as {
+  name: string;
+  roots: string[];
+  webPort: number;
+  apiPort: number;
+  coordinator: boolean;
+};
 const path = (value: string) => resolve(expandPath(value));
-const root = path(process.env.NTS_ROOT ?? "~/Projects/nts");
+const root = path(process.env.NTS_ROOT ?? project.roots[0]!);
 export interface NtsConfig {
   readonly root: string;
   readonly repo: string;
@@ -39,14 +46,13 @@ export const ntsConfig: NtsConfig = {
   plan: "docs/plan.md",
   issueLimit: 400,
   issueIntervalMs: 120_000,
-  // Reuse existing execution state in place; fresh installs use XDG_STATE_HOME.
+  // One state directory per project root, under XDG_STATE_HOME.
   state: ntsStateDirectory({
-    appDirectory: directory,
     projectRoot: root,
     override: process.env.SIGNALBOX_NTS_STATE,
   }),
-  webPort: Number(process.env.SIGNALBOX_NTS_PORT ?? 4310),
-  apiPort: Number(process.env.SIGNALBOX_NTS_API_PORT ?? 4311),
+  webPort: Number(process.env.SIGNALBOX_NTS_PORT ?? project.webPort),
+  apiPort: Number(process.env.SIGNALBOX_NTS_API_PORT ?? project.apiPort),
   // Only local clients are accepted. Remote deployment supplies its own gate/proxy.
   origin: process.env.SIGNALBOX_NTS_ORIGIN,
   apiUrl: process.env.SIGNALBOX_NTS_API_URL,
@@ -63,8 +69,11 @@ export const ntsConfig: NtsConfig = {
   // or supply any other TerminalTarget. Targets stay on the host.
   attachedTerminals: [],
   orchestration: {
-    // The coordinator starts with the host only when asked: SIGNALBOX_NTS_COORDINATOR=1.
-    coordinator: process.env.SIGNALBOX_NTS_COORDINATOR === "1",
+    // project.json decides; SIGNALBOX_NTS_COORDINATOR=0 or 1 overrides it for one host.
+    coordinator:
+      process.env.SIGNALBOX_NTS_COORDINATOR === undefined
+        ? project.coordinator
+        : process.env.SIGNALBOX_NTS_COORDINATOR === "1",
     workerSlots: 2,
     maxRounds: 4,
     // Initial profiles for a fresh state. Later changes live in the host's state

@@ -43,6 +43,8 @@ export const taskReport = z.discriminatedUnion("kind", [
     disputesDesign: z.boolean().default(false),
   }),
   z.object({ kind: z.literal("help"), message: z.string().min(1) }),
+  /** The coordinator (or user) sends a held or landed-but-wrong change back to build. */
+  z.object({ kind: z.literal("rework"), notes: z.string().min(1) }),
 ]);
 export type TaskReport = z.infer<typeof taskReport>;
 
@@ -87,6 +89,8 @@ export const taskState = z.object({
   note: z.string().default(""),
   /** Every earlier review round's findings, so each fresh reviewer checks them first. */
   reviews: z.array(z.object({ commit: sha, findings: z.string() })).default([]),
+  /** When this round queued its commit; only landing answers after it count. */
+  queuedAt: z.number().nullable().default(null),
 });
 export type TaskState = z.infer<typeof taskState>;
 
@@ -168,6 +172,7 @@ export function taskRoute(options: {
         resumeTo: null,
         note: "",
         reviews: [],
+        queuedAt: null,
       }),
       async reconcile(ctx) {
         const state = ctx.assignment.state;
@@ -218,6 +223,33 @@ export function taskRoute(options: {
         if (help && help.data.kind === "help") {
           ctx.consumeReports(help.id);
           return next({ help: help.data.message });
+        }
+
+        // Rework from landing: withdraw the change's own queue entry (a held one
+        // never lands by itself), tell the worker why, and build again.
+        const rework = ctx.reports.find((report) => report.data.kind === "rework");
+        if (rework && rework.data.kind === "rework" && (state.phase === "landing" || state.phase === "queue")) {
+          ctx.consumeReports(rework.id);
+          const commit = state.commit!;
+          await ctx.effect({
+            key: `withdraw/${commit}/${rework.id}`,
+            input: { commit },
+            idempotent: true,
+            async run({ signal }) {
+              const found = landingFor(await landingStatus(options.root, signal), commit);
+              if (!found.checking && !found.waiting && !found.held) return null;
+              const withdrawn = await runNts(options.root, ["tooling/landing/check.ts", "withdraw", commit], {
+                signal,
+                timeout: 120_000,
+              });
+              if (withdrawn.code !== 0)
+                throw new Error(`check.ts withdraw ${commit} exited ${withdrawn.code}: ${(withdrawn.stderr || withdrawn.stdout).trim()}`);
+              return null;
+            },
+          });
+          const note = `Rework ${commit}: ${rework.data.notes}\nFix the cause where it lives, prove the change again, commit and report_ready.`;
+          await tell(state.worker!.id, `rework/${rework.id}`, note);
+          return next({ phase: "build", rounds: state.rounds + 1, note, help: null });
         }
 
         if (
@@ -408,13 +440,14 @@ export function taskRoute(options: {
         }
         if (state.phase === "queue") {
           const commit = state.commit!;
-          await ctx.effect({
-            key: `queue/${commit}`,
-            input: { commit },
+          // One submission per commit and round: a reworked commit queues again.
+          const queuedAt = await ctx.effect<number>({
+            key: state.rounds === 0 ? `queue/${commit}` : `queue/${commit}/${state.rounds}`,
+            input: { commit, round: state.rounds },
             async recover({ signal }) {
               const found = landingFor(await landingStatus(options.root, signal), commit);
-              return found.checking || found.waiting || found.held || found.answers.length
-                ? { status: "completed" as const, value: null }
+              return found.checking || found.waiting || found.held
+                ? { status: "completed" as const, value: Date.now() }
                 : { status: "absent" as const };
             },
             async run({ signal }) {
@@ -424,15 +457,18 @@ export function taskRoute(options: {
               });
               if (queued.code !== 0)
                 throw new Error(`check.ts ${commit} exited ${queued.code}: ${(queued.stderr || queued.stdout).trim()}`);
-              return null;
+              return Date.now();
             },
           });
-          return next({ phase: "landing" });
+          return next({ phase: "landing", queuedAt });
         }
         if (state.phase === "landing") {
           const status = current(ctx.get(options.landing));
           if (!status) return wait("Waiting for the landing status");
-          const answer = landingFor(status, state.commit!).answers[0];
+          const answer = landingFor(status, state.commit!).answers.find(
+            // The landing service and this host share the machine's clock.
+            (candidate) => state.queuedAt === null || Date.parse(candidate.at) >= state.queuedAt,
+          );
           if (!answer) return wait("Waiting for the landing check's answer");
           if (answer.state === "landed")
             return next({ phase: "verify", landedMain: status.main.commit ?? state.commit });

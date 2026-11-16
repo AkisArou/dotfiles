@@ -27,4 +27,5 @@ run(resolve(sdk, "node_modules/.bin/tsc"), ["-p", "tsconfig.client.json"], sdk);
 const pnpm = process.env.npm_execpath;
 if (!pnpm) throw new Error("Run through pnpm (pnpm sdk), so the injected SDK copy can be refreshed");
 const javascript = /\.[cm]?js$/.test(pnpm);
-run(javascript ? process.execPath : pnpm, [...(javascript ? [pnpm] : []), "install", "--offline", "--silent"], root);
+// The workspace root (one level up) installs every project's dependencies.
+run(javascript ? process.execPath : pnpm, [...(javascript ? [pnpm] : []), "install", "--offline", "--silent"], resolve(root, ".."));

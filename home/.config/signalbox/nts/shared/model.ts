@@ -102,6 +102,9 @@ export const cancelAssignment = operation<{ assignment: string; reason: string }
 export const answerDecision = operation<{ id: string; revision: number; answer: string }, { ok: true }>(
   "nts.user-decisions.answer",
 );
+export const reworkAssignment = operation<{ assignment: string; notes: string }, { ok: true }>(
+  "nts.assignments.rework",
+);
 export const retryAssignment = operation<{ assignment: string }, { ok: true }>("nts.assignments.retry");
 export const decideDesign = operation<
   { assignment: string; accept: boolean; notes: string },
