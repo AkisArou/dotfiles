@@ -7,6 +7,9 @@ import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments/index";
 import type { Assignment } from "signalbox/ext/assignments/index";
 import type { AgentInstance } from "signalbox/ext/agents/index";
+import { textInput } from "signalbox/ext/agents/index";
+import { messaging } from "signalbox/ext/agents/features";
+import { current } from "./current.ts";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
@@ -50,7 +53,7 @@ export function managedAgentViews(instances: readonly AgentInstance[]): refs.Age
 }
 
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
-  const { profiles, work, assignments, decisions, route } = orchestration;
+  const { profiles, work, assignments, decisions, route, agents } = orchestration;
   return [
     exposeSource({
       ref: refs.profileSettings,
@@ -147,6 +150,37 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
         await context
           .get(work)
           .cancel({ assignmentId: input.assignment, reason: input.reason, requestId: context.requestId });
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
+      ref: refs.decideDesign,
+      requires: [work],
+      input: z.object({ assignment: z.string(), accept: z.boolean(), notes: z.string() }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        await context.get(work).report({
+          assignmentId: input.assignment,
+          data: { kind: "design_decision", accept: input.accept, notes: input.notes },
+          requestId: context.requestId,
+        });
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
+      ref: refs.messageWorker,
+      requires: [work, agents.runtime],
+      input: z.object({ assignment: z.string(), text: z.string().min(1) }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        const assignment = (current(context.get(work).assignments) ?? []).find(
+          (candidate) => candidate.id === input.assignment,
+        );
+        const worker = assignment && assignmentView(assignment).worker;
+        if (!worker) throw new Error("That assignment has no current worker");
+        const send = context.get(agents.runtime).capability(worker, messaging);
+        if (!send) throw new Error("The worker cannot receive messages");
+        await send.submit(textInput(`From the user: ${input.text}`), { requestId: context.requestId });
         return { ok: true as const };
       },
     }),

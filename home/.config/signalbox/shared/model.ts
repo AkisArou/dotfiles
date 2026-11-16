@@ -100,6 +100,13 @@ export const cancelAssignment = operation<{ assignment: string; reason: string }
 export const answerDecision = operation<{ id: string; revision: number; answer: string }, { ok: true }>(
   "nts.user-decisions.answer",
 );
+export const decideDesign = operation<
+  { assignment: string; accept: boolean; notes: string },
+  { ok: true }
+>("nts.assignments.decide-design");
+export const messageWorker = operation<{ assignment: string; text: string }, { ok: true }>(
+  "nts.assignments.message-worker",
+);
 export const tabs = [
   "Now",
   "Tasks",
