@@ -18,7 +18,8 @@ const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.ur
   /** Where this project's state lives, when not the per-root default. Agents' tmux
    * sessions and execution receipts are tied to it, so it moves only while no agent runs. */
   state?: string;
-  /** Addresses that proxy to this host (tailscale serve), whose pages may use it. */
+  /** Other addresses that proxy to this host, whose pages may use it. This machine's
+   * tailnet address (tailscale serve) is read from Tailscale and needs no entry. */
   publicOrigins?: string[];
 };
 const path = (value: string) => resolve(expandPath(value));

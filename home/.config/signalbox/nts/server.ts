@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { startHost } from "signalbox/host";
 import { createNtsProject, requireCheckout } from "./host/config.ts";
 import { ntsConfig } from "./config.ts";
+import { readTailnetOrigins } from "./host/tailnet.ts";
 
 const project = fileURLToPath(new URL("./", import.meta.url));
 const { webPort: port, apiPort, state: directory } = ntsConfig;
@@ -49,7 +50,12 @@ else {
   await assets.dispose();
   await stopBundler();
 }
-const host = await startHost(createNtsProject(ntsConfig, { directory: output }), {
+// A tailnet that proxies to this host (tailscale serve) is read from Tailscale, not config.
+const settings = {
+  ...ntsConfig,
+  publicOrigins: [...ntsConfig.publicOrigins, ...(await readTailnetOrigins())],
+};
+const host = await startHost(createNtsProject(settings, { directory: output }), {
   stateDirectory: directory,
 });
 let stopping: Promise<void> | undefined;
