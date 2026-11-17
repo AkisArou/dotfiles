@@ -4,38 +4,32 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useProject } from "../shared/use-project.ts";
-import { needsCount, settingsLine, tabs } from "../shared/model.ts";
-import type { Tab } from "../shared/model.ts";
+import { agentTone, needsCount, settingsLine, tabs } from "../shared/model.ts";
+import type { Agent, Tab } from "../shared/model.ts";
 import { terminalConfig } from "./config.ts";
 import { describeFilters, filterOptions, matches, toggleFilter } from "./filters.ts";
 import type { Chosen } from "./filters.ts";
 import type { TerminalTools } from "./tools.ts";
-import { Heading, Line, ListDetail, ListRow, ScrollPane, Section } from "./components.tsx";
+import { Line, ListDetail, ListRow, ScrollPane, Section } from "./components.tsx";
 import {
+  agentColor,
   AgentDetail,
   NowView,
-  TaskDetail,
-  TaskPopup,
-  agentColor,
   stateColor,
   stateMark,
+  TaskDetail,
+  TaskPopup,
+  toneColor,
 } from "./views.tsx";
 import { colors as c } from "./theme.ts";
 import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
 import { NtsContent } from "./nts.tsx";
 import { SettingDetail, settingAction, settingRows } from "./settings.tsx";
-import {
-  NeedsDetail,
-  answerNeed,
-  needsGroups,
-  needsItems,
-  needsLabel,
-  withdrawNeed,
-} from "./needs.tsx";
+import { NeedsDetail, answerNeed, needsItems, needsLabel, withdrawNeed } from "./needs.tsx";
 import type { SettingRow } from "./settings.tsx";
 import { tabLabels } from "./navigation.ts";
-import { navigationKey } from "./keyboard.ts";
+import { navigationKey, popupKey } from "./keyboard.ts";
 import { NativeTerminal } from "./terminal.tsx";
 
 export function TerminalApp({ onExit, tools }: { onExit(): void; tools: TerminalTools }) {
@@ -49,7 +43,10 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   const [message, setMessage] = useState<string>(),
     [tool, setTool] = useState<string>();
   // The task an agent works on, shown over everything (t on an agent; Escape or t closes).
-  const [popup, setPopup] = useState<number | null>(null);
+  // Over everything: an agent's task (t), or the ended sessions (e).
+  const [popup, setPopup] = useState<{ kind: "task"; issue: number } | { kind: "ended" } | null>(
+    null,
+  );
   const popupScroll = useRef<ScrollBoxRenderable>(null);
   const [help, setHelp] = useState(false),
     [terminalRequest, setTerminalRequest] = useState(0);
@@ -60,11 +57,9 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     detail = useRef<ScrollBoxRenderable>(null);
   const { overview } = project.data;
   // Ended sessions stay in the host's record; the list hides them until `e` shows them.
-  const [showEnded, setShowEnded] = useState(false);
-  const ended = project.data.agents.filter((item) => item.state === "ended").length;
-  const agents = showEnded
-    ? project.data.agents
-    : project.data.agents.filter((item) => item.state !== "ended");
+  // The list holds live sessions; the ended ones open in a popup (e).
+  const endedAgents = project.data.agents.filter((item) => item.state === "ended");
+  const agents = project.data.agents.filter((item) => item.state !== "ended");
   // The Agents tab ends with the settings its launches follow.
   const settings = settingRows(project.data.settings);
   const readings = {
@@ -243,16 +238,22 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     }
     if (popup !== null) {
       key.preventDefault();
-      const motion = navigationKey(key, false).motion;
-      if (key.name === "escape" || key.name === "t" || key.name === "q") setPopup(null);
-      else if (motion?.kind === "move")
-        popupScroll.current?.scrollBy(
-          motion.direction *
-            (motion.distance === "line"
+      const opener = popup.kind === "task" ? "t" : "e";
+      const { action, afterG: prefix } = popupKey(key, afterG.current, opener);
+      afterG.current = prefix;
+      const pane = popupScroll.current;
+      const page = Math.max(1, (pane?.viewport.height ?? 10) - 1);
+      if (action.kind === "close") setPopup(null);
+      else if (action.kind === "scroll")
+        pane?.scrollBy(
+          action.direction *
+            (action.distance === "line"
               ? 1
-              : Math.max(1, Math.floor((popupScroll.current?.viewport.height ?? 10) / 2))),
+              : action.distance === "half"
+                ? Math.max(1, Math.floor(page / 2))
+                : page),
         );
-      else if (motion?.kind === "edge") popupScroll.current?.scrollTo(motion.last ? Infinity : 0);
+      else if (action.kind === "edge") pane?.scrollTo(action.last ? Infinity : 0);
       return;
     }
     if (tab === "Agents" && agent?.terminal) key.preventDefault();
@@ -326,12 +327,13 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       return;
     }
     if (key.name === "t" && tab === "Agents") {
-      if (agent?.issue) setPopup(agent.issue);
+      if (agent?.issue) setPopup({ kind: "task", issue: agent.issue });
       else setMessage(agent ? `${agent.name} works on no task.` : "Select an agent first.");
       return;
     }
     if (key.name === "e" && tab === "Agents") {
-      setShowEnded((value) => !value);
+      if (endedAgents.length) setPopup({ kind: "ended" });
+      else setMessage("No session has ended.");
       return;
     }
     if (key.name === "/") {
@@ -394,8 +396,23 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
         : name === "Needs you"
           ? needsCount(project.data.needs)
           : undefined;
+  // A task's place: its group, else its stream; a group's place is its stream.
   const groupOf = (issue: (typeof tasks)[number]) =>
-    `${issue.stream}${issue.group ? ` › ${issue.group}` : ""}`;
+    issue.labels.includes("kind:group") ? issue.stream : issue.group || issue.stream;
+  // An agent's lines under its name: the issue it works on, then its role and tree.
+  const agentDetails = (agent: Agent) => {
+    const issue = agent.issue
+      ? project.data.issues.find((item) => item.number === agent.issue)
+      : undefined;
+    return [
+      ...(agent.issue ? [`#${agent.issue}${issue ? ` ${issue.title}` : ""}`] : []),
+      `${agent.role} · ${agent.path ? shortPath(agent.path) : "native terminal"}`,
+    ];
+  };
+  const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? "" : "s"}`;
+  const home = process.env.HOME ?? "";
+  const shortPath = (path: string) =>
+    home && path.startsWith(home) ? `~${path.slice(home.length)}` : path;
   const scroll = (
     <ScrollPane
       key={`${tab}-list`}
@@ -409,72 +426,52 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           ? `${tasks.length} of ${project.data.issues.length}${label ? ` · ${label}` : ""}`
           : tab === "Needs you"
             ? `${project.data.needs.questions.length} questions · ${project.data.needs.unasked.length} not asked yet · Enter answers`
-            : `${agents.length} agents${ended ? ` · ${ended} ended ${showEnded ? "shown" : "hidden"} (e)` : ""}`}
+            : `${plural(agents.length, "agent")}${endedAgents.length ? ` · ${endedAgents.length} ended (e)` : ""}`}
       </Line>
       {tab === "Needs you" &&
-        needsGroups.map((group) => {
-          const rows = needs.filter((item) => item.kind === group.kind);
-          if (!rows.length) return null;
+        needs.map((item) => {
+          const { label: text, meta, end } = needsLabel(item);
           return (
-            <box key={group.kind} flexDirection="column" marginTop={1} flexShrink={0}>
-              <Heading>{`${group.title} · ${rows.length}`}</Heading>
-              {rows.map((item) => {
-                const { label: text, end } = needsLabel(item);
-                return (
-                  <ListRow
-                    key={item.id}
-                    id={`row-${item.id}`}
-                    selected={item.id === currentId}
-                    focused={focus === "list"}
-                    label={`${item.kind === "answered" ? "✓" : "?"} ${text}`}
-                    end={end}
-                    color={item.kind === "answered" ? c.muted : c.warning}
-                    onSelect={() => choose(item.id)}
-                  />
-                );
-              })}
-            </box>
+            <ListRow
+              key={item.id}
+              id={`row-${item.id}`}
+              selected={item.id === currentId}
+              focused={focus === "list"}
+              label={`${item.kind === "answered" ? "✓" : "?"} ${text}`}
+              {...(meta ? { meta } : {})}
+              end={end}
+              color={item.kind === "answered" ? c.muted : c.warning}
+              onSelect={() => choose(item.id)}
+            />
           );
         })}
       {taskTab &&
-        [...new Set(tasks.map(groupOf))].map((group) => (
-          <box key={group} flexDirection="column" marginTop={1} flexShrink={0}>
-            <Heading>{group}</Heading>
-            {tasks
-              .filter((issue) => groupOf(issue) === group)
-              .map((issue) => (
-                <ListRow
-                  key={issue.id}
-                  id={`row-${issue.id}`}
-                  selected={issue.id === currentId}
-                  focused={focus === "list"}
-                  label={`${stateMark(issue.state)} #${issue.number} ${issue.title}`}
-                  end={issue.claims?.[0]?.what ?? issue.state}
-                  color={stateColor(issue.state)}
-                  onSelect={() => choose(issue.id)}
-                />
-              ))}
-          </box>
+        tasks.map((issue) => (
+          <ListRow
+            key={issue.id}
+            id={`row-${issue.id}`}
+            selected={issue.id === currentId}
+            focused={focus === "list"}
+            label={`${stateMark(issue.state)} #${issue.number} ${issue.title}`}
+            meta={groupOf(issue)}
+            end={issue.claims?.[0]?.what ?? issue.state}
+            color={stateColor(issue.state)}
+            onSelect={() => choose(issue.id)}
+          />
         ))}
       {tab === "Agents" &&
         agents.map((item) => (
-          <box key={item.id} id={`row-${item.id}`} flexDirection="column" flexShrink={0}>
-            <ListRow
-              id={`label-${item.id}`}
-              selected={item.id === currentId}
-              focused={focus === "list"}
-              label={`● ${item.name}`}
-              end={item.state}
-              color={agentColor(item.state)}
-              onSelect={() => choose(item.id)}
-            />
-            <text
-              fg={c.muted}
-              height={1}
-              wrapMode="none"
-              truncate
-            >{`  ${item.role} · ${item.path ?? "native terminal"}`}</text>
-          </box>
+          <ListRow
+            key={item.id}
+            id={`row-${item.id}`}
+            selected={item.id === currentId}
+            focused={focus === "list"}
+            label={`● ${item.name}`}
+            details={agentDetails(item)}
+            end={item.state}
+            color={agentColor(item.state)}
+            onSelect={() => choose(item.id)}
+          />
         ))}
       {!items.length && (
         <Line color={c.muted}>
@@ -493,7 +490,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       <box flexDirection="column" flexGrow={1} minHeight={0}>
         {scroll}
         <box flexDirection="column" flexShrink={0} border={["top"]} borderColor={c.border}>
-          <Heading>Settings · Enter changes</Heading>
+          <Line color={c.muted}>{" settings · Enter changes"}</Line>
           {settings.map((row) => (
             <ListRow
               key={row.id}
@@ -567,6 +564,8 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     return next.length + 11 <= width - 2 ? next : line;
   }, "");
   const labels = tabLabels(tab, width - 2, count);
+  // The popup's backdrop: what is behind it is dimmed while it is open.
+  const behind = popup === null ? 1 : 0.35;
   return (
     <box
       width={width}
@@ -582,6 +581,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
         height={3}
         flexShrink={0}
         flexDirection="column"
+        opacity={behind}
       >
         <box flexDirection="row" justifyContent="space-between" height={1}>
           <text fg={c.accent} attributes={TextAttributes.BOLD}>
@@ -616,7 +616,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           ))}
         </box>
       </box>
-      <box flexGrow={1} minHeight={0} paddingTop={1}>
+      <box flexGrow={1} minHeight={0} paddingTop={1} opacity={behind}>
         {help ? (
           <ScrollPane focused scrollRef={detail}>
             <Section title="Navigation">
@@ -659,7 +659,14 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           content
         )}
       </box>
-      <box height={3} flexShrink={0} border={["top"]} borderColor={c.border} flexDirection="column">
+      <box
+        height={3}
+        flexShrink={0}
+        border={["top"]}
+        borderColor={c.border}
+        flexDirection="column"
+        opacity={behind}
+      >
         <text
           fg={project.data.settings?.paused || project.data.settings?.error ? c.warning : c.muted}
           height={1}
@@ -689,23 +696,39 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           flexDirection="column"
           paddingLeft={1}
           paddingRight={1}
-          title={` #${popup} · Escape or t closes · j/k scroll `}
+          title={
+            popup.kind === "task"
+              ? ` #${popup.issue} · Escape or t closes · j/k scroll `
+              : ` ${plural(endedAgents.length, "ended session")} · Escape or e closes · j/k scroll `
+          }
         >
           <ScrollPane scrollRef={popupScroll} focused>
-            <TaskPopup
-              number={popup}
-              issue={project.data.issues.find((issue) => issue.number === popup)}
-              assignment={
-                [...project.data.assignments]
-                  .filter((assignment) => assignment.issue === popup)
-                  // The live task first, then the latest.
-                  .sort(
-                    (a, b) =>
-                      Number(b.status === "active") - Number(a.status === "active") ||
-                      b.acceptedAt - a.acceptedAt,
-                  )[0]
-              }
-            />
+            {popup.kind === "task" ? (
+              <TaskPopup
+                number={popup.issue}
+                issue={project.data.issues.find((issue) => issue.number === popup.issue)}
+                assignment={
+                  [...project.data.assignments]
+                    .filter((assignment) => assignment.issue === popup.issue)
+                    // The live task first, then the latest.
+                    .sort(
+                      (a, b) =>
+                        Number(b.status === "active") - Number(a.status === "active") ||
+                        b.acceptedAt - a.acceptedAt,
+                    )[0]
+                }
+              />
+            ) : (
+              // The most recently ended first.
+              [...endedAgents].reverse().map((item) => (
+                <box key={item.id} flexDirection="column" flexShrink={0} marginBottom={1}>
+                  <Line color={toneColor(agentTone(item.state))}>{`○ ${item.name}`}</Line>
+                  {agentDetails(item).map((line, index) => (
+                    <Line key={index} color={c.muted}>{`  ${line}`}</Line>
+                  ))}
+                </box>
+              ))
+            )}
           </ScrollPane>
         </box>
       )}

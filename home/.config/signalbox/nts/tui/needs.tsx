@@ -24,12 +24,6 @@ export type NeedsItem =
     }
   | { readonly id: string; readonly kind: "answered"; readonly question: QuestionView };
 
-export const needsGroups = [
-  { kind: "question", title: "Questions" },
-  { kind: "unasked", title: "Not asked yet" },
-  { kind: "answered", title: "Answered lately" },
-] as const;
-
 export function needsItems(view: NeedsView): NeedsItem[] {
   return [
     ...view.questions.map((question) => ({
@@ -51,16 +45,18 @@ export function needsItems(view: NeedsView): NeedsItem[] {
 }
 
 /** One line for the list: the question, or the issue waiting for one. */
-export function needsLabel(item: NeedsItem): { label: string; end: string } {
+/** One line for the list: the question (or the issue waiting for one), its issue, and what it wants. */
+export function needsLabel(item: NeedsItem): { label: string; meta?: string; end: string } {
   if (item.kind === "unasked")
-    return { label: `#${item.issue.number} ${item.issue.title}`, end: "not asked" };
-  const about = item.question.issue ? `#${item.question.issue.number} ` : "";
+    return { label: item.issue.title, meta: `#${item.issue.number}`, end: "not asked yet" };
+  const meta = item.question.issue ? `#${item.question.issue.number}` : undefined;
   return item.kind === "question"
     ? {
-        label: `${about}${item.question.question}`,
+        label: item.question.question,
+        ...(meta ? { meta } : {}),
         end: item.question.options.length ? "choose" : "answer",
       }
-    : { label: `${about}${item.question.question}`, end: posted(item.question) };
+    : { label: item.question.question, ...(meta ? { meta } : {}), end: posted(item.question) };
 }
 
 const posted = (question: QuestionView) =>

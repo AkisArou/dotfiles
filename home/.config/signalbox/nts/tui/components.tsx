@@ -1,5 +1,5 @@
 /** @jsxImportSource @opentui/react */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { TextAttributes } from "@opentui/core";
 import type { ColorInput, ScrollBoxRenderable } from "@opentui/core";
@@ -8,7 +8,7 @@ import { useSelection } from "./selection.tsx";
 
 export function Heading({ children }: { children: ReactNode }) {
   return (
-    <text fg={c.accent} attributes={TextAttributes.BOLD} flexShrink={0}>
+    <text fg={c.text} attributes={TextAttributes.BOLD} flexShrink={0}>
       {children}
     </text>
   );
@@ -33,9 +33,17 @@ export function Line({ children, color = c.text }: { children: ReactNode; color?
   );
 }
 
+const LABEL_MIN = 32;
+const META_MAX = 26;
+/** Cut at the end: the start of a name or a path says the most. */
+const clip = (text: string, max: number) =>
+  text.length > max ? `${text.slice(0, max - 1)}…` : text;
+
 export function ListRow({
   id,
   label,
+  meta,
+  details = [],
   end,
   selected,
   focused,
@@ -44,6 +52,10 @@ export function ListRow({
 }: {
   id: string;
   label: string;
+  /** Muted metadata after the label (a task's group): it gives way to the label. */
+  meta?: string;
+  /** Muted lines under the label, for an item whose metadata needs room (an agent's issue and tree). */
+  details?: readonly string[];
   end?: string;
   selected: boolean;
   focused: boolean;
@@ -53,29 +65,67 @@ export function ListRow({
   const selection = useSelection();
   const highlighted = selected && focused;
   const attributes = selected ? TextAttributes.BOLD | (highlighted ? selection.attributes : 0) : 0;
+  // The row measures itself: the label keeps LABEL_MIN columns (or all of a short one), and the
+  // metadata takes what is left up to META_MAX, cut at its end, or stays out when too little is.
+  const [width, setWidth] = useState(0);
+  const endWidth = end ? Math.min(22, end.length + 2) : 0;
+  const room = width - endWidth - 1 - Math.min(label.length, LABEL_MIN);
+  const metaWidth = meta && room >= 10 ? Math.min(META_MAX, meta.length, room - 2) : 0;
+  const detailColor = highlighted ? selection.text : selected ? c.text : c.muted;
   return (
-    <box id={id} height={1} flexShrink={0} flexDirection="row" onMouseDown={onSelect}>
-      <text
-        fg={highlighted ? selection.text : color}
-        bg={highlighted ? selection.background : c.background}
-        attributes={attributes}
-        flexGrow={1}
-        flexShrink={1}
-        minWidth={0}
-        wrapMode="none"
-        truncate
-      >{` ${label}`}</text>
-      {end && (
+    <box
+      id={id}
+      flexShrink={0}
+      flexDirection="column"
+      onMouseDown={onSelect}
+      onSizeChange={function () {
+        setWidth(this.width);
+      }}
+    >
+      <box height={1} flexShrink={0} flexDirection="row">
         <text
           fg={highlighted ? selection.text : color}
           bg={highlighted ? selection.background : c.background}
           attributes={attributes}
-          width={Math.min(22, end.length + 2)}
+          flexGrow={1}
+          flexShrink={1}
+          minWidth={0}
           wrapMode="none"
           truncate
-          textAlign="right"
-        >{`${end} `}</text>
-      )}
+        >{` ${label}`}</text>
+        {meta && metaWidth > 0 && (
+          <text
+            fg={highlighted ? selection.text : c.muted}
+            bg={highlighted ? selection.background : c.background}
+            attributes={highlighted ? selection.attributes : 0}
+            width={metaWidth + 2}
+            flexShrink={0}
+            wrapMode="none"
+          >{`  ${clip(meta, metaWidth)}`}</text>
+        )}
+        {end && (
+          <text
+            fg={highlighted ? selection.text : color}
+            bg={highlighted ? selection.background : c.background}
+            attributes={attributes}
+            width={Math.min(22, end.length + 2)}
+            wrapMode="none"
+            truncate
+            textAlign="right"
+          >{`${end} `}</text>
+        )}
+      </box>
+      {details.map((line, index) => (
+        <text
+          key={index}
+          height={1}
+          fg={detailColor}
+          bg={highlighted ? selection.background : c.background}
+          attributes={highlighted ? selection.attributes : 0}
+          wrapMode="none"
+          truncate
+        >{`   ${line}`}</text>
+      ))}
     </box>
   );
 }

@@ -37,3 +37,36 @@ export function navigationKey(
   // An unrelated key cancels the prefix and still performs its ordinary action.
   return { afterG: false, motion };
 }
+
+/** What a key does over a popup: it scrolls like a pane (gg and G included) and closes. */
+export type PopupAction =
+  | { kind: "close" }
+  | { kind: "scroll"; direction: 1 | -1; distance: "line" | "half" | "page" }
+  | { kind: "edge"; last: boolean }
+  | { kind: "none" };
+
+/**
+ * A popup's keys, with the same g prefix the lists use (so gg reaches the top). Escape, q and
+ * the key that opened it (`opener`, such as t) close it.
+ */
+export function popupKey(
+  key: Pick<KeyEvent, "name" | "ctrl" | "meta" | "option" | "shift">,
+  afterG: boolean,
+  opener: string,
+): { afterG: boolean; action: PopupAction } {
+  const navigation = navigationKey(key, afterG);
+  const motion = navigation.motion;
+  if (motion?.kind === "prefix") return { afterG: true, action: { kind: "none" } };
+  if (motion?.kind === "move")
+    return {
+      afterG: false,
+      action: { kind: "scroll", direction: motion.direction, distance: motion.distance },
+    };
+  if (motion?.kind === "edge") return { afterG: false, action: motion };
+  // gt and gT switch tabs under the popup's owner, not here: they do nothing over it.
+  if (motion?.kind === "tab") return { afterG: false, action: { kind: "none" } };
+  const plain = !key.ctrl && !key.meta && !key.option;
+  if (plain && (key.name === "escape" || key.name === "q" || key.name === opener))
+    return { afterG: false, action: { kind: "close" } };
+  return { afterG: false, action: { kind: "none" } };
+}

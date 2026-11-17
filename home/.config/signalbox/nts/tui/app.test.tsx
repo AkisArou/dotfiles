@@ -173,13 +173,18 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         />
       </TerminalTheme>
     </SignalboxProvider>,
-    { width: 110, height: 40, backgroundColor: colors.background },
+    { width: 110, height: 40, backgroundColor: colors.background, kittyKeyboard: true },
   );
   const keys = async (...names: string[]) => {
     for (const name of names) {
       await act(async () => {
-        await setup.mockInput.pressKeys([name]);
+        // A key's name is typed as text by pressKeys: Escape is its own press.
+        if (name === "escape") setup.mockInput.pressEscape();
+        else await setup.mockInput.pressKeys([name]);
       });
+      await setup.renderOnce();
+      // Rows measure themselves in layout (to fit their metadata): their update is the next frame.
+      await act(async () => {});
       await setup.renderOnce();
     }
   };
@@ -198,7 +203,9 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
       setup.captureCharFrame(),
       /AkisArou\/nts · PAUSED: usage low · workers 2 · rounds 4 ·/,
     );
-    assert.match(setup.captureCharFrame(), /Withdrawal cancellation/);
+    // One flat line per task: its title, then its group muted beside it; no stream headings.
+    assert.match(setup.captureCharFrame(), /#807 Withdrawal cancellation\s+Landing/);
+    assert.doesNotMatch(setup.captureCharFrame(), /Tooling › Landing/);
     assert.match(setup.captureCharFrame(), /Drain owned work/);
     assert.ok(
       setup
@@ -238,10 +245,10 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await setup.renderOnce();
     assert.match(setup.captureCharFrame(), /Drain owned work/);
     assert.equal(calls.length, 0);
-    // Ended sessions are hidden in Agents until `e` shows them.
+    // Agents lists live sessions only; e opens the ended ones in a popup.
     await keys("escape", "4");
     assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
-    assert.match(setup.captureCharFrame(), /1 ended hidden \(e\)/);
+    assert.match(setup.captureCharFrame(), /1 agent · 1 ended \(e\)/);
     // t on an agent shows its task over everything; t again (or Escape) closes it.
     await keys("t");
     assert.match(setup.captureCharFrame(), /#807 · Escape or t closes/);
@@ -249,14 +256,16 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await keys("t");
     assert.doesNotMatch(setup.captureCharFrame(), /Escape or t closes/);
     await keys("e");
-    assert.match(setup.captureCharFrame(), /Finished reviewer/);
-    // The Agents tab ends with the settings; Enter offers a row's values in the finder.
+    assert.match(setup.captureCharFrame(), /1 ended session · Escape or e closes/);
+    assert.match(setup.captureCharFrame(), /○ Finished reviewer/);
     await keys("e");
+    assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
+    // The Agents tab ends with the settings; Enter offers a row's values in the finder.
     await act(async () => {
       setup.resize(110, 40);
     });
     await setup.renderOnce();
-    assert.match(setup.captureCharFrame(), /Settings · Enter changes/);
+    assert.match(setup.captureCharFrame(), /settings · Enter changes/);
     assert.match(setup.captureCharFrame(), /Worker slots\s+2/);
     let offered: { lines: readonly string[]; title: string } | undefined;
     pick = async (lines, title) => {
@@ -311,8 +320,10 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         });
     };
     await keys("escape", "2");
-    assert.match(setup.captureCharFrame(), /Questions · 1/);
-    assert.match(setup.captureCharFrame(), /Not asked yet · 1/);
+    // One flat line each: the question with its issue and what it wants, then the issue not asked yet.
+    assert.match(setup.captureCharFrame(), /\? Buy a Mac mini\?\s+#583\s+choose/);
+    assert.match(setup.captureCharFrame(), /\? Share the recipes\s+#777\s+not asked yet/);
+    assert.doesNotMatch(setup.captureCharFrame(), /Questions · 1/);
     pick = async (lines, title) => {
       offered = { lines, title };
       return 0;

@@ -184,7 +184,7 @@ test("the embedded native terminal owns keys and paste; Ctrl+] returns to naviga
     await act(async () => {
       screen.mockInput.pressKey("]", { ctrl: true });
     });
-    await wait(() => /1 agents/.test(screen.captureCharFrame()));
+    await wait(() => /1 agent\b/.test(screen.captureCharFrame()));
     assert.doesNotMatch(await readFile(input, "utf8"), /\x1d/);
     await act(async () => {
       await screen.mockInput.pressKeys(["q"]);
