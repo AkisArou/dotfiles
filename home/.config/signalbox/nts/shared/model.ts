@@ -64,6 +64,8 @@ export type SettingsView = {
   error: string | null;
   workerSlots: number;
   maxRounds: number;
+  /** How workerSlots is shared between groups of areas, or null when nothing is split. */
+  shares: { name: string; percent: number; areas: string[]; running: number }[] | null;
   roles: Record<AgentRole, { pick: Pick; models: ProfileView[] }>;
   paused: { reason: string } | null;
   unavailable: Partial<Record<Harness, { reason: string; until?: number }>>;
@@ -141,6 +143,8 @@ export const setSettings = operation<
     workerSlots?: number;
     maxRounds?: number;
     roles?: Partial<Record<AgentRole, { pick?: Pick; models?: string[] }>>;
+    /** One group's share as a percent; the others are scaled to the rest. */
+    share?: { name: string; percent: number };
     version?: string;
   },
   { version: string }
@@ -150,7 +154,11 @@ export const pauseTasks = operation<{ reason: string }, { ok: true }>("nts.tasks
 export const resumeTasks = operation<Record<string, never>, { ok: true }>("nts.tasks.resume");
 /** One line for the TUI's bottom bar and sbn status; a pause and a file error come first, so truncation keeps them. */
 export function settingsLine(s: SettingsView): string {
-  return `${s.paused ? `PAUSED: ${s.paused.reason} · ` : ""}${s.error ? "settings.json has an error · " : ""}workers ${s.workerSlots} · rounds ${s.maxRounds}`;
+  return `${s.paused ? `PAUSED: ${s.paused.reason} · ` : ""}${s.error ? "settings.json has an error · " : ""}workers ${s.workerSlots}${s.shares ? ` (${sharesLine(s)})` : ""} · rounds ${s.maxRounds}`;
+}
+/** The worker shares in one line: compiler 50% · tooling 50%. */
+export function sharesLine(s: SettingsView): string {
+  return (s.shares ?? []).map((group) => `${group.name} ${group.percent}%`).join(" · ");
 }
 /** A role's models in order, joined for one line. */
 export function modelsLine(role: { models: ProfileView[] }): string {

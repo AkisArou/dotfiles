@@ -12,6 +12,8 @@ import type { ntsOrchestration } from "./index.ts";
 import { catalog, harnesses, profileFromId, profileId, profileLabel, roles } from "./models.ts";
 import type { Profile } from "./models.ts";
 import { picks } from "./settings.ts";
+import { groupOf, percents, withPercent } from "./shares.ts";
+import type { Share } from "./shares.ts";
 import { checkTaskModel, knownIssue } from "./tools.ts";
 import { answerFor, issueStates } from "./needs.ts";
 import { terminate } from "signalbox/ext/agents";
@@ -97,6 +99,31 @@ export function managedAgentViews(
   });
 }
 
+const fail = (message: string): never => {
+  throw new Error(message);
+};
+
+/** Each share as a percent, with the workers its group's tasks hold now. */
+function sharesView(
+  shares: readonly Share[],
+  issues: readonly refs.Issue[],
+  all: readonly Assignment[],
+): NonNullable<refs.SettingsView["shares"]> {
+  const percent = percents(shares);
+  const areaOf = (assignment: Assignment) =>
+    issues.find((issue) => issue.number === (assignment.input as { issue?: number }).issue)?.area;
+  return shares.map((group) => ({
+    name: group.name,
+    percent: percent.get(group.name) ?? 0,
+    areas: [...group.areas],
+    running: all.filter(
+      (assignment) =>
+        assignment.heldResources.some((held) => held.resource === "worker") &&
+        groupOf(shares, areaOf(assignment)) === group,
+    ).length,
+  }));
+}
+
 const profileView = (profile: Profile): refs.ProfileView => ({
   ...profile,
   id: profileId(profile),
@@ -117,17 +144,26 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
   return [
     exposeSource({
       ref: refs.settings,
-      requires: [settings, status, profiles],
+      requires: [settings, status, profiles, orchestration.issues, assignments],
       output: z.custom<refs.SettingsView>(),
       resolve: (context) =>
         combineReadables(
-          [context.get(settings).reading, context.get(status), context.get(profiles).unavailable],
-          (reading, admission, unavailable): refs.SettingsView => ({
+          [
+            context.get(settings).reading,
+            context.get(status),
+            context.get(profiles).unavailable,
+            context.get(orchestration.issues),
+            context.get(assignments),
+          ],
+          (reading, admission, unavailable, issues, all): refs.SettingsView => ({
             path: reading.path,
             version: reading.version,
             error: reading.error,
             workerSlots: reading.settings.workerSlots,
             maxRounds: reading.settings.maxRounds,
+            shares: reading.settings.shares
+              ? sharesView(reading.settings.shares, issues, all)
+              : null,
             roles: Object.fromEntries(
               roles.map((role) => [
                 role,
@@ -155,15 +191,25 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
             z.object({ pick: z.enum(picks).optional(), models: z.array(z.string()).optional() }),
           )
           .optional(),
+        share: z.object({ name: z.string(), percent: z.number().int() }).optional(),
         version: z.string().optional(),
       }),
       output: z.object({ version: z.string() }),
-      run: async ({ version, workerSlots, maxRounds, roles: changed = {} }, context) => {
+      run: async ({ version, workerSlots, maxRounds, roles: changed = {}, share }, context) => {
         const reading = await context.get(settings).update(
           (current) => ({
             ...current,
             ...(workerSlots === undefined ? {} : { workerSlots }),
             ...(maxRounds === undefined ? {} : { maxRounds }),
+            ...(share === undefined
+              ? {}
+              : {
+                  shares: withPercent(
+                    current.shares ?? fail("settings.json has no shares to change"),
+                    share.name,
+                    share.percent,
+                  ),
+                }),
             roles: Object.fromEntries(
               roles.map((role) => {
                 const change = changed[role];

@@ -107,6 +107,25 @@ export function settingRows(settings: SettingsView | undefined): SettingRow[] {
       ],
     },
   ];
+  // Right after Worker slots: how those slots are shared between groups of areas.
+  rows.splice(
+    2,
+    0,
+    ...(settings.shares ?? []).map((group) => ({
+      id: `setting:share:${group.name}`,
+      label: `${group.name[0]!.toUpperCase()}${group.name.slice(1)} share`,
+      value: `${group.percent}% · ${group.running} running`,
+      warn: false,
+      detail: [
+        `${group.percent}% of the worker slots, for tasks in ${group.areas.join(", ")}.`,
+        "",
+        "A freed slot goes to the waiting task whose group is furthest below its share.",
+        "A group with nothing waiting lends its share, so no worker idles while a task",
+        "waits; nothing running is stopped. Enter sets this share; the others take the",
+        "rest. The groups' areas are in settings.json.",
+      ],
+    })),
+  );
   for (const role of Object.keys(ROLES) as AgentRole[]) {
     const { pick, models } = settings.roles[role];
     rows.push({
@@ -168,6 +187,22 @@ export function settingAction(
       run: { ...editor, args: [...(editor.args ?? []), settings.path] },
       cwd: dirname(settings.path),
     };
+  const share = /^setting:share:(.+)$/.exec(row.id)?.[1];
+  const group = settings.shares?.find((each) => each.name === share);
+  if (group) {
+    const percents = range(0, 10).map((step) => step * 10);
+    return {
+      kind: "one",
+      lines: percents.map(
+        (percent) => `${mark(percent === group.percent)} ${group.name} ${percent}%`,
+      ),
+      apply: (index) =>
+        commands.setSettings.run({
+          share: { name: group.name, percent: percents[index]! },
+          version,
+        }),
+    };
+  }
   if (row.id === "setting:workers" || row.id === "setting:rounds") {
     const workers = row.id === "setting:workers";
     const values = workers ? range(0, 8) : range(1, 10);

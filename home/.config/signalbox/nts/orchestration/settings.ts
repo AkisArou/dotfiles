@@ -13,6 +13,7 @@ import { capability, Cell, provide } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import { Conflict } from "signalbox/core/utils";
 import { profileId, profileSchema, roles } from "./models.ts";
+import { uncoveredAreas } from "./shares.ts";
 
 /** How a launch chooses among a role's models (see chooseProfile in profiles.ts). */
 export const picks = ["first", "spread", "coordinator"] as const;
@@ -32,6 +33,19 @@ export const settingsSchema = z
     roles: z
       .object({ coordinator: roleSettings, worker: roleSettings, reviewer: roleSettings })
       .strict(),
+    /** How workerSlots is shared between groups of areas; absent, nothing is split. */
+    shares: z
+      .array(
+        z
+          .object({
+            name: z.string().min(1),
+            share: z.number().min(0),
+            areas: z.array(z.string().min(1)).min(1),
+          })
+          .strict(),
+      )
+      .min(1)
+      .optional(),
   })
   .strict()
   .superRefine((settings, issues) => {
@@ -44,6 +58,18 @@ export const settingsSchema = z
           message: "lists a model twice",
         });
     }
+    const shares = settings.shares ?? [];
+    if (new Set(shares.map((group) => group.name)).size !== shares.length)
+      issues.addIssue({ code: "custom", path: ["shares"], message: "names a group twice" });
+    const areas = shares.flatMap((group) => group.areas);
+    for (const area of new Set(areas.filter((area, index) => areas.indexOf(area) !== index)))
+      issues.addIssue({
+        code: "custom",
+        path: ["shares"],
+        message: `area ${area} is in two groups`,
+      });
+    if (shares.length && shares.every((group) => group.share === 0))
+      issues.addIssue({ code: "custom", path: ["shares"], message: "every share is 0" });
     if (settings.roles.coordinator.pick !== "first")
       issues.addIssue({
         code: "custom",
@@ -74,8 +100,8 @@ const hash = (text: string) => createHash("sha256").update(text).digest("hex").s
 const render = (settings: Settings) => `${JSON.stringify(settings, null, 2)}\n`;
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
-/** The file's settings, or the reason they are refused. */
-export function parseSettings(text: string): Settings {
+/** The file's settings, or the reason they are refused; shares must cover every known area. */
+export function parseSettings(text: string, areas: readonly string[] = []): Settings {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -84,10 +110,19 @@ export function parseSettings(text: string): Settings {
   }
   const parsed = settingsSchema.safeParse(json);
   if (!parsed.success) throw new Error(z.prettifyError(parsed.error));
+  const missing = parsed.data.shares ? uncoveredAreas(parsed.data.shares, areas) : [];
+  if (missing.length)
+    throw new Error(
+      `shares: no group has the area${missing.length > 1 ? "s" : ""} ${missing.join(", ")}`,
+    );
   return parsed.data;
 }
 
-export function settingsFile(options: { readonly path: string }): {
+export function settingsFile(options: {
+  readonly path: string;
+  /** The repository's area labels, which shares must cover. */
+  readonly areas?: readonly string[];
+}): {
   readonly extension: Extension;
   readonly service: Capability<SettingsFile>;
   /** The settings in force, for callers outside an extension (capacity, round limits). */
@@ -120,7 +155,7 @@ export function settingsFile(options: { readonly path: string }): {
       const version = hash(text);
       if (last && version === last.version && !last.error) return;
       try {
-        publish({ path, version, settings: parseSettings(text), error: null });
+        publish({ path, version, settings: parseSettings(text, options.areas), error: null });
       } catch (error) {
         if (!last) throw new Error(`${path}: ${message(error)}`);
         publish({ ...last, error: message(error) });
@@ -137,20 +172,19 @@ export function settingsFile(options: { readonly path: string }): {
         const text = await readFile(path, "utf8");
         let current: Settings;
         try {
-          current = parseSettings(text);
+          current = parseSettings(text, options.areas);
         } catch (error) {
           throw new Error(`${path} has an error; fix it first: ${message(error)}`);
         }
         if (version !== undefined && version !== hash(text))
           throw new Conflict(`${basename(path)} changed since it was read; reload and retry`);
-        const parsed = settingsSchema.safeParse(change(current));
-        if (!parsed.success) throw new Error(z.prettifyError(parsed.error));
-        const content = render(parsed.data);
+        const next = parseSettings(JSON.stringify(change(current)), options.areas);
+        const content = render(next);
         // Replace the file whole, so the watcher and editors never see half of it.
         const temporary = join(dirname(path), `.${basename(path)}.${process.pid}.tmp`);
         await writeFile(temporary, content);
         await rename(temporary, path);
-        const reading = { path, version: hash(content), settings: parsed.data, error: null };
+        const reading = { path, version: hash(content), settings: next, error: null };
         publish(reading);
         return reading;
       }),

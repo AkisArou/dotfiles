@@ -32,5 +32,28 @@
         }
       ]
     }
-  }
+  },
+  "shares": [
+    {
+      "name": "compiler",
+      "share": 50,
+      "areas": [
+        "compiler",
+        "runtime",
+        "node",
+        "chromium",
+        "benchmarks",
+        "jvm",
+        "wasm"
+      ]
+    },
+    {
+      "name": "tooling",
+      "share": 50,
+      "areas": [
+        "tooling",
+        "docs"
+      ]
+    }
+  ]
 }

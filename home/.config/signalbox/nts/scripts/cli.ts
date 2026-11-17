@@ -4,6 +4,7 @@
 //   sbn settings                    settings.json's values, the pause, harnesses
 //   sbn workers <n>                 tasks holding a worker at once (written to settings.json)
 //   sbn rounds <n>                  returns to build before a task escalates (settings.json)
+//   sbn share <group> <percent>     a group's share of the worker slots (the others take the rest)
 //   sbn role <role> <model...>      a role's models in order (ids from sbn models)
 //   sbn pick <role> <first|spread|coordinator>
 //                                   how a launch chooses among the role's models
@@ -61,6 +62,7 @@ const VERBS = [
   "pause",
   "resume",
   "role",
+  "share",
   "pick",
   "models",
   "needs",
@@ -129,6 +131,12 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       return await change({
         [verb === "workers" ? "workerSlots" : "maxRounds"]: count("a whole number"),
       });
+    if (verb === "share") {
+      const [name, percent, ...rest] = args;
+      if (!name || percent === undefined || rest.length)
+        throw new Error("share needs <group> <percent 0-100>");
+      return await change({ share: { name, percent: Number(percent.replace(/%$/, "")) } });
+    }
     if (verb === "role") {
       const [role, ...models] = args;
       if (!role || !models.length)

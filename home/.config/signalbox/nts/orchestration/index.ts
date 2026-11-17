@@ -1,5 +1,6 @@
 // Composes NTS orchestration from its parts. Wiring order matters only for the
 // late references the tools hold; everything else is declared by capability.
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { latestValue, polledSource } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
@@ -20,6 +21,7 @@ import { profiles } from "./profiles.ts";
 import type { Profiles } from "./profiles.ts";
 import { priorities } from "./priorities.ts";
 import { settingsFile } from "./settings.ts";
+import { shareRank } from "./shares.ts";
 import type { SettingsFile } from "./settings.ts";
 import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
 import { taskRoute } from "./task.ts";
@@ -64,6 +66,21 @@ export interface OrchestrationSettings {
   readonly file: string;
 }
 
+/** The repository's area labels (area:<name> in .github/labels.json), which shares must cover. */
+function repositoryAreas(root: string): string[] {
+  try {
+    const spec = JSON.parse(readFileSync(join(root, ".github/labels.json"), "utf8")) as {
+      labels?: { name: string }[];
+    };
+    return (spec.labels ?? [])
+      .map((label) => label.name)
+      .filter((name) => name.startsWith("area:"))
+      .map((name) => name.slice(5));
+  } catch {
+    return [];
+  }
+}
+
 /** A raised worker count wakes the waiting tasks, whoever raised it (a client or a hand edit). */
 function capacityFollowsSettings(
   settings: Capability<SettingsFile>,
@@ -103,7 +120,20 @@ export function ntsOrchestration(options: {
   readonly agents?: (toolsets: readonly AgentToolset[]) => ManagedAgents;
 }) {
   const engine = openWorkflowSqlite({ path: join(options.directory, "workflows.sqlite") });
-  const file = settingsFile({ path: options.settings.file });
+  const file = settingsFile({ path: options.settings.file, areas: repositoryAreas(options.root) });
+  // The issues' areas, for the worker shares; read when a slot is given out.
+  let issuesNow: () => readonly Issue[] = () => [];
+  const taskAreas: Extension = {
+    id: "nts-task-areas",
+    requires: [options.issues],
+    start(context) {
+      const issues = context.get(options.issues);
+      issuesNow = () => latestValue(issues) ?? [];
+    },
+  };
+  const issueOf = (assignment: Assignment) => (assignment.input as { issue?: number }).issue;
+  const areaOf = (assignment: Assignment) =>
+    issuesNow().find((issue) => issue.number === issueOf(assignment))?.area;
   const profileStore = profiles({ state: options.state, settings: file.service });
   const urgency = priorities({ state: options.state });
   const settingsNow = file.current;
@@ -171,8 +201,16 @@ export function ntsOrchestration(options: {
     engine: engine.engine,
     routes: [route],
     capacity: (resource) => (resource === "worker" ? settingsNow().workerSlots : 1),
-    // Freed slots and files go to the most urgent waiting task, then the oldest.
-    priority: (assignment) => urgency.rank((assignment.input as { issue?: number }).issue),
+    // A freed worker slot goes to the group furthest below its share; within a
+    // group (and for files), to the most urgent waiting task, then the oldest.
+    priority: (assignment, all) =>
+      shareRank({
+        shares: settingsNow().shares,
+        assignment,
+        all,
+        areaOf,
+        urgency: urgency.rank(issueOf(assignment)),
+      }),
   });
   wiring.work.set(work.service);
   assignmentList.set(work.assignments);
@@ -214,6 +252,7 @@ export function ntsOrchestration(options: {
       engine.extension,
       // Before the assignment service, so its first admission reads the file's values.
       file.extension,
+      taskAreas,
       profileStore.extension,
       urgency.extension,
       // Probe only the real Claude Code; stand-in agents have nothing to probe.

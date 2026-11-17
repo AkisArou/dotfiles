@@ -54,6 +54,26 @@ export function Orchestration({ project }: { project: Project }) {
               ))}
             </select>
           </label>
+          {settings.shares?.map((group) => (
+            <label key={group.name}>
+              {`${group.name} share (${group.running} running)`}{" "}
+              <select
+                value={Math.round(group.percent / 10) * 10}
+                disabled={project.busy}
+                onChange={(event) =>
+                  void project.perform(() =>
+                    write({ share: { name: group.name, percent: Number(event.target.value) } }),
+                  )
+                }
+              >
+                {range(0, 10).map((step) => (
+                  <option key={step} value={step * 10}>
+                    {`${step * 10}%`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
           <label>
             Rounds before escalation{" "}
             <select
