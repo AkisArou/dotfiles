@@ -11,7 +11,15 @@ import { describeFilters, filterOptions, matches, toggleFilter } from "./filters
 import type { Chosen } from "./filters.ts";
 import type { TerminalTools } from "./tools.ts";
 import { Heading, Line, ListDetail, ListRow, ScrollPane, Section } from "./components.tsx";
-import { AgentDetail, NowView, TaskDetail, agentColor, stateColor, stateMark } from "./views.tsx";
+import {
+  AgentDetail,
+  NowView,
+  TaskDetail,
+  TaskPopup,
+  agentColor,
+  stateColor,
+  stateMark,
+} from "./views.tsx";
 import { colors as c } from "./theme.ts";
 import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
@@ -40,6 +48,9 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   const [chosen, setChosen] = useState<Chosen>(new Map());
   const [message, setMessage] = useState<string>(),
     [tool, setTool] = useState<string>();
+  // The task an agent works on, shown over everything (t on an agent; Escape or t closes).
+  const [popup, setPopup] = useState<number | null>(null);
+  const popupScroll = useRef<ScrollBoxRenderable>(null);
   const [help, setHelp] = useState(false),
     [terminalRequest, setTerminalRequest] = useState(0);
   const nativeInput = useRef(false),
@@ -230,6 +241,20 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       }
       return;
     }
+    if (popup !== null) {
+      key.preventDefault();
+      const motion = navigationKey(key, false).motion;
+      if (key.name === "escape" || key.name === "t" || key.name === "q") setPopup(null);
+      else if (motion?.kind === "move")
+        popupScroll.current?.scrollBy(
+          motion.direction *
+            (motion.distance === "line"
+              ? 1
+              : Math.max(1, Math.floor((popupScroll.current?.viewport.height ?? 10) / 2))),
+        );
+      else if (motion?.kind === "edge") popupScroll.current?.scrollTo(motion.last ? Infinity : 0);
+      return;
+    }
     if (tab === "Agents" && agent?.terminal) key.preventDefault();
     if (key.ctrl && (key.name === "q" || key.name === "c")) {
       key.preventDefault();
@@ -298,6 +323,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     if (help || !plain) return;
     if (key.name === "n" && tab === "Agents") {
       newTerminal();
+      return;
+    }
+    if (key.name === "t" && tab === "Agents") {
+      if (agent?.issue) setPopup(agent.issue);
+      else setMessage(agent ? `${agent.name} works on no task.` : "Select an agent first.");
       return;
     }
     if (key.name === "e" && tab === "Agents") {
@@ -525,7 +555,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     "/ find",
     ...(taskTab ? ["f filter", "F clear"] : []),
     ...(tab === "Agents"
-      ? ["n new", "e ended", "Enter type/change", "Ctrl+] back"]
+      ? ["n new", "t task", "e ended", "Enter type/change", "Ctrl+] back"]
       : tab === "Needs you"
         ? ["Enter answer", "x withdraw"]
         : ["Enter details"]),
@@ -645,6 +675,40 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           {tool ?? message ?? project.error ?? failing[0] ?? `${fitted} · q quit`}
         </text>
       </box>
+      {popup !== null && (
+        <box
+          position="absolute"
+          top={2}
+          left={3}
+          width={Math.max(20, width - 6)}
+          height={Math.max(8, height - 6)}
+          zIndex={10}
+          border
+          borderColor={c.accent}
+          backgroundColor={c.background}
+          flexDirection="column"
+          paddingLeft={1}
+          paddingRight={1}
+          title={` #${popup} · Escape or t closes · j/k scroll `}
+        >
+          <ScrollPane scrollRef={popupScroll} focused>
+            <TaskPopup
+              number={popup}
+              issue={project.data.issues.find((issue) => issue.number === popup)}
+              assignment={
+                [...project.data.assignments]
+                  .filter((assignment) => assignment.issue === popup)
+                  // The live task first, then the latest.
+                  .sort(
+                    (a, b) =>
+                      Number(b.status === "active") - Number(a.status === "active") ||
+                      b.acceptedAt - a.acceptedAt,
+                  )[0]
+              }
+            />
+          </ScrollPane>
+        </box>
+      )}
     </box>
   );
 }

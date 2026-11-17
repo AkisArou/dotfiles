@@ -242,6 +242,12 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await keys("escape", "4");
     assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
     assert.match(setup.captureCharFrame(), /1 ended hidden \(e\)/);
+    // t on an agent shows its task over everything; t again (or Escape) closes it.
+    await keys("t");
+    assert.match(setup.captureCharFrame(), /#807 · Escape or t closes/);
+    assert.match(setup.captureCharFrame(), /Withdrawal cancellation/);
+    await keys("t");
+    assert.doesNotMatch(setup.captureCharFrame(), /Escape or t closes/);
     await keys("e");
     assert.match(setup.captureCharFrame(), /Finished reviewer/);
     // The Agents tab ends with the settings; Enter offers a row's values in the finder.

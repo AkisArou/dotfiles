@@ -168,6 +168,20 @@ export function landingGauges(status: LandingStatus, now = Date.now()): Gauge[] 
   ];
 }
 
+/** When a check ran, start to end in local time; the date only when it was not today. */
+export function ranAt(answer: Pick<Answer, "at" | "wall_s">, now = Date.now()): string {
+  const end = Date.parse(answer.at);
+  if (!Number.isFinite(end)) return "";
+  const start = answer.wall_s === null ? end : end - answer.wall_s * 1000;
+  const clock = (time: number) => new Date(time).toTimeString().slice(0, 5);
+  const finished = new Date(end);
+  const day =
+    finished.toDateString() === new Date(now).toDateString()
+      ? ""
+      : `${String(finished.getMonth() + 1).padStart(2, "0")}-${String(finished.getDate()).padStart(2, "0")} `;
+  return answer.wall_s === null ? `${day}${clock(end)}` : `${day}${clock(start)}–${clock(end)}`;
+}
+
 export function landingReport(status: LandingStatus, now = Date.now()): Report {
   const queue = [
     ...(status.checking
@@ -253,6 +267,7 @@ export function landingReport(status: LandingStatus, now = Date.now()): Report {
         columns: [
           { key: "change", label: "change" },
           { key: "state", label: "state" },
+          { key: "ran", label: "ran" },
           { key: "commit", label: "commit" },
           { key: "duration", label: "took", align: "right" },
           { key: "message", label: "answer" },
@@ -261,6 +276,7 @@ export function landingReport(status: LandingStatus, now = Date.now()): Report {
           id: `${answer.id}/${answer.at}/${answer.state}`,
           change: named(answer),
           state: colored(answer.state),
+          ran: ranAt(answer, now),
           commit: answer.sha.slice(0, 12),
           duration: answer.wall_s === null ? "" : `${(answer.wall_s / 60).toFixed(1)} min`,
           message: answer.message,

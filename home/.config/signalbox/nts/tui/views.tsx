@@ -1,6 +1,6 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
-import type { Agent, Issue } from "../shared/model.ts";
+import type { Agent, AssignmentView, Issue } from "../shared/model.ts";
 import { assignmentPhase, assignmentSays, modelsLine, needsCount } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
@@ -123,6 +123,57 @@ export function TaskDetail({ issue }: { issue: Issue }) {
       )}
       <box height={1} />
       <Line>{issue.body}</Line>
+    </>
+  );
+}
+/** An agent's task over everything else: its assignment (what it waits for now,
+ * its latest progress, design and summary), then the issue itself. */
+export function TaskPopup({
+  number,
+  issue,
+  assignment,
+}: {
+  number: number;
+  issue: Issue | undefined;
+  assignment: AssignmentView | undefined;
+}) {
+  const block = (title: string, text: string) =>
+    text ? (
+      <>
+        <box height={1} />
+        <Heading>{title}</Heading>
+        <Line>{text}</Line>
+      </>
+    ) : null;
+  return (
+    <>
+      {assignment ? (
+        <>
+          <Heading>{`#${number} · ${assignmentPhase(assignment)} · round ${assignment.rounds + 1}`}</Heading>
+          <Line
+            color={
+              assignment.error || assignment.escalation || assignment.stalled ? c.warning : c.text
+            }
+          >
+            {assignmentSays(assignment)}
+          </Line>
+          {assignment.tree && <Line color={c.accent}>{assignment.tree}</Line>}
+          {assignment.commit && (
+            <Line color={c.muted}>{`commit ${assignment.commit.slice(0, 12)}`}</Line>
+          )}
+          {block("Latest instruction", assignment.note)}
+          {block("Summary", assignment.summary)}
+          {block("Design", assignment.design)}
+          <box height={1} />
+        </>
+      ) : (
+        <Line color={c.muted}>{`No task is running for #${number}.`}</Line>
+      )}
+      {issue ? (
+        <TaskDetail issue={issue} />
+      ) : (
+        <Line color={c.muted}>{`#${number} is not an open issue.`}</Line>
+      )}
     </>
   );
 }

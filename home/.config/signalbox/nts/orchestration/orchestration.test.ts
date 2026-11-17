@@ -139,6 +139,44 @@ test("each area's reading list names workflow sections and lessons that exist", 
   assert.doesNotMatch(readingList(["area:docs"]), /lessons/);
 });
 
+test("a task's worker and reviewer work in its tree; the coordinator in the project root", async () => {
+  const { managedAgentViews } = await import("./endpoints.ts");
+  const { initialTaskState } = await import("./task-model.ts");
+  const task = (issue: number, worker: string | null, tree: string, acceptedAt: number) =>
+    ({
+      route: "nts/task",
+      input: { issue },
+      acceptedAt,
+      state: {
+        ...initialTaskState(),
+        tree,
+        worker: worker
+          ? { id: worker, profile: { harness: "claude", model: "claude-opus-5-5", effort: "high" } }
+          : null,
+      },
+    }) as never;
+  const views = managedAgentViews(
+    [
+      { id: "claude/w", provider: "claude", label: "#802 worker", state: "busy" },
+      { id: "claude/old", provider: "claude", label: "#802 worker", state: "ended" },
+      {
+        id: "claude/c",
+        provider: "claude",
+        label: "NTS coordinator (generation 5)",
+        state: "idle",
+      },
+      { id: "claude/x", provider: "claude", label: "#9 worker", state: "ended" },
+    ],
+    [task(802, "claude/w", "/pool/4", 2), task(802, null, "/pool/1", 1)],
+    "/nts",
+  );
+  assert.deepEqual(
+    views.map((view) => view.path),
+    ["/pool/4", "/pool/4", "/nts", null],
+    "its own task's tree, else the issue's latest; no task, no path",
+  );
+});
+
 test("managed sessions become Agents rows: role and issue from the label, state as reported", async () => {
   const { managedAgentViews } = await import("./endpoints.ts");
   const views = managedAgentViews([

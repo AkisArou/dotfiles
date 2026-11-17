@@ -73,3 +73,15 @@ test("NTS health retains project thresholds, unknown ages, and unsupported forma
     /per-part records/,
   );
 });
+
+test("a landing answer says when it ran: start to end, with the date only when not today", async () => {
+  const { ranAt } = await import("../status/landing.ts");
+  const end = new Date(2026, 10, 17, 10, 42).getTime();
+  assert.equal(ranAt({ at: new Date(end).toISOString(), wall_s: 660 }, end), "10:31–10:42");
+  assert.equal(
+    ranAt({ at: new Date(end).toISOString(), wall_s: 660 }, end + 86_400_000),
+    "11-17 10:31–10:42",
+  );
+  assert.equal(ranAt({ at: new Date(end).toISOString(), wall_s: null }, end), "10:42");
+  assert.equal(ranAt({ at: "not a time", wall_s: 1 }, end), "");
+});

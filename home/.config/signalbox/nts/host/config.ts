@@ -104,15 +104,19 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
       },
       exposeSource({
         ref: refs.agents,
-        requires: [native.service, orchestration.agents.runtime],
+        requires: [native.service, orchestration.agents.runtime, orchestration.assignments],
         output: z.custom<refs.Agent[]>(),
         resolve: (context) =>
           combineReadables(
             [
               context.get(native.service).agents,
               context.get(orchestration.agents.runtime).instances,
+              context.get(orchestration.assignments),
             ] as const,
-            (terminals, managed) => [...managedAgentViews(managed), ...terminals],
+            (terminals, managed, assignments) => [
+              ...managedAgentViews(managed, assignments, settings.root),
+              ...terminals,
+            ],
           ),
       }),
       expose(

@@ -51,21 +51,50 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
 }
 
 /** Managed sessions as Agents rows: role and issue come from the label the routes give them. */
-export function managedAgentViews(instances: readonly AgentInstance[]): refs.Agent[] {
-  return instances.map((instance) => ({
-    id: instance.id,
-    name: instance.label,
-    role: /coordinator/i.test(instance.label)
-      ? "coordinator"
-      : /review/i.test(instance.label)
-        ? "reviewer"
-        : "worker",
-    // A live Claude session's state is what it is doing (busy, idle); see the SDK's ManagedDriver.activity.
-    state: instance.state,
-    path: null,
-    issue: Number(/^#(\d+)/.exec(instance.label)?.[1]) || null,
-    terminal: instance.id,
-  }));
+/**
+ * Managed sessions as Agents rows. A task's worker or reviewer works in its
+ * task's tree, so that is its path (lazygit and the list use it); the
+ * coordinator works in the project root.
+ */
+export function managedAgentViews(
+  instances: readonly AgentInstance[],
+  assignments: readonly Assignment[] = [],
+  root: string | null = null,
+): refs.Agent[] {
+  const tasks = assignments.flatMap((assignment) => {
+    const state = taskState.safeParse(assignment.state);
+    return assignment.route === "nts/task" && state.success
+      ? [
+          {
+            issue: (assignment.input as { issue?: number }).issue,
+            state: state.data,
+            at: assignment.acceptedAt,
+          },
+        ]
+      : [];
+  });
+  return instances.map((instance) => {
+    const issue = Number(/^#(\d+)/.exec(instance.label)?.[1]) || null;
+    const coordinator = /coordinator/i.test(instance.label);
+    // Its own task first (it is that task's worker or reviewer now), else the issue's latest task.
+    const task =
+      tasks.find(
+        ({ state }) => state.worker?.id === instance.id || state.reviewer?.id === instance.id,
+      ) ??
+      tasks
+        .filter((candidate) => candidate.issue === issue && candidate.state.tree)
+        .sort((a, b) => b.at - a.at)[0];
+    return {
+      id: instance.id,
+      name: instance.label,
+      role: coordinator ? "coordinator" : /review/i.test(instance.label) ? "reviewer" : "worker",
+      // A live Claude session's state is what it is doing (busy, idle); see the SDK's ManagedDriver.activity.
+      state: instance.state,
+      path: coordinator ? root : (task?.state.tree ?? null),
+      issue,
+      terminal: instance.id,
+    };
+  });
 }
 
 const profileView = (profile: Profile): refs.ProfileView => ({
