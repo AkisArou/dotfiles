@@ -227,3 +227,15 @@ test("priorities: set, clear and rank issues; higher urgency ranks lower (goes f
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("assigning an issue filed a moment ago reads the issues first; a known one does not", async () => {
+  const { knownIssue } = await import("./tools.ts");
+  const { Cell } = await import("signalbox/core");
+  const issues = new Cell([{ number: 824 }] as never[]);
+  let refreshed = 0;
+  const refresh = async () => void refreshed++;
+  await knownIssue(issues, refresh, 824);
+  assert.equal(refreshed, 0, "a known issue needs no read");
+  await knownIssue(issues, refresh, 825);
+  assert.equal(refreshed, 1, "an unknown one is read before the task is submitted");
+});

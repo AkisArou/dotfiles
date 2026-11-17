@@ -45,6 +45,17 @@ export interface Wiring {
   readonly decisions: Capability<Questions>;
   readonly priorities: Capability<Priorities>;
   readonly settings: Capability<SettingsFile>;
+  /** Reads the issues now: an issue filed a moment ago is not in the last reading yet. */
+  readonly refreshIssues: () => Promise<void>;
+}
+
+/** Makes sure the issues reading has the issue before a task for it is submitted. */
+export async function knownIssue(
+  issues: Readable<Issue[]>,
+  refresh: () => Promise<void>,
+  issue: number,
+): Promise<void> {
+  if (!(latestValue(issues) ?? []).some((open) => open.number === issue)) await refresh();
 }
 
 /** A task may name a worker model only when workers pick "coordinator", and only a listed one. */
@@ -295,6 +306,7 @@ export function coordinatorTools(wiring: Wiring) {
           authorized(context, async () => {
             if (input.model !== undefined)
               checkTaskModel(context.get(wiring.settings).current(), input.model);
+            await knownIssue(context.get(wiring.issues), wiring.refreshIssues, input.issue);
             return toJson(
               await context.get(wiring.work.get()).submit(
                 assignmentRequest(wiring.route.get(), {

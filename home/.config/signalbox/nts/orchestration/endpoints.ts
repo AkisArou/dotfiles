@@ -12,7 +12,7 @@ import type { ntsOrchestration } from "./index.ts";
 import { catalog, harnesses, profileFromId, profileId, profileLabel, roles } from "./models.ts";
 import type { Profile } from "./models.ts";
 import { picks } from "./settings.ts";
-import { checkTaskModel } from "./tools.ts";
+import { checkTaskModel, knownIssue } from "./tools.ts";
 import { answerFor, issueStates } from "./needs.ts";
 import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
@@ -286,7 +286,7 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
     }),
     exposeOperation({
       ref: refs.assignTask,
-      requires: [work, settings],
+      requires: [work, settings, orchestration.issues],
       input: z.object({
         issue: z.number().int().positive(),
         instructions: z.string(),
@@ -295,6 +295,11 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       output: z.object({ id: z.string() }),
       run: async (input, context) => {
         if (input.model !== undefined) checkTaskModel(context.get(settings).current(), input.model);
+        await knownIssue(
+          context.get(orchestration.issues),
+          orchestration.refreshIssues,
+          input.issue,
+        );
         const { id } = await context
           .get(work)
           .submit(assignmentRequest(route, { key: `issue/${input.issue}`, input }), {

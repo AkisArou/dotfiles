@@ -141,6 +141,7 @@ export function ntsOrchestration(options: {
     decisions: decisions.service,
     priorities: urgency.service,
     settings: file.service,
+    refreshIssues: options.refreshIssues,
   };
   const tools = {
     worker: workerTools(wiring),
@@ -203,6 +204,8 @@ export function ntsOrchestration(options: {
     priorities: urgency.service,
     decisions: decisions.service,
     needs: waiting.view,
+    issues: options.issues,
+    refreshIssues: options.refreshIssues,
     agents,
     landing: landing.key,
     fullCheck: fullCheck.key,
