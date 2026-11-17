@@ -3,7 +3,7 @@
 // a status bar at the bottom (the repository, how work runs, whether the host is
 // live). The route below renders the view; ?issue=<n> opens an issue drawer
 // over any of them.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Outlet, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
 import { AppShell } from "@astryxdesign/core/AppShell";
@@ -48,6 +48,13 @@ export function Shell() {
   // A phone: the views in a bottom tab bar, the status line in its More sheet.
   const narrow = useNarrow();
   const [more, setMore] = useState(false);
+  // The view's scroller, which a second tap on its tab scrolls to the top.
+  const viewScroller = useRef<HTMLDivElement>(null);
+  const toTop = () =>
+    viewScroller.current?.scrollTo({
+      top: 0,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
   const overlay = useOverlay();
   // Notifications on this device: offered once, and the home-screen badge kept in step.
   const push = usePush();
@@ -228,7 +235,7 @@ export function Shell() {
             }
           >
             <div className={narrow ? "frame narrow" : "frame"}>
-              <div className="view">
+              <div className="view" ref={viewScroller}>
                 <div className="view-body">
                   {data.overview && pushPrompt.show && push.ready && (
                     <PushPrompt push={push} onDismiss={pushPrompt.dismiss} />
@@ -245,6 +252,7 @@ export function Shell() {
                   status={status}
                   appearance={appearance}
                   notifications={<PushSwitch push={push} />}
+                  onReselect={toTop}
                 />
               ) : (
                 <footer className="statusbar">

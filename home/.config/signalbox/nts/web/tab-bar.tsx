@@ -2,7 +2,7 @@
 // you use most, and More, a sheet with the rest, the appearance and the status
 // line the desktop shows at its foot.
 import type { ReactNode, SVGProps } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
 import { List, ListItem } from "@astryxdesign/core/List";
@@ -73,6 +73,7 @@ export function TabBar({
   status,
   appearance,
   notifications,
+  onReselect,
 }: {
   view: View;
   counts: Partial<Record<View, number>>;
@@ -83,10 +84,16 @@ export function TabBar({
   appearance: ReactNode;
   /** This device's notifications switch. */
   notifications: ReactNode;
+  /** The tab you are on, tapped again at its own page: scroll that page to its top. */
+  onReselect(): void;
 }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // As an iOS tab bar: tapping the tab you are on goes back to its own page from
+  // deeper in it (Agents › Settings), and from its own page scrolls to the top.
   const go = (to: View) => {
     setMore(false);
+    if (to === view && pathname === viewPath[to]) return onReselect();
     void navigate({ to: viewPath[to] });
   };
   const rest = tabs.filter((name) => !PRIMARY.includes(name));
