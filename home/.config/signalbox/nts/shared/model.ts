@@ -67,6 +67,8 @@ export type AssignmentView = {
   phaseSince: number | null;
   /** The awaited agent's latest progress note. */
   progress: string | null;
+  /** When the agent expected that progress to be done (ms since epoch). */
+  progressUntil: number | null;
   /** The awaited agent stayed idle through its nudges. */
   stalled: string | null;
   /** What the coordinator must decide while the task is escalated. */
@@ -118,7 +120,7 @@ export const reworkAssignment = operation<{ assignment: string; notes: string },
   "nts.assignments.rework",
 );
 /** What an assignment says now: its fault, stall, open question or wait, and its latest progress. */
-export function assignmentSays(a: AssignmentView): string {
+export function assignmentSays(a: AssignmentView, now = Date.now()): string {
   const said =
     a.error ??
     (a.escalation && `decide: ${a.escalation}`) ??
@@ -126,7 +128,12 @@ export function assignmentSays(a: AssignmentView): string {
     (a.help && `asks: ${a.help}`) ??
     a.wait ??
     "";
-  return a.progress && !a.error ? `${said} · ${a.progress}` : said;
+  if (!a.progress || a.error) return said;
+  const late =
+    a.progressUntil !== null && now > a.progressUntil
+      ? ` (expected done ${Math.round((now - a.progressUntil) / 60_000)} min ago)`
+      : "";
+  return `${said} · ${a.progress}${late}`;
 }
 /** The phase and how long it has run, e.g. "build 42 min". */
 export function assignmentPhase(a: AssignmentView, now = Date.now()): string {

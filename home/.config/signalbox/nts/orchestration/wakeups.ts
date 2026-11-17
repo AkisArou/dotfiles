@@ -17,6 +17,9 @@ import type { UserDecisions } from "./tools.ts";
 
 export type Wakeup = { readonly id: string; readonly text: string };
 
+/** How far past its own progress estimate an agent may run before the coordinator hears of it. */
+export const PROGRESS_GRACE_MS = 30 * 60_000;
+
 /** How long a phase may take before the coordinator hears of it, once per phase entry. */
 export const PHASE_BUDGET: Partial<Record<TaskState["phase"], number>> = {
   design: 2 * 3_600_000,
@@ -58,6 +61,19 @@ export function wakeups(observed: {
       events.push({
         id: `stalled/${assignment.id}/${task.watch.key}`,
         text: `${name} is stalled: ${task.stalled}`,
+      });
+    // An agent's own estimate long past: whatever it reads as (a hung background
+    // task keeps a Claude session "busy"), the coordinator should look.
+    if (
+      assignment.status === "active" &&
+      task.progress &&
+      observed.now > task.progress.until + PROGRESS_GRACE_MS
+    )
+      events.push({
+        id: `overrun/${assignment.id}/${task.progress.at}`,
+        text:
+          `${name}: its agent said "${task.progress.note}" and expected to be done ${Math.round((observed.now - task.progress.until) / 60_000)} min ago.` +
+          " Read its terminal (a hung background command keeps it busy), then message it or cancel.",
       });
     const budget = PHASE_BUDGET[task.phase];
     if (

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cardPaths } from "./task-model.ts";
-import { PHASE_BUDGET, wakeups } from "./wakeups.ts";
+import { PHASE_BUDGET, PROGRESS_GRACE_MS, wakeups } from "./wakeups.ts";
 import type { Assignment } from "signalbox/ext/assignments/index";
 
 test("a card's Paths line names the files a task reserves, and nothing else", () => {
@@ -75,6 +75,19 @@ test("wake-ups have stable identities derived from what they announce", () => {
     }).map((event) => event.id);
   assert.deepEqual(late(PHASE_BUDGET.build!, 0), []);
   assert.deepEqual(late(PHASE_BUDGET.build! + 1, 0), ["overdue/a1/build/0"]);
+  // An agent's own progress estimate long past is news once, whatever its state.
+  const overrun = (now: number) =>
+    wakeups({
+      assignments: [
+        task({ phase: "build", progress: { note: "inner.ts runs", at: 7, until: 1_000 } }),
+      ],
+      landing: undefined,
+      fullCheck: undefined,
+      decided: [],
+      now,
+    }).map((event) => event.id);
+  assert.deepEqual(overrun(1_000 + PROGRESS_GRACE_MS), []);
+  assert.deepEqual(overrun(1_000 + PROGRESS_GRACE_MS + 1), ["overrun/a1/7"]);
   assert.deepEqual(observe([task({ help: "which owner?" })]).length, 1);
   // An escalated task is announced once per escalation; the next escalation is news again.
   const escalated = (escalation: string) =>

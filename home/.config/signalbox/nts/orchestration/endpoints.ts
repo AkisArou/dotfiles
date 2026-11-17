@@ -31,6 +31,7 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     tree: state?.tree ?? null,
     phaseSince: state?.phaseSince ?? null,
     progress: state?.progress?.note ?? null,
+    progressUntil: state?.progress?.until ?? null,
     stalled: state?.stalled ?? null,
     escalation: state?.escalation ?? null,
     note: state?.note ?? "",
