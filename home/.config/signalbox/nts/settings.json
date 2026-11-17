@@ -1,5 +1,5 @@
 {
-  "workerSlots": 2,
+  "workerSlots": 4,
   "maxRounds": 4,
   "roles": {
     "coordinator": {
@@ -13,11 +13,15 @@
       ]
     },
     "worker": {
-      "pick": "coordinator",
+      "pick": "spread",
       "models": [
         {
           "harness": "claude",
           "model": "claude-opus-5-5",
+          "effort": "high"
+        },
+        {
+          "harness": "codex",
           "effort": "high"
         }
       ]
@@ -35,8 +39,16 @@
   },
   "shares": [
     {
-      "name": "compiler",
+      "name": "foundations",
       "share": 50,
+      "areas": [],
+      "streams": [
+        468
+      ]
+    },
+    {
+      "name": "correctness",
+      "share": 25,
       "areas": [
         "compiler",
         "runtime",
@@ -45,14 +57,21 @@
         "benchmarks",
         "jvm",
         "wasm"
+      ],
+      "streams": [
+        467
       ]
     },
     {
       "name": "tooling",
-      "share": 50,
+      "share": 25,
       "areas": [
         "tooling",
         "docs"
+      ],
+      "streams": [
+        472,
+        475
       ]
     }
   ]
