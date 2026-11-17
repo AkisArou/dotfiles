@@ -408,6 +408,10 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
       (await git(["status", "--porcelain"]))
     )
       throw new Conflict("The reported commit is not the clean HEAD of the task's tree");
+    // A review approves an exact commit: the same commit again (a refusal its
+    // worker showed was not its own) goes back to the queue without another review.
+    if (report.commit === t.state.accepted)
+      return t.next({ phase: "queue", commit: report.commit, summary: report.summary, help: null });
     return t.next({ phase: "review", commit: report.commit, summary: report.summary, help: null });
   },
 
@@ -466,7 +470,8 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
         `your review of ${state.commit} (report_review)`,
       );
     await t.stop(state.reviewer!.id, `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`);
-    if (report.verdict === "accept") return t.next({ phase: "queue", reviewer: null });
+    if (report.verdict === "accept")
+      return t.next({ phase: "queue", reviewer: null, accepted: state.commit });
     const reviews = [...state.reviews, { commit: state.commit!, findings: report.findings }];
     // A dispute of the approved design is the coordinator's call, not a round
     // of rework the worker starts on its own.

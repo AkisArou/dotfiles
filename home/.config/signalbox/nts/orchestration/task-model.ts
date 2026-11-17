@@ -110,6 +110,8 @@ export const taskState = z.object({
   stalled: z.string().nullable().default(null),
   /** What the coordinator must decide while the task is escalated. */
   escalation: z.string().nullable().default(null),
+  /** The exact commit a review accepted; reporting it again (after an innocent refusal) needs no new review. */
+  accepted: sha.nullable().default(null),
 });
 export type TaskState = z.infer<typeof taskState>;
 
@@ -139,6 +141,7 @@ export const initialTaskState = (): TaskState => ({
   progress: null,
   stalled: null,
   escalation: null,
+  accepted: null,
 });
 
 /** Paths named on the card's **Paths:** line, as resources two tasks must not share. */

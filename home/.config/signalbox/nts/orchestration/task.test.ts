@@ -363,7 +363,7 @@ test("a task goes from tree to verified through design approval, review and land
   await writeFile(join(building.tree!, "thing.txt"), "done");
   await git(building.tree!, "add", "thing.txt");
   await git(building.tree!, "commit", "-m", "the change");
-  const commit = (await git(building.tree!, "rev-parse", "HEAD")).stdout.trim();
+  let commit = (await git(building.tree!, "rev-parse", "HEAD")).stdout.trim();
   await report({ kind: "ready", commit, summary: "focused, inner and supported green" }, "ready-1");
   const reviewing = await phase("reviewing");
   assert.equal(reviewing.reviewer!.commit, commit);
@@ -395,9 +395,20 @@ test("a task goes from tree to verified through design approval, review and land
     /^Rework [0-9a-f]{40}: the tooling step hung in worker-memory/,
   );
   assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), []);
+  // The worker shows the hold was not its change and reports the same commit: a
+  // review accepted that exact commit, so it queues again without another review.
+  await report({ kind: "ready", commit, summary: "the hang was the fixture's" }, "ready-3");
+  await phase("landing");
+  assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), [commit]);
+  await report({ kind: "rework", notes: "it does touch the fixture" }, "rework-2");
+  await phase("build");
+
   // A reviewer disputing the design escalates: the worker hears nothing until the
   // coordinator decides, and its message returns the task to build with the finding.
-  await report({ kind: "ready", commit, summary: "the hang was the fixture's" }, "ready-3");
+  await writeFile(join(building.tree!, "thing.txt"), "done, with the fixture fixed");
+  await git(building.tree!, "commit", "-am", "fix the fixture too");
+  commit = (await git(building.tree!, "rev-parse", "HEAD")).stdout.trim();
+  await report({ kind: "ready", commit, summary: "fixed the fixture" }, "ready-3b");
   await phase("reviewing");
   const told = messages.length;
   await report(
