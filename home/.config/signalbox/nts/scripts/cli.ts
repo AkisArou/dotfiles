@@ -13,6 +13,7 @@
 //   sbn rework <issue> <notes...>   send a held or wrong landing back to build
 //   sbn prioritize <issue> <-9..9>  move a task ahead (higher first; 0 is the default)
 //   sbn retry <issue>               retry a faulted task
+//   sbn coordinator <reason...>     a fresh coordinator generation from its checkpoint
 //   sbn cancel <issue> <reason...>  cancel a task (its tree and branch stay with the pool)
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -39,6 +40,7 @@ const VERBS = [
   "rework",
   "retry",
   "cancel",
+  "coordinator",
 ] as const;
 type Verb = (typeof VERBS)[number];
 
@@ -78,6 +80,12 @@ async function main(verb: Verb, args: string[]): Promise<void> {
           `#${a.issue ?? "?"}\t${assignmentPhase(a)}\t${assignmentSays(a).split("\n", 1)[0]}`,
         );
       return;
+    }
+    if (verb === "coordinator") {
+      const reason = args.join(" ").trim();
+      if (!reason) throw new Error("coordinator needs a reason");
+      await call(client, "nts.coordinator.replace", { reason });
+      return console.log("coordinator: replacement requested (checkpoint, then a new generation)");
     }
     const issue = Number(args.shift()?.replace(/^#/, ""));
     const asAt = args.indexOf("--as");

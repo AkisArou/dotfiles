@@ -150,6 +150,10 @@ export const signOff = operation<
   { assignment: string; accept: boolean; notes: string },
   { ok: true }
 >("nts.assignments.sign-off");
+/** A fresh coordinator generation from its checkpoint: after its tools or instructions change. */
+export const replaceCoordinator = operation<{ reason: string }, { ok: true }>(
+  "nts.coordinator.replace",
+);
 export const retryAssignment = operation<{ assignment: string }, { ok: true }>(
   "nts.assignments.retry",
 );

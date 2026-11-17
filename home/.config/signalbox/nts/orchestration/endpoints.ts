@@ -153,6 +153,23 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
         },
       }),
     }),
+    ...(orchestration.coordinator
+      ? [
+          exposeOperation({
+            ref: refs.replaceCoordinator,
+            requires: [orchestration.coordinator],
+            input: z.object({ reason: z.string().min(1) }),
+            output: z.object({ ok: z.literal(true) }),
+            run: async (input, context) => {
+              await context.get(orchestration.coordinator!).replace({
+                reason: input.reason,
+                requestId: context.requestId,
+              });
+              return { ok: true as const };
+            },
+          }),
+        ]
+      : []),
     exposeOperation({
       ref: refs.signOff,
       requires: [work],
