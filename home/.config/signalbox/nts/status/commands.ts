@@ -60,7 +60,8 @@ export const landingStatus = async (root: string, signal?: AbortSignal) =>
   checked<LandingStatus>(
     await json(root, ["tooling/landing/check.ts", "status", "--json"], signal),
     "landing",
-    [1],
+    // Version 2 (#819) drops the pool trees, which this application never reads.
+    [1, 2],
     "landing",
   );
 export const fullCheckStatus = async (
