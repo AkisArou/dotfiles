@@ -5,7 +5,9 @@
 //   sbn assign <issue> [notes...]   start a task
 //   sbn approve <issue> [notes...]  approve the design
 //   sbn return <issue> <notes...>   send the design back
-//   sbn message <issue> <text...>   message the worker (answers help, decides an escalation)
+//   sbn message <issue> [--as coordinator] <text...>
+//                                   message the worker (answers help, decides an escalation);
+//                                   --as coordinator when the owner stands in for the coordinator
 //   sbn rework <issue> <notes...>   send a held or wrong landing back to build
 //   sbn retry <issue>               retry a faulted task
 //   sbn cancel <issue> <reason...>  cancel a task (its tree and branch stay with the pool)
@@ -72,6 +74,10 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       return;
     }
     const issue = Number(args.shift()?.replace(/^#/, ""));
+    const asAt = args.indexOf("--as");
+    const as = asAt >= 0 ? args.splice(asAt, 2)[1] : undefined;
+    if (as !== undefined && as !== "user" && as !== "coordinator")
+      throw new Error("--as takes user or coordinator");
     if (!Number.isInteger(issue) || issue <= 0) throw new Error(`${verb} needs an issue number`);
     const text = args.join(" ").trim();
     const needsText = (what: string) => {
@@ -117,6 +123,7 @@ async function main(verb: Verb, args: string[]): Promise<void> {
         await call(client, "nts.assignments.message-worker", {
           assignment,
           text: needsText("a message"),
+          from: as ?? "user",
         });
         break;
       case "rework":

@@ -140,9 +140,10 @@ export const decideDesign = operation<
   { assignment: string; accept: boolean; notes: string },
   { ok: true }
 >("nts.assignments.decide-design");
-export const messageWorker = operation<{ assignment: string; text: string }, { ok: true }>(
-  "nts.assignments.message-worker",
-);
+export const messageWorker = operation<
+  { assignment: string; text: string; from?: "user" | "coordinator" },
+  { ok: true }
+>("nts.assignments.message-worker");
 export const tabs = [
   "Now",
   "Tasks",

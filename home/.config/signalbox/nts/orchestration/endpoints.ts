@@ -210,13 +210,18 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
     exposeOperation({
       ref: refs.messageWorker,
       requires: [work],
-      input: z.object({ assignment: z.string(), text: z.string().min(1) }),
+      // The owner may stand in for the coordinator; the worker sees who spoke.
+      input: z.object({
+        assignment: z.string(),
+        text: z.string().min(1),
+        from: z.enum(["user", "coordinator"]).default("user"),
+      }),
       output: z.object({ ok: z.literal(true) }),
       // Through the route: delivered once, recorded, and it answers the worker's open question.
       run: async (input, context) => {
         await context.get(work).report({
           assignmentId: input.assignment,
-          data: { kind: "message", from: "user", text: input.text },
+          data: { kind: "message", from: input.from ?? "user", text: input.text },
           requestId: context.requestId,
         });
         return { ok: true as const };
