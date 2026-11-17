@@ -552,6 +552,8 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
   },
 
   async verify(t) {
+    // A task that landed before workers stopped at landing still has one: same key as retire's.
+    if (t.state.worker && !t.ended(t.state.worker.id)) await t.stop(t.state.worker.id, "worker");
     const verified = latestValue(t.ctx.get(t.options.fullCheck))?.verified.commit;
     if (!verified) return t.wait("Waiting for the full check to verify the landing");
     const contained = await run(
