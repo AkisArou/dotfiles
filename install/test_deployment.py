@@ -45,7 +45,6 @@ class DeploymentTests(unittest.TestCase):
             '.claude/settings.json': {'model': 'default'},
             '.claude.json': {'mcpServers': {}},
             '.config/flameshot/flameshot.ini': '[General]\nshowDesktopNotification=false\n',
-            '.config/muse/settings.json': {'schema_version': 1},
             '.config/BraveSoftware/Brave-Browser/Default/Preferences': {'browser': {}},
             '.config/BraveSoftware/Brave-Browser/Local State': {'brave': {}},
             '.config/dconf/user': '[org/gnome/desktop/interface]\ncolor-scheme=\'prefer-dark\'\n',
@@ -55,13 +54,13 @@ class DeploymentTests(unittest.TestCase):
             self.write(self.repo / 'home' / relative, value)
             target = self.write(self.home / relative, f'local data for {relative}')
             originals[relative] = target.read_bytes()
-        ordinary = self.write(self.repo / 'home/.config/muse/dotfiles-hooks.json', {'hooks': {}})
+        ordinary = self.write(self.repo / 'home/.claude/hooks.json', {'hooks': {}})
         deploy(self.repo / 'home', self.home)
         for relative, contents in originals.items():
             target = self.home / relative
             self.assertFalse(target.is_symlink(), relative)
             self.assertEqual(target.read_bytes(), contents)
-        self.assertEqual((self.home / '.config/muse/dotfiles-hooks.json').resolve(), ordinary)
+        self.assertEqual((self.home / '.claude/hooks.json').resolve(), ordinary)
         self.write(self.home / '.claude/settings.json', {'model': 'personal'})
         self.assertEqual(json.loads((self.repo / 'home/.claude/settings.json').read_text()), {'model': 'default'})
 
@@ -176,7 +175,7 @@ class DeploymentTests(unittest.TestCase):
 
     def test_full_deployment_merges_defaults_without_linking_live_agent_state(self):
         for name in ('deploy-home', 'link_tree.py', 'configure_claude.py',
-                     'configure_flameshot.py', 'configure_muse.py'):
+                     'configure_flameshot.py'):
             shutil.copy2(Path(__file__).with_name(name), self.repo / 'install' / name)
         self.write(self.repo / 'home/.claude/settings.json', {'theme': 'dark', 'model': 'default'})
         self.write(self.repo / 'home/.claude.json', {'mcpServers': {}})
@@ -185,16 +184,8 @@ class DeploymentTests(unittest.TestCase):
         flameshot = self.home / '.config/flameshot/flameshot.ini'
         flameshot.parent.mkdir(parents=True)
         flameshot.symlink_to(flameshot_defaults)
-        self.write(self.repo / 'home/.config/muse/settings.json', {
-            'schema_version': 1, 'managed_hooks_path': 'dotfiles-hooks.json',
-            'managed_hooks_env_vars': ['TMUX'],
-        })
-        self.write(self.repo / 'home/.config/muse/dotfiles-hooks.json', {'hooks': {}})
         claude = self.write(self.home / '.claude/settings.json', {'model': 'personal'})
         account = self.write(self.home / '.claude.json', {'accountState': 'keep'})
-        muse = self.write(self.home / '.config/muse/settings.json', {
-            'personal': True, 'managed_hooks_env_vars': ['EXTRA'],
-        })
         defaults = self.write(self.repo / 'root/etc/codex/config.toml', 'model = "default"\n')
         codex = self.home / '.codex/config.toml'
         codex.parent.mkdir()
@@ -205,7 +196,7 @@ class DeploymentTests(unittest.TestCase):
                        'XDG_STATE_HOME': str(self.home / '.local/state')}
         environment.pop('CLAUDE_CONFIG_DIR', None)
         command = [sys.executable, str(self.repo / 'install/deploy-home')]
-        before = {path: path.read_bytes() for path in (claude, account, muse, codex, flameshot)}
+        before = {path: path.read_bytes() for path in (claude, account, codex, flameshot)}
         preview = subprocess.run([*command, '--dry-run'], env=environment, check=True,
                                  capture_output=True, text=True)
         self.assertIn('Merge defaults: claude', preview.stdout)
@@ -220,14 +211,11 @@ class DeploymentTests(unittest.TestCase):
         subprocess.run(command, env=environment, check=True, capture_output=True)
         self.assertEqual(json.loads(claude.read_text()), {'model': 'personal', 'theme': 'dark'})
         self.assertEqual(json.loads(account.read_text()), {'accountState': 'keep'})
-        self.assertEqual(json.loads(muse.read_text())['managed_hooks_env_vars'], ['EXTRA', 'TMUX'])
-        self.assertTrue(json.loads(muse.read_text())['personal'])
-        for path in (claude, account, muse, codex, flameshot):
+        for path in (claude, account, codex, flameshot):
             self.assertFalse(path.is_symlink())
         self.assertEqual(flameshot_defaults.read_text(), '[General]\nshowDesktopNotification=false\n')
         codex.write_text('model = "personal"\n')
         self.assertEqual(defaults.read_text(), 'model = "default"\n')
-        self.assertTrue((self.home / '.config/muse/dotfiles-hooks.json').is_symlink())
         self.assertEqual(json.loads((self.repo / 'home/.claude/settings.json').read_text())['model'], 'default')
 
     def test_brave_merges_both_mirrored_files_and_preserves_profile_data(self):

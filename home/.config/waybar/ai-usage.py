@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read Claude, Codex and Muse subscription quotas using their existing logins."""
+"""Read Claude and Codex subscription quotas using their existing logins."""
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -21,7 +21,7 @@ import urllib.error
 import urllib.request
 from xml.etree import ElementTree
 
-PROVIDERS = (("claude", "Claude"), ("openai", "Codex"), ("muse", "Muse"))
+PROVIDERS = (("claude", "Claude"), ("openai", "Codex"))
 ROBOT = "󰚩"
 BAR_WIDTH = 12
 CACHE_TTL = 300
@@ -109,16 +109,9 @@ def credentials(provider):
             headers["ChatGPT-Account-Id"] = auth["account_id"]
         url = "https://chatgpt.com/backend-api/wham/usage"
     else:
-        directory = Path(os.environ.get("XDG_CONFIG_HOME") or home / ".config")
-        filename = Path(os.environ.get("MUSE_AUTH_PATH") or directory / "muse/auth.json")
-        auth = (read_json(filename).get("providers") or {}).get("meta") or {}
-        token = auth.get("access_token")
-        headers["x-api-version"] = "1.0.0"
-        url = "https://api.meta.ai/muse-code/key"
-        # The CLI reads quota from this standing-key response without onboarding.
-        body = b'{"onboard":false}'
+        raise UsageError(f"Unknown provider: {provider}")
     if not isinstance(token, str) or not token.strip():
-        raise UsageError("Sign in with " + {"claude": "claude", "openai": "codex login", "muse": "muse login"}[provider])
+        raise UsageError("Sign in with " + {"claude": "claude", "openai": "codex login"}[provider])
     headers["Authorization"] = "Bearer " + token
     # Scope cached usage to the login without storing the token or account ID.
     identity = hashlib.sha256((token + headers.get("ChatGPT-Account-Id", "")).encode()).hexdigest()
@@ -256,17 +249,7 @@ def parse_usage(provider, payload, plan, now):
                 metrics.append(metric)
         metrics.sort(key=lambda metric: metric["label"] == "Weekly")
     else:
-        plan = str(payload.get("subs_tier_name") or "").removeprefix("Muse Code ")
-        if payload.get("is_subs_active") is not True:
-            note = "No active Muse subscription"
-        else:
-            usage = payload.get("subs_usage") or {}
-            for key, label in (("window", "5-hour"), ("weekly", "Weekly")):
-                metric = window(label, usage.get(key), "used_percent", now)
-                if metric:
-                    metrics.append(metric)
-            if not metrics:
-                note = "Muse did not report usage; the window may be idle"
+        raise UsageError(f"Unknown provider: {provider}")
     entry = {"id": provider, "plan": plan, "metrics": metrics, "note": note}
     if provider == "openai":
         entry["reset_credits"] = reset_credits(payload.get("rate_limit_reset_credits"))
@@ -419,7 +402,7 @@ def provider_tooltip(entry, label):
     colors = tooltip_colors()
     heading = f"<span foreground='{colors['accent']}'><b>{html.escape(label)}</b></span>"
     plan = entry.get("plan") or ""
-    for prefix in ("Claude ", "ChatGPT ", "Muse Code "):
+    for prefix in ("Claude ", "ChatGPT "):
         plan = plan.removeprefix(prefix)
     if plan:
         heading += f"  <span foreground='{colors['dim']}'>{html.escape(plan)}</span>"

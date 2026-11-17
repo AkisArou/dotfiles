@@ -1,4 +1,4 @@
-"""Claude and Muse hooks: per-pane activity state alongside their native titles.
+"""Claude hooks: per-pane activity state alongside their native titles.
 
 tmux renders working, attention, or error as one colored dot.
 Ready, compaction, and background subagent counts have no extra marker.
@@ -63,7 +63,7 @@ def update(state, event):
                 waits[tool_key] = "!"
         elif name == "PermissionRequest":
             if not event.get("tool_use_id"):
-                # Muse omits the ID here. Count waits per tool for parallel calls.
+                # Count waits per tool when parallel calls omit the ID.
                 prefix = f'{agent or "main"}:permission:{tool}:'
                 index = 1
                 while f"{prefix}{index}" in waits:
@@ -118,22 +118,6 @@ def badge(state):
     return ""
 
 
-def muse_event(event):
-    """Use Muse's top-level session identity and distinguish child thread hooks."""
-    event = dict(event)
-    session = os.environ.get("MUSE_SESSION_ID") or event.get("session_id")
-    thread = os.environ.get("MUSE_THREAD_ID") or event.get("session_id")
-    event["session_id"] = session
-    event["prompt_id"] = event.get("turn_id")
-    tools = {"request_user_input": "AskUserQuestion", "exit_plan_mode": "ExitPlanMode"}
-    event["tool_name"] = tools.get(event.get("tool_name"), event.get("tool_name"))
-    if thread and thread != session:
-        event["agent_id"] = thread
-    if event.get("hook_event_name") in ("SubagentStart", "SubagentStop"):
-        event["agent_id"] = event.get("child_session_id") or event.get("subagent_id")
-    return event
-
-
 def main(agent):
     if not os.environ.get("TMUX"):
         sys.stdin.buffer.read()
@@ -141,8 +125,6 @@ def main(agent):
     event = json.load(sys.stdin)
     if not isinstance(event, dict):
         return
-    if agent == "muse":
-        event = muse_event(event)
     with PaneOptions(agent) as pane:
         fresh = (
             event.get("hook_event_name") == "SessionStart"

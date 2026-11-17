@@ -1,5 +1,0 @@
-{
-  "schema_version": 1,
-  "managed_hooks_path": "dotfiles-hooks.json",
-  "managed_hooks_env_vars": ["TMUX", "TMUX_PANE", "XDG_RUNTIME_DIR"]
-}

@@ -127,23 +127,6 @@ class ProviderTests(unittest.TestCase):
         self.assertNotIn("5-hour", plain)
         self.assertNotIn("Fable", plain)
 
-    def test_muse_keeps_only_usage_and_plan(self):
-        result = usage.parse_usage("muse", {
-            "api_key": "SECRET-KEY", "user_email": "PRIVATE-EMAIL", "payment_method": {"id": "PRIVATE-PAYMENT"},
-            "is_subs_active": True, "subs_tier_name": "Muse Code Power Usage",
-            "subs_usage": {"window": {"used_percent": 2, "resets_at": 2000}, "weekly": {"used_percent": 9, "resets_at": 3000}},
-        }, "", 1000)
-        self.assertEqual(result["plan"], "Power Usage")
-        self.assertEqual([row["percent"] for row in result["metrics"]], [2, 9])
-        self.assertNotIn("SECRET", json.dumps(result))
-        self.assertNotIn("PRIVATE", json.dumps(result))
-
-    def test_missing_muse_usage_is_unavailable_not_zero(self):
-        result = usage.parse_usage("muse", {"is_subs_active": True, "subs_tier_name": "Power"}, "", 1000)
-        self.assertEqual(result["metrics"], [])
-        self.assertIn("did not report", result["note"])
-        self.assertEqual(usage.parse_usage("muse", {"is_subs_active": False}, "", 1000)["metrics"], [])
-
     def test_invalid_percent_and_reset_are_rejected(self):
         for value in (float("nan"), float("inf"), -1, True):
             with self.subTest(value=value), self.assertRaises(usage.UsageError):
@@ -165,7 +148,7 @@ class ProviderTests(unittest.TestCase):
         ElementTree.fromstring("<tooltip>" + text + "</tooltip>")
         self.assertIn("&lt;20x&gt; &amp; friends", text)
         self.assertIn("█", text)
-        self.assertIn("Muse", text)
+        self.assertIn("Codex", text)
         self.assertEqual(usage.countdown(1000, 1000), "now")
         self.assertEqual(usage.countdown(4660, 1000), "1h 01m")
 

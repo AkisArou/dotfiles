@@ -18,7 +18,6 @@ DEPLOYMENT_RULES = {
             '.claude/settings.json': 'claude',
             '.claude.json': 'claude',
             '.config/flameshot/flameshot.ini': 'flameshot',
-            '.config/muse/settings.json': 'muse',
             '.config/BraveSoftware': 'brave',
         },
         'import': {'.config/dconf/user': 'dconf'},

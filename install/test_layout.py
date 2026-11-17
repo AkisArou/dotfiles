@@ -157,9 +157,9 @@ class LayoutTests(unittest.TestCase):
         installer = repo / 'install'
         installer.mkdir()
         shutil.copy2(Path(__file__).with_name('link_tree.py'), installer / 'link_tree.py')
-        defaults = self.write(repo / 'home/.config/muse/settings.json', '{"schema_version":1}')
-        directory = self.target / '.config/muse'
-        directory.parent.mkdir()
+        defaults = self.write(repo / 'home/.claude/settings.json', '{"model":"default"}')
+        directory = self.target / '.claude'
+        directory.parent.mkdir(exist_ok=True)
         directory.symlink_to(defaults.parent)
         with self.assertRaises(ValueError):
             deploy(repo / 'home', self.target)
@@ -171,7 +171,7 @@ class LayoutTests(unittest.TestCase):
         deploy(repo / 'home', self.target)
         self.assertFalse(directory.is_symlink())
         (directory / 'settings.json').write_text('{"personal":true}')
-        self.assertEqual(json.loads(defaults.read_text()), {'schema_version': 1})
+        self.assertEqual(json.loads(defaults.read_text()), {'model': 'default'})
 
     def test_legacy_agent_config_links_become_independent_local_files(self):
         repo = self.source

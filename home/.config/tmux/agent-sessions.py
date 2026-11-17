@@ -1,9 +1,8 @@
-"""Record Codex IDs and save exact Codex, Claude, and Muse conversations."""
+"""Record Codex IDs and save exact Codex and Claude conversations."""
 
 import json
 import os
 from pathlib import Path
-import re
 import shlex
 import subprocess
 import sys
@@ -68,8 +67,6 @@ def foreground_agent(pane_pid, processes):
         if not args:
             continue
         agent = comm if comm in ("codex", "claude") else None
-        if re.fullmatch(r"muse(-bin(-[0-9].*)?)?", Path(args[0]).name):
-            agent = "muse"
         native = agent is not None
         if not agent and Path(args[0]).name == "node" and len(args) > 1:
             script = Path(args[1]).name
@@ -97,20 +94,6 @@ def resume_options(agent, args):
             "--oss", "--search", "--no-alt-screen", "--no-daemon", "--approve-for-me",
             "--dangerously-bypass-approvals-and-sandbox",
         }
-    elif agent == "muse":
-        values = {
-            "--provider", "--preset", "-c", "--config", "--model", "--reasoning-effort",
-            "--base-url", "--workspace", "-w", "--worktree", "--worktree-base",
-            "--worktree-existing", "--approval-mode", "--permission-profile",
-            "--approval-judge", "--echo-delay-ms", "--sandbox-network",
-            "--context-compaction-strategy", "--context-compaction-soft-threshold",
-            "--context-compaction-hard-threshold",
-        }
-        flags = {
-            "--parallel-tool-calls", "--no-parallel-tool-calls", "--subagent-worktree-isolation",
-            "--yolo", "--trust-workspace", "--disable-approval", "--disable-sandbox",
-            "--disable-write", "--disable-shell", "--enable-shell-tool",
-        }
     else:
         values = {
             "--model", "--permission-mode", "--settings", "--settings-sources",
@@ -126,12 +109,6 @@ def resume_options(agent, args):
         arg = args[index]
         if arg == "--":
             break
-        if agent == "muse" and arg in ("-w", "--worktree"):
-            # Muse accepts this with no value; do not swallow the following flag.
-            explicit = index + 1 < len(args) and args[index + 1] in ("off", "create", "existing")
-            result.extend([arg, args[index + 1] if explicit else "create"])
-            index += 2 if explicit else 1
-            continue
         if arg in values and index + 1 < len(args):
             result.extend(args[index:index + 2])
             index += 2
@@ -150,12 +127,12 @@ def snapshot(path):
     processes = [line.split(None, 2) for line in output.splitlines() if line.strip()]
     format = "\t".join((
         "#{session_name}", "#{window_index}", "#{pane_index}", "#{pane_id}",
-        "#{pane_pid}", "#{@codex_session}", "#{@claude_state}", "#{@muse_state}",
+        "#{pane_pid}", "#{@codex_session}", "#{@claude_state}",
     ))
     panes = {}
     for line in tmux("list-panes", "-a", "-F", format).splitlines():
-        fields = line.split("\t", 7)
-        if len(fields) == 8:
+        fields = line.split("\t", 6)
+        if len(fields) == 7:
             panes[tuple(fields[:3])] = fields[3:]
 
     lines = path.read_text().splitlines()
@@ -166,14 +143,14 @@ def snapshot(path):
         pane = panes.get((fields[1], fields[2], fields[5]))
         active = foreground_agent(pane[1], processes) if pane else None
         # Never launch a fresh conversation if its exact ID is unavailable.
-        if fields[9] in ("codex", "claude", "muse"):
+        if fields[9] in ("codex", "claude"):
             fields[10] = ":"
         if active:
             agent, args = active
             conversation = pane[2]
-            if agent in ("claude", "muse"):
+            if agent == "claude":
                 try:
-                    conversation = json.loads(pane[3 if agent == "claude" else 4]).get("session")
+                    conversation = json.loads(pane[3]).get("session")
                 except (ValueError, AttributeError):
                     conversation = None
             conversation = session_id(conversation)
