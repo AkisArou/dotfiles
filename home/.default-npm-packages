@@ -1,4 +1,6 @@
 @openai/codex
 npm-workspaces-language-server
-@swmansion/argent oxfmt
+@swmansion/argent
 oxfmt
+oxlint
+@stylistic/eslint-plugin
