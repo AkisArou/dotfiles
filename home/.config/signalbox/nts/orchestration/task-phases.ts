@@ -173,7 +173,8 @@ async function awaiting(t: Turn, reason: string, ask: string): Promise<Step> {
   const now = t.options.clock();
   const step = stallStep({
     key: awaited.key,
-    status: latestValue(t.ctx.get(t.options.agents.activity))?.[awaited.id],
+    // Busy or idle where the harness reports it (Claude Code); otherwise unknown to a stall.
+    status: latestValue(t.runtime.instances)?.find((instance) => instance.id === awaited.id)?.state,
     watch: t.state.watch,
     now,
   });

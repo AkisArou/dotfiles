@@ -53,13 +53,11 @@ export function taskRoute(options: Omit<TaskOptions, "clock"> & { readonly clock
         options.fullCheck,
         options.profiles,
         options.agents.runtime,
-        options.agents.activity,
       ],
       watch: (ctx) => [
         ctx.get(options.landing),
         ctx.get(options.fullCheck),
         ctx.get(options.agents.runtime).instances,
-        ctx.get(options.agents.activity),
       ],
       state: taskState,
       report: taskReport,

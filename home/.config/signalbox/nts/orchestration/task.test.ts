@@ -24,8 +24,6 @@ import type { ManagedAgents } from "./agents.ts";
 import { profiles } from "./profiles.ts";
 import { taskRoute } from "./task.ts";
 import { taskState } from "./task-model.ts";
-import { activitySource } from "./activity.ts";
-import type { AgentActivity } from "./activity.ts";
 import { STALL } from "./stall.ts";
 
 const run = promisify(execFile);
@@ -111,13 +109,10 @@ test("a task goes from tree to verified through design approval, review and land
   const runtime = agentRuntime({ id: "agents", programs: [fake] });
   // The test's own clock and agent activity: stalls are decided on them.
   let now = Date.now();
-  const activityCell = new Cell<AgentActivity>({});
-  const activity = activitySource({ id: "test", cell: activityCell });
   const agents = {
     runtime: runtime.runtime,
     instances: runtime.instances,
-    activity: activity.key,
-    extensions: [runtime.extension, activity.extension],
+    extensions: [runtime.extension],
     start: (agentsRuntime, request, signal) =>
       agentsRuntime.start(
         {
@@ -299,11 +294,17 @@ test("a task goes from tree to verified through design approval, review and land
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
   };
-  // Each observation differs (a tick), as a real reading after time passes would wake
-  // the route through its retryAt; the test's clock jumps instead of waiting.
+  // The worker's session reports its activity as its state. Each observation differs
+  // (a tick), as a real reading after time passes would wake the route through its
+  // retryAt; the test's clock jumps instead of waiting.
   let tick = 0;
-  const observe = (status: string) =>
-    activityCell.set({ [worker]: status, [`tick/${++tick}`]: "" });
+  const observe = (status: string) => {
+    const [request, instance] = [...byRequest.entries()].find(
+      ([, candidate]) => candidate.id === worker,
+    )!;
+    byRequest.set(request, { ...instance, state: status, metadata: { tick: ++tick } });
+    instances.set([...byRequest.values()]);
+  };
   const nudges = () =>
     messages.filter(
       (message) => message.to === worker && /waits for your proved commit/.test(message.text),

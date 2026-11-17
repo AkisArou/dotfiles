@@ -126,48 +126,21 @@ test("each area's reading list names workflow sections and lessons that exist", 
   assert.doesNotMatch(readingList(["area:docs"]), /lessons/);
 });
 
-test("a live Claude session shows Claude Code's own status; others keep theirs", async () => {
-  const { parseClaudeAgents } = await import("./activity.ts");
+test("managed sessions become Agents rows: role and issue from the label, state as reported", async () => {
   const { managedAgentViews } = await import("./endpoints.ts");
-  // Keyed by instance ID: Claude's sessions are "claude/<session id>".
-  const activity = parseClaudeAgents(
-    JSON.stringify([
-      { sessionId: "a2494288-4abb-4e6a-967e-5a39d904f7c0", status: "busy" },
-      { sessionId: "45d08db6-4cd2-49f8-b05c-9b560324e0a4", status: "idle" },
-      { name: "no id" },
-    ]),
-  );
-  const views = managedAgentViews(
-    [
-      {
-        id: "claude/a2494288-4abb-4e6a-967e-5a39d904f7c0",
-        provider: "claude",
-        label: "#802 worker",
-        state: "running",
-      },
-      {
-        id: "claude/45d08db6-4cd2-49f8-b05c-9b560324e0a4",
-        provider: "claude",
-        label: "#816 review abc",
-        state: "running",
-      },
-      {
-        id: "claude/11111111-2222-3333-4444-555555555555",
-        provider: "claude",
-        label: "#9 worker",
-        state: "ended",
-      },
-      { id: "codex/xyz", provider: "codex", label: "#7 worker", state: "running" },
-    ],
-    activity,
-  );
+  const views = managedAgentViews([
+    { id: "claude/a", provider: "claude", label: "#802 worker", state: "busy" },
+    { id: "claude/b", provider: "claude", label: "#816 review abc", state: "idle" },
+    { id: "claude/c", provider: "claude", label: "#9 worker", state: "ended" },
+    { id: "codex/x", provider: "codex", label: "nts coordinator", state: "running" },
+  ]);
   assert.deepEqual(
     views.map((view) => [view.name, view.role, view.state, view.issue]),
     [
       ["#802 worker", "worker", "busy", 802],
       ["#816 review abc", "reviewer", "idle", 816],
       ["#9 worker", "worker", "ended", 9],
-      ["#7 worker", "worker", "running", 7],
+      ["nts coordinator", "coordinator", "running", null],
     ],
   );
 });

@@ -15,7 +15,6 @@ import { claudeCode } from "signalbox/ext/integrations/claude";
 import { codex } from "signalbox/ext/integrations/codex";
 import { tmux } from "signalbox/ext/integrations/tmux";
 import type { Harness, Profile } from "./profiles.ts";
-import { claudeActivity } from "./activity.ts";
 import { launchOptions } from "./profiles.ts";
 
 /** A zod schema as a tool's input: its parser and the JSON Schema the harness shows the model. */
@@ -65,13 +64,10 @@ export function managedAgents(options: {
     codex: codex({ ...common, id: "codex", directory: join(options.directory, "agents/codex") }),
   };
   const runtime = agentRuntime({ id: "nts-agents", programs: Object.values(programs) });
-  const activity = claudeActivity();
   return {
     runtime: runtime.runtime,
     instances: runtime.instances,
-    /** Busy or idle per instance ID, where the harness reports it. */
-    activity: activity.key,
-    extensions: [execution.extension, bridge.extension, runtime.extension, activity.extension],
+    extensions: [execution.extension, bridge.extension, runtime.extension],
     /** Start one session for a resolved profile. requestId is the durable launch identity. */
     start(
       agents: AgentRuntime,

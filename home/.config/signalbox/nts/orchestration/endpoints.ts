@@ -7,7 +7,6 @@ import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments/index";
 import type { Assignment } from "signalbox/ext/assignments/index";
 import type { AgentInstance } from "signalbox/ext/agents/index";
-import type { AgentActivity } from "./activity.ts";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
@@ -44,10 +43,7 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
 }
 
 /** Managed sessions as Agents rows: role and issue come from the label the routes give them. */
-export function managedAgentViews(
-  instances: readonly AgentInstance[],
-  activity: AgentActivity = {},
-): refs.Agent[] {
+export function managedAgentViews(instances: readonly AgentInstance[]): refs.Agent[] {
   return instances.map((instance) => ({
     id: instance.id,
     name: instance.label,
@@ -56,9 +52,8 @@ export function managedAgentViews(
       : /review/i.test(instance.label)
         ? "reviewer"
         : "worker",
-    // A live session shows what it is doing (busy, idle), not only that it is alive.
-    state:
-      instance.state === "running" ? (activity[instance.id] ?? instance.state) : instance.state,
+    // A live Claude session's state is what it is doing (busy, idle); see the SDK's ManagedDriver.activity.
+    state: instance.state,
     path: null,
     issue: Number(/^#(\d+)/.exec(instance.label)?.[1]) || null,
     terminal: instance.id,
