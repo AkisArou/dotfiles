@@ -23,14 +23,9 @@ import { settingsFile } from "./settings.ts";
 import type { SettingsFile } from "./settings.ts";
 import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
 import { taskRoute } from "./task.ts";
-import {
-  coordinatorTools,
-  Late,
-  reviewerTools,
-  userAnswer,
-  userQuestion,
-  workerTools,
-} from "./tools.ts";
+import { coordinatorTools, Late, reviewerTools, workerTools } from "./tools.ts";
+import { needs, questionAnswer, questionInput } from "./needs.ts";
+import type { GitHub } from "./needs.ts";
 import type { Wiring } from "./tools.ts";
 import { wakeupFeed } from "./wakeups.ts";
 
@@ -100,6 +95,10 @@ export function ntsOrchestration(options: {
   readonly state: Capability<WorkflowStore>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly settings: OrchestrationSettings;
+  /** Writes an answered question to its issue (label, comment); tests supply a stand-in. */
+  readonly gitHub: GitHub;
+  /** Reads the issues again after a label change. */
+  readonly refreshIssues: () => Promise<void>;
   /** Tests supply stand-in agents; production uses Claude Code and Codex in tmux. */
   readonly agents?: (toolsets: readonly AgentToolset[]) => ManagedAgents;
 }) {
@@ -112,8 +111,15 @@ export function ntsOrchestration(options: {
   const decisions = decisionRequests({
     id: "nts-user",
     state: options.state,
-    input: userQuestion,
-    decision: userAnswer,
+    input: questionInput,
+    decision: questionAnswer,
+  });
+  const waiting = needs({
+    state: options.state,
+    questions: decisions.service,
+    issues: options.issues,
+    gitHub: options.gitHub,
+    refreshIssues: options.refreshIssues,
   });
   // Routes watch both, so they stay current; the dashboard's pages project them.
   const landing = polledSource<LandingStatus>({
@@ -177,6 +183,7 @@ export function ntsOrchestration(options: {
         agents,
         profiles: profileStore.service,
         settings: file.service,
+        needs: waiting.view,
         issues: options.issues,
         work: work.service,
         tools: tools.coordinator,
@@ -195,6 +202,7 @@ export function ntsOrchestration(options: {
     settings: file.service,
     priorities: urgency.service,
     decisions: decisions.service,
+    needs: waiting.view,
     agents,
     landing: landing.key,
     fullCheck: fullCheck.key,
@@ -208,6 +216,7 @@ export function ntsOrchestration(options: {
       // Probe only the real Claude Code; stand-in agents have nothing to probe.
       ...(options.agents ? [] : [claudeMessagingProbe(options.root, profileStore.service)]),
       decisions.extension,
+      waiting.extension,
       landing.extension,
       fullCheck.extension,
       ...agents.extensions,
@@ -223,6 +232,7 @@ export function ntsOrchestration(options: {
               landing: landing.key,
               fullCheck: fullCheck.key,
               decisions: decisions.service,
+              needs: waiting.view,
             }),
           ]
         : []),

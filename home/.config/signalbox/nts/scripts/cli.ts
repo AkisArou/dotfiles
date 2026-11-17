@@ -10,6 +10,11 @@
 //   sbn models                      every model and effort the harnesses offer, by id
 //   sbn pause <reason...>           admit no new task; admitted tasks carry on
 //   sbn resume                      admit tasks again
+//   sbn needs                       what waits on you: questions (with their ids), issues not asked yet
+//   sbn answer <id> <text...> [--then ready|parked|held]
+//   sbn answer <id> --option <n>    answer a question (its choice n, or your words)
+//   sbn answer #<issue> <text...> [--then ready|parked|held]
+//                                   answer an issue that waits on you without a question
 //   sbn show <issue>                one task's design, summary and latest instruction
 //   sbn assign <issue> [--model <id>] [notes...]
 //                                   start a task (a model when workers pick "coordinator")
@@ -31,11 +36,13 @@ import { randomUUID } from "node:crypto";
 import { connectClient } from "signalbox/host";
 import type { HostClient } from "signalbox/host";
 import type { AssignmentView } from "../shared/model.ts";
-import type { SettingsView } from "../shared/model.ts";
+import type { NeedsView, SettingsView } from "../shared/model.ts";
 import {
   assignmentPhase,
   assignmentSays,
+  issueStateLabels,
   modelsLine,
+  needsCount,
   pickLabels,
   settingsLine,
 } from "../shared/model.ts";
@@ -55,6 +62,8 @@ const VERBS = [
   "role",
   "pick",
   "models",
+  "needs",
+  "answer",
   "show",
   "assign",
   "prioritize",
@@ -143,6 +152,70 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     if (verb === "models") {
       for (const model of (await settings()).catalog) console.log(`${model.id}\t${model.label}`);
       return;
+    }
+    if (verb === "needs") {
+      const now = await read<NeedsView>(client, "nts.needs");
+      if (!needsCount(now)) console.log("Nothing waits on you.");
+      for (const question of now.questions) {
+        console.log(
+          `? ${question.id}${question.issue ? ` (#${question.issue.number} ${question.issue.title})` : ""}`,
+        );
+        console.log(`  ${question.question}`);
+        if (question.context) console.log(question.context.replace(/^/gm, "    "));
+        question.options.forEach((option, index) =>
+          console.log(
+            `  ${index + 1}. ${option.label}${question.issue ? ` → ${issueStateLabels[option.then ?? "ready"]}` : ""}`,
+          ),
+        );
+      }
+      for (const issue of now.unasked)
+        console.log(`? #${issue.number} ${issue.title} (waits on you; not asked yet)`);
+      for (const question of now.answered.slice(0, 3))
+        console.log(
+          `✓ ${question.id}: ${question.answer}${question.issue ? ` · #${question.issue.number} ${question.posted === "done" ? "posted" : `not posted yet: ${question.posted}`}` : ""}`,
+        );
+      return;
+    }
+    if (verb === "answer") {
+      const flag = (name: string) => {
+        const at = args.indexOf(name);
+        return at < 0 ? undefined : args.splice(at, 2)[1];
+      };
+      const then = flag("--then");
+      const choice = flag("--option");
+      const [target, ...words] = args;
+      const text = words.join(" ").trim();
+      if (!target || (!text && choice === undefined))
+        throw new Error("answer needs <id|#issue> and your words, or --option <n>");
+      if (then !== undefined && !["ready", "parked", "held"].includes(then))
+        throw new Error("--then takes ready, parked or held");
+      if (target.startsWith("#")) {
+        await call(client, "nts.needs.answer-issue", {
+          issue: Number(target.slice(1)),
+          answer: text,
+          then: then ?? "ready",
+        });
+        return console.log(
+          `${target}: answered; it goes on the issue, and the coordinator is told.`,
+        );
+      }
+      const question = (await read<NeedsView>(client, "nts.needs")).questions.find(
+        (candidate) => candidate.id === target,
+      );
+      if (!question) throw new Error(`${target} is not an open question (sbn needs lists them)`);
+      await call(
+        client,
+        "nts.needs.answer",
+        choice !== undefined
+          ? { id: question.id, revision: question.revision, option: Number(choice) - 1 }
+          : {
+              id: question.id,
+              revision: question.revision,
+              answer: text,
+              ...(then ? { then } : {}),
+            },
+      );
+      return console.log(`${target}: answered; the coordinator is told.`);
     }
     if (verb === "settings") {
       const now = await settings();

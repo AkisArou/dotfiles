@@ -7,7 +7,7 @@ import type { Json } from "signalbox/core/remote";
 import type { AgentToolset } from "signalbox/ext/agents";
 import type { Assignments, DurableEngine, WorkflowStore } from "signalbox/ext/assignments";
 import { agentMailbox, agentService } from "signalbox/ext/orchestration";
-import type { Issue } from "../shared/model.ts";
+import type { Issue, NeedsView } from "../shared/model.ts";
 import type { ManagedAgents } from "./agents.ts";
 import { coordinatorInstructions } from "./briefs.ts";
 import type { Profiles } from "./profiles.ts";
@@ -21,6 +21,7 @@ export function coordinator(options: {
   readonly agents: ManagedAgents;
   readonly profiles: Capability<Profiles>;
   readonly settings: Capability<SettingsFile>;
+  readonly needs: Capability<Readable<NeedsView>>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly work: Capability<Assignments>;
   readonly tools: AgentToolset;
@@ -31,7 +32,7 @@ export function coordinator(options: {
     state: options.state,
     engine: options.engine,
     replicas: 1,
-    requires: [options.profiles, options.settings, options.issues, options.work],
+    requires: [options.profiles, options.settings, options.needs, options.issues, options.work],
     // Small on purpose: the coordinator reads details through its tools.
     async bootstrap(context) {
       const assignments = latestValue(context.get(options.work).assignments) ?? [];
@@ -42,9 +43,17 @@ export function coordinator(options: {
         openIssues: issues.length,
         // How workers' models are chosen, and the models assign_task may name.
         workerModels: workerModels(context.get(options.settings).current()),
-        needsUser: issues
-          .filter((issue) => issue.labels.includes("state:needs-user"))
-          .map((issue) => issue.number),
+        // What waits on the owner: questions already asked, and issues nobody has asked about.
+        waitingOnOwner: {
+          questions: (latestValue(context.get(options.needs))?.questions ?? []).map((question) => ({
+            id: question.id,
+            issue: question.issue?.number ?? null,
+            question: question.question,
+          })),
+          unasked: (latestValue(context.get(options.needs))?.unasked ?? []).map(
+            (issue) => issue.number,
+          ),
+        },
         activeTasks: assignments
           .filter((assignment) => assignment.status === "active" || assignment.status === "queued")
           .map((assignment) => ({

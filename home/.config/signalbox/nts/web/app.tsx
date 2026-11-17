@@ -5,13 +5,13 @@ import { SideNavItem } from "@astryxdesign/core/SideNav";
 import { Theme } from "@astryxdesign/core/theme";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { useProject } from "../shared/use-project.ts";
-import { tabs, tabKey } from "../shared/model.ts";
+import { needsCount, tabKey, tabs } from "../shared/model.ts";
 import type { Tab } from "../shared/model.ts";
 import { Empty, Icon } from "./components.tsx";
 import { Now } from "./views/now.tsx";
 import { Tasks } from "./views/tasks.tsx";
 import { Agents } from "./views/agents.tsx";
-import { UserDecisions } from "./views/orchestration.tsx";
+import { NeedsYou } from "./views/needs.tsx";
 import { Plan } from "./views/plan.tsx";
 import { MobileNav } from "./mobile-nav.tsx";
 import { NtsView, NtsHealth } from "./views/nts.tsx";
@@ -100,12 +100,7 @@ export function App() {
   const pages: Record<Tab, ReactNode> = {
     Now: <Now project={project} navigate={setTab} />,
     Tasks: <Tasks project={project} />,
-    "Needs you": (
-      <>
-        <UserDecisions project={project} />
-        <Tasks project={project} needsYou />
-      </>
-    ),
+    "Needs you": <NeedsYou project={project} />,
     Agents: <Agents project={project} />,
     Landing: <NtsView project={project} page="Landing" />,
     Plan: <Plan project={project} />,
@@ -156,11 +151,8 @@ export function App() {
                 onClick={() => setTab(name)}
                 icon={<Icon name={name} />}
                 endContent={
-                  name === "Needs you" &&
-                  data.issues.some((issue) => issue.state === "needs-user") ? (
-                    <span className="nav-count">
-                      {data.issues.filter((issue) => issue.state === "needs-user").length}
-                    </span>
+                  name === "Needs you" && needsCount(data.needs) > 0 ? (
+                    <span className="nav-count">{needsCount(data.needs)}</span>
                   ) : (
                     <kbd>{tabKey(index)}</kbd>
                   )
@@ -215,7 +207,8 @@ export function App() {
                       Tasks: "The work ahead.",
                       Agents: "Your working sessions.",
                       Landing: "NTS’s landing service.",
-                      "Needs you": "Your open questions.",
+                      "Needs you":
+                        "Questions waiting on you, and issues waiting before anyone asked.",
                       Plan: "Where we’re going.",
                       Benchmarks: "What NTS measured.",
                       Conformance: "Coverage and recorded outcomes.",
@@ -230,7 +223,8 @@ export function App() {
                     {
                       Now: "A live view of the work, the workers, and what needs your attention.",
                       Tasks: "GitHub issues organized by NTS streams, groups and state.",
-                      "Needs you": "Open GitHub issues labelled state:needs-user.",
+                      "Needs you":
+                        "Answer one: its choices, or your own words. It is posted on its issue.",
                       Agents:
                         "Native Codex and Claude Code terminals, including configured existing sessions.",
                       Landing: "Queue and recent answers from NTS’s own tooling.",
@@ -294,11 +288,7 @@ export function App() {
             </span>
           </footer>
         </div>
-        <MobileNav
-          tab={tab}
-          select={setTab}
-          pending={data.issues.filter((issue) => issue.state === "needs-user").length}
-        />
+        <MobileNav tab={tab} select={setTab} pending={needsCount(data.needs)} />
       </div>
     </Theme>
   );

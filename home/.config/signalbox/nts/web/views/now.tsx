@@ -1,29 +1,34 @@
 import type { Project } from "../../shared/use-project.ts";
 import type { Tab } from "../../shared/model.ts";
+import { needsCount } from "../../shared/model.ts";
 import { gaugeState } from "../../status/model.ts";
 import { Button } from "@astryxdesign/core/Button";
 import { Badge, Empty, Section } from "../components.tsx";
 
 export function Now({ project, navigate }: { project: Project; navigate(tab: Tab): void }) {
-  const needsYou = project.data.issues.filter((issue) => issue.state === "needs-user");
+  const needs = project.data.needs;
   const gauges = project.nts.health.gauges.filter((gauge) => gaugeState(gauge) !== "ok");
   return (
     <>
-      <Section title={`Needs you · ${needsYou.length}`}>
-        {needsYou.slice(0, 8).map((issue) => (
-          <p key={issue.id}>
-            <a href={issue.url} target="_blank" rel="noreferrer">
-              #{issue.number} {issue.title}
-            </a>
+      <Section
+        title={`Needs you · ${needsCount(needs)}`}
+        aside={<Button label="Answer" variant="ghost" onClick={() => navigate("Needs you")} />}
+      >
+        {needs.questions.slice(0, 8).map((question) => (
+          <p key={question.id}>
+            {question.question}
+            {question.issue ? ` (#${question.issue.number})` : ""}
           </p>
         ))}
-        {!needsYou.length && (
-          <Empty>
-            {project.issues.status === "ready"
-              ? "No open questions."
-              : "Waiting for GitHub issues…"}
-          </Empty>
-        )}
+        {needs.unasked.slice(0, 8).map((issue) => (
+          <p key={issue.number}>
+            <a href={issue.url} target="_blank" rel="noreferrer">
+              #{issue.number} {issue.title}
+            </a>{" "}
+            <span className="subtle">· not asked yet</span>
+          </p>
+        ))}
+        {!needsCount(needs) && <Empty>Nothing waits on you.</Empty>}
       </Section>
       <Section
         title="Health"

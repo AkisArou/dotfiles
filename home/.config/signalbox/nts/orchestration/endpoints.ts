@@ -1,7 +1,7 @@
 // The owner's endpoints for orchestration: what the UI shows and what the user
 // can change. The gate in host/config.ts decides who may call them.
 import { z } from "zod";
-import { combineReadables, mapReadable } from "signalbox/core";
+import { combineReadables, latestValue, mapReadable } from "signalbox/core";
 import type { Extension } from "signalbox/core";
 import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments";
@@ -13,6 +13,7 @@ import { catalog, harnesses, profileFromId, profileId, profileLabel, roles } fro
 import type { Profile } from "./models.ts";
 import { picks } from "./settings.ts";
 import { checkTaskModel } from "./tools.ts";
+import { answerFor, issueStates } from "./needs.ts";
 import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
@@ -74,7 +75,16 @@ const profileView = (profile: Profile): refs.ProfileView => ({
 });
 
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
-  const { profiles, work, assignments, decisions, route, settings, status } = orchestration;
+  const {
+    profiles,
+    work,
+    assignments,
+    decisions,
+    route,
+    settings,
+    status,
+    needs: needsView,
+  } = orchestration;
   return [
     exposeSource({
       ref: refs.settings,
@@ -171,21 +181,10 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       resolve: (context) => mapReadable(context.get(assignments), (all) => all.map(assignmentView)),
     }),
     exposeSource({
-      ref: refs.userDecisions,
-      requires: [decisions],
-      output: z.custom<refs.UserDecisionView[]>(),
-      resolve: (context) =>
-        mapReadable(context.get(decisions).requests, (requests) =>
-          requests.map((request) => ({
-            id: request.id,
-            status: request.status,
-            revision: request.revision,
-            question: request.input.question,
-            context: request.input.context,
-            answer: request.result?.decision.answer ?? null,
-            requestedAt: request.requestedAt,
-          })),
-        ),
+      ref: refs.needs,
+      requires: [needsView],
+      output: z.custom<refs.NeedsView>(),
+      resolve: (context) => context.get(needsView),
     }),
     exposeOperation({
       ref: refs.setAvailability,
@@ -349,15 +348,61 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       },
     }),
     exposeOperation({
-      ref: refs.answerDecision,
+      ref: refs.answerQuestion,
       requires: [decisions],
-      input: z.object({ id: z.string(), revision: z.number().int(), answer: z.string().min(1) }),
+      input: z.union([
+        z.object({ id: z.string(), revision: z.number().int(), option: z.number().int().min(0) }),
+        z.object({
+          id: z.string(),
+          revision: z.number().int(),
+          answer: z.string().min(1),
+          then: z.enum(issueStates).optional(),
+        }),
+      ]),
       output: z.object({ ok: z.literal(true) }),
       run: async (input, context) => {
-        await context.get(decisions).decide({
+        const questions = context.get(decisions);
+        const request = await questions.read(input.id);
+        if (!request || request.status !== "pending")
+          throw new Error(`${input.id} is not an open question`);
+        await questions.decide({
           id: input.id,
           expectedRevision: input.revision,
-          decision: { answer: input.answer },
+          decision: answerFor(request.input, input),
+          by: { owner: "local" },
+          requestId: context.requestId,
+        });
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
+      ref: refs.answerIssue,
+      requires: [decisions, needsView],
+      input: z.object({
+        issue: z.number().int().positive(),
+        answer: z.string().min(1),
+        then: z.enum(issueStates),
+      }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        const waiting = latestValue(context.get(needsView))?.unasked.find(
+          (issue) => issue.number === input.issue,
+        );
+        if (!waiting) throw new Error(`#${input.issue} is not waiting on you without a question`);
+        // The owner's own question, decided at once: the answer still posts and moves the issue.
+        const questions = context.get(decisions);
+        const request = await questions.request({
+          id: `owner/issue-${input.issue}/${context.requestId}`,
+          input: {
+            question: `What should happen with #${input.issue} ${waiting.title}?`,
+            context: "",
+            issue: input.issue,
+          },
+        });
+        await questions.decide({
+          id: request.id,
+          expectedRevision: request.revision,
+          decision: answerFor(request.input, input),
           by: { owner: "local" },
           requestId: context.requestId,
         });

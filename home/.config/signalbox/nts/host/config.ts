@@ -13,6 +13,7 @@ import { ntsObservations } from "../status/host.ts";
 import { nativeTerminals } from "./terminals.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
+import { gitHub } from "../orchestration/needs.ts";
 import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
 import { nativeAttachment } from "signalbox/ext/agents";
 import type { TerminalTarget } from "signalbox/ext/terminals";
@@ -41,7 +42,11 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
     demand: "always" | "subscribed" = "always",
   ) {
     const source = polledSource<T>({ id: `${ref.id}/reading`, interval, read, demand });
-    return { key: source.key, extensions: [source.extension, expose(ref, source.readable)] };
+    return {
+      key: source.key,
+      refresh: source.refresh,
+      extensions: [source.extension, expose(ref, source.readable)],
+    };
   }
   const planPath = join(settings.root, settings.plan);
   const issues = observe(refs.issues, settings.issueIntervalMs, async (signal) => {
@@ -59,6 +64,8 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
     state: state.state,
     issues: issues.key,
     settings: settings.orchestration,
+    gitHub: gitHub(settings.repo),
+    refreshIssues: issues.refresh,
   });
   const origin = settings.origin ?? `http://127.0.0.1:${settings.webPort}`;
   return defineConfig({

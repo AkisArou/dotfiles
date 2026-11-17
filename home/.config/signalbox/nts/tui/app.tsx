@@ -4,7 +4,7 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useProject } from "../shared/use-project.ts";
-import { settingsLine, tabs } from "../shared/model.ts";
+import { needsCount, settingsLine, tabs } from "../shared/model.ts";
 import type { Tab } from "../shared/model.ts";
 import { terminalConfig } from "./config.ts";
 import { describeFilters, filterOptions, matches, toggleFilter } from "./filters.ts";
@@ -17,6 +17,7 @@ import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
 import { NtsContent } from "./nts.tsx";
 import { SettingDetail, settingAction, settingRows } from "./settings.tsx";
+import { NeedsDetail, answerNeed, needsGroups, needsItems, needsLabel } from "./needs.tsx";
 import type { SettingRow } from "./settings.tsx";
 import { tabLabels } from "./navigation.ts";
 import { navigationKey } from "./keyboard.ts";
@@ -58,22 +59,28 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   const failing = Object.entries(readings).flatMap(([name, reading]) =>
     reading.status === "error" ? [`${name}: ${reading.error.message}`] : [],
   );
-  const taskTab = tab === "Tasks" || tab === "Needs you";
-  const tasks = project.data.issues.filter(
-    (issue) =>
-      (tab === "Needs you" ? issue.state === "needs-user" : issue.state !== "needs-user") &&
-      matches(terminalConfig.taskFacets, chosen, issue),
+  const taskTab = tab === "Tasks";
+  const tasks = project.data.issues.filter((issue) =>
+    matches(terminalConfig.taskFacets, chosen, issue),
   );
   const nts = tab === "Health" || isNtsPage(tab);
   const report =
     tab === "Health" ? project.nts.health : isNtsPage(tab) ? project.nts.page(tab) : undefined;
   const evidence = tableRows(report);
-  const items = taskTab ? tasks : tab === "Agents" ? [...agents, ...settings] : evidence;
+  const needs = needsItems(project.data.needs);
+  const items = taskTab
+    ? tasks
+    : tab === "Agents"
+      ? [...agents, ...settings]
+      : tab === "Needs you"
+        ? needs
+        : evidence;
   const currentId = items.find((item) => item.id === selected[tab])?.id ?? items[0]?.id;
   const task = tasks.find((item) => item.id === currentId),
     agent = agents.find((item) => item.id === currentId),
-    setting = tab === "Agents" ? settings.find((item) => item.id === currentId) : undefined;
-  const split = taskTab || tab === "Agents";
+    setting = tab === "Agents" ? settings.find((item) => item.id === currentId) : undefined,
+    need = tab === "Needs you" ? needs.find((item) => item.id === currentId) : undefined;
+  const split = taskTab || tab === "Agents" || tab === "Needs you";
   function choose(id: string) {
     setSelected((old) => ({ ...old, [tab]: id }));
     setFocus("list");
@@ -125,10 +132,12 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
             id: item.id,
             line: `${item.name} · ${item.state} · ${item.path ?? ""}`,
           }))
-        : tasks.map((item) => ({
-            id: item.id,
-            line: `#${item.number} ${item.title} · ${item.state}`,
-          }));
+        : target === "Needs you"
+          ? needs.map((item) => ({ id: item.id, line: needsLabel(item).label }))
+          : tasks.map((item) => ({
+              id: item.id,
+              line: `#${item.number} ${item.title} · ${item.state}`,
+            }));
     if (!candidates.length) return setMessage("No items in this view.");
     void local(`Find ${target}`, async () => {
       const index = await tools.find(
@@ -308,6 +317,14 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       git();
       return;
     }
+    if (need && key.name === "return") {
+      key.preventDefault();
+      void local("Needs you", async () => {
+        const said = await answerNeed(need, project, tools, terminalConfig.editor);
+        if (said) setMessage(said);
+      });
+      return;
+    }
     if (setting && key.name === "return") {
       key.preventDefault();
       change(setting);
@@ -331,7 +348,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       : name === "Agents"
         ? agents.length
         : name === "Needs you"
-          ? project.data.issues.filter((issue) => issue.state === "needs-user").length
+          ? needsCount(project.data.needs)
           : undefined;
   const groupOf = (issue: (typeof tasks)[number]) =>
     `${issue.stream}${issue.group ? ` › ${issue.group}` : ""}`;
@@ -346,8 +363,35 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       <Line color={c.muted}>
         {taskTab
           ? `${tasks.length} of ${project.data.issues.length}${label ? ` · ${label}` : ""}`
-          : `${agents.length} agents${ended ? ` · ${ended} ended ${showEnded ? "shown" : "hidden"} (e)` : ""}`}
+          : tab === "Needs you"
+            ? `${project.data.needs.questions.length} questions · ${project.data.needs.unasked.length} not asked yet · Enter answers`
+            : `${agents.length} agents${ended ? ` · ${ended} ended ${showEnded ? "shown" : "hidden"} (e)` : ""}`}
       </Line>
+      {tab === "Needs you" &&
+        needsGroups.map((group) => {
+          const rows = needs.filter((item) => item.kind === group.kind);
+          if (!rows.length) return null;
+          return (
+            <box key={group.kind} flexDirection="column" marginTop={1} flexShrink={0}>
+              <Heading>{`${group.title} · ${rows.length}`}</Heading>
+              {rows.map((item) => {
+                const { label: text, end } = needsLabel(item);
+                return (
+                  <ListRow
+                    key={item.id}
+                    id={`row-${item.id}`}
+                    selected={item.id === currentId}
+                    focused={focus === "list"}
+                    label={`${item.kind === "answered" ? "✓" : "?"} ${text}`}
+                    end={end}
+                    color={item.kind === "answered" ? c.muted : c.warning}
+                    onSelect={() => choose(item.id)}
+                  />
+                );
+              })}
+            </box>
+          );
+        })}
       {taskTab &&
         [...new Set(tasks.map(groupOf))].map((group) => (
           <box key={group} flexDirection="column" marginTop={1} flexShrink={0}>
@@ -392,7 +436,9 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
         <Line color={c.muted}>
           {taskTab
             ? "No matching tasks. f changes filters; F clears them."
-            : "No native terminals. n opens a session."}
+            : tab === "Needs you"
+              ? "Nothing waits on you."
+              : "No native terminals. n opens a session."}
         </Line>
       )}
     </ScrollPane>
@@ -454,6 +500,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
         {taskTab && task && <TaskDetail issue={task} />}
         {tab === "Agents" && agent && <AgentDetail agent={agent} />}
         {setting && <SettingDetail row={setting} />}
+        {need && <NeedsDetail item={need} />}
         {tab === "Plan" && <Line>{project.data.plan ?? "Waiting for docs/plan.md…"}</Line>}
       </ScrollPane>
     );
@@ -465,7 +512,9 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     ...(taskTab ? ["f filter", "F clear"] : []),
     ...(tab === "Agents"
       ? ["n new", "e ended", "Enter type/change", "Ctrl+] back"]
-      : ["Enter details"]),
+      : tab === "Needs you"
+        ? ["Enter answer"]
+        : ["Enter details"]),
     "l git",
     "? help",
   ];

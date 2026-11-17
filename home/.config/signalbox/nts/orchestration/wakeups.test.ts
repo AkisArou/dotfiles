@@ -12,7 +12,8 @@ import type { Mailbox } from "signalbox/ext/orchestration";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
-import type { UserDecisions } from "./tools.ts";
+import type { Questions } from "./needs.ts";
+import type { NeedsView } from "../shared/model.ts";
 import { sourceOf, wakeupFeed } from "./wakeups.ts";
 
 const landed = (id: string) =>
@@ -52,7 +53,8 @@ test("a source's history before it first reads ready is not news; later events a
   const work = key<Assignments>("work");
   const landing = key<Readable<LandingStatus>>("landing");
   const fullCheck = key<Readable<FullCheckStatus>>("full-check");
-  const decisions = key<UserDecisions>("decisions");
+  const decisions = key<Questions>("decisions");
+  const needs = key<Readable<NeedsView>>("needs");
   const mailbox = key<Mailbox>("mailbox");
   const landingCell = new Cell<LandingStatus>(); // loading, as at a host's start
   const state = sqliteWorkflowState({ path: join(directory, "state.sqlite") });
@@ -69,13 +71,14 @@ test("a source's history before it first reads ready is not news; later events a
             provide(work, { assignments: new Cell([]) } as unknown as Assignments),
             provide(landing, landingCell),
             provide(fullCheck, new Cell<FullCheckStatus>()),
-            provide(decisions, { requests: new Cell([]) } as unknown as UserDecisions),
+            provide(decisions, { requests: new Cell([]) } as unknown as Questions),
+            provide(needs, new Cell<NeedsView>({ questions: [], unasked: [], answered: [] })),
             provide(mailbox, {
               send: async ({ id }: { id: string }) => void sent.push(id),
             } as unknown as Mailbox),
           ],
         },
-        wakeupFeed({ state: state.state, mailbox, work, landing, fullCheck, decisions }),
+        wakeupFeed({ state: state.state, mailbox, work, landing, fullCheck, decisions, needs }),
       ],
     }),
   );

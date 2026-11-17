@@ -100,14 +100,39 @@ export type AssignmentView = {
   error: string | null;
   acceptedAt: number;
 };
-export type UserDecisionView = {
+/** Where an issue goes once its question is answered. */
+export type IssueState = "ready" | "parked" | "held";
+/** One question for the owner: its choices, and once answered, the answer and what it did. */
+export type QuestionView = {
   id: string;
-  status: string;
   revision: number;
+  status: "pending" | "decided" | "expired" | "withdrawn";
   question: string;
   context: string;
-  answer: string | null;
+  issue: { number: number; title: string; url: string } | null;
+  options: { label: string; then?: IssueState }[];
+  askedBy: "coordinator" | "owner";
   requestedAt: number;
+  answer: string | null;
+  then: IssueState | null;
+  answeredAt: number | null;
+  /** The answer on the issue: "done", "waiting", or why the last try failed (retried). */
+  posted: string | null;
+};
+/** What waits on the owner: open questions, issues nobody has asked about yet, recent answers. */
+export type NeedsView = {
+  questions: QuestionView[];
+  unasked: { number: number; title: string; url: string }[];
+  answered: QuestionView[];
+};
+/** How many things wait on the owner: open questions and issues nobody has asked about. */
+export function needsCount(needs: NeedsView): number {
+  return needs.questions.length + needs.unasked.length;
+}
+export const issueStateLabels: Record<IssueState, string> = {
+  ready: "ready to start",
+  parked: "parked (waits on your word)",
+  held: "held (waits on what the issue names)",
 };
 export const settings = source<SettingsView>("nts.settings");
 /** Changes settings.json through the host; role models are profile ids. */
@@ -132,7 +157,7 @@ export function modelsLine(role: { models: ProfileView[] }): string {
   return role.models.map((model) => model.label).join(" → ");
 }
 export const assignments = source<AssignmentView[]>("nts.assignments");
-export const userDecisions = source<UserDecisionView[]>("nts.user-decisions");
+export const needs = source<NeedsView>("nts.needs");
 export const setAvailability = operation<
   { harness: Harness; unavailable: { reason: string; until?: number } | null },
   { ok: true }
@@ -144,10 +169,17 @@ export const assignTask = operation<
 export const cancelAssignment = operation<{ assignment: string; reason: string }, { ok: true }>(
   "nts.assignments.cancel",
 );
-export const answerDecision = operation<
-  { id: string; revision: number; answer: string },
+/** Answers a question: one of its options, or written text (and, about an issue, where it goes). */
+export const answerQuestion = operation<
+  | { id: string; revision: number; option: number }
+  | { id: string; revision: number; answer: string; then?: IssueState },
   { ok: true }
->("nts.user-decisions.answer");
+>("nts.needs.answer");
+/** Answers an issue that waits on the owner but has no question yet. */
+export const answerIssue = operation<
+  { issue: number; answer: string; then: IssueState },
+  { ok: true }
+>("nts.needs.answer-issue");
 export const reworkAssignment = operation<{ assignment: string; notes: string }, { ok: true }>(
   "nts.assignments.rework",
 );
@@ -201,6 +233,8 @@ export const messageWorker = operation<
 >("nts.assignments.message-worker");
 export const tabs = [
   "Now",
+  // Second: what waits on the owner is one key away from anywhere.
+  "Needs you",
   "Tasks",
   "Agents",
   "Landing",
@@ -210,7 +244,6 @@ export const tabs = [
   "Plan",
   "Machine",
   "Health",
-  "Needs you",
 ] as const;
 export type Tab = (typeof tabs)[number];
 export const tabKey = (index: number) => (index < 9 ? String(index + 1) : index === 9 ? "0" : "");

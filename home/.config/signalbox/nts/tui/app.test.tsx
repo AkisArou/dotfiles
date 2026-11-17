@@ -1,5 +1,6 @@
 /** @jsxImportSource @opentui/react */
 import { test } from "node:test";
+import { writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 import { act } from "react";
 import { testRender } from "@opentui/react/test-utils";
@@ -86,7 +87,27 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     ],
     "nts.settings": settingsView({ reason: "usage low" }),
     "nts.assignments": [],
-    "nts.user-decisions": [],
+    "nts.needs": {
+      questions: [
+        {
+          id: "mac",
+          revision: 1,
+          status: "pending",
+          question: "Buy a Mac mini?",
+          context: "Only for the macOS host port.",
+          issue: { number: 583, title: "Compiler host ports", url: "https://example/583" },
+          options: [{ label: "No, leave it unrun", then: "parked" }, { label: "Yes, buy one" }],
+          askedBy: "coordinator",
+          requestedAt: 1,
+          answer: null,
+          then: null,
+          answeredAt: null,
+          posted: null,
+        },
+      ],
+      unasked: [{ number: 777, title: "Share the recipes", url: "https://example/777" }],
+      answered: [],
+    },
     "nts.agents": [
       {
         id: "worker",
@@ -140,7 +161,11 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
           tools={{
             find: (lines, title) => pick(lines, title),
             findMany: (lines, title, chosen) => pickMany(lines, title, chosen),
-            run: async (_command, cwd) => {
+            run: async (command, cwd) => {
+              // The editor for a written answer: the person writes it into the file.
+              const file = command.args?.at(-1);
+              if (file?.includes("answer-"))
+                return writeFile(file, "Leave it unrun\n# notes stay out\n");
               gitRuns.push(cwd);
             },
           }}
@@ -167,7 +192,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await keys("1");
     assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
     assert.match(setup.captureCharFrame(), /Agents: \d+ · 1 ended/);
-    await keys("2");
+    await keys("3");
     // Every tab's bottom bar says how it runs, the pause first.
     assert.match(
       setup.captureCharFrame(),
@@ -200,12 +225,12 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await setup.renderOnce();
     assert.match(setup.captureCharFrame(), /Array ownership/);
     assert.doesNotMatch(setup.captureCharFrame(), /Withdrawal cancellation/);
-    await keys("F", "3", "l", "L");
+    await keys("F", "4", "l", "L");
     assert.deepEqual(gitRuns, ["/pool/1", "/nts"]);
     await act(async () => {
       setup.resize(80, 24);
     });
-    await keys("2");
+    await keys("3");
     assert.doesNotMatch(setup.captureCharFrame(), /Drain owned work/);
     await act(async () => {
       setup.mockInput.pressEnter();
@@ -214,7 +239,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     assert.match(setup.captureCharFrame(), /Drain owned work/);
     assert.equal(calls.length, 0);
     // Ended sessions are hidden in Agents until `e` shows them.
-    await keys("escape", "3");
+    await keys("escape", "4");
     assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
     assert.match(setup.captureCharFrame(), /1 ended hidden \(e\)/);
     await keys("e");
@@ -272,6 +297,43 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     assert.equal(offered?.title, "Worker pick");
     assert.ok(offered?.lines.some((line) => line.startsWith("✓ coordinator:")));
     assert.deepEqual(inputs.at(-1), { roles: { worker: { pick: "spread" } }, version: "v1" });
+    // Needs you is tab 2: the question's choices come first; answering one sends that option.
+    const answered = async (count: number) => {
+      for (let i = 0; i < 100 && calls.length < count; i++)
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        });
+    };
+    await keys("escape", "2");
+    assert.match(setup.captureCharFrame(), /Questions · 1/);
+    assert.match(setup.captureCharFrame(), /Not asked yet · 1/);
+    pick = async (lines, title) => {
+      offered = { lines, title };
+      return 0;
+    };
+    let before = calls.length;
+    await act(async () => {
+      setup.mockInput.pressEnter();
+    });
+    await answered(before + 1);
+    assert.ok(offered?.lines.includes("1. No, leave it unrun  → parked (waits on your word)"));
+    assert.equal(offered?.lines.at(-1), "✎ Write a different answer");
+    assert.equal(calls.at(-1), "nts.needs.answer");
+    assert.deepEqual(inputs.at(-1), { id: "mac", revision: 1, option: 0 });
+    // An issue nobody asked about: the answer is written in the editor, then where it goes.
+    pick = async (lines, title) => {
+      offered = { lines, title };
+      return lines.findIndex((line) => line.includes("parked"));
+    };
+    await keys("j");
+    before = calls.length;
+    await act(async () => {
+      setup.mockInput.pressEnter();
+    });
+    await answered(before + 1);
+    assert.equal(offered?.title, "Then #777");
+    assert.equal(calls.at(-1), "nts.needs.answer-issue");
+    assert.deepEqual(inputs.at(-1), { issue: 777, answer: "Leave it unrun", then: "parked" });
   } finally {
     await act(async () => {
       client.close();
@@ -297,7 +359,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
     "nts.issues": [],
     "nts.settings": settingsView(null),
     "nts.assignments": [],
-    "nts.user-decisions": [],
+    "nts.needs": { questions: [], unasked: [], answered: [] },
     "nts.agents": agents,
     "nts.plan": "# Plan",
   };
@@ -401,7 +463,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
       await new Promise((resolve) => setImmediate(resolve));
     });
     await setup.renderOnce();
-    await keys("6", "G");
+    await keys("7", "G");
     assert.equal(await selectedCase(), 199, "G reaches the last item without opening lazygit");
     await keys("g", "g");
     assert.equal(await selectedCase(), 0);
@@ -423,7 +485,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
     await ctrl("j");
     assert.equal(await selectedCase(), 0, "modified j must not act as plain j");
     await keys("j", "j", "g", "t");
-    assert.match(setup.captureCharFrame(), /7 Conformance/);
+    assert.match(setup.captureCharFrame(), /8 Conformance/);
     await keys("g", "T");
     assert.equal(await selectedCase(), 2, "tab changes retain each view's selection");
 
@@ -435,7 +497,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
     assert.match(setup.captureCharFrame(), /evidence line 59/);
     await keys("g", "g");
     assert.equal(setup.captureCharFrame(), top, "gg returns to the top of details");
-    await keys("escape", "3");
+    await keys("escape", "4");
     await ctrl("d");
     await keys("return");
     const agentIndex = Number(/Agent (\d{2})/.exec(setup.captureCharFrame())?.[1]);
@@ -443,10 +505,10 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
       agentIndex > 0 && agentIndex < half,
       "two-line agents move fewer items per half pane",
     );
-    await keys("escape", "g", "2", "j");
+    await keys("escape", "g", "3", "j");
     assert.equal(gitRuns.length, 0, "unrelated keys cancel the g prefix without running git");
 
-    await keys("4");
+    await keys("5");
     assert.match(setup.captureCharFrame(), /NTS landing service/);
     assert.equal((setup.captureCharFrame().match(/Landing/g) ?? []).length, 1, "one Landing tab");
     await keys("y", "n", "l", "s", "c");

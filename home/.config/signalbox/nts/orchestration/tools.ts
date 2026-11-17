@@ -10,11 +10,12 @@ import { agentTool, agentToolset } from "signalbox/ext/agents";
 import type { AgentToolContext } from "signalbox/ext/agents";
 import { assignmentRequest } from "signalbox/ext/assignments";
 import type { Assignment, Assignments } from "signalbox/ext/assignments";
-import type { Decisions } from "signalbox/ext/decisions";
 import type { AgentService, Mailbox } from "signalbox/ext/orchestration";
 import type { Issue } from "../shared/model.ts";
 import { toolInput } from "./agents.ts";
 import type { TaskRoute } from "./task.ts";
+import { questionInput } from "./needs.ts";
+import type { Questions } from "./needs.ts";
 import { profileId, profileLabel } from "./models.ts";
 import type { Settings, SettingsFile } from "./settings.ts";
 import type { TaskState } from "./task-model.ts";
@@ -35,17 +36,13 @@ export class Late<T> {
   }
 }
 
-export const userQuestion = z.object({ question: z.string().min(1), context: z.string() });
-export const userAnswer = z.object({ answer: z.string().min(1) });
-export type UserDecisions = Decisions<z.infer<typeof userQuestion>, z.infer<typeof userAnswer>>;
-
 export interface Wiring {
   readonly work: Late<Capability<Assignments>>;
   readonly route: Late<TaskRoute>;
   readonly coordinator: Late<Capability<AgentService>>;
   readonly mailbox: Late<Capability<Mailbox>>;
   readonly issues: Capability<Readable<Issue[]>>;
-  readonly decisions: Capability<UserDecisions>;
+  readonly decisions: Capability<Questions>;
   readonly priorities: Capability<Priorities>;
   readonly settings: Capability<SettingsFile>;
 }
@@ -429,20 +426,23 @@ export function coordinatorTools(wiring: Wiring) {
       agentTool({
         name: "ask_user",
         description:
-          "Ask the user a question that is theirs to decide (deletions, product direction, spending, outward PRs). Use a stable id per question.",
-        input: toolInput(
-          z.object({ id: z.string().min(1), question: z.string().min(1), context: z.string() }),
-        ),
+          "Ask the owner a question that is theirs to decide (deletions, product direction, spending, outward PRs, scope beyond a task's card). " +
+          "State the decision in one sentence; put what they need to decide it in context. When it is about an issue, name the issue: it is labelled state:needs-user until answered, and the answer is posted on it. " +
+          "When the answer is a choice, give options, each with then: where the issue goes after it (ready, parked or held). Use a stable id per question.",
+        input: toolInput(questionInput.extend({ id: z.string().min(1) })),
         output: json,
         run: (input, context) =>
-          authorized(context, async () =>
-            toJson(
-              await context.get(wiring.decisions).request({
-                id: input.id,
-                input: { question: input.question, context: input.context },
-              }),
-            ),
-          ),
+          authorized(context, async () => {
+            const { id, ...question } = input;
+            if (
+              question.issue !== undefined &&
+              !(latestValue(context.get(wiring.issues)) ?? []).some(
+                (issue) => issue.number === question.issue,
+              )
+            )
+              throw new Error(`#${question.issue} is not an open issue`);
+            return toJson(await context.get(wiring.decisions).request({ id, input: question }));
+          }),
       }),
       agentTool({
         name: "save_checkpoint",

@@ -13,17 +13,21 @@ import type { FullCheckStatus } from "../status/full-check.ts";
 import { latestValue } from "signalbox/core";
 import { taskState } from "./task-model.ts";
 import type { TaskState } from "./task-model.ts";
-import type { UserDecisions } from "./tools.ts";
+import type { Questions } from "./needs.ts";
+import type { NeedsView } from "../shared/model.ts";
 
 export type Wakeup = { readonly id: string; readonly text: string };
 
-export const SOURCES = ["assignments", "landing", "fullCheck", "decisions"] as const;
+export const SOURCES = ["assignments", "landing", "fullCheck", "decisions", "needs"] as const;
+/** Sources whose standing state is news: an issue that waited unasked before the coordinator started still needs its question. */
+const ANNOUNCES_HISTORY: ReadonlySet<WakeupSource> = new Set(["needs"]);
 export type WakeupSource = (typeof SOURCES)[number];
 /** Which source an event comes from, by its stable ID. */
 export function sourceOf(id: string): WakeupSource {
   if (id.startsWith("landing/")) return "landing";
   if (id.startsWith("culprit/")) return "fullCheck";
   if (id.startsWith("decided/")) return "decisions";
+  if (id.startsWith("needs-question/")) return "needs";
   return "assignments";
 }
 
@@ -47,7 +51,15 @@ export function wakeups(observed: {
   readonly assignments: readonly Assignment[];
   readonly landing: LandingStatus | undefined;
   readonly fullCheck: FullCheckStatus | undefined;
-  readonly decided: readonly { id: string; answer: string }[];
+  readonly decided: readonly {
+    id: string;
+    question: string;
+    issue?: number | undefined;
+    answer: string;
+    then?: string | undefined;
+  }[];
+  /** Issues that wait on the owner with no question asked about them. */
+  readonly unasked?: readonly { number: number; title: string }[];
   /** The observation's time, for phase budgets. */
   readonly now: number;
 }): Wakeup[] {
@@ -136,7 +148,21 @@ export function wakeups(observed: {
   for (const decision of observed.decided)
     events.push({
       id: `decided/${decision.id}`,
-      text: `The user answered ${decision.id}: ${decision.answer}`,
+      text:
+        `The owner answered ${decision.id}${decision.issue ? ` (about #${decision.issue})` : ""}: "${decision.question}"\n` +
+        `Answer: ${decision.answer}` +
+        (decision.issue && decision.then
+          ? `\n#${decision.issue} is now ${decision.then}; the answer is posted on it.`
+          : "") +
+        "\nAct on it.",
+    });
+  for (const issue of observed.unasked ?? [])
+    events.push({
+      id: `needs-question/${issue.number}`,
+      text:
+        `#${issue.number} ${issue.title} waits on the owner (state:needs-user), but nobody has asked them a question. ` +
+        `Read it, then ask_user with issue ${issue.number}: the decision in one sentence, what they need to decide it in context, ` +
+        "and options when the answer is a choice, each with then (ready, parked or held).",
     });
   return events;
 }
@@ -147,7 +173,8 @@ export function wakeupFeed(options: {
   readonly work: Capability<Assignments>;
   readonly landing: Capability<Readable<LandingStatus>>;
   readonly fullCheck: Capability<Readable<FullCheckStatus>>;
-  readonly decisions: Capability<UserDecisions>;
+  readonly decisions: Capability<Questions>;
+  readonly needs: Capability<Readable<NeedsView>>;
 }): Extension {
   const NAMESPACE = "nts/wakeups";
   return {
@@ -159,6 +186,7 @@ export function wakeupFeed(options: {
       options.landing,
       options.fullCheck,
       options.decisions,
+      options.needs,
     ],
     start(context) {
       const store = context.get(options.state);
@@ -169,7 +197,14 @@ export function wakeupFeed(options: {
           fullCheck: latestValue(context.get(options.fullCheck)),
           decided: (latestValue(context.get(options.decisions).requests) ?? [])
             .filter((request) => request.status === "decided" && request.result)
-            .map((request) => ({ id: request.id, answer: request.result!.decision.answer })),
+            .map((request) => ({
+              id: request.id,
+              question: request.input.question,
+              issue: request.input.issue,
+              answer: request.result!.decision.answer,
+              then: request.result!.decision.then,
+            })),
+          unasked: latestValue(context.get(options.needs))?.unasked ?? [],
           now: Date.now(),
         });
         // Each source's history before the coordinator saw it is not news: its
@@ -181,6 +216,7 @@ export function wakeupFeed(options: {
           landing: context.get(options.landing).get(),
           fullCheck: context.get(options.fullCheck).get(),
           decisions: context.get(options.decisions).requests.get(),
+          needs: context.get(options.needs).get(),
         };
         const unseen = await store.transaction(NAMESPACE, (tx) => {
           const legacy = tx.get("seeded") !== undefined;
@@ -188,6 +224,10 @@ export function wakeupFeed(options: {
             legacy || tx.get(`seeded/${source}`) !== undefined;
           for (const source of SOURCES) {
             if (seeded(source) || readings[source].status !== "ready") continue;
+            if (ANNOUNCES_HISTORY.has(source)) {
+              tx.set(`seeded/${source}`, true);
+              continue;
+            }
             for (const event of events)
               if (sourceOf(event.id) === source) tx.set(`seen/${event.id}`, true);
             tx.set(`seeded/${source}`, true);

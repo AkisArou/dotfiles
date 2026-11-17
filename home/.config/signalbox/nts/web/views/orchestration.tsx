@@ -307,37 +307,3 @@ export function Orchestration({ project }: { project: Project }) {
     </div>
   );
 }
-
-export function UserDecisions({ project }: { project: Project }) {
-  const pending = project.data.decisions.filter((decision) => decision.status === "pending");
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  if (!pending.length) return null;
-  return (
-    <Section title="Questions from the coordinator">
-      {pending.map((decision) => (
-        <div key={decision.id} className="decision">
-          <strong>{decision.question}</strong>
-          <p className="subtle">{decision.context}</p>
-          <textarea
-            value={answers[decision.id] ?? ""}
-            onChange={(event) => setAnswers({ ...answers, [decision.id]: event.target.value })}
-          />
-          <Action
-            project={project}
-            primary
-            disabled={!answers[decision.id]?.trim()}
-            onClick={() =>
-              project.commands.answerDecision.run({
-                id: decision.id,
-                revision: decision.revision,
-                answer: answers[decision.id]!.trim(),
-              })
-            }
-          >
-            Answer
-          </Action>
-        </div>
-      ))}
-    </Section>
-  );
-}

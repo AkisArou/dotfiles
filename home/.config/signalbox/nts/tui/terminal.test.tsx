@@ -148,7 +148,7 @@ test("the embedded native terminal owns keys and paste; Ctrl+] returns to naviga
       await new Promise((resolve) => setImmediate(resolve));
     });
     await act(async () => {
-      await screen.mockInput.pressKeys(["3"]);
+      await screen.mockInput.pressKeys(["4"]);
     });
     await act(async () => {
       screen.mockInput.pressEnter();

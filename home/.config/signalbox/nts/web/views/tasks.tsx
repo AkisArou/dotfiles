@@ -5,14 +5,13 @@ import { Selector } from "@astryxdesign/core/Selector";
 import type { Project } from "../../shared/use-project.ts";
 import { Badge, Empty } from "../components.tsx";
 
-export function Tasks({ project, needsYou = false }: { project: Project; needsYou?: boolean }) {
+export function Tasks({ project }: { project: Project }) {
   const [query, setQuery] = useState(""),
     [stream, setStream] = useState("all"),
     [state, setState] = useState("all"),
     [selected, setSelected] = useState<string>();
-  const issues = project.data.issues.filter((issue) =>
-    needsYou ? issue.state === "needs-user" : issue.state !== "needs-user",
-  );
+  // Every task, those waiting on you included (Needs you is where they are answered).
+  const issues = project.data.issues;
   const visible = issues.filter(
     (issue) =>
       (stream === "all" || issue.stream === stream) &&

@@ -118,6 +118,11 @@ test("the coordinator starts with its brief and receives each event once through
     issues: issuesKey,
     agents: () => agents,
     settings: { coordinator: true, file: join(directory, "settings.json") },
+    // No issue is asked about here: GitHub is never written.
+    gitHub: async () => {
+      throw new Error("no GitHub in this test");
+    },
+    refreshIssues: async () => {},
   });
   const app = await startExtensions(
     defineConfig({
@@ -154,7 +159,10 @@ test("the coordinator starts with its brief and receives each event once through
     requestId: "d1",
   });
   const message = await until(
-    () => delivered.find((entry) => /The user answered q1: yes/.test(entry.text)),
+    () =>
+      delivered.find((entry) =>
+        /The owner answered q1: "Delete old pins\?"\nAnswer: yes/.test(entry.text),
+      ),
     30_000,
   );
   assert.equal(message.to, coordinator.id);

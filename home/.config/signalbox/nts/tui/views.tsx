@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, Issue } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays, modelsLine } from "../shared/model.ts";
+import { assignmentPhase, assignmentSays, modelsLine, needsCount } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
@@ -23,17 +23,26 @@ export const stateColor = (state: string) =>
 export function NowView({ project }: { project: Project }) {
   // Ended sessions are history; the Agents tab shows them on request.
   const live = project.data.agents.filter((agent) => agent.state !== "ended");
-  const needsYou = project.data.issues.filter((issue) => issue.state === "needs-user");
+  const needs = project.data.needs;
   return (
     <>
-      <Section title={`Needs you: ${needsYou.length}`}>
-        {needsYou.slice(0, 6).map((issue) => (
-          <Line key={issue.id} color={c.warning}>{`? #${issue.number} ${issue.title}`}</Line>
+      <Section
+        title={`Needs you: ${needsCount(needs)}${needsCount(needs) ? " · 2 answers them" : ""}`}
+      >
+        {needs.questions.slice(0, 6).map((question) => (
+          <Line key={question.id} color={c.warning}>
+            {`? ${question.issue ? `#${question.issue.number} ` : ""}${question.question}`}
+          </Line>
         ))}
-        {!needsYou.length && (
+        {needs.unasked.slice(0, 6).map((issue) => (
+          <Line key={issue.number} color={c.warning}>
+            {`? #${issue.number} ${issue.title} (not asked yet)`}
+          </Line>
+        ))}
+        {!needsCount(needs) && (
           <Line color={c.muted}>
             {project.issues.status === "ready"
-              ? "No open questions."
+              ? "Nothing waits on you."
               : "Waiting for GitHub issues…"}
           </Line>
         )}
@@ -75,14 +84,6 @@ export function NowView({ project }: { project: Project }) {
             color={c.muted}
           >{`workers ${modelsLine(project.data.settings.roles.worker)} · reviewers ${modelsLine(project.data.settings.roles.reviewer)} · coordinator ${modelsLine(project.data.settings.roles.coordinator)}`}</Line>
         )}
-        {project.data.decisions
-          .filter((d) => d.status === "pending")
-          .map((d) => (
-            <Line
-              key={d.id}
-              color={c.warning}
-            >{`? ${d.question} (answer in the browser's Needs you)`}</Line>
-          ))}
       </Section>
       <Section title="Streams">
         {[...new Set(project.data.issues.map((issue) => issue.stream))].map((stream) => {

@@ -23,14 +23,15 @@ export function useProject() {
   const startTerminal = useCommand(refs.startTerminal);
   const settings = useSource(refs.settings),
     assignments = useSource(refs.assignments),
-    decisions = useSource(refs.userDecisions);
+    needs = useSource(refs.needs);
   const setSettings = useCommand(refs.setSettings),
     pauseTasks = useCommand(refs.pauseTasks),
     resumeTasks = useCommand(refs.resumeTasks);
   const setAvailability = useCommand(refs.setAvailability),
     assignTask = useCommand(refs.assignTask),
     cancelAssignment = useCommand(refs.cancelAssignment),
-    answerDecision = useCommand(refs.answerDecision);
+    answerQuestion = useCommand(refs.answerQuestion),
+    answerIssue = useCommand(refs.answerIssue);
   const [error, setError] = useState<string>();
   const perform = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
     setError(undefined);
@@ -59,7 +60,7 @@ export function useProject() {
       plan: current(plan),
       settings: current(settings),
       assignments: current(assignments) ?? [],
-      decisions: current(decisions) ?? [],
+      needs: current(needs) ?? { questions: [], unasked: [], answered: [] },
     },
     commands: {
       startTerminal,
@@ -69,7 +70,8 @@ export function useProject() {
       setAvailability,
       assignTask,
       cancelAssignment,
-      answerDecision,
+      answerQuestion,
+      answerIssue,
     },
     perform,
     error,
@@ -82,7 +84,8 @@ export function useProject() {
       setAvailability.pending ||
       assignTask.pending ||
       cancelAssignment.pending ||
-      answerDecision.pending,
+      answerQuestion.pending ||
+      answerIssue.pending,
     online: connection.status === "connected",
   };
 }
