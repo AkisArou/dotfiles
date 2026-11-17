@@ -31,12 +31,15 @@ await build({
   tsconfig: "tsconfig.tui.json",
   sourcemap: true,
 });
-// The TUI talks to this project's host unless SIGNALBOX_API_URL says otherwise.
+// The TUI talks to this project's host unless SIGNALBOX_API_URL says otherwise,
+// and names its terminal after the project.
 const project = JSON.parse(await readFile(resolve(root, "project.json"), "utf8")) as {
+  name: string;
   apiPort: number;
 };
 const env = {
   ...process.env,
+  SIGNALBOX_PROJECT: project.name,
   SIGNALBOX_API_URL:
     process.env.SIGNALBOX_API_URL ??
     process.env.SIGNALBOX_NTS_API_URL ??

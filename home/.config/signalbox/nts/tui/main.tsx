@@ -1,5 +1,4 @@
 /** @jsxImportSource @opentui/react */
-import { readFileSync } from "node:fs";
 import { createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
 import { createClient, webSocketConnection } from "signalbox/client";
@@ -22,6 +21,9 @@ const ended = new Promise<void>((resolve) => {
 });
 const renderer = await createCliRenderer({
   screenMode: "alternate-screen",
+  // The TUI draws no images. Detecting them sends a Kitty graphics query (an
+  // APC string), which tmux takes as the pane's title.
+  environment: { OPENTUI_GRAPHICS: "false" },
   backgroundColor: colors.background,
   exitOnCtrlC: false,
   onDestroy() {
@@ -29,11 +31,9 @@ const renderer = await createCliRenderer({
     finish();
   },
 });
-// Name the terminal (and its tmux window) sbn@<project>, plain ASCII; tmux themes that
-// read a node program's pane title would otherwise show an empty name.
-renderer.setTerminalTitle(
-  `sbn@${(JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as { name: string }).name}`,
-);
+// Name the terminal (and its tmux window) sbn@<project>; the launcher names the project.
+if (process.env.SIGNALBOX_PROJECT)
+  renderer.setTerminalTitle(`sbn@${process.env.SIGNALBOX_PROJECT}`);
 const tools = createTerminalTools(renderer, terminalConfig.finder);
 createRoot(renderer).render(
   <SignalboxProvider client={client}>
