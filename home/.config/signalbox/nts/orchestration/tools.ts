@@ -11,7 +11,7 @@ import type { AgentToolContext } from "signalbox/ext/agents/tools";
 import { assignmentRequest } from "signalbox/ext/assignments/index";
 import type { Assignment, Assignments } from "signalbox/ext/assignments/index";
 import type { Decisions } from "signalbox/ext/decisions/index";
-import type { Mailbox, ManagedAgentService } from "signalbox/ext/orchestration/services";
+import type { Mailbox, AgentService } from "signalbox/ext/orchestration/services";
 import type { Issue } from "../shared/model.ts";
 import { toolInput } from "./agents.ts";
 import type { TaskRoute, TaskState } from "./task.ts";
@@ -37,7 +37,7 @@ export type UserDecisions = Decisions<z.infer<typeof userQuestion>, z.infer<type
 export interface Wiring {
   readonly work: Late<Capability<Assignments>>;
   readonly route: Late<TaskRoute>;
-  readonly coordinator: Late<Capability<ManagedAgentService>>;
+  readonly coordinator: Late<Capability<AgentService>>;
   readonly mailbox: Late<Capability<Mailbox>>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly decisions: Capability<UserDecisions>;
