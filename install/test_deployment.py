@@ -44,6 +44,7 @@ class DeploymentTests(unittest.TestCase):
         sources = {
             '.claude/settings.json': {'model': 'default'},
             '.claude.json': {'mcpServers': {}},
+            '.config/flameshot/flameshot.ini': '[General]\nshowDesktopNotification=false\n',
             '.config/muse/settings.json': {'schema_version': 1},
             '.config/BraveSoftware/Brave-Browser/Default/Preferences': {'browser': {}},
             '.config/BraveSoftware/Brave-Browser/Local State': {'brave': {}},
@@ -174,10 +175,16 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(old_stub.read_text(), 'nameserver 10.0.0.2\n')
 
     def test_full_deployment_merges_defaults_without_linking_live_agent_state(self):
-        for name in ('deploy-home', 'link_tree.py', 'configure_claude.py', 'configure_muse.py'):
+        for name in ('deploy-home', 'link_tree.py', 'configure_claude.py',
+                     'configure_flameshot.py', 'configure_muse.py'):
             shutil.copy2(Path(__file__).with_name(name), self.repo / 'install' / name)
         self.write(self.repo / 'home/.claude/settings.json', {'theme': 'dark', 'model': 'default'})
         self.write(self.repo / 'home/.claude.json', {'mcpServers': {}})
+        flameshot_defaults = self.write(self.repo / 'home/.config/flameshot/flameshot.ini',
+                                       '[General]\nshowDesktopNotification=false\n')
+        flameshot = self.home / '.config/flameshot/flameshot.ini'
+        flameshot.parent.mkdir(parents=True)
+        flameshot.symlink_to(flameshot_defaults)
         self.write(self.repo / 'home/.config/muse/settings.json', {
             'schema_version': 1, 'managed_hooks_path': 'dotfiles-hooks.json',
             'managed_hooks_env_vars': ['TMUX'],
@@ -198,22 +205,26 @@ class DeploymentTests(unittest.TestCase):
                        'XDG_STATE_HOME': str(self.home / '.local/state')}
         environment.pop('CLAUDE_CONFIG_DIR', None)
         command = [sys.executable, str(self.repo / 'install/deploy-home')]
-        before = {path: path.read_bytes() for path in (claude, account, muse, codex)}
+        before = {path: path.read_bytes() for path in (claude, account, muse, codex, flameshot)}
         preview = subprocess.run([*command, '--dry-run'], env=environment, check=True,
                                  capture_output=True, text=True)
         self.assertIn('Merge defaults: claude', preview.stdout)
+        self.assertIn('Merge defaults: flameshot', preview.stdout)
         self.assertFalse((self.home / '.local/state/dotfiles/claude').exists())
+        self.assertFalse((self.home / '.local/state/dotfiles/flameshot').exists())
         for path, contents in before.items():
             self.assertEqual(path.read_bytes(), contents)
         self.assertTrue(codex.is_symlink())
+        self.assertTrue(flameshot.is_symlink())
         subprocess.run(command, env=environment, check=True, capture_output=True)
         subprocess.run(command, env=environment, check=True, capture_output=True)
         self.assertEqual(json.loads(claude.read_text()), {'model': 'personal', 'theme': 'dark'})
         self.assertEqual(json.loads(account.read_text()), {'accountState': 'keep'})
         self.assertEqual(json.loads(muse.read_text())['managed_hooks_env_vars'], ['EXTRA', 'TMUX'])
         self.assertTrue(json.loads(muse.read_text())['personal'])
-        for path in (claude, account, muse, codex):
+        for path in (claude, account, muse, codex, flameshot):
             self.assertFalse(path.is_symlink())
+        self.assertEqual(flameshot_defaults.read_text(), '[General]\nshowDesktopNotification=false\n')
         codex.write_text('model = "personal"\n')
         self.assertEqual(defaults.read_text(), 'model = "default"\n')
         self.assertTrue((self.home / '.config/muse/dotfiles-hooks.json').is_symlink())

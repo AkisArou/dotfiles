@@ -17,6 +17,7 @@ DEPLOYMENT_RULES = {
         'merge': {
             '.claude/settings.json': 'claude',
             '.claude.json': 'claude',
+            '.config/flameshot/flameshot.ini': 'flameshot',
             '.config/muse/settings.json': 'muse',
             '.config/BraveSoftware': 'brave',
         },

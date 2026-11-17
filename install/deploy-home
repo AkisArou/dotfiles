@@ -8,6 +8,7 @@ import subprocess
 import sys
 
 import configure_claude
+import configure_flameshot
 import configure_muse
 from link_tree import deploy, deployment_rules, detach_config
 
@@ -20,7 +21,7 @@ def install_home(repo, home, *, dry_run=False):
         for relative, handler in rules.get(method, {}).items():
             if (source / relative).exists():
                 handlers.setdefault(handler, method)
-    unknown = handlers.keys() - {'claude', 'muse', 'brave', 'dconf'}
+    unknown = handlers.keys() - {'claude', 'flameshot', 'muse', 'brave', 'dconf'}
     if unknown:
         raise ValueError(f'Unknown deployment handlers: {", ".join(sorted(unknown))}')
     codex_config = Path(os.environ.get('CODEX_HOME') or home / '.codex') / 'config.toml'
@@ -32,6 +33,8 @@ def install_home(repo, home, *, dry_run=False):
             continue
         if handler == 'claude':
             configure_claude.main(source)
+        elif handler == 'flameshot':
+            configure_flameshot.main(source)
         elif handler == 'muse':
             configure_muse.install(source / '.config/muse/settings.json')
             config = Path(os.environ.get('XDG_CONFIG_HOME') or home / '.config')
