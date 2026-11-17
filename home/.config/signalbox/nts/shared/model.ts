@@ -208,6 +208,22 @@ export const reworkAssignment = operation<{ assignment: string; notes: string },
  */
 export type Tone = "good" | "active" | "attention" | "bad" | "quiet" | "plain";
 
+/**
+ * An agent's lines under its name, the same in the TUI and the web: the issue it works on (by its
+ * title), then its role and tree. path shortens the tree for display (the TUI writes ~ for home).
+ */
+export function agentLines(
+  agent: Agent,
+  issues: readonly Issue[],
+  path: (tree: string) => string = (tree) => tree,
+): string[] {
+  const issue = agent.issue ? issues.find((item) => item.number === agent.issue) : undefined;
+  return [
+    ...(agent.issue ? [`#${agent.issue}${issue ? ` ${issue.title}` : ""}`] : []),
+    `${agent.role} · ${agent.path ? path(agent.path) : "native terminal"}`,
+  ];
+}
+
 /** A session: busy is working, idle waits for a message, ended is gone; an unknown state wants a look. */
 export function agentTone(state: string): Tone {
   if (state === "busy" || state === "running") return "good";

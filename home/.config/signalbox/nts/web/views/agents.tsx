@@ -1,14 +1,16 @@
 // Agents: the sessions (a list beside the selected one's terminal), the
 // settings their launches follow, and the task assignments, as three routes
-// under /agents. A session working on an issue opens it in the issue drawer.
-import { agentTone } from "../../shared/model.ts";
+// under /agents. A session working on an issue opens it in the issue drawer;
+// ended sessions are kept out of the list and open in a drawer of their own.
+import { agentLines, agentTone } from "../../shared/model.ts";
+import type { Agent } from "../../shared/model.ts";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "@astryxdesign/core/Button";
 import { HStack } from "@astryxdesign/core/HStack";
+import { Drawer, DrawerHeader } from "@astryxdesign/core/Drawer";
 import { List, ListItem } from "@astryxdesign/core/List";
-import { Switch } from "@astryxdesign/core/Switch";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import type { Project } from "../../shared/use-project.ts";
 import { Action, Empty, Section, Status } from "../components.tsx";
@@ -46,10 +48,20 @@ export function AgentPanes({ children }: { children: ReactNode }) {
 export function Sessions({ project }: { project: Project }) {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<string>();
-  const [showEnded, setShowEnded] = useState(false);
-  const ended = project.data.agents.filter((agent) => agent.state === "ended").length;
-  const agents = project.data.agents.filter((agent) => showEnded || agent.state !== "ended"),
+  const [endedOpen, setEndedOpen] = useState(false);
+  // The most recently ended first.
+  const ended = project.data.agents.filter((agent) => agent.state === "ended").reverse();
+  const agents = project.data.agents.filter((agent) => agent.state !== "ended"),
     agent = agents.find((item) => item.id === selected) ?? agents[0];
+  const lines = (item: Agent) => (
+    <>
+      {agentLines(item, project.data.issues).map((line) => (
+        <span key={line} className="line">
+          {line}
+        </span>
+      ))}
+    </>
+  );
   const openIssue = (issue: number) =>
     void navigate({
       to: ".",
@@ -61,8 +73,15 @@ export function Sessions({ project }: { project: Project }) {
         title="Sessions"
         count={agents.length}
         aside={
-          ended > 0 && (
-            <Switch label={`${ended} ended`} size="sm" value={showEnded} onChange={setShowEnded} />
+          ended.length > 0 && (
+            <Button
+              label={`Show the ${ended.length} ended sessions`}
+              variant="ghost"
+              size="sm"
+              onClick={() => setEndedOpen(true)}
+            >
+              {`${ended.length} ended`}
+            </Button>
           )
         }
       >
@@ -72,7 +91,7 @@ export function Sessions({ project }: { project: Project }) {
               <ListItem
                 key={item.id}
                 label={item.name}
-                description={item.path ?? "native terminal"}
+                description={lines(item)}
                 endContent={<Status tone={agentTone(item.state)}>{item.state}</Status>}
                 isSelected={agent?.id === item.id}
                 onClick={() => setSelected(item.id)}
@@ -96,6 +115,26 @@ export function Sessions({ project }: { project: Project }) {
           ))}
         </div>
       </Section>
+      <Drawer
+        isOpen={endedOpen}
+        onOpenChange={setEndedOpen}
+        label="Ended sessions"
+        side="end"
+        width={560}
+        purpose="info"
+      >
+        <DrawerHeader title={`${ended.length} ended sessions`} onOpenChange={setEndedOpen} />
+        <List density="compact" hasDividers edge="padded">
+          {ended.map((item) => (
+            <ListItem
+              key={item.id}
+              label={item.name}
+              description={lines(item)}
+              endContent={<Status tone={agentTone(item.state)}>{item.state}</Status>}
+            />
+          ))}
+        </List>
+      </Drawer>
       {agent ? (
         <Section
           title={agent.name}

@@ -69,6 +69,11 @@
     font-family: var(--font-family-code);
     font-size: 12px;
   }
+  /* A line of its own inside running text, such as a list item's description. */
+  .line {
+    display: block;
+  }
+
   .secondary {
     color: var(--color-text-secondary);
   }

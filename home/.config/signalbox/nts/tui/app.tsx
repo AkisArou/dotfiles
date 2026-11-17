@@ -6,7 +6,7 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useProject } from "../shared/use-project.ts";
-import { agentTone, needsCount, settingsLine, tabs } from "../shared/model.ts";
+import { agentLines, agentTone, needsCount, settingsLine, tabs } from "../shared/model.ts";
 import type { Agent, Tab } from "../shared/model.ts";
 import { terminalConfig } from "./config.ts";
 import { describeFilters, filterOptions, matches, toggleFilter } from "./filters.ts";
@@ -403,15 +403,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   const groupOf = (issue: (typeof tasks)[number]) =>
     issue.labels.includes("kind:group") ? issue.stream : issue.group || issue.stream;
   // An agent's lines under its name: the issue it works on, then its role and tree.
-  const agentDetails = (agent: Agent) => {
-    const issue = agent.issue
-      ? project.data.issues.find((item) => item.number === agent.issue)
-      : undefined;
-    return [
-      ...(agent.issue ? [`#${agent.issue}${issue ? ` ${issue.title}` : ""}`] : []),
-      `${agent.role} · ${agent.path ? shortPath(agent.path) : "native terminal"}`,
-    ];
-  };
+  const agentDetails = (agent: Agent) => agentLines(agent, project.data.issues, shortPath);
   const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? "" : "s"}`;
   const home = process.env.HOME ?? "";
   const shortPath = (path: string) =>

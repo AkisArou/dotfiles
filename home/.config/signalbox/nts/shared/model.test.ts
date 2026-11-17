@@ -2,8 +2,15 @@
 // agent, a held issue or a faulted task reads the same in either.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { AssignmentView } from "./model.ts";
-import { agentTone, assignmentTone, gaugeTone, issueTone, postedTone } from "./model.ts";
+import type { Agent, AssignmentView, Issue } from "./model.ts";
+import {
+  agentLines,
+  agentTone,
+  assignmentTone,
+  gaugeTone,
+  issueTone,
+  postedTone,
+} from "./model.ts";
 
 test("states read the same in the TUI and the web: one tone each", () => {
   assert.deepEqual(
@@ -32,4 +39,33 @@ test("states read the same in the TUI and the web: one tone each", () => {
   assert.equal(task({ status: "finished" }), "quiet");
   assert.deepEqual((["red", "amber", "ok"] as const).map(gaugeTone), ["bad", "attention", "good"]);
   assert.deepEqual(["done", "waiting", "HTTP 502"].map(postedTone), ["quiet", "active", "bad"]);
+});
+
+test("an agent's lines: the issue it works on by title, then its role and tree", () => {
+  const agent = (change: Partial<Agent>): Agent => ({
+    id: "a",
+    name: "#823 worker",
+    role: "worker",
+    state: "busy",
+    path: "/home/me/.cache/nts-pool/7",
+    issue: 823,
+    ...change,
+  });
+  const issues = [{ number: 823, title: "Withdraw an aborted token wait" }] as Issue[];
+  assert.deepEqual(agentLines(agent({}), issues), [
+    "#823 Withdraw an aborted token wait",
+    "worker · /home/me/.cache/nts-pool/7",
+  ]);
+  assert.deepEqual(
+    agentLines(agent({}), issues, (tree) => tree.replace("/home/me", "~")),
+    ["#823 Withdraw an aborted token wait", "worker · ~/.cache/nts-pool/7"],
+    "the tree is shortened as the caller shows it",
+  );
+  assert.deepEqual(agentLines(agent({ issue: 900 }), issues), [
+    "#900",
+    "worker · /home/me/.cache/nts-pool/7",
+  ]);
+  assert.deepEqual(agentLines(agent({ issue: null, role: "coordinator", path: null }), issues), [
+    "coordinator · native terminal",
+  ]);
 });
