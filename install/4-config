@@ -27,6 +27,10 @@ sudo systemctl enable --now performance.service
 sudo systemctl enable --now paccache.timer
 sudo systemctl enable --now fstrim.timer
 sudo systemctl enable --now libvirtd
+# The tailnet (log in once, see post-install); your user may change its serve
+# settings, so sbn share needs no sudo.
+sudo systemctl enable --now tailscaled
+sudo tailscale set --operator="$USER"
 
 print_info "Setting up tmux..."
 if [[ -e "$HOME/.tmux/plugins/tpm/.git" ]]; then

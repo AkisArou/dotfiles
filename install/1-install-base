@@ -129,6 +129,7 @@ packages=(
   "scrcpy"
   "sshpass"
   "strongswan"
+  "tailscale"
   "tealdeer"
   "terminus-font"
   "tmux"

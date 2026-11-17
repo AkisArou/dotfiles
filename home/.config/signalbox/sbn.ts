@@ -23,6 +23,7 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
   start | stop | restart | enable | disable
                     the host unit (systemctl --user ... signalbox@<project>)
   logs              follow the host's log
+  share | unshare   serve the browser UI on your tailnet (tailscale serve), or stop
   doctor            the project's read-only prerequisites
   list              the projects and their hosts
   <verb> ...        any other verb goes to the project's scripts/cli.ts
@@ -71,6 +72,29 @@ export function projectFor(
       .map((root) => ({ project, depth: root.length })),
   );
   return matches.sort((a, b) => b.depth - a.depth)[0]?.project;
+}
+
+/** The browser UI's routes on a tailnet: the page, its API and its terminals. */
+export function serveRoutes(project: { webPort: number; apiPort: number }) {
+  return [
+    { path: "/", target: `http://127.0.0.1:${project.webPort}` },
+    { path: "/rpc", target: `http://127.0.0.1:${project.apiPort}/rpc` },
+    {
+      path: "/terminals",
+      target: `http://127.0.0.1:${project.apiPort}/terminals`,
+    },
+  ];
+}
+/** tailscale serve's arguments to add this project's routes, or (off) to remove only them. */
+export function serveCommands(
+  project: { webPort: number; apiPort: number },
+  on: boolean,
+) {
+  return serveRoutes(project).map((route) =>
+    on
+      ? ["serve", "--bg", "--set-path", route.path, route.target]
+      : ["serve", "--https=443", "--set-path", route.path, "off"],
+  );
 }
 
 function run(
@@ -154,7 +178,8 @@ function main(argv: readonly string[]): number {
       console.log(
         `No display here. On the computer you connect from, forward the two ports:\n\n` +
           `  ssh -N -L ${project.webPort}:127.0.0.1:${project.webPort} -L ${project.apiPort}:127.0.0.1:${project.apiPort} ${userInfo().username}@${here}\n\n` +
-          `then open http://localhost:${project.webPort} there. The forward lasts while that ssh runs.`,
+          `then open http://localhost:${project.webPort} there. The forward lasts while that ssh runs.\n` +
+          `Or, on your tailnet (a phone too): sbn share.`,
       );
       return 0;
     }
@@ -177,6 +202,28 @@ function main(argv: readonly string[]): number {
         "-o",
         "cat",
       ]);
+    // The browser UI on your tailnet, for a phone or another machine: Tailscale's own
+    // HTTPS address, proxied to this host, which accepts it (it reads the address too).
+    case "share":
+    case "unshare": {
+      for (const serve of serveCommands(project, command === "share")) {
+        const code = run("tailscale", serve);
+        if (code !== 0) return code;
+      }
+      if (command === "unshare") return 0;
+      const status = spawnSync("tailscale", ["status", "--json"], {
+        encoding: "utf8",
+      });
+      const name = (
+        JSON.parse(status.stdout || "{}") as { Self?: { DNSName?: string } }
+      ).Self?.DNSName;
+      console.log(
+        name
+          ? `\nOpen https://${name.replace(/\.$/, "")} on a device in your tailnet.`
+          : "\nShared; tailscale status names this machine's address.",
+      );
+      return 0;
+    }
     case "doctor":
       return run(process.execPath, ["scripts/doctor.ts"], {
         cwd: project.directory,

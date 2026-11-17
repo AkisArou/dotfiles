@@ -12,3 +12,14 @@ Brave local extensions
 - brave://extensions/
 - Toggle developer mode
 - Load unpacked
+
+Tailscale
+---------
+- Log in once: sudo tailscale up (open the link it prints).
+- Serve the signalbox web UI on the tailnet: sbn share. The first time, it prints a
+  link to enable serve and HTTPS for the tailnet; open it, then run sbn share again.
+  It prints this machine's address; sbn unshare removes the routes.
+- Phone: install the Tailscale app, log in with the same account, open the address in
+  Safari, and Share > Add to Home Screen.
+- Nothing about the tailnet belongs in this repository: its name, addresses and keys
+  stay in /var/lib/tailscale.
