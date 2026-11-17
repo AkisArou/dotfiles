@@ -16,7 +16,7 @@ sbn approve 817     # steer by issue number: approve, return, message, rework, r
 sbn doctor          # read-only prerequisites
 ```
 
-Settings: [`project.json`](project.json) holds the roots, ports (4310 browser, 4311 API) and whether the coordinator runs; [`config.ts`](config.ts) holds the rest (pool, polling, terminal programs, initial profiles). Environment variables override for one host: `NTS_ROOT`, `SIGNALBOX_NTS_PORT`, `SIGNALBOX_NTS_API_PORT`, `SIGNALBOX_NTS_STATE`, `SIGNALBOX_NTS_COORDINATOR=0|1`. State lives in `~/.local/state/signalbox/nts/<project-id>`; one host owns it at a time.
+Settings: [`project.json`](project.json) holds the roots, ports (4310 browser, 4311 API) and whether the coordinator runs; [`config.ts`](config.ts) holds the rest (pool, polling, terminal programs, initial profiles). Environment variables override for one host: `NTS_ROOT`, `SIGNALBOX_NTS_PORT`, `SIGNALBOX_NTS_API_PORT`, `SIGNALBOX_NTS_STATE`, `SIGNALBOX_NTS_COORDINATOR=0|1`. State lives in `~/.local/state/signalbox/nts/<project-id>` unless `project.json`'s `state` names another directory; one host owns it at a time. Agents' tmux sessions and execution receipts are tied to that directory, so it moves only while no agent runs.
 
 `pnpm sdk` rebuilds the SDK and refreshes the workspace's injected copy; `pnpm check` type-checks; `pnpm test` and `pnpm test:tui` run the tests, which use isolated fixtures and never touch the NTS checkout, GitHub or running agents.
 

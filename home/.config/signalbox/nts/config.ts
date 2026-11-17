@@ -14,6 +14,9 @@ const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.ur
   webPort: number;
   apiPort: number;
   coordinator: boolean;
+  /** Where this project's state lives, when not the per-root default. Agents' tmux
+   * sessions and execution receipts are tied to it, so it moves only while no agent runs. */
+  state?: string;
 };
 const path = (value: string) => resolve(expandPath(value));
 const root = path(process.env.NTS_ROOT ?? project.roots[0]!);
@@ -49,7 +52,7 @@ export const ntsConfig: NtsConfig = {
   // One state directory per project root, under XDG_STATE_HOME.
   state: ntsStateDirectory({
     projectRoot: root,
-    override: process.env.SIGNALBOX_NTS_STATE,
+    override: process.env.SIGNALBOX_NTS_STATE ?? project.state,
   }),
   webPort: Number(process.env.SIGNALBOX_NTS_PORT ?? project.webPort),
   apiPort: Number(process.env.SIGNALBOX_NTS_API_PORT ?? project.apiPort),
