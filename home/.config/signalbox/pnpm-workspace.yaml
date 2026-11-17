@@ -7,8 +7,3 @@ allowBuilds:
   "@astryxdesign/core": false
   esbuild: true
   node-pty: true
-
-# Projects install the Signalbox SDK as an injected copy; its workflow engine's
-# database-close patch is applied here, where its dependencies are installed.
-patchedDependencies:
-  openworkflow@0.11.0: /home/akisarou/Projects/signalbox/patches/openworkflow@0.11.0.patch

@@ -5,5 +5,8 @@
   "description": "Signalbox applications, one folder per project, and the sbn command",
   "engines": {
     "node": ">=26.4.0"
+  },
+  "scripts": {
+    "test": "node --test sbn.test.ts && pnpm --filter ./nts test"
   }
 }
