@@ -123,5 +123,10 @@ test("the host accepts its own web page under each loopback name, or only a conf
     "http://localhost:4310",
     "http://[::1]:4310",
   ]);
-  assert.deepEqual(browserOrigins(4310, "https://nts.example"), ["https://nts.example"]);
+  assert.deepEqual(browserOrigins(4310, ["https://nts.example"]), [
+    "http://127.0.0.1:4310",
+    "http://localhost:4310",
+    "http://[::1]:4310",
+    "https://nts.example",
+  ]);
 });

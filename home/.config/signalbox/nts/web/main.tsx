@@ -10,16 +10,25 @@ import "@astryxdesign/theme-neutral/theme.css";
 import "./theme.css";
 import { TerminalProvider } from "../shared/terminal.ts";
 import { terminalUrl } from "signalbox/client/terminal";
+import { apiAddress } from "../shared/address.ts";
 
 declare const SIGNALBOX_API_URL: string;
-const client = createClient({ connect: webSocketConnection(SIGNALBOX_API_URL) });
+declare const SIGNALBOX_WEB_PORT: number;
+declare const SIGNALBOX_API_PORT: number;
+// The API's address from where this page loaded (shared/address.ts), unless one is configured.
+const api = apiAddress(
+  window.location,
+  { web: SIGNALBOX_WEB_PORT, api: SIGNALBOX_API_PORT },
+  SIGNALBOX_API_URL,
+);
+const client = createClient({ connect: webSocketConnection(api) });
 client.start();
 const element = document.getElementById("root");
 if (!element) throw new Error("Missing application root");
 createRoot(element).render(
   <StrictMode>
     <SignalboxProvider client={client}>
-      <TerminalProvider url={terminalUrl(SIGNALBOX_API_URL)}>
+      <TerminalProvider url={terminalUrl(api)}>
         <RouterProvider router={router} />
       </TerminalProvider>
     </SignalboxProvider>

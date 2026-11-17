@@ -11,12 +11,12 @@ const { webPort: port, apiPort, state: directory } = ntsConfig;
 for (const value of [port, apiPort])
   if (!Number.isInteger(value) || value < 1 || value > 65535)
     throw new Error("NTS ports must be between 1 and 65535");
-const publicOrigin = ntsConfig.origin ?? `http://127.0.0.1:${port}`;
-const publicApi =
-  ntsConfig.apiUrl ??
-  (ntsConfig.origin
-    ? `${new URL(publicOrigin).protocol === "https:" ? "wss:" : "ws:"}//${new URL(publicOrigin).host}/rpc`
-    : `ws://127.0.0.1:${apiPort}/rpc`);
+// The page finds the API from where it loaded (shared/address.ts); an explicit URL overrides.
+const pageDefines = {
+  SIGNALBOX_API_URL: JSON.stringify(ntsConfig.apiUrl ?? ""),
+  SIGNALBOX_WEB_PORT: String(port),
+  SIGNALBOX_API_PORT: String(apiPort),
+};
 await requireCheckout(ntsConfig);
 // The browser UI is built once; `--watch` (pnpm dev) keeps rebuilding it on change.
 const watching = process.argv.includes("--watch");
@@ -37,7 +37,7 @@ const assets = await buildContext({
   jsx: "automatic",
   jsxImportSource: "react",
   tsconfig: "tsconfig.json",
-  define: { SIGNALBOX_API_URL: JSON.stringify(publicApi) },
+  define: pageDefines,
   sourcemap: true,
   // The long-running host serves a minified build; `--watch` keeps it readable.
   minify: !process.argv.includes("--watch"),

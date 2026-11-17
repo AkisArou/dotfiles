@@ -21,13 +21,14 @@ import type { TerminalTarget } from "signalbox/ext/terminals";
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
 // of workspaces and landing; coordinator sessions stay native.
 /** The NTS host; `web` is the built browser UI it serves on the web port. */
-/** The pages that may talk to the host: the configured origin, else this
- * machine's web port under each loopback name (a browser through an SSH
- * tunnel often says localhost). */
-export function browserOrigins(webPort: number, origin?: string): string[] {
-  return origin
-    ? [origin]
-    : ["127.0.0.1", "localhost", "[::1]"].map((host) => `http://${host}:${webPort}`);
+/** The pages that may talk to the host: this machine's web port under each loopback
+ * name (a browser through an SSH tunnel often says localhost), and the addresses that
+ * proxy to it (tailscale serve). The connection itself must still come from loopback. */
+export function browserOrigins(webPort: number, publicOrigins: readonly string[] = []): string[] {
+  return [
+    ...["127.0.0.1", "localhost", "[::1]"].map((host) => `http://${host}:${webPort}`),
+    ...publicOrigins,
+  ];
 }
 
 export function createNtsProject(settings: NtsConfig, web: { readonly directory: string }) {
@@ -76,7 +77,7 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
     gitHub: gitHub(settings.repo),
     refreshIssues: issues.refresh,
   });
-  const origins = browserOrigins(settings.webPort, settings.origin);
+  const origins = browserOrigins(settings.webPort, settings.publicOrigins);
   return defineConfig({
     id: "nts",
     title: "NTS",

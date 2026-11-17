@@ -18,6 +18,8 @@ const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.ur
   /** Where this project's state lives, when not the per-root default. Agents' tmux
    * sessions and execution receipts are tied to it, so it moves only while no agent runs. */
   state?: string;
+  /** Addresses that proxy to this host (tailscale serve), whose pages may use it. */
+  publicOrigins?: string[];
 };
 const path = (value: string) => resolve(expandPath(value));
 const root = path(process.env.NTS_ROOT ?? project.roots[0]!);
@@ -31,7 +33,8 @@ export interface NtsConfig {
   readonly state: string;
   readonly webPort: number;
   readonly apiPort: number;
-  readonly origin?: string;
+  /** Pages that may talk to the host beyond its loopback addresses (a proxy's address). */
+  readonly publicOrigins: readonly string[];
   readonly apiUrl?: string;
   readonly terminalPrograms: readonly (CommandSpec & { id: string; label: string })[];
   readonly discoverTerminals: boolean;
@@ -58,7 +61,10 @@ export const ntsConfig: NtsConfig = {
   webPort: Number(process.env.SIGNALBOX_NTS_PORT ?? project.webPort),
   apiPort: Number(process.env.SIGNALBOX_NTS_API_PORT ?? project.apiPort),
   // Only local clients are accepted. Remote deployment supplies its own gate/proxy.
-  origin: process.env.SIGNALBOX_NTS_ORIGIN,
+  publicOrigins: [
+    ...(project.publicOrigins ?? []),
+    ...(process.env.SIGNALBOX_NTS_ORIGIN ? [process.env.SIGNALBOX_NTS_ORIGIN] : []),
+  ],
   apiUrl: process.env.SIGNALBOX_NTS_API_URL,
   // Native CLI flags belong here; launch is always an explicit user action.
   terminalPrograms: [
