@@ -271,7 +271,9 @@
   grid-template-columns: repeat(5, 1fr);
   border-top: 1px solid var(--color-border);
   background: var(--color-background-card);
-  padding-bottom: env(safe-area-inset-bottom);
+  /* As low as a current iOS tab bar: its labels clear the home indicator, which
+     sits in the bar's lower part, rather than a full inset above it. */
+  padding-bottom: max(calc(env(safe-area-inset-bottom) - 18px), 4px);
 }
 .tab-bar-item {
   appearance: none;
@@ -589,4 +591,33 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   display: block;
+}
+
+/* An issue on a phone: a full-screen page with the agent view's header. */
+.issue-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background-body);
+  padding-top: env(safe-area-inset-top);
+}
+.issue-screen-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.issue-screen-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.issue-screen-link {
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
 }
