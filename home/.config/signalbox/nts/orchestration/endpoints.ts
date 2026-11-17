@@ -153,7 +153,14 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
   return [
     exposeSource({
       ref: refs.settings,
-      requires: [settings, status, profiles, orchestration.issues, assignments],
+      requires: [
+        settings,
+        status,
+        profiles,
+        orchestration.issues,
+        assignments,
+        orchestration.priorities,
+      ],
       output: z.custom<refs.SettingsView>(),
       resolve: (context) =>
         combineReadables(
@@ -163,8 +170,9 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
             context.get(profiles).unavailable,
             context.get(orchestration.issues),
             context.get(assignments),
+            context.get(orchestration.priorities).next,
           ],
-          (reading, admission, unavailable, issues, all): refs.SettingsView => ({
+          (reading, admission, unavailable, issues, all, next): refs.SettingsView => ({
             path: reading.path,
             version: reading.version,
             error: reading.error,
@@ -183,6 +191,7 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
               ]),
             ) as refs.SettingsView["roles"],
             paused: admission.paused ? { reason: admission.reason ?? "paused" } : null,
+            next: [...next],
             unavailable,
             catalog: catalog.map(profileView),
           }),
@@ -283,6 +292,19 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       run: async (input, context) => {
         await context.get(profiles).setAvailability(input.harness, input.unavailable);
         return { ok: true as const };
+      },
+    }),
+    // The owner's lever only: the coordinator's tools set urgency, never this list.
+    exposeOperation({
+      ref: refs.takeNextSlot,
+      requires: [orchestration.priorities, orchestration.work],
+      input: z.object({ issue: z.number().int().positive(), on: z.boolean() }),
+      output: z.object({ next: z.array(z.number()) }),
+      run: async (input, context) => {
+        const next = await context.get(orchestration.priorities).setNext(input.issue, input.on);
+        // The order changed: the queue says at once who goes first, before a slot frees.
+        await context.get(orchestration.work).capacityChanged(["worker"]);
+        return { next: [...next] };
       },
     }),
     exposeOperation({

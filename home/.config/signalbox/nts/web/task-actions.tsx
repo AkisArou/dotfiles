@@ -24,7 +24,7 @@ export function TaskActions({
   issue: Issue;
   task: AssignmentView | undefined;
 }) {
-  const actions = taskActions(issue, task);
+  const actions = taskActions(issue, task, project.data.settings?.next);
   const [open, setOpen] = useState<TaskAction>();
   const [text, setText] = useState("");
   const [urgency, setUrgency] = useState("0");

@@ -90,6 +90,8 @@ export type SettingsView = {
     | null;
   roles: Record<AgentRole, { pick: Pick; models: ProfileView[] }>;
   paused: { reason: string } | null;
+  /** The owner's next-slot list: tasks that take the next free workers, in order, ahead of the shares. */
+  next: number[];
   unavailable: Partial<Record<Harness, { reason: string; until?: number }>>;
   /** Every profile the harnesses offer. */
   catalog: ProfileView[];
@@ -182,7 +184,7 @@ export const pauseTasks = operation<{ reason: string }, { ok: true }>("nts.tasks
 export const resumeTasks = operation<Record<string, never>, { ok: true }>("nts.tasks.resume");
 /** One line for the TUI's bottom bar and sbn status; a pause and a file error come first, so truncation keeps them. */
 export function settingsLine(s: SettingsView): string {
-  return `${s.paused ? `PAUSED: ${s.paused.reason} · ` : ""}${s.error ? "settings.json has an error · " : ""}workers ${s.workerSlots}${s.shares ? ` (${sharesLine(s)})` : ""} · rounds ${s.maxRounds}`;
+  return `${s.paused ? `PAUSED: ${s.paused.reason} · ` : ""}${s.error ? "settings.json has an error · " : ""}workers ${s.workerSlots}${s.shares ? ` (${sharesLine(s)})` : ""}${s.next.length ? ` · next ${s.next.map((issue) => `#${issue}`).join(", ")}` : ""} · rounds ${s.maxRounds}`;
 }
 /** The worker shares in one line: compiler 50% · tooling 50%. */
 export function sharesLine(s: SettingsView): string {
@@ -365,6 +367,10 @@ export const prioritizeTask = operation<
   { issue: number; urgency: number },
   { urgency: Record<string, number> }
 >("nts.tasks.prioritize");
+/** Puts a task on the owner's next-slot list (it takes the next free worker, ahead of the shares), or off. */
+export const takeNextSlot = operation<{ issue: number; on: boolean }, { next: number[] }>(
+  "nts.tasks.next",
+);
 export const signOff = operation<
   { assignment: string; accept: boolean; notes: string },
   { ok: true }

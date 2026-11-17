@@ -14,6 +14,8 @@ export type TaskActionId =
   | "retry"
   | "message"
   | "prioritize"
+  | "next"
+  | "unnext"
   | "cancel";
 
 /** none: runs at once · optional: a note you may leave empty · required: words · urgency: -9..9. */
@@ -76,6 +78,19 @@ const ACTIONS: Record<TaskActionId, TaskAction> = {
     meaning: "-9..9, higher first within its share of the workers (0 is the default)",
     input: "urgency",
   },
+  next: {
+    id: "next",
+    label: "Take the next free worker",
+    meaning:
+      "ahead of the shares, once (a task that unblocks others); it leaves the list when it starts",
+    input: "none",
+  },
+  unnext: {
+    id: "unnext",
+    label: "Wait for its share again",
+    meaning: "off the next-worker list: it waits its turn under the shares",
+    input: "none",
+  },
   cancel: {
     id: "cancel",
     label: "Cancel the task",
@@ -84,11 +99,20 @@ const ACTIONS: Record<TaskActionId, TaskAction> = {
   },
 };
 
-/** The actions a task's state allows, in the order you would want them. */
-export function taskActions(issue: Issue, task: AssignmentView | undefined): TaskAction[] {
-  if (!task) return issue.labels.includes("task") ? [ACTIONS.assign, ACTIONS.prioritize] : [];
+/** The actions a task's state allows, in the order you would want them. `next` is the
+ * owner's next-worker list, for a task that still waits for its worker. */
+export function taskActions(
+  issue: Issue,
+  task: AssignmentView | undefined,
+  next: readonly number[] = [],
+): TaskAction[] {
+  const waiting = !task || (task.status === "queued" && !task.worker);
+  const jump = waiting ? [next.includes(issue.number) ? ACTIONS.unnext : ACTIONS.next] : [];
+  if (!task)
+    return issue.labels.includes("task") ? [ACTIONS.assign, ...jump, ACTIONS.prioritize] : [];
   const phase = task.phase ?? "";
   return [
+    ...jump,
     ...(task.error ? [ACTIONS.retry] : []),
     ...(phase === "approve" ? [ACTIONS.approve, ACTIONS.return] : []),
     ...(phase === "signoff" ? [ACTIONS.signoff, ACTIONS.refuse] : []),
@@ -133,6 +157,9 @@ export function runTaskAction(
       return commands.messageWorker.run({ assignment, text });
     case "prioritize":
       return commands.prioritizeTask.run({ issue, urgency: values.urgency ?? 0 });
+    case "next":
+    case "unnext":
+      return commands.takeNextSlot.run({ issue, on: action === "next" });
     case "cancel":
       return commands.cancelAssignment.run({ assignment, reason: text });
   }

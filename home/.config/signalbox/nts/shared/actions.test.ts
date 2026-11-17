@@ -18,7 +18,15 @@ const task = (change: Partial<AssignmentView>) =>
 const ids = (actions: readonly { id: string }[]) => actions.map((action) => action.id);
 
 test("a task offers only the actions its state allows", () => {
-  assert.deepEqual(ids(taskActions(issue(["task"]), undefined)), ["assign", "prioritize"]);
+  assert.deepEqual(ids(taskActions(issue(["task"]), undefined)), ["assign", "next", "prioritize"]);
+  // A task waiting for its worker can take the next free one, ahead of the shares, or stop.
+  const queued = task({ status: "queued", phase: null, worker: null });
+  assert.deepEqual(ids(taskActions(issue(["task"]), queued)), ["next", "prioritize", "cancel"]);
+  assert.deepEqual(ids(taskActions(issue(["task"]), queued, [issue(["task"]).number])), [
+    "unnext",
+    "prioritize",
+    "cancel",
+  ]);
   assert.deepEqual(ids(taskActions(issue(["kind:group"]), undefined)), [], "not a task: nothing");
   assert.deepEqual(ids(taskActions(issue(["task"]), task({ phase: "approve" }))), [
     "approve",

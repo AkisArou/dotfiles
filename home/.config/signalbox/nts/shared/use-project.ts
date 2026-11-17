@@ -40,7 +40,8 @@ export function useProject() {
     reworkAssignment = useCommand(refs.reworkAssignment),
     retryAssignment = useCommand(refs.retryAssignment),
     messageWorker = useCommand(refs.messageWorker),
-    prioritizeTask = useCommand(refs.prioritizeTask);
+    prioritizeTask = useCommand(refs.prioritizeTask),
+    takeNextSlot = useCommand(refs.takeNextSlot);
   const [error, setError] = useState<string>();
   const perform = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
     setError(undefined);
@@ -89,6 +90,7 @@ export function useProject() {
       retryAssignment,
       messageWorker,
       prioritizeTask,
+      takeNextSlot,
     },
     perform,
     error,
@@ -109,7 +111,8 @@ export function useProject() {
       reworkAssignment.pending ||
       retryAssignment.pending ||
       messageWorker.pending ||
-      prioritizeTask.pending,
+      prioritizeTask.pending ||
+      takeNextSlot.pending,
     online: connection.status === "connected",
   };
 }

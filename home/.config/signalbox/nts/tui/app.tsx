@@ -225,7 +225,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     if (!task) return setMessage("Select a task first.");
     const issue = task;
     const live = liveTask(project.data.assignments, issue.number);
-    const actions = taskActions(issue, live);
+    const actions = taskActions(issue, live, project.data.settings?.next);
     if (!actions.length) return setMessage(`#${issue.number} is not a task: nothing to do here.`);
     const choices = actions.flatMap((action) =>
       action.input === "optional"
@@ -646,7 +646,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
             issue={task}
             task={liveTask(project.data.assignments, task.number)}
             earlier={earlierTasks(project.data.assignments, task.number)}
-            actions={taskActions(task, liveTask(project.data.assignments, task.number))}
+            actions={taskActions(
+              task,
+              liveTask(project.data.assignments, task.number),
+              project.data.settings?.next,
+            )}
           />
         )}
         {tab === "Agents" && agent && <AgentDetail agent={agent} />}

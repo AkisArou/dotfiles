@@ -29,6 +29,8 @@
 //                                   --as coordinator when the owner stands in for the coordinator
 //   sbn rework <issue> <notes...>   send a held or wrong landing back to build
 //   sbn prioritize <issue> <-9..9>  move a task ahead (higher first; 0 is the default)
+//   sbn next <issue> [off]          the task takes the next free worker, ahead of the shares
+//                                   (once: it leaves the list when it starts); off takes it off
 //   sbn retry <issue>               retry a faulted task
 //   sbn coordinator <reason...>     a fresh coordinator generation from its checkpoint
 //   sbn end-agent <name|id>         end one managed agent session (a stray or replaced one)
@@ -71,6 +73,7 @@ const VERBS = [
   "show",
   "assign",
   "prioritize",
+  "next",
   "approve",
   "return",
   "signoff",
@@ -299,6 +302,17 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       if (!text) throw new Error(`${verb} needs ${what}`);
       return text;
     };
+    if (verb === "next") {
+      if (text && text !== "off") throw new Error("next takes an issue and, to take it off, off");
+      const { next } = (await call(client, "nts.tasks.next", { issue, on: text !== "off" })) as {
+        next: number[];
+      };
+      return console.log(
+        next.length
+          ? `next free workers go to ${next.map((each) => `#${each}`).join(", ")}, in that order`
+          : "no task is waiting to take the next free worker",
+      );
+    }
     if (verb === "prioritize") {
       const urgency = Number(needsText("an urgency from -9 to 9"));
       const { urgency: all } = (await call(client, "nts.tasks.prioritize", { issue, urgency })) as {

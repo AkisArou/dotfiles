@@ -41,6 +41,7 @@ const settingsView = (paused: { reason: string } | null) => ({
   },
   paused,
   unavailable: {},
+  next: [],
   catalog: [opusHigh, codexHigh],
 });
 

@@ -20,6 +20,7 @@ import { coordinator } from "./coordinator.ts";
 import { profiles } from "./profiles.ts";
 import type { Profiles } from "./profiles.ts";
 import { priorities } from "./priorities.ts";
+import type { Priorities } from "./priorities.ts";
 import { settingsFile } from "./settings.ts";
 import { shareRank } from "./shares.ts";
 import type { SettingsFile } from "./settings.ts";
@@ -82,6 +83,37 @@ function repositoryAreas(root: string): string[] {
 }
 
 /** A raised worker count wakes the waiting tasks, whoever raised it (a client or a hand edit). */
+/** A task on the next-slot list leaves it once it holds a worker: the list is a one-time jump. */
+export function nextLeavesOnStart(
+  priorities: Capability<Priorities>,
+  assignments: Capability<Readable<readonly Assignment[]>>,
+): Extension {
+  return {
+    id: "nts-next-leaves-on-start",
+    requires: [priorities, assignments],
+    start(context) {
+      const service = context.get(priorities);
+      const list = context.get(assignments);
+      const check = () => {
+        const reading = list.get();
+        const next = service.next.get();
+        if (reading.status !== "ready" || next.status !== "ready") return;
+        for (const issue of next.value)
+          if (
+            reading.value.some(
+              (assignment) =>
+                (assignment.input as { issue?: number }).issue === issue &&
+                assignment.heldResources.some((held) => held.resource === "worker"),
+            )
+          )
+            void service.setNext(issue, false).catch((error) => context.log.error("next", error));
+      };
+      const stops = [list.subscribe(check), service.next.subscribe(check)];
+      context.onStop(() => stops.forEach((stop) => stop()));
+      check();
+    },
+  };
+}
 function capacityFollowsSettings(
   settings: Capability<SettingsFile>,
   work: Capability<Assignments>,
@@ -211,13 +243,15 @@ export function ntsOrchestration(options: {
     priority: (assignment, all) =>
       issuesNow() === undefined
         ? undefined
-        : shareRank({
+        : // The owner's next-slot list first, in its order, whatever the shares.
+          (urgency.jump(issueOf(assignment)) ??
+          shareRank({
             shares: settingsNow().shares,
             assignment,
             all,
             placeOf,
             urgency: urgency.rank(issueOf(assignment)),
-          }),
+          })),
   });
   wiring.work.set(work.service);
   assignmentList.set(work.assignments);
@@ -271,6 +305,7 @@ export function ntsOrchestration(options: {
       ...agents.extensions,
       work.extension,
       capacityFollowsSettings(file.service, work.service),
+      nextLeavesOnStart(urgency.service, work.assignments),
       ...(lead
         ? [
             ...lead.extensions,

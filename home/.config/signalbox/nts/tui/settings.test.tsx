@@ -23,6 +23,7 @@ const settings = {
   },
   paused: null,
   unavailable: {},
+  next: [],
   catalog: [],
 } as unknown as SettingsView;
 
