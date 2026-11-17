@@ -16,7 +16,8 @@ import type { Reading } from "../status/model.ts";
 
 test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without simulated commands", async () => {
   const calls: string[] = [],
-    gitRuns: string[] = [];
+    gitRuns: string[] = [],
+    inputs: unknown[] = [];
   let pick: (lines: readonly string[], title: string) => Promise<number | undefined> = async () =>
     undefined;
   const issue = {
@@ -112,7 +113,11 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
               event: true,
             }),
           );
-        if (request.type === "call") calls.push(request.ref!);
+        if (request.type === "call") {
+          calls.push(request.ref!);
+          inputs.push(request.input);
+          queueMicrotask(() => handlers.message({ id: request.id, result: { revision: 2 } }));
+        }
       },
       close() {},
     }),
@@ -202,6 +207,28 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     assert.match(setup.captureCharFrame(), /1 ended hidden \(e\)/);
     await keys("e");
     assert.match(setup.captureCharFrame(), /Finished reviewer/);
+    // The Agents tab ends with the settings; Enter offers a row's values in the finder.
+    await keys("e");
+    await act(async () => {
+      setup.resize(110, 40);
+    });
+    await setup.renderOnce();
+    assert.match(setup.captureCharFrame(), /Settings · Enter changes/);
+    assert.match(setup.captureCharFrame(), /Worker slots\s+2/);
+    let offered: { lines: readonly string[]; title: string } | undefined;
+    pick = async (lines, title) => {
+      offered = { lines, title };
+      return lines.findIndex((line) => line.endsWith(" 3 worker slots"));
+    };
+    await keys("G", "k", "k", "k", "k", "k", "k", "k");
+    await act(async () => {
+      setup.mockInput.pressEnter();
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    assert.equal(offered?.title, "Worker slots");
+    assert.ok(offered?.lines.includes("✓ 2 worker slots"), "the current value is marked");
+    assert.equal(calls.at(-1), "nts.operations.set");
+    assert.deepEqual(inputs.at(-1), { workerSlots: 3, revision: 1 });
   } finally {
     await act(async () => {
       client.close();

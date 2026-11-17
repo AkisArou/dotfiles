@@ -16,6 +16,8 @@ import { colors as c } from "./theme.ts";
 import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
 import { NtsContent } from "./nts.tsx";
+import { SettingDetail, settingChoice, settingRows } from "./settings.tsx";
+import type { SettingRow } from "./settings.tsx";
 import { tabLabels } from "./navigation.ts";
 import { navigationKey } from "./keyboard.ts";
 import { NativeTerminal } from "./terminal.tsx";
@@ -44,6 +46,8 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   const agents = showEnded
     ? project.data.agents
     : project.data.agents.filter((item) => item.state !== "ended");
+  // The Agents tab ends with the settings its launches follow.
+  const settings = settingRows(project);
   const readings = {
     Overview: project.overview,
     Tasks: project.issues,
@@ -64,10 +68,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   const report =
     tab === "Health" ? project.nts.health : isNtsPage(tab) ? project.nts.page(tab) : undefined;
   const evidence = tableRows(report);
-  const items = taskTab ? tasks : tab === "Agents" ? agents : evidence;
+  const items = taskTab ? tasks : tab === "Agents" ? [...agents, ...settings] : evidence;
   const currentId = items.find((item) => item.id === selected[tab])?.id ?? items[0]?.id;
   const task = tasks.find((item) => item.id === currentId),
-    agent = agents.find((item) => item.id === currentId);
+    agent = agents.find((item) => item.id === currentId),
+    setting = tab === "Agents" ? settings.find((item) => item.id === currentId) : undefined;
   const split = taskTab || tab === "Agents";
   function choose(id: string) {
     setSelected((old) => ({ ...old, [tab]: id }));
@@ -93,6 +98,14 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       borrowing.current = false;
       setTool(undefined);
     }
+  }
+  function change(row: SettingRow) {
+    const choice = settingChoice(row, project);
+    if (!choice) return;
+    void local(row.label, async () => {
+      const index = await tools.find(choice.lines, row.label);
+      if (index !== undefined) await choice.apply(index);
+    });
   }
   function find() {
     const target = nts || split ? tab : "Tasks";
@@ -289,6 +302,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       git();
       return;
     }
+    if (setting && key.name === "return") {
+      key.preventDefault();
+      change(setting);
+      return;
+    }
     if ((split || nts) && (key.name === "return" || key.name === "right")) {
       key.preventDefault();
       if (tab === "Agents" && agent?.terminal) setTerminalRequest((value) => value + 1);
@@ -322,7 +340,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       <Line color={c.muted}>
         {taskTab
           ? `${tasks.length} of ${project.data.issues.length}${label ? ` · ${label}` : ""}`
-          : `${items.length} agents${ended ? ` · ${ended} ended ${showEnded ? "shown" : "hidden"} (e)` : ""}`}
+          : `${agents.length} agents${ended ? ` · ${ended} ended ${showEnded ? "shown" : "hidden"} (e)` : ""}`}
       </Line>
       {taskTab &&
         [...new Set(tasks.map(groupOf))].map((group) => (
@@ -364,6 +382,23 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
             >{`  ${item.role} · ${item.path ?? "native terminal"}`}</text>
           </box>
         ))}
+      {tab === "Agents" && settings.length > 0 && (
+        <box flexDirection="column" marginTop={1} flexShrink={0}>
+          <Heading>Settings · Enter changes</Heading>
+          {settings.map((row) => (
+            <ListRow
+              key={row.id}
+              id={`row-${row.id}`}
+              selected={row.id === currentId}
+              focused={focus === "list"}
+              label={row.label}
+              end={row.value}
+              color={row.warn ? c.warning : c.text}
+              onSelect={() => choose(row.id)}
+            />
+          ))}
+        </box>
+      )}
       {!items.length && (
         <Line color={c.muted}>
           {taskTab
@@ -405,6 +440,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
         {tab === "Now" && <NowView project={project} />}
         {taskTab && task && <TaskDetail issue={task} />}
         {tab === "Agents" && agent && <AgentDetail agent={agent} />}
+        {setting && <SettingDetail row={setting} />}
         {tab === "Plan" && <Line>{project.data.plan ?? "Waiting for docs/plan.md…"}</Line>}
       </ScrollPane>
     );
@@ -414,7 +450,9 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     "Ctrl+D/U half pane",
     "/ find",
     ...(taskTab ? ["f filter", "F clear"] : []),
-    ...(tab === "Agents" ? ["n new", "e ended", "Enter type", "Ctrl+] back"] : ["Enter details"]),
+    ...(tab === "Agents"
+      ? ["n new", "e ended", "Enter type/change", "Ctrl+] back"]
+      : ["Enter details"]),
     "l git",
     "? help",
   ];
