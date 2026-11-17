@@ -196,6 +196,44 @@ export const reworkAssignment = operation<{ assignment: string; notes: string },
   "nts.assignments.rework",
 );
 /** What an assignment says now: its fault, stall, open question or wait, and its latest progress. */
+/**
+ * How a state reads, the same in the TUI and the web: each maps a tone to its
+ * own colours. good: working or done well; active: under way; attention: wants
+ * a look or a decision; bad: failed; quiet: gone; plain: nothing to say.
+ */
+export type Tone = "good" | "active" | "attention" | "bad" | "quiet" | "plain";
+
+/** A session: busy is working, idle waits for a message, ended is gone; an unknown state wants a look. */
+export function agentTone(state: string): Tone {
+  if (state === "busy" || state === "running") return "good";
+  if (state === "idle" || state === "external") return "plain";
+  if (state === "ended" || state === "exited") return "quiet";
+  return "attention";
+}
+
+/** An issue: held, parked, waiting on the owner or unscoped wants a look; the rest is plain. */
+export function issueTone(state: string): Tone {
+  return ["held", "parked", "needs-user", "unscoped"].includes(state) ? "attention" : "plain";
+}
+
+/** A task: a fault is bad; an escalation, a stall or a question wants a look; finished is quiet. */
+export function assignmentTone(a: AssignmentView): Tone {
+  if (a.error) return "bad";
+  if (a.escalation || a.stalled || a.help) return "attention";
+  if (a.status === "finished" || a.status === "cancelled") return "quiet";
+  return "plain";
+}
+
+/** An answer's way to its issue: posted is done, posting is under way, a failure is bad (retried). */
+export function postedTone(posted: string | null): Tone {
+  return posted === "done" ? "quiet" : posted === "waiting" ? "active" : "bad";
+}
+
+/** A health reading: red is bad, amber wants a look, ok is good. */
+export function gaugeTone(state: "red" | "amber" | "ok"): Tone {
+  return state === "red" ? "bad" : state === "amber" ? "attention" : "good";
+}
+
 export function assignmentSays(a: AssignmentView, now = Date.now()): string {
   const said =
     a.error ??

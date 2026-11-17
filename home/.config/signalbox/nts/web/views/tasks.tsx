@@ -1,16 +1,31 @@
-import { useState } from "react";
-import { Button } from "@astryxdesign/core/Button";
-import { TextInput } from "@astryxdesign/core/TextInput";
+// Tasks: every open task in one line each, found by text, stream and state
+// (kept in the URL, so a filtered list can be linked); a task opens in the
+// issue drawer.
+import { issueTone } from "../../shared/model.ts";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Selector } from "@astryxdesign/core/Selector";
+import { Table, pixel, proportional } from "@astryxdesign/core/Table";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { Toolbar } from "@astryxdesign/core/Toolbar";
 import type { Project } from "../../shared/use-project.ts";
-import { Badge, Empty } from "../components.tsx";
+import { Empty, Section, Status } from "../components.tsx";
+
+type Filters = { q?: string; stream?: string; state?: string; issue?: number };
 
 export function Tasks({ project }: { project: Project }) {
-  const [query, setQuery] = useState(""),
-    [stream, setStream] = useState("all"),
-    [state, setState] = useState("all"),
-    [selected, setSelected] = useState<string>();
-  // Every task, those waiting on you included (Needs you is where they are answered).
+  const navigate = useNavigate();
+  const { q = "", stream = "all", state = "all" } = useSearch({ strict: false }) as Filters;
+  const filter = (change: Partial<Filters>) =>
+    void navigate({
+      to: "/tasks",
+      search: (previous: Filters) => {
+        const next: Filters = { ...previous, ...change };
+        for (const key of ["q", "stream", "state"] as const)
+          if (!next[key] || next[key] === "all") delete next[key];
+        return next;
+      },
+      replace: true,
+    });
   const issues = project.data.issues;
   const visible = issues.filter(
     (issue) =>
@@ -18,134 +33,118 @@ export function Tasks({ project }: { project: Project }) {
       (state === "all" || issue.state === state) &&
       `${issue.number} ${issue.title} ${issue.labels.join(" ")} ${issue.owner ?? ""}`
         .toLowerCase()
-        .includes(query.toLowerCase()),
+        .includes(q.toLowerCase()),
   );
-  const task = visible.find((issue) => issue.id === selected);
+  const rows = visible.map((issue) => ({
+    id: issue.id,
+    number: issue.number,
+    title: issue.title,
+    state: issue.state,
+    place: issue.group ?? issue.stream,
+    owner: issue.owner ?? "",
+  }));
   return (
-    <div className={`detail-layout ${task ? "has-detail" : ""}`}>
-      <div>
-        <div className="toolbar">
-          <TextInput
-            label="Search tasks"
-            isLabelHidden
-            id="task-search"
-            type="search"
-            placeholder="Find an issue or label…"
-            value={query}
-            onChange={setQuery}
-            containerClassName="search-field"
-            size="lg"
-          />
-          <Selector
-            label="Stream"
-            isLabelHidden
-            value={stream}
-            onChange={setStream}
-            options={[
-              { value: "all", label: "All streams" },
-              ...[...new Set(issues.map((issue) => issue.stream))].map((value) => ({
-                value,
-                label: value,
-              })),
-            ]}
-          />
-          <Selector
-            label="State"
-            isLabelHidden
-            value={state}
-            onChange={setState}
-            options={[
-              { value: "all", label: "All states" },
-              ...[...new Set(issues.map((issue) => issue.state))].map((value) => ({
-                value,
-                label: value,
-              })),
-            ]}
-          />
-          <span className="subtle">{visible.length} issues</span>
-        </div>
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Issue</th>
-                <th>Stream / group</th>
-                <th>State</th>
-                <th>Owner</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((issue) => (
-                <tr key={issue.id} className={issue.id === selected ? "selected-row" : ""}>
-                  <td>
-                    <Button
-                      label={`#${issue.number} ${issue.title}`}
-                      variant="ghost"
-                      className="issue-link"
-                      onClick={() => setSelected(issue.id)}
-                    >
-                      <span className="issue-link-content">
-                        <span className="issue-number">#{issue.number}</span>
-                        <span>{issue.title}</span>
-                      </span>
-                    </Button>
-                  </td>
-                  <td>
-                    {issue.stream}
-                    {issue.group && <span className="subtle"> › {issue.group}</span>}
-                  </td>
-                  <td>
-                    <Badge state={issue.state}>{issue.state}</Badge>
-                  </td>
-                  <td>{issue.owner ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!visible.length && <Empty>No matching issues.</Empty>}
-        </div>
-      </div>
-      {task && (
-        <aside className="detail-panel">
-          <div className="section-heading">
-            <a href={task.url} target="_blank" rel="noreferrer">
-              GitHub #{task.number} ↗
-            </a>
-            <Button
-              label="Close issue details"
-              icon={<span>×</span>}
-              isIconOnly
-              variant="ghost"
-              onClick={() => setSelected(undefined)}
+    <Section
+      title="Tasks"
+      count={
+        visible.length === issues.length ? issues.length : `${visible.length} of ${issues.length}`
+      }
+    >
+      <Toolbar
+        label="Find tasks"
+        startContent={
+          <>
+            <TextInput
+              label="Find a task"
+              isLabelHidden
+              id="task-search"
+              type="search"
+              size="sm"
+              placeholder="Find by number, title, label or owner  (/)"
+              value={q}
+              onChange={(value) => filter({ q: value })}
             />
-          </div>
-          <h2>{task.title}</h2>
-          {task.workspace && <p className="mono">{task.workspace}</p>}
-          {task.claims?.map((claim) => (
-            <p key={`${claim.what}/${claim.path}`}>{claim.what}</p>
-          ))}
-          <Badge state={task.state}>{task.state}</Badge>
-          <div className="label-list">
-            {task.labels.map((label) => (
-              <span key={label}>{label}</span>
-            ))}
-          </div>
-          {task.parent && (
-            <p>
-              Parent: #{task.parent.number} {task.parent.title}
-            </p>
-          )}
-          {task.progress && (
-            <p>
-              {task.progress.completed} / {task.progress.total} sub-issues complete
-            </p>
-          )}
-          {task.blockedBy.length > 0 && (
-            <p>Blocked by {task.blockedBy.map((number) => `#${number}`).join(", ")}</p>
-          )}
-          <pre className="detail-body">{task.body}</pre>
-        </aside>
+            <Selector
+              label="Stream"
+              isLabelHidden
+              value={stream}
+              onChange={(value) => filter({ stream: value })}
+              options={[
+                { value: "all", label: "All streams" },
+                ...[...new Set(issues.map((issue) => issue.stream))].map((value) => ({
+                  value,
+                  label: value,
+                })),
+              ]}
+            />
+            <Selector
+              label="State"
+              isLabelHidden
+              value={state}
+              onChange={(value) => filter({ state: value })}
+              options={[
+                { value: "all", label: "All states" },
+                ...[...new Set(issues.map((issue) => issue.state))].map((value) => ({
+                  value,
+                  label: value,
+                })),
+              ]}
+            />
+          </>
+        }
+      />
+      {rows.length ? (
+        <Table
+          data={rows}
+          idKey="id"
+          density="compact"
+          dividers="rows"
+          hasHover
+          textOverflow="truncate"
+          columns={[
+            {
+              key: "number",
+              header: "#",
+              width: pixel(64),
+              renderCell: (row) => <span className="mono secondary">{row.number}</span>,
+            },
+            {
+              key: "title",
+              header: "Title",
+              width: proportional(4),
+              renderCell: (row) => (
+                <button
+                  type="button"
+                  className="cell-link"
+                  title={row.title}
+                  onClick={() => filter({ issue: row.number })}
+                >
+                  {row.title}
+                </button>
+              ),
+            },
+            {
+              key: "state",
+              header: "State",
+              width: pixel(130),
+              renderCell: (row) => <Status tone={issueTone(row.state)}>{row.state}</Status>,
+            },
+            {
+              key: "place",
+              header: "Group",
+              width: proportional(2),
+              renderCell: (row) => (
+                <span className="secondary" title={row.place}>
+                  {row.place}
+                </span>
+              ),
+            },
+            { key: "owner", header: "Owner", width: pixel(140) },
+          ]}
+        />
+      ) : (
+        <Empty>No matching task</Empty>
       )}
-    </div>
+    </Section>
   );
 }

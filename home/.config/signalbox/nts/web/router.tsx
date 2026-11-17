@@ -1,0 +1,88 @@
+// The console's routes, defined in code: one per view, the same views and order
+// as the TUI's tabs, with Agents' three panes as child routes. ?issue=<n> on any
+// route opens that issue in the drawer; Tasks keeps its filters in its search.
+import type { ReactNode } from "react";
+import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/react-router";
+import type { Project } from "../shared/use-project.ts";
+import { Shell } from "./app.tsx";
+import { useProjectContext } from "./project.ts";
+import { Now } from "./views/now.tsx";
+import { NeedsYou } from "./views/needs.tsx";
+import { Tasks } from "./views/tasks.tsx";
+import { AgentPanes, Sessions } from "./views/agents.tsx";
+import { Assignments, Settings } from "./views/orchestration.tsx";
+import { Plan } from "./views/plan.tsx";
+import { NtsHealth, NtsView } from "./views/nts.tsx";
+
+const text = (value: unknown) => (typeof value === "string" && value ? value : undefined);
+
+const rootRoute = createRootRoute({
+  component: Shell,
+  validateSearch: (search: Record<string, unknown>): { issue?: number } => {
+    const issue = Number(search.issue);
+    return Number.isInteger(issue) && issue > 0 ? { issue } : {};
+  },
+});
+
+/** A view's route: its component gets the project the shell reads. */
+const view = (path: string, render: (project: Project) => ReactNode) =>
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path,
+    component: () => render(useProjectContext()),
+  });
+
+const tasksRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tasks",
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { q?: string; stream?: string; state?: string } => ({
+    ...(text(search.q) ? { q: text(search.q) } : {}),
+    ...(text(search.stream) ? { stream: text(search.stream) } : {}),
+    ...(text(search.state) ? { state: text(search.state) } : {}),
+  }),
+  component: () => <Tasks project={useProjectContext()} />,
+});
+
+const agentsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/agents",
+  component: () => (
+    <AgentPanes>
+      <Outlet />
+    </AgentPanes>
+  ),
+});
+const pane = (path: string, render: (project: Project) => ReactNode) =>
+  createRoute({
+    getParentRoute: () => agentsRoute,
+    path,
+    component: () => render(useProjectContext()),
+  });
+
+const routeTree = rootRoute.addChildren([
+  view("/", (project) => <Now project={project} />),
+  view("/needs-you", (project) => <NeedsYou project={project} />),
+  tasksRoute,
+  agentsRoute.addChildren([
+    pane("/", (project) => <Sessions project={project} />),
+    pane("/settings", (project) => <Settings project={project} />),
+    pane("/assignments", (project) => <Assignments project={project} />),
+  ]),
+  view("/landing", (project) => <NtsView project={project} page="Landing" />),
+  view("/full-check", (project) => <NtsView project={project} page="Full check" />),
+  view("/benchmarks", (project) => <NtsView project={project} page="Benchmarks" />),
+  view("/conformance", (project) => <NtsView project={project} page="Conformance" />),
+  view("/plan", (project) => <Plan project={project} />),
+  view("/machine", (project) => <NtsView project={project} page="Machine" />),
+  view("/health", (project) => <NtsHealth project={project} />),
+]);
+
+export const router = createRouter({ routeTree, defaultPreload: false });
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}

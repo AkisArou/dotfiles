@@ -146,7 +146,13 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
         fullCheck: orchestration.fullCheck,
       }),
       webListener({ hostname: "127.0.0.1", port: settings.apiPort }),
-      staticListener({ hostname: "127.0.0.1", port: settings.webPort, directory: web.directory }),
+      staticListener({
+        hostname: "127.0.0.1",
+        port: settings.webPort,
+        directory: web.directory,
+        // The console's routes (/tasks, /agents/settings) load the app.
+        appRoutes: true,
+      }),
     ],
   });
 }

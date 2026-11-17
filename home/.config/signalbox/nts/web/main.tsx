@@ -2,7 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createClient, webSocketConnection } from "signalbox/client";
 import { SignalboxProvider } from "signalbox/client/react";
-import { App } from "./app.tsx";
+import { RouterProvider } from "@tanstack/react-router";
+import { router } from "./router.tsx";
 import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
 import "@astryxdesign/theme-neutral/theme.css";
@@ -19,7 +20,7 @@ createRoot(element).render(
   <StrictMode>
     <SignalboxProvider client={client}>
       <TerminalProvider url={terminalUrl(SIGNALBOX_API_URL)}>
-        <App />
+        <RouterProvider router={router} />
       </TerminalProvider>
     </SignalboxProvider>
   </StrictMode>,

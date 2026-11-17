@@ -1,78 +1,131 @@
+// Agents: the sessions (a list beside the selected one's terminal), the
+// settings their launches follow, and the task assignments, as three routes
+// under /agents. A session working on an issue opens it in the issue drawer.
+import { agentTone } from "../../shared/model.ts";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Button } from "@astryxdesign/core/Button";
+import { HStack } from "@astryxdesign/core/HStack";
+import { List, ListItem } from "@astryxdesign/core/List";
+import { Switch } from "@astryxdesign/core/Switch";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
 import type { Project } from "../../shared/use-project.ts";
-import { useEffect, useRef, useState } from "react";
-import { ClickableCard } from "@astryxdesign/core/ClickableCard";
-import { Badge, Empty, Section } from "../components.tsx";
-import { Action } from "../components.tsx";
+import { Action, Empty, Section, Status } from "../components.tsx";
 import { NativeTerminal } from "../terminal.tsx";
-import { Orchestration } from "./orchestration.tsx";
 
-export function Agents({ project }: { project: Project }) {
+const PANES = [
+  { path: "/agents", label: "Sessions" },
+  { path: "/agents/settings", label: "Settings" },
+  { path: "/agents/assignments", label: "Assignments" },
+] as const;
+
+/** The panes' tabs above whichever pane the route shows. */
+export function AgentPanes({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const current =
+    PANES.find((pane) => pane.path === pathname.replace(/\/$/, ""))?.path ?? "/agents";
+  return (
+    <>
+      <TabList
+        value={current}
+        onChange={(path) => void navigate({ to: path })}
+        size="sm"
+        hasDivider
+      >
+        {PANES.map((pane) => (
+          <Tab key={pane.path} value={pane.path} label={pane.label} />
+        ))}
+      </TabList>
+      {children}
+    </>
+  );
+}
+
+export function Sessions({ project }: { project: Project }) {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<string>();
   const [showEnded, setShowEnded] = useState(false);
-  const details = useRef<HTMLDivElement>(null);
   const ended = project.data.agents.filter((agent) => agent.state === "ended").length;
   const agents = project.data.agents.filter((agent) => showEnded || agent.state !== "ended"),
-    agent = agents.find((agent) => agent.id === selected) ?? agents[0];
-  useEffect(() => {
-    if (selected && agent?.id === selected && window.innerWidth <= 1150)
-      details.current?.scrollIntoView({ block: "start" });
-  }, [selected, agent?.id]);
+    agent = agents.find((item) => item.id === selected) ?? agents[0];
+  const openIssue = (issue: number) =>
+    void navigate({
+      to: ".",
+      search: (previous: Record<string, unknown>) => ({ ...previous, issue }),
+    });
   return (
-    <div className="agents-view">
-      <Orchestration project={project} />
-      <div className="terminal-programs" aria-label="Open a native session">
-        {project.terminalPrograms.map((program) => (
-          <Action
-            key={program.id}
-            project={project}
-            onClick={async () => {
-              const result = await project.commands.startTerminal.run({ program: program.id });
-              setSelected(result.id);
-            }}
-          >{`New ${program.label}`}</Action>
-        ))}
-      </div>
-      {ended > 0 && (
-        <label className="show-ended">
-          <input
-            type="checkbox"
-            checked={showEnded}
-            onChange={(event) => setShowEnded(event.target.checked)}
-          />
-          {` Show ${ended} ended session${ended === 1 ? "" : "s"}`}
-        </label>
-      )}
-      <div className="agents-layout">
-        <div className="agent-list">
-          {agents.map((item) => (
-            <ClickableCard
-              label={item.name}
-              key={item.id}
-              className={`agent-item ${agent?.id === item.id ? "active" : ""}`}
-              onClick={() => setSelected(item.id)}
-            >
-              <span className="agent-glyph">{item.role === "coordinator" ? "⌘" : "⌁"}</span>
-              <div>
-                <strong>{item.name}</strong>
-                <span>{item.path ?? "Native terminal"}</span>
-              </div>
-              <Badge state={item.state}>{item.state}</Badge>
-            </ClickableCard>
+    <div className="split">
+      <Section
+        title="Sessions"
+        count={agents.length}
+        aside={
+          ended > 0 && (
+            <Switch label={`${ended} ended`} size="sm" value={showEnded} onChange={setShowEnded} />
+          )
+        }
+      >
+        {agents.length ? (
+          <List density="compact" hasDividers edge="padded">
+            {agents.map((item) => (
+              <ListItem
+                key={item.id}
+                label={item.name}
+                description={item.path ?? "native terminal"}
+                endContent={<Status tone={agentTone(item.state)}>{item.state}</Status>}
+                isSelected={agent?.id === item.id}
+                onClick={() => setSelected(item.id)}
+              />
+            ))}
+          </List>
+        ) : (
+          <Empty>Sessions appear when work starts</Empty>
+        )}
+        <div className="panel-body">
+          {project.terminalPrograms.map((program) => (
+            <Action
+              key={program.id}
+              project={project}
+              quiet
+              onClick={async () => {
+                const result = await project.commands.startTerminal.run({ program: program.id });
+                setSelected(result.id);
+              }}
+            >{`New ${program.label}`}</Action>
           ))}
-          {!agents.length && <Empty>Sessions appear when work starts.</Empty>}
         </div>
-        <div ref={details} className="agent-detail">
-          {agent && (
-            <Section title={agent.name} aside={<span className="subtle">NATIVE TERMINAL</span>}>
-              {agent.terminal ? (
-                <NativeTerminal key={agent.terminal} id={agent.terminal} />
-              ) : (
-                <Empty>No terminal attachment is available for this session.</Empty>
+      </Section>
+      {agent ? (
+        <Section
+          title={agent.name}
+          aside={
+            <HStack gap={3} align="center">
+              {agent.issue && (
+                <Button
+                  label={`Open issue #${agent.issue}`}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => openIssue(agent.issue!)}
+                >
+                  {`#${agent.issue}`}
+                </Button>
               )}
-            </Section>
+              <Status tone={agentTone(agent.state)}>{agent.state}</Status>
+            </HStack>
+          }
+        >
+          {agent.terminal ? (
+            <NativeTerminal key={agent.terminal} id={agent.terminal} />
+          ) : (
+            <Empty>No terminal is attached to this session</Empty>
           )}
-        </div>
-      </div>
+        </Section>
+      ) : (
+        <Section title="Terminal">
+          <Empty>Select a session</Empty>
+        </Section>
+      )}
     </div>
   );
 }

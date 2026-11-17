@@ -1,24 +1,34 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
-import type { Agent, AssignmentView, Issue } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays, modelsLine, needsCount } from "../shared/model.ts";
+import type { Agent, AssignmentView, Issue, Tone } from "../shared/model.ts";
+import {
+  agentTone,
+  assignmentPhase,
+  assignmentSays,
+  assignmentTone,
+  gaugeTone,
+  issueTone,
+  modelsLine,
+  needsCount,
+} from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
 
 export const stateMark = (state: string) =>
   state === "ready" ? "○" : state === "needs-user" ? "?" : "◐";
-/** Busy is working, idle waits for a message, ended is gone; anything else needs a look. */
-export const agentColor = (state: string) =>
-  state === "busy" || state === "running"
-    ? c.success
-    : state === "idle"
-      ? c.text
-      : state === "ended" || state === "exited"
-        ? c.muted
-        : c.warning;
-export const stateColor = (state: string) =>
-  ["held", "parked", "needs-user", "unscoped"].includes(state) ? c.warning : c.text;
+/** A tone in the TUI's palette; the web maps the same tones to its own. */
+export const toneColor = (tone: Tone) =>
+  ({
+    good: c.success,
+    active: c.accent,
+    attention: c.warning,
+    bad: c.danger,
+    quiet: c.muted,
+    plain: c.text,
+  })[tone];
+export const agentColor = (state: string) => toneColor(agentTone(state));
+export const stateColor = (state: string) => toneColor(issueTone(state));
 
 export function NowView({ project }: { project: Project }) {
   // Ended sessions are history; the Agents tab shows them on request.
@@ -53,7 +63,7 @@ export function NowView({ project }: { project: Project }) {
           .map((gauge) => (
             <Line
               key={`${gauge.section}/${gauge.id}`}
-              color={gaugeState(gauge) === "red" ? c.danger : c.warning}
+              color={toneColor(gaugeTone(gaugeState(gauge)))}
             >{`${gauge.label}: ${gauge.text ?? gauge.value}${gauge.why ? ` · ${gauge.why}` : ""}`}</Line>
           ))}
         {!project.nts.readAt && <Line color={c.muted}>Waiting for NTS observations…</Line>}
@@ -76,7 +86,7 @@ export function NowView({ project }: { project: Project }) {
           .map((a) => (
             <Line
               key={a.id}
-              color={a.error || a.escalation || a.stalled || a.help ? c.warning : c.text}
+              color={toneColor(assignmentTone(a))}
             >{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
           ))}
         {project.data.settings && (
@@ -150,13 +160,7 @@ export function TaskPopup({
       {assignment ? (
         <>
           <Heading>{`#${number} · ${assignmentPhase(assignment)} · round ${assignment.rounds + 1}`}</Heading>
-          <Line
-            color={
-              assignment.error || assignment.escalation || assignment.stalled ? c.warning : c.text
-            }
-          >
-            {assignmentSays(assignment)}
-          </Line>
+          <Line color={toneColor(assignmentTone(assignment))}>{assignmentSays(assignment)}</Line>
           {assignment.tree && <Line color={c.accent}>{assignment.tree}</Line>}
           {assignment.commit && (
             <Line color={c.muted}>{`commit ${assignment.commit.slice(0, 12)}`}</Line>

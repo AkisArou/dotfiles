@@ -9,7 +9,8 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import type { Project } from "../shared/use-project.ts";
 import type { IssueState, NeedsView, QuestionView } from "../shared/model.ts";
-import { issueStateLabels } from "../shared/model.ts";
+import { issueStateLabels, postedTone } from "../shared/model.ts";
+import { toneColor } from "./views.tsx";
 import { Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
 import type { TerminalCommand, TerminalTools } from "./tools.ts";
@@ -119,7 +120,7 @@ export function NeedsDetail({ item }: { item: NeedsItem }) {
             color={c.accent}
           >{`Answered ${question.answeredAt ? when(question.answeredAt) : ""}: ${question.answer ?? ""}`}</Line>
           {question.issue && (
-            <Line color={question.posted === "done" ? c.muted : c.warning}>
+            <Line color={toneColor(postedTone(question.posted))}>
               {`#${question.issue.number}${question.then ? ` is ${issueStateLabels[question.then]}` : ""} · ${
                 question.posted === "done"
                   ? "posted on the issue"

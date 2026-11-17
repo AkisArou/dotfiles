@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
+    <!-- The console has its own dark and light modes: Dark Reader leaves it as it is. -->
+    <meta name="darkreader-lock" />
     <meta name="theme-color" content="#050505" />
     <meta name="apple-mobile-web-app-title" content="Signalbox" />
     <title>nts · Signalbox</title>
@@ -15,8 +17,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/app.js"></script>
-    <script>
-      new EventSource("/esbuild").addEventListener("change", () => location.reload());
-    </script>
   </body>
 </html>

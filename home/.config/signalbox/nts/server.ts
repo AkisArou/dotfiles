@@ -39,6 +39,8 @@ const assets = await buildContext({
   tsconfig: "tsconfig.json",
   define: { SIGNALBOX_API_URL: JSON.stringify(publicApi) },
   sourcemap: true,
+  // The long-running host serves a minified build; `--watch` keeps it readable.
+  minify: !process.argv.includes("--watch"),
 });
 if (watching) await assets.watch();
 else {

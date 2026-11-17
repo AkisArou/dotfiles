@@ -1,71 +1,52 @@
+// The console's frame, laid out like the TUI: Astryx's AppShell with the views
+// as tabs in the top bar (each with its key and, where it matters, a count) and
+// a status bar at the bottom (the repository, how work runs, whether the host is
+// live). The route below renders the view; ?issue=<n> opens an issue drawer
+// over any of them.
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { Outlet, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
+import { AppShell } from "@astryxdesign/core/AppShell";
+import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
-import { SideNavItem } from "@astryxdesign/core/SideNav";
+import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Tab, TabList } from "@astryxdesign/core/TabList";
+import { Text } from "@astryxdesign/core/Text";
 import { Theme } from "@astryxdesign/core/theme";
+import { TopNav, TopNavHeading } from "@astryxdesign/core/TopNav";
 import { neutralTheme } from "@astryxdesign/theme-neutral/built";
 import { useProject } from "../shared/use-project.ts";
-import { needsCount, tabKey, tabs } from "../shared/model.ts";
-import type { Tab } from "../shared/model.ts";
-import { Empty, Icon } from "./components.tsx";
-import { Now } from "./views/now.tsx";
-import { Tasks } from "./views/tasks.tsx";
-import { Agents } from "./views/agents.tsx";
-import { NeedsYou } from "./views/needs.tsx";
-import { Plan } from "./views/plan.tsx";
-import { MobileNav } from "./mobile-nav.tsx";
-import { NtsView, NtsHealth } from "./views/nts.tsx";
+import { needsCount, settingsLine, tabKey, tabs } from "../shared/model.ts";
+import type { Tab as View } from "../shared/model.ts";
+import { Empty } from "./components.tsx";
+import { IssueDrawer } from "./issue-drawer.tsx";
+import { ProjectContext, viewOf, viewPath } from "./project.ts";
 
-interface InstallPrompt extends Event {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
-function InstallButton() {
-  const [prompt, setPrompt] = useState<InstallPrompt>();
-  useEffect(() => {
-    const available = (event: Event) => {
-      event.preventDefault();
-      setPrompt(event as InstallPrompt);
-    };
-    const installed = () => setPrompt(undefined);
-    window.addEventListener("beforeinstallprompt", available);
-    window.addEventListener("appinstalled", installed);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", available);
-      window.removeEventListener("appinstalled", installed);
-    };
-  }, []);
-  if (!prompt || window.matchMedia("(display-mode: standalone)").matches) return null;
-  return (
-    <Button
-      label="Install app"
-      variant="secondary"
-      className="button install-button"
-      onClick={() => {
-        void (async () => {
-          try {
-            await prompt.prompt();
-            await prompt.userChoice;
-          } finally {
-            setPrompt(undefined);
-          }
-        })().catch(console.error);
-      }}
-    >
-      Install app ↗
-    </Button>
-  );
-}
+type Mode = "dark" | "light" | "system";
+const MODES: Mode[] = ["dark", "light", "system"];
+const storedMode = (): Mode => {
+  try {
+    const value = localStorage.getItem("signalbox-nts-mode");
+    return value === "light" || value === "system" ? value : "dark";
+  } catch {
+    return "dark";
+  }
+};
 
-export function App() {
+export function Shell() {
   const project = useProject();
-  const [tab, setTab] = useState<Tab>("Now");
-  const [theme, setTheme] = useState(() =>
-    localStorage.getItem("signalbox-nts-theme") === "paper" ? "paper" : "night",
-  );
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { issue } = useSearch({ strict: false }) as { issue?: number };
+  const tab = viewOf(pathname);
+  const [mode, setMode] = useState<Mode>(storedMode);
   useEffect(() => {
-    localStorage.setItem("signalbox-nts-theme", theme);
-  }, [theme]);
+    try {
+      localStorage.setItem("signalbox-nts-mode", mode);
+    } catch {
+      // A private window keeps the choice for this visit only.
+    }
+  }, [mode]);
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
       const target = event.target;
@@ -80,16 +61,18 @@ export function App() {
         return;
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       const index = event.key === "0" ? 9 : Number(event.key) - 1;
-      if (index >= 0 && index < tabs.length) setTab(tabs[index]!);
+      if (index >= 0 && index < Math.min(10, tabs.length))
+        void navigate({ to: viewPath[tabs[index]!] });
       if (event.key === "/") {
         event.preventDefault();
-        setTab("Tasks");
-        requestAnimationFrame(() => document.getElementById("task-search")?.focus());
+        void navigate({ to: "/tasks" }).then(() =>
+          requestAnimationFrame(() => document.getElementById("task-search")?.focus()),
+        );
       }
     };
     window.addEventListener("keydown", keydown);
     return () => window.removeEventListener("keydown", keydown);
-  }, []);
+  }, [navigate]);
   const data = project.data;
   const sourceErrors = Object.entries({
     Tasks: project.issues,
@@ -97,199 +80,150 @@ export function App() {
     Plan: project.plan,
     ...project.nts.readings,
   }).filter(([, reading]) => reading.status === "error");
-  const pages: Record<Tab, ReactNode> = {
-    Now: <Now project={project} navigate={setTab} />,
-    Tasks: <Tasks project={project} />,
-    "Needs you": <NeedsYou project={project} />,
-    Agents: <Agents project={project} />,
-    Landing: <NtsView project={project} page="Landing" />,
-    Plan: <Plan project={project} />,
-    Benchmarks: <NtsView project={project} page="Benchmarks" />,
-    Conformance: <NtsView project={project} page="Conformance" />,
-    "Full check": <NtsView project={project} page="Full check" />,
-    Machine: <NtsView project={project} page="Machine" />,
-    Health: <NtsHealth project={project} />,
+  const live = data.agents.filter((agent) => agent.state !== "ended").length;
+  const counts: Partial<Record<View, ReactNode>> = {
+    "Needs you": needsCount(data.needs) ? (
+      <span className="tab-count attention">{needsCount(data.needs)}</span>
+    ) : undefined,
+    Agents: <span className="tab-count">{live}</span>,
   };
+  const banners = [
+    !project.online && (
+      <Banner
+        key="offline"
+        status="warning"
+        container="section"
+        title={`Host ${project.connection.status}`}
+        description="Showing the last readings; controls return when the connection does."
+      />
+    ),
+    data.settings?.paused && (
+      <Banner
+        key="paused"
+        status="warning"
+        container="section"
+        title="New tasks are paused"
+        description={data.settings.paused.reason}
+      />
+    ),
+    data.settings?.error && (
+      <Banner
+        key="settings"
+        status="error"
+        container="section"
+        title="settings.json is not in force; the last good settings are"
+        description={data.settings.error}
+      />
+    ),
+    project.error && (
+      <Banner
+        key="error"
+        status="error"
+        container="section"
+        title={project.error}
+        isDismissable
+        onDismiss={project.dismissError}
+      />
+    ),
+    sourceErrors.length > 0 && (
+      <Banner
+        key="sources"
+        status="error"
+        container="section"
+        title={`${sourceErrors.length} source${sourceErrors.length === 1 ? "" : "s"} unavailable; their last readings may be stale`}
+        description={sourceErrors
+          .map(
+            ([name, reading]) =>
+              `${name}: ${reading.status === "error" ? reading.error.message : ""}`,
+          )
+          .join(" · ")}
+      />
+    ),
+  ].filter(Boolean);
+  const next = MODES[(MODES.indexOf(mode) + 1) % MODES.length]!;
   return (
-    <Theme theme={neutralTheme} mode={theme === "paper" ? "light" : "dark"}>
-      <div className="app-shell">
-        <a href="#content" className="skip-link">
-          Skip to content
-        </a>
-        <aside className="sidebar">
-          <a
-            className="brand"
-            href="#"
-            onClick={(event) => {
-              event.preventDefault();
-              setTab("Now");
-            }}
-          >
-            <span className="brand-mark">
-              s<span>·</span>
-            </span>
-            <span>
-              signalbox<span className="brand-version">nts</span>
-            </span>
-          </a>
-          <div className="project-switch">
-            <span className="project-symbol">n</span>
-            <div>
-              <strong>nts</strong>
-              <span>Compiler & runtime</span>
-            </div>
-            <span className="chevron">⌄</span>
-          </div>
-          <div className="nav-label">WORKSPACE</div>
-          <nav aria-label="Project views">
-            {tabs.map((name, index) => (
-              <SideNavItem
-                label={name}
-                isSelected={name === tab}
-                key={name}
-                className={`nav-item ${name === tab ? "selected" : ""}`}
-                onClick={() => setTab(name)}
-                icon={<Icon name={name} />}
-                endContent={
-                  name === "Needs you" && needsCount(data.needs) > 0 ? (
-                    <span className="nav-count">{needsCount(data.needs)}</span>
-                  ) : (
-                    <kbd>{tabKey(index)}</kbd>
-                  )
-                }
-              />
-            ))}
-          </nav>
-          <div className="sidebar-bottom">
-            <div className="project-tag">
-              <span className="status-dot" />
-              NTS
-            </div>
-            <p>
-              GitHub issues. Native agents.
-              <br />
-              Your NTS tooling and services.
-            </p>
-            <Button
-              label={theme === "night" ? "Light appearance" : "Dark appearance"}
-              variant="ghost"
-              className="theme-button"
-              onClick={() => setTheme(theme === "night" ? "paper" : "night")}
-            >
-              {theme === "night" ? "◐ Paper theme" : "◑ Night theme"}
-            </Button>
-          </div>
-        </aside>
-        <div className="workspace">
-          <header className="topbar">
-            <div className="breadcrumb">
-              nts <span>/</span> <strong>{tab}</strong>
-            </div>
-            <div className="topbar-right">
-              <InstallButton />
-              <span className={`connection ${project.online ? "online" : "offline"}`} role="status">
-                <span className="status-dot" />
-                {project.connection.status === "connected" ? "Live" : project.connection.status}
-              </span>
-              <span className="divider" />
-              <span>SELF-HOSTED</span>
-              <span className="avatar">AK</span>
-            </div>
-          </header>
-          <main id="content" tabIndex={-1}>
-            <div className="page-header">
-              <div>
-                <div className="eyebrow">PROJECT CONTROL ROOM</div>
-                <h1>
-                  {
-                    {
-                      Now: "What’s moving.",
-                      Tasks: "The work ahead.",
-                      Agents: "Your working sessions.",
-                      Landing: "NTS’s landing service.",
-                      "Needs you":
-                        "Questions waiting on you, and issues waiting before anyone asked.",
-                      Plan: "Where we’re going.",
-                      Benchmarks: "What NTS measured.",
-                      Conformance: "Coverage and recorded outcomes.",
-                      "Full check": "From landed to verified.",
-                      Machine: "NTS machine admission.",
-                      Health: "What needs attention in NTS.",
-                    }[tab]
-                  }
-                </h1>
-                <p>
-                  {
-                    {
-                      Now: "A live view of the work, the workers, and what needs your attention.",
-                      Tasks: "GitHub issues organized by NTS streams, groups and state.",
-                      "Needs you":
-                        "Answer one: its choices, or your own words. It is posted on its issue.",
-                      Agents:
-                        "Native Codex and Claude Code terminals, including configured existing sessions.",
-                      Landing: "Queue and recent answers from NTS’s own tooling.",
-                      Plan: "The project’s own plan.md, independent of Signalbox.",
-                      Benchmarks:
-                        "Run identity, comparator versions, verdict counts and per-case ratios.",
-                      Conformance:
-                        "Whole-suite census coverage alongside the records each backend is held to.",
-                      "Full check":
-                        "Core and wide runs, culprits, records, inventory findings and outstanding task lines.",
-                      Machine:
-                        "Memory reservations and waits, worktree pool capacity, measurement locks and services.",
-                      Health:
-                        "NTS-specific thresholds and explanations, collected from its observations.",
-                    }[tab]
-                  }
-                </p>
-              </div>
-              <span className="subtle">{data.overview?.repo}</span>
-            </div>
-            {!project.online && (
-              <div className="notice warning" role="status">
-                Host {project.connection.status}. Showing the last received snapshots; controls will
-                return when the connection recovers.
-              </div>
-            )}
-            {project.error && (
-              <div className="notice danger" role="alert">
-                <span>{project.error}</span>
+    <ProjectContext value={project}>
+      <Theme theme={neutralTheme} mode={mode}>
+        <AppShell
+          height="fill"
+          contentPadding={0}
+          banner={banners.length ? <div className="banners">{banners}</div> : undefined}
+          topNav={
+            <TopNav
+              label="Views"
+              heading={<TopNavHeading heading="nts" />}
+              startContent={
+                <TabList
+                  value={tab}
+                  onChange={(value) => void navigate({ to: viewPath[value as View] })}
+                  size="sm"
+                >
+                  {tabs.map((name, index) => {
+                    const key = tabKey(index);
+                    return (
+                      <Tab
+                        key={name}
+                        value={name}
+                        label={name}
+                        icon={key ? <span className="tab-key">{key}</span> : undefined}
+                        endContent={counts[name]}
+                      />
+                    );
+                  })}
+                </TabList>
+              }
+              endContent={
                 <Button
-                  label="Dismiss error"
-                  icon={<span>×</span>}
-                  isIconOnly
+                  label={`Appearance: ${mode}; switch to ${next}`}
                   variant="ghost"
-                  onClick={project.dismissError}
+                  size="sm"
+                  onClick={() => setMode(next)}
+                >
+                  {mode}
+                </Button>
+              }
+            />
+          }
+        >
+          <div className="frame">
+            <div className="view">
+              {!data.overview ? <Empty>Connecting to the project…</Empty> : <Outlet />}
+            </div>
+            <footer className="statusbar">
+              <Text type="supporting" color="secondary" className="statusbar-line">
+                {[
+                  data.overview?.repo,
+                  data.settings && settingsLine(data.settings),
+                  `${data.issues.length} open issues`,
+                  `${live} live agent${live === 1 ? "" : "s"}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </Text>
+              <span className="statusbar-live">
+                <StatusDot
+                  variant={project.online ? "success" : "warning"}
+                  label={project.online ? "Live" : project.connection.status}
+                  isPulsing={!project.online}
                 />
-              </div>
-            )}
-            {sourceErrors.length > 0 && (
-              <details className="notice danger">
-                <summary>
-                  {sourceErrors.length} project source(s) unavailable · retained readings may be
-                  stale
-                </summary>
-                {sourceErrors.map(([name, reading]) => (
-                  <p key={name}>
-                    {name}: {reading.status === "error" && reading.error.message}
-                  </p>
-                ))}
-              </details>
-            )}
-            {!data.overview ? <Empty>Connecting to the project…</Empty> : pages[tab]}
-          </main>
-          <footer className="footer">
-            <span>
-              <span className="status-dot" /> nts <span className="footer-separator">/</span>{" "}
-              {data.overview?.repo}
-            </span>
-            <span>
-              <kbd>1–9 / 0</kbd> switch view <kbd>/</kbd> find a task
-            </span>
-          </footer>
-        </div>
-        <MobileNav tab={tab} select={setTab} pending={needsCount(data.needs)} />
-      </div>
-    </Theme>
+                <Text type="supporting" color="secondary">
+                  {project.online ? "live" : project.connection.status}
+                </Text>
+              </span>
+            </footer>
+          </div>
+          <IssueDrawer
+            project={project}
+            number={issue}
+            close={() =>
+              void navigate({
+                to: ".",
+                search: (previous: Record<string, unknown>) => ({ ...previous, issue: undefined }),
+              })
+            }
+          />
+        </AppShell>
+      </Theme>
+    </ProjectContext>
   );
 }

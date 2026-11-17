@@ -1,15 +1,19 @@
-// Needs you: every question waiting on the owner, with its choices or a box for
-// a written answer; the issues that wait on the owner before anyone asked; and
-// what was answered lately, with whether the answer reached its issue.
+// Needs you: every question waiting on the owner, with its choices or a written
+// answer; the issues that wait on the owner before anyone asked; and what was
+// answered lately, with whether the answer reached its issue.
 import { useState } from "react";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Selector } from "@astryxdesign/core/Selector";
+import { Table, pixel, proportional } from "@astryxdesign/core/Table";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { Timestamp } from "@astryxdesign/core/Timestamp";
 import type { Project } from "../../shared/use-project.ts";
 import type { IssueState, QuestionView } from "../../shared/model.ts";
-import { issueStateLabels } from "../../shared/model.ts";
-import { Action, Badge, Empty, Section } from "../components.tsx";
+import { issueStateLabels, postedTone } from "../../shared/model.ts";
+import { Action, Empty, Section, Status } from "../components.tsx";
 
 const states: IssueState[] = ["ready", "parked", "held"];
-const when = (time: number) =>
-  new Date(time).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
 function IssueLink({ issue }: { issue: { number: number; title: string; url: string } }) {
   return (
@@ -26,29 +30,27 @@ function WrittenAnswer({
   submit,
 }: {
   project: Project;
-  issue: boolean;
+  issue: number | undefined;
   submit(answer: string, then: IssueState): Promise<unknown>;
 }) {
   const [answer, setAnswer] = useState("");
   const [then, setThen] = useState<IssueState>("ready");
   return (
-    <div className="decision">
-      <textarea
-        placeholder="Write your answer"
+    <div className="write">
+      <TextArea
+        label="Your answer"
+        isLabelHidden
+        placeholder={issue ? `Your answer, posted on #${issue}` : "Your answer"}
         value={answer}
-        onChange={(event) => setAnswer(event.target.value)}
+        onChange={setAnswer}
       />
-      {issue && (
-        <label>
-          Then the issue is{" "}
-          <select value={then} onChange={(event) => setThen(event.target.value as IssueState)}>
-            {states.map((state) => (
-              <option key={state} value={state}>
-                {issueStateLabels[state]}
-              </option>
-            ))}
-          </select>
-        </label>
+      {issue !== undefined && (
+        <Selector
+          label="Then the issue is"
+          value={then}
+          onChange={(value) => setThen(value as IssueState)}
+          options={states.map((state) => ({ value: state, label: issueStateLabels[state] }))}
+        />
       )}
       <Action
         project={project}
@@ -67,19 +69,22 @@ function WrittenAnswer({
 
 function Question({ project, question }: { project: Project; question: QuestionView }) {
   return (
-    <div className="decision">
-      <strong>{question.question}</strong>
-      <p className="subtle">
+    <div className="question">
+      <Text type="large" weight="medium">
+        {question.question}
+      </Text>
+      <Text type="supporting" color="secondary">
         {question.issue && (
           <>
-            About <IssueLink issue={question.issue} /> ·{" "}
+            <IssueLink issue={question.issue} /> ·{" "}
           </>
         )}
-        asked by the {question.askedBy} · {when(question.requestedAt)}
-      </p>
-      {question.context && <p style={{ whiteSpace: "pre-wrap" }}>{question.context}</p>}
+        asked by the {question.askedBy} ·{" "}
+        <Timestamp value={question.requestedAt / 1000} format="relative" />
+      </Text>
+      {question.context && <div className="context">{question.context}</div>}
       {question.options.length > 0 && (
-        <div className="harnesses">
+        <HStack gap={2} wrap="wrap">
           {question.options.map((option, index) => (
             <Action
               key={index}
@@ -98,11 +103,11 @@ function Question({ project, question }: { project: Project; question: QuestionV
                 : option.label}
             </Action>
           ))}
-        </div>
+        </HStack>
       )}
       <WrittenAnswer
         project={project}
-        issue={!!question.issue}
+        issue={question.issue?.number}
         submit={(answer, then) =>
           project.commands.answerQuestion.run({
             id: question.id,
@@ -112,47 +117,53 @@ function Question({ project, question }: { project: Project; question: QuestionV
           })
         }
       />
-      {question.issue && (
-        <p className="subtle">
-          Your answer is posted on #{question.issue.number} and the coordinator is told.
-        </p>
-      )}
-      <Action
-        project={project}
-        onClick={() =>
-          project.commands.withdrawQuestion.run({ id: question.id, revision: question.revision })
-        }
-      >
-        Withdraw the question
-      </Action>
+      <div>
+        <Action
+          project={project}
+          quiet
+          onClick={() =>
+            project.commands.withdrawQuestion.run({ id: question.id, revision: question.revision })
+          }
+        >
+          Withdraw the question
+        </Action>
+      </div>
     </div>
   );
 }
 
 export function NeedsYou({ project }: { project: Project }) {
   const { questions, unasked, answered } = project.data.needs;
+  const rows = answered.map((question) => ({
+    id: question.id,
+    question: question.question,
+    answer: question.answer ?? "",
+    issue: question.issue ? `#${question.issue.number}` : "",
+    then: question.then ? issueStateLabels[question.then] : "",
+    posted: question.posted ?? "",
+    at: question.answeredAt ?? 0,
+  }));
   return (
     <>
-      <Section title={`Questions · ${questions.length}`}>
+      <Section title="Questions" count={questions.length}>
         {questions.map((question) => (
           <Question key={question.id} project={project} question={question} />
         ))}
-        {!questions.length && <Empty>No open questions.</Empty>}
+        {!questions.length && <Empty>No open questions</Empty>}
       </Section>
       {unasked.length > 0 && (
-        <Section title={`Waiting on you, not asked yet · ${unasked.length}`}>
+        <Section title="Waiting on you, not asked yet" count={unasked.length}>
           {unasked.map((issue) => (
-            <div key={issue.number} className="decision">
-              <strong>
+            <div key={issue.number} className="question">
+              <Text weight="medium">
                 <IssueLink issue={issue} />
-              </strong>
-              <p className="subtle">
-                Labelled as waiting on you; the coordinator is asked to state its question. You can
-                answer it now.
-              </p>
+              </Text>
+              <Text type="supporting" color="secondary">
+                The coordinator is asked to state its question; you can answer it now.
+              </Text>
               <WrittenAnswer
                 project={project}
-                issue
+                issue={issue.number}
                 submit={(answer, then) =>
                   project.commands.answerIssue.run({ issue: issue.number, answer, then })
                 }
@@ -161,39 +172,62 @@ export function NeedsYou({ project }: { project: Project }) {
           ))}
         </Section>
       )}
-      {answered.length > 0 && (
-        <Section title="Answered lately">
-          {answered.map((question) => (
-            <div key={question.id} className="decision">
-              <strong>{question.question}</strong>
-              <p>{question.answer}</p>
-              <p className="subtle">
-                {question.answeredAt ? when(question.answeredAt) : ""}
-                {question.issue && (
-                  <>
-                    {" "}
-                    · <IssueLink issue={question.issue} />
-                    {question.then ? ` is ${issueStateLabels[question.then]}` : ""} ·{" "}
-                    <Badge
-                      state={
-                        question.posted === "done"
-                          ? "ready"
-                          : question.posted === "waiting"
-                            ? "busy"
-                            : "red"
-                      }
-                    >
-                      {question.posted === "done"
+      {rows.length > 0 && (
+        <Section title="Answered lately" count={rows.length}>
+          <Table
+            data={rows}
+            idKey="id"
+            density="compact"
+            dividers="rows"
+            textOverflow="truncate"
+            columns={[
+              {
+                key: "at",
+                header: "When",
+                width: pixel(120),
+                renderCell: (row) => <Timestamp value={row.at / 1000} format="relative" />,
+              },
+              {
+                key: "question",
+                header: "Question",
+                width: proportional(3),
+                renderCell: (row) => <span title={row.question}>{row.question}</span>,
+              },
+              {
+                key: "answer",
+                header: "Answer",
+                width: proportional(3),
+                renderCell: (row) => <span title={row.answer}>{row.answer}</span>,
+              },
+              {
+                key: "issue",
+                header: "Issue",
+                width: pixel(170),
+                renderCell: (row) =>
+                  row.issue ? (
+                    <span className="nowrap">
+                      <span className="mono">{row.issue}</span>{" "}
+                      <span className="secondary">{row.then}</span>
+                    </span>
+                  ) : null,
+              },
+              {
+                key: "posted",
+                header: "On the issue",
+                width: pixel(130),
+                renderCell: (row) =>
+                  row.issue ? (
+                    <Status tone={postedTone(row.posted)}>
+                      {row.posted === "done"
                         ? "posted"
-                        : question.posted === "waiting"
+                        : row.posted === "waiting"
                           ? "posting"
-                          : `not posted yet: ${question.posted}`}
-                    </Badge>
-                  </>
-                )}
-              </p>
-            </div>
-          ))}
+                          : "not yet"}
+                    </Status>
+                  ) : null,
+              },
+            ]}
+          />
         </Section>
       )}
     </>
