@@ -3,7 +3,13 @@
 #   vim-view bind KEY   bind KEY in the root table: view the current pane, or
 #                       focus its view if it has one; views follow their panes
 #   vim-view prewarm    start a waiting Neovim unless one is waiting
-#   vim-view ui PANE    the floating pane's command: show PANE
+#   vim-view ui PANE [SOCKET SHOWN]
+#                       the floating pane's command: show PANE, or the pane
+#                       SHOWN of the tmux server at SOCKET when PANE shows it
+#
+# A pane whose program shows another tmux pane (a terminal viewer, such as a
+# Signalbox TUI showing an agent) names it in its @shown-pane option, as
+# "SOCKET SHOWN"; the view then floats over PANE and shows SHOWN's history.
 #
 # Waiting Neovims run headless, outside tmux, with your config; the floating
 # pane runs only a UI attached to one, so a view shows in milliseconds. Each
@@ -31,7 +37,9 @@ spare() {
 }
 
 # Claim a waiting Neovim into $name. A rename is atomic, so two views never
-# take the same one; one whose process is gone is dropped.
+# take the same one; one whose process is gone is dropped. One that started
+# before vim-view.lua last changed runs the old code: it is asked to quit (its
+# VimLeavePre clears its files), so an edit shows in the next view.
 claim() {
   for entry in "$pool"/idle/*; do
     [ -e "$entry" ] || continue
@@ -40,7 +48,9 @@ claim() {
     pid=
     read -r pid <"$pool/busy/$name" || true
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
-      return 0
+      [ "$here/vim-view.lua" -nt "$pool/busy/$name" ] || return 0
+      (cd "$pool" && nvim --server "./$name.sock" --remote-expr 'execute("qa!")') >/dev/null 2>&1 || true
+      continue
     fi
     rm -f "$pool/busy/$name" "$pool/$name.sock"
   done
@@ -76,7 +86,7 @@ ui)
       sleep 0.01
     done
   fi
-  printf '%s %s\n' "$2" "$TMUX_PANE" >"$pool/busy/$name"
+  printf '%s %s%s\n' "$2" "$TMUX_PANE" "${3:+ $3 ${4:-}}" >"$pool/busy/$name"
   waiting || spare &
   cd "$pool"
   exec nvim --server "./$name.sock" --remote-ui
@@ -89,7 +99,7 @@ bind)
   # zoomed. run-shell -C expands formats without a shell; with separate
   # arguments, new-pane starts the launcher without one too.
   geometry='#{pane_width}x#{pane_height}+#{pane_left}+#{pane_top}'
-  float="new-pane #{?window_zoomed_flag,-A ,}-B none -x #{pane_width} -y #{pane_height} -X #{window_width} -Y 0 '$here/vim-view' ui #{pane_id} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry"
+  float="new-pane #{?window_zoomed_flag,-A ,}-B none -x #{pane_width} -y #{pane_height} -X #{window_width} -Y 0 '$here/vim-view' ui #{pane_id} #{@shown-pane} ; set-option -p -t #{pane_id} @vim-view-geometry $geometry"
   # Floats follow their panes when the window's layout or size changes,
   # including their own moves, which then find nothing to do. A zoomed
   # window hides floats; unzoomed, they come back where their panes are.
@@ -108,7 +118,7 @@ set-hook -g 'window-resized[100]' { run-shell -C "$follow" }
 EOF
   ;;
 *)
-  echo "usage: vim-view bind KEY | prewarm | ui PANE" >&2
+  echo "usage: vim-view bind KEY | prewarm | ui PANE [SOCKET SHOWN]" >&2
   exit 2
   ;;
 esac

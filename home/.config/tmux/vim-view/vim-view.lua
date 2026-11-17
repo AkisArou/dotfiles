@@ -11,6 +11,10 @@
 -- the next. When a view ends, this Neovim waits again, unless another one
 -- already does.
 --
+-- A pane can show another tmux pane, even one of another tmux server: a
+-- terminal viewer names the pane it shows in its @shown-pane option. The view
+-- then floats over the viewer and reads the shown pane, through its server.
+--
 -- vim-view.so, built from vim-view.c, parses what tmux captures; this file
 -- keeps what needs Neovim. The program's output reaches this Neovim through
 -- pipe-pane, which only tells it to read the pane again.
@@ -51,7 +55,9 @@ local pool, name = vim.env.VIM_VIEW_POOL, vim.env.VIM_VIEW_NAME
 local fifo_path = pool .. '/' .. name .. '.fifo'
 
 local ns = api.nvim_create_namespace('vim-view')
-local view = { generation = 0 } -- What the buffer holds: for which pane, in which floating pane.
+-- What the buffer holds: the pane read (pane, on the server at socket, or on
+-- this one), the pane the view floats over (host) and the floating pane.
+local view = { generation = 0 }
 
 local log_path = vim.env.VIM_VIEW_LOG
 local function log(...)
@@ -80,6 +86,11 @@ local function tmux(args, callback)
       callback(result.code == 0, result.stdout or '')
     end)
   end)
+end
+
+-- Run tmux commands on the viewed pane's server.
+local function source(args, callback)
+  return tmux(view.socket and vim.list_extend({ '-S', view.socket }, args) or args, callback)
 end
 
 -- Colours --------------------------------------------------------------------
@@ -269,7 +280,7 @@ local function colour_history(stop, row)
   end
   local first = tonumber(C.vv_chunk(stop, COLOUR_ROWS, number_out))
   local start = row - tonumber(number_out[0])
-  tmux({ 'capture-pane', '-p', '-e', '-J', '-t', view.pane, '-S', ('#{e|-|:%d,#{history_size}}'):format(start),
+  source({ 'capture-pane', '-p', '-e', '-J', '-t', view.pane, '-S', ('#{e|-|:%d,#{history_size}}'):format(start),
          '-E', ('#{e|-|:%d,#{history_size}}'):format(row - 1) }, function(ok, out)
     if view.generation ~= generation or not ok then
       return
@@ -302,13 +313,13 @@ local function load_history(last_row, wait)
   local capture = { 'capture-pane', '-p', '-J', '-t', view.pane, '-S', '-',
                     '-E', ('#{e|-|:%d,#{history_size}}'):format(last_row) }
   if wait then
-    local ok, out = tmux(capture)
+    local ok, out = source(capture)
     if ok then
       insert_history(out, last_row)
     end
     return
   end
-  tmux(capture, function(ok, out)
+  source(capture, function(ok, out)
     if view.generation == generation and ok then
       insert_history(out, last_row)
     end
@@ -317,23 +328,38 @@ end
 
 local updating, stale = false, false
 
+-- The view floats over host and reads shown ({ socket, pane }: a pane host
+-- shows, on that tmux server), or host itself.
 -- With restore, read the pane again at a new size and keep the place: the
 -- cursor's line and column, the top line, or following the last line.
-function M.enter(target, float, restore)
+function M.enter(host, float, shown, restore)
   local started = uv.hrtime()
   view.generation, updating, stale = view.generation + 1, false, false
-  view.pane, view.float, view.ready, view.waiting = target, float, false, false
+  view.host, view.float, view.ready, view.waiting = host, float, false, false
+  view.pane, view.socket = shown and shown.pane or host, shown and shown.socket
+  local target = view.pane
   -- Tmux navigation and anything else run from here act on the floating pane.
   vim.env.TMUX_PANE = float
+  -- The float's place is its host's; what it shows is the viewed pane's.
+  local own = { 'set-option', '-p', '-t', host, '@vim-view-float', float, ';',
+                'set-option', '-p', '-t', float, '@vim-view-target', host }
   -- pipe-pane shows the program's output, unless the pane already has a pipe:
   -- tmux keeps one, and that one stays.
-  local ok, out = tmux({ 'if-shell', '-F', '-t', target, '#{pane_in_mode}', 'send-keys -t ' .. target .. ' -X cancel', ';',
-                         'set-option', '-p', '-t', target, '@vim-view-float', float, ';',
-                         'set-option', '-p', '-t', float, '@vim-view-target', target, ';',
-                         'display-message', '-p', '-t', target, INFO, ';',
-                         'if-shell', '-F', '-t', target, '#{?pane_pipe,0,1}',
-                         ("pipe-pane -O -t %s \"exec '%s/vim-view-signal' '%s'\""):format(target, here, fifo_path), ';',
-                         'capture-pane', '-p', '-e', '-J', '-S', tostring(-FIRST_ROWS), '-E', '-', '-t', target })
+  local read = { 'if-shell', '-F', '-t', target, '#{pane_in_mode}', 'send-keys -t ' .. target .. ' -X cancel', ';',
+                 'display-message', '-p', '-t', target, INFO, ';',
+                 'if-shell', '-F', '-t', target, '#{?pane_pipe,0,1}',
+                 ("pipe-pane -O -t %s \"exec '%s/vim-view-signal' '%s'\""):format(target, here, fifo_path), ';',
+                 'capture-pane', '-p', '-e', '-J', '-S', tostring(-FIRST_ROWS), '-E', '-', '-t', target }
+  -- The floating pane has its host's size; on another server, ask its host.
+  local ok, out, host_size = true, nil, nil
+  if view.socket then
+    ok, host_size = tmux(vim.list_extend(own, { ';', 'display-message', '-p', '-t', host, '#{pane_width} #{pane_height}' }))
+    local read_ok
+    read_ok, out = source(read)
+    ok = ok and read_ok
+  else
+    ok, out = tmux(vim.list_extend(vim.list_extend(own, { ';' }), read))
+  end
   local newline = out:find('\n') or #out
   local width, height, cx, cy, history, collected, piped, path =
     out:sub(1, newline):match('^(%d+) (%d+) (%d+) (%d+) (%d+) (%d+) (%d) (.*)\n')
@@ -350,15 +376,21 @@ function M.enter(target, float, restore)
   pcall(vim.fn.chdir, path)
   log('captured after', (uv.hrtime() - started) / 1e6, 'ms; size', width, height, 'nvim', vim.o.columns, vim.o.lines)
   if not restore then
-    -- The floating pane has the pane's size; its UI gives Neovim that size.
+    -- The floating pane has its host's size; its UI gives Neovim that size.
+    local columns, lines = width, height
+    if host_size then
+      columns, lines = host_size:match('^(%d+) (%d+)')
+      columns, lines = tonumber(columns), tonumber(lines)
+    end
     vim.wait(200, function()
-      return vim.o.columns == width and vim.o.lines == height
+      return vim.o.columns == columns and vim.o.lines == lines
     end, 2)
   end
 
-  -- The gutter Neovim will draw: the line count's digits and a space.
+  -- The gutter Neovim will draw: the line count's digits and a space. A
+  -- shown pane narrower than the view keeps its whole width.
   view.width, view.height, view.collected = width, height, collected
-  view.text_width = width - math.max(vim.o.numberwidth - 1, #tostring(history + height)) - 1
+  view.text_width = math.min(width, vim.o.columns - math.max(vim.o.numberwidth - 1, #tostring(history + height)) - 1)
   C.vv_clear(width, view.text_width)
   local count = tonumber(C.vv_parse(ffi.cast('const char *', out) + newline, #out - newline, 0, 0))
   local buf = buffer()
@@ -394,7 +426,7 @@ function M.enter(target, float, restore)
   -- The floating pane started outside the window, so it appears only now,
   -- already drawn.
   if not restore then
-    tmux({ 'run-shell', '-t', target, '-C', ('move-pane -t %s -X #{pane_left} -Y #{pane_top}'):format(float) },
+    tmux({ 'run-shell', '-t', host, '-C', ('move-pane -t %s -X #{pane_left} -Y #{pane_top}'):format(float) },
          function() end)
   end
   log('shown after', (uv.hrtime() - started) / 1e6, 'ms; first', view.first, 'anchor', view.anchor, 'lines',
@@ -417,14 +449,15 @@ local function reread()
   if not view.ready then
     return
   end
-  local ok, size = tmux({ 'display-message', '-p', '-t', view.pane, '#{pane_width} #{pane_height}' })
+  local ok, size = source({ 'display-message', '-p', '-t', view.pane, '#{pane_width} #{pane_height}' })
   local width, height = size:match('^(%d+) (%d+)')
   if not ok or (tonumber(width) == view.width and tonumber(height) == view.height) then
     return
   end
   local cursor = api.nvim_win_get_cursor(0)
-  M.enter(view.pane, view.float, { line = cursor[1], col = cursor[2], top = vim.fn.line('w0'),
-                                   follow = cursor[1] == api.nvim_buf_line_count(view.buf) })
+  M.enter(view.host, view.float, view.socket and { socket = view.socket, pane = view.pane },
+          { line = cursor[1], col = cursor[2], top = vim.fn.line('w0'),
+            follow = cursor[1] == api.nvim_buf_line_count(view.buf) })
 end
 
 -- Dragging a border resizes many times; read once it settles.
@@ -491,12 +524,19 @@ end
 
 -- The view ended: its UI detached, or tmux closed the floating pane.
 local function finish()
-  local target = view.pane
-  view.chan, view.pane, view.float, view.ready = nil, nil, nil, false
+  local host, target, socket = view.host, view.pane, view.socket
+  view.chan, view.host, view.pane, view.socket, view.float, view.ready = nil, nil, nil, nil, nil, false
   view.generation = view.generation + 1
-  if target then
-    tmux({ 'set-option', '-pu', '-t', target, '@vim-view-float', ';', 'set-option', '-pu', '-t', target, '@vim-view-geometry',
-           unpack(view.piped and { ';', 'pipe-pane', '-t', target } or {}) })
+  if host then
+    local unset = { 'set-option', '-pu', '-t', host, '@vim-view-float', ';', 'set-option', '-pu', '-t', host, '@vim-view-geometry' }
+    if socket then
+      tmux(unset)
+      if view.piped then
+        tmux({ '-S', socket, 'pipe-pane', '-t', target })
+      end
+    else
+      tmux(vim.list_extend(unset, view.piped and { ';', 'pipe-pane', '-t', target } or {}))
+    end
   end
   view.piped = nil
   C.vv_clear(view.width or 80, view.text_width or 80)
@@ -508,16 +548,18 @@ end
 api.nvim_create_autocmd('UIEnter', {
   callback = function()
     local chan = vim.v.event.chan
-    local target, float = (read_file(pool .. '/busy/' .. name) or ''):match('^(%%%d+) (%%%d+)')
-    if not target or view.chan then
+    local host, float, socket, shown =
+      (read_file(pool .. '/busy/' .. name) or ''):match('^(%%%d+) (%%%d+) ?(%S*) ?(%%?%d*)')
+    if not host or view.chan then
       return
     end
+    shown = socket ~= '' and shown ~= '' and { socket = socket, pane = shown } or nil
     view.chan = chan
     vim.schedule(function()
       -- The floating pane can close before this runs.
       for _, ui in ipairs(api.nvim_list_uis()) do
         if ui.chan == chan and view.chan == chan then
-          return M.enter(target, float)
+          return M.enter(host, float, shown)
         end
       end
     end)
@@ -580,7 +622,7 @@ function M.update()
   end
   updating, last = true, uv.now()
   local generation = view.generation
-  tmux({ 'display-message', '-p', '-t', view.pane, '#{history_size} #{history_collected}', ';',
+  source({ 'display-message', '-p', '-t', view.pane, '#{history_size} #{history_collected}', ';',
          'capture-pane', '-p', '-e', '-J', '-t', view.pane, '-E', '-',
          '-S', ('#{e|-|:%d,#{history_size}}'):format(view.anchor) }, function(ok, out)
     updating = false
