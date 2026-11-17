@@ -24,7 +24,7 @@
     "web/**/*.tsx",
     "web/**/*.ts",
     "config.ts",
-    "scripts/doctor.ts"
+    "scripts/*.ts"
   ],
   "exclude": ["node_modules", ".signalbox", ".cache"]
 }

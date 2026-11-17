@@ -24,8 +24,13 @@ sbn start | stop | restart | enable | disable   # signalbox@<project>
 sbn logs            # follow the host's log
 sbn doctor          # read-only prerequisites
 sbn list            # every project and its host
-sbn --api ws://127.0.0.1:4321/rpc   # the TUI on another host (a pilot)
+sbn --api ws://127.0.0.1:4321/rpc   # the TUI (or any verb) on another host, e.g. a pilot
 ```
+
+Any other verb goes to the project's `scripts/cli.ts`. For nts: `sbn show 817`,
+`sbn assign 817 [notes]`, `sbn approve 817 [notes]`, `sbn return 817 <notes>`,
+`sbn message 817 <text>`, `sbn rework 817 <notes>`, `sbn retry 817`,
+`sbn cancel 817 <reason>`: tasks by issue number, through the host's operations.
 
 ## Hosts
 

@@ -19,15 +19,18 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
 
   (none) | tui      the terminal UI on the project's running host
   web               open the browser UI
-  status            the host unit, and the project's assignments
+  status            the host unit, and the project's own status
   start | stop | restart | enable | disable
                     the host unit (systemctl --user ... signalbox@<project>)
   logs              follow the host's log
   doctor            the project's read-only prerequisites
   list              the projects and their hosts
+  <verb> ...        any other verb goes to the project's scripts/cli.ts
+                    (nts: show, assign, approve, return, message, rework, retry, cancel)
 
 The project is the one whose root contains the current directory, the only
-project if there is one, or --project. --api points the TUI at another host.`;
+project if there is one, or --project. --api points the TUI and the project's
+verbs at another host.`;
 
 const home = dirname(fileURLToPath(import.meta.url));
 const expand = (path: string) => resolve(path.replace(/^~(?=$|\/)/, homedir()));
@@ -60,6 +63,16 @@ function run(command: string, args: readonly string[], options: { cwd?: string; 
   const result = spawnSync(command, args, { stdio: "inherit", ...options });
   if (result.error) throw result.error;
   return result.status ?? 1;
+}
+
+/** A project's own verbs (scripts/cli.ts), if it has any. */
+function projectVerb(project: Project, args: readonly string[], url: string): number | undefined {
+  const cli = join(project.directory, "scripts/cli.ts");
+  if (!existsSync(cli)) return undefined;
+  return run(process.execPath, [cli, ...args], {
+    cwd: project.directory,
+    env: { ...process.env, SIGNALBOX_API_URL: url },
+  });
 }
 
 function main(argv: readonly string[]): number {
@@ -115,16 +128,16 @@ function main(argv: readonly string[]): number {
     case "doctor":
       return run(process.execPath, ["scripts/doctor.ts"], { cwd: project.directory });
     case "status": {
-      run("systemctl", ["--user", "status", unit, "--no-pager", "--lines", "0"]);
-      return run(
-        process.execPath,
-        [join(project.directory, "node_modules/signalbox/bin/signalbox.js"), "read", "nts.assignments", "--url", url],
-        { cwd: project.directory },
-      );
+      const state = spawnSync("systemctl", ["--user", "is-active", unit], { encoding: "utf8" });
+      console.log(`${unit}: ${state.stdout.trim()}${api ? ` (showing ${url})` : ""}`);
+      return projectVerb(project, ["status"], url) ?? 0;
     }
-    default:
+    default: {
+      const code = projectVerb(project, [command, ...args], url);
+      if (code !== undefined) return code;
       console.error(`Unknown command ${command}\n\n${HELP}`);
       return 2;
+    }
   }
 }
 
