@@ -20,6 +20,7 @@ import { codex } from "signalbox/ext/integrations/codex";
 import { tmux } from "signalbox/ext/integrations/tmux";
 import type { Harness, Profile } from "./models.ts";
 import { launchOptions } from "./models.ts";
+import { agentTemp } from "./agent-temp.ts";
 
 /** A zod schema as a tool's input: its parser and the JSON Schema the harness shows the model. */
 export function toolInput<T extends z.ZodType<Json>>(schema: T): ToolInput<z.infer<T>> {
@@ -48,6 +49,10 @@ export function managedAgents(options: {
     directory: join(options.directory, "agents/tools"),
     toolsets: options.toolsets,
   });
+  const temp = (() => {
+    const directory = join(options.directory, "agents/claude-tmp");
+    return { directory, extension: agentTemp({ directory }) };
+  })();
   const common = {
     state: options.state,
     execution: execution.backend,
@@ -64,6 +69,8 @@ export function managedAgents(options: {
       // messages applies to Signalbox's own sessions only, not the user's others;
       // it does trust every local session of this user to message them.
       settings: { crossSessionInbound: "accept" },
+      // Temporary files on disk, aged by the host (agentTemp), not in /tmp's small tmpfs quota.
+      env: { CLAUDE_CODE_TMPDIR: temp.directory },
     }),
     codex: codex({ ...common, id: "codex", directory: join(options.directory, "agents/codex") }),
   };
@@ -71,7 +78,7 @@ export function managedAgents(options: {
   return {
     runtime: runtime.runtime,
     instances: runtime.instances,
-    extensions: [execution.extension, bridge.extension, runtime.extension],
+    extensions: [execution.extension, bridge.extension, temp.extension, runtime.extension],
     /** Start one session for a resolved profile. requestId is the durable launch identity. */
     start(
       agents: AgentRuntime,
