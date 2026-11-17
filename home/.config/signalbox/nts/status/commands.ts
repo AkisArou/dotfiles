@@ -6,6 +6,7 @@ import type { LandingStatus } from "./landing.ts";
 import type { PoolStatus } from "./machine.ts";
 import type { FullCheckStatus } from "./full-check.ts";
 import { readFullCheck } from "./full-check.ts";
+import { checked } from "./status.ts";
 
 export interface CommandResult {
   readonly code: number;
@@ -49,10 +50,19 @@ async function json(root: string, args: readonly string[], signal?: AbortSignal)
   return JSON.parse(result.stdout) as unknown;
 }
 
-export const poolStatus = (root: string, signal?: AbortSignal) =>
-  json(root, ["tooling/landing/pool.ts", "status", "--json"], signal) as Promise<PoolStatus>;
-export const landingStatus = (root: string, signal?: AbortSignal) =>
-  json(root, ["tooling/landing/check.ts", "status", "--json"], signal) as Promise<LandingStatus>;
+export const poolStatus = async (root: string, signal?: AbortSignal) =>
+  checked<PoolStatus>(
+    await json(root, ["tooling/landing/pool.ts", "status", "--json"], signal),
+    "pool",
+    [1],
+  );
+export const landingStatus = async (root: string, signal?: AbortSignal) =>
+  checked<LandingStatus>(
+    await json(root, ["tooling/landing/check.ts", "status", "--json"], signal),
+    "landing",
+    [1],
+    "landing",
+  );
 export const fullCheckStatus = async (
   root: string,
   signal?: AbortSignal,

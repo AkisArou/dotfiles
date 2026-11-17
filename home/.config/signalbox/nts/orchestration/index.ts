@@ -1,7 +1,7 @@
 // Composes NTS orchestration from its parts. Wiring order matters only for the
 // late references the tools hold; everything else is declared by capability.
 import { join } from "node:path";
-import { capability, Cell, latestValue, provide } from "signalbox/core";
+import { latestValue, polledSource } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import { poll } from "signalbox/core/utils";
 import type { WorkflowStore } from "signalbox/ext/assignments/index";
@@ -30,28 +30,6 @@ import {
 } from "./tools.ts";
 import type { Wiring } from "./tools.ts";
 import { wakeupFeed } from "./wakeups.ts";
-
-/** A polled NTS status as a capability other extensions can watch. */
-function statusSource<T>(id: string, interval: number, read: (signal: AbortSignal) => Promise<T>) {
-  const key = capability<Readable<T>>(id);
-  const cell = new Cell<T>();
-  const extension: Extension = {
-    id,
-    provides: [provide(key, cell)],
-    start(context) {
-      context.afterStart(() => {
-        const loop = poll(
-          async () => cell.set(await read(context.signal)),
-          interval,
-          context.signal,
-          (error) => cell.fail(error),
-        );
-        context.onStop(() => loop);
-      });
-    },
-  };
-  return { key, extension };
-}
 
 /**
  * Claude Code's messaging rests on CLI features that an upgrade can change. The
@@ -108,12 +86,17 @@ export function ntsOrchestration(options: {
     input: userQuestion,
     decision: userAnswer,
   });
-  const landing = statusSource<LandingStatus>("nts/landing-status", 10_000, (signal) =>
-    landingStatus(options.root, signal),
-  );
-  const fullCheck = statusSource<FullCheckStatus>("nts/full-check-status", 30_000, (signal) =>
-    fullCheckStatus(options.root, signal),
-  );
+  // Routes watch both, so they stay current; the dashboard's pages project them.
+  const landing = polledSource<LandingStatus>({
+    id: "nts/landing-status",
+    interval: 10_000,
+    read: (signal) => landingStatus(options.root, signal),
+  });
+  const fullCheck = polledSource<FullCheckStatus>({
+    id: "nts/full-check-status",
+    interval: 30_000,
+    read: (signal) => fullCheckStatus(options.root, signal),
+  });
   const wiring: Wiring = {
     work: new Late(),
     route: new Late(),
@@ -174,6 +157,8 @@ export function ntsOrchestration(options: {
     profiles: profileStore.service,
     decisions: decisions.service,
     agents,
+    landing: landing.key,
+    fullCheck: fullCheck.key,
     coordinator: lead?.service,
     extensions: [
       engine.extension,

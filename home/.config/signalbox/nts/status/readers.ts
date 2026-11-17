@@ -4,27 +4,25 @@ import { promisify } from "node:util";
 import { readFile, stat } from "node:fs/promises";
 import { benchmarkReport, conformanceCommits, conformanceReport } from "./records.ts";
 import type { BenchmarksSummary, ConformanceSummary } from "./records.ts";
-import { fullCheckReport, readFullCheck } from "./full-check.ts";
 import { machineReport } from "./machine.ts";
-import type { PoolStatus, LedgerStatus } from "./machine.ts";
-import { landingReport } from "./landing.ts";
-import type { LandingStatus } from "./landing.ts";
+import type { LedgerStatus } from "./machine.ts";
+import { poolStatus } from "./commands.ts";
 import type { NtsPage, Report, TableCell } from "./model.ts";
 import { checked } from "./status.ts";
 
 const execute = promisify(execFile);
-const intervals: Record<NtsPage, number> = {
+/** Pages read on their own; Landing and Full check project the orchestration's sources. */
+export type ReadPage = Exclude<NtsPage, "Landing" | "Full check">;
+const intervals: Record<ReadPage, number> = {
   Benchmarks: 300_000,
   Conformance: 300_000,
-  "Full check": 30_000,
   Machine: 15_000,
-  Landing: 10_000,
 };
 export { intervals };
 export function liveReaders(
   root: string,
   signal: AbortSignal,
-): Record<NtsPage, () => Promise<Report>> {
+): Record<ReadPage, () => Promise<Report>> {
   async function run(command: string, args: readonly string[], timeout = 30_000) {
     const result = await execute(command, [...args], {
       cwd: root,
@@ -78,27 +76,8 @@ export function liveReaders(
       }
       return conformanceReport(summary, behind);
     },
-    async "Full check"() {
-      return fullCheckReport(
-        readFullCheck(await json(["tooling/full-check/service.ts", "--status", "--json"])),
-      );
-    },
-    async Landing() {
-      return landingReport(
-        checked<LandingStatus>(
-          await json(["tooling/landing/check.ts", "status", "--json"]),
-          "landing",
-          [1],
-          "landing",
-        ),
-      );
-    },
     async Machine() {
-      const pool = checked<PoolStatus>(
-        await json(["tooling/landing/pool.ts", "status", "--json"]),
-        "pool",
-        [1],
-      );
+      const pool = await poolStatus(root, signal);
       const ledger = checked<LedgerStatus>(
         await json(["tooling/gate/admit.ts", "--status", "--json"]),
         "memory",

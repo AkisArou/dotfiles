@@ -40,14 +40,14 @@ const trees = () => execFileSync("git", ["worktree", "list", "--porcelain"], { e
   .split("\\n\\n").filter((block) => block.includes("branch refs/heads/") && !block.includes("refs/heads/main"))
   .map((block) => ({ name: "t", path: block.match(/^worktree (.*)$/m)[1], state: "held",
     task: block.match(/branch refs\\/heads\\/(.*)$/m)[1], ahead: 0, behind: 0, uncommitted: 0, idle_ms: 0, target_bytes: null }));
-if (command === "status") console.log(JSON.stringify({ pool: root, room: { ok: true, free_bytes: 1, floor_bytes: 0, unbuilt: 0, why: null }, trees: trees() }));
+if (command === "status") console.log(JSON.stringify({ version: 1, pool: root, room: { ok: true, free_bytes: 1, floor_bytes: 0, unbuilt: 0, why: null }, trees: trees() }));
 else if (command === "take") { const n = rest[1]; if (!existsSync(tree(n))) execFileSync("git", ["worktree", "add", "-b", n, tree(n), "main"]); }
 `;
 // check.ts: `<sha> --no-wait` records the submission; `status --json` shows it waiting.
 const CHECK = `import { readFileSync, writeFileSync, existsSync } from "node:fs";
 const file = process.env.STAND_IN_QUEUE, [first] = process.argv.slice(2);
 const queue = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : [];
-if (first === "status") console.log(JSON.stringify({ service: { running: true, state: "idle", since: "", message: null }, checking: null,
+if (first === "status") console.log(JSON.stringify({ version: 1, kind: "landing", service: { running: true, state: "idle", since: "", message: null }, checking: null,
   waiting: queue.map((sha) => ({ id: sha.slice(0, 12), sha, branch: null, issue: null, by: "t", submitted_at: "", note: null })),
   held: [], day: { landed: 0, refused: 0, held: 0, withdrawn: 0, median_wall_s: null, max_wall_s: null }, recent: [], main: { commit: null, pushed: null } }));
 else if (first === "withdraw") { writeFileSync(file, JSON.stringify(queue.filter((sha) => sha !== process.argv[3]))); }

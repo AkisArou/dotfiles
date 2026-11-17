@@ -2,10 +2,9 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { IncomingMessage } from "node:http";
 import { z } from "zod";
-import { capability, Cell, combineReadables, defineConfig, provide } from "signalbox/core";
-import type { Capability, Extension, Readable } from "signalbox/core";
+import { Cell, combineReadables, defineConfig, polledSource } from "signalbox/core";
+import type { Readable } from "signalbox/core";
 import type { Json, SourceRef } from "signalbox/core/remote";
-import { poll } from "signalbox/core/utils";
 import { exposeSource, exposeOperation, webListener } from "signalbox/host";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import * as refs from "../shared/model.ts";
@@ -33,30 +32,15 @@ export function createNtsProject(settings: NtsConfig) {
   function expose<T extends Json>(ref: SourceRef<T>, cell: Readable<T>) {
     return exposeSource({ ref, requires: [], output: z.custom<T>(), resolve: () => cell });
   }
+  /** A polled reading exposed under its ref; demand as in polledSource. */
   function observe<T extends Json>(
     ref: SourceRef<T>,
     interval: number,
     read: (signal: AbortSignal) => Promise<T>,
-  ): Extension & { readonly key: Capability<Readable<T>> } {
-    const cell = new Cell<T>();
-    const key = capability<Readable<T>>(`${ref.id}/reading`);
-    return {
-      id: `${ref.id}/reader`,
-      key,
-      provides: [provide(key, cell)],
-      extensions: [expose(ref, cell)],
-      start(context) {
-        context.afterStart(() => {
-          const loop = poll(
-            async () => cell.set(await read(context.signal)),
-            interval,
-            context.signal,
-            (error) => cell.fail(error),
-          );
-          context.onStop(() => loop);
-        });
-      },
-    };
+    demand: "always" | "subscribed" = "always",
+  ) {
+    const source = polledSource<T>({ id: `${ref.id}/reading`, interval, read, demand });
+    return { key: source.key, extensions: [source.extension, expose(ref, source.readable)] };
   }
   const planPath = join(settings.root, settings.plan);
   const issues = observe(refs.issues, settings.issueIntervalMs, async (signal) => {
@@ -97,8 +81,9 @@ export function createNtsProject(settings: NtsConfig) {
         refs.overview,
         new Cell({ name: "nts", root: settings.root, repo: settings.repo, startedAt }),
       ),
-      observe(refs.plan, 30_000, () => readFile(planPath, "utf8")),
-      issues,
+      // The plan page is only viewed; issues feed admission and the coordinator.
+      ...observe(refs.plan, 30_000, () => readFile(planPath, "utf8"), "subscribed").extensions,
+      ...issues.extensions,
       ...orchestration.extensions,
       ...orchestrationEndpoints(orchestration),
       {
@@ -134,7 +119,11 @@ export function createNtsProject(settings: NtsConfig) {
         run: (input, context) =>
           context.get(native.service).start(input.program, context.requestId),
       }),
-      ntsObservations({ root: settings.root }),
+      ntsObservations({
+        root: settings.root,
+        landing: orchestration.landing,
+        fullCheck: orchestration.fullCheck,
+      }),
       webListener({ hostname: "127.0.0.1", port: settings.apiPort }),
     ],
   });
