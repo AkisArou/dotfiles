@@ -22,6 +22,9 @@ DEPLOYMENT_RULES = {
         },
         'import': {'.config/dconf/user': 'dconf'},
         'wrap': {'.local/bin/codex': '.local/libexec/codex'},
+        # Directories linked whole: a file added in the repository appears at
+        # once, without another deployment. Their local state stays ignored.
+        'link': {'.config/signalbox'},
         'mkdir': {
             '.config/nable': 0o700,
             '.config/nable/huly-agent': 0o700,
@@ -171,6 +174,14 @@ def deploy(source, destination, *, dry_run=False, copies=None, planned_links=Non
         copy = next((mode for name, mode in copies.items()
                      if policy_path == name or policy_path.startswith(name + '/')), None)
         if dry_run and planned_links.get(target) == current and copy is None:
+            return
+        if policy_path in rules.get('link', set()):
+            if target.is_symlink() and target.resolve() == current.resolve():
+                return
+            # A merged copy of the directory (per-file links and local state) is set aside whole.
+            if os.path.lexists(target):
+                backup(target, dry_run=dry_run)
+            replace_link(current, target, dry_run=dry_run)
             return
         if current.is_dir() and not current.is_symlink():
             if target.is_symlink():

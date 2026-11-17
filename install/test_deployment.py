@@ -95,6 +95,23 @@ class DeploymentTests(unittest.TestCase):
         self.assertFalse(session.is_symlink())
         self.assertFalse(secret.is_symlink())
 
+    def test_a_linked_directory_is_one_link_and_replaces_a_merged_copy(self):
+        source = self.write(self.repo / 'home/.config/signalbox/nts/config.ts', 'export {}')
+        merged = self.home / '.config/signalbox/nts/config.ts'
+        merged.parent.mkdir(parents=True)
+        merged.symlink_to(source)
+        self.write(self.home / '.config/signalbox/nts/.cache/bundle.js', 'local state')
+        deploy(self.repo / 'home', self.home)
+        target = self.home / '.config/signalbox'
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(target.resolve(), (self.repo / 'home/.config/signalbox').resolve())
+        saved = self.home / '.config/signalbox.before-dotfiles'
+        self.assertEqual((saved / 'nts/.cache/bundle.js').read_text(), 'local state')
+        added = self.write(self.repo / 'home/.config/signalbox/nts/added.ts', 'new')
+        self.assertEqual((target / 'nts/added.ts').resolve(), added.resolve())
+        deploy(self.repo / 'home', self.home)
+        self.assertFalse((self.home / '.config/signalbox.before-dotfiles.1').exists(), 'a correct link stays')
+
     def test_private_directory_bootstrap_does_not_follow_an_existing_symlink(self):
         self.write(self.repo / 'home/.config/ordinary/settings', 'ordinary')
         external = self.base / 'external'
