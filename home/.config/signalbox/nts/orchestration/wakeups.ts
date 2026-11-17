@@ -17,6 +17,16 @@ import type { UserDecisions } from "./tools.ts";
 
 export type Wakeup = { readonly id: string; readonly text: string };
 
+export const SOURCES = ["assignments", "landing", "fullCheck", "decisions"] as const;
+export type WakeupSource = (typeof SOURCES)[number];
+/** Which source an event comes from, by its stable ID. */
+export function sourceOf(id: string): WakeupSource {
+  if (id.startsWith("landing/")) return "landing";
+  if (id.startsWith("culprit/")) return "fullCheck";
+  if (id.startsWith("decided/")) return "decisions";
+  return "assignments";
+}
+
 /** How far past its own progress estimate an agent may run before the coordinator hears of it. */
 export const PROGRESS_GRACE_MS = 30 * 60_000;
 
@@ -154,18 +164,30 @@ export function wakeupFeed(options: {
             .map((request) => ({ id: request.id, answer: request.result!.decision.answer })),
           now: Date.now(),
         });
-        // The first observation of a fresh state seeds the cursor: history before
-        // the coordinator existed is not news.
-        const fresh = await store.transaction(NAMESPACE, (tx) => {
-          if (tx.get("seeded") !== undefined) return false;
-          for (const event of events) tx.set(`seen/${event.id}`, true);
-          tx.set("seeded", true);
-          return true;
+        // Each source's history before the coordinator saw it is not news: its
+        // events are marked seen the first time that source reads ready, and it
+        // says nothing until then. (State from before per-source seeding has one
+        // "seeded" mark that covers every source.)
+        const readings: Record<WakeupSource, { status: string }> = {
+          assignments: context.get(options.work).assignments.get(),
+          landing: context.get(options.landing).get(),
+          fullCheck: context.get(options.fullCheck).get(),
+          decisions: context.get(options.decisions).requests.get(),
+        };
+        const unseen = await store.transaction(NAMESPACE, (tx) => {
+          const legacy = tx.get("seeded") !== undefined;
+          const seeded = (source: WakeupSource) =>
+            legacy || tx.get(`seeded/${source}`) !== undefined;
+          for (const source of SOURCES) {
+            if (seeded(source) || readings[source].status !== "ready") continue;
+            for (const event of events)
+              if (sourceOf(event.id) === source) tx.set(`seen/${event.id}`, true);
+            tx.set(`seeded/${source}`, true);
+          }
+          return events.filter(
+            (event) => seeded(sourceOf(event.id)) && tx.get(`seen/${event.id}`) === undefined,
+          );
         });
-        if (fresh) return;
-        const unseen = await store.transaction(NAMESPACE, (tx) =>
-          events.filter((event) => tx.get(`seen/${event.id}`) === undefined),
-        );
         const mailbox = context.get(options.mailbox);
         for (const event of unseen) {
           await mailbox.send({ id: event.id, input: textInput(event.text) });
