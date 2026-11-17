@@ -14,5 +14,10 @@ export function ntsStateDirectory(options: {
   const home = resolve(
     expandPath(options.stateHome ?? process.env.XDG_STATE_HOME ?? join(homedir(), ".local/state")),
   );
-  return join(home, "signalbox", "nts", hash(resolve(expandPath(options.projectRoot))).slice(0, 12));
+  return join(
+    home,
+    "signalbox",
+    "nts",
+    hash(resolve(expandPath(options.projectRoot))).slice(0, 12),
+  );
 }

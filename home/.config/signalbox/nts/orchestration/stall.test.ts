@@ -11,7 +11,11 @@ test("an idle agent is nudged twice, then the coordinator is told once", () => {
     return step;
   };
   assert.equal(at(0, "busy").action, "none");
-  assert.deepEqual(at(1_000, "idle"), { watch: watch, action: "none", retryAt: 1_000 + STALL.idle });
+  assert.deepEqual(at(1_000, "idle"), {
+    watch: watch,
+    action: "none",
+    retryAt: 1_000 + STALL.idle,
+  });
   assert.equal(at(1_000 + STALL.idle - 1, "idle").action, "none");
   assert.equal(at(1_000 + STALL.idle, "idle").action, "nudge");
   assert.equal(at(1_000 + STALL.idle + 1, "idle").action, "none", "the timer restarts at a nudge");

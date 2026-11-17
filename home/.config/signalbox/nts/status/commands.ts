@@ -32,7 +32,11 @@ export function runNts(
       (error, stdout, stderr) => {
         if (error && typeof (error as NodeJS.ErrnoException).code !== "number")
           return reject(error);
-        resolve({ code: error ? Number((error as { code?: number }).code ?? 1) : 0, stdout, stderr });
+        resolve({
+          code: error ? Number((error as { code?: number }).code ?? 1) : 0,
+          stdout,
+          stderr,
+        });
       },
     );
   });
@@ -49,13 +53,17 @@ export const poolStatus = (root: string, signal?: AbortSignal) =>
   json(root, ["tooling/landing/pool.ts", "status", "--json"], signal) as Promise<PoolStatus>;
 export const landingStatus = (root: string, signal?: AbortSignal) =>
   json(root, ["tooling/landing/check.ts", "status", "--json"], signal) as Promise<LandingStatus>;
-export const fullCheckStatus = async (root: string, signal?: AbortSignal): Promise<FullCheckStatus> =>
+export const fullCheckStatus = async (
+  root: string,
+  signal?: AbortSignal,
+): Promise<FullCheckStatus> =>
   readFullCheck(await json(root, ["tooling/full-check/service.ts", "--status", "--json"], signal));
 
 /** The pool tree holding issue N's branch (`<N>` or `<N>-<slug>`), if any. */
 export function treeForIssue(pool: PoolStatus, issue: number) {
   return pool.trees.find(
-    (tree) => tree.task !== null && (tree.task === String(issue) || tree.task.startsWith(`${issue}-`)),
+    (tree) =>
+      tree.task !== null && (tree.task === String(issue) || tree.task.startsWith(`${issue}-`)),
   );
 }
 

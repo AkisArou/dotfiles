@@ -14,11 +14,18 @@ export function parseClaudeAgents(stdout: string): AgentActivity {
   const listed = JSON.parse(stdout) as unknown;
   const sessions = Array.isArray(listed)
     ? listed
-    : ((listed as { sessions?: unknown[] }).sessions ?? (listed as { agents?: unknown[] }).agents ?? []);
+    : ((listed as { sessions?: unknown[] }).sessions ??
+      (listed as { agents?: unknown[] }).agents ??
+      []);
   const activity: Record<string, string> = {};
-  for (const session of sessions as { sessionId?: unknown; session_id?: unknown; status?: unknown }[]) {
+  for (const session of sessions as {
+    sessionId?: unknown;
+    session_id?: unknown;
+    status?: unknown;
+  }[]) {
     const id = session.sessionId ?? session.session_id;
-    if (typeof id === "string" && typeof session.status === "string") activity[`claude/${id}`] = session.status;
+    if (typeof id === "string" && typeof session.status === "string")
+      activity[`claude/${id}`] = session.status;
   }
   return activity;
 }
@@ -48,7 +55,7 @@ export function activitySource(options: {
               const next = await read(context.signal);
               const text = JSON.stringify(next);
               // Only a change wakes the routes that watch it.
-              if (text !== last) (last = text), cell.set(next);
+              if (text !== last) ((last = text), cell.set(next));
             },
             options.interval ?? 15_000,
             context.signal,

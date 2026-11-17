@@ -1,7 +1,7 @@
 // Composes NTS orchestration from its parts. Wiring order matters only for the
 // late references the tools hold; everything else is declared by capability.
 import { join } from "node:path";
-import { capability, Cell, provide } from "signalbox/core";
+import { capability, Cell, latestValue, provide } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import { poll } from "signalbox/core/utils";
 import type { WorkflowStore } from "signalbox/ext/assignments/index";
@@ -19,9 +19,15 @@ import { coordinator } from "./coordinator.ts";
 import { profiles } from "./profiles.ts";
 import type { ProfileSettings, Profiles } from "./profiles.ts";
 import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
-import { current } from "./current.ts";
 import { taskRoute } from "./task.ts";
-import { coordinatorTools, Late, reviewerTools, userAnswer, userQuestion, workerTools } from "./tools.ts";
+import {
+  coordinatorTools,
+  Late,
+  reviewerTools,
+  userAnswer,
+  userQuestion,
+  workerTools,
+} from "./tools.ts";
 import type { Wiring } from "./tools.ts";
 import { wakeupFeed } from "./wakeups.ts";
 
@@ -34,8 +40,11 @@ function statusSource<T>(id: string, interval: number, read: (signal: AbortSigna
     provides: [provide(key, cell)],
     start(context) {
       context.afterStart(() => {
-        const loop = poll(async () => cell.set(await read(context.signal)), interval, context.signal, (error) =>
-          cell.fail(error),
+        const loop = poll(
+          async () => cell.set(await read(context.signal)),
+          interval,
+          context.signal,
+          (error) => cell.fail(error),
         );
         context.onStop(() => loop);
       });
@@ -58,12 +67,14 @@ function claudeMessagingProbe(root: string, profilesKey: Capability<Profiles>): 
       const store = context.get(profilesKey);
       const check = async () => {
         const result = await probeClaudeMessaging({ cwd: root, signal: context.signal });
-        const marked = current(store.settings)?.unavailable.claude?.reason.startsWith(PREFIX);
+        const marked = latestValue(store.settings)?.unavailable.claude?.reason.startsWith(PREFIX);
         if (!result.ok) await store.setAvailability("claude", { reason: PREFIX + result.reason });
         else if (marked) await store.setAvailability("claude", null);
       };
       context.afterStart(() => {
-        const loop = poll(check, 6 * 3_600_000, context.signal, (error) => context.log.error("claude probe", error));
+        const loop = poll(check, 6 * 3_600_000, context.signal, (error) =>
+          context.log.error("claude probe", error),
+        );
         context.onStop(() => loop);
       });
     },
@@ -111,7 +122,11 @@ export function ntsOrchestration(options: {
     issues: options.issues,
     decisions: decisions.service,
   };
-  const tools = { worker: workerTools(wiring), reviewer: reviewerTools(wiring), coordinator: coordinatorTools(wiring) };
+  const tools = {
+    worker: workerTools(wiring),
+    reviewer: reviewerTools(wiring),
+    coordinator: coordinatorTools(wiring),
+  };
   const toolsets = [tools.worker, tools.reviewer, tools.coordinator];
   const agents = options.agents
     ? options.agents(toolsets)

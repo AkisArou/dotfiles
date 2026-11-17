@@ -52,7 +52,8 @@ export function stallStep(input: {
       action: "nudge",
       retryAt: input.now + STALL.idle,
     };
-  if (!watch.escalated) return { watch: { ...watch, idleSince, escalated: true }, action: "escalate" };
+  if (!watch.escalated)
+    return { watch: { ...watch, idleSince, escalated: true }, action: "escalate" };
   return { watch: { ...watch, idleSince }, action: "none" };
 }
 

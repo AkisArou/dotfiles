@@ -5,7 +5,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { z } from "zod";
 import type { Capability, Readable } from "signalbox/core";
-import { current } from "./current.ts";
+import { latestValue } from "signalbox/core";
 import { Conflict, hash } from "signalbox/core/utils";
 import { textInput } from "signalbox/ext/agents/index";
 import { messaging, terminate } from "signalbox/ext/agents/features";
@@ -18,7 +18,13 @@ import { landingFor, landingStatus, poolStatus, runNts, treeForIssue } from "../
 import type { ManagedAgents } from "./agents.ts";
 import type { Profiles } from "./profiles.ts";
 import { profileSchema } from "./profiles.ts";
-import { reviewerBrief, workerBrief, workerInstructions, workerResumeBrief, reviewerInstructions } from "./briefs.ts";
+import {
+  reviewerBrief,
+  workerBrief,
+  workerInstructions,
+  workerResumeBrief,
+  reviewerInstructions,
+} from "./briefs.ts";
 import { progressed, stallStep, STALL, watchState } from "./stall.ts";
 
 const run = promisify(execFile);
@@ -54,7 +60,11 @@ export const taskReport = z.discriminatedUnion("kind", [
     minutes: z.number().int().min(1).max(480),
   }),
   /** The coordinator's message to the worker: delivered once, and it answers any open help. */
-  z.object({ kind: z.literal("message"), from: z.enum(["coordinator", "user"]), text: z.string().min(1) }),
+  z.object({
+    kind: z.literal("message"),
+    from: z.enum(["coordinator", "user"]),
+    text: z.string().min(1),
+  }),
 ]);
 export type TaskReport = z.infer<typeof taskReport>;
 
@@ -81,7 +91,9 @@ export const taskState = z.object({
   tree: z.string().nullable(),
   branch: z.string().nullable(),
   worker: z.object({ id: z.string(), profile: profileSchema }).nullable(),
-  reviewer: z.object({ id: z.string(), commit: sha, round: z.number().int(), profile: profileSchema }).nullable(),
+  reviewer: z
+    .object({ id: z.string(), commit: sha, round: z.number().int(), profile: profileSchema })
+    .nullable(),
   design: z.string(),
   commit: sha.nullable(),
   summary: z.string(),
@@ -106,7 +118,10 @@ export const taskState = z.object({
   /** The awaited agent's idle watch (stall.ts). */
   watch: watchState.nullable().default(null),
   /** The awaited agent's latest progress note. */
-  progress: z.object({ note: z.string(), at: z.number(), until: z.number() }).nullable().default(null),
+  progress: z
+    .object({ note: z.string(), at: z.number(), until: z.number() })
+    .nullable()
+    .default(null),
   /** Set when an awaited agent stayed idle through its nudges; the coordinator decides. */
   stalled: z.string().nullable().default(null),
 });
@@ -121,11 +136,21 @@ export function cardPaths(body: string): string[] {
 }
 
 /** The agent whose report the task waits for, if any. A worker with an open question waits on the coordinator. */
-export function awaitedAgent(state: TaskState): { role: "worker" | "reviewer"; id: string; key: string } | undefined {
+export function awaitedAgent(
+  state: TaskState,
+): { role: "worker" | "reviewer"; id: string; key: string } | undefined {
   if ((state.phase === "design" || state.phase === "build") && state.worker && !state.help)
-    return { role: "worker", id: state.worker.id, key: `${state.phase}/${state.worker.id}/${state.rounds}` };
+    return {
+      role: "worker",
+      id: state.worker.id,
+      key: `${state.phase}/${state.worker.id}/${state.rounds}`,
+    };
   if (state.phase === "reviewing" && state.reviewer)
-    return { role: "reviewer", id: state.reviewer.id, key: `reviewing/${state.reviewer.id}/${state.reviewer.round}` };
+    return {
+      role: "reviewer",
+      id: state.reviewer.id,
+      key: `reviewing/${state.reviewer.id}/${state.reviewer.round}`,
+    };
   return undefined;
 }
 
@@ -156,7 +181,9 @@ export function taskRoute(options: {
     concurrency: 4,
     resources: (input, state) => [
       { resource: `issue/${input.issue}`, units: 1 },
-      ...(state.phase === "prepare" || state.phase === "done" ? [] : [{ resource: "worker", units: 1 }]),
+      ...(state.phase === "prepare" || state.phase === "done"
+        ? []
+        : [{ resource: "worker", units: 1 }]),
       ...state.paths.map((path) => ({ resource: `file:${path}`, units: 1 })),
     ],
     admission: [
@@ -164,10 +191,11 @@ export function taskRoute(options: {
         requires: [options.issues],
         watch: (ctx) => [ctx.get(options.issues)],
         check(ctx) {
-          const issues = current(ctx.get(options.issues));
+          const issues = latestValue(ctx.get(options.issues));
           if (!issues) return { allowed: false, reason: "Issues are not read yet" };
           const found = issue(issues, ctx.input.issue);
-          if (!found) return { allowed: false, reason: `Issue #${ctx.input.issue} is not an open task` };
+          if (!found)
+            return { allowed: false, reason: `Issue #${ctx.input.issue} is not an open task` };
           const blocked = found.labels.find((label) =>
             ["state:needs-user", "state:held", "state:parked"].includes(label),
           );
@@ -179,7 +207,14 @@ export function taskRoute(options: {
       },
     ],
     lifecycle: {
-      requires: [options.issues, options.landing, options.fullCheck, options.profiles, options.agents.runtime, activity],
+      requires: [
+        options.issues,
+        options.landing,
+        options.fullCheck,
+        options.profiles,
+        options.agents.runtime,
+        activity,
+      ],
       watch: (ctx) => [
         ctx.get(options.landing),
         ctx.get(options.fullCheck),
@@ -220,7 +255,14 @@ export function taskRoute(options: {
         // A new phase restarts its clock and forgets the previous phase's watch.
         const moved = (patch: Partial<TaskState>): TaskState =>
           patch.phase !== undefined && patch.phase !== state.phase
-            ? { ...state, phaseSince: clock(), watch: null, progress: null, stalled: null, ...patch }
+            ? {
+                ...state,
+                phaseSince: clock(),
+                watch: null,
+                progress: null,
+                stalled: null,
+                ...patch,
+              }
             : { ...state, ...patch };
         const next = (patch: Partial<TaskState>) => ({
           state: moved(patch),
@@ -234,8 +276,9 @@ export function taskRoute(options: {
         });
         // A session is replaced only when it has provably ended; unknown state waits.
         const ended = (id: string) =>
-          (current(runtime.instances) ?? []).some(
-            (instance) => instance.id === id && (instance.state === "ended" || instance.state === "exited"),
+          (latestValue(runtime.instances) ?? []).some(
+            (instance) =>
+              instance.id === id && (instance.state === "ended" || instance.state === "exited"),
           );
         const tell = async (to: string, key: string, text: string) => {
           if (ended(to)) return;
@@ -292,7 +335,7 @@ export function taskRoute(options: {
           const now = clock();
           const step = stallStep({
             key: awaited.key,
-            status: current(ctx.get(activity))?.[awaited.id],
+            status: latestValue(ctx.get(activity))?.[awaited.id],
             watch: state.watch,
             now,
           });
@@ -326,7 +369,11 @@ export function taskRoute(options: {
         // Rework from landing: withdraw the change's own queue entry (a held one
         // never lands by itself), tell the worker why, and build again.
         const rework = ctx.reports.find((report) => report.data.kind === "rework");
-        if (rework && rework.data.kind === "rework" && (state.phase === "landing" || state.phase === "queue")) {
+        if (
+          rework &&
+          rework.data.kind === "rework" &&
+          (state.phase === "landing" || state.phase === "queue")
+        ) {
           ctx.consumeReports(rework.id);
           const commit = state.commit!;
           await ctx.effect({
@@ -336,12 +383,18 @@ export function taskRoute(options: {
             async run({ signal }) {
               const found = landingFor(await landingStatus(options.root, signal), commit);
               if (!found.checking && !found.waiting && !found.held) return null;
-              const withdrawn = await runNts(options.root, ["tooling/landing/check.ts", "withdraw", commit], {
-                signal,
-                timeout: 120_000,
-              });
+              const withdrawn = await runNts(
+                options.root,
+                ["tooling/landing/check.ts", "withdraw", commit],
+                {
+                  signal,
+                  timeout: 120_000,
+                },
+              );
               if (withdrawn.code !== 0)
-                throw new Error(`check.ts withdraw ${commit} exited ${withdrawn.code}: ${(withdrawn.stderr || withdrawn.stdout).trim()}`);
+                throw new Error(
+                  `check.ts withdraw ${commit} exited ${withdrawn.code}: ${(withdrawn.stderr || withdrawn.stdout).trim()}`,
+                );
               return null;
             },
           });
@@ -358,7 +411,7 @@ export function taskRoute(options: {
           return next({ phase: "start", resumeTo: state.phase });
 
         if (state.phase === "prepare") {
-          const found = issue(current(ctx.get(options.issues)) ?? [], ctx.input.issue);
+          const found = issue(latestValue(ctx.get(options.issues)) ?? [], ctx.input.issue);
           if (!found) return wait(`Issue #${ctx.input.issue} is not available`);
           return next({
             phase: "workspace",
@@ -385,7 +438,9 @@ export function taskRoute(options: {
               );
               const held = treeForIssue(await poolStatus(options.root, signal), ctx.input.issue);
               if (!held)
-                throw new Error(`pool.ts take exited ${taken.code}: ${(taken.stderr || taken.stdout).trim()}`);
+                throw new Error(
+                  `pool.ts take exited ${taken.code}: ${(taken.stderr || taken.stdout).trim()}`,
+                );
               return { path: held.path, branch: held.task! };
             },
           });
@@ -394,7 +449,7 @@ export function taskRoute(options: {
         if (state.phase === "start") {
           const resolved = await ctx.get(options.profiles).resolve("worker");
           if ("wait" in resolved) return wait(resolved.wait, {}, resolved.retryAt);
-          const found = issue(current(ctx.get(options.issues)) ?? [], ctx.input.issue);
+          const found = issue(latestValue(ctx.get(options.issues)) ?? [], ctx.input.issue);
           if (!found) return wait(`Issue #${ctx.input.issue} is not available`);
           const generation = state.generation + 1;
           const resume = state.resumeTo
@@ -467,13 +522,29 @@ export function taskRoute(options: {
         if (state.phase === "build") {
           const report = ctx.reports.find((report) => report.data.kind === "ready");
           if (!report || report.data.kind !== "ready")
-            return awaiting("Waiting for the worker's proved commit", "your proved commit (report_ready)");
+            return awaiting(
+              "Waiting for the worker's proved commit",
+              "your proved commit (report_ready)",
+            );
           ctx.consumeReports(report.id);
           const git = async (args: string[]) =>
-            (await run("git", ["--no-optional-locks", ...args], { cwd: state.tree!, timeout: 30_000 })).stdout.trim();
-          if ((await git(["rev-parse", "HEAD"])) !== report.data.commit || (await git(["status", "--porcelain"])))
+            (
+              await run("git", ["--no-optional-locks", ...args], {
+                cwd: state.tree!,
+                timeout: 30_000,
+              })
+            ).stdout.trim();
+          if (
+            (await git(["rev-parse", "HEAD"])) !== report.data.commit ||
+            (await git(["status", "--porcelain"]))
+          )
             throw new Conflict("The reported commit is not the clean HEAD of the task's tree");
-          return next({ phase: "review", commit: report.data.commit, summary: report.data.summary, help: null });
+          return next({
+            phase: "review",
+            commit: report.data.commit,
+            summary: report.data.summary,
+            help: null,
+          });
         }
         if (state.phase === "review") {
           const resolved = await ctx.get(options.profiles).resolve("reviewer");
@@ -501,7 +572,10 @@ export function taskRoute(options: {
                     design: state.design,
                     summary: state.summary,
                     previous: state.reviews,
-                    labels: current(ctx.get(options.issues))?.find((issue) => issue.number === ctx.input.issue)?.labels ?? [],
+                    labels:
+                      latestValue(ctx.get(options.issues))?.find(
+                        (issue) => issue.number === ctx.input.issue,
+                      )?.labels ?? [],
                   }),
                   tools: [options.reviewerTools],
                   requestId,
@@ -511,18 +585,30 @@ export function taskRoute(options: {
               return { id: instance.id };
             },
           });
-          return next({ phase: "reviewing", reviewer: { id: started.id, commit, round: state.rounds, profile: resolved.profile } });
+          return next({
+            phase: "reviewing",
+            reviewer: { id: started.id, commit, round: state.rounds, profile: resolved.profile },
+          });
         }
         if (state.phase === "reviewing") {
           const report = ctx.reports.find(
             (report) => report.data.kind === "review" && report.data.commit === state.commit,
           );
           if (!report || report.data.kind !== "review")
-            return awaiting("Waiting for the review of the exact commit", `your review of ${state.commit} (report_review)`);
+            return awaiting(
+              "Waiting for the review of the exact commit",
+              `your review of ${state.commit} (report_review)`,
+            );
           ctx.consumeReports(report.id);
-          await stop(state.reviewer!.id, `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`);
+          await stop(
+            state.reviewer!.id,
+            `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`,
+          );
           if (report.data.verdict === "accept") return next({ phase: "queue", reviewer: null });
-          const reviews = [...state.reviews, { commit: state.commit!, findings: report.data.findings }];
+          const reviews = [
+            ...state.reviews,
+            { commit: state.commit!, findings: report.data.findings },
+          ];
           // A dispute of the approved design is the coordinator's call, not a
           // round of rework the worker should start on its own.
           if (report.data.disputesDesign)
@@ -536,7 +622,13 @@ export function taskRoute(options: {
           const findings = `The review of ${state.commit} asks for changes:\n${report.data.findings}\nFix them, prove the change again, commit and report_ready.`;
           await tell(state.worker!.id, `review/${report.id}`, findings);
           return rounds > options.maxRounds
-            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", reviewer: null, rounds, note: findings, reviews })
+            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, {
+                phase: "build",
+                reviewer: null,
+                rounds,
+                note: findings,
+                reviews,
+              })
             : next({ phase: "build", reviewer: null, rounds, note: findings, reviews });
         }
         if (state.phase === "queue") {
@@ -552,19 +644,25 @@ export function taskRoute(options: {
                 : { status: "absent" as const };
             },
             async run({ signal }) {
-              const queued = await runNts(state.tree!, ["tooling/landing/check.ts", commit, "--no-wait"], {
-                signal,
-                timeout: 300_000,
-              });
+              const queued = await runNts(
+                state.tree!,
+                ["tooling/landing/check.ts", commit, "--no-wait"],
+                {
+                  signal,
+                  timeout: 300_000,
+                },
+              );
               if (queued.code !== 0)
-                throw new Error(`check.ts ${commit} exited ${queued.code}: ${(queued.stderr || queued.stdout).trim()}`);
+                throw new Error(
+                  `check.ts ${commit} exited ${queued.code}: ${(queued.stderr || queued.stdout).trim()}`,
+                );
               return clock();
             },
           });
           return next({ phase: "landing", queuedAt });
         }
         if (state.phase === "landing") {
-          const status = current(ctx.get(options.landing));
+          const status = latestValue(ctx.get(options.landing));
           if (!status) return wait("Waiting for the landing status");
           const answer = landingFor(status, state.commit!).answers.find(
             // The landing service and this host share the machine's clock.
@@ -579,11 +677,15 @@ export function taskRoute(options: {
           const refusal = `The landing check refused ${state.commit}: ${answer.message}\nLogs: ${answer.run ?? "none"}\nFind the cause, fix it where it lives, prove it again, commit and report_ready.`;
           await tell(state.worker!.id, `refused/${answer.id}`, refusal);
           return rounds > options.maxRounds
-            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, { phase: "build", rounds, note: refusal })
+            ? wait(`Escalated after ${rounds} rounds; the coordinator decides`, {
+                phase: "build",
+                rounds,
+                note: refusal,
+              })
             : next({ phase: "build", rounds, note: refusal });
         }
         if (state.phase === "verify") {
-          const verified = current(ctx.get(options.fullCheck))?.verified.commit;
+          const verified = latestValue(ctx.get(options.fullCheck))?.verified.commit;
           if (!verified) return wait("Waiting for the full check to verify the landing");
           const contained = await run(
             "git",
@@ -593,12 +695,17 @@ export function taskRoute(options: {
             () => true,
             () => false,
           );
-          if (!contained) return wait(`Waiting for verified to reach ${state.landedMain!.slice(0, 12)}`);
+          if (!contained)
+            return wait(`Waiting for verified to reach ${state.landedMain!.slice(0, 12)}`);
           return next({ phase: "retire", outcome: "verified" });
         }
         if (state.phase === "retire") {
           if (state.worker) await stop(state.worker.id, "worker");
-          if (state.reviewer) await stop(state.reviewer.id, `reviewer/${state.reviewer.commit}/${state.reviewer.round}`);
+          if (state.reviewer)
+            await stop(
+              state.reviewer.id,
+              `reviewer/${state.reviewer.commit}/${state.reviewer.round}`,
+            );
           return { state: { ...state, phase: "done" as const }, next: "finish" as const };
         }
         return { state, next: "finish" as const };
@@ -620,7 +727,14 @@ export function taskRoute(options: {
                 },
               });
           }
-        return { state: { ...ctx.assignment.state, phase: "done" as const, outcome: `cancelled: ${ctx.reason}` }, next: "finish" as const };
+        return {
+          state: {
+            ...ctx.assignment.state,
+            phase: "done" as const,
+            outcome: `cancelled: ${ctx.reason}`,
+          },
+          next: "finish" as const,
+        };
       },
     },
   });

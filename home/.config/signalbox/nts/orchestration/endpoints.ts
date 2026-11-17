@@ -50,7 +50,11 @@ export function managedAgentViews(
   return instances.map((instance) => ({
     id: instance.id,
     name: instance.label,
-    role: /coordinator/i.test(instance.label) ? "coordinator" : /review/i.test(instance.label) ? "reviewer" : "worker",
+    role: /coordinator/i.test(instance.label)
+      ? "coordinator"
+      : /review/i.test(instance.label)
+        ? "reviewer"
+        : "worker",
     // A live session shows what it is doing (busy, idle), not only that it is alive.
     state:
       instance.state === "running" ? (activity[instance.id] ?? instance.state) : instance.state,
@@ -67,7 +71,8 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       ref: refs.profileSettings,
       requires: [profiles],
       output: z.custom<refs.ProfileSettingsView>(),
-      resolve: (context) => context.get(profiles).settings as unknown as Cell<refs.ProfileSettingsView>,
+      resolve: (context) =>
+        context.get(profiles).settings as unknown as Cell<refs.ProfileSettingsView>,
     }),
     exposeSource({
       ref: refs.assignments,
@@ -128,11 +133,14 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       requires: [profiles],
       input: z.object({
         harness: z.enum(harnesses),
-        unavailable: z.object({ reason: z.string().min(1), until: z.number().optional() }).nullable(),
+        unavailable: z
+          .object({ reason: z.string().min(1), until: z.number().optional() })
+          .nullable(),
       }),
       output: z.object({ revision: z.number() }),
       run: async (input, context) => ({
-        revision: (await context.get(profiles).setAvailability(input.harness, input.unavailable)).revision,
+        revision: (await context.get(profiles).setAvailability(input.harness, input.unavailable))
+          .revision,
       }),
     }),
     exposeOperation({
@@ -142,10 +150,11 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       output: z.object({ id: z.string() }),
       run: async (input, context) => ({
         id: (
-          await context.get(work).submit(
-            assignmentRequest(route, { key: `issue/${input.issue}`, input }),
-            { requestId: context.requestId },
-          )
+          await context
+            .get(work)
+            .submit(assignmentRequest(route, { key: `issue/${input.issue}`, input }), {
+              requestId: context.requestId,
+            })
         ).id,
       }),
     }),
@@ -157,7 +166,11 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       run: async (input, context) => {
         await context
           .get(work)
-          .cancel({ assignmentId: input.assignment, reason: input.reason, requestId: context.requestId });
+          .cancel({
+            assignmentId: input.assignment,
+            reason: input.reason,
+            requestId: context.requestId,
+          });
         return { ok: true as const };
       },
     }),

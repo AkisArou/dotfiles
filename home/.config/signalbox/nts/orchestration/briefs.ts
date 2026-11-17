@@ -6,7 +6,10 @@ import type { Issue } from "../shared/model.ts";
 /** docs/workflow.md sections and docs/contributing/lessons/ topics for a card's area.
  * Every agent already has AGENTS.md (CLAUDE.md loads it). */
 const READING: Record<string, { sections: readonly string[]; lessons: readonly string[] }> = {
-  tooling: { sections: ["The machine", "Records"], lessons: ["concurrency", "fixtures", "machine"] },
+  tooling: {
+    sections: ["The machine", "Records"],
+    lessons: ["concurrency", "fixtures", "machine"],
+  },
   compiler: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
   runtime: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
   jvm: { sections: ["Records"], lessons: ["soundness", "backends", "memory", "fixtures"] },
@@ -21,13 +24,17 @@ const ALWAYS = ["The loop", "Tasks", "Agents", "Landing: the landing check"];
 /** What this agent reads before acting: chosen by the card's area, not the whole of workflow.md. */
 export function readingList(labels: readonly string[]): string {
   const areas = labels.filter((label) => label.startsWith("area:")).map((label) => label.slice(5));
-  const sections = [...new Set([...ALWAYS, ...areas.flatMap((area) => READING[area]?.sections ?? [])])];
+  const sections = [
+    ...new Set([...ALWAYS, ...areas.flatMap((area) => READING[area]?.sections ?? [])]),
+  ];
   const lessons = [...new Set(areas.flatMap((area) => READING[area]?.lessons ?? []))];
   return [
     "Read before acting (AGENTS.md is already loaded):",
     `- docs/workflow.md, only these sections: ${sections.map((name) => `"## ${name}"`).join(", ")}. Read a section with sed between its heading and the next "## ".`,
-    lessons.length ? `- docs/contributing/lessons/: ${lessons.map((topic) => `${topic}.md`).join(", ")}.` : "",
-    "- docs/workflow.md \"## Decisions\": only the entries about the files you change (grep for their paths), not the whole section.",
+    lessons.length
+      ? `- docs/contributing/lessons/: ${lessons.map((topic) => `${topic}.md`).join(", ")}.`
+      : "",
+    '- docs/workflow.md "## Decisions": only the entries about the files you change (grep for their paths), not the whole section.',
     "Read more only when the task reaches it.",
   ]
     .filter(Boolean)
@@ -139,7 +146,10 @@ export function reviewerBrief(task: {
       ? [
           "",
           `This is review round ${task.previous.length + 1}. Earlier rounds asked for:`,
-          ...task.previous.map((round, index) => `Round ${index + 1} (${round.commit.slice(0, 12)}):\n${round.findings}`),
+          ...task.previous.map(
+            (round, index) =>
+              `Round ${index + 1} (${round.commit.slice(0, 12)}):\n${round.findings}`,
+          ),
           "",
           `First check each earlier finding against what changed since: git -C ${task.tree} --no-optional-locks diff ${last.commit}..${task.commit}. Say which are fixed and which are not. Then review the whole change. Do not raise again a point an earlier round accepted.`,
         ]

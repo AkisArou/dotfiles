@@ -2,7 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { IncomingMessage } from "node:http";
 import { z } from "zod";
-import { Cell, capability, defineConfig, provide } from "signalbox/core";
+import { capability, Cell, combineReadables, defineConfig, provide } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import type { Json, SourceRef } from "signalbox/core/remote";
 import { poll } from "signalbox/core/utils";
@@ -15,7 +15,6 @@ import { nativeTerminals } from "./terminals.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
 import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
-import { combineReadables } from "../orchestration/current.ts";
 import { nativeAttachment } from "signalbox/ext/agents/features";
 import type { TerminalTarget } from "signalbox/ext/terminals/index";
 
@@ -116,13 +115,15 @@ export function createNtsProject(settings: NtsConfig) {
         output: z.custom<refs.Agent[]>(),
         resolve: (context) =>
           combineReadables(
-            combineReadables(
+            [
               context.get(native.service).agents,
               context.get(orchestration.agents.runtime).instances,
-              (terminals, managed) => ({ terminals, managed }),
-            ),
-            context.get(orchestration.agents.activity),
-            ({ terminals, managed }, sessions) => [...managedAgentViews(managed, sessions), ...terminals],
+              context.get(orchestration.agents.activity),
+            ] as const,
+            (terminals, managed, activity) => [
+              ...managedAgentViews(managed, activity),
+              ...terminals,
+            ],
           ),
       }),
       expose(

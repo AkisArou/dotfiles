@@ -2,7 +2,7 @@
 // replacements, with a durable mailbox for its wake-ups. Each generation starts
 // from a short brief and its predecessor's checkpoint and queries the rest.
 import type { Capability, Readable } from "signalbox/core";
-import { current } from "./current.ts";
+import { latestValue } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
 import type { AgentToolset } from "signalbox/ext/agents/tools";
 import type { Assignments, WorkflowStore } from "signalbox/ext/assignments/index";
@@ -32,22 +32,32 @@ export function coordinator(options: {
     requires: [options.profiles, options.issues, options.work],
     // Small on purpose: the coordinator reads details through its tools.
     async bootstrap(context) {
-      const assignments = current(context.get(options.work).assignments) ?? [];
-      const issues = current(context.get(options.issues)) ?? [];
+      const assignments = latestValue(context.get(options.work).assignments) ?? [];
+      const issues = latestValue(context.get(options.issues)) ?? [];
       return {
         generation: context.generation,
         checkpoint: context.checkpoint ?? null,
         openIssues: issues.length,
-        needsUser: issues.filter((issue) => issue.labels.includes("state:needs-user")).map((issue) => issue.number),
+        needsUser: issues
+          .filter((issue) => issue.labels.includes("state:needs-user"))
+          .map((issue) => issue.number),
         activeTasks: assignments
           .filter((assignment) => assignment.status === "active" || assignment.status === "queued")
-          .map((assignment) => ({ id: assignment.id, key: assignment.key, wait: assignment.wait?.reason ?? null })),
+          .map((assignment) => ({
+            id: assignment.id,
+            key: assignment.key,
+            wait: assignment.wait?.reason ?? null,
+          })),
       } satisfies Json;
     },
     async launch(context) {
       const resolved = await context.get(options.profiles).resolve("coordinator");
       if ("wait" in resolved)
-        return { available: false, reason: resolved.wait, ...(resolved.retryAt === undefined ? {} : { retryAt: resolved.retryAt }) };
+        return {
+          available: false,
+          reason: resolved.wait,
+          ...(resolved.retryAt === undefined ? {} : { retryAt: resolved.retryAt }),
+        };
       const instance = await options.agents.start(
         context.get(options.agents.runtime),
         {

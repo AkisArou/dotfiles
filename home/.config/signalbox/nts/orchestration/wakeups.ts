@@ -10,7 +10,7 @@ import type { Assignment, Assignments, WorkflowStore } from "signalbox/ext/assig
 import type { Mailbox } from "signalbox/ext/orchestration/services";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
-import { current } from "./current.ts";
+import { latestValue } from "signalbox/core";
 import { taskState } from "./task.ts";
 import type { TaskState } from "./task.ts";
 import type { UserDecisions } from "./tools.ts";
@@ -60,7 +60,12 @@ export function wakeups(observed: {
         text: `${name} is stalled: ${task.stalled}`,
       });
     const budget = PHASE_BUDGET[task.phase];
-    if (assignment.status === "active" && budget && task.phaseSince !== null && observed.now - task.phaseSince > budget)
+    if (
+      assignment.status === "active" &&
+      budget &&
+      task.phaseSince !== null &&
+      observed.now - task.phaseSince > budget
+    )
       events.push({
         id: `overdue/${assignment.id}/${task.phase}/${task.phaseSince}`,
         text:
@@ -78,7 +83,10 @@ export function wakeups(observed: {
         text: `${name} faulted (${assignment.error.code}): ${assignment.error.message}`,
       });
     if (assignment.status === "finished")
-      events.push({ id: `finished/${assignment.id}`, text: `${name} finished: ${task.outcome ?? "done"}.` });
+      events.push({
+        id: `finished/${assignment.id}`,
+        text: `${name} finished: ${task.outcome ?? "done"}.`,
+      });
   }
   for (const answer of observed.landing?.recent ?? [])
     if (answer.state !== "landed" || answer.issue !== null)
@@ -92,7 +100,10 @@ export function wakeups(observed: {
       text: `Full check ${culprit.part} red: culprit ${culprit.commit.slice(0, 12)} (${culprit.steps.join(", ")})${culprit.revert ? `, reverted as ${culprit.revert.slice(0, 12)}` : ""}. Logs: ${culprit.run}`,
     });
   for (const decision of observed.decided)
-    events.push({ id: `decided/${decision.id}`, text: `The user answered ${decision.id}: ${decision.answer}` });
+    events.push({
+      id: `decided/${decision.id}`,
+      text: `The user answered ${decision.id}: ${decision.answer}`,
+    });
   return events;
 }
 
@@ -107,15 +118,22 @@ export function wakeupFeed(options: {
   const NAMESPACE = "nts/wakeups";
   return {
     id: "nts-wakeups",
-    requires: [options.state, options.mailbox, options.work, options.landing, options.fullCheck, options.decisions],
+    requires: [
+      options.state,
+      options.mailbox,
+      options.work,
+      options.landing,
+      options.fullCheck,
+      options.decisions,
+    ],
     start(context) {
       const store = context.get(options.state);
       const observe = async () => {
         const events = wakeups({
-          assignments: current(context.get(options.work).assignments) ?? [],
-          landing: current(context.get(options.landing)),
-          fullCheck: current(context.get(options.fullCheck)),
-          decided: (current(context.get(options.decisions).requests) ?? [])
+          assignments: latestValue(context.get(options.work).assignments) ?? [],
+          landing: latestValue(context.get(options.landing)),
+          fullCheck: latestValue(context.get(options.fullCheck)),
+          decided: (latestValue(context.get(options.decisions).requests) ?? [])
             .filter((request) => request.status === "decided" && request.result)
             .map((request) => ({ id: request.id, answer: request.result!.decision.answer })),
           now: Date.now(),
@@ -139,7 +157,9 @@ export function wakeupFeed(options: {
         }
       };
       context.afterStart(() => {
-        const loop = poll(observe, 5_000, context.signal, (error) => context.log.error("wake-ups", error));
+        const loop = poll(observe, 5_000, context.signal, (error) =>
+          context.log.error("wake-ups", error),
+        );
         context.onStop(() => loop);
       });
     },

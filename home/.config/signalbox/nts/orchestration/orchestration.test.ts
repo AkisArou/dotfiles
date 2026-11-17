@@ -51,7 +51,9 @@ const task = (patch: object, assignment: Partial<Assignment> = {}): Assignment =
 
 test("wake-ups have stable identities derived from what they announce", () => {
   const observe = (assignments: Assignment[]) =>
-    wakeups({ assignments, landing: undefined, fullCheck: undefined, decided: [], now: 0 }).map((event) => event.id);
+    wakeups({ assignments, landing: undefined, fullCheck: undefined, decided: [], now: 0 }).map(
+      (event) => event.id,
+    );
   const design = observe([task({ phase: "approve", design: "fix it at the cause" })]);
   assert.equal(design.length, 1);
   assert.match(design[0]!, /^design\/a1\//);
@@ -60,18 +62,33 @@ test("wake-ups have stable identities derived from what they announce", () => {
   assert.notDeepEqual(observe([task({ phase: "approve", design: "a better design" })]), design);
   // A stalled agent is announced once per watched report; a phase past its budget once per entry.
   const watch = { key: "build/claude/x/0", idleSince: 0, until: null, nudges: 2, escalated: true };
-  assert.deepEqual(observe([task({ phase: "build", stalled: "idle", watch })]), ["stalled/a1/build/claude/x/0"]);
+  assert.deepEqual(observe([task({ phase: "build", stalled: "idle", watch })]), [
+    "stalled/a1/build/claude/x/0",
+  ]);
   const late = (now: number, phaseSince: number) =>
-    wakeups({ assignments: [task({ phase: "build", phaseSince })], landing: undefined, fullCheck: undefined, decided: [], now })
-      .map((event) => event.id);
+    wakeups({
+      assignments: [task({ phase: "build", phaseSince })],
+      landing: undefined,
+      fullCheck: undefined,
+      decided: [],
+      now,
+    }).map((event) => event.id);
   assert.deepEqual(late(PHASE_BUDGET.build!, 0), []);
   assert.deepEqual(late(PHASE_BUDGET.build! + 1, 0), ["overdue/a1/build/0"]);
   assert.deepEqual(observe([task({ help: "which owner?" })]).length, 1);
   assert.deepEqual(
-    observe([task({ rounds: 5 }, { wait: { reason: "Escalated after 5 rounds; the coordinator decides" } })]),
+    observe([
+      task(
+        { rounds: 5 },
+        { wait: { reason: "Escalated after 5 rounds; the coordinator decides" } },
+      ),
+    ]),
     ["escalated/a1/5"],
   );
-  assert.deepEqual(observe([task({ phase: "done", outcome: "verified" }, { status: "finished" })]), ["finished/a1"]);
+  assert.deepEqual(
+    observe([task({ phase: "done", outcome: "verified" }, { status: "finished" })]),
+    ["finished/a1"],
+  );
 });
 
 test("each area's reading list names workflow sections and lessons that exist", async () => {
@@ -80,9 +97,20 @@ test("each area's reading list names workflow sections and lessons that exist", 
   const { ntsConfig } = await import("../config.ts");
   const workflow = await readFile(`${ntsConfig.root}/docs/workflow.md`, "utf8");
   const headings = new Set([...workflow.matchAll(/^## (.+)$/gm)].map((match) => match[1]!));
-  for (const area of ["tooling", "compiler", "runtime", "jvm", "wasm", "node", "benchmarks", "chromium", "docs"]) {
+  for (const area of [
+    "tooling",
+    "compiler",
+    "runtime",
+    "jvm",
+    "wasm",
+    "node",
+    "benchmarks",
+    "chromium",
+    "docs",
+  ]) {
     const list = readingList([`area:${area}`]);
-    for (const [, name] of list.matchAll(/"## ([^"]+)"/g)) assert.ok(headings.has(name!), `${area}: no section ${name}`);
+    for (const [, name] of list.matchAll(/"## ([^"]+)"/g))
+      assert.ok(headings.has(name!), `${area}: no section ${name}`);
     const lessons = /^- docs\/contributing\/lessons\/: (.+)\.$/m.exec(list)?.[1] ?? "";
     for (const [, topic] of lessons.matchAll(/(\w+)\.md/g))
       await access(`${ntsConfig.root}/docs/contributing/lessons/${topic}.md`);
@@ -104,9 +132,24 @@ test("a live Claude session shows Claude Code's own status; others keep theirs",
   );
   const views = managedAgentViews(
     [
-      { id: "claude/a2494288-4abb-4e6a-967e-5a39d904f7c0", provider: "claude", label: "#802 worker", state: "running" },
-      { id: "claude/45d08db6-4cd2-49f8-b05c-9b560324e0a4", provider: "claude", label: "#816 review abc", state: "running" },
-      { id: "claude/11111111-2222-3333-4444-555555555555", provider: "claude", label: "#9 worker", state: "ended" },
+      {
+        id: "claude/a2494288-4abb-4e6a-967e-5a39d904f7c0",
+        provider: "claude",
+        label: "#802 worker",
+        state: "running",
+      },
+      {
+        id: "claude/45d08db6-4cd2-49f8-b05c-9b560324e0a4",
+        provider: "claude",
+        label: "#816 review abc",
+        state: "running",
+      },
+      {
+        id: "claude/11111111-2222-3333-4444-555555555555",
+        provider: "claude",
+        label: "#9 worker",
+        state: "ended",
+      },
       { id: "codex/xyz", provider: "codex", label: "#7 worker", state: "running" },
     ],
     activity,

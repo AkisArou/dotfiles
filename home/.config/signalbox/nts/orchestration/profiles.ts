@@ -79,7 +79,9 @@ export function profiles(options: {
     store.transaction(NAMESPACE, (tx) => {
       const current = settingsSchema.parse(tx.get(KEY));
       if (expected !== undefined && current.revision !== expected)
-        throw new Error(`Profile settings changed (revision ${current.revision}); reload and retry`);
+        throw new Error(
+          `Profile settings changed (revision ${current.revision}); reload and retry`,
+        );
       const next = validate({ ...update(current), revision: current.revision + 1 });
       tx.set(KEY, next as unknown as Json);
       return next;
@@ -87,7 +89,9 @@ export function profiles(options: {
   const instance: Profiles = {
     settings: cell,
     async resolve(role, now = Date.now()) {
-      const settings = await store.transaction(NAMESPACE, (tx) => settingsSchema.parse(tx.get(KEY)));
+      const settings = await store.transaction(NAMESPACE, (tx) =>
+        settingsSchema.parse(tx.get(KEY)),
+      );
       const blocked = (profile: Profile) => {
         const state = settings.unavailable[profile.harness];
         return state && (state.until === undefined || state.until > now) ? state : undefined;
@@ -108,7 +112,10 @@ export function profiles(options: {
       const next = await write(
         (current) => ({
           ...current,
-          profiles: [...current.profiles.filter((old) => old.id !== profile.id), profileSchema.parse(profile)],
+          profiles: [
+            ...current.profiles.filter((old) => old.id !== profile.id),
+            profileSchema.parse(profile),
+          ],
         }),
         expected,
       );
@@ -117,7 +124,10 @@ export function profiles(options: {
     },
     async setRole(role, selection, expected) {
       const next = await write(
-        (current) => ({ ...current, roles: { ...current.roles, [role]: roleSchema.parse(selection) } }),
+        (current) => ({
+          ...current,
+          roles: { ...current.roles, [role]: roleSchema.parse(selection) },
+        }),
         expected,
       );
       cell.set(next);

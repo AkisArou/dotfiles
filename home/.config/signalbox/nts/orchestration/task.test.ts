@@ -79,7 +79,12 @@ test("a task goes from tree to verified through design approval, review and land
       async create(request) {
         let instance = byRequest.get(request.requestId);
         if (!instance) {
-          instance = { id: `fake/${byRequest.size}`, provider: "fake", state: "running", label: request.label ?? "" };
+          instance = {
+            id: `fake/${byRequest.size}`,
+            provider: "fake",
+            state: "running",
+            label: request.label ?? "",
+          };
           byRequest.set(request.requestId, instance);
           started.push({ id: instance.id, cwd: request.cwd!, brief: inputText(request.input) });
           instances.set([...byRequest.values()]);
@@ -90,7 +95,10 @@ test("a task goes from tree to verified through design approval, review and land
         if (key.id === terminate.id) return { terminate: async () => void stopped.push(id) } as T;
         if (key.id === messaging.id)
           return {
-            submit: async (input: Parameters<typeof inputText>[0], options: { requestId: string }) => {
+            submit: async (
+              input: Parameters<typeof inputText>[0],
+              options: { requestId: string },
+            ) => {
               messages.push({ to: id, text: inputText(input) });
               return { id: options.requestId, delivery: "queued" };
             },
@@ -139,7 +147,7 @@ test("a task goes from tree to verified through design approval, review and land
     parent: null,
     progress: null,
   };
-  const keyOf = <T,>(id: string, cell: Cell<T>) => {
+  const keyOf = <T>(id: string, cell: Cell<T>) => {
     const key = capability<Readable<T>>(id);
     return { key, extension: { id, provides: [provide(key, cell)] } };
   };
@@ -154,7 +162,11 @@ test("a task goes from tree to verified through design approval, review and land
     state: state.state,
     initial: {
       profiles: [{ id: "p", label: "p", harness: "claude", model: "m", effort: "high" }],
-      roles: { coordinator: { profile: "p" }, worker: { profile: "p" }, reviewer: { profile: "p" } },
+      roles: {
+        coordinator: { profile: "p" },
+        worker: { profile: "p" },
+        reviewer: { profile: "p" },
+      },
     },
   });
   const tools = { id: "none", tools: [] };
@@ -170,7 +182,12 @@ test("a task goes from tree to verified through design approval, review and land
     maxRounds: 4,
     clock: () => now,
   });
-  const work = assignmentService({ id: "work", state: state.state, engine: engine.engine, routes: [route] });
+  const work = assignmentService({
+    id: "work",
+    state: state.state,
+    engine: engine.engine,
+    routes: [route],
+  });
   const app = await startExtensions(
     defineConfig({
       id: "task-test",
@@ -204,9 +221,12 @@ test("a task goes from tree to verified through design approval, review and land
     for (;;) {
       const assignment = read();
       if (assignment.error) throw new Error(`assignment faulted: ${assignment.error.message}`);
-      if (taskState.parse(assignment.state).phase === expected) return taskState.parse(assignment.state);
+      if (taskState.parse(assignment.state).phase === expected)
+        return taskState.parse(assignment.state);
       if (Date.now() > deadline)
-        throw new Error(`still ${taskState.parse(assignment.state).phase} (${assignment.wait?.reason}), wanted ${expected}`);
+        throw new Error(
+          `still ${taskState.parse(assignment.state).phase} (${assignment.wait?.reason}), wanted ${expected}`,
+        );
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
   };
@@ -219,7 +239,9 @@ test("a task goes from tree to verified through design approval, review and land
   assert.match(started[0]!.brief, /issue #900, Make the thing durable/);
   assert.deepEqual(designing.paths, ["docs/workflow.md", "tooling/gate/thing.ts"]);
   assert.deepEqual(
-    read().heldResources.map((claim) => claim.resource).sort(),
+    read()
+      .heldResources.map((claim) => claim.resource)
+      .sort(),
     ["file:docs/workflow.md", "file:tooling/gate/thing.ts", "issue/900", "worker"],
   );
 
@@ -235,7 +257,9 @@ test("a task goes from tree to verified through design approval, review and land
   assert.match(messages.at(-1)!.text, /^Design approved\./);
 
   // The worker's session ends mid-build: a fresh worker takes over with a handoff.
-  const first = [...byRequest.entries()].find(([, instance]) => instance.id === building.worker!.id)!;
+  const first = [...byRequest.entries()].find(
+    ([, instance]) => instance.id === building.worker!.id,
+  )!;
   byRequest.set(first[0], { ...first[1], state: "ended" });
   instances.set([...byRequest.values()]);
   const resumed = await (async () => {
@@ -255,7 +279,10 @@ test("a task goes from tree to verified through design approval, review and land
   // An idle worker is nudged; its progress report holds nudges until its time;
   // after the nudges the coordinator is told; a coordinator message answers it.
   const worker = resumed.worker!.id;
-  const until = async (check: (state: ReturnType<typeof taskState.parse>) => boolean, what: string) => {
+  const until = async (
+    check: (state: ReturnType<typeof taskState.parse>) => boolean,
+    what: string,
+  ) => {
     const deadline = Date.now() + 20_000;
     for (;;) {
       const state = taskState.parse(read().state);
@@ -267,15 +294,22 @@ test("a task goes from tree to verified through design approval, review and land
   // Each observation differs (a tick), as a real reading after time passes would wake
   // the route through its retryAt; the test's clock jumps instead of waiting.
   let tick = 0;
-  const observe = (status: string) => activityCell.set({ [worker]: status, [`tick/${++tick}`]: "" });
-  const nudges = () => messages.filter((message) => message.to === worker && /waits for your proved commit/.test(message.text)).length;
+  const observe = (status: string) =>
+    activityCell.set({ [worker]: status, [`tick/${++tick}`]: "" });
+  const nudges = () =>
+    messages.filter(
+      (message) => message.to === worker && /waits for your proved commit/.test(message.text),
+    ).length;
   observe("idle");
   await until((state) => state.watch?.idleSince === now, "watched");
   now += STALL.idle;
   observe("idle");
   await until(() => nudges() === 1, "nudged");
   assert.match(messages.at(-1)!.text, /report_progress/);
-  await report({ kind: "progress", role: "worker", note: "inner.ts runs", minutes: 30 }, "progress-1");
+  await report(
+    { kind: "progress", role: "worker", note: "inner.ts runs", minutes: 30 },
+    "progress-1",
+  );
   await until((state) => state.progress?.note === "inner.ts runs", "progressed");
   now += 20 * 60_000;
   observe("idle");
@@ -290,9 +324,19 @@ test("a task goes from tree to verified through design approval, review and land
   now += STALL.idle;
   observe("idle");
   const stalled = await until((state) => state.stalled !== null, "stalled");
-  assert.match(stalled.stalled!, /stayed idle without your proved commit \(report_ready\) through 2 nudges; its last progress: inner\.ts runs/);
-  await report({ kind: "message", from: "coordinator", text: "Commit what you have." }, "message-1");
-  await until((state) => state.stalled === null && state.note === "From the coordinator: Commit what you have.", "answered");
+  assert.match(
+    stalled.stalled!,
+    /stayed idle without your proved commit \(report_ready\) through 2 nudges; its last progress: inner\.ts runs/,
+  );
+  await report(
+    { kind: "message", from: "coordinator", text: "Commit what you have." },
+    "message-1",
+  );
+  await until(
+    (state) =>
+      state.stalled === null && state.note === "From the coordinator: Commit what you have.",
+    "answered",
+  );
   assert.equal(messages.at(-1)!.text, "From the coordinator: Commit what you have.");
   observe("busy");
 
@@ -307,7 +351,10 @@ test("a task goes from tree to verified through design approval, review and land
   assert.equal(started.length, 3);
   assert.match(started[2]!.brief, new RegExp(`review commit ${commit}`));
 
-  await report({ kind: "review", commit, verdict: "changes", findings: "thing.txt:1 needs a newline" }, "review-1");
+  await report(
+    { kind: "review", commit, verdict: "changes", findings: "thing.txt:1 needs a newline" },
+    "review-1",
+  );
   await phase("build");
   assert.deepEqual(stopped, ["fake/2"]);
   assert.match(messages.at(-1)!.text, /needs a newline/);
@@ -324,7 +371,10 @@ test("a task goes from tree to verified through design approval, review and land
   // is withdrawn, the worker is told why, and the same commit can queue again.
   await report({ kind: "rework", notes: "the tooling step hung in worker-memory" }, "rework-1");
   await phase("build");
-  assert.match(messages.at(-1)!.text, /^Rework [0-9a-f]{40}: the tooling step hung in worker-memory/);
+  assert.match(
+    messages.at(-1)!.text,
+    /^Rework [0-9a-f]{40}: the tooling step hung in worker-memory/,
+  );
   assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), []);
   await report({ kind: "ready", commit, summary: "the hang was the fixture's" }, "ready-3");
   await phase("reviewing");
@@ -340,8 +390,21 @@ test("a task goes from tree to verified through design approval, review and land
       held: [],
       day: { landed: 0, refused: 0, held: 0, withdrawn: 0, median_wall_s: null, max_wall_s: null },
       recent: [
-        { id: `${commit.slice(0, 12)}-1`, sha: commit, state, at: new Date(now).toISOString(), message: state, branch: "900", issue: 900, run: "/logs",
-          wall_s: 1, estimate_s: 1, landing: [], deferred: [], pending: 0 },
+        {
+          id: `${commit.slice(0, 12)}-1`,
+          sha: commit,
+          state,
+          at: new Date(now).toISOString(),
+          message: state,
+          branch: "900",
+          issue: 900,
+          run: "/logs",
+          wall_s: 1,
+          estimate_s: 1,
+          landing: [],
+          deferred: [],
+          pending: 0,
+        },
       ],
       main: { commit, pushed: true },
     }) satisfies LandingStatus;
@@ -350,7 +413,8 @@ test("a task goes from tree to verified through design approval, review and land
   assert.equal(verifying.landedMain, commit);
   fullCheckCell.set({ verified: { commit, pushed: null } } as unknown as FullCheckStatus);
   const deadline = Date.now() + 20_000;
-  while (read().status !== "finished" && Date.now() < deadline) await new Promise((resolve) => setTimeout(resolve, 50));
+  while (read().status !== "finished" && Date.now() < deadline)
+    await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(read().status, "finished");
   assert.equal(taskState.parse(read().state).outcome, "verified");
   assert.deepEqual(stopped.sort(), ["fake/1", "fake/2", "fake/3", "fake/4"]);

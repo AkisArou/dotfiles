@@ -88,9 +88,10 @@ export type UserDecisionView = {
 export const profileSettings = source<ProfileSettingsView>("nts.profiles");
 export const assignments = source<AssignmentView[]>("nts.assignments");
 export const userDecisions = source<UserDecisionView[]>("nts.user-decisions");
-export const setProfile = operation<{ profile: ProfileView; revision: number }, { revision: number }>(
-  "nts.profiles.set",
-);
+export const setProfile = operation<
+  { profile: ProfileView; revision: number },
+  { revision: number }
+>("nts.profiles.set");
 export const setRole = operation<
   { role: AgentRole; profile: string; fallback?: string; revision: number },
   { revision: number }
@@ -105,23 +106,33 @@ export const assignTask = operation<{ issue: number; instructions: string }, { i
 export const cancelAssignment = operation<{ assignment: string; reason: string }, { ok: true }>(
   "nts.assignments.cancel",
 );
-export const answerDecision = operation<{ id: string; revision: number; answer: string }, { ok: true }>(
-  "nts.user-decisions.answer",
-);
+export const answerDecision = operation<
+  { id: string; revision: number; answer: string },
+  { ok: true }
+>("nts.user-decisions.answer");
 export const reworkAssignment = operation<{ assignment: string; notes: string }, { ok: true }>(
   "nts.assignments.rework",
 );
 /** What an assignment says now: its fault, stall, open question or wait, and its latest progress. */
 export function assignmentSays(a: AssignmentView): string {
-  const said = a.error ?? (a.stalled && `stalled: ${a.stalled}`) ?? (a.help && `asks: ${a.help}`) ?? a.wait ?? "";
+  const said =
+    a.error ??
+    (a.stalled && `stalled: ${a.stalled}`) ??
+    (a.help && `asks: ${a.help}`) ??
+    a.wait ??
+    "";
   return a.progress && !a.error ? `${said} · ${a.progress}` : said;
 }
 /** The phase and how long it has run, e.g. "build 42 min". */
 export function assignmentPhase(a: AssignmentView, now = Date.now()): string {
   const phase = a.error ? "faulted" : (a.phase ?? a.status);
-  return a.phaseSince === null ? phase : `${phase} ${Math.max(0, Math.round((now - a.phaseSince) / 60_000))} min`;
+  return a.phaseSince === null
+    ? phase
+    : `${phase} ${Math.max(0, Math.round((now - a.phaseSince) / 60_000))} min`;
 }
-export const retryAssignment = operation<{ assignment: string }, { ok: true }>("nts.assignments.retry");
+export const retryAssignment = operation<{ assignment: string }, { ok: true }>(
+  "nts.assignments.retry",
+);
 export const decideDesign = operation<
   { assignment: string; accept: boolean; notes: string },
   { ok: true }

@@ -41,9 +41,18 @@ test("the coordinator starts with its brief and receives each event once through
       async create(request) {
         let instance = byRequest.get(request.requestId);
         if (!instance) {
-          instance = { id: `fake/${byRequest.size}`, provider: "fake", state: "running", label: request.label ?? "" };
+          instance = {
+            id: `fake/${byRequest.size}`,
+            provider: "fake",
+            state: "running",
+            label: request.label ?? "",
+          };
           byRequest.set(request.requestId, instance);
-          started.push({ id: instance.id, brief: inputText(request.input), tools: (request.tools ?? []).map((set) => set.id) });
+          started.push({
+            id: instance.id,
+            brief: inputText(request.input),
+            tools: (request.tools ?? []).map((set) => set.id),
+          });
           instances.set([...byRequest.values()]);
         }
         return instance;
@@ -51,7 +60,10 @@ test("the coordinator starts with its brief and receives each event once through
       capability<T>(id: string, key: { id: string }): T | undefined {
         if (key.id !== messaging.id) return undefined;
         return {
-          submit: async (input: Parameters<typeof inputText>[0], options: { requestId: string }) => {
+          submit: async (
+            input: Parameters<typeof inputText>[0],
+            options: { requestId: string },
+          ) => {
             delivered.push({ to: id, text: inputText(input), requestId: options.requestId });
             return { id: options.requestId, delivery: "queued" };
           },
@@ -93,7 +105,11 @@ test("the coordinator starts with its brief and receives each event once through
       maxRounds: 4,
       profiles: {
         profiles: [{ id: "p", label: "p", harness: "claude" }],
-        roles: { coordinator: { profile: "p" }, worker: { profile: "p" }, reviewer: { profile: "p" } },
+        roles: {
+          coordinator: { profile: "p" },
+          worker: { profile: "p" },
+          reviewer: { profile: "p" },
+        },
       },
     },
   });
@@ -111,16 +127,30 @@ test("the coordinator starts with its brief and receives each event once through
   );
   t.after(() => app.stop());
 
-  const coordinator = await until(() => started.find((agent) => /coordinator generation 1/.test(agent.brief)));
+  const coordinator = await until(() =>
+    started.find((agent) => /coordinator generation 1/.test(agent.brief)),
+  );
   assert.deepEqual(coordinator.tools, ["nts-coordinator"]);
   assert.match(coordinator.brief, /"checkpoint": null/);
 
   // The first observation only seeds the cursor; a later event is news.
   await new Promise((resolve) => setTimeout(resolve, 6_000));
   const decisions = app.context.get(orchestration.decisions);
-  const asked = await decisions.request({ id: "q1", input: { question: "Delete old pins?", context: "12 GB" } });
-  await decisions.decide({ id: "q1", expectedRevision: asked.revision, decision: { answer: "yes" }, by: {}, requestId: "d1" });
-  const message = await until(() => delivered.find((entry) => /The user answered q1: yes/.test(entry.text)), 30_000);
+  const asked = await decisions.request({
+    id: "q1",
+    input: { question: "Delete old pins?", context: "12 GB" },
+  });
+  await decisions.decide({
+    id: "q1",
+    expectedRevision: asked.revision,
+    decision: { answer: "yes" },
+    by: {},
+    requestId: "d1",
+  });
+  const message = await until(
+    () => delivered.find((entry) => /The user answered q1: yes/.test(entry.text)),
+    30_000,
+  );
   assert.equal(message.to, coordinator.id);
   await new Promise((resolve) => setTimeout(resolve, 6_000));
   assert.equal(delivered.filter((entry) => /answered q1/.test(entry.text)).length, 1);
