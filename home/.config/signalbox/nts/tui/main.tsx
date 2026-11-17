@@ -1,4 +1,5 @@
 /** @jsxImportSource @opentui/react */
+import { readFileSync } from "node:fs";
 import { createCliRenderer } from "@opentui/core";
 import { createRoot } from "@opentui/react";
 import { createClient, webSocketConnection } from "signalbox/client";
@@ -28,6 +29,11 @@ const renderer = await createCliRenderer({
     finish();
   },
 });
+// Name the terminal (and its tmux window) after the project; tmux themes that
+// read a node program's pane title would otherwise show an empty name.
+renderer.setTerminalTitle(
+  `signalbox · ${(JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as { name: string }).name}`,
+);
 const tools = createTerminalTools(renderer, terminalConfig.finder);
 createRoot(renderer).render(
   <SignalboxProvider client={client}>
