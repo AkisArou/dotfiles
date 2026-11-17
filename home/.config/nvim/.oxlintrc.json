@@ -9,13 +9,45 @@
       "error",
       {
         "blankLine": "always",
-        "prev": "block-like",
+        "prev": ["import", "directive"],
+        "next": "*"
+      },
+      {
+        "blankLine": "always",
+        "prev": [
+          "block-like",
+          "if",
+          "for",
+          "while",
+          "do",
+          "switch",
+          "try",
+          "type",
+          "interface",
+          "enum",
+          "function-overload"
+        ],
         "next": "*"
       },
       {
         "blankLine": "always",
         "prev": "*",
-        "next": ["if", "for", "while", "switch", "try"]
+        "next": [
+          "if",
+          "for",
+          "while",
+          "do",
+          "switch",
+          "try",
+          "function",
+          "class",
+          "type",
+          "interface",
+          "enum",
+          "function-overload",
+          "return",
+          "throw"
+        ]
       },
       {
         "blankLine": "always",
@@ -23,14 +55,44 @@
         "next": "*"
       },
       {
-        "blankLine": "any",
-        "prev": ["const", "let", "var"],
+        "blankLine": "always",
+        "prev": "*",
         "next": ["const", "let", "var"]
       },
       {
         "blankLine": "always",
+        "prev": "multiline-expression",
+        "next": "*"
+      },
+      {
+        "blankLine": "always",
         "prev": "*",
-        "next": "return"
+        "next": "multiline-expression"
+      },
+      {
+        "blankLine": "any",
+        "prev": ["singleline-const", "singleline-let", "singleline-var"],
+        "next": ["singleline-const", "singleline-let", "singleline-var"]
+      },
+      {
+        "blankLine": "any",
+        "prev": "import",
+        "next": "import"
+      },
+      {
+        "blankLine": "any",
+        "prev": "directive",
+        "next": "directive"
+      },
+      {
+        "blankLine": "any",
+        "prev": "singleline-type",
+        "next": "singleline-type"
+      },
+      {
+        "blankLine": "any",
+        "prev": "function-overload",
+        "next": ["function-overload", "function"]
       }
     ]
   },
