@@ -120,9 +120,11 @@ function main(argv: readonly string[]): number {
     case "start":
     case "stop":
     case "restart":
+      return run("systemctl", ["--user", command, unit]);
+    // At login from now on, and now.
     case "enable":
     case "disable":
-      return run("systemctl", ["--user", command, unit]);
+      return run("systemctl", ["--user", command, "--now", unit]);
     case "logs":
       return run("journalctl", ["--user", "-u", unit, "-f", "-n", "100", "-o", "cat"]);
     case "doctor":
