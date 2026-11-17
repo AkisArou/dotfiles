@@ -53,6 +53,10 @@ const tools = createTerminalTools(
     },
   },
   terminalConfig.finder,
+  // TMUX is "<socket>,<server pid>,<session>"; TMUX_PANE is this pane.
+  process.env.TMUX && process.env.TMUX_PANE
+    ? { socketPath: process.env.TMUX.split(",")[0]!, pane: process.env.TMUX_PANE }
+    : undefined,
 );
 createRoot(renderer).render(
   <SignalboxProvider client={client}>

@@ -36,6 +36,11 @@ export const agents = source<Agent[]>("nts.agents");
 export const plan = source<string>("nts.plan");
 export const terminalPrograms = source<{ id: string; label: string }[]>("nts.terminal-programs");
 export const startTerminal = operation<{ program: string }, { id: string }>("nts.start-terminal");
+/** The tmux pane a terminal's program runs in, for native tools such as a scrollback viewer. */
+export type TerminalPane = { socketPath: string; pane: string };
+export const terminalPane = operation<{ terminal: string }, TerminalPane | null>(
+  "nts.terminal-pane",
+);
 // Orchestration: browser-safe views of host state, and the owner operations on it.
 export type Harness = "claude" | "codex";
 export type AgentRole = "coordinator" | "worker" | "reviewer";

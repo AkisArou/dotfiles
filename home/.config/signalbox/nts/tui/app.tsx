@@ -1,5 +1,7 @@
 /** @jsxImportSource @opentui/react */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useClient } from "signalbox/client/react";
+import * as refs from "../shared/model.ts";
 import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
@@ -33,6 +35,7 @@ import { navigationKey, popupKey } from "./keyboard.ts";
 import { NativeTerminal } from "./terminal.tsx";
 
 export function TerminalApp({ onExit, tools }: { onExit(): void; tools: TerminalTools }) {
+  const client = useClient();
   const selection = useSelection(),
     project = useProject(),
     { width, height } = useTerminalDimensions();
@@ -564,6 +567,19 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     return next.length + 11 <= width - 2 ? next : line;
   }, "");
   const labels = tabLabels(tab, width - 2, count);
+  // The agent terminal shown here: its tmux pane is named on this TUI's own pane, for native
+  // tools such as a scrollback viewer (TerminalTools.showPane).
+  const shownTerminal = tab === "Agents" ? agent?.terminal : undefined;
+  useEffect(() => {
+    if (!tools.showPane) return;
+    if (!shownTerminal) return tools.showPane(undefined);
+    const abort = new AbortController();
+    client.call(refs.terminalPane, { terminal: shownTerminal }, { signal: abort.signal }).then(
+      (pane) => abort.signal.aborted || tools.showPane?.(pane ?? undefined),
+      () => abort.signal.aborted || tools.showPane?.(undefined),
+    );
+    return () => abort.abort();
+  }, [client, tools, shownTerminal]);
   // The popup's backdrop: what is behind it is dimmed while it is open.
   const behind = popup === null ? 1 : 0.35;
   return (

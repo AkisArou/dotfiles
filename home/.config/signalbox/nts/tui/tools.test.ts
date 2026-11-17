@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createTerminalTools } from "./tools.ts";
 
 function terminal() {
@@ -123,4 +123,44 @@ test("the configured finder ticks the chosen lines at start, in their order", as
   assert.ok(many.includes("--multi"));
   assert.ok(many.includes("load:pos(3)+select+pos(1)+select+first"));
   assert.ok(terminalConfig.finder("Find").args?.includes("--no-multi"));
+});
+
+test("the viewer names the pane it shows on its own tmux pane, and clears it on closing", async () => {
+  const socket = `sb-shown-${process.pid}-${Date.now()}`;
+  const tmux = (...args: string[]) =>
+    execFileSync("tmux", ["-L", socket, "-f", "/dev/null", ...args], { encoding: "utf8" }).trim();
+  tmux("new-session", "-d", "-s", "viewer");
+  const [socketPath, pane] = tmux(
+    "display-message",
+    "-p",
+    "-t",
+    "viewer",
+    "#{socket_path}\t#{pane_id}",
+  ).split("\t");
+  const shown = () => tmux("show-options", "-pqv", "-t", pane!, "@shown-pane");
+  const until = async (expected: string) => {
+    for (let tries = 0; tries < 200 && shown() !== expected; tries++)
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.equal(shown(), expected);
+  };
+  const tools = createTerminalTools(terminal(), () => ({ command: "unused" }), {
+    socketPath: socketPath!,
+    pane: pane!,
+  });
+  try {
+    tools.showPane({ socketPath: "/tmp/agents", pane: "%7" });
+    await until("/tmp/agents %7");
+    tools.showPane({ socketPath: "/tmp/agents", pane: "%8" });
+    await until("/tmp/agents %8");
+    tools.showPane(undefined);
+    await until("");
+    tools.showPane({ socketPath: "/tmp/agents", pane: "%9" });
+    await tools.close();
+    assert.equal(shown(), "", "closing clears it");
+  } finally {
+    await tools.close();
+    tmux("kill-server");
+    // tmux leaves its socket file behind.
+    await rm(socketPath!, { force: true });
+  }
 });

@@ -140,6 +140,17 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
         run: (input, context) =>
           context.get(native.service).start(input.program, context.requestId),
       }),
+      exposeOperation({
+        ref: refs.terminalPane,
+        requires: [native.service],
+        input: z.object({ terminal: z.string().min(1) }),
+        output: z.object({ socketPath: z.string(), pane: z.string() }).nullable(),
+        run: async (input, context) => {
+          const target = await context.get(native.service).resolve(input.terminal);
+          const source = await target.source?.(context.signal);
+          return source ? { socketPath: source.socketPath, pane: source.pane } : null;
+        },
+      }),
       ntsObservations({
         root: settings.root,
         landing: orchestration.landing,

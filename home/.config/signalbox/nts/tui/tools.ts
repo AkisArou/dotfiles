@@ -1,8 +1,9 @@
 // Local viewer tools. They borrow the terminal; they do not run on the host.
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { stat } from "node:fs/promises";
 import type { ChildProcess } from "node:child_process";
 import type { CliRenderer } from "@opentui/core";
+import type { TerminalPane } from "../shared/model.ts";
 
 export interface TerminalCommand {
   readonly command: string;
@@ -17,13 +18,40 @@ export interface TerminalTools {
     chosen: readonly number[],
   ): Promise<number[] | undefined>;
   run(command: TerminalCommand, cwd: string): Promise<void>;
+  /**
+   * Tell the tmux pane this viewer runs in which pane it shows now (undefined: none), in its
+   * @shown-pane option as "<socket> <pane>". A native tool run on this pane, such as vim-view's
+   * scrollback view, then shows that pane's history rather than this viewer's screen.
+   */
+  showPane?(pane: TerminalPane | undefined): void;
 }
 type Terminal = Pick<CliRenderer, "suspend" | "resume" | "isDestroyed">;
 
 export function createTerminalTools(
   terminal: Terminal,
   finder: (title: string, chosen?: readonly number[]) => TerminalCommand,
+  /** The tmux pane this viewer runs in, when it runs in tmux. */
+  here?: TerminalPane,
 ) {
+  // The @shown-pane value last asked for; tmux applies the changes in order.
+  let shown: string | undefined;
+  let showing: Promise<void> = Promise.resolve();
+  function showPane(pane: TerminalPane | undefined) {
+    const value = pane ? `${pane.socketPath} ${pane.pane}` : undefined;
+    if (!here || value === shown) return;
+    shown = value;
+    const args = [
+      "-S",
+      here.socketPath,
+      ...(value
+        ? ["set-option", "-p", "-t", here.pane, "@shown-pane", value]
+        : ["set-option", "-pu", "-t", here.pane, "@shown-pane"]),
+    ];
+    showing = showing.then(
+      () =>
+        new Promise<void>((resolve) => execFile("tmux", args, { timeout: 5000 }, () => resolve())),
+    );
+  }
   let active: ChildProcess | undefined;
   let running: Promise<unknown> | undefined;
   let closed = false;
@@ -142,9 +170,13 @@ export function createTerminalTools(
           throw new Error(`${command.command} exited with ${result.signal ?? result.code}`);
       });
     },
+    showPane,
     close(): Promise<void> {
       closed = true;
       return (closing ??= (async () => {
+        // Leaving, this pane shows nothing of another's.
+        showPane(undefined);
+        await showing;
         const child = active;
         child?.kill("SIGTERM");
         const force = child ? setTimeout(() => child.kill("SIGKILL"), 1500) : undefined;
