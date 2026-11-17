@@ -712,6 +712,35 @@ body {
 }
 
 /* An issue on a phone: a full-screen page with the agent view's header. */
+/* A details screen on a phone moves as an iOS push (web/slide.ts): in from the right,
+   and out to the right from its back button. */
+@media (max-width: 760px) {
+  .issue-screen,
+  .agent-screen {
+    animation: screen-in 340ms cubic-bezier(0.2, 0.9, 0.25, 1);
+    box-shadow: -10px 0 28px rgb(0 0 0 / 0.28);
+  }
+  .issue-screen.leaving,
+  .agent-screen.leaving {
+    animation: screen-out 260ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+}
+@keyframes screen-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes screen-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .issue-screen,
+  .agent-screen {
+    animation: none;
+  }
+}
 .issue-screen {
   position: fixed;
   top: 0;

@@ -19,6 +19,7 @@ import type { Agent } from "../shared/model.ts";
 import { Status } from "./components.tsx";
 import { NativeTerminal } from "./terminal.tsx";
 import { appHeight } from "./viewport.ts";
+import { useSlideBack } from "./slide.ts";
 
 /** Lines of history read for the transcript, and how often it is read again. */
 const HISTORY_LINES = 3000;
@@ -323,6 +324,7 @@ function Composer({ terminal, sent }: { terminal: string; sent(): void }) {
 }
 
 export function AgentScreen({ agent, close }: { agent: Agent; close(): void }) {
+  const slide = useSlideBack(close, agent.id);
   const { style: viewport, keyboard } = useVisualViewport();
   const [mode, setMode] = useState<"transcript" | "terminal">("transcript");
   const [nudge, setNudge] = useState(0);
@@ -336,7 +338,8 @@ export function AgentScreen({ agent, close }: { agent: Agent; close(): void }) {
   if (!agent.terminal) return null;
   return (
     <div
-      className={keyboard ? "agent-screen keyboard" : "agent-screen"}
+      className={`agent-screen${keyboard ? " keyboard" : ""}${slide.leaving ? " leaving" : ""}`}
+      onAnimationEnd={slide.onAnimationEnd}
       style={viewport}
       role="dialog"
       aria-label={agent.name}
@@ -346,7 +349,7 @@ export function AgentScreen({ agent, close }: { agent: Agent; close(): void }) {
           label="Back"
           variant="ghost"
           size="sm"
-          onClick={close}
+          onClick={slide.back}
           icon={<Icon icon="chevronLeft" />}
         />
         <div className="agent-screen-title">

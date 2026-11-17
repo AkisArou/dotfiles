@@ -25,6 +25,7 @@ import {
 import { Status } from "./components.tsx";
 import { TaskActions } from "./task-actions.tsx";
 import { useNarrow } from "./narrow.ts";
+import { useSlideBack } from "./slide.ts";
 
 export function IssueDrawer({
   project,
@@ -36,6 +37,7 @@ export function IssueDrawer({
   close(): void;
 }) {
   const narrow = useNarrow();
+  const slide = useSlideBack(close, number);
   const issue = project.data.issues.find((candidate) => candidate.number === number);
   const task = number === undefined ? undefined : liveTask(project.data.assignments, number);
   const earlier = number === undefined ? [] : earlierTasks(project.data.assignments, number);
@@ -191,13 +193,18 @@ export function IssueDrawer({
   );
   // A phone: a full-screen page, as the agent view is; a desktop: the drawer.
   return narrow ? (
-    <div className="issue-screen" role="dialog" aria-label={title}>
+    <div
+      className={slide.leaving ? "issue-screen leaving" : "issue-screen"}
+      role="dialog"
+      aria-label={title}
+      onAnimationEnd={slide.onAnimationEnd}
+    >
       <header className="agent-screen-head">
         <IconButton
           label="Back"
           variant="ghost"
           size="sm"
-          onClick={close}
+          onClick={slide.back}
           icon={<Icon icon="chevronLeft" />}
         />
         <div className="agent-screen-title">
