@@ -32,9 +32,28 @@ const renderer = await createCliRenderer({
   },
 });
 // Name the terminal (and its tmux window) sbn@<project>; the launcher names the project.
-if (process.env.SIGNALBOX_PROJECT)
-  renderer.setTerminalTitle(`sbn@${process.env.SIGNALBOX_PROJECT}`);
-const tools = createTerminalTools(renderer, terminalConfig.finder);
+const title = process.env.SIGNALBOX_PROJECT ? `sbn@${process.env.SIGNALBOX_PROJECT}` : undefined;
+const nameTerminal = () => title && renderer.setTerminalTitle(title);
+nameTerminal();
+// A tool (fzf, lazygit, the editor) borrows the terminal through suspend, which
+// clears the title: the window keeps its name while the tool runs, and after.
+const tools = createTerminalTools(
+  {
+    suspend: async () => {
+      await renderer.suspend();
+      // Suspended, the renderer takes no title; the terminal is the tool's now, named directly (OSC 2).
+      if (title && process.stdout.isTTY) process.stdout.write(`\x1b]2;${title}\x07`);
+    },
+    resume: async () => {
+      await renderer.resume();
+      nameTerminal();
+    },
+    get isDestroyed() {
+      return renderer.isDestroyed;
+    },
+  },
+  terminalConfig.finder,
+);
 createRoot(renderer).render(
   <SignalboxProvider client={client}>
     <TerminalTheme>

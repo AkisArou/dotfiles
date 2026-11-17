@@ -21,6 +21,15 @@ import type { TerminalTarget } from "signalbox/ext/terminals";
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
 // of workspaces and landing; coordinator sessions stay native.
 /** The NTS host; `web` is the built browser UI it serves on the web port. */
+/** The pages that may talk to the host: the configured origin, else this
+ * machine's web port under each loopback name (a browser through an SSH
+ * tunnel often says localhost). */
+export function browserOrigins(webPort: number, origin?: string): string[] {
+  return origin
+    ? [origin]
+    : ["127.0.0.1", "localhost", "[::1]"].map((host) => `http://${host}:${webPort}`);
+}
+
 export function createNtsProject(settings: NtsConfig, web: { readonly directory: string }) {
   const state = sqliteWorkflowState({ path: join(settings.state, "runtime.sqlite") });
   let resolveManaged: ((id: string) => Promise<TerminalTarget | undefined>) | undefined;
@@ -67,7 +76,7 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
     gitHub: gitHub(settings.repo),
     refreshIssues: issues.refresh,
   });
-  const origin = settings.origin ?? `http://127.0.0.1:${settings.webPort}`;
+  const origins = browserOrigins(settings.webPort, settings.origin);
   return defineConfig({
     id: "nts",
     title: "NTS",
@@ -78,7 +87,7 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
         if (!(request instanceof IncomingMessage)) return false;
         if (!["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(request.socket.remoteAddress ?? ""))
           return false;
-        if (request.headers.origin && request.headers.origin !== origin) return false;
+        if (request.headers.origin && !origins.includes(request.headers.origin)) return false;
         return { context: {} };
       },
     },
