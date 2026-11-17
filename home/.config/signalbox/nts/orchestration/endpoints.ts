@@ -2,7 +2,7 @@
 // can change. The gate in host/config.ts decides who may call them.
 import { z } from "zod";
 import { combineReadables, latestValue, mapReadable } from "signalbox/core";
-import type { Extension } from "signalbox/core";
+import type { Extension, Readable } from "signalbox/core";
 import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments";
 import type { Assignment } from "signalbox/ext/assignments";
@@ -139,6 +139,23 @@ const profileView = (profile: Profile): refs.ProfileView => ({
   label: profileLabel(profile, configuredCodexModel()),
 });
 
+/** The issues as last read, or none yet: always ready, for a view that only counts with them. */
+export function lastIssues(issues: Readable<refs.Issue[]>): Readable<refs.Issue[]> {
+  return {
+    get: () => {
+      const reading = issues.get();
+      if (reading.status === "ready") return reading;
+      const previous = reading.status === "error" ? reading.previous : undefined;
+      return {
+        status: "ready",
+        value: previous?.value ?? [],
+        observedAt: previous?.observedAt ?? 0,
+      };
+    },
+    subscribe: (listener) => issues.subscribe(listener),
+  };
+}
+
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
   const {
     profiles,
@@ -168,7 +185,8 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
             context.get(settings).reading,
             context.get(status),
             context.get(profiles).unavailable,
-            context.get(orchestration.issues),
+            // Only the shares' running counts use the issues: GitHub being down keeps the view.
+            lastIssues(context.get(orchestration.issues)),
             context.get(assignments),
             context.get(orchestration.priorities).next,
           ],

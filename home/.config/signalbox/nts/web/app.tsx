@@ -229,10 +229,12 @@ export function Shell() {
           >
             <div className={narrow ? "frame narrow" : "frame"}>
               <div className="view">
-                {data.overview && pushPrompt.show && push.ready && (
-                  <PushPrompt push={push} onDismiss={pushPrompt.dismiss} />
-                )}
-                {!data.overview ? <Empty>Connecting to the project…</Empty> : <Outlet />}
+                <div className="view-body">
+                  {data.overview && pushPrompt.show && push.ready && (
+                    <PushPrompt push={push} onDismiss={pushPrompt.dismiss} />
+                  )}
+                  {!data.overview ? <Empty>Connecting to the project…</Empty> : <Outlet />}
+                </div>
               </div>
               {narrow ? (
                 <TabBar

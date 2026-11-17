@@ -4,6 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Assignment } from "signalbox/ext/assignments";
+import type { Issue } from "../shared/model.ts";
 import { parseSettings } from "./settings.ts";
 import { groupOf, percents, shareRank, uncoveredAreas, withPercent } from "./shares.ts";
 
@@ -187,5 +188,22 @@ test("a group may take whole streams: a task joins its stream's group before its
   assert.throws(
     () => parseSettings(file([...split, { name: "empty", share: 1, areas: [] }]), known),
     /empty names no stream and no area/,
+  );
+});
+
+test("the settings view counts with the issues last read, so GitHub being down never takes it away", async () => {
+  const { Cell } = await import("signalbox/core");
+  const { lastIssues } = await import("./endpoints.ts");
+  const read = new Cell<Issue[]>();
+  const view = lastIssues(read);
+  assert.deepEqual(view.get(), { status: "ready", value: [], observedAt: 0 }, "not read yet: none");
+  const issues = [{ number: 1 }] as unknown as Issue[];
+  read.set(issues);
+  assert.equal(view.get().status, "ready");
+  read.fail(new Error("dial tcp: i/o timeout"));
+  const reading = view.get();
+  assert.ok(
+    reading.status === "ready" && reading.value === issues,
+    "a failed read keeps the last list",
   );
 });
