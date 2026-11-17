@@ -92,7 +92,11 @@ function runStyle(run: Run): CSSProperties | undefined {
   };
 }
 
-/** The agent's pane as a transcript: read again every few seconds, following the end. */
+/**
+ * The agent's pane as a transcript: read again every few seconds, following the end.
+ * Scrolled up, it holds still: what arrives waits (New output) until you are back at the
+ * end or tap the button, so the lines you read never move under you.
+ */
 function Transcript({ terminal, nudge }: { terminal: string; nudge: number }) {
   const client = useClient();
   const [text, setText] = useState<string>();
@@ -100,6 +104,14 @@ function Transcript({ terminal, nudge }: { terminal: string; nudge: number }) {
   const scroller = useRef<HTMLDivElement>(null);
   const following = useRef(true);
   const [behind, setBehind] = useState(false);
+  // What arrived while you were scrolled up, shown when you come back to the end.
+  const pending = useRef<string>(undefined);
+  const [waiting, setWaiting] = useState(false);
+  const show = useCallback((next: string) => {
+    pending.current = undefined;
+    setWaiting(false);
+    setText((old) => (old === next ? old : next));
+  }, []);
   const read = useCallback(
     async (signal?: AbortSignal) => {
       try {
@@ -108,14 +120,18 @@ function Transcript({ terminal, nudge }: { terminal: string; nudge: number }) {
           { terminal, lines: HISTORY_LINES },
           signal ? { signal } : {},
         );
-        setText((old) => (old === result.text ? old : result.text));
+        if (following.current) show(result.text);
+        else {
+          pending.current = result.text;
+          setWaiting(true);
+        }
         setError(undefined);
       } catch (failure) {
         if (!signal?.aborted)
           setError(failure instanceof Error ? failure.message : String(failure));
       }
     },
-    [client, terminal],
+    [client, terminal, show],
   );
   useEffect(() => {
     const abort = new AbortController();
@@ -132,9 +148,10 @@ function Transcript({ terminal, nudge }: { terminal: string; nudge: number }) {
   useEffect(() => {
     if (!nudge) return;
     following.current = true;
+    if (pending.current !== undefined) show(pending.current);
     const timer = setTimeout(() => void read(), 250);
     return () => clearTimeout(timer);
-  }, [nudge, read]);
+  }, [nudge, read, show]);
   // Trailing blank lines are the pane's empty screen, not output.
   const lines = useMemo(() => {
     const parsed = text === undefined ? [] : parseAnsi(text);
@@ -152,12 +169,15 @@ function Transcript({ terminal, nudge }: { terminal: string; nudge: number }) {
     const atEnd = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
     following.current = atEnd;
     setBehind(!atEnd);
+    // Back at the end: what arrived meanwhile shows, and the transcript follows again.
+    if (atEnd && pending.current !== undefined) show(pending.current);
   };
   const toEnd = () => {
     const element = scroller.current;
     if (!element) return;
     following.current = true;
-    element.scrollTo({ top: element.scrollHeight, behavior: "smooth" });
+    if (pending.current !== undefined) show(pending.current);
+    else element.scrollTo({ top: element.scrollHeight, behavior: "smooth" });
   };
   return (
     <div className="transcript-wrap">
@@ -191,8 +211,12 @@ function Transcript({ terminal, nudge }: { terminal: string; nudge: number }) {
         </pre>
       </div>
       {behind && (
-        <button type="button" className="transcript-latest" onClick={toEnd}>
-          Latest ↓
+        <button
+          type="button"
+          className={waiting ? "transcript-latest new" : "transcript-latest"}
+          onClick={toEnd}
+        >
+          {waiting ? "New output ↓" : "Latest ↓"}
         </button>
       )}
     </div>
