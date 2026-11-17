@@ -527,7 +527,7 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
     return t.next({ phase: "landing", queuedAt });
   },
 
-  landing(t) {
+  async landing(t) {
     const { state } = t;
     const status = latestValue(t.ctx.get(t.options.landing));
     if (!status) return t.wait("Waiting for the landing status");
@@ -536,8 +536,11 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
       (candidate) => state.queuedAt === null || Date.parse(candidate.at) >= state.queuedAt,
     );
     if (!answer) return t.wait("Waiting for the landing check's answer");
-    if (answer.state === "landed")
+    if (answer.state === "landed") {
+      // The worker's part is done once its change is on main.
+      if (state.worker) await t.stop(state.worker.id, "worker");
       return t.next({ phase: "verify", landedMain: status.main.commit ?? state.commit });
+    }
     if (answer.state === "held") return t.wait(`Landing held: ${answer.message}`);
     if (answer.state === "withdrawn") return t.next({ phase: "retire", outcome: "withdrawn" });
     return returnToBuild(t, {
