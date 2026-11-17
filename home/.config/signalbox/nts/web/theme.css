@@ -259,3 +259,330 @@
   gap: 8px;
   max-width: 560px;
 }
+
+/* A phone: the views in a bottom tab bar (web/tab-bar.tsx), clear of the home
+   indicator; the content scrolls above it. */
+.frame.narrow .view {
+  padding: 10px 10px 16px;
+}
+.tab-bar {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background-card);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab-bar-item {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 0 6px;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-bar-item.active {
+  color: var(--color-text-primary);
+}
+.tab-bar-icon {
+  position: relative;
+  display: inline-flex;
+}
+.tab-bar-label {
+  font-size: 11px;
+  line-height: 13px;
+  white-space: nowrap;
+}
+.tab-bar-badge {
+  position: absolute;
+  top: -4px;
+  left: 16px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--color-text-warning);
+  color: var(--color-background-body);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 17px;
+  text-align: center;
+}
+.sheet-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+}
+
+/* Controls stacked at full width (a phone's toolbar). */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* A panel header's aside gives way to its title on a narrow screen. */
+.panel-aside {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A table's rows as cards on a phone (ResponsiveTable). */
+.stacked-rows {
+  display: flex;
+  flex-direction: column;
+}
+.stacked-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border);
+  min-width: 0;
+}
+.stacked-row > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.stacked-title {
+  grid-column: 1 / -1;
+  font-weight: 500;
+}
+.stacked-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.stacked-label {
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+}
+
+/* The app is pinned to the screen's edges rather than sized by 100dvh, which an
+   iOS home-screen app measures short of the home indicator. Under the translucent
+   status bar, the top inset keeps the header clear of it. */
+html,
+body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+#root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  background: var(--color-background-body);
+}
+
+/* An agent over the whole screen (web/agent-screen.tsx): a header, its transcript
+   or live terminal, and the composer; it follows the visual viewport, so the
+   composer rides above an on-screen keyboard. */
+.agent-screen {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background-body);
+  padding-top: env(safe-area-inset-top);
+}
+.agent-screen-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-card);
+}
+.agent-screen-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.agent-screen-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.agent-screen-body .native-terminal {
+  flex: 1;
+  min-height: 0;
+}
+.transcript-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.transcript {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 10px 12px 16px;
+  background: var(--transcript-background);
+  color: var(--transcript-text);
+}
+.transcript-text {
+  margin: 0;
+  font-family: var(--font-family-code);
+  font-size: 12.5px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.transcript-line {
+  min-height: 1.45em;
+}
+/* A band (a prompt's background) spans the transcript's width, past its padding. */
+.transcript-line.band {
+  margin: 0 -12px;
+  padding: 0 12px;
+}
+.transcript-latest {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: var(--color-background-card);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.28);
+  cursor: pointer;
+}
+.composer {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-background-card);
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.composer-keys {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.composer-keys::-webkit-scrollbar {
+  display: none;
+}
+.composer-key {
+  flex-shrink: 0;
+  min-width: 40px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background-body);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.composer-key:active {
+  background: var(--color-border);
+}
+.composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.composer-box {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 8px 14px;
+  background: var(--color-background-body);
+  color: var(--color-text-primary);
+  font: inherit;
+  /* 16px keeps iOS from zooming into the box when it takes focus. */
+  font-size: 16px;
+  line-height: 1.35;
+  max-height: 150px;
+  /* It grows with its text (to six lines), so it shows no scrollbar of its own. */
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.composer-box::-webkit-scrollbar {
+  display: none;
+}
+.composer-box:focus {
+  outline: none;
+  border-color: var(--color-text-secondary);
+}
+
+/* The 16 terminal colours a transcript uses, for each appearance. */
+:root,
+[data-theme="dark"] {
+  --transcript-background: #0c0c0e;
+  --transcript-text: #d6d6d6;
+  --ansi-0: #1d1f21;
+  --ansi-1: #e06c6c;
+  --ansi-2: #8fc77a;
+  --ansi-3: #e5c07b;
+  --ansi-4: #6fa8dc;
+  --ansi-5: #c38bdc;
+  --ansi-6: #63c5c8;
+  --ansi-7: #c8c8c8;
+  --ansi-8: #6b6b6b;
+  --ansi-9: #ff8080;
+  --ansi-10: #a6e38e;
+  --ansi-11: #f2d38a;
+  --ansi-12: #8cc0f0;
+  --ansi-13: #d9a6f0;
+  --ansi-14: #82dde0;
+  --ansi-15: #f0f0f0;
+}
+[data-theme="light"] {
+  --transcript-background: #fbfbfa;
+  --transcript-text: #232323;
+  --ansi-0: #232323;
+  --ansi-1: #b3261e;
+  --ansi-2: #2d7d1f;
+  --ansi-3: #8a6100;
+  --ansi-4: #1f5fae;
+  --ansi-5: #8a3ab0;
+  --ansi-6: #127a80;
+  --ansi-7: #6b6b6b;
+  --ansi-8: #8c8c8c;
+  --ansi-9: #d33a30;
+  --ansi-10: #3b9a2a;
+  --ansi-11: #a87900;
+  --ansi-12: #2f78d0;
+  --ansi-13: #a552cc;
+  --ansi-14: #1b959c;
+  --ansi-15: #111111;
+}
+
+/* Long text in a panel header's aside (the settings file's path) truncates. */
+.panel-aside > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}

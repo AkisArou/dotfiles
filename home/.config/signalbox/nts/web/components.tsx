@@ -7,8 +7,11 @@ import { Card } from "@astryxdesign/core/Card";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { HStack } from "@astryxdesign/core/HStack";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
+import { Table } from "@astryxdesign/core/Table";
+import type { TableProps } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import type { Project } from "../shared/use-project.ts";
+import { useNarrow } from "./narrow.ts";
 import type { Tone } from "../shared/model.ts";
 
 const VARIANT: Record<Tone, "success" | "warning" | "error" | "accent" | "neutral"> = {
@@ -111,5 +114,48 @@ export function Action({
     >
       {children}
     </Button>
+  );
+}
+
+/**
+ * A table on a desktop; on a phone, each row a small card of its cells, each header
+ * over its value, the first cell as the card's title. Empty cells are left out.
+ */
+export function ResponsiveTable<T extends Record<string, unknown>>(
+  props: TableProps<T> & { data: T[] },
+) {
+  const narrow = useNarrow();
+  if (!narrow) return <Table {...props} />;
+  const columns = props.columns ?? [];
+  const key = (row: T, index: number) =>
+    typeof props.idKey === "function"
+      ? String(props.idKey(row))
+      : props.idKey
+        ? String(row[props.idKey])
+        : String(index);
+  return (
+    <div className="stacked-rows">
+      {props.data.map((row, index) => (
+        <div key={key(row, index)} className="stacked-row">
+          {columns.map((column, at) => {
+            const value = column.renderCell
+              ? column.renderCell(row)
+              : (row[column.key] as ReactNode);
+            if (value === null || value === undefined || value === "" || value === false)
+              return null;
+            return at === 0 ? (
+              <div key={column.key} className="stacked-title">
+                {value}
+              </div>
+            ) : (
+              <div key={column.key} className="stacked-cell">
+                {column.header ? <span className="stacked-label">{column.header}</span> : null}
+                <span className="stacked-value">{value}</span>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
   );
 }

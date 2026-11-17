@@ -16,6 +16,7 @@ import { ntsOrchestration } from "../orchestration/index.ts";
 import { gitHub } from "../orchestration/needs.ts";
 import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
 import { nativeAttachment } from "signalbox/ext/agents";
+import { TERMINAL_KEY } from "signalbox/ext/terminals";
 import type { TerminalTarget } from "signalbox/ext/terminals";
 
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
@@ -154,6 +155,42 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
         output: z.object({ id: z.string() }),
         run: (input, context) =>
           context.get(native.service).start(input.program, context.requestId),
+      }),
+      exposeOperation({
+        ref: refs.terminalHistory,
+        requires: [native.service],
+        input: z.object({
+          terminal: z.string().min(1),
+          lines: z.number().int().min(0).max(20_000),
+        }),
+        output: z.object({ text: z.string() }),
+        run: async (input, context) => {
+          const target = await context.get(native.service).resolve(input.terminal);
+          if (!target.history) throw new Error("This terminal keeps no history to read");
+          return { text: await target.history(input.lines, context.signal) };
+        },
+      }),
+      exposeOperation({
+        ref: refs.terminalSend,
+        requires: [native.service],
+        input: z.object({
+          terminal: z.string().min(1),
+          text: z.string().max(100_000).optional(),
+          keys: z.array(z.string().regex(TERMINAL_KEY)).max(32).optional(),
+        }),
+        output: z.object({ ok: z.literal(true) }),
+        run: async (input, context) => {
+          const target = await context.get(native.service).resolve(input.terminal);
+          if (!target.send) throw new Error("This terminal takes no input without a viewer");
+          await target.send(
+            {
+              ...(input.text ? { text: input.text } : {}),
+              ...(input.keys ? { keys: input.keys } : {}),
+            },
+            context.signal,
+          );
+          return { ok: true as const };
+        },
       }),
       exposeOperation({
         ref: refs.terminalPane,

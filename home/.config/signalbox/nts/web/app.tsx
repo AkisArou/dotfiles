@@ -8,7 +8,6 @@ import type { ReactNode } from "react";
 import { Outlet, useLocation, useNavigate, useSearch } from "@tanstack/react-router";
 import { AppShell } from "@astryxdesign/core/AppShell";
 import { Banner } from "@astryxdesign/core/Banner";
-import { Button } from "@astryxdesign/core/Button";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { Text } from "@astryxdesign/core/Text";
@@ -20,7 +19,10 @@ import { needsCount, settingsLine, tabKey, tabs } from "../shared/model.ts";
 import type { Tab as View } from "../shared/model.ts";
 import { Empty } from "./components.tsx";
 import { IssueDrawer } from "./issue-drawer.tsx";
+import { AgentScreen } from "./agent-screen.tsx";
 import { ProjectContext, viewOf, viewPath } from "./project.ts";
+import { useNarrow } from "./narrow.ts";
+import { AppearanceButton, TabBar } from "./tab-bar.tsx";
 
 type Mode = "dark" | "light" | "system";
 const MODES: Mode[] = ["dark", "light", "system"];
@@ -37,9 +39,12 @@ export function Shell() {
   const project = useProject();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { issue } = useSearch({ strict: false }) as { issue?: number };
+  const { issue, screen } = useSearch({ strict: false }) as { issue?: number; screen?: string };
   const tab = viewOf(pathname);
   const [mode, setMode] = useState<Mode>(storedMode);
+  // A phone: the views in a bottom tab bar, the status line in its More sheet.
+  const narrow = useNarrow();
+  const [more, setMore] = useState(false);
   useEffect(() => {
     try {
       localStorage.setItem("signalbox-nts-mode", mode);
@@ -141,77 +146,103 @@ export function Shell() {
     ),
   ].filter(Boolean);
   const next = MODES[(MODES.indexOf(mode) + 1) % MODES.length]!;
+  const appearance = <AppearanceButton mode={mode} next={next} onSwitch={() => setMode(next)} />;
+  const status = [
+    data.overview?.repo,
+    data.settings && settingsLine(data.settings),
+    `${data.issues.length} open issues`,
+    `${live} live agent${live === 1 ? "" : "s"}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const liveDot = (
+    <span className="statusbar-live">
+      <StatusDot
+        variant={project.online ? "success" : "warning"}
+        label={project.online ? "Live" : project.connection.status}
+        isPulsing={!project.online}
+      />
+      <Text type="supporting" color="secondary">
+        {project.online ? "live" : project.connection.status}
+      </Text>
+    </span>
+  );
   return (
     <ProjectContext value={project}>
       <Theme theme={neutralTheme} mode={mode}>
         <AppShell
           height="fill"
+          // The root (#root) is pinned to the screen; the shell fills it, not 100dvh.
+          style={{ height: "100%", flex: 1, minHeight: 0 }}
           contentPadding={0}
+          mobileNav={false}
           banner={banners.length ? <div className="banners">{banners}</div> : undefined}
           topNav={
             <TopNav
               label="Views"
-              heading={<TopNavHeading heading="nts" />}
+              heading={<TopNavHeading heading={narrow ? tab : "nts"} />}
               startContent={
-                <TabList
-                  value={tab}
-                  onChange={(value) => void navigate({ to: viewPath[value as View] })}
-                  size="sm"
-                >
-                  {tabs.map((name, index) => {
-                    const key = tabKey(index);
-                    return (
-                      <Tab
-                        key={name}
-                        value={name}
-                        label={name}
-                        icon={key ? <span className="tab-key">{key}</span> : undefined}
-                        endContent={counts[name]}
-                      />
-                    );
-                  })}
-                </TabList>
+                narrow ? undefined : (
+                  <TabList
+                    value={tab}
+                    onChange={(value) => void navigate({ to: viewPath[value as View] })}
+                    size="sm"
+                  >
+                    {tabs.map((name, index) => {
+                      const key = tabKey(index);
+                      return (
+                        <Tab
+                          key={name}
+                          value={name}
+                          label={name}
+                          icon={key ? <span className="tab-key">{key}</span> : undefined}
+                          endContent={counts[name]}
+                        />
+                      );
+                    })}
+                  </TabList>
+                )
               }
-              endContent={
-                <Button
-                  label={`Appearance: ${mode}; switch to ${next}`}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setMode(next)}
-                >
-                  {mode}
-                </Button>
-              }
+              endContent={narrow ? liveDot : appearance}
             />
           }
         >
-          <div className="frame">
+          <div className={narrow ? "frame narrow" : "frame"}>
             <div className="view">
               {!data.overview ? <Empty>Connecting to the project…</Empty> : <Outlet />}
             </div>
-            <footer className="statusbar">
-              <Text type="supporting" color="secondary" className="statusbar-line">
-                {[
-                  data.overview?.repo,
-                  data.settings && settingsLine(data.settings),
-                  `${data.issues.length} open issues`,
-                  `${live} live agent${live === 1 ? "" : "s"}`,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </Text>
-              <span className="statusbar-live">
-                <StatusDot
-                  variant={project.online ? "success" : "warning"}
-                  label={project.online ? "Live" : project.connection.status}
-                  isPulsing={!project.online}
-                />
-                <Text type="supporting" color="secondary">
-                  {project.online ? "live" : project.connection.status}
+            {narrow ? (
+              <TabBar
+                view={tab}
+                counts={{ "Needs you": needsCount(data.needs), Agents: live }}
+                more={more}
+                setMore={setMore}
+                status={status}
+                appearance={appearance}
+              />
+            ) : (
+              <footer className="statusbar">
+                <Text type="supporting" color="secondary" className="statusbar-line">
+                  {status}
                 </Text>
-              </span>
-            </footer>
+                {liveDot}
+              </footer>
+            )}
           </div>
+          {screen && project.data.agents.find((agent) => agent.id === screen) && (
+            <AgentScreen
+              agent={project.data.agents.find((agent) => agent.id === screen)!}
+              close={() =>
+                void navigate({
+                  to: ".",
+                  search: (previous: Record<string, unknown>) => ({
+                    ...previous,
+                    screen: undefined,
+                  }),
+                })
+              }
+            />
+          )}
           <IssueDrawer
             project={project}
             number={issue}

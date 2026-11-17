@@ -18,9 +18,13 @@ const text = (value: unknown) => (typeof value === "string" && value ? value : u
 
 const rootRoute = createRootRoute({
   component: Shell,
-  validateSearch: (search: Record<string, unknown>): { issue?: number } => {
+  // Over any view: an issue in its drawer (?issue=n), an agent full screen (?screen=id).
+  validateSearch: (search: Record<string, unknown>): { issue?: number; screen?: string } => {
     const issue = Number(search.issue);
-    return Number.isInteger(issue) && issue > 0 ? { issue } : {};
+    return {
+      ...(Number.isInteger(issue) && issue > 0 ? { issue } : {}),
+      ...(typeof search.screen === "string" && search.screen ? { screen: search.screen } : {}),
+    };
   },
 });
 

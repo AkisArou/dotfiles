@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Selector } from "@astryxdesign/core/Selector";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Table, pixel, proportional } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
@@ -12,6 +13,7 @@ import type { Project } from "../../shared/use-project.ts";
 import type { IssueState, QuestionView } from "../../shared/model.ts";
 import { issueStateLabels, postedTone } from "../../shared/model.ts";
 import { Action, Empty, Section, Status } from "../components.tsx";
+import { useNarrow } from "../narrow.ts";
 
 const states: IssueState[] = ["ready", "parked", "held"];
 
@@ -134,6 +136,7 @@ function Question({ project, question }: { project: Project; question: QuestionV
 
 export function NeedsYou({ project }: { project: Project }) {
   const { questions, unasked, answered } = project.data.needs;
+  const narrow = useNarrow();
   const rows = answered.map((question) => ({
     id: question.id,
     question: question.question,
@@ -174,60 +177,91 @@ export function NeedsYou({ project }: { project: Project }) {
       )}
       {rows.length > 0 && (
         <Section title="Answered lately" count={rows.length}>
-          <Table
-            data={rows}
-            idKey="id"
-            density="compact"
-            dividers="rows"
-            textOverflow="truncate"
-            columns={[
-              {
-                key: "at",
-                header: "When",
-                width: pixel(120),
-                renderCell: (row) => <Timestamp value={row.at / 1000} format="relative" />,
-              },
-              {
-                key: "question",
-                header: "Question",
-                width: proportional(3),
-                renderCell: (row) => <span title={row.question}>{row.question}</span>,
-              },
-              {
-                key: "answer",
-                header: "Answer",
-                width: proportional(3),
-                renderCell: (row) => <span title={row.answer}>{row.answer}</span>,
-              },
-              {
-                key: "issue",
-                header: "Issue",
-                width: pixel(170),
-                renderCell: (row) =>
-                  row.issue ? (
-                    <span className="nowrap">
-                      <span className="mono">{row.issue}</span>{" "}
-                      <span className="secondary">{row.then}</span>
-                    </span>
-                  ) : null,
-              },
-              {
-                key: "posted",
-                header: "On the issue",
-                width: pixel(130),
-                renderCell: (row) =>
-                  row.issue ? (
-                    <Status tone={postedTone(row.posted)}>
-                      {row.posted === "done"
-                        ? "posted"
-                        : row.posted === "waiting"
-                          ? "posting"
-                          : "not yet"}
-                    </Status>
-                  ) : null,
-              },
-            ]}
-          />
+          {narrow ? (
+            <List density="compact" hasDividers edge="padded">
+              {rows.map((row) => (
+                <ListItem
+                  key={row.id}
+                  label={row.question}
+                  description={
+                    <>
+                      <span className="line">{row.answer}</span>
+                      <span className="line">
+                        <Timestamp value={row.at / 1000} format="relative" />
+                        {row.issue ? ` · ${row.issue} ${row.then}` : ""}
+                      </span>
+                    </>
+                  }
+                  endContent={
+                    row.issue ? (
+                      <Status tone={postedTone(row.posted)}>
+                        {row.posted === "done"
+                          ? "posted"
+                          : row.posted === "waiting"
+                            ? "posting"
+                            : "not yet"}
+                      </Status>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </List>
+          ) : (
+            <Table
+              data={rows}
+              idKey="id"
+              density="compact"
+              dividers="rows"
+              textOverflow="truncate"
+              columns={[
+                {
+                  key: "at",
+                  header: "When",
+                  width: pixel(120),
+                  renderCell: (row) => <Timestamp value={row.at / 1000} format="relative" />,
+                },
+                {
+                  key: "question",
+                  header: "Question",
+                  width: proportional(3),
+                  renderCell: (row) => <span title={row.question}>{row.question}</span>,
+                },
+                {
+                  key: "answer",
+                  header: "Answer",
+                  width: proportional(3),
+                  renderCell: (row) => <span title={row.answer}>{row.answer}</span>,
+                },
+                {
+                  key: "issue",
+                  header: "Issue",
+                  width: pixel(170),
+                  renderCell: (row) =>
+                    row.issue ? (
+                      <span className="nowrap">
+                        <span className="mono">{row.issue}</span>{" "}
+                        <span className="secondary">{row.then}</span>
+                      </span>
+                    ) : null,
+                },
+                {
+                  key: "posted",
+                  header: "On the issue",
+                  width: pixel(130),
+                  renderCell: (row) =>
+                    row.issue ? (
+                      <Status tone={postedTone(row.posted)}>
+                        {row.posted === "done"
+                          ? "posted"
+                          : row.posted === "waiting"
+                            ? "posting"
+                            : "not yet"}
+                      </Status>
+                    ) : null,
+                },
+              ]}
+            />
+          )}
         </Section>
       )}
     </>

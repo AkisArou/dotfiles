@@ -16,6 +16,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import type { Project } from "../../shared/use-project.ts";
 import { Action, Empty, Section, Status } from "../components.tsx";
 import { NativeTerminal } from "../terminal.tsx";
+import { useNarrow } from "../narrow.ts";
 
 const PANES = [
   { path: "/agents", label: "Sessions" },
@@ -62,6 +63,12 @@ export function Sessions({ project }: { project: Project }) {
       ))}
     </>
   );
+  const narrow = useNarrow();
+  const openScreen = (id: string) =>
+    void navigate({
+      to: ".",
+      search: (previous: Record<string, unknown>) => ({ ...previous, screen: id }),
+    });
   const openIssue = (issue: number) =>
     void navigate({
       to: ".",
@@ -98,7 +105,9 @@ export function Sessions({ project }: { project: Project }) {
                   </Status>
                 }
                 isSelected={agent?.id === item.id}
-                onClick={() => setSelected(item.id)}
+                onClick={() =>
+                  narrow && item.terminal ? openScreen(item.id) : setSelected(item.id)
+                }
               />
             ))}
           </List>
@@ -143,7 +152,7 @@ export function Sessions({ project }: { project: Project }) {
           ))}
         </List>
       </Drawer>
-      {agent ? (
+      {narrow ? null : agent ? (
         <Section
           title={agent.name}
           aside={
@@ -161,6 +170,16 @@ export function Sessions({ project }: { project: Project }) {
               <Status tone={agentTone(agent.state)} title={agentStates[agent.state]?.meaning}>
                 {agent.state}
               </Status>
+              {agent.terminal && (
+                <Button
+                  label={`Show ${agent.name} full screen, to scroll its transcript and message it`}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => openScreen(agent.id)}
+                >
+                  Full screen
+                </Button>
+              )}
             </HStack>
           }
         >

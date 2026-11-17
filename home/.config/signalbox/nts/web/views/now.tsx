@@ -15,15 +15,23 @@ import {
   gaugeTone,
   needsCount,
   taskMeaning,
+  taskWord,
 } from "../../shared/model.ts";
 import { gaugeState } from "../../status/model.ts";
 import { Empty, Section, Status } from "../components.tsx";
 import { viewPath } from "../project.ts";
+import { useNarrow } from "../narrow.ts";
 
 const SEVERITY = { red: 0, amber: 1, ok: 2 } as const;
 
 export function Now({ project }: { project: Project }) {
   const navigate = useNavigate();
+  const narrow = useNarrow();
+  const openIssue = (issue: number) =>
+    void navigate({
+      to: ".",
+      search: (previous: Record<string, unknown>) => ({ ...previous, issue }),
+    });
   const { needs, assignments, agents, issues } = project.data;
   const flight = assignments
     .filter((a) => a.status === "active" || a.status === "queued")
@@ -33,6 +41,8 @@ export function Now({ project }: { project: Project }) {
       tone: assignmentTone(a),
       meaning: taskMeaning(a),
       when: assignmentPhase(a),
+      word: taskWord(a),
+      title: issues.find((issue) => issue.number === a.issue)?.title ?? "",
       says: assignmentSays(a).split("\n", 1)[0] ?? "",
     }))
     .sort((a, b) => a.issue - b.issue);
@@ -94,7 +104,23 @@ export function Now({ project }: { project: Project }) {
           )}
         </Section>
         <Section title="In flight" count={flight.length} aside={go("Agents", "Agents")}>
-          {flight.length ? (
+          {flight.length && narrow ? (
+            <List density="compact" hasDividers edge="padded">
+              {flight.map((row) => (
+                <ListItem
+                  key={row.id}
+                  label={`#${row.issue} ${row.title}`}
+                  description={row.says}
+                  endContent={
+                    <Status tone={row.tone} title={row.meaning}>
+                      {row.word}
+                    </Status>
+                  }
+                  onClick={() => openIssue(row.issue)}
+                />
+              ))}
+            </List>
+          ) : flight.length ? (
             <Table
               data={flight}
               idKey="id"
@@ -171,7 +197,31 @@ export function Now({ project }: { project: Project }) {
           )}
         </Section>
         <Section title="Agents" count={live.length}>
-          {live.length ? (
+          {live.length && narrow ? (
+            <List density="compact" hasDividers edge="padded">
+              {live.map((row) => (
+                <ListItem
+                  key={row.id}
+                  label={row.name}
+                  description={row.path}
+                  onClick={() =>
+                    void navigate({
+                      to: ".",
+                      search: (previous: Record<string, unknown>) => ({
+                        ...previous,
+                        screen: row.id,
+                      }),
+                    })
+                  }
+                  endContent={
+                    <Status tone={agentTone(row.state)} title={agentStates[row.state]?.meaning}>
+                      {row.state}
+                    </Status>
+                  }
+                />
+              ))}
+            </List>
+          ) : live.length ? (
             <Table
               data={live}
               idKey="id"

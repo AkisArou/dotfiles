@@ -42,6 +42,15 @@ export const terminalPrograms = source<{ id: string; label: string }[]>("nts.ter
 export const startTerminal = operation<{ program: string }, { id: string }>("nts.start-terminal");
 /** The tmux pane a terminal's program runs in, for native tools such as a scrollback viewer. */
 export type TerminalPane = { socketPath: string; pane: string };
+/** An agent's recent output (history and screen) as text with its colours, oldest first. */
+export const terminalHistory = operation<{ terminal: string; lines: number }, { text: string }>(
+  "nts.terminal-history",
+);
+/** Text (pasted) and then named keys sent straight to an agent, with no viewer or claim. */
+export const terminalSend = operation<
+  { terminal: string; text?: string; keys?: string[] },
+  { ok: true }
+>("nts.terminal-send");
 export const terminalPane = operation<{ terminal: string }, TerminalPane | null>(
   "nts.terminal-pane",
 );

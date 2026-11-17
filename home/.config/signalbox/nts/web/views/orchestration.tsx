@@ -2,12 +2,12 @@
 // rounds and each role's models and pick) with the host's pause and harness
 // availability. A task's own steps are in the issue drawer (web/task-actions.tsx).
 import { Selector } from "@astryxdesign/core/Selector";
-import { Table, pixel, proportional } from "@astryxdesign/core/Table";
+import { pixel, proportional } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import type { Project } from "../../shared/use-project.ts";
 import type { AgentRole, Harness, Pick } from "../../shared/model.ts";
 import { pickLabels } from "../../shared/model.ts";
-import { Action, Empty, Section, Status } from "../components.tsx";
+import { Action, Empty, ResponsiveTable, Section, Status } from "../components.tsx";
 
 const roleNames: Record<AgentRole, string> = {
   coordinator: "Coordinator",
@@ -98,7 +98,7 @@ export function Settings({ project }: { project: Project }) {
           </Text>
         }
       >
-        <Table
+        <ResponsiveTable
           data={roleRows}
           idKey="id"
           density="compact"
@@ -208,7 +208,7 @@ export function Settings({ project }: { project: Project }) {
         />
       </Section>
       <Section title="Harnesses">
-        <Table
+        <ResponsiveTable
           data={harnessRows}
           idKey="id"
           density="compact"

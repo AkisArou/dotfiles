@@ -2,7 +2,7 @@
 // and Health. A report is facts and tables: facts as a metadata list, rows as a
 // compact table whose cells keep their source's colour.
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
-import { Table, proportional } from "@astryxdesign/core/Table";
+import { proportional } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import { Timestamp } from "@astryxdesign/core/Timestamp";
 import { ntsPages, gaugeState, cellText } from "../../status/model.ts";
@@ -10,7 +10,7 @@ import { gaugeTone } from "../../shared/model.ts";
 import type { NtsPage, Reading, TableCell } from "../../status/model.ts";
 import { reportOf } from "../../status/use-nts.ts";
 import type { Project } from "../../shared/use-project.ts";
-import { Empty, Section, Status } from "../components.tsx";
+import { Empty, ResponsiveTable, Section, Status } from "../components.tsx";
 
 function Cell({ value }: { value: TableCell | undefined }) {
   const style = value && typeof value === "object" ? value : undefined;
@@ -90,7 +90,7 @@ export function NtsView({ project, page }: { project: Project; page: NtsPage }) 
               )}
               {!facts &&
                 (rows.length ? (
-                  <Table
+                  <ResponsiveTable
                     data={rows}
                     idKey="__id"
                     density="compact"
@@ -111,7 +111,7 @@ export function NtsView({ project, page }: { project: Project; page: NtsPage }) 
                   <Empty>No entries</Empty>
                 ))}
               {table.facts && rows.length > 0 && (
-                <Table
+                <ResponsiveTable
                   data={rows}
                   idKey="__id"
                   density="compact"
@@ -169,7 +169,7 @@ export function NtsHealth({ project }: { project: Project }) {
             }));
           return (
             <Section key={section} title={section} count={rows.length}>
-              <Table
+              <ResponsiveTable
                 data={rows}
                 idKey="id"
                 density="compact"

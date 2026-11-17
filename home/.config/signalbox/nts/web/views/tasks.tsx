@@ -3,6 +3,7 @@
 // facets), kept in the URL so a filtered list can be linked; a task opens in
 // the issue drawer. A task the coordinator queued shows where it is.
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { MultiSelector } from "@astryxdesign/core/MultiSelector";
 import { Table, pixel, proportional } from "@astryxdesign/core/Table";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -26,11 +27,13 @@ import {
 } from "../../shared/model.ts";
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, Section, Status } from "../components.tsx";
+import { useNarrow } from "../narrow.ts";
 
 type Search = { q?: string; filter?: string[]; issue?: number };
 
 export function Tasks({ project }: { project: Project }) {
   const navigate = useNavigate();
+  const narrow = useNarrow();
   const { q = "", filter = [] } = useSearch({ strict: false }) as Search;
   const search = (change: Partial<Search>) =>
     void navigate({
@@ -75,6 +78,37 @@ export function Tasks({ project }: { project: Project }) {
       owner: issue.owner ?? "",
     };
   });
+  // The search and the filters: one row on a desktop, stacked on a phone.
+  const controls = (
+    <>
+      <TextInput
+        label="Find a task"
+        isLabelHidden
+        id="task-search"
+        type="search"
+        size="sm"
+        width={narrow ? "100%" : 340}
+        placeholder="Find by number, title, label or owner  (/)"
+        value={q}
+        onChange={(value) => search({ q: value })}
+      />
+      <MultiSelector
+        label="Filters"
+        isLabelHidden
+        size="sm"
+        width={narrow ? "100%" : 320}
+        placeholder="Filter by area, stream, kind, state, label…"
+        options={options}
+        value={keysOf(chosen)}
+        onChange={(value) => search({ filter: value })}
+        hasSearch
+        searchPlaceholder="Find a filter"
+        hasClear
+        triggerDisplay="badges"
+        maxBadges={3}
+      />
+    </>
+  );
   return (
     <Section
       title="Tasks"
@@ -82,40 +116,28 @@ export function Tasks({ project }: { project: Project }) {
         visible.length === issues.length ? issues.length : `${visible.length} of ${issues.length}`
       }
     >
-      <Toolbar
-        label="Find tasks"
-        startContent={
-          <>
-            <TextInput
-              label="Find a task"
-              isLabelHidden
-              id="task-search"
-              type="search"
-              size="sm"
-              width={340}
-              placeholder="Find by number, title, label or owner  (/)"
-              value={q}
-              onChange={(value) => search({ q: value })}
+      {narrow ? (
+        <div className="panel-body stack">{controls}</div>
+      ) : (
+        <Toolbar label="Find tasks" startContent={controls} />
+      )}
+      {rows.length && narrow ? (
+        <List density="compact" hasDividers edge="padded">
+          {rows.map((row) => (
+            <ListItem
+              key={row.id}
+              label={row.title}
+              description={`#${row.number} · ${row.place}`}
+              endContent={
+                <Status tone={row.tone} title={row.meaning}>
+                  {row.state}
+                </Status>
+              }
+              onClick={() => search({ issue: row.number })}
             />
-            <MultiSelector
-              label="Filters"
-              isLabelHidden
-              size="sm"
-              width={320}
-              placeholder="Filter by area, stream, kind, state, label…"
-              options={options}
-              value={keysOf(chosen)}
-              onChange={(value) => search({ filter: value })}
-              hasSearch
-              searchPlaceholder="Find a filter"
-              hasClear
-              triggerDisplay="badges"
-              maxBadges={3}
-            />
-          </>
-        }
-      />
-      {rows.length ? (
+          ))}
+        </List>
+      ) : rows.length ? (
         <Table
           data={rows}
           idKey="id"

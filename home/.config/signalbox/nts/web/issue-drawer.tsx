@@ -20,6 +20,7 @@ import {
 } from "../shared/model.ts";
 import { Status } from "./components.tsx";
 import { TaskActions } from "./task-actions.tsx";
+import { useNarrow } from "./narrow.ts";
 
 export function IssueDrawer({
   project,
@@ -30,6 +31,7 @@ export function IssueDrawer({
   number: number | undefined;
   close(): void;
 }) {
+  const narrow = useNarrow();
   const issue = project.data.issues.find((candidate) => candidate.number === number);
   const task = number === undefined ? undefined : liveTask(project.data.assignments, number);
   const earlier = number === undefined ? [] : earlierTasks(project.data.assignments, number);
@@ -40,7 +42,7 @@ export function IssueDrawer({
       onOpenChange={(open) => !open && close()}
       label={title}
       side="end"
-      width={680}
+      width={narrow ? "100%" : 680}
       purpose="info"
     >
       {number !== undefined && (
