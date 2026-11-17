@@ -421,11 +421,30 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
       (
         await run("git", ["--no-optional-locks", ...args], { cwd: t.state.tree!, timeout: 30_000 })
       ).stdout.trim();
-    if (
-      (await git(["rev-parse", "HEAD"])) !== report.commit ||
-      (await git(["status", "--porcelain"]))
-    )
-      throw new Conflict("The reported commit is not the clean HEAD of the task's tree");
+    // Only the tree's clean HEAD is reviewed and landed. A report that is not it (the
+    // worker committed on, or left changes) is the worker's to put right: it is told
+    // exactly why, and the task keeps waiting for its proved commit.
+    const head = await git(["rev-parse", "HEAD"]);
+    const loose = (await git(["status", "--porcelain"])).split("\n").filter(Boolean);
+    if (head !== report.commit || loose.length) {
+      const why = [
+        head !== report.commit ? `the tree's HEAD is ${head}, not ${report.commit}` : "",
+        loose.length
+          ? `it has uncommitted changes (${loose
+              .slice(0, 5)
+              .map((line) => line.slice(3))
+              .join(", ")}${loose.length > 5 ? `, ${loose.length - 5} more` : ""})`
+          : "",
+      ]
+        .filter(Boolean)
+        .join(", and ");
+      const text =
+        `Your proved commit was not taken: ${why}. A review and a landing take exactly ` +
+        `the tree's clean HEAD. Commit or discard what is left, prove the commit you mean ` +
+        `to land, and report_ready with HEAD's 40-hex commit.`;
+      await t.tell(t.state.worker!.id, `ready/${report.id}`, text);
+      return t.next({ phase: "build", note: text });
+    }
     // A review approves an exact commit: the same commit again (a refusal its
     // worker showed was not its own) goes back to the queue without another review.
     if (report.commit === t.state.accepted)

@@ -376,11 +376,31 @@ test("a task goes from tree to verified through design approval, review and land
   assert.equal(messages.at(-1)!.text, "From the coordinator: Commit what you have.");
   observe("busy");
 
-  // A report naming a commit that is not the tree's clean HEAD faults loudly, never lands.
+  // A report that is not the tree's clean HEAD is never reviewed or landed: the worker is
+  // told why, and the task keeps waiting for its proved commit.
+  await writeFile(join(building.tree!, "thing.txt"), "draft");
+  await git(building.tree!, "add", "thing.txt");
+  await git(building.tree!, "commit", "-m", "a draft");
+  const draft = (await git(building.tree!, "rev-parse", "HEAD")).stdout.trim();
+  await writeFile(join(building.tree!, "loose.txt"), "uncommitted");
+  await report({ kind: "ready", commit: draft, summary: "green" }, "ready-0");
+  await until(
+    (state) =>
+      state.phase === "build" &&
+      /not taken: it has uncommitted changes \(loose\.txt\)/.test(state.note),
+    "told of the loose file, still building",
+  );
+  assert.match(messages.at(-1)!.text, /not taken: it has uncommitted changes \(loose\.txt\)/);
+  await rm(join(building.tree!, "loose.txt"));
   await writeFile(join(building.tree!, "thing.txt"), "done");
   await git(building.tree!, "add", "thing.txt");
   await git(building.tree!, "commit", "-m", "the change");
   let commit = (await git(building.tree!, "rev-parse", "HEAD")).stdout.trim();
+  await report({ kind: "ready", commit: draft, summary: "green" }, "ready-0b");
+  await until(
+    (state) => state.phase === "build" && state.note.includes(`HEAD is ${commit}, not ${draft}`),
+    "told the tree moved on, still building",
+  );
   await report({ kind: "ready", commit, summary: "focused, inner and supported green" }, "ready-1");
   const reviewing = await phase("reviewing");
   assert.equal(reviewing.reviewer!.commit, commit);
