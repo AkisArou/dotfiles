@@ -146,6 +146,10 @@ export const prioritizeTask = operation<
   { issue: number; urgency: number },
   { urgency: Record<string, number> }
 >("nts.tasks.prioritize");
+export const signOff = operation<
+  { assignment: string; accept: boolean; notes: string },
+  { ok: true }
+>("nts.assignments.sign-off");
 export const retryAssignment = operation<{ assignment: string }, { ok: true }>(
   "nts.assignments.retry",
 );

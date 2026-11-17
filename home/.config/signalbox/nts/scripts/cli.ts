@@ -5,6 +5,8 @@
 //   sbn assign <issue> [notes...]   start a task
 //   sbn approve <issue> [notes...]  approve the design
 //   sbn return <issue> <notes...>   send the design back
+//   sbn signoff <issue> [notes...]  sign off a reviewed core change (queues it)
+//   sbn refuse <issue> <notes...>   refuse it: back to build with the notes
 //   sbn message <issue> [--as coordinator] <text...>
 //                                   message the worker (answers help, decides an escalation);
 //                                   --as coordinator when the owner stands in for the coordinator
@@ -31,6 +33,8 @@ const VERBS = [
   "prioritize",
   "approve",
   "return",
+  "signoff",
+  "refuse",
   "message",
   "rework",
   "retry",
@@ -124,6 +128,16 @@ async function main(verb: Verb, args: string[]): Promise<void> {
         break;
       case "return":
         await call(client, "nts.assignments.decide-design", {
+          assignment,
+          accept: false,
+          notes: needsText("notes"),
+        });
+        break;
+      case "signoff":
+        await call(client, "nts.assignments.sign-off", { assignment, accept: true, notes: text });
+        break;
+      case "refuse":
+        await call(client, "nts.assignments.sign-off", {
           assignment,
           accept: false,
           notes: needsText("notes"),

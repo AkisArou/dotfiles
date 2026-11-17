@@ -34,6 +34,7 @@ export const PROGRESS_GRACE_MS = 30 * 60_000;
 export const PHASE_BUDGET: Partial<Record<TaskState["phase"], number>> = {
   design: 2 * 3_600_000,
   approve: 3_600_000,
+  signoff: 3_600_000,
   build: 8 * 3_600_000,
   reviewing: 2 * 3_600_000,
   queue: 30 * 60_000,
@@ -97,6 +98,13 @@ export function wakeups(observed: {
         text:
           `${name} has been in ${task.phase} for ${Math.round((observed.now - task.phaseSince) / 60_000)} min (budget ${budget / 60_000}).` +
           ` Now: ${assignment.wait?.reason ?? "working"}${task.progress ? `; progress: ${task.progress.note}` : ""}. Decide whether it needs you.`,
+      });
+    if (task.phase === "signoff" && task.commit)
+      events.push({
+        id: `signoff/${assignment.id}/${task.commit}`,
+        text:
+          `${name}: the reviewed commit ${task.commit} changes core paths (${task.core.join(", ")}); AGENTS.md has you read it before it is submitted.` +
+          ` Read the diff in ${task.tree} (git show ${task.commit.slice(0, 12)}) and its proof, then sign_off: accept to queue it, or refuse with what must change.`,
       });
     if (task.phase === "escalated" && task.escalation)
       events.push({

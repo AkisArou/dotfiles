@@ -412,6 +412,10 @@ test("a task goes from tree to verified through design approval, review and land
   // A reviewer disputing the design escalates: the worker hears nothing until the
   // coordinator decides, and its message returns the task to build with the finding.
   await writeFile(join(building.tree!, "thing.txt"), "done, with the fixture fixed");
+  // This round also changes the gate: once reviewed it waits for the coordinator.
+  await mkdir(join(building.tree!, "tooling/gate"), { recursive: true });
+  await writeFile(join(building.tree!, "tooling/gate/thing.ts"), "export {};\n");
+  await git(building.tree!, "add", "tooling/gate/thing.ts");
   await git(building.tree!, "commit", "-am", "fix the fixture too");
   commit = (await git(building.tree!, "rev-parse", "HEAD")).stdout.trim();
   await report({ kind: "ready", commit, summary: "fixed the fixture" }, "ready-3b");
@@ -454,6 +458,14 @@ test("a task goes from tree to verified through design approval, review and land
 
   await phase("reviewing");
   await report({ kind: "review", commit, verdict: "accept", findings: "" }, "review-3");
+  const signing = await phase("signoff");
+  assert.deepEqual(signing.core, ["tooling/gate/thing.ts"]);
+  assert.deepEqual(
+    JSON.parse(await readFile(join(directory, "queue.json"), "utf8")),
+    [],
+    "not submitted before the sign-off",
+  );
+  await report({ kind: "signoff", accept: true, notes: "read it" }, "signoff-1");
   await phase("landing");
   assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), [commit]);
 

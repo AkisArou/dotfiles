@@ -304,6 +304,27 @@ export function coordinatorTools(wiring: Wiring) {
           }),
       }),
       agentTool({
+        name: "sign_off",
+        description:
+          "Sign off a reviewed change to the compiler core, runtime/c, the gate or the landing tools after reading it: accept queues the exact commit; refuse sends it back to build with your notes.",
+        input: toolInput(
+          z.object({ assignment: z.string(), accept: z.boolean(), notes: z.string() }),
+        ),
+        output: ok,
+        run: (input, context) =>
+          authorized(context, async () => {
+            await context.get(wiring.work.get()).report(
+              {
+                assignmentId: input.assignment,
+                data: { kind: "signoff", accept: input.accept, notes: input.notes },
+                requestId: context.requestId,
+              },
+              context.signal,
+            );
+            return { ok: true as const };
+          }),
+      }),
+      agentTool({
         name: "rework",
         description:
           "Send a held or wrong landing back to build: its queue entry is withdrawn and the worker gets your notes.",

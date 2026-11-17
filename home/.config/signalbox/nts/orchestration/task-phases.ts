@@ -143,6 +143,21 @@ export function turn(ctx: TaskContext, options: TaskOptions): Turn {
 
 const firstLine = (text: string) => text.split("\n", 1)[0]!;
 
+/** Paths AGENTS.md has the coordinator read before a change is submitted. */
+export const CORE_PATHS = ["compiler/", "runtime/c/", "tooling/gate/", "tooling/landing/"];
+
+/** The core paths a commit changes since it left main. */
+async function corePaths(tree: string, commit: string): Promise<string[]> {
+  const { stdout } = await run(
+    "git",
+    ["--no-optional-locks", "diff", "--name-only", `main...${commit}`],
+    { cwd: tree, timeout: 30_000, maxBuffer: 16 * 1024 * 1024 },
+  );
+  return stdout
+    .split("\n")
+    .filter((path) => path && CORE_PATHS.some((prefix) => path.startsWith(prefix)));
+}
+
 /** Hand the task to the coordinator; nothing moves until it decides. */
 const escalate = (t: Turn, escalation: string, patch: Partial<TaskState>) =>
   t.next({ phase: "escalated", escalation, ...patch });
@@ -409,7 +424,12 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
     // A review approves an exact commit: the same commit again (a refusal its
     // worker showed was not its own) goes back to the queue without another review.
     if (report.commit === t.state.accepted)
-      return t.next({ phase: "queue", commit: report.commit, summary: report.summary, help: null });
+      return t.next({
+        phase: t.state.core.length && t.state.signedOff !== report.commit ? "signoff" : "queue",
+        commit: report.commit,
+        summary: report.summary,
+        help: null,
+      });
     return t.next({ phase: "review", commit: report.commit, summary: report.summary, help: null });
   },
 
@@ -468,8 +488,15 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
         `your review of ${state.commit} (report_review)`,
       );
     await t.stop(state.reviewer!.id, `reviewer/${state.reviewer!.commit}/${state.reviewer!.round}`);
-    if (report.verdict === "accept")
-      return t.next({ phase: "queue", reviewer: null, accepted: state.commit });
+    if (report.verdict === "accept") {
+      const core = await corePaths(state.tree!, state.commit!);
+      return t.next({
+        phase: core.length ? "signoff" : "queue",
+        reviewer: null,
+        accepted: state.commit,
+        core,
+      });
+    }
     const reviews = [...state.reviews, { commit: state.commit!, findings: report.findings }];
     // A dispute of the approved design is the coordinator's call, not a round
     // of rework the worker starts on its own.
@@ -494,6 +521,21 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
       },
       { reviewer: null, reviews },
     );
+  },
+
+  async signoff(t) {
+    const { state } = t;
+    const report = t.take("signoff");
+    if (!report)
+      return t.wait(
+        `Waiting for the coordinator to sign off ${state.commit!.slice(0, 12)} (it changes ${state.core.length} core path${state.core.length === 1 ? "" : "s"})`,
+      );
+    if (report.accept) return t.next({ phase: "queue", signedOff: state.commit });
+    return returnToBuild(t, {
+      key: `signoff/${report.id}`,
+      note: `The coordinator did not sign off ${state.commit}: ${report.notes}\nAnswer it, prove the change again, commit and report_ready.`,
+      why: `the coordinator did not sign off ${state.commit}`,
+    });
   },
 
   escalated: (t) =>

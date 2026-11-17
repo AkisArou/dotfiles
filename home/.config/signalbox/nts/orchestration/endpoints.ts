@@ -154,6 +154,20 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       }),
     }),
     exposeOperation({
+      ref: refs.signOff,
+      requires: [work],
+      input: z.object({ assignment: z.string(), accept: z.boolean(), notes: z.string() }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        await context.get(work).report({
+          assignmentId: input.assignment,
+          data: { kind: "signoff", accept: input.accept, notes: input.notes },
+          requestId: context.requestId,
+        });
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
       ref: refs.assignTask,
       requires: [work],
       input: z.object({ issue: z.number().int().positive(), instructions: z.string() }),

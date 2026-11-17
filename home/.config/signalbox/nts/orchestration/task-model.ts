@@ -17,6 +17,8 @@ export type TaskInput = z.infer<typeof taskInput>;
 export const taskReport = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("design"), summary: z.string().min(1) }),
   z.object({ kind: z.literal("design_decision"), accept: z.boolean(), notes: z.string() }),
+  /** The coordinator's (or owner's) reading of a core change before it is submitted. */
+  z.object({ kind: z.literal("signoff"), accept: z.boolean(), notes: z.string() }),
   z.object({ kind: z.literal("ready"), commit: sha, summary: z.string().min(1) }),
   z.object({
     kind: z.literal("review"),
@@ -55,6 +57,9 @@ export const phases = [
   "build",
   "review",
   "reviewing",
+  /** A reviewed change to the compiler core, runtime/c, the gate or the landing
+   * tools waits for the coordinator to read it before it is submitted (AGENTS.md). */
+  "signoff",
   /** Waits for the coordinator: too many rounds, or a disputed design. */
   "escalated",
   "queue",
@@ -112,6 +117,10 @@ export const taskState = z.object({
   escalation: z.string().nullable().default(null),
   /** The exact commit a review accepted; reporting it again (after an innocent refusal) needs no new review. */
   accepted: sha.nullable().default(null),
+  /** The core paths the accepted commit changes; non-empty means it needs a sign-off. */
+  core: z.array(z.string()).default([]),
+  /** The exact commit the coordinator signed off. */
+  signedOff: sha.nullable().default(null),
 });
 export type TaskState = z.infer<typeof taskState>;
 
@@ -142,6 +151,8 @@ export const initialTaskState = (): TaskState => ({
   stalled: null,
   escalation: null,
   accepted: null,
+  core: [],
+  signedOff: null,
 });
 
 /** Paths named on the card's **Paths:** line, as resources two tasks must not share. */
