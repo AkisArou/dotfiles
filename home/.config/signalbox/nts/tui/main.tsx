@@ -29,10 +29,10 @@ const renderer = await createCliRenderer({
     finish();
   },
 });
-// Name the terminal (and its tmux window) after the project; tmux themes that
+// Name the terminal (and its tmux window) sbn@<project>, plain ASCII; tmux themes that
 // read a node program's pane title would otherwise show an empty name.
 renderer.setTerminalTitle(
-  `signalbox · ${(JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as { name: string }).name}`,
+  `sbn@${(JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as { name: string }).name}`,
 );
 const tools = createTerminalTools(renderer, terminalConfig.finder);
 createRoot(renderer).render(
