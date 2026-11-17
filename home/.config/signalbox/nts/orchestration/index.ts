@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { latestValue, polledSource } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import { poll } from "signalbox/core/utils";
-import type { WorkflowStore } from "signalbox/ext/assignments";
+import type { Assignment, Assignments, WorkflowStore } from "signalbox/ext/assignments";
 import { assignmentService } from "signalbox/ext/assignments";
 import { decisionRequests } from "signalbox/ext/decisions";
 import { openWorkflowSqlite } from "signalbox/ext/integrations/openworkflow";
@@ -17,10 +17,10 @@ import type { ManagedAgents } from "./agents.ts";
 import type { AgentToolset } from "signalbox/ext/agents";
 import { coordinator } from "./coordinator.ts";
 import { profiles } from "./profiles.ts";
+import type { Profiles } from "./profiles.ts";
 import { priorities } from "./priorities.ts";
-import { operations } from "./operations.ts";
-import type { OperationValues } from "./operations.ts";
-import type { ProfileSettings, Profiles } from "./profiles.ts";
+import { settingsFile } from "./settings.ts";
+import type { SettingsFile } from "./settings.ts";
 import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
 import { taskRoute } from "./task.ts";
 import {
@@ -48,7 +48,7 @@ function claudeMessagingProbe(root: string, profilesKey: Capability<Profiles>): 
       const store = context.get(profilesKey);
       const check = async () => {
         const result = await probeClaudeMessaging({ cwd: root, signal: context.signal });
-        const marked = latestValue(store.settings)?.unavailable.claude?.reason.startsWith(PREFIX);
+        const marked = latestValue(store.unavailable)?.claude?.reason.startsWith(PREFIX);
         if (!result.ok) await store.setAvailability("claude", { reason: PREFIX + result.reason });
         else if (marked) await store.setAvailability("claude", null);
       };
@@ -65,11 +65,33 @@ function claudeMessagingProbe(root: string, profilesKey: Capability<Profiles>): 
 export interface OrchestrationSettings {
   /** Install the coordinator and its wake-ups. Off, the routes still run assignments submitted by hand. */
   readonly coordinator: boolean;
-  /** Worker slots and rounds for a fresh state; later changes live in the state
-   * (sbn workers / sbn rounds) and need no restart. The memory ledger still
-   * guards each heavy command. */
-  readonly operations: OperationValues;
-  readonly profiles: Omit<ProfileSettings, "revision" | "unavailable">;
+  /** settings.json: worker slots, rounds and each role's models, the only source for them. */
+  readonly file: string;
+}
+
+/** A raised worker count wakes the waiting tasks, whoever raised it (a client or a hand edit). */
+function capacityFollowsSettings(
+  settings: Capability<SettingsFile>,
+  work: Capability<Assignments>,
+): Extension {
+  return {
+    id: "nts-capacity-follows-settings",
+    requires: [settings, work],
+    start(context) {
+      const file = context.get(settings);
+      let slots = file.current().workerSlots;
+      const stop = file.reading.subscribe(() => {
+        const next = file.current().workerSlots;
+        if (next > slots)
+          void context
+            .get(work)
+            .capacityChanged(["worker"])
+            .catch((error) => context.log.error("capacity", error));
+        slots = next;
+      });
+      context.onStop(stop);
+    },
+  };
 }
 
 export function ntsOrchestration(options: {
@@ -82,9 +104,11 @@ export function ntsOrchestration(options: {
   readonly agents?: (toolsets: readonly AgentToolset[]) => ManagedAgents;
 }) {
   const engine = openWorkflowSqlite({ path: join(options.directory, "workflows.sqlite") });
-  const profileStore = profiles({ state: options.state, initial: options.settings.profiles });
+  const file = settingsFile({ path: options.settings.file });
+  const profileStore = profiles({ state: options.state, settings: file.service });
   const urgency = priorities({ state: options.state });
-  const running = operations({ state: options.state, initial: options.settings.operations });
+  const settingsNow = file.current;
+  const assignmentList = new Late<Capability<Readable<readonly Assignment[]>>>();
   const decisions = decisionRequests({
     id: "nts-user",
     state: options.state,
@@ -110,6 +134,7 @@ export function ntsOrchestration(options: {
     issues: options.issues,
     decisions: decisions.service,
     priorities: urgency.service,
+    settings: file.service,
   };
   const tools = {
     worker: workerTools(wiring),
@@ -126,10 +151,11 @@ export function ntsOrchestration(options: {
     landing: landing.key,
     fullCheck: fullCheck.key,
     profiles: profileStore.service,
+    assignments: () => assignmentList.get(),
     agents,
     workerTools: tools.worker,
     reviewerTools: tools.reviewer,
-    maxRounds: () => running.current().maxRounds,
+    maxRounds: () => settingsNow().maxRounds,
   });
   wiring.route.set(route);
   const work = assignmentService({
@@ -137,12 +163,12 @@ export function ntsOrchestration(options: {
     state: options.state,
     engine: engine.engine,
     routes: [route],
-    // A raised worker count wakes the waiting tasks (the operations endpoint calls capacityChanged).
-    capacity: (resource) => (resource === "worker" ? running.current().workerSlots : 1),
+    capacity: (resource) => (resource === "worker" ? settingsNow().workerSlots : 1),
     // Freed slots and files go to the most urgent waiting task, then the oldest.
     priority: (assignment) => urgency.rank((assignment.input as { issue?: number }).issue),
   });
   wiring.work.set(work.service);
+  assignmentList.set(work.assignments);
   const lead = options.settings.coordinator
     ? coordinator({
         root: options.root,
@@ -150,6 +176,7 @@ export function ntsOrchestration(options: {
         engine: engine.engine,
         agents,
         profiles: profileStore.service,
+        settings: file.service,
         issues: options.issues,
         work: work.service,
         tools: tools.coordinator,
@@ -165,7 +192,7 @@ export function ntsOrchestration(options: {
     assignments: work.assignments,
     status: work.status,
     profiles: profileStore.service,
-    operations: running.service,
+    settings: file.service,
     priorities: urgency.service,
     decisions: decisions.service,
     agents,
@@ -174,10 +201,10 @@ export function ntsOrchestration(options: {
     coordinator: lead?.service,
     extensions: [
       engine.extension,
+      // Before the assignment service, so its first admission reads the file's values.
+      file.extension,
       profileStore.extension,
       urgency.extension,
-      // Before the assignment service, so its first admission reads the stored values.
-      running.extension,
       // Probe only the real Claude Code; stand-in agents have nothing to probe.
       ...(options.agents ? [] : [claudeMessagingProbe(options.root, profileStore.service)]),
       decisions.extension,
@@ -185,6 +212,7 @@ export function ntsOrchestration(options: {
       fullCheck.extension,
       ...agents.extensions,
       work.extension,
+      capacityFollowsSettings(file.service, work.service),
       ...(lead
         ? [
             ...lead.extensions,

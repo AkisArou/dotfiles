@@ -1,6 +1,7 @@
 // This is the NTS application's configuration. Signalbox contains no NTS policy.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ntsStateDirectory } from "./host/state-directory.ts";
 import { expandPath } from "signalbox/core/utils";
 import type { CommandSpec } from "signalbox/ext/execution";
@@ -77,34 +78,8 @@ export const ntsConfig: NtsConfig = {
       process.env.SIGNALBOX_NTS_COORDINATOR === undefined
         ? project.coordinator
         : process.env.SIGNALBOX_NTS_COORDINATOR === "1",
-    // Initial values for a fresh state. Later changes live in the host's state
-    // (sbn workers N, sbn rounds N) and need no restart.
-    operations: { workerSlots: 2, maxRounds: 4 },
-    // Initial profiles for a fresh state. Later changes live in the host's state
-    // (Agents view or the profiles operations) and need no restart.
-    profiles: {
-      profiles: [
-        {
-          id: "opus-high",
-          label: "Claude Opus 5.5, high effort",
-          harness: "claude",
-          model: "claude-opus-5-5",
-          effort: "high",
-        },
-        {
-          id: "opus-medium",
-          label: "Claude Opus 5.5, medium effort",
-          harness: "claude",
-          model: "claude-opus-5-5",
-          effort: "medium",
-        },
-        { id: "codex", label: "Codex, configured model", harness: "codex" },
-      ],
-      roles: {
-        coordinator: { profile: "opus-high" },
-        worker: { profile: "opus-high" },
-        reviewer: { profile: "opus-high" },
-      },
-    },
+    // Worker slots, rounds and each role's models: settings.json is their only
+    // source. Edit it by hand or from the TUI, web view or sbn; the host applies it live.
+    file: fileURLToPath(new URL("./settings.json", import.meta.url)),
   },
 };

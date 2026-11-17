@@ -8,7 +8,7 @@ import { latestValue } from "signalbox/core";
 import { Conflict, hash } from "signalbox/core/utils";
 import { messaging, terminate, textInput } from "signalbox/ext/agents";
 import type { AgentRuntime, AgentToolset } from "signalbox/ext/agents";
-import type { AssignmentContext, AssignmentStep } from "signalbox/ext/assignments";
+import type { Assignment, AssignmentContext, AssignmentStep } from "signalbox/ext/assignments";
 import type { Issue } from "../shared/model.ts";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
@@ -23,7 +23,7 @@ import {
   workerResumeBrief,
 } from "./briefs.ts";
 import { progressed, STALL, stallStep } from "./stall.ts";
-import { awaitedAgent, cardPaths } from "./task-model.ts";
+import { awaitedAgent, cardPaths, liveProfiles } from "./task-model.ts";
 import type { Phase, TaskInput, TaskReport, TaskReportOf, TaskState } from "./task-model.ts";
 
 const run = promisify(execFile);
@@ -34,6 +34,8 @@ export interface TaskOptions {
   readonly landing: Capability<Readable<LandingStatus>>;
   readonly fullCheck: Capability<Readable<FullCheckStatus>>;
   readonly profiles: Capability<Profiles>;
+  /** Every assignment, for the live agents a "spread" pick balances. */
+  readonly assignments: () => Capability<Readable<readonly Assignment[]>>;
   readonly agents: ManagedAgents;
   readonly workerTools: AgentToolset;
   readonly reviewerTools: AgentToolset;
@@ -336,7 +338,10 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
 
   async start(t) {
     const { state, ctx, options } = t;
-    const resolved = await ctx.get(options.profiles).resolve("worker");
+    const resolved = ctx.get(options.profiles).resolve("worker", {
+      preferred: ctx.input.model,
+      inUse: liveProfiles(latestValue(ctx.get(options.assignments())) ?? [], "worker"),
+    });
     if ("wait" in resolved) return t.wait(resolved.wait, {}, resolved.retryAt);
     const found = t.issue();
     if (!found) return t.wait(`Issue #${ctx.input.issue} is not available`);
@@ -435,7 +440,9 @@ export const phaseHandlers: Readonly<Record<Phase, PhaseHandler>> = {
 
   async review(t) {
     const { state, ctx, options } = t;
-    const resolved = await ctx.get(options.profiles).resolve("reviewer");
+    const resolved = ctx.get(options.profiles).resolve("reviewer", {
+      inUse: liveProfiles(latestValue(ctx.get(options.assignments())) ?? [], "reviewer"),
+    });
     if ("wait" in resolved) return t.wait(resolved.wait, {}, resolved.retryAt);
     const commit = state.commit!;
     const brief = reviewerBrief({

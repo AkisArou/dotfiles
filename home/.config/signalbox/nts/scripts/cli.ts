@@ -1,15 +1,18 @@
 // The NTS project's own verbs for sbn: read and steer tasks by issue number
 // through the host's operations, as the browser and TUI do.
 //   sbn status                      how it runs (workers, rounds, pause), then active tasks
-//   sbn settings                    worker slots, rounds, pause, role profiles, harnesses
-//   sbn workers <n>                 tasks holding a worker at once (live, no restart)
-//   sbn rounds <n>                  returns to build before a task escalates (live)
+//   sbn settings                    settings.json's values, the pause, harnesses
+//   sbn workers <n>                 tasks holding a worker at once (written to settings.json)
+//   sbn rounds <n>                  returns to build before a task escalates (settings.json)
+//   sbn role <role> <model...>      a role's models in order (ids from sbn models)
+//   sbn pick <role> <first|spread|coordinator>
+//                                   how a launch chooses among the role's models
+//   sbn models                      every model and effort the harnesses offer, by id
 //   sbn pause <reason...>           admit no new task; admitted tasks carry on
 //   sbn resume                      admit tasks again
-//   sbn role <role> <profile> [fallback]
-//                                   which profile the coordinator, workers or reviewers use
 //   sbn show <issue>                one task's design, summary and latest instruction
-//   sbn assign <issue> [notes...]   start a task
+//   sbn assign <issue> [--model <id>] [notes...]
+//                                   start a task (a model when workers pick "coordinator")
 //   sbn approve <issue> [notes...]  approve the design
 //   sbn return <issue> <notes...>   send the design back
 //   sbn signoff <issue> [notes...]  sign off a reviewed core change (queues it)
@@ -28,8 +31,14 @@ import { randomUUID } from "node:crypto";
 import { connectClient } from "signalbox/host";
 import type { HostClient } from "signalbox/host";
 import type { AssignmentView } from "../shared/model.ts";
-import type { OperationsView, ProfileSettingsView } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays, operationsLine } from "../shared/model.ts";
+import type { SettingsView } from "../shared/model.ts";
+import {
+  assignmentPhase,
+  assignmentSays,
+  modelsLine,
+  pickLabels,
+  settingsLine,
+} from "../shared/model.ts";
 
 const project = JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as {
   apiPort: number;
@@ -44,6 +53,8 @@ const VERBS = [
   "pause",
   "resume",
   "role",
+  "pick",
+  "models",
   "show",
   "assign",
   "prioritize",
@@ -98,53 +109,57 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       if (args.length !== 1 || !Number.isInteger(value)) throw new Error(`${verb} needs ${what}`);
       return value;
     };
-    if (verb === "workers" || verb === "rounds") {
-      const value = count("a whole number");
-      await call(client, "nts.operations.set", {
-        [verb === "workers" ? "workerSlots" : "maxRounds"]: value,
+    const settings = () => read<SettingsView>(client, "nts.settings");
+    const change = async (input: object) => {
+      await call(client, "nts.settings.set", { ...input, version: (await settings()).version });
+      return console.log(settingsLine(await settings()));
+    };
+    if (verb === "workers" || verb === "rounds")
+      return await change({
+        [verb === "workers" ? "workerSlots" : "maxRounds"]: count("a whole number"),
       });
-      return console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+    if (verb === "role") {
+      const [role, ...models] = args;
+      if (!role || !models.length)
+        throw new Error("role needs <coordinator|worker|reviewer> <model id...>");
+      return await change({ roles: { [role]: { models } } });
+    }
+    if (verb === "pick") {
+      const [role, pick, ...rest] = args;
+      if (!role || !pick || rest.length)
+        throw new Error("pick needs <coordinator|worker|reviewer> <first|spread|coordinator>");
+      return await change({ roles: { [role]: { pick } } });
     }
     if (verb === "pause") {
       const reason = args.join(" ").trim();
       if (!reason) throw new Error("pause needs a reason");
       await call(client, "nts.tasks.pause", { reason });
-      return console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+      return console.log(settingsLine(await settings()));
     }
     if (verb === "resume") {
       await call(client, "nts.tasks.resume", {});
-      return console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+      return console.log(settingsLine(await settings()));
     }
-    if (verb === "role") {
-      const [role, profile, fallback, ...rest] = args;
-      if (!role || !profile || rest.length)
-        throw new Error("role needs <coordinator|worker|reviewer> <profile> [fallback]");
-      const { revision } = await read<ProfileSettingsView>(client, "nts.profiles");
-      await call(client, "nts.roles.set", {
-        role,
-        profile,
-        ...(fallback ? { fallback } : {}),
-        revision,
-      });
-      verb = "settings";
+    if (verb === "models") {
+      for (const model of (await settings()).catalog) console.log(`${model.id}\t${model.label}`);
+      return;
     }
     if (verb === "settings") {
-      const operations = await read<OperationsView>(client, "nts.operations");
-      const profiles = await read<ProfileSettingsView>(client, "nts.profiles");
-      console.log(operationsLine(operations));
-      for (const [role, choice] of Object.entries(profiles.roles))
-        console.log(
-          `${role}: ${choice.profile}${choice.fallback ? ` (fallback ${choice.fallback})` : ""}`,
-        );
-      console.log("profiles:");
-      for (const p of profiles.profiles)
-        console.log(
-          `  ${p.id}\t${p.label}${profiles.unavailable[p.harness] ? ` (unavailable: ${profiles.unavailable[p.harness]!.reason})` : ""}`,
-        );
+      const now = await settings();
+      console.log(`${now.path} (version ${now.version})`);
+      if (now.error) console.log(`ERROR, not in force (the last good settings are):\n${now.error}`);
+      console.log(settingsLine(now));
+      for (const [role, choice] of Object.entries(now.roles)) {
+        console.log(`${role}: picks ${pickLabels[choice.pick]}`);
+        for (const model of choice.models) console.log(`  ${model.id}\t${model.label}`);
+      }
+      for (const [harness, blocked] of Object.entries(now.unavailable))
+        if (blocked) console.log(`${harness}: unavailable (${blocked.reason})`);
       return;
     }
     if (verb === "status") {
-      console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+      const now = await settings();
+      console.log(`${settingsLine(now)} · workers use ${modelsLine(now.roles.worker)}`);
       const live = (await assignments(client)).filter(
         (a) => a.status === "active" || a.status === "queued",
       );
@@ -179,6 +194,9 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       return console.log("coordinator: replacement requested (checkpoint, then a new generation)");
     }
     const issue = Number(args.shift()?.replace(/^#/, ""));
+    const modelAt = args.indexOf("--model");
+    const model = modelAt >= 0 ? args.splice(modelAt, 2)[1] : undefined;
+    if (modelAt >= 0 && !model) throw new Error("--model needs a model id (sbn models lists them)");
     const asAt = args.indexOf("--as");
     const as = asAt >= 0 ? args.splice(asAt, 2)[1] : undefined;
     if (as !== undefined && as !== "user" && as !== "coordinator")
@@ -197,7 +215,11 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       return console.log(`#${issue}: urgency ${urgency}; set: ${JSON.stringify(all)}`);
     }
     if (verb === "assign") {
-      const { id } = (await call(client, "nts.tasks.assign", { issue, instructions: text })) as {
+      const { id } = (await call(client, "nts.tasks.assign", {
+        issue,
+        instructions: text,
+        ...(model ? { model } : {}),
+      })) as {
         id: string;
       };
       return console.log(`#${issue}: assigned (${id})`);

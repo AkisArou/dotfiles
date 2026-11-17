@@ -1,7 +1,7 @@
 // The owner's endpoints for orchestration: what the UI shows and what the user
 // can change. The gate in host/config.ts decides who may call them.
 import { z } from "zod";
-import { Cell, combineReadables, latestValue, mapReadable } from "signalbox/core";
+import { combineReadables, mapReadable } from "signalbox/core";
 import type { Extension } from "signalbox/core";
 import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments";
@@ -9,11 +9,13 @@ import type { Assignment } from "signalbox/ext/assignments";
 import type { AgentInstance } from "signalbox/ext/agents";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
-import { harnesses, profileSchema, roles } from "./profiles.ts";
+import { catalog, harnesses, profileFromId, profileId, profileLabel, roles } from "./models.ts";
+import type { Profile } from "./models.ts";
+import { picks } from "./settings.ts";
+import { checkTaskModel } from "./tools.ts";
 import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
-import { operationValues } from "./operations.ts";
 
 type Orchestration = ReturnType<typeof ntsOrchestration>;
 
@@ -65,35 +67,81 @@ export function managedAgentViews(instances: readonly AgentInstance[]): refs.Age
   }));
 }
 
+const profileView = (profile: Profile): refs.ProfileView => ({
+  ...profile,
+  id: profileId(profile),
+  label: profileLabel(profile),
+});
+
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
-  const { profiles, work, assignments, decisions, route, operations, status } = orchestration;
+  const { profiles, work, assignments, decisions, route, settings, status } = orchestration;
   return [
     exposeSource({
-      ref: refs.operationsSettings,
-      requires: [operations, status],
-      output: z.custom<refs.OperationsView>(),
+      ref: refs.settings,
+      requires: [settings, status, profiles],
+      output: z.custom<refs.SettingsView>(),
       resolve: (context) =>
         combineReadables(
-          [context.get(operations).settings, context.get(status)],
-          (settings, admission): refs.OperationsView => ({
-            ...settings,
+          [context.get(settings).reading, context.get(status), context.get(profiles).unavailable],
+          (reading, admission, unavailable): refs.SettingsView => ({
+            path: reading.path,
+            version: reading.version,
+            error: reading.error,
+            workerSlots: reading.settings.workerSlots,
+            maxRounds: reading.settings.maxRounds,
+            roles: Object.fromEntries(
+              roles.map((role) => [
+                role,
+                {
+                  pick: reading.settings.roles[role].pick,
+                  models: reading.settings.roles[role].models.map(profileView),
+                },
+              ]),
+            ) as refs.SettingsView["roles"],
             paused: admission.paused ? { reason: admission.reason ?? "paused" } : null,
+            unavailable,
+            catalog: catalog.map(profileView),
           }),
         ),
     }),
     exposeOperation({
-      ref: refs.setOperations,
-      requires: [operations, work],
-      input: operationValues.partial().extend({ revision: z.number().int().optional() }),
-      output: z.object({ revision: z.number() }),
-      run: async ({ revision, ...change }, context) => {
-        const store = context.get(operations);
-        const before = latestValue(store.settings)?.workerSlots;
-        const after = await store.set(change, revision);
-        // Waiting tasks sleep until a release; a raised count must wake them.
-        if (before === undefined || after.workerSlots > before)
-          await context.get(work).capacityChanged(["worker"]);
-        return { revision: after.revision };
+      ref: refs.setSettings,
+      requires: [settings],
+      input: z.object({
+        workerSlots: z.number().int().optional(),
+        maxRounds: z.number().int().optional(),
+        roles: z
+          .partialRecord(
+            z.enum(roles),
+            z.object({ pick: z.enum(picks).optional(), models: z.array(z.string()).optional() }),
+          )
+          .optional(),
+        version: z.string().optional(),
+      }),
+      output: z.object({ version: z.string() }),
+      run: async ({ version, workerSlots, maxRounds, roles: changed = {} }, context) => {
+        const reading = await context.get(settings).update(
+          (current) => ({
+            ...current,
+            ...(workerSlots === undefined ? {} : { workerSlots }),
+            ...(maxRounds === undefined ? {} : { maxRounds }),
+            roles: Object.fromEntries(
+              roles.map((role) => {
+                const change = changed[role];
+                const now = current.roles[role];
+                return [
+                  role,
+                  {
+                    pick: change?.pick ?? now.pick,
+                    models: change?.models ? change.models.map(profileFromId) : now.models,
+                  },
+                ];
+              }),
+            ),
+          }),
+          version,
+        );
+        return { version: reading.version };
       },
     }),
     exposeOperation({
@@ -115,13 +163,6 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
         await context.get(work).resumeNewAssignments();
         return { ok: true as const };
       },
-    }),
-    exposeSource({
-      ref: refs.profileSettings,
-      requires: [profiles],
-      output: z.custom<refs.ProfileSettingsView>(),
-      resolve: (context) =>
-        context.get(profiles).settings as unknown as Cell<refs.ProfileSettingsView>,
     }),
     exposeSource({
       ref: refs.assignments,
@@ -147,37 +188,6 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
         ),
     }),
     exposeOperation({
-      ref: refs.setProfile,
-      requires: [profiles],
-      input: z.object({ profile: profileSchema, revision: z.number().int() }),
-      output: z.object({ revision: z.number() }),
-      run: async (input, context) => ({
-        revision: (await context.get(profiles).setProfile(input.profile, input.revision)).revision,
-      }),
-    }),
-    exposeOperation({
-      ref: refs.setRole,
-      requires: [profiles],
-      input: z.object({
-        role: z.enum(roles),
-        profile: z.string(),
-        fallback: z.string().optional(),
-        revision: z.number().int(),
-      }),
-      output: z.object({ revision: z.number() }),
-      run: async (input, context) => ({
-        revision: (
-          await context
-            .get(profiles)
-            .setRole(
-              input.role,
-              { profile: input.profile, ...(input.fallback ? { fallback: input.fallback } : {}) },
-              input.revision,
-            )
-        ).revision,
-      }),
-    }),
-    exposeOperation({
       ref: refs.setAvailability,
       requires: [profiles],
       input: z.object({
@@ -186,11 +196,11 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
           .object({ reason: z.string().min(1), until: z.number().optional() })
           .nullable(),
       }),
-      output: z.object({ revision: z.number() }),
-      run: async (input, context) => ({
-        revision: (await context.get(profiles).setAvailability(input.harness, input.unavailable))
-          .revision,
-      }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        await context.get(profiles).setAvailability(input.harness, input.unavailable);
+        return { ok: true as const };
+      },
     }),
     exposeOperation({
       ref: refs.prioritizeTask,
@@ -248,18 +258,22 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
     }),
     exposeOperation({
       ref: refs.assignTask,
-      requires: [work],
-      input: z.object({ issue: z.number().int().positive(), instructions: z.string() }),
-      output: z.object({ id: z.string() }),
-      run: async (input, context) => ({
-        id: (
-          await context
-            .get(work)
-            .submit(assignmentRequest(route, { key: `issue/${input.issue}`, input }), {
-              requestId: context.requestId,
-            })
-        ).id,
+      requires: [work, settings],
+      input: z.object({
+        issue: z.number().int().positive(),
+        instructions: z.string(),
+        model: z.string().optional(),
       }),
+      output: z.object({ id: z.string() }),
+      run: async (input, context) => {
+        if (input.model !== undefined) checkTaskModel(context.get(settings).current(), input.model);
+        const { id } = await context
+          .get(work)
+          .submit(assignmentRequest(route, { key: `issue/${input.issue}`, input }), {
+            requestId: context.requestId,
+          });
+        return { id };
+      },
     }),
     exposeOperation({
       ref: refs.cancelAssignment,

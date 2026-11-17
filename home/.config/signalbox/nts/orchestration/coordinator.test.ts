@@ -3,7 +3,7 @@
 // delivers it to the coordinator session exactly once.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { capability, Cell, defineConfig, provide, startExtensions } from "signalbox/core";
@@ -93,6 +93,22 @@ test("the coordinator starts with its brief and receives each event once through
         signal,
       ),
   } as ManagedAgents;
+  await writeFile(
+    join(directory, "settings.json"),
+    JSON.stringify({
+      workerSlots: 2,
+      maxRounds: 4,
+      roles: Object.fromEntries(
+        ["coordinator", "worker", "reviewer"].map((role) => [
+          role,
+          {
+            pick: "first",
+            models: [{ harness: "claude", model: "claude-opus-5-5", effort: "high" }],
+          },
+        ]),
+      ),
+    }),
+  );
   const issuesKey = capability<Readable<Issue[]>>("issues");
   const state = sqliteWorkflowState({ path: join(directory, "state.sqlite") });
   const orchestration = ntsOrchestration({
@@ -101,18 +117,7 @@ test("the coordinator starts with its brief and receives each event once through
     state: state.state,
     issues: issuesKey,
     agents: () => agents,
-    settings: {
-      coordinator: true,
-      operations: { workerSlots: 2, maxRounds: 4 },
-      profiles: {
-        profiles: [{ id: "p", label: "p", harness: "claude" }],
-        roles: {
-          coordinator: { profile: "p" },
-          worker: { profile: "p" },
-          reviewer: { profile: "p" },
-        },
-      },
-    },
+    settings: { coordinator: true, file: join(directory, "settings.json") },
   });
   const app = await startExtensions(
     defineConfig({

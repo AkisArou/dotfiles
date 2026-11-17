@@ -14,6 +14,35 @@ import { sampleReports } from "../status/tests/fixtures.ts";
 import type { RemoteReading } from "signalbox/core/remote";
 import type { Reading } from "../status/model.ts";
 
+const opusHigh = {
+  id: "claude/claude-opus-5-5/high",
+  label: "Opus 5.5 · high",
+  harness: "claude",
+  model: "claude-opus-5-5",
+  effort: "high",
+};
+const codexHigh = {
+  id: "codex/configured/high",
+  label: "Codex (configured model) · high",
+  harness: "codex",
+  effort: "high",
+};
+const settingsView = (paused: { reason: string } | null) => ({
+  path: "/apps/nts/settings.json",
+  version: "v1",
+  error: null,
+  workerSlots: 2,
+  maxRounds: 4,
+  roles: {
+    coordinator: { pick: "first", models: [opusHigh] },
+    worker: { pick: "coordinator", models: [opusHigh] },
+    reviewer: { pick: "first", models: [opusHigh] },
+  },
+  paused,
+  unavailable: {},
+  catalog: [opusHigh, codexHigh],
+});
+
 test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without simulated commands", async () => {
   const calls: string[] = [],
     gitRuns: string[] = [],
@@ -50,30 +79,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         state: "held",
       },
     ],
-    "nts.operations": {
-      revision: 1,
-      workerSlots: 2,
-      maxRounds: 4,
-      paused: { reason: "usage low" },
-    },
-    "nts.profiles": {
-      revision: 0,
-      profiles: [
-        {
-          id: "opus-high",
-          label: "Opus high",
-          harness: "claude",
-          model: "claude-opus-5-5",
-          effort: "high",
-        },
-      ],
-      roles: {
-        coordinator: { profile: "opus-high" },
-        worker: { profile: "opus-high" },
-        reviewer: { profile: "opus-high" },
-      },
-      unavailable: {},
-    },
+    "nts.settings": settingsView({ reason: "usage low" }),
     "nts.assignments": [],
     "nts.user-decisions": [],
     "nts.agents": [
@@ -227,8 +233,28 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     });
     assert.equal(offered?.title, "Worker slots");
     assert.ok(offered?.lines.includes("✓ 2 worker slots"), "the current value is marked");
-    assert.equal(calls.at(-1), "nts.operations.set");
-    assert.deepEqual(inputs.at(-1), { workerSlots: 3, revision: 1 });
+    assert.equal(calls.at(-1), "nts.settings.set");
+    assert.deepEqual(inputs.at(-1), { workerSlots: 3, version: "v1" });
+    // A role's row adds a model from the catalog, kept in order after the listed ones.
+    pick = async (lines, title) => {
+      offered = { lines, title };
+      return lines.findIndex((line) => line.startsWith("+ add: Codex"));
+    };
+    await keys("j", "j", "j", "j");
+    await act(async () => {
+      setup.mockInput.pressEnter();
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    assert.equal(offered?.title, "Workers");
+    assert.ok(
+      offered?.lines.includes(
+        "✓ pick: the coordinator names one per task (else the first available)",
+      ),
+    );
+    assert.deepEqual(inputs.at(-1), {
+      roles: { worker: { models: ["claude/claude-opus-5-5/high", "codex/configured/high"] } },
+      version: "v1",
+    });
   } finally {
     await act(async () => {
       client.close();
@@ -252,24 +278,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
   const values: Record<string, unknown> = {
     "nts.overview": overview,
     "nts.issues": [],
-    "nts.profiles": {
-      revision: 0,
-      profiles: [
-        {
-          id: "opus-high",
-          label: "Opus high",
-          harness: "claude",
-          model: "claude-opus-5-5",
-          effort: "high",
-        },
-      ],
-      roles: {
-        coordinator: { profile: "opus-high" },
-        worker: { profile: "opus-high" },
-        reviewer: { profile: "opus-high" },
-      },
-      unavailable: {},
-    },
+    "nts.settings": settingsView(null),
     "nts.assignments": [],
     "nts.user-decisions": [],
     "nts.agents": agents,

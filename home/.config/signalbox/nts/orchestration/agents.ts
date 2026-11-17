@@ -18,8 +18,8 @@ import type { WorkflowStore } from "signalbox/ext/assignments";
 import { claudeCode } from "signalbox/ext/integrations/claude";
 import { codex } from "signalbox/ext/integrations/codex";
 import { tmux } from "signalbox/ext/integrations/tmux";
-import type { Harness, Profile } from "./profiles.ts";
-import { launchOptions } from "./profiles.ts";
+import type { Harness, Profile } from "./models.ts";
+import { launchOptions } from "./models.ts";
 
 /** A zod schema as a tool's input: its parser and the JSON Schema the harness shows the model. */
 export function toolInput<T extends z.ZodType<Json>>(schema: T): ToolInput<z.infer<T>> {

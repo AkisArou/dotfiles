@@ -21,15 +21,13 @@ export function useProject() {
     plan = useSource(refs.plan);
   const terminalPrograms = useSource(refs.terminalPrograms);
   const startTerminal = useCommand(refs.startTerminal);
-  const operations = useSource(refs.operationsSettings);
-  const profiles = useSource(refs.profileSettings),
+  const settings = useSource(refs.settings),
     assignments = useSource(refs.assignments),
     decisions = useSource(refs.userDecisions);
-  const setOperations = useCommand(refs.setOperations),
+  const setSettings = useCommand(refs.setSettings),
     pauseTasks = useCommand(refs.pauseTasks),
     resumeTasks = useCommand(refs.resumeTasks);
-  const setRole = useCommand(refs.setRole),
-    setAvailability = useCommand(refs.setAvailability),
+  const setAvailability = useCommand(refs.setAvailability),
     assignTask = useCommand(refs.assignTask),
     cancelAssignment = useCommand(refs.cancelAssignment),
     answerDecision = useCommand(refs.answerDecision);
@@ -59,17 +57,15 @@ export function useProject() {
       ]),
       agents: current(agents) ?? [],
       plan: current(plan),
-      profiles: current(profiles),
-      operations: current(operations),
+      settings: current(settings),
       assignments: current(assignments) ?? [],
       decisions: current(decisions) ?? [],
     },
     commands: {
       startTerminal,
-      setOperations,
+      setSettings,
       pauseTasks,
       resumeTasks,
-      setRole,
       setAvailability,
       assignTask,
       cancelAssignment,
@@ -80,10 +76,9 @@ export function useProject() {
     dismissError: () => setError(undefined),
     busy:
       startTerminal.pending ||
-      setOperations.pending ||
+      setSettings.pending ||
       pauseTasks.pending ||
       resumeTasks.pending ||
-      setRole.pending ||
       setAvailability.pending ||
       assignTask.pending ||
       cancelAssignment.pending ||

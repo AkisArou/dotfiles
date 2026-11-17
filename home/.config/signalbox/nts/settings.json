@@ -1,0 +1,36 @@
+{
+  "workerSlots": 2,
+  "maxRounds": 4,
+  "roles": {
+    "coordinator": {
+      "pick": "first",
+      "models": [
+        {
+          "harness": "claude",
+          "model": "claude-opus-5-5",
+          "effort": "high"
+        }
+      ]
+    },
+    "worker": {
+      "pick": "coordinator",
+      "models": [
+        {
+          "harness": "claude",
+          "model": "claude-opus-5-5",
+          "effort": "high"
+        }
+      ]
+    },
+    "reviewer": {
+      "pick": "first",
+      "models": [
+        {
+          "harness": "claude",
+          "model": "claude-opus-5-5",
+          "effort": "high"
+        }
+      ]
+    }
+  }
+}

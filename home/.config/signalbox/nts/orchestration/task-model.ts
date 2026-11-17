@@ -2,7 +2,7 @@
 // phases and its durable state. The route (task.ts) and its phases
 // (task-phases.ts) act on it; tools, wake-ups and views read it.
 import { z } from "zod";
-import { profileSchema } from "./profiles.ts";
+import { profileId, profileSchema } from "./models.ts";
 import { watchState } from "./stall.ts";
 
 const sha = z.string().regex(/^[0-9a-f]{40}$/);
@@ -11,6 +11,8 @@ export const taskInput = z.object({
   issue: z.number().int().positive(),
   /** The coordinator's note for this task: scope, order, things to watch. */
   instructions: z.string().default(""),
+  /** The coordinator's model for the worker (a profile id), used when workers pick "coordinator". */
+  model: z.string().optional(),
 });
 export type TaskInput = z.infer<typeof taskInput>;
 
@@ -180,4 +182,21 @@ export function awaitedAgent(
       key: `reviewing/${state.reviewer.id}/${state.reviewer.round}`,
     };
   return undefined;
+}
+
+/** Live agents of a role per profile id across tasks, for the "spread" pick. */
+export function liveProfiles(
+  assignments: readonly { readonly status: string; readonly state?: unknown }[],
+  role: "worker" | "reviewer",
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const assignment of assignments) {
+    if (assignment.status !== "active") continue;
+    const parsed = taskState.safeParse(assignment.state);
+    const agent = parsed.success ? parsed.data[role] : null;
+    if (!agent) continue;
+    const id = profileId(agent.profile);
+    counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return counts;
 }

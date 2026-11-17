@@ -11,6 +11,8 @@ import type { Issue } from "../shared/model.ts";
 import type { ManagedAgents } from "./agents.ts";
 import { coordinatorInstructions } from "./briefs.ts";
 import type { Profiles } from "./profiles.ts";
+import type { SettingsFile } from "./settings.ts";
+import { workerModels } from "./tools.ts";
 
 export function coordinator(options: {
   readonly root: string;
@@ -18,6 +20,7 @@ export function coordinator(options: {
   readonly engine: Capability<DurableEngine>;
   readonly agents: ManagedAgents;
   readonly profiles: Capability<Profiles>;
+  readonly settings: Capability<SettingsFile>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly work: Capability<Assignments>;
   readonly tools: AgentToolset;
@@ -28,7 +31,7 @@ export function coordinator(options: {
     state: options.state,
     engine: options.engine,
     replicas: 1,
-    requires: [options.profiles, options.issues, options.work],
+    requires: [options.profiles, options.settings, options.issues, options.work],
     // Small on purpose: the coordinator reads details through its tools.
     async bootstrap(context) {
       const assignments = latestValue(context.get(options.work).assignments) ?? [];
@@ -37,6 +40,8 @@ export function coordinator(options: {
         generation: context.generation,
         checkpoint: context.checkpoint ?? null,
         openIssues: issues.length,
+        // How workers' models are chosen, and the models assign_task may name.
+        workerModels: workerModels(context.get(options.settings).current()),
         needsUser: issues
           .filter((issue) => issue.labels.includes("state:needs-user"))
           .map((issue) => issue.number),
@@ -50,7 +55,7 @@ export function coordinator(options: {
       } satisfies Json;
     },
     async launch(context) {
-      const resolved = await context.get(options.profiles).resolve("coordinator");
+      const resolved = context.get(options.profiles).resolve("coordinator");
       if ("wait" in resolved)
         return {
           available: false,

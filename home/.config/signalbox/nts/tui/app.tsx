@@ -4,7 +4,7 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useProject } from "../shared/use-project.ts";
-import { operationsLine, tabs } from "../shared/model.ts";
+import { settingsLine, tabs } from "../shared/model.ts";
 import type { Tab } from "../shared/model.ts";
 import { terminalConfig } from "./config.ts";
 import { describeFilters, filterOptions, matches, toggleFilter } from "./filters.ts";
@@ -16,7 +16,7 @@ import { colors as c } from "./theme.ts";
 import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
 import { NtsContent } from "./nts.tsx";
-import { SettingDetail, settingChoice, settingRows } from "./settings.tsx";
+import { SettingDetail, settingAction, settingRows } from "./settings.tsx";
 import type { SettingRow } from "./settings.tsx";
 import { tabLabels } from "./navigation.ts";
 import { navigationKey } from "./keyboard.ts";
@@ -47,7 +47,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     ? project.data.agents
     : project.data.agents.filter((item) => item.state !== "ended");
   // The Agents tab ends with the settings its launches follow.
-  const settings = settingRows(project);
+  const settings = settingRows(project.data.settings);
   const readings = {
     Overview: project.overview,
     Tasks: project.issues,
@@ -100,11 +100,12 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     }
   }
   function change(row: SettingRow) {
-    const choice = settingChoice(row, project);
-    if (!choice) return;
+    const action = settingAction(row, project, terminalConfig.editor);
+    if (!action) return;
     void local(row.label, async () => {
-      const index = await tools.find(choice.lines, row.label);
-      if (index !== undefined) await choice.apply(index);
+      if ("run" in action) return tools.run(action.run, action.cwd);
+      const index = await tools.find(action.lines, row.label);
+      if (index !== undefined) await action.apply(index);
     });
   }
   function find() {
@@ -555,11 +556,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       </box>
       <box height={3} flexShrink={0} border={["top"]} borderColor={c.border} flexDirection="column">
         <text
-          fg={project.data.operations?.paused ? c.warning : c.muted}
+          fg={project.data.settings?.paused || project.data.settings?.error ? c.warning : c.muted}
           height={1}
           wrapMode="none"
           truncate
-        >{`${overview?.repo ?? "GitHub"}${project.data.operations ? ` · ${operationsLine(project.data.operations)}` : ""} · ${project.data.issues.length} open issues · ${agents.length} native terminals · ${overview?.root ?? "connecting…"}`}</text>
+        >{`${overview?.repo ?? "GitHub"}${project.data.settings ? ` · ${settingsLine(project.data.settings)}` : ""} · ${project.data.issues.length} open issues · ${agents.length} native terminals · ${overview?.root ?? "connecting…"}`}</text>
         <text
           fg={project.error || failing.length ? c.danger : message ? c.warning : c.muted}
           height={1}

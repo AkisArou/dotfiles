@@ -1,144 +1,112 @@
-// Agent profiles and role selections are live data in the host's state, not
-// code: changing a role's harness, model or effort applies to the next launch
-// without a restart. A launch records the profile it resolved, so recovery
-// relaunches exactly that.
+// Which profile a launch uses: the role's models from settings.json, chosen the
+// way the role says, among the harnesses available now. Availability is host
+// state, not configuration: the Claude probe marks it, and the owner can. A
+// launch records the profile it resolved, so recovery relaunches exactly that.
 import { z } from "zod";
 import { capability, Cell, provide } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
 import type { WorkflowStore } from "signalbox/ext/assignments";
+import { harnessLabels, harnesses, profileId } from "./models.ts";
+import type { Harness, Profile, Role } from "./models.ts";
+import type { RoleSettings, SettingsFile } from "./settings.ts";
 
-export const harnesses = ["claude", "codex"] as const;
-export const roles = ["coordinator", "worker", "reviewer"] as const;
-export type Harness = (typeof harnesses)[number];
-export type Role = (typeof roles)[number];
-
-export const profileSchema = z.object({
-  id: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
-  label: z.string().min(1),
-  harness: z.enum(harnesses),
-  model: z.string().min(1).optional(),
-  effort: z.string().min(1).optional(),
-});
-export type Profile = z.infer<typeof profileSchema>;
-const roleSchema = z.object({ profile: z.string(), fallback: z.string().optional() });
-const unavailableSchema = z.object({ reason: z.string(), until: z.number().optional() });
-export const settingsSchema = z.object({
-  revision: z.number().int().nonnegative(),
-  profiles: z.array(profileSchema),
-  roles: z.object({ coordinator: roleSchema, worker: roleSchema, reviewer: roleSchema }),
-  unavailable: z.partialRecord(z.enum(harnesses), unavailableSchema),
-});
-export type ProfileSettings = z.infer<typeof settingsSchema>;
+const unavailableSchema = z.partialRecord(
+  z.enum(harnesses),
+  z.object({ reason: z.string(), until: z.number().optional() }),
+);
+export type Unavailable = z.infer<typeof unavailableSchema>;
 
 /** What a launch uses: the profile itself, frozen at the moment it was resolved. */
 export type Resolved =
   | { readonly profile: Profile }
   | { readonly wait: string; readonly retryAt?: number };
 
+export interface Choosing {
+  /** The coordinator's choice for this task (a profile id), honoured under pick "coordinator". */
+  readonly preferred?: string | undefined;
+  /** Live agents of the role per profile id, balanced under pick "spread". */
+  readonly inUse?: ReadonlyMap<string, number>;
+  readonly now?: number;
+}
+
+/**
+ * first: the first model whose harness is available, in the role's order.
+ * spread: the available model with the fewest live agents of the role (ties in order).
+ * coordinator: the coordinator's named model while it is listed and available, else first.
+ */
+export function chooseProfile(
+  role: Role,
+  settings: RoleSettings,
+  unavailable: Unavailable,
+  choosing: Choosing = {},
+): Resolved {
+  const now = choosing.now ?? Date.now();
+  const blocked = (harness: Harness) => {
+    const state = unavailable[harness];
+    return state && (state.until === undefined || state.until > now) ? state : undefined;
+  };
+  const open = settings.models.filter((profile) => !blocked(profile.harness));
+  if (!open.length) {
+    const down = [...new Set(settings.models.map((profile) => profile.harness))];
+    const until = down
+      .map((harness) => blocked(harness)!.until)
+      .filter((value) => value !== undefined);
+    return {
+      wait: `Every ${role} model is unavailable: ${down.map((harness) => `${harnessLabels[harness]} (${blocked(harness)!.reason})`).join(", ")}`,
+      ...(until.length ? { retryAt: Math.min(...until) } : {}),
+    };
+  }
+  if (settings.pick === "coordinator" && choosing.preferred) {
+    const named = open.find((profile) => profileId(profile) === choosing.preferred);
+    if (named) return { profile: named };
+  }
+  if (settings.pick === "spread") {
+    const use = (profile: Profile) => choosing.inUse?.get(profileId(profile)) ?? 0;
+    return { profile: open.reduce((best, profile) => (use(profile) < use(best) ? profile : best)) };
+  }
+  return { profile: open[0]! };
+}
+
 export interface Profiles {
-  readonly settings: Readable<ProfileSettings>;
-  resolve(role: Role, now?: number): Promise<Resolved>;
-  setProfile(profile: Profile, expectedRevision: number): Promise<ProfileSettings>;
-  setRole(
-    role: Role,
-    selection: { profile: string; fallback?: string },
-    expectedRevision: number,
-  ): Promise<ProfileSettings>;
+  readonly unavailable: Readable<Unavailable>;
+  resolve(role: Role, choosing?: Choosing): Resolved;
   /** Mark a harness unavailable (usage exhausted, login expired), or available again with null. */
   setAvailability(
     harness: Harness,
     state: { reason: string; until?: number } | null,
-  ): Promise<ProfileSettings>;
+  ): Promise<Unavailable>;
 }
 
-const NAMESPACE = "nts/profiles";
-const KEY = "settings";
-
-function validate(settings: ProfileSettings): ProfileSettings {
-  const parsed = settingsSchema.parse(settings);
-  const ids = new Set(parsed.profiles.map((profile) => profile.id));
-  if (ids.size !== parsed.profiles.length) throw new Error("Profile IDs must be unique");
-  for (const role of roles) {
-    const selection = parsed.roles[role];
-    for (const id of [selection.profile, ...(selection.fallback ? [selection.fallback] : [])])
-      if (!ids.has(id)) throw new Error(`Role ${role} names an unknown profile: ${id}`);
-  }
-  return parsed;
-}
+const NAMESPACE = "nts/availability";
+const KEY = "unavailable";
 
 export function profiles(options: {
   readonly state: Capability<WorkflowStore>;
-  /** The settings a fresh state starts from; later edits live in the state. */
-  readonly initial: Omit<ProfileSettings, "revision" | "unavailable">;
+  readonly settings: Capability<SettingsFile>;
 }): { readonly extension: Extension; readonly service: Capability<Profiles> } {
   const service = capability<Profiles>("nts/profiles");
-  const cell = new Cell<ProfileSettings>();
+  const cell = new Cell<Unavailable>({});
   let store: WorkflowStore;
-  const write = (update: (current: ProfileSettings) => ProfileSettings, expected?: number) =>
-    store.transaction(NAMESPACE, (tx) => {
-      const current = settingsSchema.parse(tx.get(KEY));
-      if (expected !== undefined && current.revision !== expected)
-        throw new Error(
-          `Profile settings changed (revision ${current.revision}); reload and retry`,
-        );
-      const next = validate({ ...update(current), revision: current.revision + 1 });
-      tx.set(KEY, next as unknown as Json);
-      return next;
-    });
+  let settings: SettingsFile;
   const instance: Profiles = {
-    settings: cell,
-    async resolve(role, now = Date.now()) {
-      const settings = await store.transaction(NAMESPACE, (tx) =>
-        settingsSchema.parse(tx.get(KEY)),
+    unavailable: cell,
+    resolve(role, choosing) {
+      const reading = cell.get();
+      return chooseProfile(
+        role,
+        settings.current().roles[role],
+        reading.status === "ready" ? reading.value : {},
+        choosing,
       );
-      const blocked = (profile: Profile) => {
-        const state = settings.unavailable[profile.harness];
-        return state && (state.until === undefined || state.until > now) ? state : undefined;
-      };
-      const selection = settings.roles[role];
-      for (const id of [selection.profile, ...(selection.fallback ? [selection.fallback] : [])]) {
-        const profile = settings.profiles.find((candidate) => candidate.id === id)!;
-        if (!blocked(profile)) return { profile };
-      }
-      const primary = settings.profiles.find((profile) => profile.id === selection.profile)!;
-      const state = blocked(primary)!;
-      return {
-        wait: `${role} profile ${primary.id} (${primary.harness}) is unavailable: ${state.reason}`,
-        ...(state.until === undefined ? {} : { retryAt: state.until }),
-      };
-    },
-    async setProfile(profile, expected) {
-      const next = await write(
-        (current) => ({
-          ...current,
-          profiles: [
-            ...current.profiles.filter((old) => old.id !== profile.id),
-            profileSchema.parse(profile),
-          ],
-        }),
-        expected,
-      );
-      cell.set(next);
-      return next;
-    },
-    async setRole(role, selection, expected) {
-      const next = await write(
-        (current) => ({
-          ...current,
-          roles: { ...current.roles, [role]: roleSchema.parse(selection) },
-        }),
-        expected,
-      );
-      cell.set(next);
-      return next;
     },
     async setAvailability(harness, state) {
-      const next = await write((current) => {
-        const unavailable = { ...current.unavailable };
-        if (state) unavailable[harness] = unavailableSchema.parse(state);
+      const next = await store.transaction(NAMESPACE, (tx) => {
+        const unavailable = { ...unavailableSchema.parse(tx.get(KEY) ?? {}) };
+        if (state) unavailable[harness] = state;
         else delete unavailable[harness];
-        return { ...current, unavailable };
+        tx.set(KEY, unavailable as Json);
+        return unavailable;
       });
       cell.set(next);
       return next;
@@ -148,27 +116,15 @@ export function profiles(options: {
     service,
     extension: {
       id: "nts-profiles",
-      requires: [options.state],
+      requires: [options.state, options.settings],
       provides: [provide(service, instance)],
       async start(context) {
         store = context.get(options.state);
-        const settings = await store.transaction(NAMESPACE, (tx) => {
-          const existing = tx.get(KEY);
-          if (existing !== undefined) return settingsSchema.parse(existing);
-          const fresh = validate({ ...options.initial, revision: 0, unavailable: {} });
-          tx.set(KEY, fresh as unknown as Json);
-          return fresh;
-        });
-        cell.set(settings);
+        settings = context.get(options.settings);
+        cell.set(
+          await store.transaction(NAMESPACE, (tx) => unavailableSchema.parse(tx.get(KEY) ?? {})),
+        );
       },
     },
-  };
-}
-
-/** The launch options a profile passes to its harness adapter. */
-export function launchOptions(profile: Profile): Json {
-  return {
-    ...(profile.model ? { model: profile.model } : {}),
-    ...(profile.effort ? { effort: profile.effort } : {}),
   };
 }

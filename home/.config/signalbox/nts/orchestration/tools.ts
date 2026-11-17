@@ -15,6 +15,8 @@ import type { AgentService, Mailbox } from "signalbox/ext/orchestration";
 import type { Issue } from "../shared/model.ts";
 import { toolInput } from "./agents.ts";
 import type { TaskRoute } from "./task.ts";
+import { profileId, profileLabel } from "./models.ts";
+import type { Settings, SettingsFile } from "./settings.ts";
 import type { TaskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
 import type { Priorities } from "./priorities.ts";
@@ -45,6 +47,29 @@ export interface Wiring {
   readonly issues: Capability<Readable<Issue[]>>;
   readonly decisions: Capability<UserDecisions>;
   readonly priorities: Capability<Priorities>;
+  readonly settings: Capability<SettingsFile>;
+}
+
+/** A task may name a worker model only when workers pick "coordinator", and only a listed one. */
+export function checkTaskModel(settings: Settings, model: string): void {
+  const workers = workerModels(settings);
+  if (workers.pick !== "coordinator")
+    throw new Error(
+      `Workers pick "${workers.pick}" (the owner's setting), so a task cannot name a model; leave model out`,
+    );
+  if (!workers.models.some((listed) => listed.id === model))
+    throw new Error(
+      `${model} is not one of the workers' models: ${workers.models.map((listed) => listed.id).join(", ")}`,
+    );
+}
+
+/** The workers' models as the coordinator sees them: how they are picked, and their ids. */
+export function workerModels(settings: Settings) {
+  const { pick, models } = settings.roles.worker;
+  return {
+    pick,
+    models: models.map((profile) => ({ id: profileId(profile), label: profileLabel(profile) })),
+  };
 }
 
 const ok = z.object({ ok: z.literal(true) });
@@ -258,30 +283,38 @@ export function coordinatorTools(wiring: Wiring) {
       agentTool({
         name: "assign_task",
         description:
-          "Start one fresh worker on an issue (key issue/<N>; a second attempt after a revert uses attempt 2).",
+          "Start one fresh worker on an issue (key issue/<N>; a second attempt after a revert uses attempt 2). " +
+          "When workers pick 'coordinator', model names one of the workers' models (see workerModels in your starting state, or the error) for this task: a harder task can take a stronger model, a mechanical one a cheaper one. Without it the first available is used.",
         input: toolInput(
           z.object({
             issue: z.number().int().positive(),
             instructions: z.string().default(""),
             attempt: z.number().int().min(1).default(1),
+            model: z.string().optional(),
           }),
         ),
         output: json,
         run: (input, context) =>
-          authorized(context, async () =>
-            toJson(
+          authorized(context, async () => {
+            if (input.model !== undefined)
+              checkTaskModel(context.get(wiring.settings).current(), input.model);
+            return toJson(
               await context.get(wiring.work.get()).submit(
                 assignmentRequest(wiring.route.get(), {
                   key:
                     input.attempt === 1
                       ? `issue/${input.issue}`
                       : `issue/${input.issue}/${input.attempt}`,
-                  input: { issue: input.issue, instructions: input.instructions },
+                  input: {
+                    issue: input.issue,
+                    instructions: input.instructions,
+                    ...(input.model === undefined ? {} : { model: input.model }),
+                  },
                 }),
                 { requestId: context.requestId, signal: context.signal },
               ),
-            ),
-          ),
+            );
+          }),
       }),
       agentTool({
         name: "decide_design",

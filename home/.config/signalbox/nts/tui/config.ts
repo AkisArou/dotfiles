@@ -11,6 +11,8 @@ export const terminalConfig = {
     args: ["--no-multi", "--no-print-query", "--no-expect", "--prompt", `${title}> `],
   }),
   git: { command: "lazygit" } satisfies TerminalCommand,
+  // Opens settings.json from the Agents tab's Settings file row.
+  editor: { command: process.env.VISUAL ?? process.env.EDITOR ?? "vi" } satisfies TerminalCommand,
   taskFacets: [
     { id: "area", label: "area", values: (issue) => [issue.area] },
     { id: "stream", label: "stream", values: (issue) => [issue.stream] },

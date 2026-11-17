@@ -28,6 +28,7 @@ import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import type { ManagedAgents } from "./agents.ts";
 import { profiles } from "./profiles.ts";
+import { settingsFile } from "./settings.ts";
 import { taskRoute } from "./task.ts";
 import { taskState } from "./task-model.ts";
 import { STALL } from "./stall.ts";
@@ -160,17 +161,24 @@ test("a task goes from tree to verified through design approval, review and land
   const fullCheck = keyOf("full-check", fullCheckCell);
   const state = sqliteWorkflowState({ path: join(directory, "state.sqlite") });
   const engine = openWorkflowSqlite({ path: join(directory, "engine.sqlite") });
-  const store = profiles({
-    state: state.state,
-    initial: {
-      profiles: [{ id: "p", label: "p", harness: "claude", model: "m", effort: "high" }],
-      roles: {
-        coordinator: { profile: "p" },
-        worker: { profile: "p" },
-        reviewer: { profile: "p" },
-      },
-    },
-  });
+  await writeFile(
+    join(directory, "settings.json"),
+    JSON.stringify({
+      workerSlots: 2,
+      maxRounds: 4,
+      roles: Object.fromEntries(
+        ["coordinator", "worker", "reviewer"].map((role) => [
+          role,
+          {
+            pick: "first",
+            models: [{ harness: "claude", model: "claude-opus-5-5", effort: "high" }],
+          },
+        ]),
+      ),
+    }),
+  );
+  const file = settingsFile({ path: join(directory, "settings.json") });
+  const store = profiles({ state: state.state, settings: file.service });
   const tools = { id: "none", tools: [] };
   const route = taskRoute({
     root,
@@ -178,6 +186,7 @@ test("a task goes from tree to verified through design approval, review and land
     landing: landing.key,
     fullCheck: fullCheck.key,
     profiles: store.service,
+    assignments: () => work.assignments,
     agents,
     workerTools: tools,
     reviewerTools: tools,
@@ -201,6 +210,7 @@ test("a task goes from tree to verified through design approval, review and land
         issues.extension,
         landing.extension,
         fullCheck.extension,
+        file.extension,
         store.extension,
         ...agents.extensions,
         work.extension,

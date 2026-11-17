@@ -39,18 +39,36 @@ export const startTerminal = operation<{ program: string }, { id: string }>("nts
 // Orchestration: browser-safe views of host state, and the owner operations on it.
 export type Harness = "claude" | "codex";
 export type AgentRole = "coordinator" | "worker" | "reviewer";
+/** One harness, model and effort; id is its stable name (claude/claude-opus-5-5/high). */
 export type ProfileView = {
   id: string;
   label: string;
   harness: Harness;
   model?: string;
-  effort?: string;
+  effort: string;
 };
-export type ProfileSettingsView = {
-  revision: number;
-  profiles: ProfileView[];
-  roles: Record<AgentRole, { profile: string; fallback?: string }>;
+/** How a launch chooses among a role's models. */
+export type Pick = "first" | "spread" | "coordinator";
+export const pickLabels: Record<Pick, string> = {
+  first: "the first available, in order",
+  spread: "spread across them (fewest live agents first)",
+  coordinator: "the coordinator names one per task (else the first available)",
+};
+/** The agent settings in force, from settings.json, with the host's pause and availability. */
+export type SettingsView = {
+  /** settings.json, the only source of worker slots, rounds and the roles' models. */
+  path: string;
+  /** The file's version; a change names the version it read. */
+  version: string;
+  /** Why the file on disk is not in force (the last good settings are), or null. */
+  error: string | null;
+  workerSlots: number;
+  maxRounds: number;
+  roles: Record<AgentRole, { pick: Pick; models: ProfileView[] }>;
+  paused: { reason: string } | null;
   unavailable: Partial<Record<Harness, { reason: string; until?: number }>>;
+  /** Every profile the harnesses offer. */
+  catalog: ProfileView[];
 };
 export type AssignmentView = {
   id: string;
@@ -91,43 +109,38 @@ export type UserDecisionView = {
   answer: string | null;
   requestedAt: number;
 };
-/** How the project runs now: worker slots, rounds, and whether new tasks are paused. */
-export type OperationsView = {
-  revision: number;
-  workerSlots: number;
-  maxRounds: number;
-  paused: { reason: string } | null;
-};
-export const operationsSettings = source<OperationsView>("nts.operations");
-export const setOperations = operation<
-  { workerSlots?: number; maxRounds?: number; revision?: number },
-  { revision: number }
->("nts.operations.set");
+export const settings = source<SettingsView>("nts.settings");
+/** Changes settings.json through the host; role models are profile ids. */
+export const setSettings = operation<
+  {
+    workerSlots?: number;
+    maxRounds?: number;
+    roles?: Partial<Record<AgentRole, { pick?: Pick; models?: string[] }>>;
+    version?: string;
+  },
+  { version: string }
+>("nts.settings.set");
 /** Queued tasks wait and none is admitted; admitted tasks carry on. */
 export const pauseTasks = operation<{ reason: string }, { ok: true }>("nts.tasks.pause");
 export const resumeTasks = operation<Record<string, never>, { ok: true }>("nts.tasks.resume");
-/** One line for the TUI's bottom bar and sbn status; a pause comes first, so truncation keeps it. */
-export function operationsLine(o: OperationsView): string {
-  return `${o.paused ? `PAUSED: ${o.paused.reason} · ` : ""}workers ${o.workerSlots} · rounds ${o.maxRounds}`;
+/** One line for the TUI's bottom bar and sbn status; a pause and a file error come first, so truncation keeps them. */
+export function settingsLine(s: SettingsView): string {
+  return `${s.paused ? `PAUSED: ${s.paused.reason} · ` : ""}${s.error ? "settings.json has an error · " : ""}workers ${s.workerSlots} · rounds ${s.maxRounds}`;
 }
-export const profileSettings = source<ProfileSettingsView>("nts.profiles");
+/** A role's models in order, joined for one line. */
+export function modelsLine(role: { models: ProfileView[] }): string {
+  return role.models.map((model) => model.label).join(" → ");
+}
 export const assignments = source<AssignmentView[]>("nts.assignments");
 export const userDecisions = source<UserDecisionView[]>("nts.user-decisions");
-export const setProfile = operation<
-  { profile: ProfileView; revision: number },
-  { revision: number }
->("nts.profiles.set");
-export const setRole = operation<
-  { role: AgentRole; profile: string; fallback?: string; revision: number },
-  { revision: number }
->("nts.roles.set");
 export const setAvailability = operation<
   { harness: Harness; unavailable: { reason: string; until?: number } | null },
-  { revision: number }
+  { ok: true }
 >("nts.harness.availability");
-export const assignTask = operation<{ issue: number; instructions: string }, { id: string }>(
-  "nts.tasks.assign",
-);
+export const assignTask = operation<
+  { issue: number; instructions: string; model?: string },
+  { id: string }
+>("nts.tasks.assign");
 export const cancelAssignment = operation<{ assignment: string; reason: string }, { ok: true }>(
   "nts.assignments.cancel",
 );

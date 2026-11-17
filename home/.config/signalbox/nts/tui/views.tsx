@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, Issue } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays } from "../shared/model.ts";
+import { assignmentPhase, assignmentSays, modelsLine } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
@@ -70,10 +70,10 @@ export function NowView({ project }: { project: Project }) {
               color={a.error || a.escalation || a.stalled || a.help ? c.warning : c.text}
             >{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
           ))}
-        {project.data.profiles && (
+        {project.data.settings && (
           <Line
             color={c.muted}
-          >{`workers ${project.data.profiles.roles.worker.profile} · reviewers ${project.data.profiles.roles.reviewer.profile} · coordinator ${project.data.profiles.roles.coordinator.profile}`}</Line>
+          >{`workers ${modelsLine(project.data.settings.roles.worker)} · reviewers ${modelsLine(project.data.settings.roles.reviewer)} · coordinator ${modelsLine(project.data.settings.roles.coordinator)}`}</Line>
         )}
         {project.data.decisions
           .filter((d) => d.status === "pending")

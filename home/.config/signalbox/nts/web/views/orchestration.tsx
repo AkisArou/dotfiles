@@ -1,10 +1,10 @@
-// The orchestration controls: how many tasks hold a worker, the rounds before
-// escalation and the pause, which profile each role launches with, which
-// harnesses are available, the task assignments, and starting one by hand.
+// The orchestration controls: settings.json (the only source of worker slots,
+// rounds and each role's models, and how one is picked) with the host's pause
+// and harness availability, the task assignments, and starting one by hand.
 import { useState } from "react";
 import type { Project } from "../../shared/use-project.ts";
-import type { AgentRole, Harness } from "../../shared/model.ts";
-import { assignmentPhase, assignmentSays } from "../../shared/model.ts";
+import type { AgentRole, Harness, Pick } from "../../shared/model.ts";
+import { assignmentPhase, assignmentSays, pickLabels } from "../../shared/model.ts";
 import { Action, Badge, Empty, Section } from "../components.tsx";
 
 const roleNames: Record<AgentRole, string> = {
@@ -12,136 +12,175 @@ const roleNames: Record<AgentRole, string> = {
   worker: "Workers",
   reviewer: "Reviewers",
 };
+/** The coordinator runs one at a time, so it only takes the first available. */
+const picksFor: Record<AgentRole, Pick[]> = {
+  coordinator: ["first"],
+  worker: ["first", "spread", "coordinator"],
+  reviewer: ["first", "spread"],
+};
+const range = (from: number, to: number) =>
+  Array.from({ length: to - from + 1 }, (_, index) => from + index);
 
 export function Orchestration({ project }: { project: Project }) {
-  const settings = project.data.profiles;
+  const settings = project.data.settings;
   const [issue, setIssue] = useState("");
   const [instructions, setInstructions] = useState("");
-  if (!settings) return <Empty>Orchestration settings are loading.</Empty>;
-  const change = (role: AgentRole, field: "profile" | "fallback", value: string) => {
-    const current = settings.roles[role];
-    const next = { ...current, [field]: value || undefined };
-    return project.perform(() =>
-      project.commands.setRole.run({
-        role,
-        profile: next.profile,
-        ...(next.fallback ? { fallback: next.fallback } : {}),
-        revision: settings.revision,
-      }),
-    );
-  };
-  const running = project.data.operations;
-  const range = (from: number, to: number) =>
-    Array.from({ length: to - from + 1 }, (_, index) => from + index);
+  const [model, setModel] = useState("");
+  if (!settings) return <Empty>Settings are loading.</Empty>;
+  const write = (change: Parameters<typeof project.commands.setSettings.run>[0]) =>
+    project.commands.setSettings.run({ ...change, version: settings.version });
+  const models = (role: AgentRole) => settings.roles[role].models.map((listed) => listed.id);
+  const workersNamed = settings.roles.worker.pick === "coordinator";
   return (
     <div className="orchestration">
-      {running && (
-        <Section title="Running" aside={<span className="subtle">APPLIES NOW</span>}>
-          <div className="harnesses">
-            <label>
-              Worker slots{" "}
-              <select
-                value={running.workerSlots}
-                disabled={project.busy}
-                onChange={(event) =>
-                  void project.perform(() =>
-                    project.commands.setOperations.run({
-                      workerSlots: Number(event.target.value),
-                      revision: running.revision,
-                    }),
-                  )
-                }
-              >
-                {range(0, 8).map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Rounds before escalation{" "}
-              <select
-                value={running.maxRounds}
-                disabled={project.busy}
-                onChange={(event) =>
-                  void project.perform(() =>
-                    project.commands.setOperations.run({
-                      maxRounds: Number(event.target.value),
-                      revision: running.revision,
-                    }),
-                  )
-                }
-              >
-                {range(1, 10).map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {running.paused ? (
-              <>
-                <Badge state="held">{`Paused: ${running.paused.reason}`}</Badge>
-                <Action project={project} onClick={() => project.commands.resumeTasks.run({})}>
-                  Resume new tasks
-                </Action>
-              </>
-            ) : (
-              <Action
-                project={project}
-                onClick={() =>
-                  project.commands.pauseTasks.run({ reason: "paused from the web view" })
-                }
-              >
-                Pause new tasks
+      <Section title="Running" aside={<span className="subtle">{settings.path}</span>}>
+        {settings.error && (
+          <Badge state="red">{`settings.json is not in force (the last good settings are): ${settings.error}`}</Badge>
+        )}
+        <div className="harnesses">
+          <label>
+            Worker slots{" "}
+            <select
+              value={settings.workerSlots}
+              disabled={project.busy}
+              onChange={(event) =>
+                void project.perform(() => write({ workerSlots: Number(event.target.value) }))
+              }
+            >
+              {range(0, 8).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Rounds before escalation{" "}
+            <select
+              value={settings.maxRounds}
+              disabled={project.busy}
+              onChange={(event) =>
+                void project.perform(() => write({ maxRounds: Number(event.target.value) }))
+              }
+            >
+              {range(1, 10).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </label>
+          {settings.paused ? (
+            <>
+              <Badge state="held">{`Paused: ${settings.paused.reason}`}</Badge>
+              <Action project={project} onClick={() => project.commands.resumeTasks.run({})}>
+                Resume new tasks
               </Action>
-            )}
-          </div>
-        </Section>
-      )}
-      <Section title="Profiles" aside={<span className="subtle">APPLIES TO THE NEXT LAUNCH</span>}>
+            </>
+          ) : (
+            <Action
+              project={project}
+              onClick={() =>
+                project.commands.pauseTasks.run({ reason: "paused from the web view" })
+              }
+            >
+              Pause new tasks
+            </Action>
+          )}
+        </div>
+      </Section>
+      <Section title="Models" aside={<span className="subtle">APPLIES TO THE NEXT LAUNCH</span>}>
         <table className="table">
           <thead>
             <tr>
               <th>Role</th>
-              <th>Profile</th>
-              <th>Fallback</th>
+              <th>Picks</th>
+              <th>Models, in order</th>
+              <th>Add</th>
             </tr>
           </thead>
           <tbody>
-            {(Object.keys(roleNames) as AgentRole[]).map((role) => (
-              <tr key={role}>
-                <td>{roleNames[role]}</td>
-                <td>
-                  <select
-                    value={settings.roles[role].profile}
-                    disabled={project.busy}
-                    onChange={(event) => void change(role, "profile", event.target.value)}
-                  >
-                    {settings.profiles.map((profile) => (
-                      <option key={profile.id} value={profile.id}>
-                        {profile.label}
-                      </option>
+            {(Object.keys(roleNames) as AgentRole[]).map((role) => {
+              const { pick, models: listed } = settings.roles[role];
+              const ids = models(role);
+              return (
+                <tr key={role}>
+                  <td>{roleNames[role]}</td>
+                  <td>
+                    <select
+                      value={pick}
+                      disabled={project.busy || picksFor[role].length === 1}
+                      onChange={(event) =>
+                        void project.perform(() =>
+                          write({ roles: { [role]: { pick: event.target.value as Pick } } }),
+                        )
+                      }
+                    >
+                      {picksFor[role].map((way) => (
+                        <option key={way} value={way}>
+                          {pickLabels[way]}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    {listed.map((entry, index) => (
+                      <div key={entry.id} className="harness">
+                        <span>{`${index + 1}. ${entry.label}`}</span>
+                        {index > 0 && (
+                          <Action
+                            project={project}
+                            onClick={() =>
+                              write({
+                                roles: {
+                                  [role]: {
+                                    models: [entry.id, ...ids.filter((id) => id !== entry.id)],
+                                  },
+                                },
+                              })
+                            }
+                          >
+                            First
+                          </Action>
+                        )}
+                        {listed.length > 1 && (
+                          <Action
+                            project={project}
+                            onClick={() =>
+                              write({
+                                roles: { [role]: { models: ids.filter((id) => id !== entry.id) } },
+                              })
+                            }
+                          >
+                            Remove
+                          </Action>
+                        )}
+                      </div>
                     ))}
-                  </select>
-                </td>
-                <td>
-                  <select
-                    value={settings.roles[role].fallback ?? ""}
-                    disabled={project.busy}
-                    onChange={(event) => void change(role, "fallback", event.target.value)}
-                  >
-                    <option value="">None (wait)</option>
-                    {settings.profiles.map((profile) => (
-                      <option key={profile.id} value={profile.id}>
-                        {profile.label}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td>
+                    <select
+                      value=""
+                      disabled={project.busy}
+                      onChange={(event) =>
+                        void project.perform(() =>
+                          write({ roles: { [role]: { models: [...ids, event.target.value] } } }),
+                        )
+                      }
+                    >
+                      <option value="">Add a model…</option>
+                      {settings.catalog
+                        .filter((entry) => !ids.includes(entry.id))
+                        .map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.label}
+                          </option>
+                        ))}
+                    </select>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         <div className="harnesses">
@@ -182,14 +221,29 @@ export function Orchestration({ project }: { project: Project }) {
             value={instructions}
             onChange={(event) => setInstructions(event.target.value)}
           />
+          {workersNamed && (
+            <select value={model} onChange={(event) => setModel(event.target.value)}>
+              <option value="">First available model</option>
+              {settings.roles.worker.models.map((entry) => (
+                <option key={entry.id} value={entry.id}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+          )}
           <Action
             project={project}
             primary
             disabled={!issue}
             onClick={async () => {
-              await project.commands.assignTask.run({ issue: Number(issue), instructions });
+              await project.commands.assignTask.run({
+                issue: Number(issue),
+                instructions,
+                ...(workersNamed && model ? { model } : {}),
+              });
               setIssue("");
               setInstructions("");
+              setModel("");
             }}
           >
             Assign
