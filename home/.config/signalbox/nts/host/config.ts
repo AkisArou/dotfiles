@@ -5,7 +5,7 @@ import { z } from "zod";
 import { Cell, combineReadables, defineConfig, polledSource } from "signalbox/core";
 import type { Readable } from "signalbox/core";
 import type { Json, SourceRef } from "signalbox/core/remote";
-import { exposeSource, exposeOperation, webListener } from "signalbox/host";
+import { exposeOperation, exposeSource, staticListener, webListener } from "signalbox/host";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import * as refs from "../shared/model.ts";
 import type { NtsConfig } from "../config.ts";
@@ -19,7 +19,8 @@ import type { TerminalTarget } from "signalbox/ext/terminals/index";
 
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
 // of workspaces and landing; coordinator sessions stay native.
-export function createNtsProject(settings: NtsConfig) {
+/** The NTS host; `web` is the built browser UI it serves on the web port. */
+export function createNtsProject(settings: NtsConfig, web: { readonly directory: string }) {
   const state = sqliteWorkflowState({ path: join(settings.state, "runtime.sqlite") });
   let resolveManaged: ((id: string) => Promise<TerminalTarget | undefined>) | undefined;
   const native = nativeTerminals({
@@ -125,6 +126,7 @@ export function createNtsProject(settings: NtsConfig) {
         fullCheck: orchestration.fullCheck,
       }),
       webListener({ hostname: "127.0.0.1", port: settings.apiPort }),
+      staticListener({ hostname: "127.0.0.1", port: settings.webPort, directory: web.directory }),
     ],
   });
 }

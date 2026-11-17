@@ -46,19 +46,27 @@ test("NTS application reads GitHub and plan, exposes real failures and no simula
     );
     await chmod(join(bin, "gh"), 0o755);
     process.env.PATH = `${bin}:${previousPath}`;
-    const socket = createServer();
-    await new Promise<void>((resolve) => socket.listen(0, "127.0.0.1", resolve));
-    const port = (socket.address() as import("node:net").AddressInfo).port;
-    await new Promise<void>((resolve) => socket.close(() => resolve()));
+    // Free ports of the test's own, never the running host's.
+    const freePort = async () => {
+      const socket = createServer();
+      await new Promise<void>((resolve) => socket.listen(0, "127.0.0.1", resolve));
+      const free = (socket.address() as import("node:net").AddressInfo).port;
+      await new Promise<void>((resolve) => socket.close(() => resolve()));
+      return free;
+    };
+    const port = await freePort();
     const settings = {
       ...ntsConfig,
       root,
       state: join(directory, "state"),
       apiPort: port,
+      webPort: await freePort(),
       discoverTerminals: false,
       issueIntervalMs: 60_000,
     };
-    host = await startHost(createNtsProject(settings), { stateDirectory: settings.state });
+    host = await startHost(createNtsProject(settings, { directory: join(directory, "web") }), {
+      stateDirectory: settings.state,
+    });
     client = await connectClient({ url: `ws://127.0.0.1:${port}/rpc` });
     const connected = client;
     const issues = await until(
