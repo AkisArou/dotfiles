@@ -235,7 +235,7 @@ export function Shell() {
             }
           >
             <div className={narrow ? "frame narrow" : "frame"}>
-              <div className="view" ref={viewScroller}>
+              <div className="view" ref={viewScroller} data-scroll-restoration-id="view">
                 <div className="view-body">
                   {data.overview && pushPrompt.show && push.ready && (
                     <PushPrompt push={push} onDismiss={pushPrompt.dismiss} />

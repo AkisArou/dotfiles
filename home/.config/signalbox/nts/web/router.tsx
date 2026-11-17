@@ -85,7 +85,17 @@ const routeTree = rootRoute.addChildren([
   view("/health", (project) => <NtsHealth project={project} />),
 ]);
 
-export const router = createRouter({ routeTree, defaultPreload: false });
+// Each view keeps its own scroll: the router records the view's scroller (app.tsx,
+// data-scroll-restoration-id="view") per path, restores it on returning to that view
+// (a tab, or Back), and starts a view not seen yet at its top. An issue or an agent
+// opened over a view changes only the search, so the view stays where it was.
+export const router = createRouter({
+  routeTree,
+  defaultPreload: false,
+  scrollRestoration: true,
+  getScrollRestorationKey: (location) => location.pathname,
+  scrollToTopSelectors: ['[data-scroll-restoration-id="view"]'],
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
