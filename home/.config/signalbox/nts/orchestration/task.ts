@@ -21,7 +21,10 @@ export function taskRoute(options: Omit<TaskOptions, "clock"> & { readonly clock
     // visibly instead of being reinterpreted (keep the old revision until they drain).
     revision: "1",
     input: taskInput,
-    concurrency: 4,
+    // No route concurrency: the worker slots bound the work (a session and its pool
+    // tree), and the service hands a freed slot out by the shares. A route bound
+    // let tasks that only waited for a worker hold places ahead of other groups,
+    // so a freed slot could only go to the group that queued first.
     resources: (input, state) => [
       { resource: `issue/${input.issue}`, units: 1 },
       // A worker slot is held while an agent works for the task, and the card's
