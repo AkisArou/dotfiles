@@ -1,6 +1,13 @@
 // The NTS project's own verbs for sbn: read and steer tasks by issue number
 // through the host's operations, as the browser and TUI do.
-//   sbn status                      active tasks: phase, time in it, what each waits for
+//   sbn status                      how it runs (workers, rounds, pause), then active tasks
+//   sbn settings                    worker slots, rounds, pause, role profiles, harnesses
+//   sbn workers <n>                 tasks holding a worker at once (live, no restart)
+//   sbn rounds <n>                  returns to build before a task escalates (live)
+//   sbn pause <reason...>           admit no new task; admitted tasks carry on
+//   sbn resume                      admit tasks again
+//   sbn role <role> <profile> [fallback]
+//                                   which profile the coordinator, workers or reviewers use
 //   sbn show <issue>                one task's design, summary and latest instruction
 //   sbn assign <issue> [notes...]   start a task
 //   sbn approve <issue> [notes...]  approve the design
@@ -21,7 +28,8 @@ import { randomUUID } from "node:crypto";
 import { connectClient } from "signalbox/host";
 import type { HostClient } from "signalbox/host";
 import type { AssignmentView } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays } from "../shared/model.ts";
+import type { OperationsView, ProfileSettingsView } from "../shared/model.ts";
+import { assignmentPhase, assignmentSays, operationsLine } from "../shared/model.ts";
 
 const project = JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as {
   apiPort: number;
@@ -30,6 +38,12 @@ const url = process.env.SIGNALBOX_API_URL ?? `ws://127.0.0.1:${project.apiPort}/
 
 const VERBS = [
   "status",
+  "settings",
+  "workers",
+  "rounds",
+  "pause",
+  "resume",
+  "role",
   "show",
   "assign",
   "prioritize",
@@ -45,6 +59,13 @@ const VERBS = [
   "end-agent",
 ] as const;
 type Verb = (typeof VERBS)[number];
+
+async function read<T>(client: HostClient, ref: string): Promise<T> {
+  const reading = await client.request<{ status: string; value?: T }>({ type: "read", ref });
+  if (reading.status !== "ready" || reading.value === undefined)
+    throw new Error(`${ref} is ${reading.status}`);
+  return reading.value;
+}
 
 async function assignments(client: HostClient): Promise<AssignmentView[]> {
   const reading = await client.request<{ status: string; value?: AssignmentView[] }>({
@@ -72,7 +93,58 @@ const call = (client: HostClient, ref: string, input: object) =>
 async function main(verb: Verb, args: string[]): Promise<void> {
   const client = await connectClient({ url });
   try {
+    const count = (what: string) => {
+      const value = Number(args[0]);
+      if (args.length !== 1 || !Number.isInteger(value)) throw new Error(`${verb} needs ${what}`);
+      return value;
+    };
+    if (verb === "workers" || verb === "rounds") {
+      const value = count("a whole number");
+      await call(client, "nts.operations.set", {
+        [verb === "workers" ? "workerSlots" : "maxRounds"]: value,
+      });
+      return console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+    }
+    if (verb === "pause") {
+      const reason = args.join(" ").trim();
+      if (!reason) throw new Error("pause needs a reason");
+      await call(client, "nts.tasks.pause", { reason });
+      return console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+    }
+    if (verb === "resume") {
+      await call(client, "nts.tasks.resume", {});
+      return console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
+    }
+    if (verb === "role") {
+      const [role, profile, fallback, ...rest] = args;
+      if (!role || !profile || rest.length)
+        throw new Error("role needs <coordinator|worker|reviewer> <profile> [fallback]");
+      const { revision } = await read<ProfileSettingsView>(client, "nts.profiles");
+      await call(client, "nts.roles.set", {
+        role,
+        profile,
+        ...(fallback ? { fallback } : {}),
+        revision,
+      });
+      verb = "settings";
+    }
+    if (verb === "settings") {
+      const operations = await read<OperationsView>(client, "nts.operations");
+      const profiles = await read<ProfileSettingsView>(client, "nts.profiles");
+      console.log(operationsLine(operations));
+      for (const [role, choice] of Object.entries(profiles.roles))
+        console.log(
+          `${role}: ${choice.profile}${choice.fallback ? ` (fallback ${choice.fallback})` : ""}`,
+        );
+      console.log("profiles:");
+      for (const p of profiles.profiles)
+        console.log(
+          `  ${p.id}\t${p.label}${profiles.unavailable[p.harness] ? ` (unavailable: ${profiles.unavailable[p.harness]!.reason})` : ""}`,
+        );
+      return;
+    }
     if (verb === "status") {
+      console.log(operationsLine(await read<OperationsView>(client, "nts.operations")));
       const live = (await assignments(client)).filter(
         (a) => a.status === "active" || a.status === "queued",
       );

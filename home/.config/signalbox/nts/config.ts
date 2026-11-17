@@ -77,8 +77,9 @@ export const ntsConfig: NtsConfig = {
       process.env.SIGNALBOX_NTS_COORDINATOR === undefined
         ? project.coordinator
         : process.env.SIGNALBOX_NTS_COORDINATOR === "1",
-    workerSlots: 2,
-    maxRounds: 4,
+    // Initial values for a fresh state. Later changes live in the host's state
+    // (sbn workers N, sbn rounds N) and need no restart.
+    operations: { workerSlots: 2, maxRounds: 4 },
     // Initial profiles for a fresh state. Later changes live in the host's state
     // (Agents view or the profiles operations) and need no restart.
     profiles: {

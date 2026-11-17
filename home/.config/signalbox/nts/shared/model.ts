@@ -91,6 +91,25 @@ export type UserDecisionView = {
   answer: string | null;
   requestedAt: number;
 };
+/** How the project runs now: worker slots, rounds, and whether new tasks are paused. */
+export type OperationsView = {
+  revision: number;
+  workerSlots: number;
+  maxRounds: number;
+  paused: { reason: string } | null;
+};
+export const operationsSettings = source<OperationsView>("nts.operations");
+export const setOperations = operation<
+  { workerSlots?: number; maxRounds?: number; revision?: number },
+  { revision: number }
+>("nts.operations.set");
+/** Queued tasks wait and none is admitted; admitted tasks carry on. */
+export const pauseTasks = operation<{ reason: string }, { ok: true }>("nts.tasks.pause");
+export const resumeTasks = operation<Record<string, never>, { ok: true }>("nts.tasks.resume");
+/** One line for the TUI and sbn status. */
+export function operationsLine(o: OperationsView): string {
+  return `workers ${o.workerSlots} · rounds ${o.maxRounds}${o.paused ? ` · PAUSED: ${o.paused.reason}` : ""}`;
+}
 export const profileSettings = source<ProfileSettingsView>("nts.profiles");
 export const assignments = source<AssignmentView[]>("nts.assignments");
 export const userDecisions = source<UserDecisionView[]>("nts.user-decisions");

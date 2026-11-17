@@ -172,6 +172,7 @@ export function coordinatorInstructions(): string[] {
       "- A stalled agent (idle through its nudges) or a phase past its budget: read the task, then message the worker, or cancel.",
       "- A held landing: read its logs. If the change caused it, rework it with the cause; if the change is innocent (a flake elsewhere), let the worker show that, then file the flake as its own task and requeue through rework.",
       "- A sign-off: a reviewed change to compiler/, runtime/c/, tooling/gate/ or tooling/landing/ waits for you. Read its diff and proof, then sign_off: accept queues it, refuse sends it back with what must change.",
+      "- The owner sets how many tasks hold a worker and may pause new tasks; a queued task then waits with that reason. Leave both as they are: ask the user if they block something urgent.",
       "- A refused landing goes back to the worker by itself; a landed task verifies and retires by itself.",
       "A defect found along the way (a flake, a regression of a closed issue, a slow tool) becomes its own task: node tooling/tasks/new.ts with its evidence by path, then assign it. Never widen the current task to absorb it.",
       "The user decides deletions of shared state, product direction, spending and outward pull requests: use ask_user, never act on them.",

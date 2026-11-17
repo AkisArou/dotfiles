@@ -103,8 +103,7 @@ test("the coordinator starts with its brief and receives each event once through
     agents: () => agents,
     settings: {
       coordinator: true,
-      workerSlots: 2,
-      maxRounds: 4,
+      operations: { workerSlots: 2, maxRounds: 4 },
       profiles: {
         profiles: [{ id: "p", label: "p", harness: "claude" }],
         roles: {

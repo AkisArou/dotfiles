@@ -37,8 +37,8 @@ export interface TaskOptions {
   readonly agents: ManagedAgents;
   readonly workerTools: AgentToolset;
   readonly reviewerTools: AgentToolset;
-  /** Returns to build before the task escalates instead of looping. */
-  readonly maxRounds: number;
+  /** Returns to build before the task escalates instead of looping; read when a round ends. */
+  readonly maxRounds: () => number;
   /** The clock for phase times, progress and stalls; tests advance their own. */
   readonly clock: () => number;
 }
@@ -169,7 +169,7 @@ async function returnToBuild(
   patch: Partial<TaskState> = {},
 ): Promise<Step> {
   const rounds = t.state.rounds + 1;
-  if (rounds > t.options.maxRounds)
+  if (rounds > t.options.maxRounds())
     return escalate(t, `Escalated after ${rounds} rounds: ${findings.why}`, {
       rounds,
       note: findings.note,

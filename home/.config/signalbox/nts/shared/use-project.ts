@@ -21,9 +21,13 @@ export function useProject() {
     plan = useSource(refs.plan);
   const terminalPrograms = useSource(refs.terminalPrograms);
   const startTerminal = useCommand(refs.startTerminal);
+  const operations = useSource(refs.operationsSettings);
   const profiles = useSource(refs.profileSettings),
     assignments = useSource(refs.assignments),
     decisions = useSource(refs.userDecisions);
+  const setOperations = useCommand(refs.setOperations),
+    pauseTasks = useCommand(refs.pauseTasks),
+    resumeTasks = useCommand(refs.resumeTasks);
   const setRole = useCommand(refs.setRole),
     setAvailability = useCommand(refs.setAvailability),
     assignTask = useCommand(refs.assignTask),
@@ -56,11 +60,15 @@ export function useProject() {
       agents: current(agents) ?? [],
       plan: current(plan),
       profiles: current(profiles),
+      operations: current(operations),
       assignments: current(assignments) ?? [],
       decisions: current(decisions) ?? [],
     },
     commands: {
       startTerminal,
+      setOperations,
+      pauseTasks,
+      resumeTasks,
       setRole,
       setAvailability,
       assignTask,
@@ -72,6 +80,9 @@ export function useProject() {
     dismissError: () => setError(undefined),
     busy:
       startTerminal.pending ||
+      setOperations.pending ||
+      pauseTasks.pending ||
+      resumeTasks.pending ||
       setRole.pending ||
       setAvailability.pending ||
       assignTask.pending ||

@@ -1,4 +1,5 @@
-// The orchestration controls: which profile each role launches with, which
+// The orchestration controls: how many tasks hold a worker, the rounds before
+// escalation and the pause, which profile each role launches with, which
 // harnesses are available, the task assignments, and starting one by hand.
 import { useState } from "react";
 import type { Project } from "../../shared/use-project.ts";
@@ -29,8 +30,76 @@ export function Orchestration({ project }: { project: Project }) {
       }),
     );
   };
+  const running = project.data.operations;
+  const range = (from: number, to: number) =>
+    Array.from({ length: to - from + 1 }, (_, index) => from + index);
   return (
     <div className="orchestration">
+      {running && (
+        <Section title="Running" aside={<span className="subtle">APPLIES NOW</span>}>
+          <div className="harnesses">
+            <label>
+              Worker slots{" "}
+              <select
+                value={running.workerSlots}
+                disabled={project.busy}
+                onChange={(event) =>
+                  void project.perform(() =>
+                    project.commands.setOperations.run({
+                      workerSlots: Number(event.target.value),
+                      revision: running.revision,
+                    }),
+                  )
+                }
+              >
+                {range(0, 8).map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Rounds before escalation{" "}
+              <select
+                value={running.maxRounds}
+                disabled={project.busy}
+                onChange={(event) =>
+                  void project.perform(() =>
+                    project.commands.setOperations.run({
+                      maxRounds: Number(event.target.value),
+                      revision: running.revision,
+                    }),
+                  )
+                }
+              >
+                {range(1, 10).map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {running.paused ? (
+              <>
+                <Badge state="held">{`Paused: ${running.paused.reason}`}</Badge>
+                <Action project={project} onClick={() => project.commands.resumeTasks.run({})}>
+                  Resume new tasks
+                </Action>
+              </>
+            ) : (
+              <Action
+                project={project}
+                onClick={() =>
+                  project.commands.pauseTasks.run({ reason: "paused from the web view" })
+                }
+              >
+                Pause new tasks
+              </Action>
+            )}
+          </div>
+        </Section>
+      )}
       <Section title="Profiles" aside={<span className="subtle">APPLIES TO THE NEXT LAUNCH</span>}>
         <table className="table">
           <thead>

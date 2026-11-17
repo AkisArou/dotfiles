@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, Issue } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays } from "../shared/model.ts";
+import { assignmentPhase, assignmentSays, operationsLine } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
@@ -66,6 +66,11 @@ export function NowView({ project }: { project: Project }) {
               color={a.error || a.escalation || a.stalled || a.help ? c.warning : c.text}
             >{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
           ))}
+        {project.data.operations && (
+          <Line color={project.data.operations.paused ? c.warning : c.muted}>
+            {operationsLine(project.data.operations)}
+          </Line>
+        )}
         {project.data.profiles && (
           <Line
             color={c.muted}

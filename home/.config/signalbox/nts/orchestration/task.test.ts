@@ -181,7 +181,7 @@ test("a task goes from tree to verified through design approval, review and land
     agents,
     workerTools: tools,
     reviewerTools: tools,
-    maxRounds: 4,
+    maxRounds: () => 4,
     clock: () => now,
   });
   const work = assignmentService({

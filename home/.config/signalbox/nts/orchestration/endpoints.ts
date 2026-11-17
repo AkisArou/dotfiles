@@ -1,7 +1,7 @@
 // The owner's endpoints for orchestration: what the UI shows and what the user
 // can change. The gate in host/config.ts decides who may call them.
 import { z } from "zod";
-import { Cell, mapReadable } from "signalbox/core";
+import { Cell, combineReadables, latestValue, mapReadable } from "signalbox/core";
 import type { Extension } from "signalbox/core";
 import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments";
@@ -13,6 +13,7 @@ import { harnesses, profileSchema, roles } from "./profiles.ts";
 import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
+import { operationValues } from "./operations.ts";
 
 type Orchestration = ReturnType<typeof ntsOrchestration>;
 
@@ -65,8 +66,56 @@ export function managedAgentViews(instances: readonly AgentInstance[]): refs.Age
 }
 
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {
-  const { profiles, work, assignments, decisions, route } = orchestration;
+  const { profiles, work, assignments, decisions, route, operations, status } = orchestration;
   return [
+    exposeSource({
+      ref: refs.operationsSettings,
+      requires: [operations, status],
+      output: z.custom<refs.OperationsView>(),
+      resolve: (context) =>
+        combineReadables(
+          [context.get(operations).settings, context.get(status)],
+          (settings, admission): refs.OperationsView => ({
+            ...settings,
+            paused: admission.paused ? { reason: admission.reason ?? "paused" } : null,
+          }),
+        ),
+    }),
+    exposeOperation({
+      ref: refs.setOperations,
+      requires: [operations, work],
+      input: operationValues.partial().extend({ revision: z.number().int().optional() }),
+      output: z.object({ revision: z.number() }),
+      run: async ({ revision, ...change }, context) => {
+        const store = context.get(operations);
+        const before = latestValue(store.settings)?.workerSlots;
+        const after = await store.set(change, revision);
+        // Waiting tasks sleep until a release; a raised count must wake them.
+        if (before === undefined || after.workerSlots > before)
+          await context.get(work).capacityChanged(["worker"]);
+        return { revision: after.revision };
+      },
+    }),
+    exposeOperation({
+      ref: refs.pauseTasks,
+      requires: [work],
+      input: z.object({ reason: z.string().min(1) }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        await context.get(work).pauseNewAssignments(input.reason);
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
+      ref: refs.resumeTasks,
+      requires: [work],
+      input: z.object({}),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (_input, context) => {
+        await context.get(work).resumeNewAssignments();
+        return { ok: true as const };
+      },
+    }),
     exposeSource({
       ref: refs.profileSettings,
       requires: [profiles],
