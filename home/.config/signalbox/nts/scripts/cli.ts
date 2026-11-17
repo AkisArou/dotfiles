@@ -99,6 +99,7 @@ async function main(verb: Verb, args: string[]): Promise<void> {
             `#${issue} ${a.status} ${assignmentPhase(a)} (${a.id})`,
             assignmentSays(a),
             a.design && `\nDesign:\n${a.design}`,
+            a.note && `\nLatest instruction to the worker:\n${a.note}`,
             a.summary && `\nLatest report:\n${a.summary}`,
             a.commit && `\nCommit ${a.commit}${a.tree ? ` in ${a.tree}` : ""}`,
           ]

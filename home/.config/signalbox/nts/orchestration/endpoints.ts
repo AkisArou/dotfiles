@@ -33,6 +33,7 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     progress: state?.progress?.note ?? null,
     stalled: state?.stalled ?? null,
     escalation: state?.escalation ?? null,
+    note: state?.note ?? "",
     design: state?.design ?? "",
     summary: state?.summary ?? "",
     worker: state?.worker?.id ?? null,

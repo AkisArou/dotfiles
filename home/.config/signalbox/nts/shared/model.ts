@@ -71,6 +71,8 @@ export type AssignmentView = {
   stalled: string | null;
   /** What the coordinator must decide while the task is escalated. */
   escalation: string | null;
+  /** The latest instruction the worker received (findings, a refusal, a decision). */
+  note: string;
   design: string;
   summary: string;
   worker: string | null;
