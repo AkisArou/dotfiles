@@ -1,11 +1,11 @@
 import { join, resolve } from "node:path";
 import { capability, Cell, provide, valueOf } from "signalbox/core";
 import type { Capability, Extension } from "signalbox/core";
-import { hash, poll, toJson, expandPath, Conflict } from "signalbox/core/utils";
-import type { WorkflowStore } from "signalbox/ext/assignments/index";
+import { Conflict, expandPath, hash, poll, toJson } from "signalbox/core/utils";
+import type { WorkflowStore } from "signalbox/ext/assignments";
 import { tmux } from "signalbox/ext/integrations/tmux";
 import { exposeTerminals } from "signalbox/ext/terminals/web";
-import type { TerminalTarget } from "signalbox/ext/terminals/index";
+import type { TerminalTarget } from "signalbox/ext/terminals";
 import type { Agent } from "../shared/model.ts";
 import type { NtsConfig } from "../config.ts";
 import { discoverTerminals } from "./discovery.ts";
@@ -43,7 +43,7 @@ export function nativeTerminals(options: {
   const service = capability<NativeTerminals>("nts/native-terminals");
   const agents = new Cell<Agent[]>([]);
   let state: WorkflowStore;
-  let backend: import("signalbox/ext/execution/index").ExecutionBackend;
+  let backend: import("signalbox/ext/execution").ExecutionBackend;
   const records = () =>
     state.transaction("nts/native-terminals", (tx) =>
       tx.entries("").map((entry) => entry.value as unknown as Record),

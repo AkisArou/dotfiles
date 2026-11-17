@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { relative, isAbsolute } from "node:path";
-import { tmuxTerminal } from "signalbox/ext/integrations/tmux-terminal";
+import { tmuxTerminal } from "signalbox/ext/integrations/tmux/terminal";
 import type { NtsConfig } from "../config.ts";
 
 const run = promisify(execFile);

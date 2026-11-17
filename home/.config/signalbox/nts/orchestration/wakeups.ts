@@ -5,9 +5,9 @@
 import type { Capability, Extension, Readable } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
 import { hash, poll } from "signalbox/core/utils";
-import { textInput } from "signalbox/ext/agents/index";
-import type { Assignment, Assignments, WorkflowStore } from "signalbox/ext/assignments/index";
-import type { Mailbox } from "signalbox/ext/orchestration/services";
+import { textInput } from "signalbox/ext/agents";
+import type { Assignment, Assignments, WorkflowStore } from "signalbox/ext/assignments";
+import type { Mailbox } from "signalbox/ext/orchestration";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import { latestValue } from "signalbox/core";

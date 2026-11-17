@@ -51,8 +51,20 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     ],
     "nts.profiles": {
       revision: 0,
-      profiles: [{ id: "opus-high", label: "Opus high", harness: "claude", model: "claude-opus-5-5", effort: "high" }],
-      roles: { coordinator: { profile: "opus-high" }, worker: { profile: "opus-high" }, reviewer: { profile: "opus-high" } },
+      profiles: [
+        {
+          id: "opus-high",
+          label: "Opus high",
+          harness: "claude",
+          model: "claude-opus-5-5",
+          effort: "high",
+        },
+      ],
+      roles: {
+        coordinator: { profile: "opus-high" },
+        worker: { profile: "opus-high" },
+        reviewer: { profile: "opus-high" },
+      },
       unavailable: {},
     },
     "nts.assignments": [],
@@ -200,8 +212,20 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
     "nts.issues": [],
     "nts.profiles": {
       revision: 0,
-      profiles: [{ id: "opus-high", label: "Opus high", harness: "claude", model: "claude-opus-5-5", effort: "high" }],
-      roles: { coordinator: { profile: "opus-high" }, worker: { profile: "opus-high" }, reviewer: { profile: "opus-high" } },
+      profiles: [
+        {
+          id: "opus-high",
+          label: "Opus high",
+          harness: "claude",
+          model: "claude-opus-5-5",
+          effort: "high",
+        },
+      ],
+      roles: {
+        coordinator: { profile: "opus-high" },
+        worker: { profile: "opus-high" },
+        reviewer: { profile: "opus-high" },
+      },
       unavailable: {},
     },
     "nts.assignments": [],

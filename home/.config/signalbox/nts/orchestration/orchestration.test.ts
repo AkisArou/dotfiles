@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cardPaths } from "./task-model.ts";
 import { PHASE_BUDGET, PROGRESS_GRACE_MS, wakeups } from "./wakeups.ts";
-import type { Assignment } from "signalbox/ext/assignments/index";
+import type { Assignment } from "signalbox/ext/assignments";
 
 test("a card's Paths line names the files a task reserves, and nothing else", () => {
   const body = [

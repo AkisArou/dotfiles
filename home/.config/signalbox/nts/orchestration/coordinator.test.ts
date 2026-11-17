@@ -8,9 +8,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { capability, Cell, defineConfig, provide, startExtensions } from "signalbox/core";
 import type { Readable } from "signalbox/core";
-import { agentProfile, agentProgram, agentRuntime, inputText } from "signalbox/ext/agents/index";
-import type { AgentInstance } from "signalbox/ext/agents/index";
-import { messaging } from "signalbox/ext/agents/features";
+import {
+  agentProfile,
+  agentProgram,
+  agentRuntime,
+  inputText,
+  messaging,
+} from "signalbox/ext/agents";
+import type { AgentInstance } from "signalbox/ext/agents";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { Issue } from "../shared/model.ts";
 import type { ManagedAgents } from "./agents.ts";

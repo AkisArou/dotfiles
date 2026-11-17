@@ -5,7 +5,7 @@ import { z } from "zod";
 import { capability, Cell, provide } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
-import type { WorkflowStore } from "signalbox/ext/assignments/index";
+import type { WorkflowStore } from "signalbox/ext/assignments";
 
 const NAMESPACE = "nts/priorities";
 const KEY = "urgency";

@@ -4,10 +4,9 @@
 import type { Capability, Readable } from "signalbox/core";
 import { latestValue } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
-import type { AgentToolset } from "signalbox/ext/agents/tools";
-import type { Assignments, WorkflowStore } from "signalbox/ext/assignments/index";
-import type { DurableEngine } from "signalbox/ext/assignments/engine";
-import { agentMailbox, agentService } from "signalbox/ext/orchestration/services";
+import type { AgentToolset } from "signalbox/ext/agents";
+import type { Assignments, DurableEngine, WorkflowStore } from "signalbox/ext/assignments";
+import { agentMailbox, agentService } from "signalbox/ext/orchestration";
 import type { Issue } from "../shared/model.ts";
 import type { ManagedAgents } from "./agents.ts";
 import { coordinatorInstructions } from "./briefs.ts";

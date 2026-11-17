@@ -14,8 +14,8 @@ import { nativeTerminals } from "./terminals.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
 import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
-import { nativeAttachment } from "signalbox/ext/agents/features";
-import type { TerminalTarget } from "signalbox/ext/terminals/index";
+import { nativeAttachment } from "signalbox/ext/agents";
+import type { TerminalTarget } from "signalbox/ext/terminals";
 
 // Live NTS observations and native terminal hosting. NTS tools retain ownership
 // of workspaces and landing; coordinator sessions stay native.

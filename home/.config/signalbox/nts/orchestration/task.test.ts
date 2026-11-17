@@ -10,11 +10,17 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { capability, Cell, defineConfig, provide, startExtensions } from "signalbox/core";
 import type { Readable } from "signalbox/core";
-import { agentProfile, agentProgram, agentRuntime, inputText } from "signalbox/ext/agents/index";
-import type { AgentInstance } from "signalbox/ext/agents/index";
-import { messaging, terminate } from "signalbox/ext/agents/features";
-import { assignmentRequest, assignmentService } from "signalbox/ext/assignments/index";
-import type { Assignment } from "signalbox/ext/assignments/index";
+import {
+  agentProfile,
+  agentProgram,
+  agentRuntime,
+  inputText,
+  messaging,
+  terminate,
+} from "signalbox/ext/agents";
+import type { AgentInstance } from "signalbox/ext/agents";
+import { assignmentRequest, assignmentService } from "signalbox/ext/assignments";
+import type { Assignment } from "signalbox/ext/assignments";
 import { openWorkflowSqlite } from "signalbox/ext/integrations/openworkflow";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { Issue } from "../shared/model.ts";

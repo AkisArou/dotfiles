@@ -6,11 +6,15 @@ import { z } from "zod";
 import type { Capability } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
 import { hash } from "signalbox/core/utils";
-import { agentProfile, agentRuntime, textInput } from "signalbox/ext/agents/index";
-import type { AgentInstance, AgentProgram, AgentRuntime } from "signalbox/ext/agents/index";
-import type { AgentToolset, ToolInput } from "signalbox/ext/agents/tools";
-import { agentToolBridge } from "signalbox/ext/agents/bridge";
-import type { WorkflowStore } from "signalbox/ext/assignments/index";
+import { agentProfile, agentRuntime, agentToolBridge, textInput } from "signalbox/ext/agents";
+import type {
+  AgentInstance,
+  AgentProgram,
+  AgentRuntime,
+  AgentToolset,
+  ToolInput,
+} from "signalbox/ext/agents";
+import type { WorkflowStore } from "signalbox/ext/assignments";
 import { claudeCode } from "signalbox/ext/integrations/claude";
 import { codex } from "signalbox/ext/integrations/codex";
 import { tmux } from "signalbox/ext/integrations/tmux";

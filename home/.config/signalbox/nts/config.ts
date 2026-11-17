@@ -3,8 +3,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ntsStateDirectory } from "./host/state-directory.ts";
 import { expandPath } from "signalbox/core/utils";
-import type { CommandSpec } from "signalbox/ext/execution/index";
-import type { TerminalTarget } from "signalbox/ext/terminals/index";
+import type { CommandSpec } from "signalbox/ext/execution";
+import type { TerminalTarget } from "signalbox/ext/terminals";
 import type { OrchestrationSettings } from "./orchestration/index.ts";
 
 /** The project's identity, shared with sbn: its roots, ports and coordinator choice. */
@@ -83,8 +83,20 @@ export const ntsConfig: NtsConfig = {
     // (Agents view or the profiles operations) and need no restart.
     profiles: {
       profiles: [
-        { id: "opus-high", label: "Claude Opus 5.5, high effort", harness: "claude", model: "claude-opus-5-5", effort: "high" },
-        { id: "opus-medium", label: "Claude Opus 5.5, medium effort", harness: "claude", model: "claude-opus-5-5", effort: "medium" },
+        {
+          id: "opus-high",
+          label: "Claude Opus 5.5, high effort",
+          harness: "claude",
+          model: "claude-opus-5-5",
+          effort: "high",
+        },
+        {
+          id: "opus-medium",
+          label: "Claude Opus 5.5, medium effort",
+          harness: "claude",
+          model: "claude-opus-5-5",
+          effort: "medium",
+        },
         { id: "codex", label: "Codex, configured model", harness: "codex" },
       ],
       roles: {

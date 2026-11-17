@@ -34,7 +34,11 @@ export function Agents({ project }: { project: Project }) {
       </div>
       {ended > 0 && (
         <label className="show-ended">
-          <input type="checkbox" checked={showEnded} onChange={(event) => setShowEnded(event.target.checked)} />
+          <input
+            type="checkbox"
+            checked={showEnded}
+            onChange={(event) => setShowEnded(event.target.checked)}
+          />
           {` Show ${ended} ended session${ended === 1 ? "" : "s"}`}
         </label>
       )}

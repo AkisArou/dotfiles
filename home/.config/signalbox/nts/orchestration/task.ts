@@ -1,7 +1,7 @@
 // The NTS task route: one GitHub issue, one fresh worker, NTS's own gates.
 // Phases follow docs/workflow.md (task-phases.ts); the data is task-model.ts.
 import { latestValue, mapReadable } from "signalbox/core";
-import { assignmentRoute } from "signalbox/ext/assignments/index";
+import { assignmentRoute } from "signalbox/ext/assignments";
 import { cancelTask, interrupts, phaseHandlers, turn } from "./task-phases.ts";
 import type { TaskOptions } from "./task-phases.ts";
 import { initialTaskState, taskInput, taskReport, taskState } from "./task-model.ts";
