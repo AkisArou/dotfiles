@@ -199,7 +199,12 @@ test("the embedded native terminal owns keys and paste; Ctrl+] returns to naviga
       });
     else client.close();
     await host?.stop();
+    // tmux leaves its socket file behind.
+    const socketPath = (
+      await tmux(["display-message", "-p", "#{socket_path}"]).catch(() => undefined)
+    )?.stdout.trim();
     await tmux(["kill-server"]).catch(() => {});
+    if (socketPath) await rm(socketPath, { force: true });
     await rm(root, { recursive: true, force: true });
   }
 });
