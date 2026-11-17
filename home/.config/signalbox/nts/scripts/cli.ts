@@ -21,7 +21,17 @@ const project = JSON.parse(readFileSync(new URL("../project.json", import.meta.u
 };
 const url = process.env.SIGNALBOX_API_URL ?? `ws://127.0.0.1:${project.apiPort}/rpc`;
 
-const VERBS = ["status", "show", "assign", "approve", "return", "message", "rework", "retry", "cancel"] as const;
+const VERBS = [
+  "status",
+  "show",
+  "assign",
+  "approve",
+  "return",
+  "message",
+  "rework",
+  "retry",
+  "cancel",
+] as const;
 type Verb = (typeof VERBS)[number];
 
 async function assignments(client: HostClient): Promise<AssignmentView[]> {
@@ -29,7 +39,8 @@ async function assignments(client: HostClient): Promise<AssignmentView[]> {
     type: "read",
     ref: "nts.assignments",
   });
-  if (reading.status !== "ready" || !reading.value) throw new Error(`Assignments are ${reading.status}`);
+  if (reading.status !== "ready" || !reading.value)
+    throw new Error(`Assignments are ${reading.status}`);
   return reading.value;
 }
 
@@ -50,10 +61,14 @@ async function main(verb: Verb, args: string[]): Promise<void> {
   const client = await connectClient({ url });
   try {
     if (verb === "status") {
-      const live = (await assignments(client)).filter((a) => a.status === "active" || a.status === "queued");
+      const live = (await assignments(client)).filter(
+        (a) => a.status === "active" || a.status === "queued",
+      );
       if (!live.length) return console.log("No active tasks.");
       for (const a of live.sort((x, y) => (x.issue ?? 0) - (y.issue ?? 0)))
-        console.log(`#${a.issue ?? "?"}\t${assignmentPhase(a)}\t${assignmentSays(a).split("\n", 1)[0]}`);
+        console.log(
+          `#${a.issue ?? "?"}\t${assignmentPhase(a)}\t${assignmentSays(a).split("\n", 1)[0]}`,
+        );
       return;
     }
     const issue = Number(args.shift()?.replace(/^#/, ""));
@@ -63,8 +78,12 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       if (!text) throw new Error(`${verb} needs ${what}`);
       return text;
     };
-    if (verb === "assign")
-      return void console.log(await call(client, "nts.tasks.assign", { issue, instructions: text }));
+    if (verb === "assign") {
+      const { id } = (await call(client, "nts.tasks.assign", { issue, instructions: text })) as {
+        id: string;
+      };
+      return console.log(`#${issue}: assigned (${id})`);
+    }
     const a = await task(client, issue);
     const assignment = a.id;
     switch (verb) {
@@ -81,13 +100,24 @@ async function main(verb: Verb, args: string[]): Promise<void> {
             .join("\n"),
         );
       case "approve":
-        await call(client, "nts.assignments.decide-design", { assignment, accept: true, notes: text });
+        await call(client, "nts.assignments.decide-design", {
+          assignment,
+          accept: true,
+          notes: text,
+        });
         break;
       case "return":
-        await call(client, "nts.assignments.decide-design", { assignment, accept: false, notes: needsText("notes") });
+        await call(client, "nts.assignments.decide-design", {
+          assignment,
+          accept: false,
+          notes: needsText("notes"),
+        });
         break;
       case "message":
-        await call(client, "nts.assignments.message-worker", { assignment, text: needsText("a message") });
+        await call(client, "nts.assignments.message-worker", {
+          assignment,
+          text: needsText("a message"),
+        });
         break;
       case "rework":
         await call(client, "nts.assignments.rework", { assignment, notes: needsText("notes") });
