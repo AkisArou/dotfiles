@@ -10,6 +10,7 @@ import type { AgentInstance } from "signalbox/ext/agents";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
+import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
 
@@ -170,6 +171,18 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
           }),
         ]
       : []),
+    exposeOperation({
+      ref: refs.endAgent,
+      requires: [orchestration.agents.runtime],
+      input: z.object({ id: z.string().min(1) }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        const end = context.get(orchestration.agents.runtime).capability(input.id, terminate);
+        if (!end) throw new Error(`No managed agent ${input.id} can be ended`);
+        await end.terminate(context.signal);
+        return { ok: true as const };
+      },
+    }),
     exposeOperation({
       ref: refs.signOff,
       requires: [work],

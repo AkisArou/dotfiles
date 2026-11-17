@@ -154,6 +154,8 @@ export const signOff = operation<
 export const replaceCoordinator = operation<{ reason: string }, { ok: true }>(
   "nts.coordinator.replace",
 );
+/** Ends one managed agent session (a stray or replaced one); tasks end their own. */
+export const endAgent = operation<{ id: string }, { ok: true }>("nts.agents.end");
 export const retryAssignment = operation<{ assignment: string }, { ok: true }>(
   "nts.assignments.retry",
 );

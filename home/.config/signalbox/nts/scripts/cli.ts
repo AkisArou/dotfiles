@@ -14,6 +14,7 @@
 //   sbn prioritize <issue> <-9..9>  move a task ahead (higher first; 0 is the default)
 //   sbn retry <issue>               retry a faulted task
 //   sbn coordinator <reason...>     a fresh coordinator generation from its checkpoint
+//   sbn end-agent <name|id>         end one managed agent session (a stray or replaced one)
 //   sbn cancel <issue> <reason...>  cancel a task (its tree and branch stay with the pool)
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -41,6 +42,7 @@ const VERBS = [
   "retry",
   "cancel",
   "coordinator",
+  "end-agent",
 ] as const;
 type Verb = (typeof VERBS)[number];
 
@@ -80,6 +82,23 @@ async function main(verb: Verb, args: string[]): Promise<void> {
           `#${a.issue ?? "?"}\t${assignmentPhase(a)}\t${assignmentSays(a).split("\n", 1)[0]}`,
         );
       return;
+    }
+    if (verb === "end-agent") {
+      const wanted = args.join(" ").trim();
+      if (!wanted) throw new Error("end-agent needs an agent name or id");
+      const listed = await client.request<{
+        status: string;
+        value?: { id: string; name: string; state: string }[];
+      }>({ type: "read", ref: "nts.agents" });
+      const matches = (listed.value ?? []).filter(
+        (agent) => agent.state !== "ended" && (agent.id === wanted || agent.name === wanted),
+      );
+      if (matches.length !== 1)
+        throw new Error(
+          `${matches.length} live agents match "${wanted}"; use the exact name or id`,
+        );
+      await call(client, "nts.agents.end", { id: matches[0]!.id });
+      return console.log(`ended ${matches[0]!.name} (${matches[0]!.id})`);
     }
     if (verb === "coordinator") {
       const reason = args.join(" ").trim();
