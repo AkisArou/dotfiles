@@ -169,6 +169,11 @@ export function landingGauges(status: LandingStatus, now = Date.now()): Gauge[] 
 }
 
 /** When a check ran, start to end in local time; the date only when it was not today. */
+/** The landing service's answers, the most recent first. */
+export function newestFirst<T extends Pick<Answer, "at">>(answers: readonly T[]): T[] {
+  return [...answers].sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+}
+
 export function ranAt(answer: Pick<Answer, "at" | "wall_s">, now = Date.now()): string {
   const end = Date.parse(answer.at);
   if (!Number.isFinite(end)) return "";
@@ -272,7 +277,7 @@ export function landingReport(status: LandingStatus, now = Date.now()): Report {
           { key: "duration", label: "took", align: "right" },
           { key: "message", label: "answer" },
         ],
-        rows: status.recent.map((answer) => ({
+        rows: newestFirst(status.recent).map((answer) => ({
           id: `${answer.id}/${answer.at}/${answer.state}`,
           change: named(answer),
           state: colored(answer.state),

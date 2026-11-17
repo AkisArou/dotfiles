@@ -85,3 +85,21 @@ test("a landing answer says when it ran: start to end, with the date only when n
   assert.equal(ranAt({ at: new Date(end).toISOString(), wall_s: null }, end), "10:42");
   assert.equal(ranAt({ at: "not a time", wall_s: 1 }, end), "");
 });
+
+test("the landing page lists its recent answers, the most recent first", async () => {
+  const { newestFirst } = await import("./landing.ts");
+  const answers = [
+    { id: "a", at: "2026-11-17T14:00:00Z" },
+    { id: "b", at: "2026-11-17T16:30:00Z" },
+    { id: "c", at: "2026-11-17T09:15:00Z" },
+  ];
+  assert.deepEqual(
+    newestFirst(answers).map((answer) => answer.id),
+    ["b", "a", "c"],
+  );
+  assert.deepEqual(
+    answers.map((answer) => answer.id),
+    ["a", "b", "c"],
+    "the input is left as it was",
+  );
+});
