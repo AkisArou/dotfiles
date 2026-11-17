@@ -369,9 +369,10 @@
   color: var(--color-text-secondary);
 }
 
-/* The app is pinned to the screen's edges rather than sized by 100dvh, which an
-   iOS home-screen app measures short of the home indicator. Under the translucent
-   status bar, the top inset keeps the header clear of it. */
+/* The app's height is set from the screen (web/viewport.ts, --app-height): an
+   iOS home-screen app under a translucent status bar measures its viewport, and
+   so 100dvh and a fixed inset, short by the status bar's height. AppShell keeps
+   the header clear of the status bar itself. */
 html,
 body {
   height: 100%;
@@ -379,11 +380,18 @@ body {
 }
 #root {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-height, 100%);
   display: flex;
   flex-direction: column;
-  padding-top: env(safe-area-inset-top);
   background: var(--color-background-body);
+}
+/* AppShell pads its main area by the home indicator; on a phone the tab bar draws
+   there instead, as a native tab bar does: the frame takes that padding. */
+.frame.narrow {
+  height: calc(100% + env(safe-area-inset-bottom));
 }
 
 /* An agent over the whole screen (web/agent-screen.tsx): a header, its transcript
@@ -596,7 +604,10 @@ body {
 /* An issue on a phone: a full-screen page with the agent view's header. */
 .issue-screen {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-height, 100%);
   z-index: 40;
   display: flex;
   flex-direction: column;
@@ -620,4 +631,9 @@ body {
 .issue-screen-link {
   font-size: 12.5px;
   color: var(--color-text-secondary);
+}
+
+/* With the keyboard up, the home indicator is hidden: the composer sits on the keyboard. */
+.agent-screen.keyboard .composer {
+  padding-bottom: 8px;
 }

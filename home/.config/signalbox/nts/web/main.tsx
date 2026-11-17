@@ -11,6 +11,7 @@ import "./theme.css";
 import { TerminalProvider } from "../shared/terminal.ts";
 import { terminalUrl } from "signalbox/client/terminal";
 import { apiAddress } from "../shared/address.ts";
+import { followAppHeight } from "./viewport.ts";
 
 declare const SIGNALBOX_API_URL: string;
 declare const SIGNALBOX_WEB_PORT: number;
@@ -21,6 +22,7 @@ const api = apiAddress(
   { web: SIGNALBOX_WEB_PORT, api: SIGNALBOX_API_PORT },
   SIGNALBOX_API_URL,
 );
+followAppHeight();
 const client = createClient({ connect: webSocketConnection(api) });
 client.start();
 const element = document.getElementById("root");

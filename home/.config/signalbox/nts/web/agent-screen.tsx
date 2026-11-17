@@ -18,6 +18,7 @@ import { agentTone } from "../shared/model.ts";
 import type { Agent } from "../shared/model.ts";
 import { Status } from "./components.tsx";
 import { NativeTerminal } from "./terminal.tsx";
+import { appHeight } from "./viewport.ts";
 
 /** Lines of history read for the transcript, and how often it is read again. */
 const HISTORY_LINES = 3000;
@@ -37,13 +38,23 @@ const KEYS: readonly { label: string; key: string; title: string }[] = [
   { label: "^C", key: "C-c", title: "Ctrl+C" },
 ];
 
-/** Follows the visual viewport, so the composer rides above an on-screen keyboard. */
-function useVisualViewport(): CSSProperties {
-  const read = (): CSSProperties => {
+/**
+ * The screen the view takes: the app's height, or, while an on-screen keyboard is up,
+ * the visual viewport above it, so the composer rides on the keyboard.
+ */
+function useVisualViewport(): { style: CSSProperties; keyboard: boolean } {
+  const read = () => {
     const view = window.visualViewport;
-    return view ? { height: view.height, top: view.offsetTop } : { inset: 0 };
+    const keyboard = !!view && view.height + 120 < appHeight();
+    return {
+      keyboard,
+      style:
+        keyboard && view
+          ? { height: view.height, top: view.offsetTop }
+          : { top: 0, height: "var(--app-height, 100%)" },
+    };
   };
-  const [style, setStyle] = useState<CSSProperties>(read);
+  const [style, setStyle] = useState(read);
   useEffect(() => {
     const view = window.visualViewport;
     if (!view) return;
@@ -312,7 +323,7 @@ function Composer({ terminal, sent }: { terminal: string; sent(): void }) {
 }
 
 export function AgentScreen({ agent, close }: { agent: Agent; close(): void }) {
-  const viewport = useVisualViewport();
+  const { style: viewport, keyboard } = useVisualViewport();
   const [mode, setMode] = useState<"transcript" | "terminal">("transcript");
   const [nudge, setNudge] = useState(0);
   useEffect(() => {
@@ -324,7 +335,12 @@ export function AgentScreen({ agent, close }: { agent: Agent; close(): void }) {
   }, [close]);
   if (!agent.terminal) return null;
   return (
-    <div className="agent-screen" style={viewport} role="dialog" aria-label={agent.name}>
+    <div
+      className={keyboard ? "agent-screen keyboard" : "agent-screen"}
+      style={viewport}
+      role="dialog"
+      aria-label={agent.name}
+    >
       <header className="agent-screen-head">
         <IconButton
           label="Back"
