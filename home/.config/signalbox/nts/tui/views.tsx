@@ -1,4 +1,5 @@
 /** @jsxImportSource @opentui/react */
+import type { TaskAction } from "../shared/actions.ts";
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, AssignmentView, Issue, Tone } from "../shared/model.ts";
 import {
@@ -11,6 +12,8 @@ import {
   issueTone,
   modelsLine,
   needsCount,
+  phaseLabel,
+  taskMeaning,
 } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
@@ -109,9 +112,30 @@ export function NowView({ project }: { project: Project }) {
     </>
   );
 }
-export function TaskDetail({ issue }: { issue: Issue }) {
+/**
+ * An issue in the Tasks tab: its task first when one runs (where it is, what it waits for,
+ * what you can do with a), then the issue, then its earlier tasks.
+ */
+export function TaskDetail({
+  issue,
+  task,
+  earlier = [],
+  actions = [],
+}: {
+  issue: Issue;
+  task?: AssignmentView | undefined;
+  earlier?: readonly AssignmentView[];
+  actions?: readonly TaskAction[];
+}) {
   return (
     <>
+      {task && <TaskBlock number={issue.number} assignment={task} />}
+      {actions.length > 0 && (
+        <Line
+          color={c.muted}
+        >{`a: ${actions.map((action) => action.label.toLowerCase()).join(" · ")}`}</Line>
+      )}
+      {(task || actions.length > 0) && <box height={1} />}
       <Heading>{`#${issue.number} ${issue.title}`}</Heading>
       <Line color={stateColor(issue.state)}>
         {`${stateMark(issue.state)} ${issueStateTerm(issue.state).label}`}
@@ -137,6 +161,17 @@ export function TaskDetail({ issue }: { issue: Issue }) {
       )}
       <box height={1} />
       <Line>{issue.body}</Line>
+      {earlier.length > 0 && (
+        <>
+          <box height={1} />
+          <Heading>Earlier tasks</Heading>
+          {earlier.map((a) => (
+            <Line key={a.id} color={c.muted}>
+              {`${a.status} at ${phaseLabel(a.phase ?? a.status)} · round ${a.rounds + 1}${a.commit ? ` · ${a.commit.slice(0, 12)}` : ""}${a.error ? ` · ${a.error.split("\n", 1)[0]}` : ""}`}
+            </Line>
+          ))}
+        </>
+      )}
     </>
   );
 }
@@ -151,27 +186,11 @@ export function TaskPopup({
   issue: Issue | undefined;
   assignment: AssignmentView | undefined;
 }) {
-  const block = (title: string, text: string) =>
-    text ? (
-      <>
-        <box height={1} />
-        <Heading>{title}</Heading>
-        <Line>{text}</Line>
-      </>
-    ) : null;
   return (
     <>
       {assignment ? (
         <>
-          <Heading>{`#${number} · ${assignmentPhase(assignment)} · round ${assignment.rounds + 1}`}</Heading>
-          <Line color={toneColor(assignmentTone(assignment))}>{assignmentSays(assignment)}</Line>
-          {assignment.tree && <Line color={c.accent}>{assignment.tree}</Line>}
-          {assignment.commit && (
-            <Line color={c.muted}>{`commit ${assignment.commit.slice(0, 12)}`}</Line>
-          )}
-          {block("Latest instruction", assignment.note)}
-          {block("Summary", assignment.summary)}
-          {block("Design", assignment.design)}
+          <TaskBlock number={number} assignment={assignment} />
           <box height={1} />
         </>
       ) : (
@@ -182,6 +201,33 @@ export function TaskPopup({
       ) : (
         <Line color={c.muted}>{`#${number} is not an open issue.`}</Line>
       )}
+    </>
+  );
+}
+
+/** A task: its word and round, what it waits for, its tree and commit, then its latest
+ * instruction, summary and design. */
+export function TaskBlock({ number, assignment }: { number: number; assignment: AssignmentView }) {
+  const block = (title: string, text: string) =>
+    text ? (
+      <>
+        <box height={1} />
+        <Heading>{title}</Heading>
+        <Line>{text}</Line>
+      </>
+    ) : null;
+  return (
+    <>
+      <Heading>{`#${number} · ${assignmentPhase(assignment)} · round ${assignment.rounds + 1}`}</Heading>
+      <Line color={c.muted}>{taskMeaning(assignment)}</Line>
+      <Line color={toneColor(assignmentTone(assignment))}>{assignmentSays(assignment)}</Line>
+      {assignment.tree && <Line color={c.accent}>{assignment.tree}</Line>}
+      {assignment.commit && (
+        <Line color={c.muted}>{`commit ${assignment.commit.slice(0, 12)}`}</Line>
+      )}
+      {block("Latest instruction", assignment.note)}
+      {block("Summary", assignment.summary)}
+      {block("Design", assignment.design)}
     </>
   );
 }

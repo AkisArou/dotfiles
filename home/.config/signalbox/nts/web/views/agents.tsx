@@ -1,6 +1,6 @@
-// Agents: the sessions (a list beside the selected one's terminal), the
-// settings their launches follow, and the task assignments, as three routes
-// under /agents. A session working on an issue opens it in the issue drawer;
+// Agents: the sessions (a list beside the selected one's terminal) and the
+// settings their launches follow, as two routes under /agents (a task's own
+// steps are in the issue drawer). A session working on an issue opens it in the issue drawer;
 // ended sessions are kept out of the list and open in a drawer of their own.
 import { agentStates } from "../../shared/glossary.ts";
 import { agentLines, agentTone } from "../../shared/model.ts";
@@ -20,7 +20,6 @@ import { NativeTerminal } from "../terminal.tsx";
 const PANES = [
   { path: "/agents", label: "Sessions" },
   { path: "/agents/settings", label: "Settings" },
-  { path: "/agents/assignments", label: "Assignments" },
 ] as const;
 
 /** The panes' tabs above whichever pane the route shows. */

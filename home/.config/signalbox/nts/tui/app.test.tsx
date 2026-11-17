@@ -250,19 +250,42 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     );
     assert.match(setup.captureCharFrame(), /Array ownership/);
     assert.match(setup.captureCharFrame(), /Withdrawal cancellation/);
-    await keys("F", "4", "l", "L");
+    // a on a task offers what its state allows; nothing runs, so it can be started.
+    await keys("F");
+    let actTitle = "";
+    let offeredActions: readonly string[] = [];
+    pick = async (lines, title) => {
+      actTitle = title;
+      offeredActions = lines;
+      return lines.findIndex((line) => line.startsWith("Start the task  —"));
+    };
+    await keys("a");
+    await act(async () => {
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    assert.ok(
+      offeredActions.includes("Start the task, with a note…"),
+      "a note is offered, not forced",
+    );
+    assert.equal(calls.at(-1), "nts.tasks.assign");
+    assert.deepEqual(inputs.at(-1), {
+      issue: Number(/#(\d+)/.exec(actTitle)?.[1]),
+      instructions: "",
+    });
+    await keys("4", "l", "L");
     assert.deepEqual(gitRuns, ["/pool/1", "/nts"]);
     await act(async () => {
       setup.resize(80, 24);
     });
     await keys("3");
     assert.doesNotMatch(setup.captureCharFrame(), /Drain owned work/);
+    const callsBefore = calls.length;
     await act(async () => {
       setup.mockInput.pressEnter();
     });
     await setup.renderOnce();
     assert.match(setup.captureCharFrame(), /Drain owned work/);
-    assert.equal(calls.length, 0);
+    assert.equal(calls.length, callsBefore, "opening details calls nothing");
     // Agents lists live sessions only; e opens the ended ones in a popup.
     await keys("escape", "4");
     assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);

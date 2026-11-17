@@ -4,9 +4,6 @@
 // choices in the finder, or a written answer in the editor; about an issue, the
 // finder then asks where the issue goes (ready, parked or held). The host posts
 // the answer on the issue and tells the coordinator.
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import type { Project } from "../shared/use-project.ts";
 import type { IssueState, NeedsView, QuestionView } from "../shared/model.ts";
 import { issueStateLabels, postedTone } from "../shared/model.ts";
@@ -14,6 +11,7 @@ import { toneColor } from "./views.tsx";
 import { Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
 import type { TerminalCommand, TerminalTools } from "./tools.ts";
+import { written } from "./compose.ts";
 
 export type NeedsItem =
   | { readonly id: string; readonly kind: "question"; readonly question: QuestionView }
@@ -133,38 +131,6 @@ export function NeedsDetail({ item }: { item: NeedsItem }) {
 }
 
 const STATES: IssueState[] = ["ready", "parked", "held"];
-
-/** Writes an answer in the editor; lines starting with # are the question's notes. */
-async function written(
-  tools: TerminalTools,
-  editor: TerminalCommand,
-  name: string,
-  notes: readonly string[],
-): Promise<string | undefined> {
-  const directory = join(process.env.XDG_CACHE_HOME ?? join(homedir(), ".cache"), "signalbox-tui");
-  await mkdir(directory, { recursive: true });
-  const file = join(directory, `answer-${name.replace(/[^A-Za-z0-9_.-]/g, "_")}.md`);
-  await writeFile(
-    file,
-    [
-      "",
-      "# Write your answer above. Lines starting with # are left out; an empty answer cancels.",
-      ...notes.map((note) => `# ${note}`),
-      "",
-    ].join("\n"),
-  );
-  try {
-    await tools.run({ ...editor, args: [...(editor.args ?? []), file] }, directory);
-    const text = (await readFile(file, "utf8"))
-      .split("\n")
-      .filter((line) => !line.startsWith("#"))
-      .join("\n")
-      .trim();
-    return text || undefined;
-  } finally {
-    await rm(file, { force: true });
-  }
-}
 
 /** Withdraws an open question after the owner confirms; the coordinator is told. */
 export async function withdrawNeed(

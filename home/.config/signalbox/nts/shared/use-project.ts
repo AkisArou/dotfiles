@@ -34,6 +34,13 @@ export function useProject() {
     answerQuestion = useCommand(refs.answerQuestion),
     answerIssue = useCommand(refs.answerIssue),
     withdrawQuestion = useCommand(refs.withdrawQuestion);
+  // A task's own steps (shared/actions.ts offers them where its state allows).
+  const decideDesign = useCommand(refs.decideDesign),
+    signOff = useCommand(refs.signOff),
+    reworkAssignment = useCommand(refs.reworkAssignment),
+    retryAssignment = useCommand(refs.retryAssignment),
+    messageWorker = useCommand(refs.messageWorker),
+    prioritizeTask = useCommand(refs.prioritizeTask);
   const [error, setError] = useState<string>();
   const perform = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
     setError(undefined);
@@ -76,6 +83,12 @@ export function useProject() {
       answerQuestion,
       answerIssue,
       withdrawQuestion,
+      decideDesign,
+      signOff,
+      reworkAssignment,
+      retryAssignment,
+      messageWorker,
+      prioritizeTask,
     },
     perform,
     error,
@@ -90,7 +103,13 @@ export function useProject() {
       cancelAssignment.pending ||
       answerQuestion.pending ||
       answerIssue.pending ||
-      withdrawQuestion.pending,
+      withdrawQuestion.pending ||
+      decideDesign.pending ||
+      signOff.pending ||
+      reworkAssignment.pending ||
+      retryAssignment.pending ||
+      messageWorker.pending ||
+      prioritizeTask.pending,
     online: connection.status === "connected",
   };
 }

@@ -245,3 +245,17 @@
     }
   }
 }
+
+/* A task's actions in the issue drawer, and the short form one opens. */
+.task-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-action-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 560px;
+}

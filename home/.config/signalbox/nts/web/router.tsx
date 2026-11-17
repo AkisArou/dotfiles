@@ -10,7 +10,7 @@ import { Now } from "./views/now.tsx";
 import { NeedsYou } from "./views/needs.tsx";
 import { Tasks } from "./views/tasks.tsx";
 import { AgentPanes, Sessions } from "./views/agents.tsx";
-import { Assignments, Settings } from "./views/orchestration.tsx";
+import { Settings } from "./views/orchestration.tsx";
 import { Plan } from "./views/plan.tsx";
 import { NtsHealth, NtsView } from "./views/nts.tsx";
 
@@ -71,7 +71,6 @@ const routeTree = rootRoute.addChildren([
   agentsRoute.addChildren([
     pane("/", (project) => <Sessions project={project} />),
     pane("/settings", (project) => <Settings project={project} />),
-    pane("/assignments", (project) => <Assignments project={project} />),
   ]),
   view("/landing", (project) => <NtsView project={project} page="Landing" />),
   view("/full-check", (project) => <NtsView project={project} page="Full check" />),

@@ -1,13 +1,25 @@
 // An issue in a drawer, opened from any view by ?issue=<number>: its task first
-// (phase, what it waits for, the latest instruction, summary and design), then
-// the issue itself, as the TUI's t popup shows them.
+// (where it is, what it waits for, the latest instruction, summary and design)
+// with what you can do to it, then the issue itself, then its earlier tasks: as
+// the TUI's Tasks detail shows them.
 import { Drawer, DrawerHeader } from "@astryxdesign/core/Drawer";
 import { Markdown } from "@astryxdesign/core/Markdown";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { Text } from "@astryxdesign/core/Text";
 import type { Project } from "../shared/use-project.ts";
-import { assignmentPhase, assignmentSays, assignmentTone, issueTone } from "../shared/model.ts";
+import { earlierTasks } from "../shared/actions.ts";
+import {
+  assignmentPhase,
+  assignmentSays,
+  assignmentTone,
+  issueStateTerm,
+  issueTone,
+  liveTask,
+  phaseLabel,
+  taskMeaning,
+} from "../shared/model.ts";
 import { Status } from "./components.tsx";
+import { TaskActions } from "./task-actions.tsx";
 
 export function IssueDrawer({
   project,
@@ -19,14 +31,8 @@ export function IssueDrawer({
   close(): void;
 }) {
   const issue = project.data.issues.find((candidate) => candidate.number === number);
-  // The live task first, then the latest.
-  const task = project.data.assignments
-    .filter((assignment) => assignment.issue === number)
-    .sort(
-      (a, b) =>
-        Number(b.status === "active") - Number(a.status === "active") ||
-        b.acceptedAt - a.acceptedAt,
-    )[0];
+  const task = number === undefined ? undefined : liveTask(project.data.assignments, number);
+  const earlier = number === undefined ? [] : earlierTasks(project.data.assignments, number);
   const title = issue ? `#${issue.number} ${issue.title}` : `#${number}`;
   return (
     <Drawer
@@ -55,7 +61,7 @@ export function IssueDrawer({
               <section className="drawer-section">
                 <MetadataList columns={2}>
                   <MetadataListItem label="Task">
-                    <Status tone={assignmentTone(task)}>
+                    <Status tone={assignmentTone(task)} title={taskMeaning(task)}>
                       {`${assignmentPhase(task)} · round ${task.rounds + 1}`}
                     </Status>
                   </MetadataListItem>
@@ -99,11 +105,26 @@ export function IssueDrawer({
                 )}
               </section>
             )}
+            {issue && (
+              <section className="drawer-section">
+                {!task && (
+                  <Text type="supporting" color="secondary">
+                    No task runs for it.
+                  </Text>
+                )}
+                <TaskActions project={project} issue={issue} task={task} />
+              </section>
+            )}
             {issue ? (
               <section className="drawer-section">
                 <MetadataList columns={2}>
                   <MetadataListItem label="State">
-                    <Status tone={issueTone(issue.state)}>{issue.state}</Status>
+                    <Status
+                      tone={issueTone(issue.state)}
+                      title={issueStateTerm(issue.state).meaning}
+                    >
+                      {issueStateTerm(issue.state).label}
+                    </Status>
                   </MetadataListItem>
                   <MetadataListItem label="Owner">{issue.owner ?? "—"}</MetadataListItem>
                   <MetadataListItem label="Stream">{issue.stream}</MetadataListItem>
@@ -135,6 +156,18 @@ export function IssueDrawer({
               <Text type="supporting" color="secondary">
                 #{number} is not an open issue.
               </Text>
+            )}
+            {earlier.length > 0 && (
+              <section className="drawer-section">
+                <Text type="label" weight="semibold">
+                  Earlier tasks
+                </Text>
+                {earlier.map((a) => (
+                  <Text key={a.id} type="supporting" color="secondary">
+                    {`${a.status} at ${phaseLabel(a.phase ?? a.status)} · round ${a.rounds + 1}${a.commit ? ` · ${a.commit.slice(0, 12)}` : ""}${a.error ? ` · ${a.error.split("\n", 1)[0]}` : ""}`}
+                  </Text>
+                ))}
+              </section>
             )}
           </div>
         </>

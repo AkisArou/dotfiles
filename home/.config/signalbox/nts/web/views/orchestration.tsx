@@ -1,16 +1,12 @@
-// Agents' settings and assignments. Settings: settings.json (the only source of
-// worker slots, shares, rounds and each role's models and pick) with the host's
-// pause and harness availability. Assignments: start a task by hand, and every
-// task's phase, wait, rounds and commit.
-import { useState } from "react";
+// Agents' settings: settings.json (the only source of worker slots, shares,
+// rounds and each role's models and pick) with the host's pause and harness
+// availability. A task's own steps are in the issue drawer (web/task-actions.tsx).
 import { Selector } from "@astryxdesign/core/Selector";
 import { Table, pixel, proportional } from "@astryxdesign/core/Table";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { Text } from "@astryxdesign/core/Text";
-import { Toolbar } from "@astryxdesign/core/Toolbar";
 import type { Project } from "../../shared/use-project.ts";
 import type { AgentRole, Harness, Pick } from "../../shared/model.ts";
-import { assignmentPhase, assignmentSays, assignmentTone, pickLabels } from "../../shared/model.ts";
+import { pickLabels } from "../../shared/model.ts";
 import { Action, Empty, Section, Status } from "../components.tsx";
 
 const roleNames: Record<AgentRole, string> = {
@@ -257,145 +253,6 @@ export function Settings({ project }: { project: Project }) {
             },
           ]}
         />
-      </Section>
-    </>
-  );
-}
-
-export function Assignments({ project }: { project: Project }) {
-  const settings = project.data.settings;
-  const [issue, setIssue] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [model, setModel] = useState("");
-  const workersNamed = settings?.roles.worker.pick === "coordinator";
-  const rows = project.data.assignments.map((assignment) => ({
-    id: assignment.id,
-    task: assignment.issue ? `#${assignment.issue}` : assignment.key,
-    tone: assignmentTone(assignment),
-    phase: assignmentPhase(assignment),
-    says: assignmentSays(assignment).split("\n", 1)[0] ?? "",
-    rounds: assignment.rounds,
-    commit: assignment.commit?.slice(0, 12) ?? "",
-    open: assignment.status === "active" || assignment.status === "queued",
-  }));
-  return (
-    <>
-      <Section title="Assign a task">
-        <Toolbar
-          label="Assign a task"
-          startContent={
-            <>
-              <TextInput
-                label="Issue"
-                isLabelHidden
-                size="sm"
-                placeholder="Issue number"
-                value={issue}
-                onChange={(value) => setIssue(value.replace(/\D/g, ""))}
-              />
-              <TextInput
-                label="Note for the worker"
-                isLabelHidden
-                size="sm"
-                placeholder="Note for the worker (optional)"
-                value={instructions}
-                onChange={setInstructions}
-              />
-              {workersNamed && settings && (
-                <Selector
-                  label="Model"
-                  isLabelHidden
-                  value={model}
-                  onChange={setModel}
-                  placeholder="First available model"
-                  options={settings.roles.worker.models.map((entry) => ({
-                    value: entry.id,
-                    label: entry.label,
-                  }))}
-                />
-              )}
-              <Action
-                project={project}
-                primary
-                disabled={!issue}
-                onClick={async () => {
-                  await project.commands.assignTask.run({
-                    issue: Number(issue),
-                    instructions,
-                    ...(workersNamed && model ? { model } : {}),
-                  });
-                  setIssue("");
-                  setInstructions("");
-                  setModel("");
-                }}
-              >
-                Assign
-              </Action>
-            </>
-          }
-        />
-      </Section>
-      <Section title="Assignments" count={rows.length}>
-        {rows.length ? (
-          <Table
-            data={rows}
-            idKey="id"
-            density="compact"
-            dividers="rows"
-            hasHover
-            textOverflow="truncate"
-            columns={[
-              {
-                key: "task",
-                header: "Task",
-                width: pixel(80),
-                renderCell: (row) => <span className="mono">{row.task}</span>,
-              },
-              {
-                key: "phase",
-                header: "Phase",
-                width: pixel(160),
-                renderCell: (row) => <Status tone={row.tone}>{row.phase}</Status>,
-              },
-              {
-                key: "says",
-                header: "Waiting for",
-                width: proportional(4),
-                renderCell: (row) => <span title={row.says}>{row.says}</span>,
-              },
-              { key: "rounds", header: "Rounds", width: pixel(80), align: "end" },
-              {
-                key: "commit",
-                header: "Commit",
-                width: pixel(130),
-                renderCell: (row) => <span className="mono secondary">{row.commit}</span>,
-              },
-              {
-                key: "cancel",
-                header: "",
-                width: pixel(90),
-                align: "end",
-                renderCell: (row) =>
-                  row.open ? (
-                    <Action
-                      project={project}
-                      quiet
-                      onClick={() =>
-                        project.commands.cancelAssignment.run({
-                          assignment: row.id,
-                          reason: "cancelled by the user",
-                        })
-                      }
-                    >
-                      Cancel
-                    </Action>
-                  ) : null,
-              },
-            ]}
-          />
-        ) : (
-          <Empty>No assignments yet</Empty>
-        )}
       </Section>
     </>
   );

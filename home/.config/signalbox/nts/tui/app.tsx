@@ -1,6 +1,9 @@
 /** @jsxImportSource @opentui/react */
 import { useEffect, useRef, useState } from "react";
 import { useClient } from "signalbox/client/react";
+import { earlierTasks, runTaskAction, taskActions } from "../shared/actions.ts";
+import type { ActionValues } from "../shared/actions.ts";
+import { written } from "./compose.ts";
 import { agentStates, issueStates, taskConditions, taskPhases } from "../shared/glossary.ts";
 import * as refs from "../shared/model.ts";
 import { useKeyboard, useTerminalDimensions } from "@opentui/react";
@@ -216,6 +219,70 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       setFocus("list");
     });
   }
+  // What you can do to the selected task (shared/actions.ts): an action whose note is
+  // optional is offered plain and "with a note…"; words open the editor; urgency is a pick.
+  function act() {
+    if (!task) return setMessage("Select a task first.");
+    const issue = task;
+    const live = liveTask(project.data.assignments, issue.number);
+    const actions = taskActions(issue, live);
+    if (!actions.length) return setMessage(`#${issue.number} is not a task: nothing to do here.`);
+    const choices = actions.flatMap((action) =>
+      action.input === "optional"
+        ? [
+            { action, note: false, line: `${action.label}  — ${action.meaning}` },
+            { action, note: true, line: `${action.label}, with a note…` },
+          ]
+        : [
+            {
+              action,
+              note: action.input === "required",
+              line: `${action.label}  — ${action.meaning}`,
+            },
+          ],
+    );
+    void local(`#${issue.number}`, async () => {
+      const picked = await tools.find(
+        choices.map((choice) => choice.line),
+        `#${issue.number} ${live ? taskWord(live) : issueStateTerm(issue.state).label}`,
+      );
+      const choice = picked === undefined ? undefined : choices[picked];
+      if (!choice) return;
+      const { action } = choice;
+      const values: ActionValues = {};
+      if (action.input === "urgency") {
+        const levels = Array.from({ length: 19 }, (_, index) => 9 - index);
+        const at = await tools.find(
+          levels.map(
+            (level) => `${level > 0 ? "+" : ""}${level}${level === 0 ? "  the default" : ""}`,
+          ),
+          `#${issue.number} urgency (higher first)`,
+        );
+        if (at === undefined) return;
+        values.urgency = levels[at]!;
+      } else if (choice.note) {
+        const text = await written(tools, terminalConfig.editor, `${action.id}-${issue.number}`, [
+          `#${issue.number} ${issue.title}`,
+          `${action.label}: ${action.meaning}`,
+        ]);
+        if (text === undefined) return setMessage(`${action.label}: cancelled, nothing written.`);
+        values.text = text;
+      }
+      const worker = project.data.settings?.roles.worker;
+      if (action.id === "assign" && worker?.pick === "coordinator" && worker.models.length > 1) {
+        const at = await tools.find(
+          ["The first available model", ...worker.models.map((model) => model.label)],
+          `#${issue.number} worker model`,
+        );
+        if (at === undefined) return;
+        if (at > 0) values.model = worker.models[at - 1]!.id;
+      }
+      const done = await project.perform(() =>
+        runTaskAction(project.commands, action.id, issue.number, live, values),
+      );
+      if (done !== undefined) setMessage(`#${issue.number}: ${action.label.toLowerCase()}, done.`);
+    });
+  }
   function newTerminal() {
     if (!project.online || project.busy) return;
     const programs = project.terminalPrograms;
@@ -374,6 +441,10 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     }
     if (key.name === "f" && !key.shift && taskTab) {
       filter();
+      return;
+    }
+    if (key.name === "a" && !key.shift && taskTab) {
+      act();
       return;
     }
     if ((key.name === "F" || (key.name === "f" && key.shift)) && taskTab) {
@@ -570,7 +641,14 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           />
         )}
         {tab === "Now" && <NowView project={project} />}
-        {taskTab && task && <TaskDetail issue={task} />}
+        {taskTab && task && (
+          <TaskDetail
+            issue={task}
+            task={liveTask(project.data.assignments, task.number)}
+            earlier={earlierTasks(project.data.assignments, task.number)}
+            actions={taskActions(task, liveTask(project.data.assignments, task.number))}
+          />
+        )}
         {tab === "Agents" && agent && <AgentDetail agent={agent} />}
         {setting && <SettingDetail row={setting} />}
         {need && <NeedsDetail item={need} />}
@@ -582,7 +660,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     "j/k move",
     "Ctrl+D/U half pane",
     "/ find",
-    ...(taskTab ? ["f filter", "F clear"] : []),
+    ...(taskTab ? ["a act", "f filter", "F clear"] : []),
     ...(tab === "Agents"
       ? ["n new", "t task", "e ended", "Enter type/change", "Ctrl+] back"]
       : tab === "Needs you"
