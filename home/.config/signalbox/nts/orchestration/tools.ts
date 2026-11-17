@@ -22,6 +22,7 @@ import type { TaskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
 import type { Priorities } from "./priorities.ts";
 import { taskState } from "./task-model.ts";
+import { configuredCodexModel } from "./codex-config.ts";
 
 /** A capability that exists only once later wiring creates it; checked on use. */
 export class Late<T> {
@@ -76,7 +77,10 @@ export function workerModels(settings: Settings) {
   const { pick, models } = settings.roles.worker;
   return {
     pick,
-    models: models.map((profile) => ({ id: profileId(profile), label: profileLabel(profile) })),
+    models: models.map((profile) => ({
+      id: profileId(profile),
+      label: profileLabel(profile, configuredCodexModel()),
+    })),
   };
 }
 

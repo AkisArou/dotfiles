@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Assignment } from "signalbox/ext/assignments";
 import { parseSettings } from "./settings.ts";
-import { percents, shareRank, uncoveredAreas, withPercent } from "./shares.ts";
+import { groupOf, percents, shareRank, uncoveredAreas, withPercent } from "./shares.ts";
 
 const shares = [
   { name: "compiler", share: 1, areas: ["compiler", "runtime"] },
@@ -23,9 +23,11 @@ const areas: Record<number, string> = {
   4: "runtime",
   9: "unlabelled",
 };
-const areaOf = (assignment: Assignment) => areas[(assignment.input as { issue: number }).issue];
+const placeOf = (assignment: Assignment) => ({
+  area: areas[(assignment.input as { issue: number }).issue],
+});
 const rank = (assignment: Assignment, all: Assignment[], urgency = 0, split = shares) =>
-  shareRank({ shares: split, assignment, all, areaOf, urgency });
+  shareRank({ shares: split, assignment, all, placeOf, urgency });
 
 test("a freed slot goes to the group furthest below its share; urgency orders within a group", () => {
   const running = [task(1, true)]; // compiler holds one worker, tooling none
@@ -56,7 +58,7 @@ test("a freed slot goes to the group furthest below its share; urgency orders wi
   // An issue without an area label ranks as if its group ran nothing; without shares, urgency alone.
   assert.equal(rank(task(9, false), running, 2), 2);
   assert.equal(
-    shareRank({ shares: undefined, assignment: compiler, all: running, areaOf, urgency: -3 }),
+    shareRank({ shares: undefined, assignment: compiler, all: running, placeOf, urgency: -3 }),
     -3,
   );
 });
@@ -136,4 +138,54 @@ test("settings.json is refused when shares overlap, leave a known area out, or a
     /every share is 0/,
   );
   assert.deepEqual(uncoveredAreas(shares, known), []);
+});
+
+test("a group may take whole streams: a task joins its stream's group before its area's", () => {
+  const split = [
+    { name: "foundations", share: 2, areas: [], streams: [468] },
+    { name: "correctness", share: 1, areas: ["compiler", "runtime"], streams: [467] },
+    { name: "tooling", share: 1, areas: ["tooling", "docs"], streams: [472] },
+  ];
+  assert.equal(groupOf(split, { area: "compiler", stream: 468 })?.name, "foundations");
+  assert.equal(groupOf(split, { area: "compiler", stream: 467 })?.name, "correctness");
+  assert.equal(
+    groupOf(split, { area: "compiler", stream: 472 })?.name,
+    "tooling",
+    "the stream wins over the area",
+  );
+  assert.equal(
+    groupOf(split, { area: "runtime", stream: 471 })?.name,
+    "correctness",
+    "an unnamed stream falls back to its area",
+  );
+  assert.equal(groupOf(split, { area: "docs", stream: null })?.name, "tooling");
+  const known = ["compiler", "runtime", "tooling", "docs"];
+  const file = (shares: unknown) =>
+    JSON.stringify({
+      workerSlots: 4,
+      maxRounds: 4,
+      roles: Object.fromEntries(
+        ["coordinator", "worker", "reviewer"].map((role) => [
+          role,
+          {
+            pick: "first",
+            models: [{ harness: "claude", model: "claude-opus-5-5", effort: "high" }],
+          },
+        ]),
+      ),
+      shares,
+    });
+  assert.doesNotThrow(() => parseSettings(file(split), known));
+  assert.throws(
+    () =>
+      parseSettings(
+        file([...split, { name: "again", share: 1, areas: [], streams: [468] }]),
+        known,
+      ),
+    /stream #468 is in two groups/,
+  );
+  assert.throws(
+    () => parseSettings(file([...split, { name: "empty", share: 1, areas: [] }]), known),
+    /empty names no stream and no area/,
+  );
 });

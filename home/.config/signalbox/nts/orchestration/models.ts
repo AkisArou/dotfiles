@@ -39,11 +39,12 @@ export function profileId(profile: Profile): string {
   return `${profile.harness}/${profile.model ?? "configured"}/${profile.effort}`;
 }
 
-export function profileLabel(profile: Profile): string {
+/** A profile's name for lists; `configured` names the model Codex runs when none is given. */
+export function profileLabel(profile: Profile, configured?: string): string {
   const model =
     profile.harness === "claude"
       ? claudeModels[profile.model]
-      : `Codex ${profile.model ?? "(configured model)"}`;
+      : `Codex ${profile.model ?? configured ?? "(configured model)"}`;
   return `${model} · ${profile.effort}`;
 }
 

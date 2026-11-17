@@ -19,6 +19,7 @@ import { answerFor, issueStates } from "./needs.ts";
 import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
 import { urgencyValue } from "./priorities.ts";
+import { configuredCodexModel } from "./codex-config.ts";
 
 type Orchestration = ReturnType<typeof ntsOrchestration>;
 
@@ -113,16 +114,21 @@ function sharesView(
   all: readonly Assignment[],
 ): NonNullable<refs.SettingsView["shares"]> {
   const percent = percents(shares);
-  const areaOf = (assignment: Assignment) =>
-    issues.find((issue) => issue.number === (assignment.input as { issue?: number }).issue)?.area;
+  const placeOf = (assignment: Assignment) => {
+    const issue = issues.find(
+      (candidate) => candidate.number === (assignment.input as { issue?: number }).issue,
+    );
+    return issue && { area: issue.area, stream: issue.streamNumber };
+  };
   return shares.map((group) => ({
     name: group.name,
     percent: percent.get(group.name) ?? 0,
     areas: [...group.areas],
+    streams: [...(group.streams ?? [])],
     running: all.filter(
       (assignment) =>
         assignment.heldResources.some((held) => held.resource === "worker") &&
-        groupOf(shares, areaOf(assignment)) === group,
+        groupOf(shares, placeOf(assignment)) === group,
     ).length,
   }));
 }
@@ -130,7 +136,7 @@ function sharesView(
 const profileView = (profile: Profile): refs.ProfileView => ({
   ...profile,
   id: profileId(profile),
-  label: profileLabel(profile),
+  label: profileLabel(profile, configuredCodexModel()),
 });
 
 export function orchestrationEndpoints(orchestration: Orchestration): Extension[] {

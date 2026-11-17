@@ -1,4 +1,5 @@
-// How the worker slots are shared between groups of areas. workerSlots stays
+// How the worker slots are shared between groups of work: by stream (its parent
+// issue, such as #468 Foundations) or by area. workerSlots stays
 // the one count of tasks holding a worker; a share only decides who gets the
 // next free slot: the waiting task whose group is furthest below its share of
 // the slots in use. A group with nothing waiting lends its share (no worker
@@ -12,7 +13,15 @@ export interface Share {
   readonly share: number;
   /** The issues' area labels (area:<name>) this group's tasks come from. */
   readonly areas: readonly string[];
+  /** Streams (their parent issues' numbers) whose tasks this group takes, whatever their area. */
+  readonly streams?: readonly number[];
 }
+
+/** Where a task's issue sits: its area label and its stream's parent issue. */
+export type Place = {
+  readonly area?: string | undefined;
+  readonly stream?: number | null | undefined;
+};
 
 /** Areas the shares must cover: every area the repository labels, so no task falls outside them. */
 export function uncoveredAreas(shares: readonly Share[], known: readonly string[]): string[] {
@@ -20,9 +29,14 @@ export function uncoveredAreas(shares: readonly Share[], known: readonly string[
   return known.filter((area) => !named.has(area));
 }
 
-/** The group a task's issue area belongs to. */
-export function groupOf(shares: readonly Share[], area: string | undefined): Share | undefined {
-  return area === undefined ? undefined : shares.find((group) => group.areas.includes(area));
+/** A task's group: the one naming its stream, else the one naming its area. */
+export function groupOf(shares: readonly Share[], place: Place | undefined): Share | undefined {
+  if (!place) return undefined;
+  const { area, stream } = place;
+  return (
+    (stream ? shares.find((group) => group.streams?.includes(stream)) : undefined) ??
+    (area === undefined ? undefined : shares.find((group) => group.areas.includes(area)))
+  );
 }
 
 const holdsWorker = (assignment: Assignment) =>
@@ -39,18 +53,18 @@ export function shareRank(options: {
   readonly shares: readonly Share[] | undefined;
   readonly assignment: Assignment;
   readonly all: readonly Assignment[];
-  readonly areaOf: (assignment: Assignment) => string | undefined;
+  readonly placeOf: (assignment: Assignment) => Place | undefined;
   readonly urgency: number;
 }): number {
-  const { shares, assignment, all, areaOf, urgency } = options;
+  const { shares, assignment, all, placeOf, urgency } = options;
   if (!shares?.length) return urgency;
-  const group = groupOf(shares, areaOf(assignment));
+  const group = groupOf(shares, placeOf(assignment));
   if (!group) return urgency;
   const total = shares.reduce((sum, each) => sum + each.share, 0);
   // A share of nothing waits behind every other group.
   if (group.share === 0) return 1e6 + urgency;
   const running = all.filter(
-    (other) => holdsWorker(other) && groupOf(shares, areaOf(other)) === group,
+    (other) => holdsWorker(other) && groupOf(shares, placeOf(other)) === group,
   ).length;
   return 20 * running * (total / group.share) + urgency;
 }

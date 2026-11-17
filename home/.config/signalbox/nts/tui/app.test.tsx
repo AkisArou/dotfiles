@@ -63,6 +63,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     url: "https://github.com/AkisArou/nts/issues/807",
     area: "tooling",
     stream: "Tooling",
+    streamNumber: 472,
     group: "Landing",
     labels: ["task", "area:tooling"],
     state: "in_progress",

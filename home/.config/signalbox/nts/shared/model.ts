@@ -11,6 +11,8 @@ export type Issue = {
   url: string;
   area: string;
   stream: string;
+  /** The stream's parent issue (#468), or null when the issue sits under none. */
+  streamNumber: number | null;
   group: string;
   labels: string[];
   state: string;
@@ -83,7 +85,9 @@ export type SettingsView = {
   workerSlots: number;
   maxRounds: number;
   /** How workerSlots is shared between groups of areas, or null when nothing is split. */
-  shares: { name: string; percent: number; areas: string[]; running: number }[] | null;
+  shares:
+    | { name: string; percent: number; areas: string[]; streams: number[]; running: number }[]
+    | null;
   roles: Record<AgentRole, { pick: Pick; models: ProfileView[] }>;
   paused: { reason: string } | null;
   unavailable: Partial<Record<Harness, { reason: string; until?: number }>>;

@@ -133,8 +133,10 @@ export function ntsOrchestration(options: {
     },
   };
   const issueOf = (assignment: Assignment) => (assignment.input as { issue?: number }).issue;
-  const areaOf = (assignment: Assignment) =>
-    issuesNow()?.find((issue) => issue.number === issueOf(assignment))?.area;
+  const placeOf = (assignment: Assignment) => {
+    const issue = issuesNow()?.find((candidate) => candidate.number === issueOf(assignment));
+    return issue && { area: issue.area, stream: issue.streamNumber };
+  };
   const profileStore = profiles({ state: options.state, settings: file.service });
   const urgency = priorities({ state: options.state });
   const settingsNow = file.current;
@@ -213,7 +215,7 @@ export function ntsOrchestration(options: {
             shares: settingsNow().shares,
             assignment,
             all,
-            areaOf,
+            placeOf,
             urgency: urgency.rank(issueOf(assignment)),
           }),
   });

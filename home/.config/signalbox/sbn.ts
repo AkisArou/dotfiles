@@ -23,7 +23,7 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
   start | stop | restart | enable | disable
                     the host unit (systemctl --user ... signalbox@<project>)
   logs              follow the host's log
-  share | unshare   serve the browser UI on your tailnet (tailscale serve), or stop
+  tailnet [off]     serve the browser UI on your tailnet (tailscale serve), or stop
   doctor            the project's read-only prerequisites
   list              the projects and their hosts
   <verb> ...        any other verb goes to the project's scripts/cli.ts
@@ -179,7 +179,7 @@ function main(argv: readonly string[]): number {
         `No display here. On the computer you connect from, forward the two ports:\n\n` +
           `  ssh -N -L ${project.webPort}:127.0.0.1:${project.webPort} -L ${project.apiPort}:127.0.0.1:${project.apiPort} ${userInfo().username}@${here}\n\n` +
           `then open http://localhost:${project.webPort} there. The forward lasts while that ssh runs.\n` +
-          `Or, on your tailnet (a phone too): sbn share.`,
+          `Or, on your tailnet (a phone too): sbn tailnet.`,
       );
       return 0;
     }
@@ -204,13 +204,13 @@ function main(argv: readonly string[]): number {
       ]);
     // The browser UI on your tailnet, for a phone or another machine: Tailscale's own
     // HTTPS address, proxied to this host, which accepts it (it reads the address too).
-    case "share":
-    case "unshare": {
-      for (const serve of serveCommands(project, command === "share")) {
+    case "tailnet": {
+      const on = args[0] !== "off";
+      for (const serve of serveCommands(project, on)) {
         const code = run("tailscale", serve);
         if (code !== 0) return code;
       }
-      if (command === "unshare") return 0;
+      if (!on) return 0;
       const status = spawnSync("tailscale", ["status", "--json"], {
         encoding: "utf8",
       });

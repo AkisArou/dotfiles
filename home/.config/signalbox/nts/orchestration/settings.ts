@@ -33,14 +33,16 @@ export const settingsSchema = z
     roles: z
       .object({ coordinator: roleSettings, worker: roleSettings, reviewer: roleSettings })
       .strict(),
-    /** How workerSlots is shared between groups of areas; absent, nothing is split. */
+    /** How workerSlots is shared between groups of streams or areas; absent, nothing is split. */
     shares: z
       .array(
         z
           .object({
             name: z.string().min(1),
             share: z.number().min(0),
-            areas: z.array(z.string().min(1)).min(1),
+            areas: z.array(z.string().min(1)),
+            /** Streams by their parent issue (#468 is 468): their tasks join this group first. */
+            streams: z.array(z.number().int().positive()).optional(),
           })
           .strict(),
       )
@@ -67,6 +69,20 @@ export const settingsSchema = z
         code: "custom",
         path: ["shares"],
         message: `area ${area} is in two groups`,
+      });
+    for (const [index, group] of shares.entries())
+      if (!group.areas.length && !group.streams?.length)
+        issues.addIssue({
+          code: "custom",
+          path: ["shares", index],
+          message: `${group.name} names no stream and no area`,
+        });
+    const streams = shares.flatMap((group) => group.streams ?? []);
+    for (const stream of new Set(streams.filter((stream, at) => streams.indexOf(stream) !== at)))
+      issues.addIssue({
+        code: "custom",
+        path: ["shares"],
+        message: `stream #${stream} is in two groups`,
       });
     if (shares.length && shares.every((group) => group.share === 0))
       issues.addIssue({ code: "custom", path: ["shares"], message: "every share is 0" });

@@ -141,6 +141,7 @@ test("a task goes from tree to verified through design approval, review and land
     url: "",
     area: "tooling",
     stream: "s",
+    streamNumber: 472,
     group: "g",
     labels: ["task", "area:tooling", "kind:foundation"],
     state: "ready",

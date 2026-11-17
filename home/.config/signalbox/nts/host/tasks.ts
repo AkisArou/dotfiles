@@ -106,6 +106,7 @@ export function projectIssues(listed: readonly ListedIssue[], plan: string): Iss
         state,
         area: labels.find((label) => label.startsWith("area:"))?.slice(5) ?? "unassigned",
         stream: stream?.title ?? issue.parent?.title ?? "Unsorted",
+        streamNumber: stream?.number ?? null,
         group: group?.title ?? (labels.includes("kind:group") ? issue.title : ""),
         assignees: issue.assignees.map((assignee) => assignee.login),
         owner: owner || null,

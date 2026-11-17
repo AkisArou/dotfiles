@@ -29,7 +29,7 @@ test("sbn picks the project whose root contains the directory, deepest root firs
   assert.equal(projectFor(all, "/elsewhere"), undefined);
 });
 
-test("sbn share serves the page, its API and its terminals on the tailnet; unshare removes only those", () => {
+test("sbn tailnet serves the page, its API and its terminals on the tailnet; off removes only those", () => {
   const ports = { webPort: 4310, apiPort: 4311 };
   assert.deepEqual(serveCommands(ports, true), [
     ["serve", "--bg", "--set-path", "/", "http://127.0.0.1:4310"],
