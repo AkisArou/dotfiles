@@ -11,8 +11,8 @@ import type { Mailbox } from "signalbox/ext/orchestration/services";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import { latestValue } from "signalbox/core";
-import { taskState } from "./task.ts";
-import type { TaskState } from "./task.ts";
+import { taskState } from "./task-model.ts";
+import type { TaskState } from "./task-model.ts";
 import type { UserDecisions } from "./tools.ts";
 
 export type Wakeup = { readonly id: string; readonly text: string };
@@ -72,10 +72,10 @@ export function wakeups(observed: {
           `${name} has been in ${task.phase} for ${Math.round((observed.now - task.phaseSince) / 60_000)} min (budget ${budget / 60_000}).` +
           ` Now: ${assignment.wait?.reason ?? "working"}${task.progress ? `; progress: ${task.progress.note}` : ""}. Decide whether it needs you.`,
       });
-    if (assignment.wait?.reason.startsWith("Escalated"))
+    if (task.phase === "escalated" && task.escalation)
       events.push({
-        id: `escalated/${assignment.id}/${task.rounds}`,
-        text: `${name} escalated: ${assignment.wait.reason}. Decide: guide the worker, cancel, or ask the user.`,
+        id: `escalated/${assignment.id}/${hash(task.escalation).slice(0, 16)}`,
+        text: `${name} needs your decision: ${task.escalation}\nDecide with message_worker (it returns to build with your message), cancel_assignment, or ask_user.`,
       });
     if (assignment.error)
       events.push({

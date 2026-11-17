@@ -69,6 +69,8 @@ export type AssignmentView = {
   progress: string | null;
   /** The awaited agent stayed idle through its nudges. */
   stalled: string | null;
+  /** What the coordinator must decide while the task is escalated. */
+  escalation: string | null;
   design: string;
   summary: string;
   worker: string | null;
@@ -117,6 +119,7 @@ export const reworkAssignment = operation<{ assignment: string; notes: string },
 export function assignmentSays(a: AssignmentView): string {
   const said =
     a.error ??
+    (a.escalation && `decide: ${a.escalation}`) ??
     (a.stalled && `stalled: ${a.stalled}`) ??
     (a.help && `asks: ${a.help}`) ??
     a.wait ??

@@ -14,8 +14,9 @@ import type { Decisions } from "signalbox/ext/decisions/index";
 import type { Mailbox, AgentService } from "signalbox/ext/orchestration/services";
 import type { Issue } from "../shared/model.ts";
 import { toolInput } from "./agents.ts";
-import type { TaskRoute, TaskState } from "./task.ts";
-import { taskState } from "./task.ts";
+import type { TaskRoute } from "./task.ts";
+import type { TaskState } from "./task-model.ts";
+import { taskState } from "./task-model.ts";
 
 /** A capability that exists only once later wiring creates it; checked on use. */
 export class Late<T> {
@@ -75,16 +76,14 @@ function progressTool(wiring: Wiring, role: "worker" | "reviewer") {
     output: ok,
     async run(input, context) {
       const { assignment } = callerTask(context, wiring, role);
-      await context
-        .get(wiring.work.get())
-        .report(
-          {
-            assignmentId: assignment.id,
-            data: { kind: "progress", role, ...input },
-            requestId: context.requestId,
-          },
-          context.signal,
-        );
+      await context.get(wiring.work.get()).report(
+        {
+          assignmentId: assignment.id,
+          data: { kind: "progress", role, ...input },
+          requestId: context.requestId,
+        },
+        context.signal,
+      );
       return { ok: true as const };
     },
   });
@@ -94,16 +93,14 @@ export function workerTools(wiring: Wiring) {
   const report =
     (kind: "design" | "ready" | "help") => async (data: Json, context: AgentToolContext) => {
       const { assignment } = callerTask(context, wiring, "worker");
-      await context
-        .get(wiring.work.get())
-        .report(
-          {
-            assignmentId: assignment.id,
-            data: { kind, ...(data as object) },
-            requestId: context.requestId,
-          },
-          context.signal,
-        );
+      await context.get(wiring.work.get()).report(
+        {
+          assignmentId: assignment.id,
+          data: { kind, ...(data as object) },
+          requestId: context.requestId,
+        },
+        context.signal,
+      );
       return { ok: true as const };
     };
   return agentToolset({
@@ -161,16 +158,14 @@ export function reviewerTools(wiring: Wiring) {
           const { assignment, state } = callerTask(context, wiring, "reviewer");
           if (state.reviewer!.commit !== input.commit)
             throw new Error(`You review ${state.reviewer!.commit}`);
-          await context
-            .get(wiring.work.get())
-            .report(
-              {
-                assignmentId: assignment.id,
-                data: { kind: "review", ...input },
-                requestId: context.requestId,
-              },
-              context.signal,
-            );
+          await context.get(wiring.work.get()).report(
+            {
+              assignmentId: assignment.id,
+              data: { kind: "review", ...input },
+              requestId: context.requestId,
+            },
+            context.signal,
+          );
           return { ok: true as const };
         },
       }),
@@ -313,22 +308,21 @@ export function coordinatorTools(wiring: Wiring) {
         output: ok,
         run: (input, context) =>
           authorized(context, async () => {
-            await context
-              .get(wiring.work.get())
-              .report(
-                {
-                  assignmentId: input.assignment,
-                  data: { kind: "rework", notes: input.notes },
-                  requestId: context.requestId,
-                },
-                context.signal,
-              );
+            await context.get(wiring.work.get()).report(
+              {
+                assignmentId: input.assignment,
+                data: { kind: "rework", notes: input.notes },
+                requestId: context.requestId,
+              },
+              context.signal,
+            );
             return { ok: true as const };
           }),
       }),
       agentTool({
         name: "message_worker",
-        description: "Send a message to a task's current worker.",
+        description:
+          "Send a message to a task's current worker. It answers the worker's open question; an escalated task returns to build with it.",
         input: toolInput(z.object({ assignment: z.string(), text: z.string().min(1) })),
         output: ok,
         // Through the route: delivered once, recorded, and it answers the worker's open question.
@@ -353,16 +347,14 @@ export function coordinatorTools(wiring: Wiring) {
         output: ok,
         run: (input, context) =>
           authorized(context, async () => {
-            await context
-              .get(wiring.work.get())
-              .cancel(
-                {
-                  assignmentId: input.assignment,
-                  reason: input.reason,
-                  requestId: context.requestId,
-                },
-                context.signal,
-              );
+            await context.get(wiring.work.get()).cancel(
+              {
+                assignmentId: input.assignment,
+                reason: input.reason,
+                requestId: context.requestId,
+              },
+              context.signal,
+            );
             return { ok: true as const };
           }),
       }),
@@ -377,12 +369,10 @@ export function coordinatorTools(wiring: Wiring) {
         run: (input, context) =>
           authorized(context, async () =>
             toJson(
-              await context
-                .get(wiring.decisions)
-                .request({
-                  id: input.id,
-                  input: { question: input.question, context: input.context },
-                }),
+              await context.get(wiring.decisions).request({
+                id: input.id,
+                input: { question: input.question, context: input.context },
+              }),
             ),
           ),
       }),

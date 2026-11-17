@@ -11,7 +11,7 @@ import type { AgentActivity } from "./activity.ts";
 import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
-import { taskState } from "./task.ts";
+import { taskState } from "./task-model.ts";
 
 type Orchestration = ReturnType<typeof ntsOrchestration>;
 
@@ -33,6 +33,7 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     phaseSince: state?.phaseSince ?? null,
     progress: state?.progress?.note ?? null,
     stalled: state?.stalled ?? null,
+    escalation: state?.escalation ?? null,
     design: state?.design ?? "",
     summary: state?.summary ?? "",
     worker: state?.worker?.id ?? null,
@@ -164,13 +165,11 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       input: z.object({ assignment: z.string(), reason: z.string().min(1) }),
       output: z.object({ ok: z.literal(true) }),
       run: async (input, context) => {
-        await context
-          .get(work)
-          .cancel({
-            assignmentId: input.assignment,
-            reason: input.reason,
-            requestId: context.requestId,
-          });
+        await context.get(work).cancel({
+          assignmentId: input.assignment,
+          reason: input.reason,
+          requestId: context.requestId,
+        });
         return { ok: true as const };
       },
     }),

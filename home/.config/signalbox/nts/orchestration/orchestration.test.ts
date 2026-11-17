@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cardPaths } from "./task.ts";
+import { cardPaths } from "./task-model.ts";
 import { PHASE_BUDGET, wakeups } from "./wakeups.ts";
 import type { Assignment } from "signalbox/ext/assignments/index";
 
@@ -76,14 +76,21 @@ test("wake-ups have stable identities derived from what they announce", () => {
   assert.deepEqual(late(PHASE_BUDGET.build!, 0), []);
   assert.deepEqual(late(PHASE_BUDGET.build! + 1, 0), ["overdue/a1/build/0"]);
   assert.deepEqual(observe([task({ help: "which owner?" })]).length, 1);
+  // An escalated task is announced once per escalation; the next escalation is news again.
+  const escalated = (escalation: string) =>
+    observe([task({ phase: "escalated", rounds: 5, escalation })]);
+  assert.equal(escalated("Escalated after 5 rounds: the review asks again").length, 1);
+  assert.match(
+    escalated("Escalated after 5 rounds: the review asks again")[0]!,
+    /^escalated\/a1\//,
+  );
   assert.deepEqual(
-    observe([
-      task(
-        { rounds: 5 },
-        { wait: { reason: "Escalated after 5 rounds; the coordinator decides" } },
-      ),
-    ]),
-    ["escalated/a1/5"],
+    escalated("Escalated after 5 rounds: the review asks again"),
+    escalated("Escalated after 5 rounds: the review asks again"),
+  );
+  assert.notDeepEqual(
+    escalated("Escalated after 6 rounds: the landing refused"),
+    escalated("Escalated after 5 rounds: the review asks again"),
   );
   assert.deepEqual(
     observe([task({ phase: "done", outcome: "verified" }, { status: "finished" })]),

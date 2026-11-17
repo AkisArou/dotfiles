@@ -22,7 +22,8 @@ import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import type { ManagedAgents } from "./agents.ts";
 import { profiles } from "./profiles.ts";
-import { taskRoute, taskState } from "./task.ts";
+import { taskRoute } from "./task.ts";
+import { taskState } from "./task-model.ts";
 import { activitySource } from "./activity.ts";
 import type { AgentActivity } from "./activity.ts";
 import { STALL } from "./stall.ts";
@@ -230,6 +231,13 @@ test("a task goes from tree to verified through design approval, review and land
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
   };
+  const eventually = async (check: () => boolean, what: string) => {
+    const deadline = Date.now() + 20_000;
+    while (!check()) {
+      if (Date.now() > deadline) throw new Error(`never ${what}: ${read().wait?.reason}`);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+  };
   const report = (data: object, requestId: string) =>
     service.report({ assignmentId: id, data: data as never, requestId });
 
@@ -376,7 +384,46 @@ test("a task goes from tree to verified through design approval, review and land
     /^Rework [0-9a-f]{40}: the tooling step hung in worker-memory/,
   );
   assert.deepEqual(JSON.parse(await readFile(join(directory, "queue.json"), "utf8")), []);
+  // A reviewer disputing the design escalates: the worker hears nothing until the
+  // coordinator decides, and its message returns the task to build with the finding.
   await report({ kind: "ready", commit, summary: "the hang was the fixture's" }, "ready-3");
+  await phase("reviewing");
+  const told = messages.length;
+  await report(
+    {
+      kind: "review",
+      commit,
+      verdict: "changes",
+      findings: "the design owns the wrong file",
+      disputesDesign: true,
+    },
+    "review-dispute",
+  );
+  const escalated = await phase("escalated");
+  assert.match(
+    escalated.escalation!,
+    /disputes the approved design:\nthe design owns the wrong file/,
+  );
+  assert.equal(messages.length, told, "the worker is not sent to rework on the reviewer's word");
+  await eventually(
+    () =>
+      /^The coordinator decides: The reviewer of [0-9a-f]{40} disputes/.test(
+        read().wait?.reason ?? "",
+      ),
+    "waiting for the coordinator",
+  );
+  await report(
+    { kind: "message", from: "coordinator", text: "Keep the design; answer the finding." },
+    "decide-1",
+  );
+  const decided = await phase("build");
+  assert.equal(decided.escalation, null);
+  assert.match(
+    messages.at(-1)!.text,
+    /^From the coordinator: Keep the design; answer the finding\.\n\nIt decides on:\nThe review of [0-9a-f]{40} disputes/,
+  );
+  await report({ kind: "ready", commit, summary: "answered the finding" }, "ready-4");
+
   await phase("reviewing");
   await report({ kind: "review", commit, verdict: "accept", findings: "" }, "review-3");
   await phase("landing");
@@ -417,6 +464,7 @@ test("a task goes from tree to verified through design approval, review and land
     await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(read().status, "finished");
   assert.equal(taskState.parse(read().state).outcome, "verified");
-  assert.deepEqual(stopped.sort(), ["fake/1", "fake/2", "fake/3", "fake/4"]);
+  // fake/5 is the fresh reviewer after the dispute: its round counted, so its launch key is new.
+  assert.deepEqual(stopped.sort(), ["fake/1", "fake/2", "fake/3", "fake/4", "fake/5"]);
   assert.deepEqual(read().heldResources, []);
 });
