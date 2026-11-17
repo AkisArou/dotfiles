@@ -17,7 +17,14 @@ import { useSelection } from "./selection.tsx";
 import { isNtsPage, tableRows, cellText } from "../status/model.ts";
 import { NtsContent } from "./nts.tsx";
 import { SettingDetail, settingAction, settingRows } from "./settings.tsx";
-import { NeedsDetail, answerNeed, needsGroups, needsItems, needsLabel } from "./needs.tsx";
+import {
+  NeedsDetail,
+  answerNeed,
+  needsGroups,
+  needsItems,
+  needsLabel,
+  withdrawNeed,
+} from "./needs.tsx";
 import type { SettingRow } from "./settings.tsx";
 import { tabLabels } from "./navigation.ts";
 import { navigationKey } from "./keyboard.ts";
@@ -317,6 +324,13 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       git();
       return;
     }
+    if (need && key.name === "x") {
+      void local("Needs you", async () => {
+        const said = await withdrawNeed(need, project, tools);
+        if (said) setMessage(said);
+      });
+      return;
+    }
     if (need && key.name === "return") {
       key.preventDefault();
       void local("Needs you", async () => {
@@ -513,7 +527,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     ...(tab === "Agents"
       ? ["n new", "e ended", "Enter type/change", "Ctrl+] back"]
       : tab === "Needs you"
-        ? ["Enter answer"]
+        ? ["Enter answer", "x withdraw"]
         : ["Enter details"]),
     "l git",
     "? help",

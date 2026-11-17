@@ -15,6 +15,7 @@
 //   sbn answer <id> --option <n>    answer a question (its choice n, or your words)
 //   sbn answer #<issue> <text...> [--then ready|parked|held]
 //                                   answer an issue that waits on you without a question
+//   sbn withdraw <id>               withdraw an open question (the coordinator is told)
 //   sbn show <issue>                one task's design, summary and latest instruction
 //   sbn assign <issue> [--model <id>] [notes...]
 //                                   start a task (a model when workers pick "coordinator")
@@ -64,6 +65,7 @@ const VERBS = [
   "models",
   "needs",
   "answer",
+  "withdraw",
   "show",
   "assign",
   "prioritize",
@@ -175,6 +177,15 @@ async function main(verb: Verb, args: string[]): Promise<void> {
           `✓ ${question.id}: ${question.answer}${question.issue ? ` · #${question.issue.number} ${question.posted === "done" ? "posted" : `not posted yet: ${question.posted}`}` : ""}`,
         );
       return;
+    }
+    if (verb === "withdraw") {
+      const id = args.join(" ").trim();
+      const question = (await read<NeedsView>(client, "nts.needs")).questions.find(
+        (candidate) => candidate.id === id,
+      );
+      if (!question) throw new Error(`${id} is not an open question (sbn needs lists them)`);
+      await call(client, "nts.needs.withdraw", { id, revision: question.revision });
+      return console.log(`${id}: withdrawn; the coordinator is told.`);
     }
     if (verb === "answer") {
       const flag = (name: string) => {

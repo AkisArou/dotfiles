@@ -31,7 +31,8 @@ export function useProject() {
     assignTask = useCommand(refs.assignTask),
     cancelAssignment = useCommand(refs.cancelAssignment),
     answerQuestion = useCommand(refs.answerQuestion),
-    answerIssue = useCommand(refs.answerIssue);
+    answerIssue = useCommand(refs.answerIssue),
+    withdrawQuestion = useCommand(refs.withdrawQuestion);
   const [error, setError] = useState<string>();
   const perform = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
     setError(undefined);
@@ -72,6 +73,7 @@ export function useProject() {
       cancelAssignment,
       answerQuestion,
       answerIssue,
+      withdrawQuestion,
     },
     perform,
     error,
@@ -85,7 +87,8 @@ export function useProject() {
       assignTask.pending ||
       cancelAssignment.pending ||
       answerQuestion.pending ||
-      answerIssue.pending,
+      answerIssue.pending ||
+      withdrawQuestion.pending,
     online: connection.status === "connected",
   };
 }

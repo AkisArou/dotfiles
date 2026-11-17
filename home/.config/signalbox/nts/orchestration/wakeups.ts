@@ -26,7 +26,7 @@ export type WakeupSource = (typeof SOURCES)[number];
 export function sourceOf(id: string): WakeupSource {
   if (id.startsWith("landing/")) return "landing";
   if (id.startsWith("culprit/")) return "fullCheck";
-  if (id.startsWith("decided/")) return "decisions";
+  if (id.startsWith("decided/") || id.startsWith("withdrawn/")) return "decisions";
   if (id.startsWith("needs-question/")) return "needs";
   return "assignments";
 }
@@ -58,6 +58,8 @@ export function wakeups(observed: {
     answer: string;
     then?: string | undefined;
   }[];
+  /** Questions withdrawn (by the owner, or by the coordinator replacing one). */
+  readonly withdrawn?: readonly { id: string; question: string; issue?: number | undefined }[];
   /** Issues that wait on the owner with no question asked about them. */
   readonly unasked?: readonly { number: number; title: string }[];
   /** The observation's time, for phase budgets. */
@@ -156,6 +158,13 @@ export function wakeups(observed: {
           : "") +
         "\nAct on it.",
     });
+  for (const question of observed.withdrawn ?? [])
+    events.push({
+      id: `withdrawn/${question.id}`,
+      text:
+        `The question ${question.id} ("${question.question}") was withdrawn. ` +
+        "If it still needs the owner, ask again with ask_user: name the issue it is about and give options, each with then.",
+    });
   for (const issue of observed.unasked ?? [])
     events.push({
       id: `needs-question/${issue.number}`,
@@ -203,6 +212,13 @@ export function wakeupFeed(options: {
               issue: request.input.issue,
               answer: request.result!.decision.answer,
               then: request.result!.decision.then,
+            })),
+          withdrawn: (latestValue(context.get(options.decisions).requests) ?? [])
+            .filter((request) => request.status === "withdrawn")
+            .map((request) => ({
+              id: request.id,
+              question: request.input.question,
+              issue: request.input.issue,
             })),
           unasked: latestValue(context.get(options.needs))?.unasked ?? [],
           now: Date.now(),

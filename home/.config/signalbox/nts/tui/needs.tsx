@@ -169,6 +169,25 @@ async function written(
   }
 }
 
+/** Withdraws an open question after the owner confirms; the coordinator is told. */
+export async function withdrawNeed(
+  item: NeedsItem,
+  project: Project,
+  tools: TerminalTools,
+): Promise<string | undefined> {
+  if (item.kind !== "question") return "Only an open question can be withdrawn.";
+  const confirm = await tools.find(
+    [`Withdraw: ${item.question.question}`, "Keep it"],
+    "Withdraw the question?",
+  );
+  if (confirm !== 0) return undefined;
+  await project.commands.withdrawQuestion.run({
+    id: item.question.id,
+    revision: item.question.revision,
+  });
+  return "Withdrawn; the coordinator is told.";
+}
+
 /** Answers one item; returns what to tell the owner, or undefined when they cancelled. */
 export async function answerNeed(
   item: NeedsItem,

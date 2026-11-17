@@ -376,6 +376,16 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       },
     }),
     exposeOperation({
+      ref: refs.withdrawQuestion,
+      requires: [decisions],
+      input: z.object({ id: z.string(), revision: z.number().int() }),
+      output: z.object({ ok: z.literal(true) }),
+      run: async (input, context) => {
+        await context.get(decisions).withdraw(input.id, input.revision);
+        return { ok: true as const };
+      },
+    }),
+    exposeOperation({
       ref: refs.answerIssue,
       requires: [decisions, needsView],
       input: z.object({

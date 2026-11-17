@@ -14,7 +14,7 @@ import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import type { Questions } from "./needs.ts";
 import type { NeedsView } from "../shared/model.ts";
-import { sourceOf, wakeupFeed } from "./wakeups.ts";
+import { sourceOf, wakeupFeed, wakeups } from "./wakeups.ts";
 
 const landed = (id: string) =>
   ({
@@ -37,6 +37,27 @@ const landed = (id: string) =>
     ],
     main: { commit: null, pushed: null },
   }) as unknown as LandingStatus;
+
+test("what waits on the owner reaches the coordinator: unasked issues, answers, withdrawals", () => {
+  const events = wakeups({
+    assignments: [],
+    landing: undefined,
+    fullCheck: undefined,
+    decided: [{ id: "mac", question: "Buy a Mac mini?", issue: 583, answer: "No", then: "parked" }],
+    withdrawn: [{ id: "old", question: "May they edit compiler/?" }],
+    unasked: [{ number: 777, title: "Share the recipes" }],
+    now: 0,
+  });
+  const text = (id: string) => events.find((event) => event.id === id)?.text ?? "";
+  assert.match(text("decided/mac"), /Buy a Mac mini\?[\s\S]*Answer: No[\s\S]*#583 is now parked/);
+  assert.match(text("withdrawn/old"), /was withdrawn[\s\S]*ask again with ask_user/);
+  assert.match(
+    text("needs-question/777"),
+    /#777 Share the recipes waits on the owner[\s\S]*ask_user with issue 777/,
+  );
+  assert.equal(sourceOf("needs-question/777"), "needs");
+  assert.equal(sourceOf("withdrawn/old"), "decisions");
+});
 
 test("wake-up sources: landing, culprit and decided IDs name their source", () => {
   assert.equal(sourceOf("landing/a/refused"), "landing");

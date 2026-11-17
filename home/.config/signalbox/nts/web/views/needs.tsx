@@ -117,6 +117,14 @@ function Question({ project, question }: { project: Project; question: QuestionV
           Your answer is posted on #{question.issue.number} and the coordinator is told.
         </p>
       )}
+      <Action
+        project={project}
+        onClick={() =>
+          project.commands.withdrawQuestion.run({ id: question.id, revision: question.revision })
+        }
+      >
+        Withdraw the question
+      </Action>
     </div>
   );
 }

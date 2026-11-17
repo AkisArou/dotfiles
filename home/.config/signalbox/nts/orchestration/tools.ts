@@ -445,6 +445,22 @@ export function coordinatorTools(wiring: Wiring) {
           }),
       }),
       agentTool({
+        name: "withdraw_question",
+        description:
+          "Withdraw your open question to the owner when it became moot or you will ask it better (with its issue and options). It leaves Needs you.",
+        input: toolInput(z.object({ id: z.string().min(1) })),
+        output: ok,
+        run: (input, context) =>
+          authorized(context, async () => {
+            const questions = context.get(wiring.decisions);
+            const request = await questions.read(input.id);
+            if (!request || request.status !== "pending")
+              throw new Error(`${input.id} is not an open question`);
+            await questions.withdraw(input.id, request.revision);
+            return { ok: true as const };
+          }),
+      }),
+      agentTool({
         name: "save_checkpoint",
         description:
           "Save what your successor needs: open decisions, order of work, what you are waiting for and why.",

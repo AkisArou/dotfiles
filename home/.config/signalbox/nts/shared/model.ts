@@ -175,6 +175,10 @@ export const answerQuestion = operation<
   | { id: string; revision: number; answer: string; then?: IssueState },
   { ok: true }
 >("nts.needs.answer");
+/** Withdraws an open question: moot, or to be asked again better. The coordinator is told. */
+export const withdrawQuestion = operation<{ id: string; revision: number }, { ok: true }>(
+  "nts.needs.withdraw",
+);
 /** Answers an issue that waits on the owner but has no question yet. */
 export const answerIssue = operation<
   { issue: number; answer: string; then: IssueState },
