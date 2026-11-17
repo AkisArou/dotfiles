@@ -100,6 +100,20 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
       ),
       // The plan page is only viewed; issues feed admission and the coordinator.
       ...observe(refs.plan, 30_000, () => readFile(planPath, "utf8"), "subscribed").extensions,
+      // What each label means, from the project's own vocabulary file.
+      ...observe(
+        refs.labels,
+        600_000,
+        async () => {
+          const file = JSON.parse(
+            await readFile(join(settings.root, ".github/labels.json"), "utf8"),
+          ) as { labels?: { name: string; description?: string }[] };
+          return Object.fromEntries(
+            (file.labels ?? []).map((label) => [label.name, label.description ?? ""]),
+          );
+        },
+        "subscribed",
+      ).extensions,
       ...issues.extensions,
       ...orchestration.extensions,
       ...orchestrationEndpoints(orchestration),

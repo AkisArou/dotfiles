@@ -1,5 +1,7 @@
 // NTS application data shared by the host, web client and terminal client.
 import { operation, source } from "signalbox/core/remote";
+import { issueStates, taskConditions, taskPhases } from "./glossary.ts";
+import type { Term } from "./glossary.ts";
 
 export type Issue = {
   id: string;
@@ -34,6 +36,8 @@ export const overview = source<Overview>("nts.overview");
 export const issues = source<Issue[]>("nts.issues");
 export const agents = source<Agent[]>("nts.agents");
 export const plan = source<string>("nts.plan");
+/** NTS's label meanings (name to description), from its .github/labels.json. */
+export const labels = source<Record<string, string>>("nts.labels");
 export const terminalPrograms = source<{ id: string; label: string }[]>("nts.terminal-programs");
 export const startTerminal = operation<{ program: string }, { id: string }>("nts.start-terminal");
 /** The tmux pane a terminal's program runs in, for native tools such as a scrollback viewer. */
@@ -88,6 +92,8 @@ export type AssignmentView = {
   waitingOn: string[];
   /** The task that gets it first, when one queues ahead (its key, issue/<n>). */
   ahead: string | null;
+  /** Its place in the queue is not known yet (the host is still reading the issues). */
+  unordered: boolean;
   help: string | null;
   rounds: number;
   commit: string | null;
@@ -236,9 +242,11 @@ export function agentTone(state: string): Tone {
   return "attention";
 }
 
-/** An issue: held, parked, waiting on the owner or unscoped wants a look; the rest is plain. */
+/** An issue: held, parked, waiting on the owner, unscoped or orphaned (work nobody is doing) wants a look. */
 export function issueTone(state: string): Tone {
-  return ["held", "parked", "needs-user", "unscoped"].includes(state) ? "attention" : "plain";
+  return ["held", "parked", "needs-user", "unscoped", "orphaned"].includes(state)
+    ? "attention"
+    : "plain";
 }
 
 /** A task: a fault is bad; an escalation, a stall or a question wants a look; finished is quiet. */
@@ -283,13 +291,34 @@ export function taskWord(a: AssignmentView): string {
   if (a.escalation) return "escalated";
   if (a.stalled) return "stalled";
   if (a.help) return "asks";
+  if (a.unordered) return taskConditions.queued!.label;
   if (a.waitingOn.includes("resource:worker")) {
     const ahead = a.ahead && /^issue\/(\d+)/.exec(a.ahead)?.[1];
-    return a.ahead ? `queued after ${ahead ? `#${ahead}` : a.ahead}` : "next for a worker";
+    return a.ahead ? `queued after ${ahead ? `#${ahead}` : a.ahead}` : taskConditions.next!.label;
   }
-  if (a.status === "queued") return "queued";
-  return a.phase ?? a.status;
+  if (a.status === "queued") return taskConditions.queued!.label;
+  return phaseLabel(a.phase ?? a.status);
 }
+
+/** A phase as the lists say it ("building", "in review"); an unknown one as it is. */
+export const phaseLabel = (phase: string) => taskPhases[phase]?.label ?? phase;
+
+/** What a task's word means (the glossary's), for a tooltip or the help. */
+export function taskMeaning(a: AssignmentView): string {
+  if (a.error) return taskConditions.faulted!.meaning;
+  if (a.escalation) return taskConditions.escalated!.meaning;
+  if (a.stalled) return taskConditions.stalled!.meaning;
+  if (a.help) return taskConditions.asks!.meaning;
+  if (a.unordered) return taskConditions.queued!.meaning;
+  if (a.waitingOn.includes("resource:worker"))
+    return (a.ahead ? taskConditions.after! : taskConditions.next!).meaning;
+  if (a.status === "queued") return taskConditions.queued!.meaning;
+  return taskPhases[a.phase ?? ""]?.meaning ?? "";
+}
+
+/** An issue's state as the lists say it ("in progress"), and what it means. */
+export const issueStateTerm = (state: string): Term =>
+  issueStates[state] ?? { label: state, meaning: "" };
 
 /** An issue's task in flight (queued or active), the latest when there are several. */
 export function liveTask(
@@ -301,12 +330,13 @@ export function liveTask(
     .sort((a, b) => b.acceptedAt - a.acceptedAt)[0];
 }
 
-/** The phase and how long it has run, e.g. "build 42 min". */
+/** The task word and how long its phase has run, e.g. "building · 42 min". */
 export function assignmentPhase(a: AssignmentView, now = Date.now()): string {
-  const phase = a.error ? "faulted" : (a.phase ?? a.status);
+  // Its word (a queue place, a phase, what it needs), then how long the phase has run.
+  const word = taskWord(a);
   return a.phaseSince === null
-    ? phase
-    : `${phase} ${Math.max(0, Math.round((now - a.phaseSince) / 60_000))} min`;
+    ? word
+    : `${word} · ${Math.max(0, Math.round((now - a.phaseSince) / 60_000))} min`;
 }
 export const prioritizeTask = operation<
   { issue: number; urgency: number },

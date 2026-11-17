@@ -21,8 +21,17 @@ const VARIANT: Record<Tone, "success" | "warning" | "error" | "accent" | "neutra
 };
 
 /** A state as a dot and its word, in the tone the shared rules give it (as the TUI shows it). */
-export function Status({ tone, children }: { tone: Tone; children: ReactNode }) {
-  return (
+export function Status({
+  tone,
+  children,
+  title,
+}: {
+  tone: Tone;
+  children: ReactNode;
+  /** What the state means (the glossary's), shown on hover. */
+  title?: string;
+}) {
+  const status = (
     <HStack gap={1.5} align="center" className="status">
       <StatusDot variant={VARIANT[tone]} label={typeof children === "string" ? children : tone} />
       <Text
@@ -35,6 +44,7 @@ export function Status({ tone, children }: { tone: Tone; children: ReactNode }) 
       </Text>
     </HStack>
   );
+  return title ? <span title={title}>{status}</span> : status;
 }
 
 /** A panel: a flat Card whose header is one quiet line (title, count, aside). */

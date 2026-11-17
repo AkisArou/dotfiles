@@ -21,8 +21,10 @@ test("states read the same in the TUI and the web: one tone each", () => {
     "busy works, idle waits, ended is gone, an unknown state wants a look",
   );
   assert.deepEqual(
-    ["held", "parked", "needs-user", "unscoped", "ready", "in_progress", "group"].map(issueTone),
-    ["attention", "attention", "attention", "attention", "plain", "plain", "plain"],
+    ["held", "parked", "needs-user", "unscoped", "orphaned", "ready", "in_progress", "group"].map(
+      issueTone,
+    ),
+    ["attention", "attention", "attention", "attention", "attention", "plain", "plain", "plain"],
   );
   const task = (change: Partial<AssignmentView>) => assignmentTone(view(change));
   assert.equal(task({}), "plain");
@@ -74,6 +76,7 @@ function view(change: Partial<AssignmentView>): AssignmentView {
     help: null,
     waitingOn: [],
     ahead: null,
+    unordered: false,
     issue: 1,
     acceptedAt: 0,
     ...change,
@@ -93,7 +96,12 @@ test("a task's word for lists: its place in the worker queue, its phase, or what
     taskWord(view({ status: "queued", phase: "prepare", waitingOn: ["route:nts/task"] })),
     "queued",
   );
-  assert.equal(taskWord(view({})), "build");
+  assert.equal(taskWord(view({})), "building");
+  assert.equal(
+    taskWord(view({ phase: "workspace", waitingOn: ["resource:worker"], unordered: true })),
+    "queued",
+    "a place not known yet is not next",
+  );
   assert.equal(taskWord(view({ help: "a question" })), "asks");
   assert.equal(taskWord(view({ error: "boom", waitingOn: ["resource:worker"] })), "faulted");
   const tasks = [

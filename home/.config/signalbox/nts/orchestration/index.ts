@@ -122,18 +122,19 @@ export function ntsOrchestration(options: {
   const engine = openWorkflowSqlite({ path: join(options.directory, "workflows.sqlite") });
   const file = settingsFile({ path: options.settings.file, areas: repositoryAreas(options.root) });
   // The issues' areas, for the worker shares; read when a slot is given out.
-  let issuesNow: () => readonly Issue[] = () => [];
+  // Undefined until the issues are read: the shares cannot rank before.
+  let issuesNow: () => readonly Issue[] | undefined = () => undefined;
   const taskAreas: Extension = {
     id: "nts-task-areas",
     requires: [options.issues],
     start(context) {
       const issues = context.get(options.issues);
-      issuesNow = () => latestValue(issues) ?? [];
+      issuesNow = () => latestValue(issues);
     },
   };
   const issueOf = (assignment: Assignment) => (assignment.input as { issue?: number }).issue;
   const areaOf = (assignment: Assignment) =>
-    issuesNow().find((issue) => issue.number === issueOf(assignment))?.area;
+    issuesNow()?.find((issue) => issue.number === issueOf(assignment))?.area;
   const profileStore = profiles({ state: options.state, settings: file.service });
   const urgency = priorities({ state: options.state });
   const settingsNow = file.current;
@@ -203,14 +204,18 @@ export function ntsOrchestration(options: {
     capacity: (resource) => (resource === "worker" ? settingsNow().workerSlots : 1),
     // A freed worker slot goes to the group furthest below its share; within a
     // group (and for files), to the most urgent waiting task, then the oldest.
+    // Until the issues are read, no area is known: the order waits (undefined) rather
+    // than ranking every task by urgency alone, across the shares.
     priority: (assignment, all) =>
-      shareRank({
-        shares: settingsNow().shares,
-        assignment,
-        all,
-        areaOf,
-        urgency: urgency.rank(issueOf(assignment)),
-      }),
+      issuesNow() === undefined
+        ? undefined
+        : shareRank({
+            shares: settingsNow().shares,
+            assignment,
+            all,
+            areaOf,
+            urgency: urgency.rank(issueOf(assignment)),
+          }),
   });
   wiring.work.set(work.service);
   assignmentList.set(work.assignments);

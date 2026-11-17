@@ -9,13 +9,21 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
 import {
   chosenOf,
+  describeTaskFilter,
   filterKey,
   filterOptions,
   keysOf,
   matches,
   taskFacets,
 } from "../../shared/filters.ts";
-import { assignmentTone, issueTone, liveTask, taskWord } from "../../shared/model.ts";
+import {
+  assignmentTone,
+  issueStateTerm,
+  issueTone,
+  liveTask,
+  taskMeaning,
+  taskWord,
+} from "../../shared/model.ts";
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, Section, Status } from "../components.tsx";
 
@@ -44,9 +52,15 @@ export function Tasks({ project }: { project: Project }) {
         .toLowerCase()
         .includes(q.toLowerCase()),
   );
-  const options = filterOptions(taskFacets, chosen, issues).map((option) => ({
+  const options = filterOptions(
+    taskFacets,
+    chosen,
+    issues,
+    describeTaskFilter(project.data.labels),
+  ).map((option) => ({
     value: filterKey(option.facet, option.value),
     label: `${option.label} (${option.count})`,
+    ...(option.meaning ? { description: option.meaning } : {}),
   }));
   const rows = visible.map((issue) => {
     const live = liveTask(project.data.assignments, issue.number);
@@ -55,7 +69,8 @@ export function Tasks({ project }: { project: Project }) {
       number: issue.number,
       title: issue.title,
       tone: live ? assignmentTone(live) : issueTone(issue.state),
-      state: live ? taskWord(live) : issue.state,
+      state: live ? taskWord(live) : issueStateTerm(issue.state).label,
+      meaning: live ? taskMeaning(live) : issueStateTerm(issue.state).meaning,
       place: issue.group ?? issue.stream,
       owner: issue.owner ?? "",
     };
@@ -134,7 +149,11 @@ export function Tasks({ project }: { project: Project }) {
               key: "state",
               header: "State",
               width: pixel(170),
-              renderCell: (row) => <Status tone={row.tone}>{row.state}</Status>,
+              renderCell: (row) => (
+                <Status tone={row.tone} title={row.meaning}>
+                  {row.state}
+                </Status>
+              ),
             },
             {
               key: "place",

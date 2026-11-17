@@ -35,7 +35,13 @@ export type Gauge = {
   };
   readonly why?: string;
 };
-export type WorkClaim = { readonly issue: number; readonly what: string; readonly path?: string };
+export type WorkClaim = {
+  readonly issue: number;
+  readonly what: string;
+  readonly path?: string;
+  /** How long a tree's work has been untouched, when known. */
+  readonly idleMs?: number;
+};
 export type Report = {
   readonly claims?: readonly WorkClaim[];
   readonly tables: readonly Table[];

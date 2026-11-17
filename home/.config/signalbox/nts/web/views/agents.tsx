@@ -2,6 +2,7 @@
 // settings their launches follow, and the task assignments, as three routes
 // under /agents. A session working on an issue opens it in the issue drawer;
 // ended sessions are kept out of the list and open in a drawer of their own.
+import { agentStates } from "../../shared/glossary.ts";
 import { agentLines, agentTone } from "../../shared/model.ts";
 import type { Agent } from "../../shared/model.ts";
 import { useState } from "react";
@@ -92,7 +93,11 @@ export function Sessions({ project }: { project: Project }) {
                 key={item.id}
                 label={item.name}
                 description={lines(item)}
-                endContent={<Status tone={agentTone(item.state)}>{item.state}</Status>}
+                endContent={
+                  <Status tone={agentTone(item.state)} title={agentStates[item.state]?.meaning}>
+                    {item.state}
+                  </Status>
+                }
                 isSelected={agent?.id === item.id}
                 onClick={() => setSelected(item.id)}
               />
@@ -130,7 +135,11 @@ export function Sessions({ project }: { project: Project }) {
               key={item.id}
               label={item.name}
               description={lines(item)}
-              endContent={<Status tone={agentTone(item.state)}>{item.state}</Status>}
+              endContent={
+                <Status tone={agentTone(item.state)} title={agentStates[item.state]?.meaning}>
+                  {item.state}
+                </Status>
+              }
             />
           ))}
         </List>
@@ -150,7 +159,9 @@ export function Sessions({ project }: { project: Project }) {
                   {`#${agent.issue}`}
                 </Button>
               )}
-              <Status tone={agentTone(agent.state)}>{agent.state}</Status>
+              <Status tone={agentTone(agent.state)} title={agentStates[agent.state]?.meaning}>
+                {agent.state}
+              </Status>
             </HStack>
           }
         >

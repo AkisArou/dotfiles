@@ -7,6 +7,7 @@ import {
   assignmentSays,
   assignmentTone,
   gaugeTone,
+  issueStateTerm,
   issueTone,
   modelsLine,
   needsCount,
@@ -16,7 +17,7 @@ import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
 
 export const stateMark = (state: string) =>
-  state === "ready" ? "○" : state === "needs-user" ? "?" : "◐";
+  state === "ready" ? "○" : state === "needs-user" ? "?" : state === "orphaned" ? "◌" : "◐";
 /** A tone in the TUI's palette; the web maps the same tones to its own. */
 export const toneColor = (tone: Tone) =>
   ({
@@ -112,7 +113,10 @@ export function TaskDetail({ issue }: { issue: Issue }) {
   return (
     <>
       <Heading>{`#${issue.number} ${issue.title}`}</Heading>
-      <Line color={stateColor(issue.state)}>{`${stateMark(issue.state)} ${issue.state}`}</Line>
+      <Line color={stateColor(issue.state)}>
+        {`${stateMark(issue.state)} ${issueStateTerm(issue.state).label}`}
+        <span fg={c.muted}>{`  ${issueStateTerm(issue.state).meaning}`}</span>
+      </Line>
       <Line color={c.accent}>{issue.url}</Line>
       {issue.workspace && <Line color={c.accent}>{issue.workspace}</Line>}
       {issue.claims?.map((claim) => (

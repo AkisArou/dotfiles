@@ -35,6 +35,7 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     wait: assignment.wait?.reason ?? null,
     waitingOn: [...(assignment.wait?.on ?? [])],
     ahead: assignment.wait?.ahead ?? null,
+    unordered: assignment.wait?.unordered === true,
     help: state?.help ?? null,
     rounds: state?.rounds ?? 0,
     commit: state?.commit ?? null,

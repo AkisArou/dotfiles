@@ -1,5 +1,6 @@
 // Now: what needs you, the tasks in flight and what each waits for, what needs
 // attention, the live agents, and the streams' size. Everything is one line.
+import { agentStates } from "../../shared/glossary.ts";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@astryxdesign/core/Button";
 import { List, ListItem } from "@astryxdesign/core/List";
@@ -13,6 +14,7 @@ import {
   assignmentTone,
   gaugeTone,
   needsCount,
+  taskMeaning,
 } from "../../shared/model.ts";
 import { gaugeState } from "../../status/model.ts";
 import { Empty, Section, Status } from "../components.tsx";
@@ -29,6 +31,7 @@ export function Now({ project }: { project: Project }) {
       id: a.id,
       issue: a.issue ?? 0,
       tone: assignmentTone(a),
+      meaning: taskMeaning(a),
       when: assignmentPhase(a),
       says: assignmentSays(a).split("\n", 1)[0] ?? "",
     }))
@@ -127,7 +130,11 @@ export function Now({ project }: { project: Project }) {
                   key: "phase",
                   header: "Phase",
                   width: pixel(150),
-                  renderCell: (row) => <Status tone={row.tone}>{row.when}</Status>,
+                  renderCell: (row) => (
+                    <Status tone={row.tone} title={row.meaning}>
+                      {row.when}
+                    </Status>
+                  ),
                 },
                 {
                   key: "says",
@@ -177,7 +184,11 @@ export function Now({ project }: { project: Project }) {
                   key: "state",
                   header: "State",
                   width: pixel(110),
-                  renderCell: (row) => <Status tone={agentTone(row.state)}>{row.state}</Status>,
+                  renderCell: (row) => (
+                    <Status tone={agentTone(row.state)} title={agentStates[row.state]?.meaning}>
+                      {row.state}
+                    </Status>
+                  ),
                 },
                 {
                   key: "path",

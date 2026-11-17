@@ -18,7 +18,8 @@ export function useProject() {
   const overview = useSource(refs.overview),
     issues = useSource(refs.issues),
     agents = useSource(refs.agents),
-    plan = useSource(refs.plan);
+    plan = useSource(refs.plan),
+    labels = useSource(refs.labels);
   const terminalPrograms = useSource(refs.terminalPrograms);
   const startTerminal = useCommand(refs.startTerminal);
   const settings = useSource(refs.settings),
@@ -59,6 +60,7 @@ export function useProject() {
       ]),
       agents: current(agents) ?? [],
       plan: current(plan),
+      labels: current(labels) ?? {},
       settings: current(settings),
       assignments: current(assignments) ?? [],
       needs: current(needs) ?? { questions: [], unasked: [], answered: [] },

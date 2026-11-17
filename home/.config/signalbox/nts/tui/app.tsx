@@ -1,6 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import { useEffect, useRef, useState } from "react";
 import { useClient } from "signalbox/client/react";
+import { agentStates, issueStates, taskConditions, taskPhases } from "../shared/glossary.ts";
 import * as refs from "../shared/model.ts";
 import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
@@ -10,6 +11,7 @@ import {
   agentLines,
   agentTone,
   assignmentTone,
+  issueStateTerm,
   liveTask,
   needsCount,
   settingsLine,
@@ -21,6 +23,7 @@ import { terminalConfig } from "./config.ts";
 import {
   chosenOf,
   describeFilters,
+  describeTaskFilter,
   filterKey,
   filterOptions,
   matches,
@@ -183,10 +186,18 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
   }
   // Several at once: the current filters start ticked, and the ticked set is the new filter.
   function filter() {
-    const options = filterOptions(taskFacets, chosen, project.data.issues);
+    const options = filterOptions(
+      taskFacets,
+      chosen,
+      project.data.issues,
+      describeTaskFilter(project.data.labels),
+    );
     const lines = [
       "✕ clear the filters",
-      ...options.map((option) => `${option.label}  (${option.count})`),
+      ...options.map(
+        (option) =>
+          `${option.label}  (${option.count})${option.meaning ? `  — ${option.meaning}` : ""}`,
+      ),
     ];
     const ticked = options.flatMap((option, index) => (option.selected ? [index + 1] : []));
     void local("Filter Tasks", async () => {
@@ -470,7 +481,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
               focused={focus === "list"}
               label={`${stateMark(issue.state)} #${issue.number} ${issue.title}`}
               meta={groupOf(issue)}
-              end={live ? taskWord(live) : (issue.claims?.[0]?.what ?? issue.state)}
+              end={
+                live
+                  ? taskWord(live)
+                  : (issue.claims?.[0]?.what ?? issueStateTerm(issue.state).label)
+              }
               color={live ? toneColor(assignmentTone(live)) : stateColor(issue.state)}
               onSelect={() => choose(issue.id)}
             />
@@ -665,6 +680,23 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
             <Section title="Local tools">
               <Line>l lazygit in the selected workspace · L lazygit on main · q/Ctrl+Q quit</Line>
             </Section>
+            {/* The status words, from the glossary the lists, filters and web share. */}
+            {(
+              [
+                ["Issue states", issueStates],
+                ["Task progress", { ...taskConditions, ...taskPhases }],
+                ["Agent states", agentStates],
+              ] as const
+            ).map(([title, terms]) => (
+              <Section key={title} title={title}>
+                {Object.values(terms).map((term) => (
+                  <Line key={term.label}>
+                    <span fg={c.text}>{term.label}</span>
+                    <span fg={c.muted}>{`  ${term.meaning}`}</span>
+                  </Line>
+                ))}
+              </Section>
+            ))}
             {failing.length > 0 && (
               <Section title="Source errors">
                 {failing.map((failure) => (

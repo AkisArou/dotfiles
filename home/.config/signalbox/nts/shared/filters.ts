@@ -2,6 +2,8 @@
 // facet and AND between facets. Task states and workflow policy remain owned by
 // the project.
 import type { Issue } from "./model.ts";
+import { assignedValues, issueStates } from "./glossary.ts";
+import type { Term } from "./glossary.ts";
 export interface Facet<T> {
   readonly id: string;
   readonly label: string;
@@ -12,9 +14,13 @@ export type FilterOption = {
   facet: string;
   value: string;
   label: string;
+  /** What the value means, when the glossary or the project's labels say. */
+  meaning?: string;
   count: number;
   selected: boolean;
 };
+/** A value's words: how it reads and what it means. */
+export type Describe = (facet: string, value: string) => Term | undefined;
 
 /** OR within a facet, AND between facets. */
 export function matches<T>(facets: readonly Facet<T>[], chosen: Chosen, item: T): boolean {
@@ -29,6 +35,7 @@ export function filterOptions<T>(
   facets: readonly Facet<T>[],
   chosen: Chosen,
   items: readonly T[],
+  describe: Describe = () => undefined,
 ): FilterOption[] {
   return facets.flatMap((facet) => {
     const others = new Map([...chosen].filter(([id]) => id !== facet.id));
@@ -41,13 +48,17 @@ export function filterOptions<T>(
     for (const value of chosen.get(facet.id) ?? []) if (!counts.has(value)) counts.set(value, 0);
     return [...counts]
       .sort(([a, ac], [b, bc]) => bc - ac || a.localeCompare(b))
-      .map(([value, count]) => ({
-        facet: facet.id,
-        value,
-        count,
-        label: `${facet.label}: ${value}`,
-        selected: chosen.get(facet.id)?.has(value) ?? false,
-      }));
+      .map(([value, count]) => {
+        const term = describe(facet.id, value);
+        return {
+          facet: facet.id,
+          value,
+          count,
+          label: `${facet.label}: ${term?.label ?? value}`,
+          ...(term?.meaning ? { meaning: term.meaning } : {}),
+          selected: chosen.get(facet.id)?.has(value) ?? false,
+        };
+      });
   });
 }
 
@@ -106,4 +117,25 @@ export function chosenOf(keys: readonly string[]): Chosen {
     chosen.set(facet, (chosen.get(facet) ?? new Set()).add(key.slice(at + 1)));
   }
   return chosen;
+}
+
+/**
+ * The task facets' words: Signalbox's glossary for state and assigned, the project's own
+ * label descriptions (name to description, refs.labels) for kind, area and label.
+ */
+export function describeTaskFilter(labels: Readonly<Record<string, string>>): Describe {
+  const label = (name: string, shown: string): Term | undefined =>
+    labels[name] ? { label: shown, meaning: labels[name] } : undefined;
+  return (facet, value) =>
+    facet === "state"
+      ? issueStates[value]
+      : facet === "assigned"
+        ? assignedValues[value]
+        : facet === "kind"
+          ? label(`kind:${value}`, value)
+          : facet === "area"
+            ? label(`area:${value}`, value)
+            : facet === "label"
+              ? label(value, value)
+              : undefined;
 }

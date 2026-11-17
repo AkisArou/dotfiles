@@ -346,7 +346,15 @@ export function machineReport(snapshot: MachineSnapshot, now = Date.now()): Repo
   return {
     claims: pool.trees.flatMap((tree) => {
       const issue = tree.state === "held" ? /^(\d+)(?:-|$)/.exec(tree.task ?? "")?.[1] : undefined;
-      return issue ? [{ issue: Number(issue), what: `tree ${tree.name}`, path: tree.path }] : [];
+      if (!issue) return [];
+      return [
+        {
+          issue: Number(issue),
+          what: `tree ${tree.name}${tree.ahead ? ` · ${tree.ahead} unlanded` : ""}`,
+          path: tree.path,
+          ...(tree.idle_ms === null ? {} : { idleMs: tree.idle_ms }),
+        },
+      ];
     }),
     tables: [
       machine,

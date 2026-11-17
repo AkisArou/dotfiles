@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { chosenOf, filterOptions, keysOf, matches, toggleFilter } from "./filters.ts";
+import {
+  chosenOf,
+  describeTaskFilter,
+  filterOptions,
+  keysOf,
+  matches,
+  taskFacets,
+  toggleFilter,
+} from "./filters.ts";
+import type { Issue } from "./model.ts";
 import type { Chosen, Facet } from "./filters.ts";
 
 test("task facets combine values, count against other facets, and retain selected values which disappear", () => {
@@ -43,4 +52,32 @@ test("a choice travels as facet:value keys, a value's own colons kept", () => {
   assert.deepEqual([...chosen.get("label")!], ["area:compiler"]);
   assert.equal(chosen.size, 2, "a key without a facet is dropped");
   assert.deepEqual(keysOf(chosen), ["area:tooling", "area:compiler", "label:area:compiler"]);
+});
+
+test("each filter value reads and means what the glossary and the project's labels say", () => {
+  const issue = {
+    area: "tooling",
+    stream: "Tooling",
+    labels: ["task", "kind:foundation", "area:tooling"],
+    state: "in_progress",
+    owner: null,
+  } as unknown as Issue;
+  const options = filterOptions(
+    taskFacets,
+    new Map(),
+    [issue],
+    describeTaskFilter({
+      task: "An agent can take it",
+      "kind:foundation": "A foundation or the tooling it stands on",
+      "area:tooling": "Tooling and the gate",
+    }),
+  );
+  const find = (label: string) => options.find((option) => option.label === label);
+  assert.equal(find("state: in progress")?.meaning?.startsWith("being worked on"), true);
+  assert.equal(find("kind: foundation")?.meaning, "A foundation or the tooling it stands on");
+  assert.equal(find("area: tooling")?.meaning, "Tooling and the gate");
+  assert.equal(find("label: task")?.meaning, "An agent can take it");
+  assert.equal(find("assigned: no")?.meaning, "nobody owns it");
+  assert.equal(find("stream: Tooling")?.meaning, undefined);
+  assert.equal(find("state: in progress")?.value, "in_progress", "the key keeps the value");
 });

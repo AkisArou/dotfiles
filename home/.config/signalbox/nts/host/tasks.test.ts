@@ -77,7 +77,7 @@ test("pool and landing claims project active work without changing held task pol
     tasks,
     [agent],
     [
-      { issue: 807, what: "tree 1", path: "/pool/1" },
+      { issue: 807, what: "tree 1", path: "/pool/1", idleMs: 5 * 3_600_000 },
       { issue: 808, what: "held in landing" },
     ],
   );
@@ -89,5 +89,21 @@ test("pool and landing claims project active work without changing held task pol
     tasks.find((task) => task.number === 807)?.state,
     "ready",
     "observing work does not mutate the board",
+  );
+  // A tree nobody works in, untouched for a day, holds idle work; one used lately is in progress.
+  const idle = (idleMs: number) =>
+    claimedIssues(
+      tasks,
+      [],
+      [{ issue: 807, what: "tree 6 · 10 unlanded", path: "/pool/6", idleMs }],
+    ).find((task) => task.number === 807)?.state;
+  assert.equal(idle(24 * 3_600_000), "orphaned");
+  assert.equal(idle(10 * 60_000), "in_progress");
+  assert.equal(
+    claimedIssues(tasks, [], [{ issue: 807, what: "checking in the landing service" }]).find(
+      (task) => task.number === 807,
+    )?.state,
+    "in_progress",
+    "the landing service holding it is work in progress",
   );
 });
