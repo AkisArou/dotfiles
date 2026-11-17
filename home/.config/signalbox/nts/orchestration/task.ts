@@ -7,7 +7,8 @@ import type { TaskOptions } from "./task-phases.ts";
 import { initialTaskState, taskInput, taskReport, taskState } from "./task-model.ts";
 import type { Phase } from "./task-model.ts";
 
-const WITHOUT_WORKER: readonly Phase[] = ["prepare", "verify", "retire", "done"];
+const LANDED: readonly Phase[] = ["verify", "retire", "done"];
+const WITHOUT_WORKER: readonly Phase[] = ["prepare", ...LANDED];
 
 /** Labels that keep an issue from starting: the user's, or the plan's. */
 const BLOCKING = ["state:needs-user", "state:held", "state:parked"];
@@ -23,10 +24,12 @@ export function taskRoute(options: Omit<TaskOptions, "clock"> & { readonly clock
     concurrency: 4,
     resources: (input, state) => [
       { resource: `issue/${input.issue}`, units: 1 },
-      // A worker slot is held while an agent works for the task; waiting for the
-      // full check to verify a landed change holds none.
+      // A worker slot is held while an agent works for the task, and the card's
+      // paths until the change is on main: verifying a landed change holds neither.
       ...(WITHOUT_WORKER.includes(state.phase) ? [] : [{ resource: "worker", units: 1 }]),
-      ...state.paths.map((path) => ({ resource: `file:${path}`, units: 1 })),
+      ...(LANDED.includes(state.phase)
+        ? []
+        : state.paths.map((path) => ({ resource: `file:${path}`, units: 1 }))),
     ],
     admission: [
       {

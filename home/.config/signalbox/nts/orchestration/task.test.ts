@@ -483,8 +483,8 @@ test("a task goes from tree to verified through design approval, review and land
   // Landed: the worker stops, and waiting for verification holds no worker slot.
   assert.ok(stopped.includes(verifying.worker!.id), "the worker stops at landing");
   await eventually(
-    () => !read().heldResources.some((claim) => claim.resource === "worker"),
-    "the worker slot released while verifying",
+    () => read().heldResources.every((claim) => claim.resource === "issue/900"),
+    "the worker slot and the card's paths released while verifying",
   );
   fullCheckCell.set({ verified: { commit, pushed: null } } as unknown as FullCheckStatus);
   const deadline = Date.now() + 20_000;
