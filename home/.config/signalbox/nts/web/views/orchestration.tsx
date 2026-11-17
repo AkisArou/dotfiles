@@ -6,7 +6,11 @@ import type { AgentRole, Harness } from "../../shared/model.ts";
 import { assignmentPhase, assignmentSays } from "../../shared/model.ts";
 import { Action, Badge, Empty, Section } from "../components.tsx";
 
-const roleNames: Record<AgentRole, string> = { coordinator: "Coordinator", worker: "Workers", reviewer: "Reviewers" };
+const roleNames: Record<AgentRole, string> = {
+  coordinator: "Coordinator",
+  worker: "Workers",
+  reviewer: "Reviewers",
+};
 
 export function Orchestration({ project }: { project: Project }) {
   const settings = project.data.profiles;
@@ -77,7 +81,9 @@ export function Orchestration({ project }: { project: Project }) {
             return (
               <div key={harness} className="harness">
                 <strong>{harness === "claude" ? "Claude Code" : "Codex"}</strong>
-                <Badge state={blocked ? "held" : "ready"}>{blocked ? `unavailable: ${blocked.reason}` : "available"}</Badge>
+                <Badge state={blocked ? "held" : "ready"}>
+                  {blocked ? `unavailable: ${blocked.reason}` : "available"}
+                </Badge>
                 <Action
                   project={project}
                   onClick={() =>
@@ -137,7 +143,15 @@ export function Orchestration({ project }: { project: Project }) {
                 <tr key={assignment.id}>
                   <td>{assignment.issue ? `#${assignment.issue}` : assignment.key}</td>
                   <td>
-                    <Badge state={assignment.error ? "error" : assignment.status}>
+                    <Badge
+                      state={
+                        assignment.error
+                          ? "error"
+                          : assignment.escalation || assignment.stalled || assignment.help
+                            ? "needs-user"
+                            : assignment.status
+                      }
+                    >
                       {assignmentPhase(assignment)}
                     </Badge>
                   </td>
@@ -149,7 +163,10 @@ export function Orchestration({ project }: { project: Project }) {
                       <Action
                         project={project}
                         onClick={() =>
-                          project.commands.cancelAssignment.run({ assignment: assignment.id, reason: "cancelled by the user" })
+                          project.commands.cancelAssignment.run({
+                            assignment: assignment.id,
+                            reason: "cancelled by the user",
+                          })
                         }
                       >
                         Cancel

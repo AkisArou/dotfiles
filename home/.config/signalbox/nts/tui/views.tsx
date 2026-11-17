@@ -61,15 +61,23 @@ export function NowView({ project }: { project: Project }) {
         {project.data.assignments
           .filter((a) => a.status === "active" || a.status === "queued")
           .map((a) => (
-            <Line key={a.id} color={a.error || a.stalled || a.help ? c.warning : c.text}>{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
+            <Line
+              key={a.id}
+              color={a.error || a.escalation || a.stalled || a.help ? c.warning : c.text}
+            >{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
           ))}
         {project.data.profiles && (
-          <Line color={c.muted}>{`workers ${project.data.profiles.roles.worker.profile} · reviewers ${project.data.profiles.roles.reviewer.profile} · coordinator ${project.data.profiles.roles.coordinator.profile}`}</Line>
+          <Line
+            color={c.muted}
+          >{`workers ${project.data.profiles.roles.worker.profile} · reviewers ${project.data.profiles.roles.reviewer.profile} · coordinator ${project.data.profiles.roles.coordinator.profile}`}</Line>
         )}
         {project.data.decisions
           .filter((d) => d.status === "pending")
           .map((d) => (
-            <Line key={d.id} color={c.warning}>{`? ${d.question} (answer in the browser's Needs you)`}</Line>
+            <Line
+              key={d.id}
+              color={c.warning}
+            >{`? ${d.question} (answer in the browser's Needs you)`}</Line>
           ))}
       </Section>
       <Section title="Streams">
