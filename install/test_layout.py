@@ -12,7 +12,6 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from legacy_paths import relocate
 from link_tree import deploy
 
 
@@ -97,34 +96,6 @@ class LayoutTests(unittest.TestCase):
         self.assertFalse((self.target / '.config/app/state.lock').exists())
         self.assertFalse((self.target / '__pycache__').exists())
 
-    def test_migration_handles_old_directory_links_and_renamed_files(self):
-        repo = self.base / 'checkout'
-        old_repo = self.base / 'previous-checkout'
-        source = self.write(repo / 'home/.config/nvim/init.lua')
-        vim = self.write(repo / 'home/.ideavimrc')
-        app_link = self.target / '.config/nvim'
-        app_link.parent.mkdir()
-        app_link.symlink_to(old_repo / 'nvim')
-        file_link = self.target / '.ideavimrc'
-        file_link.symlink_to(old_repo / 'vim/.ideavimrc')
-        planned = migrate.migrate_links([app_link, file_link], repo, old_repo, dry_run=True)
-        deploy(repo / 'home', self.target, dry_run=True, planned_links=planned)
-        self.assertEqual(app_link.readlink(), old_repo / 'nvim')
-        migrate.migrate_links([app_link, file_link], repo, old_repo)
-        deploy(repo / 'home', self.target)
-        self.assertEqual(app_link.resolve(), source.parent)
-        self.assertEqual(file_link.resolve(), vim)
-
-    def test_migration_leaves_unrelated_and_preexisting_broken_links_alone(self):
-        repo = self.base / 'checkout'
-        unrelated = self.target / 'unrelated'
-        unrelated.symlink_to(self.base / 'other/settings')
-        broken = self.target / 'old-missing'
-        broken.symlink_to(repo / 'systemd/user/removed.service')
-        migrate.migrate_links([unrelated, broken], repo, repo)
-        self.assertEqual(unrelated.readlink(), self.base / 'other/settings')
-        self.assertEqual(broken.readlink(), repo / 'systemd/user/removed.service')
-
     def test_hook_migration_preserves_local_settings_and_modes(self):
         home = self.target
         settings = self.write(home / '.claude/settings.json', json.dumps({
@@ -147,7 +118,7 @@ class LayoutTests(unittest.TestCase):
         repo = self.base / 'computer/dotfiles'
         installer = repo / 'install'
         installer.mkdir(parents=True)
-        for name in ('migrate', 'link_tree.py', 'legacy_paths.py'):
+        for name in ('migrate', 'link_tree.py'):
             shutil.copy2(Path(__file__).with_name(name), installer / name)
         browser_paths = repo / 'home/.local/libexec/browser_paths.py'
         browser_paths.parent.mkdir(parents=True)
@@ -163,16 +134,16 @@ class LayoutTests(unittest.TestCase):
         old_wrapper = self.target / '.codex/codex.py'
         old_wrapper.symlink_to(repo / 'codex/codex.py')
         (self.target / '.config').mkdir()
-        (self.target / '.config/nvim').symlink_to(repo / 'nvim')
+        (self.target / '.config/nvim').symlink_to(repo / 'home/.config/nvim')
         environment = {**os.environ, 'HOME': str(self.target),
                        'CLAUDE_CONFIG_DIR': str(self.target / '.claude'),
                        'CODEX_HOME': str(self.target / '.codex'),
                        'XDG_STATE_HOME': str(self.target / '.local/state')}
-        command = [sys.executable, str(installer / 'migrate'), '--skip-root', '--no-reload']
+        command = [sys.executable, str(installer / 'migrate'), '--no-reload']
         subprocess.run([*command, '--dry-run'], env=environment, check=True, capture_output=True)
         self.assertTrue(old_wrapper.is_symlink())
         self.assertEqual(old_work.readlink(), repo / 'scripts/work')
-        self.assertEqual((self.target / '.config/nvim').readlink(), repo / 'nvim')
+        self.assertEqual((self.target / '.config/nvim').readlink(), repo / 'home/.config/nvim')
         subprocess.run(command, env=environment, check=True, capture_output=True)
         result = subprocess.run(command, env=environment, check=True, capture_output=True, text=True)
         self.assertEqual(result.stdout.strip(), 'Migration complete.')
@@ -180,15 +151,6 @@ class LayoutTests(unittest.TestCase):
         self.assertTrue((self.target / '.local/share/nable-private-access/resolved.conf').is_file())
         self.assertFalse(os.path.lexists(old_wrapper))
         self.assertEqual(old_work.resolve(), work)
-
-    def test_specific_legacy_paths_take_precedence(self):
-        self.assertEqual(relocate('systemd/user/example.service'), 'home/.config/systemd/user/example.service')
-        self.assertEqual(relocate('systemd/system/example.service'), 'root/etc/systemd/system/example.service')
-        self.assertEqual(relocate('shell/zsh/.zshenv'), 'home/.zshenv')
-        self.assertEqual(relocate('install/data/vconsole/desktop.conf'), 'root/etc/vconsole/desktop.conf')
-        self.assertEqual(relocate('claude/mcp.json'), 'home/.claude.json')
-        self.assertEqual(relocate('codex/codex.py'), 'home/.local/bin/codex')
-        self.assertEqual(relocate('home/.codex/codex.py'), 'home/.local/bin/codex')
 
     def test_managed_directory_links_are_detached_before_deployment(self):
         repo = self.source
@@ -224,7 +186,7 @@ class LayoutTests(unittest.TestCase):
         local.write_text('model = "personal"\n')
         self.assertEqual(defaults.read_text(), 'model = "default"\n')
 
-    def test_running_browser_does_not_recreate_legacy_paths(self):
+    def test_running_browser_does_not_recreate_old_extension_paths(self):
         target = self.target / '.local/share/brave/extensions/video-repeater'
         self.write(target / 'manifest.json', '{"name":"Video Repeater"}')
         old = self.source / 'brave/extensions/video-repeater'

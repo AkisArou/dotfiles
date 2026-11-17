@@ -190,7 +190,7 @@ def deploy(source, destination, *, dry_run=False, copies=None, planned_links=Non
                     if any(name.startswith(policy_path + '/') for name in managed):
                         raise ValueError(f'Managed settings need a real directory: {target}; run install/migrate')
                     return
-                raise ValueError(f'Directory is a different symlink: {target}; run install/migrate for old dotfiles links')
+                raise ValueError(f'Directory is a different symlink: {target}; replace it with a real directory before deploying')
             if target.exists() and not target.is_dir():
                 backup(target, dry_run=dry_run)
             if not dry_run:
