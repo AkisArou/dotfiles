@@ -11,6 +11,7 @@ import * as refs from "../shared/model.ts";
 import type { NtsConfig } from "../config.ts";
 import { ntsObservations } from "../status/host.ts";
 import { nativeTerminals } from "./terminals.ts";
+import { pushNotifications } from "./push.ts";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
 import { gitHub } from "../orchestration/needs.ts";
@@ -119,6 +120,12 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
       ...issues.extensions,
       ...orchestration.extensions,
       ...orchestrationEndpoints(orchestration),
+      ...pushNotifications({
+        state: state.state,
+        needs: orchestration.needs,
+        issues: orchestration.issues,
+        directory: settings.state,
+      }),
       {
         id: "nts-managed-terminals",
         requires: [orchestration.agents.runtime],

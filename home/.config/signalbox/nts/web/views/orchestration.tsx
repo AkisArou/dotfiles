@@ -8,6 +8,8 @@ import type { Project } from "../../shared/use-project.ts";
 import type { AgentRole, Harness, Pick } from "../../shared/model.ts";
 import { pickLabels, sharePercents } from "../../shared/model.ts";
 import { Action, Empty, ResponsiveTable, Section, Status } from "../components.tsx";
+import { usePushContext } from "../push.ts";
+import { PushSwitch } from "../push-controls.tsx";
 
 const roleNames: Record<AgentRole, string> = {
   coordinator: "Coordinator",
@@ -26,6 +28,7 @@ const numbers = (values: number[], suffix = "") =>
   values.map((value) => ({ value: String(value), label: `${value}${suffix}` }));
 
 export function Settings({ project }: { project: Project }) {
+  const push = usePushContext();
   const settings = project.data.settings;
   if (!settings) return <Empty>Settings are loading…</Empty>;
   const write = (change: Parameters<typeof project.commands.setSettings.run>[0]) =>
@@ -210,6 +213,11 @@ export function Settings({ project }: { project: Project }) {
             },
           ]}
         />
+      </Section>
+      <Section title="Notifications on this device">
+        <div className="panel-body">
+          <PushSwitch push={push} />
+        </div>
       </Section>
       <Section title="Harnesses">
         <ResponsiveTable

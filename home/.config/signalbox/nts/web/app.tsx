@@ -24,6 +24,8 @@ import { ProjectContext, viewOf, viewPath } from "./project.ts";
 import { useNarrow } from "./narrow.ts";
 import { AppearanceButton, TabBar } from "./tab-bar.tsx";
 import { useOverlay } from "./overlay.ts";
+import { PushContext, useAppBadge, usePush, usePushPrompt } from "./push.ts";
+import { PushPrompt, PushSwitch } from "./push-controls.tsx";
 
 type Mode = "dark" | "light" | "system";
 const MODES: Mode[] = ["dark", "light", "system"];
@@ -47,6 +49,10 @@ export function Shell() {
   const narrow = useNarrow();
   const [more, setMore] = useState(false);
   const overlay = useOverlay();
+  // Notifications on this device: offered once, and the home-screen badge kept in step.
+  const push = usePush();
+  const pushPrompt = usePushPrompt(push.state);
+  useAppBadge(needsCount(project.data.needs));
   // The home-screen app's status bar takes the header's colour (theme-color), in
   // either appearance, so it reads as one bar with it, as a native app's does.
   useEffect(() => {
@@ -182,75 +188,81 @@ export function Shell() {
   );
   return (
     <ProjectContext value={project}>
-      <Theme theme={neutralTheme} mode={mode}>
-        <AppShell
-          height="fill"
-          // The root (#root) is pinned to the screen; the shell fills it, not 100dvh.
-          style={{ height: "100%", flex: 1, minHeight: 0 }}
-          contentPadding={0}
-          mobileNav={false}
-          banner={banners.length ? <div className="banners">{banners}</div> : undefined}
-          topNav={
-            <TopNav
-              label="Views"
-              heading={<TopNavHeading heading={narrow ? tab : "nts"} />}
-              startContent={
-                narrow ? undefined : (
-                  <TabList
-                    value={tab}
-                    onChange={(value) => void navigate({ to: viewPath[value as View] })}
-                    size="sm"
-                  >
-                    {tabs.map((name, index) => {
-                      const key = tabKey(index);
-                      return (
-                        <Tab
-                          key={name}
-                          value={name}
-                          label={name}
-                          icon={key ? <span className="tab-key">{key}</span> : undefined}
-                          endContent={counts[name]}
-                        />
-                      );
-                    })}
-                  </TabList>
-                )
-              }
-              endContent={narrow ? liveDot : appearance}
-            />
-          }
-        >
-          <div className={narrow ? "frame narrow" : "frame"}>
-            <div className="view">
-              {!data.overview ? <Empty>Connecting to the project…</Empty> : <Outlet />}
-            </div>
-            {narrow ? (
-              <TabBar
-                view={tab}
-                counts={{ "Needs you": needsCount(data.needs), Agents: live }}
-                more={more}
-                setMore={setMore}
-                status={status}
-                appearance={appearance}
+      <PushContext value={push}>
+        <Theme theme={neutralTheme} mode={mode}>
+          <AppShell
+            height="fill"
+            // The root (#root) is pinned to the screen; the shell fills it, not 100dvh.
+            style={{ height: "100%", flex: 1, minHeight: 0 }}
+            contentPadding={0}
+            mobileNav={false}
+            banner={banners.length ? <div className="banners">{banners}</div> : undefined}
+            topNav={
+              <TopNav
+                label="Views"
+                heading={<TopNavHeading heading={narrow ? tab : "nts"} />}
+                startContent={
+                  narrow ? undefined : (
+                    <TabList
+                      value={tab}
+                      onChange={(value) => void navigate({ to: viewPath[value as View] })}
+                      size="sm"
+                    >
+                      {tabs.map((name, index) => {
+                        const key = tabKey(index);
+                        return (
+                          <Tab
+                            key={name}
+                            value={name}
+                            label={name}
+                            icon={key ? <span className="tab-key">{key}</span> : undefined}
+                            endContent={counts[name]}
+                          />
+                        );
+                      })}
+                    </TabList>
+                  )
+                }
+                endContent={narrow ? liveDot : appearance}
               />
-            ) : (
-              <footer className="statusbar">
-                <Text type="supporting" color="secondary" className="statusbar-line">
-                  {status}
-                </Text>
-                {liveDot}
-              </footer>
+            }
+          >
+            <div className={narrow ? "frame narrow" : "frame"}>
+              <div className="view">
+                {data.overview && pushPrompt.show && push.ready && (
+                  <PushPrompt push={push} onDismiss={pushPrompt.dismiss} />
+                )}
+                {!data.overview ? <Empty>Connecting to the project…</Empty> : <Outlet />}
+              </div>
+              {narrow ? (
+                <TabBar
+                  view={tab}
+                  counts={{ "Needs you": needsCount(data.needs), Agents: live }}
+                  more={more}
+                  setMore={setMore}
+                  status={status}
+                  appearance={appearance}
+                  notifications={<PushSwitch push={push} />}
+                />
+              ) : (
+                <footer className="statusbar">
+                  <Text type="supporting" color="secondary" className="statusbar-line">
+                    {status}
+                  </Text>
+                  {liveDot}
+                </footer>
+              )}
+            </div>
+            {screen && project.data.agents.find((agent) => agent.id === screen) && (
+              <AgentScreen
+                agent={project.data.agents.find((agent) => agent.id === screen)!}
+                close={() => overlay.close("screen")}
+              />
             )}
-          </div>
-          {screen && project.data.agents.find((agent) => agent.id === screen) && (
-            <AgentScreen
-              agent={project.data.agents.find((agent) => agent.id === screen)!}
-              close={() => overlay.close("screen")}
-            />
-          )}
-          <IssueDrawer project={project} number={issue} close={() => overlay.close("issue")} />
-        </AppShell>
-      </Theme>
+            <IssueDrawer project={project} number={issue} close={() => overlay.close("issue")} />
+          </AppShell>
+        </Theme>
+      </PushContext>
     </ProjectContext>
   );
 }

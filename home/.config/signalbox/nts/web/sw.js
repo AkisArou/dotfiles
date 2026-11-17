@@ -60,3 +60,42 @@ self.addEventListener("fetch", (event) => {
       }),
   );
 });
+
+// A notification from the host (host/push.ts): what now waits on the owner. The
+// home-screen icon's badge shows how many things wait.
+self.addEventListener("push", (event) => {
+  let notice;
+  try {
+    notice = event.data.json();
+  } catch {
+    notice = { title: "Needs you", body: event.data ? event.data.text() : "", url: "/needs-you" };
+  }
+  event.waitUntil(
+    Promise.all([
+      self.registration.showNotification(notice.title, {
+        body: notice.body,
+        tag: notice.id,
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+        data: { url: notice.url ?? "/needs-you" },
+      }),
+      typeof notice.count === "number" && self.navigator.setAppBadge
+        ? notice.count > 0
+          ? self.navigator.setAppBadge(notice.count)
+          : self.navigator.clearAppBadge()
+        : Promise.resolve(),
+    ]),
+  );
+});
+// Tapping one opens the app where it points, in the window already open if there is one.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL(event.notification.data?.url ?? "/needs-you", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((each) => new URL(each.url).origin === self.location.origin);
+      if (open) return open.navigate(url).then((client) => (client ?? open).focus());
+      return self.clients.openWindow(url);
+    }),
+  );
+});

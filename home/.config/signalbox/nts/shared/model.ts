@@ -193,6 +193,16 @@ export function modelsLine(role: { models: ProfileView[] }): string {
   return role.models.map((model) => model.label).join(" → ");
 }
 export const assignments = source<AssignmentView[]>("nts.assignments");
+/** A device's push subscription (PushSubscription.toJSON()): where the host sends notifications. */
+export type PushDevice = { endpoint: string; keys: { p256dh: string; auth: string } };
+/** The host's public push key, which a device subscribes with. */
+export const pushKey = source<{ publicKey: string }>("nts.push.key");
+export const pushSubscribe = operation<PushDevice, { ok: true }>("nts.push.subscribe");
+export const pushUnsubscribe = operation<{ endpoint: string }, { ok: true }>(
+  "nts.push.unsubscribe",
+);
+/** Sends this device a test notification. */
+export const pushTest = operation<{ endpoint: string }, { ok: true }>("nts.push.test");
 export const needs = source<NeedsView>("nts.needs");
 export const setAvailability = operation<
   { harness: Harness; unavailable: { reason: string; until?: number } | null },

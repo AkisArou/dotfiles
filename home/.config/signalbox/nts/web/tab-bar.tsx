@@ -72,6 +72,7 @@ export function TabBar({
   setMore,
   status,
   appearance,
+  notifications,
 }: {
   view: View;
   counts: Partial<Record<View, number>>;
@@ -80,6 +81,8 @@ export function TabBar({
   /** The status line the desktop shows at its foot. */
   status: string;
   appearance: ReactNode;
+  /** This device's notifications switch. */
+  notifications: ReactNode;
 }) {
   const navigate = useNavigate();
   const go = (to: View) => {
@@ -115,6 +118,7 @@ export function TabBar({
           ))}
         </List>
         <div className="sheet-foot">
+          {notifications}
           {appearance}
           <Text type="supporting" color="secondary">
             {status}
