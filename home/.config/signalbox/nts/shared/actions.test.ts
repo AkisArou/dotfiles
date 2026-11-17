@@ -62,3 +62,26 @@ test("an issue's earlier tasks are its finished and cancelled ones, newest first
   ];
   assert.deepEqual(ids(earlierTasks(all, 7)), ["newer", "old"]);
 });
+
+test("a stranded task reads as stranded, says why, and offers a retry and a cancel", async () => {
+  const { assignmentSays, assignmentTone, taskWord } = await import("./model.ts");
+  const stranded = task({
+    waitingOn: [],
+    stranded: "it was started under nts/task@1, and this host runs nts/task@2",
+  });
+  assert.equal(taskWord(stranded), "stranded");
+  assert.equal(assignmentTone(stranded), "bad");
+  assert.match(assignmentSays(stranded), /^stranded: it was started under nts\/task@1/);
+  assert.deepEqual(ids(taskActions(issue(["task"]), stranded)), [
+    "retry",
+    "message",
+    "prioritize",
+    "cancel",
+  ]);
+  const cancelled = task({
+    waitingOn: [],
+    status: "cancelled",
+    stranded: "gone; cancelled without its route's cleanup",
+  });
+  assert.notEqual(taskWord(cancelled), "stranded", "once cancelled it reads as cancelled");
+});

@@ -17,8 +17,9 @@ export function taskRoute(options: Omit<TaskOptions, "clock"> & { readonly clock
   const settings: TaskOptions = { ...options, clock: options.clock ?? Date.now };
   return assignmentRoute({
     id: "nts/task",
-    // Bump with any change to state or phase meaning; old assignments then fault
-    // visibly instead of being reinterpreted (keep the old revision until they drain).
+    // Bump with any change to state or phase meaning. A task that never started then
+    // moves to the new revision; a started one is shown stranded at the host's start
+    // (never reinterpreted): cancel it, or retry it once a route that fits is back.
     revision: "1",
     input: taskInput,
     // No route concurrency: the worker slots bound the work (a session and its pool

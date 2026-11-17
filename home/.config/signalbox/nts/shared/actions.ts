@@ -113,7 +113,7 @@ export function taskActions(
   const phase = task.phase ?? "";
   return [
     ...jump,
-    ...(task.error ? [ACTIONS.retry] : []),
+    ...(task.error || task.stranded ? [ACTIONS.retry] : []),
     ...(phase === "approve" ? [ACTIONS.approve, ACTIONS.return] : []),
     ...(phase === "signoff" ? [ACTIONS.signoff, ACTIONS.refuse] : []),
     ...(phase === "landing" || phase === "verify" ? [ACTIONS.rework] : []),

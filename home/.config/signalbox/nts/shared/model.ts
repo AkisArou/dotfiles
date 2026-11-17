@@ -130,6 +130,8 @@ export type AssignmentView = {
   worker: string | null;
   reviewer: string | null;
   error: string | null;
+  /** Why the task route can no longer run it (shared/glossary.ts "stranded"), or null. */
+  stranded: string | null;
   acceptedAt: number;
 };
 /** Where an issue goes once its question is answered. */
@@ -276,7 +278,7 @@ export function issueTone(state: string): Tone {
 
 /** A task: a fault is bad; an escalation, a stall or a question wants a look; finished is quiet. */
 export function assignmentTone(a: AssignmentView): Tone {
-  if (a.error) return "bad";
+  if (a.error || (a.stranded && a.status !== "cancelled")) return "bad";
   if (a.escalation || a.stalled || a.help) return "attention";
   if (a.status === "finished" || a.status === "cancelled") return "quiet";
   return "plain";
@@ -294,13 +296,14 @@ export function gaugeTone(state: "red" | "amber" | "ok"): Tone {
 
 export function assignmentSays(a: AssignmentView, now = Date.now()): string {
   const said =
+    (a.stranded && `stranded: ${a.stranded}`) ??
     a.error ??
     (a.escalation && `decide: ${a.escalation}`) ??
     (a.stalled && `stalled: ${a.stalled}`) ??
     (a.help && `asks: ${a.help}`) ??
     a.wait ??
     "";
-  if (!a.progress || a.error) return said;
+  if (!a.progress || a.error || a.stranded) return said;
   const late =
     a.progressUntil !== null && now > a.progressUntil
       ? ` (expected done ${Math.round((now - a.progressUntil) / 60_000)} min ago)`
@@ -312,6 +315,7 @@ export function assignmentSays(a: AssignmentView, now = Date.now()): string {
  * the queue for a worker, or its phase.
  */
 export function taskWord(a: AssignmentView): string {
+  if (a.stranded && a.status !== "cancelled") return "stranded";
   if (a.error) return "faulted";
   if (a.escalation) return "escalated";
   if (a.stalled) return "stalled";
@@ -330,6 +334,7 @@ export const phaseLabel = (phase: string) => taskPhases[phase]?.label ?? phase;
 
 /** What a task's word means (the glossary's), for a tooltip or the help. */
 export function taskMeaning(a: AssignmentView): string {
+  if (a.stranded && a.status !== "cancelled") return taskConditions.stranded!.meaning;
   if (a.error) return taskConditions.faulted!.meaning;
   if (a.escalation) return taskConditions.escalated!.meaning;
   if (a.stalled) return taskConditions.stalled!.meaning;

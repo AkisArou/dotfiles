@@ -81,6 +81,11 @@ export const taskConditions: Record<string, Term> = {
   stalled: { label: "stalled", meaning: "its agent stayed idle through the nudges" },
   escalated: taskPhases.escalated!,
   faulted: { label: "faulted", meaning: "it hit an error; its detail says which" },
+  stranded: {
+    label: "stranded",
+    meaning:
+      "the task route changed under it and cannot run it: cancel it (its cleanup is then yours), or retry once a route that fits is back",
+  },
 };
 
 /** An agent session's state. */

@@ -52,6 +52,11 @@ export function assignmentView(assignment: Assignment): refs.AssignmentView {
     worker: state?.worker?.id ?? null,
     reviewer: state?.reviewer?.id ?? null,
     error: assignment.error ? `${assignment.error.code}: ${assignment.error.message}` : null,
+    stranded: assignment.stranded
+      ? assignment.stranded.cleanup === "skipped"
+        ? `${assignment.stranded.reason}; cancelled without its route's cleanup: end its sessions and give its tree back by hand`
+        : assignment.stranded.reason
+      : null,
     acceptedAt: assignment.acceptedAt,
   };
 }
