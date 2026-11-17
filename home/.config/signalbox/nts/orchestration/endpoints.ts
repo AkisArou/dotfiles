@@ -11,6 +11,7 @@ import * as refs from "../shared/model.ts";
 import type { ntsOrchestration } from "./index.ts";
 import { harnesses, profileSchema, roles } from "./profiles.ts";
 import { taskState } from "./task-model.ts";
+import { urgencyValue } from "./priorities.ts";
 
 type Orchestration = ReturnType<typeof ntsOrchestration>;
 
@@ -139,6 +140,17 @@ export function orchestrationEndpoints(orchestration: Orchestration): Extension[
       run: async (input, context) => ({
         revision: (await context.get(profiles).setAvailability(input.harness, input.unavailable))
           .revision,
+      }),
+    }),
+    exposeOperation({
+      ref: refs.prioritizeTask,
+      requires: [orchestration.priorities],
+      input: z.object({ issue: z.number().int().positive(), urgency: urgencyValue }),
+      output: z.object({ urgency: z.record(z.string(), z.number()) }),
+      run: async (input, context) => ({
+        urgency: {
+          ...(await context.get(orchestration.priorities).set(input.issue, input.urgency)),
+        },
       }),
     }),
     exposeOperation({

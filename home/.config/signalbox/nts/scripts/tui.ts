@@ -32,11 +32,15 @@ await build({
   sourcemap: true,
 });
 // The TUI talks to this project's host unless SIGNALBOX_API_URL says otherwise.
-const project = JSON.parse(await readFile(resolve(root, "project.json"), "utf8")) as { apiPort: number };
+const project = JSON.parse(await readFile(resolve(root, "project.json"), "utf8")) as {
+  apiPort: number;
+};
 const env = {
   ...process.env,
   SIGNALBOX_API_URL:
-    process.env.SIGNALBOX_API_URL ?? process.env.SIGNALBOX_NTS_API_URL ?? `ws://127.0.0.1:${project.apiPort}/rpc`,
+    process.env.SIGNALBOX_API_URL ??
+    process.env.SIGNALBOX_NTS_API_URL ??
+    `ws://127.0.0.1:${project.apiPort}/rpc`,
 };
 const child = spawn(
   process.execPath,

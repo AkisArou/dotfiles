@@ -16,6 +16,8 @@ import type { Issue } from "../shared/model.ts";
 import { toolInput } from "./agents.ts";
 import type { TaskRoute } from "./task.ts";
 import type { TaskState } from "./task-model.ts";
+import { urgencyValue } from "./priorities.ts";
+import type { Priorities } from "./priorities.ts";
 import { taskState } from "./task-model.ts";
 
 /** A capability that exists only once later wiring creates it; checked on use. */
@@ -42,6 +44,7 @@ export interface Wiring {
   readonly mailbox: Late<Capability<Mailbox>>;
   readonly issues: Capability<Readable<Issue[]>>;
   readonly decisions: Capability<UserDecisions>;
+  readonly priorities: Capability<Priorities>;
 }
 
 const ok = z.object({ ok: z.literal(true) });
@@ -338,6 +341,17 @@ export function coordinatorTools(wiring: Wiring) {
             );
             return { ok: true as const };
           }),
+      }),
+      agentTool({
+        name: "prioritize_task",
+        description:
+          "Set a task's urgency (-9 to 9, default 0; higher first): freed worker slots and files go to the most urgent waiting task, then the oldest.",
+        input: toolInput(z.object({ issue: z.number().int().positive(), urgency: urgencyValue })),
+        output: json,
+        run: (input, context) =>
+          authorized(context, async () => ({
+            urgency: await context.get(wiring.priorities).set(input.issue, input.urgency),
+          })),
       }),
       agentTool({
         name: "cancel_assignment",

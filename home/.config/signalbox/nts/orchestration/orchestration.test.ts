@@ -157,3 +157,35 @@ test("managed sessions become Agents rows: role and issue from the label, state 
     ],
   );
 });
+
+test("priorities: set, clear and rank issues; higher urgency ranks lower (goes first)", async () => {
+  const { priorities } = await import("./priorities.ts");
+  const { sqliteWorkflowState } = await import("signalbox/ext/integrations/sqlite");
+  const { defineConfig, startExtensions } = await import("signalbox/core");
+  const { mkdtemp, rm } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const directory = await mkdtemp(join(tmpdir(), "nts-priorities-"));
+  const state = sqliteWorkflowState({ path: join(directory, "state.sqlite") });
+  const store = priorities({ state: state.state });
+  const app = await startExtensions(
+    defineConfig({
+      id: "p",
+      root: directory,
+      gate: { accept: () => false },
+      extensions: [state.extension, store.extension],
+    }),
+  );
+  try {
+    const service = app.context.get(store.service);
+    assert.equal(store.rank(823), -0);
+    assert.deepEqual(await service.set(823, 2), { "823": 2 });
+    assert.equal(store.rank(823), -2);
+    assert.equal(store.rank(821), -0, "an unset issue keeps the default");
+    assert.deepEqual(await service.set(823, 0), {}, "0 clears it");
+    await assert.rejects(service.set(823, 10), /too_big|less than or equal/i);
+  } finally {
+    await app.stop();
+    await rm(directory, { recursive: true, force: true });
+  }
+});

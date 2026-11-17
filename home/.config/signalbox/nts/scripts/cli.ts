@@ -9,6 +9,7 @@
 //                                   message the worker (answers help, decides an escalation);
 //                                   --as coordinator when the owner stands in for the coordinator
 //   sbn rework <issue> <notes...>   send a held or wrong landing back to build
+//   sbn prioritize <issue> <-9..9>  move a task ahead (higher first; 0 is the default)
 //   sbn retry <issue>               retry a faulted task
 //   sbn cancel <issue> <reason...>  cancel a task (its tree and branch stay with the pool)
 import { readFileSync } from "node:fs";
@@ -27,6 +28,7 @@ const VERBS = [
   "status",
   "show",
   "assign",
+  "prioritize",
   "approve",
   "return",
   "message",
@@ -84,6 +86,13 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       if (!text) throw new Error(`${verb} needs ${what}`);
       return text;
     };
+    if (verb === "prioritize") {
+      const urgency = Number(needsText("an urgency from -9 to 9"));
+      const { urgency: all } = (await call(client, "nts.tasks.prioritize", { issue, urgency })) as {
+        urgency: Record<string, number>;
+      };
+      return console.log(`#${issue}: urgency ${urgency}; set: ${JSON.stringify(all)}`);
+    }
     if (verb === "assign") {
       const { id } = (await call(client, "nts.tasks.assign", { issue, instructions: text })) as {
         id: string;

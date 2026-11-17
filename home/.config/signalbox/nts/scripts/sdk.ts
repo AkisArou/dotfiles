@@ -22,7 +22,8 @@ function run(command: string, args: readonly string[], cwd: string): void {
 
 // npm_execpath is the pnpm running this script (a native executable or a JS entry).
 const pnpm = process.env.npm_execpath;
-if (!pnpm) throw new Error("Run through pnpm (pnpm sdk), so the injected SDK copy can be refreshed");
+if (!pnpm)
+  throw new Error("Run through pnpm (pnpm sdk), so the injected SDK copy can be refreshed");
 const javascript = /\.[cm]?js$/.test(pnpm);
 const viaPnpm = (args: readonly string[], cwd: string) =>
   run(javascript ? process.execPath : pnpm, [...(javascript ? [pnpm] : []), ...args], cwd);

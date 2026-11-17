@@ -142,6 +142,10 @@ export function assignmentPhase(a: AssignmentView, now = Date.now()): string {
     ? phase
     : `${phase} ${Math.max(0, Math.round((now - a.phaseSince) / 60_000))} min`;
 }
+export const prioritizeTask = operation<
+  { issue: number; urgency: number },
+  { urgency: Record<string, number> }
+>("nts.tasks.prioritize");
 export const retryAssignment = operation<{ assignment: string }, { ok: true }>(
   "nts.assignments.retry",
 );

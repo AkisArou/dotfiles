@@ -17,6 +17,7 @@ import type { ManagedAgents } from "./agents.ts";
 import type { AgentToolset } from "signalbox/ext/agents/tools";
 import { coordinator } from "./coordinator.ts";
 import { profiles } from "./profiles.ts";
+import { priorities } from "./priorities.ts";
 import type { ProfileSettings, Profiles } from "./profiles.ts";
 import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
 import { taskRoute } from "./task.ts";
@@ -80,6 +81,7 @@ export function ntsOrchestration(options: {
 }) {
   const engine = openWorkflowSqlite({ path: join(options.directory, "workflows.sqlite") });
   const profileStore = profiles({ state: options.state, initial: options.settings.profiles });
+  const urgency = priorities({ state: options.state });
   const decisions = decisionRequests({
     id: "nts-user",
     state: options.state,
@@ -104,6 +106,7 @@ export function ntsOrchestration(options: {
     mailbox: new Late(),
     issues: options.issues,
     decisions: decisions.service,
+    priorities: urgency.service,
   };
   const tools = {
     worker: workerTools(wiring),
@@ -132,6 +135,8 @@ export function ntsOrchestration(options: {
     engine: engine.engine,
     routes: [route],
     capacity: (resource) => (resource === "worker" ? options.settings.workerSlots : 1),
+    // Freed slots and files go to the most urgent waiting task, then the oldest.
+    priority: (assignment) => urgency.rank((assignment.input as { issue?: number }).issue),
   });
   wiring.work.set(work.service);
   const lead = options.settings.coordinator
@@ -155,6 +160,7 @@ export function ntsOrchestration(options: {
     work: work.service,
     assignments: work.assignments,
     profiles: profileStore.service,
+    priorities: urgency.service,
     decisions: decisions.service,
     agents,
     landing: landing.key,
@@ -163,6 +169,7 @@ export function ntsOrchestration(options: {
     extensions: [
       engine.extension,
       profileStore.extension,
+      urgency.extension,
       // Probe only the real Claude Code; stand-in agents have nothing to probe.
       ...(options.agents ? [] : [claudeMessagingProbe(options.root, profileStore.service)]),
       decisions.extension,
