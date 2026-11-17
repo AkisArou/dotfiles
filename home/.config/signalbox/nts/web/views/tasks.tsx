@@ -28,12 +28,14 @@ import {
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, Section, Status } from "../components.tsx";
 import { useNarrow } from "../narrow.ts";
+import { useOverlay } from "../overlay.ts";
 
 type Search = { q?: string; filter?: string[]; issue?: number };
 
 export function Tasks({ project }: { project: Project }) {
   const navigate = useNavigate();
   const narrow = useNarrow();
+  const overlay = useOverlay();
   const { q = "", filter = [] } = useSearch({ strict: false }) as Search;
   const search = (change: Partial<Search>) =>
     void navigate({
@@ -133,7 +135,7 @@ export function Tasks({ project }: { project: Project }) {
                   {row.state}
                 </Status>
               }
-              onClick={() => search({ issue: row.number })}
+              onClick={() => overlay.open({ issue: row.number })}
             />
           ))}
         </List>
@@ -161,7 +163,7 @@ export function Tasks({ project }: { project: Project }) {
                   type="button"
                   className="cell-link"
                   title={row.title}
-                  onClick={() => search({ issue: row.number })}
+                  onClick={() => overlay.open({ issue: row.number })}
                 >
                   {row.title}
                 </button>

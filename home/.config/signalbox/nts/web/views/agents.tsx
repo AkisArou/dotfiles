@@ -17,6 +17,7 @@ import type { Project } from "../../shared/use-project.ts";
 import { Action, Empty, Section, Status } from "../components.tsx";
 import { NativeTerminal } from "../terminal.tsx";
 import { useNarrow } from "../narrow.ts";
+import { useOverlay } from "../overlay.ts";
 
 const PANES = [
   { path: "/agents", label: "Sessions" },
@@ -47,7 +48,6 @@ export function AgentPanes({ children }: { children: ReactNode }) {
 }
 
 export function Sessions({ project }: { project: Project }) {
-  const navigate = useNavigate();
   const [selected, setSelected] = useState<string>();
   const [endedOpen, setEndedOpen] = useState(false);
   // The most recently ended first.
@@ -64,16 +64,9 @@ export function Sessions({ project }: { project: Project }) {
     </>
   );
   const narrow = useNarrow();
-  const openScreen = (id: string) =>
-    void navigate({
-      to: ".",
-      search: (previous: Record<string, unknown>) => ({ ...previous, screen: id }),
-    });
-  const openIssue = (issue: number) =>
-    void navigate({
-      to: ".",
-      search: (previous: Record<string, unknown>) => ({ ...previous, issue }),
-    });
+  const overlay = useOverlay();
+  const openScreen = (id: string) => overlay.open({ screen: id });
+  const openIssue = (issue: number) => overlay.open({ issue });
   return (
     <div className="split">
       <Section

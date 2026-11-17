@@ -11,10 +11,24 @@ import type { NtsPage, Reading, TableCell } from "../../status/model.ts";
 import { reportOf } from "../../status/use-nts.ts";
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, ResponsiveTable, Section, Status } from "../components.tsx";
+import { useOverlay } from "../overlay.ts";
 
 function Cell({ value }: { value: TableCell | undefined }) {
+  const overlay = useOverlay();
   const style = value && typeof value === "object" ? value : undefined;
   const text = cellText(value);
+  // A cell about an issue opens it, as a task does anywhere.
+  if (style?.issue)
+    return (
+      <button
+        type="button"
+        className={`cell-link${style.color ? ` nts-${style.color}` : ""}`}
+        title={`Open #${style.issue}`}
+        onClick={() => overlay.open({ issue: style.issue! })}
+      >
+        {text}
+      </button>
+    );
   return (
     <span
       className={style?.color ? `nts-${style.color}` : undefined}

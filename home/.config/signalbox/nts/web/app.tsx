@@ -23,6 +23,7 @@ import { AgentScreen } from "./agent-screen.tsx";
 import { ProjectContext, viewOf, viewPath } from "./project.ts";
 import { useNarrow } from "./narrow.ts";
 import { AppearanceButton, TabBar } from "./tab-bar.tsx";
+import { useOverlay } from "./overlay.ts";
 
 type Mode = "dark" | "light" | "system";
 const MODES: Mode[] = ["dark", "light", "system"];
@@ -45,6 +46,18 @@ export function Shell() {
   // A phone: the views in a bottom tab bar, the status line in its More sheet.
   const narrow = useNarrow();
   const [more, setMore] = useState(false);
+  const overlay = useOverlay();
+  // The home-screen app's status bar takes the header's colour (theme-color), in
+  // either appearance, so it reads as one bar with it, as a native app's does.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      const header = document.querySelector(".astryx-app-shell-header");
+      const colour = header ? getComputedStyle(header).backgroundColor : "";
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta && colour && colour !== "rgba(0, 0, 0, 0)") meta.setAttribute("content", colour);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [mode, narrow]);
   useEffect(() => {
     try {
       localStorage.setItem("signalbox-nts-mode", mode);
@@ -232,27 +245,10 @@ export function Shell() {
           {screen && project.data.agents.find((agent) => agent.id === screen) && (
             <AgentScreen
               agent={project.data.agents.find((agent) => agent.id === screen)!}
-              close={() =>
-                void navigate({
-                  to: ".",
-                  search: (previous: Record<string, unknown>) => ({
-                    ...previous,
-                    screen: undefined,
-                  }),
-                })
-              }
+              close={() => overlay.close("screen")}
             />
           )}
-          <IssueDrawer
-            project={project}
-            number={issue}
-            close={() =>
-              void navigate({
-                to: ".",
-                search: (previous: Record<string, unknown>) => ({ ...previous, issue: undefined }),
-              })
-            }
-          />
+          <IssueDrawer project={project} number={issue} close={() => overlay.close("issue")} />
         </AppShell>
       </Theme>
     </ProjectContext>

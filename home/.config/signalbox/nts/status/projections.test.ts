@@ -103,3 +103,12 @@ test("the landing page lists its recent answers, the most recent first", async (
     "the input is left as it was",
   );
 });
+
+test("a landing change names its issue, so a page can open it", async () => {
+  const { changeCell } = await import("./landing.ts");
+  assert.deepEqual(changeCell({ issue: 824, branch: "824", sha: "126ef371a9cc0000" }), {
+    text: "#824 824",
+    issue: 824,
+  });
+  assert.equal(changeCell({ issue: null, branch: null, sha: "1f1c6d675717aaaa" }), "1f1c6d675717");
+});

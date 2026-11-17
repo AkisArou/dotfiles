@@ -21,17 +21,15 @@ import { gaugeState } from "../../status/model.ts";
 import { Empty, Section, Status } from "../components.tsx";
 import { viewPath } from "../project.ts";
 import { useNarrow } from "../narrow.ts";
+import { useOverlay } from "../overlay.ts";
 
 const SEVERITY = { red: 0, amber: 1, ok: 2 } as const;
 
 export function Now({ project }: { project: Project }) {
   const navigate = useNavigate();
   const narrow = useNarrow();
-  const openIssue = (issue: number) =>
-    void navigate({
-      to: ".",
-      search: (previous: Record<string, unknown>) => ({ ...previous, issue }),
-    });
+  const overlay = useOverlay();
+  const openIssue = (issue: number) => overlay.open({ issue });
   const { needs, assignments, agents, issues } = project.data;
   const flight = assignments
     .filter((a) => a.status === "active" || a.status === "queued")
@@ -138,15 +136,7 @@ export function Now({ project }: { project: Project }) {
                       type="button"
                       className="cell-link mono"
                       title={`Open #${row.issue}`}
-                      onClick={() =>
-                        void navigate({
-                          to: ".",
-                          search: (previous: Record<string, unknown>) => ({
-                            ...previous,
-                            issue: row.issue,
-                          }),
-                        })
-                      }
+                      onClick={() => openIssue(row.issue)}
                     >
                       #{row.issue}
                     </button>
@@ -204,15 +194,7 @@ export function Now({ project }: { project: Project }) {
                   key={row.id}
                   label={row.name}
                   description={row.path}
-                  onClick={() =>
-                    void navigate({
-                      to: ".",
-                      search: (previous: Record<string, unknown>) => ({
-                        ...previous,
-                        screen: row.id,
-                      }),
-                    })
-                  }
+                  onClick={() => overlay.open({ screen: row.id })}
                   endContent={
                     <Status tone={agentTone(row.state)} title={agentStates[row.state]?.meaning}>
                       {row.state}

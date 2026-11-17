@@ -5,7 +5,13 @@ export type Color = "red" | "green" | "yellow" | "gray" | "cyan" | "blue";
 export type TableCell =
   | string
   | number
-  | { readonly text: string; readonly color?: Color; readonly bold?: boolean };
+  | {
+      readonly text: string;
+      readonly color?: Color;
+      readonly bold?: boolean;
+      /** The issue the cell is about: a page may open it. */
+      readonly issue?: number;
+    };
 export type TableRow = Readonly<Record<string, TableCell>>;
 export type Table = {
   readonly id: string;

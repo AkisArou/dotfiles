@@ -63,6 +63,9 @@ const named = (change: {
   readonly branch: string | null;
   readonly sha: string;
 }) => `${change.issue ? `#${change.issue} ` : ""}${change.branch ?? change.sha.slice(0, 12)}`;
+/** A change's cell: its name, and its issue to open when it has one. */
+export const changeCell = (change: Parameters<typeof named>[0]): TableCell =>
+  change.issue ? { text: named(change), issue: change.issue } : named(change);
 /** The landing check's goal for one change, in minutes. */
 export const GOAL_MIN = 10;
 
@@ -260,7 +263,7 @@ export function landingReport(status: LandingStatus, now = Date.now()): Report {
         ],
         rows: queue.map((change) => ({
           id: change.id,
-          change: named(change),
+          change: changeCell(change),
           state: colored(change.state),
           detail: change.detail,
         })),
@@ -279,7 +282,7 @@ export function landingReport(status: LandingStatus, now = Date.now()): Report {
         ],
         rows: newestFirst(status.recent).map((answer) => ({
           id: `${answer.id}/${answer.at}/${answer.state}`,
-          change: named(answer),
+          change: changeCell(answer),
           state: colored(answer.state),
           ran: ranAt(answer, now),
           commit: answer.sha.slice(0, 12),
