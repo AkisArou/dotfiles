@@ -4,7 +4,7 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useProject } from "../shared/use-project.ts";
-import { tabs } from "../shared/model.ts";
+import { operationsLine, tabs } from "../shared/model.ts";
 import type { Tab } from "../shared/model.ts";
 import { terminalConfig } from "./config.ts";
 import { describeFilters, filterOptions, matches, toggleFilter } from "./filters.ts";
@@ -517,11 +517,11 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       </box>
       <box height={3} flexShrink={0} border={["top"]} borderColor={c.border} flexDirection="column">
         <text
-          fg={c.muted}
+          fg={project.data.operations?.paused ? c.warning : c.muted}
           height={1}
           wrapMode="none"
           truncate
-        >{`${overview?.repo ?? "GitHub"} · ${project.data.issues.length} open issues · ${agents.length} native terminals · ${overview?.root ?? "connecting…"}`}</text>
+        >{`${overview?.repo ?? "GitHub"}${project.data.operations ? ` · ${operationsLine(project.data.operations)}` : ""} · ${project.data.issues.length} open issues · ${agents.length} native terminals · ${overview?.root ?? "connecting…"}`}</text>
         <text
           fg={project.error || failing.length ? c.danger : message ? c.warning : c.muted}
           height={1}

@@ -106,9 +106,9 @@ export const setOperations = operation<
 /** Queued tasks wait and none is admitted; admitted tasks carry on. */
 export const pauseTasks = operation<{ reason: string }, { ok: true }>("nts.tasks.pause");
 export const resumeTasks = operation<Record<string, never>, { ok: true }>("nts.tasks.resume");
-/** One line for the TUI and sbn status. */
+/** One line for the TUI's bottom bar and sbn status; a pause comes first, so truncation keeps it. */
 export function operationsLine(o: OperationsView): string {
-  return `workers ${o.workerSlots} · rounds ${o.maxRounds}${o.paused ? ` · PAUSED: ${o.paused.reason}` : ""}`;
+  return `${o.paused ? `PAUSED: ${o.paused.reason} · ` : ""}workers ${o.workerSlots} · rounds ${o.maxRounds}`;
 }
 export const profileSettings = source<ProfileSettingsView>("nts.profiles");
 export const assignments = source<AssignmentView[]>("nts.assignments");

@@ -1,7 +1,7 @@
 /** @jsxImportSource @opentui/react */
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, Issue } from "../shared/model.ts";
-import { assignmentPhase, assignmentSays, operationsLine } from "../shared/model.ts";
+import { assignmentPhase, assignmentSays } from "../shared/model.ts";
 import { gaugeState } from "../status/model.ts";
 import { Heading, Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
@@ -21,6 +21,8 @@ export const stateColor = (state: string) =>
   ["held", "parked", "needs-user", "unscoped"].includes(state) ? c.warning : c.text;
 
 export function NowView({ project }: { project: Project }) {
+  // Ended sessions are history; the Agents tab shows them on request.
+  const live = project.data.agents.filter((agent) => agent.state !== "ended");
   const needsYou = project.data.issues.filter((issue) => issue.state === "needs-user");
   return (
     <>
@@ -47,8 +49,10 @@ export function NowView({ project }: { project: Project }) {
           ))}
         {!project.nts.readAt && <Line color={c.muted}>Waiting for NTS observations…</Line>}
       </Section>
-      <Section title={`Agents: ${project.data.agents.length}`}>
-        {project.data.agents.map((agent) => (
+      <Section
+        title={`Agents: ${live.length}${live.length < project.data.agents.length ? ` · ${project.data.agents.length - live.length} ended (Agents tab, e)` : ""}`}
+      >
+        {live.map((agent) => (
           <Line key={agent.id}>{`${agent.name}  ${agent.state} · ${agent.path ?? ""}`}</Line>
         ))}
         {!project.data.agents.length && (
@@ -66,11 +70,6 @@ export function NowView({ project }: { project: Project }) {
               color={a.error || a.escalation || a.stalled || a.help ? c.warning : c.text}
             >{`#${a.issue ?? "?"}  ${assignmentPhase(a)} · ${assignmentSays(a)}`}</Line>
           ))}
-        {project.data.operations && (
-          <Line color={project.data.operations.paused ? c.warning : c.muted}>
-            {operationsLine(project.data.operations)}
-          </Line>
-        )}
         {project.data.profiles && (
           <Line
             color={c.muted}

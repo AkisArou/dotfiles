@@ -49,6 +49,12 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         state: "held",
       },
     ],
+    "nts.operations": {
+      revision: 1,
+      workerSlots: 2,
+      maxRounds: 4,
+      paused: { reason: "usage low" },
+    },
     "nts.profiles": {
       revision: 0,
       profiles: [
@@ -140,7 +146,16 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
       client.start();
       await new Promise((resolve) => setImmediate(resolve));
     });
+    // The Now tab lists live agents; ended ones are a count.
+    await keys("1");
+    assert.doesNotMatch(setup.captureCharFrame(), /Finished reviewer/);
+    assert.match(setup.captureCharFrame(), /Agents: \d+ · 1 ended/);
     await keys("2");
+    // Every tab's bottom bar says how it runs, the pause first.
+    assert.match(
+      setup.captureCharFrame(),
+      /AkisArou\/nts · PAUSED: usage low · workers 2 · rounds 4 ·/,
+    );
     assert.match(setup.captureCharFrame(), /Withdrawal cancellation/);
     assert.match(setup.captureCharFrame(), /Drain owned work/);
     assert.ok(
