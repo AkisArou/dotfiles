@@ -294,16 +294,26 @@ test("a task goes from tree to verified through design approval, review and land
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
   };
-  // The worker's session reports its activity as its state. Each observation differs
-  // (a tick), as a real reading after time passes would wake the route through its
-  // retryAt; the test's clock jumps instead of waiting.
+  // The worker's session reports its activity as its state. In production the
+  // idle deadline wakes the route through its retryAt; this test's clock jumps
+  // instead, so each observation also publishes a landing status with a new main
+  // commit, a source the route watches and the build phase ignores.
   let tick = 0;
   const observe = (status: string) => {
     const [request, instance] = [...byRequest.entries()].find(
       ([, candidate]) => candidate.id === worker,
     )!;
-    byRequest.set(request, { ...instance, state: status, metadata: { tick: ++tick } });
+    byRequest.set(request, { ...instance, state: status });
     instances.set([...byRequest.values()]);
+    landingCell.set({
+      service: { running: true, state: "idle", since: "", message: null },
+      checking: null,
+      waiting: [],
+      held: [],
+      day: { landed: 0, refused: 0, held: 0, withdrawn: 0, median_wall_s: null, max_wall_s: null },
+      recent: [],
+      main: { commit: String(++tick).padStart(40, "0"), pushed: true },
+    } as unknown as LandingStatus);
   };
   const nudges = () =>
     messages.filter(

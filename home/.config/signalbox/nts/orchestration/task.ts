@@ -1,6 +1,6 @@
 // The NTS task route: one GitHub issue, one fresh worker, NTS's own gates.
 // Phases follow docs/workflow.md (task-phases.ts); the data is task-model.ts.
-import { latestValue } from "signalbox/core";
+import { latestValue, mapReadable } from "signalbox/core";
 import { assignmentRoute } from "signalbox/ext/assignments/index";
 import { cancelTask, interrupts, phaseHandlers, turn } from "./task-phases.ts";
 import type { TaskOptions } from "./task-phases.ts";
@@ -54,10 +54,20 @@ export function taskRoute(options: Omit<TaskOptions, "clock"> & { readonly clock
         options.profiles,
         options.agents.runtime,
       ],
+      // Each wake is an activation: watch only what the phases decide on, so a
+      // status's timestamps and counters changing every poll wake nothing.
       watch: (ctx) => [
-        ctx.get(options.landing),
-        ctx.get(options.fullCheck),
-        ctx.get(options.agents.runtime).instances,
+        mapReadable(ctx.get(options.landing), (status) => ({
+          main: status.main.commit,
+          checking: status.checking?.sha ?? null,
+          waiting: status.waiting.map((entry) => entry.sha),
+          held: status.held.map((entry) => entry.sha),
+          answers: status.recent.map((answer) => `${answer.id}:${answer.state}`),
+        })),
+        mapReadable(ctx.get(options.fullCheck), (status) => status.verified.commit),
+        mapReadable(ctx.get(options.agents.runtime).instances, (instances) =>
+          instances.map((instance) => `${instance.id}:${instance.state}`),
+        ),
       ],
       state: taskState,
       report: taskReport,
