@@ -1,7 +1,7 @@
 // On a phone, the views sit in a bottom tab bar, as in a native app: the four
 // you use most, and More, a sheet with the rest, the appearance and the status
 // line the desktop shows at its foot.
-import type { ReactNode, SVGProps } from "react";
+import type { PointerEvent, ReactNode, SVGProps } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
@@ -65,6 +65,32 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
+/** A press ripples out from the finger, as Material's does; it fades once the press ends. */
+function ripple(event: PointerEvent<HTMLButtonElement>) {
+  const button = event.currentTarget;
+  const box = button.getBoundingClientRect();
+  const x = event.clientX - box.left;
+  const y = event.clientY - box.top;
+  // Large enough to reach the button's farthest corner from the finger.
+  const radius = Math.hypot(Math.max(x, box.width - x), Math.max(y, box.height - y));
+  const wave = document.createElement("span");
+  wave.className = "tab-bar-ripple";
+  Object.assign(wave.style, {
+    left: `${x - radius}px`,
+    top: `${y - radius}px`,
+    width: `${radius * 2}px`,
+    height: `${radius * 2}px`,
+  });
+  button.appendChild(wave);
+  const release = () => {
+    wave.classList.add("leaving");
+    setTimeout(() => wave.remove(), 450);
+  };
+  button.addEventListener("pointerup", release, { once: true });
+  button.addEventListener("pointercancel", release, { once: true });
+  button.addEventListener("pointerleave", release, { once: true });
+}
+
 export function TabBar({
   view,
   counts,
@@ -97,6 +123,7 @@ export function TabBar({
       className={`tab-bar-item${active ? " active" : ""}`}
       aria-current={active ? "page" : undefined}
       onClick={onPress}
+      onPointerDown={ripple}
     >
       <span className="tab-bar-icon">
         {ICONS[name]}
