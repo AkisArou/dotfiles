@@ -116,7 +116,11 @@ test("the embedded native terminal owns keys and paste; Ctrl+] returns to naviga
         <TerminalTheme>
           <TerminalProvider url={`ws://127.0.0.1:${port}/terminals`}>
             <TerminalApp
-              tools={{ find: async () => undefined, run: async () => {} }}
+              tools={{
+                find: async () => undefined,
+                findMany: async () => undefined,
+                run: async () => {},
+              }}
               onExit={() => {
                 exits++;
               }}

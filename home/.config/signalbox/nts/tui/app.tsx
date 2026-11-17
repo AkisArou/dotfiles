@@ -103,7 +103,12 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     const action = settingAction(row, project, terminalConfig.editor);
     if (!action) return;
     void local(row.label, async () => {
-      if ("run" in action) return tools.run(action.run, action.cwd);
+      if (action.kind === "run") return tools.run(action.run, action.cwd);
+      if (action.kind === "many") {
+        const indices = await tools.findMany(action.lines, row.label, action.chosen);
+        if (indices !== undefined) await action.apply(indices);
+        return;
+      }
       const index = await tools.find(action.lines, row.label);
       if (index !== undefined) await action.apply(index);
     });
@@ -330,7 +335,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           : undefined;
   const groupOf = (issue: (typeof tasks)[number]) =>
     `${issue.stream}${issue.group ? ` › ${issue.group}` : ""}`;
-  const list = (
+  const scroll = (
     <ScrollPane
       key={`${tab}-list`}
       scrollRef={listScroll}
@@ -383,8 +388,21 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
             >{`  ${item.role} · ${item.path ?? "native terminal"}`}</text>
           </box>
         ))}
-      {tab === "Agents" && settings.length > 0 && (
-        <box flexDirection="column" marginTop={1} flexShrink={0}>
+      {!items.length && (
+        <Line color={c.muted}>
+          {taskTab
+            ? "No matching tasks. f changes filters; F clears them."
+            : "No native terminals. n opens a session."}
+        </Line>
+      )}
+    </ScrollPane>
+  );
+  // The Agents tab's settings stay at the bottom of its list, however many agents scroll above.
+  const list =
+    tab === "Agents" && settings.length > 0 ? (
+      <box flexDirection="column" flexGrow={1} minHeight={0}>
+        {scroll}
+        <box flexDirection="column" flexShrink={0} border={["top"]} borderColor={c.border}>
           <Heading>Settings · Enter changes</Heading>
           {settings.map((row) => (
             <ListRow
@@ -399,16 +417,10 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
             />
           ))}
         </box>
-      )}
-      {!items.length && (
-        <Line color={c.muted}>
-          {taskTab
-            ? "No matching tasks. f changes filters; F clears them."
-            : "No native terminals. n opens a session."}
-        </Line>
-      )}
-    </ScrollPane>
-  );
+      </box>
+    ) : (
+      scroll
+    );
   const content =
     tab === "Agents" && agent?.terminal ? (
       <NativeTerminal

@@ -19,15 +19,26 @@ export interface SettingRow {
   readonly warn: boolean;
   readonly detail: readonly string[];
 }
-/** What Enter does on a row: offer choices in the finder, or run a program on the terminal. */
+/** What Enter does on a row: one choice in the finder, several, or a program on the terminal. */
 export type SettingAction =
-  | { readonly lines: readonly string[]; apply(index: number): Promise<unknown> }
-  | { readonly run: TerminalCommand; readonly cwd: string };
+  | {
+      readonly kind: "one";
+      readonly lines: readonly string[];
+      apply(index: number): Promise<unknown>;
+    }
+  | {
+      readonly kind: "many";
+      readonly lines: readonly string[];
+      /** The lines chosen now, in their order; the finder starts with them ticked. */
+      readonly chosen: readonly number[];
+      apply(indices: readonly number[]): Promise<unknown>;
+    }
+  | { readonly kind: "run"; readonly run: TerminalCommand; readonly cwd: string };
 
 const ROLES: Record<AgentRole, string> = {
   coordinator: "Coordinator",
-  worker: "Workers",
-  reviewer: "Reviewers",
+  worker: "Worker",
+  reviewer: "Reviewer",
 };
 const HARNESSES: Record<Harness, string> = { claude: "Claude Code", codex: "Codex" };
 /** The coordinator runs one at a time, so it only takes the first available. */
@@ -99,18 +110,31 @@ export function settingRows(settings: SettingsView | undefined): SettingRow[] {
   for (const role of Object.keys(ROLES) as AgentRole[]) {
     const { pick, models } = settings.roles[role];
     rows.push({
-      id: `setting:role:${role}`,
-      label: ROLES[role],
+      id: `setting:models:${role}`,
+      label: `${ROLES[role]} models`,
       value: modelsLine(settings.roles[role]),
       warn: false,
       detail: [
-        `Picks ${pickLabels[pick]}.`,
         ...models.map((model, index) => `${index + 1}. ${model.label}   ${model.id}`),
         "",
-        "The next launch of this role uses one of these; running agents keep theirs.",
-        "A model whose harness is unavailable is skipped.",
+        "Enter offers every model at every effort, these ticked. Tab ticks or unticks;",
+        "the order ticked is the order tried. The next launch of this role uses one of",
+        "these; running agents keep theirs, and an unavailable harness is skipped.",
       ],
     });
+    // The coordinator runs one at a time: it takes the first available, with nothing to choose.
+    if (PICKS[role].length > 1)
+      rows.push({
+        id: `setting:pick:${role}`,
+        label: `${ROLES[role]} pick`,
+        value: pick,
+        warn: false,
+        detail: [
+          `Picks ${pickLabels[pick]}.`,
+          "",
+          ...PICKS[role].map((way) => `${way}: ${pickLabels[way]}`),
+        ],
+      });
   }
   for (const harness of Object.keys(HARNESSES) as Harness[]) {
     const blocked = settings.unavailable[harness];
@@ -140,6 +164,7 @@ export function settingAction(
   const version = settings.version;
   if (row.id === "setting:file")
     return {
+      kind: "run",
       run: { ...editor, args: [...(editor.args ?? []), settings.path] },
       cwd: dirname(settings.path),
     };
@@ -148,6 +173,7 @@ export function settingAction(
     const values = workers ? range(0, 8) : range(1, 10);
     const now = workers ? settings.workerSlots : settings.maxRounds;
     return {
+      kind: "one",
       lines: values.map((n) => `${mark(n === now)} ${n} ${workers ? "worker slots" : "rounds"}`),
       apply: (index) =>
         commands.setSettings.run({
@@ -158,52 +184,36 @@ export function settingAction(
   }
   if (row.id === "setting:pause")
     return settings.paused
-      ? { lines: ["Resume new tasks"], apply: () => commands.resumeTasks.run({}) }
+      ? { kind: "one", lines: ["Resume new tasks"], apply: () => commands.resumeTasks.run({}) }
       : {
+          kind: "one",
           lines: PAUSE_REASONS.map((reason) => `Pause: ${reason}`),
           apply: (index) => commands.pauseTasks.run({ reason: PAUSE_REASONS[index]! }),
         };
-  const role = /^setting:role:(\w+)$/.exec(row.id)?.[1] as AgentRole | undefined;
-  if (role) {
-    const { pick, models } = settings.roles[role];
-    const ids = models.map((model) => model.id);
-    const listed = new Set(ids);
-    const options: { line: string; change: { pick?: Pick; models?: string[] } }[] = [
-      ...(PICKS[role].length > 1
-        ? PICKS[role].map((way) => ({
-            line: `${mark(way === pick)} pick: ${pickLabels[way]}`,
-            change: { pick: way },
-          }))
-        : []),
-      ...models.flatMap((model, index) => [
-        ...(index > 0
-          ? [
-              {
-                line: `↑ first: ${model.label}`,
-                change: { models: [model.id, ...ids.filter((id) => id !== model.id)] },
-              },
-            ]
-          : []),
-        ...(models.length > 1
-          ? [
-              {
-                line: `✕ remove: ${model.label}`,
-                change: { models: ids.filter((id) => id !== model.id) },
-              },
-            ]
-          : []),
-      ]),
-      ...settings.catalog
-        .filter((model) => !listed.has(model.id))
-        .map((model) => ({
-          line: `+ add: ${model.label}`,
-          change: { models: [...ids, model.id] },
-        })),
-    ];
+  const modelsOf = /^setting:models:(\w+)$/.exec(row.id)?.[1] as AgentRole | undefined;
+  if (modelsOf) {
+    const ids = settings.catalog.map((model) => model.id);
     return {
-      lines: options.map((option) => option.line),
+      kind: "many",
+      lines: settings.catalog.map((model) => `${model.label}   ${model.id}`),
+      chosen: settings.roles[modelsOf].models.map((model) => ids.indexOf(model.id)),
+      apply: (indices) =>
+        commands.setSettings.run({
+          roles: { [modelsOf]: { models: indices.map((index) => ids[index]!) } },
+          version,
+        }),
+    };
+  }
+  const pickOf = /^setting:pick:(\w+)$/.exec(row.id)?.[1] as AgentRole | undefined;
+  if (pickOf) {
+    const ways = PICKS[pickOf];
+    return {
+      kind: "one",
+      lines: ways.map(
+        (way) => `${mark(way === settings.roles[pickOf].pick)} ${way}: ${pickLabels[way]}`,
+      ),
       apply: (index) =>
-        commands.setSettings.run({ roles: { [role]: options[index]!.change }, version }),
+        commands.setSettings.run({ roles: { [pickOf]: { pick: ways[index]! } }, version }),
     };
   }
   const harness = /^setting:harness:(\w+)$/.exec(row.id)?.[1] as Harness | undefined;
@@ -211,6 +221,7 @@ export function settingAction(
     const states = [null, ...UNAVAILABLE.map((reason) => ({ reason }))];
     const blocked = settings.unavailable[harness]?.reason;
     return {
+      kind: "one",
       lines: states.map((state) =>
         state
           ? `${mark(blocked === state.reason)} unavailable: ${state.reason}`

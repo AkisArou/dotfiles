@@ -10,13 +10,19 @@ export interface TerminalCommand {
 }
 export interface TerminalTools {
   find(lines: readonly string[], title: string): Promise<number | undefined>;
+  /** Several lines, starting from those already chosen; the indices come in the order chosen. */
+  findMany(
+    lines: readonly string[],
+    title: string,
+    chosen: readonly number[],
+  ): Promise<number[] | undefined>;
   run(command: TerminalCommand, cwd: string): Promise<void>;
 }
 type Terminal = Pick<CliRenderer, "suspend" | "resume" | "isDestroyed">;
 
 export function createTerminalTools(
   terminal: Terminal,
-  finder: (title: string) => TerminalCommand,
+  finder: (title: string, chosen?: readonly number[]) => TerminalCommand,
 ) {
   let active: ChildProcess | undefined;
   let running: Promise<unknown> | undefined;
@@ -88,26 +94,41 @@ export function createTerminalTools(
     );
   }
 
+  /** The candidate lines the finder printed, as indices in its order; undefined when cancelled. */
+  function choose(lines: readonly string[], title: string, chosen?: readonly number[]) {
+    // A candidate is one terminal-safe line; never shell code or an ANSI escape.
+    const candidates = lines.map((line) => line.replace(/[\x00-\x1f\x7f-\x9f]/g, " "));
+    return borrow(async () => {
+      const command = finder(title, chosen);
+      const result = await execute(command, {
+        capture: true,
+        input: `${candidates.join("\n")}\n`,
+      });
+      if (result.code === 1 || result.code === 130 || result.signal === "SIGINT") return undefined;
+      if (result.code !== 0)
+        throw new Error(`${command.command} exited with ${result.signal ?? result.code}`);
+      return result.output
+        .replace(/\r?\n$/, "")
+        .split(/\r?\n/)
+        .map((selected) => {
+          const index = candidates.indexOf(selected);
+          if (index < 0) throw new Error("Finder must print only candidate lines");
+          return index;
+        });
+    });
+  }
+
   return {
     async find(lines: readonly string[], title: string): Promise<number | undefined> {
       if (!lines.length) return undefined;
-      // A candidate is one terminal-safe line; never shell code or an ANSI escape.
-      const candidates = lines.map((line) => line.replace(/[\x00-\x1f\x7f-\x9f]/g, " "));
-      return borrow(async () => {
-        const command = finder(title);
-        const result = await execute(command, {
-          capture: true,
-          input: `${candidates.join("\n")}\n`,
-        });
-        if (result.code === 1 || result.code === 130 || result.signal === "SIGINT")
-          return undefined;
-        if (result.code !== 0)
-          throw new Error(`${command.command} exited with ${result.signal ?? result.code}`);
-        const selected = result.output.replace(/\r?\n$/, "");
-        const index = candidates.indexOf(selected);
-        if (index < 0) throw new Error("Finder must print exactly one of the candidate lines");
-        return index;
-      });
+      const picked = await choose(lines, title);
+      if (picked && picked.length !== 1)
+        throw new Error("Finder must print exactly one of the candidate lines");
+      return picked?.[0];
+    },
+    async findMany(lines, title, chosen) {
+      if (!lines.length) return undefined;
+      return choose(lines, title, chosen);
     },
     async run(command: TerminalCommand, cwd: string): Promise<void> {
       const directory = await stat(cwd).catch(() => undefined);

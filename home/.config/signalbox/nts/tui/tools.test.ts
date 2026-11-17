@@ -101,3 +101,26 @@ test(
     }
   },
 );
+
+test("several choices start from those already chosen and come back in the order chosen", async () => {
+  // The finder is told what is chosen; this one prints lines 3 then 1, as a person ticking them would.
+  const tools = createTerminalTools(terminal(), (title, chosen) => ({
+    command: process.execPath,
+    args: [
+      "-e",
+      "const fs=require('node:fs'); if(process.argv[1]!=='Models'||process.argv[2]!=='2,0') process.exit(2); const lines=fs.readFileSync(0,'utf8').trimEnd().split('\\n'); process.stdout.write(lines[2]+'\\n'+lines[0]+'\\n');",
+      title,
+      (chosen ?? []).join(","),
+    ],
+  }));
+  assert.deepEqual(await tools.findMany(["opus", "sonnet", "codex"], "Models", [2, 0]), [2, 0]);
+  await tools.close();
+});
+
+test("the configured finder ticks the chosen lines at start, in their order", async () => {
+  const { terminalConfig } = await import("./config.ts");
+  const many = terminalConfig.finder("Models", [2, 0]).args ?? [];
+  assert.ok(many.includes("--multi"));
+  assert.ok(many.includes("load:pos(3)+select+pos(1)+select+first"));
+  assert.ok(terminalConfig.finder("Find").args?.includes("--no-multi"));
+});

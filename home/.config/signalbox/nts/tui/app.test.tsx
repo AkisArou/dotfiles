@@ -49,6 +49,11 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     inputs: unknown[] = [];
   let pick: (lines: readonly string[], title: string) => Promise<number | undefined> = async () =>
     undefined;
+  let pickMany: (
+    lines: readonly string[],
+    title: string,
+    chosen: readonly number[],
+  ) => Promise<number[] | undefined> = async () => undefined;
   const issue = {
     id: "807",
     number: 807,
@@ -134,6 +139,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         <TerminalApp
           tools={{
             find: (lines, title) => pick(lines, title),
+            findMany: (lines, title, chosen) => pickMany(lines, title, chosen),
             run: async (_command, cwd) => {
               gitRuns.push(cwd);
             },
@@ -226,7 +232,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
       offered = { lines, title };
       return lines.findIndex((line) => line.endsWith(" 3 worker slots"));
     };
-    await keys("G", "k", "k", "k", "k", "k", "k", "k");
+    await keys("G", "k", "k", "k", "k", "k", "k", "k", "k", "k");
     await act(async () => {
       setup.mockInput.pressEnter();
       await new Promise((resolve) => setImmediate(resolve));
@@ -235,26 +241,37 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     assert.ok(offered?.lines.includes("✓ 2 worker slots"), "the current value is marked");
     assert.equal(calls.at(-1), "nts.settings.set");
     assert.deepEqual(inputs.at(-1), { workerSlots: 3, version: "v1" });
-    // A role's row adds a model from the catalog, kept in order after the listed ones.
-    pick = async (lines, title) => {
-      offered = { lines, title };
-      return lines.findIndex((line) => line.startsWith("+ add: Codex"));
+    // A role's models row offers every model at every effort, the listed ones ticked;
+    // the ticked lines come back in the order ticked.
+    let many: { lines: readonly string[]; title: string; chosen: readonly number[] } | undefined;
+    pickMany = async (lines, title, chosen) => {
+      many = { lines, title, chosen };
+      return [...chosen, lines.findIndex((line) => line.startsWith("Codex"))];
     };
     await keys("j", "j", "j", "j");
     await act(async () => {
       setup.mockInput.pressEnter();
       await new Promise((resolve) => setImmediate(resolve));
     });
-    assert.equal(offered?.title, "Workers");
-    assert.ok(
-      offered?.lines.includes(
-        "✓ pick: the coordinator names one per task (else the first available)",
-      ),
-    );
+    assert.equal(many?.title, "Worker models");
+    assert.deepEqual(many?.chosen, [0], "the listed model starts ticked");
     assert.deepEqual(inputs.at(-1), {
       roles: { worker: { models: ["claude/claude-opus-5-5/high", "codex/configured/high"] } },
       version: "v1",
     });
+    // How one is picked is its own row.
+    pick = async (lines, title) => {
+      offered = { lines, title };
+      return lines.findIndex((line) => line.includes("spread:"));
+    };
+    await keys("j");
+    await act(async () => {
+      setup.mockInput.pressEnter();
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+    assert.equal(offered?.title, "Worker pick");
+    assert.ok(offered?.lines.some((line) => line.startsWith("✓ coordinator:")));
+    assert.deepEqual(inputs.at(-1), { roles: { worker: { pick: "spread" } }, version: "v1" });
   } finally {
     await act(async () => {
       client.close();
@@ -346,6 +363,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
           onExit={() => {}}
           tools={{
             find: async () => undefined,
+            findMany: async () => undefined,
             run: async (_command, cwd) => {
               gitRuns.push(cwd);
             },
