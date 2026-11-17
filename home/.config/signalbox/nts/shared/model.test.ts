@@ -6,6 +6,8 @@ import type { Agent, AssignmentView, Issue } from "./model.ts";
 import {
   agentLines,
   agentTone,
+  liveTask,
+  taskWord,
   assignmentTone,
   gaugeTone,
   issueTone,
@@ -22,15 +24,7 @@ test("states read the same in the TUI and the web: one tone each", () => {
     ["held", "parked", "needs-user", "unscoped", "ready", "in_progress", "group"].map(issueTone),
     ["attention", "attention", "attention", "attention", "plain", "plain", "plain"],
   );
-  const task = (change: Partial<AssignmentView>) =>
-    assignmentTone({
-      status: "active",
-      error: null,
-      escalation: null,
-      stalled: null,
-      help: null,
-      ...change,
-    } as AssignmentView);
+  const task = (change: Partial<AssignmentView>) => assignmentTone(view(change));
   assert.equal(task({}), "plain");
   assert.equal(task({ error: "boom" }), "bad");
   assert.equal(task({ escalation: "decide" }), "attention");
@@ -68,4 +62,45 @@ test("an agent's lines: the issue it works on by title, then its role and tree",
   assert.deepEqual(agentLines(agent({ issue: null, role: "coordinator", path: null }), issues), [
     "coordinator · native terminal",
   ]);
+});
+
+function view(change: Partial<AssignmentView>): AssignmentView {
+  return {
+    status: "active",
+    phase: "build",
+    error: null,
+    escalation: null,
+    stalled: null,
+    help: null,
+    waitingOn: [],
+    ahead: null,
+    issue: 1,
+    acceptedAt: 0,
+    ...change,
+  } as AssignmentView;
+}
+
+test("a task's word for lists: its place in the worker queue, its phase, or what it needs", () => {
+  assert.equal(
+    taskWord(view({ phase: "workspace", waitingOn: ["resource:worker"] })),
+    "next for a worker",
+  );
+  assert.equal(
+    taskWord(view({ phase: "workspace", waitingOn: ["resource:worker"], ahead: "issue/828" })),
+    "queued after #828",
+  );
+  assert.equal(
+    taskWord(view({ status: "queued", phase: "prepare", waitingOn: ["route:nts/task"] })),
+    "queued",
+  );
+  assert.equal(taskWord(view({})), "build");
+  assert.equal(taskWord(view({ help: "a question" })), "asks");
+  assert.equal(taskWord(view({ error: "boom", waitingOn: ["resource:worker"] })), "faulted");
+  const tasks = [
+    view({ issue: 7, status: "finished", acceptedAt: 3 }),
+    view({ issue: 7, status: "active", acceptedAt: 2, phase: "verify" }),
+    view({ issue: 8, status: "queued", acceptedAt: 1 }),
+  ];
+  assert.equal(liveTask(tasks, 7)?.phase, "verify", "a finished task is not live");
+  assert.equal(liveTask(tasks, 9), undefined);
 });

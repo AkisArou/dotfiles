@@ -1,48 +1,65 @@
-// Tasks: every open task in one line each, found by text, stream and state
-// (kept in the URL, so a filtered list can be linked); a task opens in the
-// issue drawer.
-import { issueTone } from "../../shared/model.ts";
+// Tasks: every open task in one line each, found by text and by the same
+// facets as the TUI (several values at once: OR within a facet, AND between
+// facets), kept in the URL so a filtered list can be linked; a task opens in
+// the issue drawer. A task the coordinator queued shows where it is.
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Selector } from "@astryxdesign/core/Selector";
+import { MultiSelector } from "@astryxdesign/core/MultiSelector";
 import { Table, pixel, proportional } from "@astryxdesign/core/Table";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Toolbar } from "@astryxdesign/core/Toolbar";
+import {
+  chosenOf,
+  filterKey,
+  filterOptions,
+  keysOf,
+  matches,
+  taskFacets,
+} from "../../shared/filters.ts";
+import { assignmentTone, issueTone, liveTask, taskWord } from "../../shared/model.ts";
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, Section, Status } from "../components.tsx";
 
-type Filters = { q?: string; stream?: string; state?: string; issue?: number };
+type Search = { q?: string; filter?: string[]; issue?: number };
 
 export function Tasks({ project }: { project: Project }) {
   const navigate = useNavigate();
-  const { q = "", stream = "all", state = "all" } = useSearch({ strict: false }) as Filters;
-  const filter = (change: Partial<Filters>) =>
+  const { q = "", filter = [] } = useSearch({ strict: false }) as Search;
+  const search = (change: Partial<Search>) =>
     void navigate({
       to: "/tasks",
-      search: (previous: Filters) => {
-        const next: Filters = { ...previous, ...change };
-        for (const key of ["q", "stream", "state"] as const)
-          if (!next[key] || next[key] === "all") delete next[key];
+      search: (previous: Search) => {
+        const next: Search = { ...previous, ...change };
+        if (!next.q) delete next.q;
+        if (!next.filter?.length) delete next.filter;
         return next;
       },
       replace: true,
     });
   const issues = project.data.issues;
+  const chosen = chosenOf(filter);
   const visible = issues.filter(
     (issue) =>
-      (stream === "all" || issue.stream === stream) &&
-      (state === "all" || issue.state === state) &&
+      matches(taskFacets, chosen, issue) &&
       `${issue.number} ${issue.title} ${issue.labels.join(" ")} ${issue.owner ?? ""}`
         .toLowerCase()
         .includes(q.toLowerCase()),
   );
-  const rows = visible.map((issue) => ({
-    id: issue.id,
-    number: issue.number,
-    title: issue.title,
-    state: issue.state,
-    place: issue.group ?? issue.stream,
-    owner: issue.owner ?? "",
+  const options = filterOptions(taskFacets, chosen, issues).map((option) => ({
+    value: filterKey(option.facet, option.value),
+    label: `${option.label} (${option.count})`,
   }));
+  const rows = visible.map((issue) => {
+    const live = liveTask(project.data.assignments, issue.number);
+    return {
+      id: issue.id,
+      number: issue.number,
+      title: issue.title,
+      tone: live ? assignmentTone(live) : issueTone(issue.state),
+      state: live ? taskWord(live) : issue.state,
+      place: issue.group ?? issue.stream,
+      owner: issue.owner ?? "",
+    };
+  });
   return (
     <Section
       title="Tasks"
@@ -60,35 +77,25 @@ export function Tasks({ project }: { project: Project }) {
               id="task-search"
               type="search"
               size="sm"
+              width={340}
               placeholder="Find by number, title, label or owner  (/)"
               value={q}
-              onChange={(value) => filter({ q: value })}
+              onChange={(value) => search({ q: value })}
             />
-            <Selector
-              label="Stream"
+            <MultiSelector
+              label="Filters"
               isLabelHidden
-              value={stream}
-              onChange={(value) => filter({ stream: value })}
-              options={[
-                { value: "all", label: "All streams" },
-                ...[...new Set(issues.map((issue) => issue.stream))].map((value) => ({
-                  value,
-                  label: value,
-                })),
-              ]}
-            />
-            <Selector
-              label="State"
-              isLabelHidden
-              value={state}
-              onChange={(value) => filter({ state: value })}
-              options={[
-                { value: "all", label: "All states" },
-                ...[...new Set(issues.map((issue) => issue.state))].map((value) => ({
-                  value,
-                  label: value,
-                })),
-              ]}
+              size="sm"
+              width={320}
+              placeholder="Filter by area, stream, kind, state, label…"
+              options={options}
+              value={keysOf(chosen)}
+              onChange={(value) => search({ filter: value })}
+              hasSearch
+              searchPlaceholder="Find a filter"
+              hasClear
+              triggerDisplay="badges"
+              maxBadges={3}
             />
           </>
         }
@@ -117,7 +124,7 @@ export function Tasks({ project }: { project: Project }) {
                   type="button"
                   className="cell-link"
                   title={row.title}
-                  onClick={() => filter({ issue: row.number })}
+                  onClick={() => search({ issue: row.number })}
                 >
                   {row.title}
                 </button>
@@ -126,8 +133,8 @@ export function Tasks({ project }: { project: Project }) {
             {
               key: "state",
               header: "State",
-              width: pixel(130),
-              renderCell: (row) => <Status tone={issueTone(row.state)}>{row.state}</Status>,
+              width: pixel(170),
+              renderCell: (row) => <Status tone={row.tone}>{row.state}</Status>,
             },
             {
               key: "place",

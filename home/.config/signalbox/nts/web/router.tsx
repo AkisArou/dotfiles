@@ -35,13 +35,16 @@ const view = (path: string, render: (project: Project) => ReactNode) =>
 const tasksRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tasks",
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { q?: string; stream?: string; state?: string } => ({
-    ...(text(search.q) ? { q: text(search.q) } : {}),
-    ...(text(search.stream) ? { stream: text(search.stream) } : {}),
-    ...(text(search.state) ? { state: text(search.state) } : {}),
-  }),
+  // The filters as facet:value keys (see shared/filters.ts), several at once.
+  validateSearch: (search: Record<string, unknown>): { q?: string; filter?: string[] } => {
+    const filter = (Array.isArray(search.filter) ? search.filter : [search.filter]).filter(
+      (key): key is string => typeof key === "string" && key.length > 0,
+    );
+    return {
+      ...(text(search.q) ? { q: text(search.q) } : {}),
+      ...(filter.length ? { filter } : {}),
+    };
+  },
   component: () => <Tasks project={useProjectContext()} />,
 });
 

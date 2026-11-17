@@ -6,11 +6,27 @@ import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";
 import type { ScrollBoxRenderable } from "@opentui/core";
 import { useProject } from "../shared/use-project.ts";
-import { agentLines, agentTone, needsCount, settingsLine, tabs } from "../shared/model.ts";
+import {
+  agentLines,
+  agentTone,
+  assignmentTone,
+  liveTask,
+  needsCount,
+  settingsLine,
+  tabs,
+  taskWord,
+} from "../shared/model.ts";
 import type { Agent, Tab } from "../shared/model.ts";
 import { terminalConfig } from "./config.ts";
-import { describeFilters, filterOptions, matches, toggleFilter } from "./filters.ts";
-import type { Chosen } from "./filters.ts";
+import {
+  chosenOf,
+  describeFilters,
+  filterKey,
+  filterOptions,
+  matches,
+  taskFacets,
+} from "../shared/filters.ts";
+import type { Chosen } from "../shared/filters.ts";
 import type { TerminalTools } from "./tools.ts";
 import { Line, ListDetail, ListRow, ScrollPane, Section } from "./components.tsx";
 import {
@@ -76,9 +92,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
     reading.status === "error" ? [`${name}: ${reading.error.message}`] : [],
   );
   const taskTab = tab === "Tasks";
-  const tasks = project.data.issues.filter((issue) =>
-    matches(terminalConfig.taskFacets, chosen, issue),
-  );
+  const tasks = project.data.issues.filter((issue) => matches(taskFacets, chosen, issue));
   const nts = tab === "Health" || isNtsPage(tab);
   const report =
     tab === "Health" ? project.nts.health : isNtsPage(tab) ? project.nts.page(tab) : undefined;
@@ -167,23 +181,27 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       }
     });
   }
+  // Several at once: the current filters start ticked, and the ticked set is the new filter.
   function filter() {
-    const options = filterOptions(terminalConfig.taskFacets, chosen, project.data.issues),
-      clear = chosen.size > 0;
+    const options = filterOptions(taskFacets, chosen, project.data.issues);
     const lines = [
-      ...(clear ? ["✕ clear the filters"] : []),
-      ...options.map(
-        (option) => `${option.selected ? "✓" : "·"} ${option.label}  (${option.count})`,
-      ),
+      "✕ clear the filters",
+      ...options.map((option) => `${option.label}  (${option.count})`),
     ];
+    const ticked = options.flatMap((option, index) => (option.selected ? [index + 1] : []));
     void local("Filter Tasks", async () => {
-      const picked = await tools.find(lines, "Filter Tasks");
+      const picked = await tools.findMany(lines, "Filter Tasks", ticked);
       if (picked === undefined) return;
-      if (clear && picked === 0) setChosen(new Map());
-      else {
-        const option = options[picked - (clear ? 1 : 0)];
-        if (option) setChosen((old) => toggleFilter(old, option.facet, option.value));
-      }
+      setChosen(
+        picked.includes(0)
+          ? new Map()
+          : chosenOf(
+              picked.flatMap((index) => {
+                const option = options[index - 1];
+                return option ? [filterKey(option.facet, option.value)] : [];
+              }),
+            ),
+      );
       setFocus("list");
     });
   }
@@ -390,7 +408,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       setFocus("list");
     }
   });
-  const label = describeFilters(terminalConfig.taskFacets, chosen);
+  const label = describeFilters(taskFacets, chosen);
   const count = (name: Tab) =>
     name === "Tasks"
       ? tasks.length
@@ -441,19 +459,23 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
           );
         })}
       {taskTab &&
-        tasks.map((issue) => (
-          <ListRow
-            key={issue.id}
-            id={`row-${issue.id}`}
-            selected={issue.id === currentId}
-            focused={focus === "list"}
-            label={`${stateMark(issue.state)} #${issue.number} ${issue.title}`}
-            meta={groupOf(issue)}
-            end={issue.claims?.[0]?.what ?? issue.state}
-            color={stateColor(issue.state)}
-            onSelect={() => choose(issue.id)}
-          />
-        ))}
+        tasks.map((issue) => {
+          // A task the coordinator queued says where it is; any other issue, its labels' state.
+          const live = liveTask(project.data.assignments, issue.number);
+          return (
+            <ListRow
+              key={issue.id}
+              id={`row-${issue.id}`}
+              selected={issue.id === currentId}
+              focused={focus === "list"}
+              label={`${stateMark(issue.state)} #${issue.number} ${issue.title}`}
+              meta={groupOf(issue)}
+              end={live ? taskWord(live) : (issue.claims?.[0]?.what ?? issue.state)}
+              color={live ? toneColor(assignmentTone(live)) : stateColor(issue.state)}
+              onSelect={() => choose(issue.id)}
+            />
+          );
+        })}
       {tab === "Agents" &&
         agents.map((item) => (
           <ListRow

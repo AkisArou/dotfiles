@@ -84,6 +84,10 @@ export type AssignmentView = {
   issue: number | null;
   phase: string | null;
   wait: string | null;
+  /** What it waits for, when it waits to be admitted: "resource:worker", "route:nts/task". */
+  waitingOn: string[];
+  /** The task that gets it first, when one queues ahead (its key, issue/<n>). */
+  ahead: string | null;
   help: string | null;
   rounds: number;
   commit: string | null;
@@ -270,6 +274,33 @@ export function assignmentSays(a: AssignmentView, now = Date.now()): string {
       : "";
   return `${said} · ${a.progress}${late}`;
 }
+/**
+ * A task's progress in a word or two, for lists: what it needs from someone, its place in
+ * the queue for a worker, or its phase.
+ */
+export function taskWord(a: AssignmentView): string {
+  if (a.error) return "faulted";
+  if (a.escalation) return "escalated";
+  if (a.stalled) return "stalled";
+  if (a.help) return "asks";
+  if (a.waitingOn.includes("resource:worker")) {
+    const ahead = a.ahead && /^issue\/(\d+)/.exec(a.ahead)?.[1];
+    return a.ahead ? `queued after ${ahead ? `#${ahead}` : a.ahead}` : "next for a worker";
+  }
+  if (a.status === "queued") return "queued";
+  return a.phase ?? a.status;
+}
+
+/** An issue's task in flight (queued or active), the latest when there are several. */
+export function liveTask(
+  assignments: readonly AssignmentView[],
+  issue: number,
+): AssignmentView | undefined {
+  return assignments
+    .filter((a) => a.issue === issue && (a.status === "queued" || a.status === "active"))
+    .sort((a, b) => b.acceptedAt - a.acceptedAt)[0];
+}
+
 /** The phase and how long it has run, e.g. "build 42 min". */
 export function assignmentPhase(a: AssignmentView, now = Date.now()): string {
   const phase = a.error ? "faulted" : (a.phase ?? a.status);

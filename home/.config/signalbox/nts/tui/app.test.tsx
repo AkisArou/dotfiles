@@ -224,14 +224,32 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await act(async () => {
       release(0);
     });
-    pick = async (lines, title) => {
+    // f filters by several values at once: the current ones start ticked, and the
+    // ticked set is the new filter.
+    let filterOffer: { lines: readonly string[]; chosen: readonly number[] } | undefined;
+    pickMany = async (lines, title, chosen) => {
       assert.equal(title, "Filter Tasks");
-      return lines.findIndex((line) => line.includes("area: runtime"));
+      filterOffer = { lines, chosen };
+      return [lines.findIndex((line) => line.startsWith("area: runtime"))];
     };
     await keys("f");
     await setup.renderOnce();
     assert.match(setup.captureCharFrame(), /Array ownership/);
     assert.doesNotMatch(setup.captureCharFrame(), /Withdrawal cancellation/);
+    assert.deepEqual(filterOffer?.chosen, [], "nothing starts ticked without a filter");
+    pickMany = async (lines, _title, chosen) => {
+      filterOffer = { lines, chosen };
+      return [...chosen, lines.findIndex((line) => line.startsWith("area: tooling"))];
+    };
+    await keys("f");
+    await setup.renderOnce();
+    assert.deepEqual(
+      filterOffer?.chosen.map((index) => filterOffer!.lines[index]!.replace(/\s+\(\d+\)$/, "")),
+      ["area: runtime"],
+      "the current filter starts ticked",
+    );
+    assert.match(setup.captureCharFrame(), /Array ownership/);
+    assert.match(setup.captureCharFrame(), /Withdrawal cancellation/);
     await keys("F", "4", "l", "L");
     assert.deepEqual(gitRuns, ["/pool/1", "/nts"]);
     await act(async () => {

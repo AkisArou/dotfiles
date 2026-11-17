@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { filterOptions, matches, toggleFilter } from "./filters.ts";
+import { chosenOf, filterOptions, keysOf, matches, toggleFilter } from "./filters.ts";
 import type { Chosen, Facet } from "./filters.ts";
 
 test("task facets combine values, count against other facets, and retain selected values which disappear", () => {
@@ -35,4 +35,12 @@ test("task facets combine values, count against other facets, and retain selecte
     items.filter((item) => matches(facets, new Map(), item)),
     items,
   );
+});
+
+test("a choice travels as facet:value keys, a value's own colons kept", () => {
+  const chosen = chosenOf(["area:tooling", "label:area:compiler", "area:compiler", "nonsense"]);
+  assert.deepEqual([...chosen.get("area")!], ["tooling", "compiler"]);
+  assert.deepEqual([...chosen.get("label")!], ["area:compiler"]);
+  assert.equal(chosen.size, 2, "a key without a facet is dropped");
+  assert.deepEqual(keysOf(chosen), ["area:tooling", "area:compiler", "label:area:compiler"]);
 });
