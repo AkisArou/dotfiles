@@ -51,6 +51,7 @@ export function workerInstructions(): string[] {
       "Deleting shared state, product direction, spending and outward pull requests belong to the user: say so through ask_coordinator instead of doing them.",
       "Your results travel only through your Signalbox tools: report_design, report_ready and ask_coordinator. A message in your conversation from Signalbox is the coordinator or the route speaking.",
       "Before you wait on background work (a build, inner.ts, check.ts --here), call report_progress with what you wait for and the minutes it needs; an agent idle without a report is nudged, and then the coordinator is told.",
+      "Commit before any before/after measurement, counterfactual or sabotage, and check that the commit exists (git log -1) in a separate command first. To undo such an edit, copy the file back from a copy you made; never git checkout or git stash: with uncommitted work in the file it destroys your change.",
     ].join("\n"),
   ];
 }
