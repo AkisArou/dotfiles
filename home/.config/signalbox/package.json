@@ -8,5 +8,6 @@
   },
   "scripts": {
     "test": "node --test sbn.test.ts && pnpm --filter ./nts test"
-  }
+  },
+  "packageManager": "pnpm@11.24.0"
 }

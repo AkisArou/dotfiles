@@ -113,8 +113,9 @@ export function NowView({ project }: { project: Project }) {
   );
 }
 /**
- * An issue in the Tasks tab: its task first when one runs (where it is, what it waits for,
- * what you can do with a), then the issue, then its earlier tasks.
+ * An issue with its task: what you can do (a), where the task is and what it waits for,
+ * then the issue itself, then the task's long notes (its latest instruction, summary and
+ * design), then its earlier tasks: the short and actionable first, the long last.
  */
 export function TaskDetail({
   issue,
@@ -129,12 +130,12 @@ export function TaskDetail({
 }) {
   return (
     <>
-      {task && <TaskBlock number={issue.number} assignment={task} />}
       {actions.length > 0 && (
         <Line
-          color={c.muted}
+          color={c.accent}
         >{`a: ${actions.map((action) => action.label.toLowerCase()).join(" · ")}`}</Line>
       )}
+      {task && <TaskStatus number={issue.number} assignment={task} />}
       {(task || actions.length > 0) && <box height={1} />}
       <Heading>{`#${issue.number} ${issue.title}`}</Heading>
       <Line color={stateColor(issue.state)}>
@@ -161,6 +162,7 @@ export function TaskDetail({
       )}
       <box height={1} />
       <Line>{issue.body}</Line>
+      {task && <TaskNotes assignment={task} />}
       {earlier.length > 0 && (
         <>
           <box height={1} />
@@ -175,8 +177,7 @@ export function TaskDetail({
     </>
   );
 }
-/** An agent's task over everything else: its assignment (what it waits for now,
- * its latest progress, design and summary), then the issue itself. */
+/** An agent's task over everything else, as the Tasks tab shows it. */
 export function TaskPopup({
   number,
   issue,
@@ -186,28 +187,39 @@ export function TaskPopup({
   issue: Issue | undefined;
   assignment: AssignmentView | undefined;
 }) {
+  if (issue) return <TaskDetail issue={issue} task={assignment} />;
   return (
     <>
       {assignment ? (
         <>
-          <TaskBlock number={number} assignment={assignment} />
+          <TaskStatus number={number} assignment={assignment} />
+          <TaskNotes assignment={assignment} />
           <box height={1} />
         </>
       ) : (
         <Line color={c.muted}>{`No task is running for #${number}.`}</Line>
       )}
-      {issue ? (
-        <TaskDetail issue={issue} />
-      ) : (
-        <Line color={c.muted}>{`#${number} is not an open issue.`}</Line>
-      )}
+      <Line color={c.muted}>{`#${number} is not an open issue.`}</Line>
     </>
   );
 }
 
-/** A task: its word and round, what it waits for, its tree and commit, then its latest
- * instruction, summary and design. */
-export function TaskBlock({ number, assignment }: { number: number; assignment: AssignmentView }) {
+/** A task in a few lines: its word and round, what it waits for, its tree and commit. */
+export function TaskStatus({ number, assignment }: { number: number; assignment: AssignmentView }) {
+  return (
+    <>
+      <Heading>{`#${number} · ${assignmentPhase(assignment)} · round ${assignment.rounds + 1}`}</Heading>
+      <Line color={c.muted}>{taskMeaning(assignment)}</Line>
+      <Line color={toneColor(assignmentTone(assignment))}>{assignmentSays(assignment)}</Line>
+      {assignment.tree && <Line color={c.accent}>{assignment.tree}</Line>}
+      {assignment.commit && (
+        <Line color={c.muted}>{`commit ${assignment.commit.slice(0, 12)}`}</Line>
+      )}
+    </>
+  );
+}
+/** A task's long notes: its latest instruction, summary and design. */
+export function TaskNotes({ assignment }: { assignment: AssignmentView }) {
   const block = (title: string, text: string) =>
     text ? (
       <>
@@ -218,13 +230,6 @@ export function TaskBlock({ number, assignment }: { number: number; assignment: 
     ) : null;
   return (
     <>
-      <Heading>{`#${number} · ${assignmentPhase(assignment)} · round ${assignment.rounds + 1}`}</Heading>
-      <Line color={c.muted}>{taskMeaning(assignment)}</Line>
-      <Line color={toneColor(assignmentTone(assignment))}>{assignmentSays(assignment)}</Line>
-      {assignment.tree && <Line color={c.accent}>{assignment.tree}</Line>}
-      {assignment.commit && (
-        <Line color={c.muted}>{`commit ${assignment.commit.slice(0, 12)}`}</Line>
-      )}
       {block("Latest instruction", assignment.note)}
       {block("Summary", assignment.summary)}
       {block("Design", assignment.design)}

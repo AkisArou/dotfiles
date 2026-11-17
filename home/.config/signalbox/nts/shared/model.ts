@@ -392,3 +392,10 @@ export const tabs = [
 ] as const;
 export type Tab = (typeof tabs)[number];
 export const tabKey = (index: number) => (index < 9 ? String(index + 1) : index === 9 ? "0" : "");
+
+/** The percents a worker share can be set to: steps of 5, plus its own value when it lies
+ * between (a share set in the file), so a control always shows the true value. */
+export function sharePercents(current: number): number[] {
+  const steps = Array.from({ length: 21 }, (_, step) => step * 5);
+  return steps.includes(current) ? steps : [...steps, current].sort((a, b) => a - b);
+}

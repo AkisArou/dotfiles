@@ -6,7 +6,7 @@ import { pixel, proportional } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import type { Project } from "../../shared/use-project.ts";
 import type { AgentRole, Harness, Pick } from "../../shared/model.ts";
-import { pickLabels } from "../../shared/model.ts";
+import { pickLabels, sharePercents } from "../../shared/model.ts";
 import { Action, Empty, ResponsiveTable, Section, Status } from "../components.tsx";
 
 const roleNames: Record<AgentRole, string> = {
@@ -44,7 +44,14 @@ export function Settings({ project }: { project: Project }) {
   }));
   return (
     <>
-      <Section title="Running" aside={<span className="mono secondary">{settings.path}</span>}>
+      <Section
+        title="Running"
+        aside={
+          <span className="mono secondary truncate" title={settings.path}>
+            {settings.path}
+          </span>
+        }
+      >
         <div className="controls">
           <Selector
             label="Worker slots"
@@ -56,14 +63,11 @@ export function Settings({ project }: { project: Project }) {
             <Selector
               key={group.name}
               label={`${group.name[0]!.toUpperCase()}${group.name.slice(1)} share · ${group.running} running`}
-              value={String(Math.round(group.percent / 10) * 10)}
+              value={String(group.percent)}
               onChange={(value) =>
                 void write({ share: { name: group.name, percent: Number(value) } })
               }
-              options={numbers(
-                range(0, 10).map((step) => step * 10),
-                "%",
-              )}
+              options={numbers(sharePercents(group.percent), "%")}
             />
           ))}
           <Selector

@@ -145,7 +145,8 @@ export function Now({ project }: { project: Project }) {
                 {
                   key: "phase",
                   header: "Phase",
-                  width: pixel(150),
+                  // Fits "queued after #837 · 355 min".
+                  width: pixel(200),
                   renderCell: (row) => (
                     <Status tone={row.tone} title={row.meaning}>
                       {row.when}

@@ -1,7 +1,7 @@
-// An issue in a drawer, opened from any view by ?issue=<number>: its task first
-// (where it is, what it waits for, the latest instruction, summary and design)
-// with what you can do to it, then the issue itself, then its earlier tasks: as
-// the TUI's Tasks detail shows them.
+// An issue in a drawer, opened from any view by ?issue=<number>: what you can do
+// to its task first, then where the task is and what it waits for, then the issue
+// itself, then the task's long notes (its latest instruction, summary and design)
+// and its earlier tasks: the short and actionable first, as the TUI's Tasks detail.
 import type { ReactNode } from "react";
 import { Drawer, DrawerHeader } from "@astryxdesign/core/Drawer";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -10,6 +10,7 @@ import { Markdown } from "@astryxdesign/core/Markdown";
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { Text } from "@astryxdesign/core/Text";
 import type { Project } from "../shared/use-project.ts";
+import { current } from "../shared/use-project.ts";
 import { earlierTasks } from "../shared/actions.ts";
 import {
   assignmentPhase,
@@ -67,9 +68,19 @@ export function IssueDrawer({
     </Drawer>
   );
   if (number === undefined) return narrow ? null : drawer(null);
-  // The issue's task, actions, issue and earlier tasks: one body for both containers.
+  // Actions, task, issue, notes and earlier tasks: one body for both containers.
   const body = (
     <div className="drawer-body">
+      {issue && (
+        <section className="drawer-section">
+          {!task && (
+            <Text type="supporting" color="secondary">
+              No task runs for it.
+            </Text>
+          )}
+          <TaskActions project={project} issue={issue} task={task} />
+        </section>
+      )}
       {task && (
         <section className="drawer-section">
           <MetadataList columns={narrow ? 1 : 2}>
@@ -86,46 +97,6 @@ export function IssueDrawer({
               <span className="mono">{task.tree ?? "—"}</span>
             </MetadataListItem>
           </MetadataList>
-          {task.note && (
-            <>
-              <Text type="label" weight="semibold">
-                Latest instruction
-              </Text>
-              <Markdown density="compact" headingLevelStart={4}>
-                {task.note}
-              </Markdown>
-            </>
-          )}
-          {task.summary && (
-            <>
-              <Text type="label" weight="semibold">
-                Summary
-              </Text>
-              <Markdown density="compact" headingLevelStart={4}>
-                {task.summary}
-              </Markdown>
-            </>
-          )}
-          {task.design && (
-            <>
-              <Text type="label" weight="semibold">
-                Design
-              </Text>
-              <Markdown density="compact" headingLevelStart={4}>
-                {task.design}
-              </Markdown>
-            </>
-          )}
-        </section>
-      )}
-      {issue && (
-        <section className="drawer-section">
-          {!task && (
-            <Text type="supporting" color="secondary">
-              No task runs for it.
-            </Text>
-          )}
-          <TaskActions project={project} issue={issue} task={task} />
         </section>
       )}
       {issue ? (
@@ -164,8 +135,45 @@ export function IssueDrawer({
         </section>
       ) : (
         <Text type="supporting" color="secondary">
-          #{number} is not an open issue.
+          {/* Until the issues arrive, a link to one is not yet known to be closed. */}
+          {current(project.issues) === undefined
+            ? `Loading #${number}…`
+            : `#${number} is not an open issue.`}
         </Text>
+      )}
+      {task && (task.note || task.summary || task.design) && (
+        <section className="drawer-section">
+          {task.note && (
+            <>
+              <Text type="label" weight="semibold">
+                Latest instruction
+              </Text>
+              <Markdown density="compact" headingLevelStart={4}>
+                {task.note}
+              </Markdown>
+            </>
+          )}
+          {task.summary && (
+            <>
+              <Text type="label" weight="semibold">
+                Summary
+              </Text>
+              <Markdown density="compact" headingLevelStart={4}>
+                {task.summary}
+              </Markdown>
+            </>
+          )}
+          {task.design && (
+            <>
+              <Text type="label" weight="semibold">
+                Design
+              </Text>
+              <Markdown density="compact" headingLevelStart={4}>
+                {task.design}
+              </Markdown>
+            </>
+          )}
+        </section>
       )}
       {earlier.length > 0 && (
         <section className="drawer-section">

@@ -44,7 +44,7 @@ test("each worker share is a Settings row after Worker slots; Enter sets its per
   const action = settingAction(rows[2]!, project, { command: "true" });
   assert.equal(action?.kind, "one");
   if (action?.kind !== "one") return;
-  assert.equal(action.lines.length, 11);
+  assert.equal(action.lines.length, 21, "steps of 5");
   assert.ok(action.lines.includes("✓ compiler 50%"), "the current share is marked");
   await action.apply(action.lines.indexOf("· compiler 70%"));
   assert.deepEqual(sent, [{ share: { name: "compiler", percent: 70 }, version: "v1" }]);

@@ -62,6 +62,16 @@
   .attention {
     color: var(--color-text-warning);
   }
+  /* A status (dot and word) in a narrow cell ends in an ellipsis rather than cut. */
+  .status {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .status .nowrap {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .nowrap {
     white-space: nowrap;
   }
@@ -330,12 +340,22 @@
   flex-direction: column;
   gap: 8px;
 }
-/* A panel header's aside gives way to its title on a narrow screen. */
-.panel-aside {
+/* A panel header's title gives way to its aside (its buttons and status), which keeps its
+   size unless it is text marked to truncate. */
+.panel-title {
+  flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.panel-aside {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+/* When the aside is only text to truncate (a file's path), the title keeps its words. */
+.panel-head:has(> .panel-aside > .truncate) > .panel-title {
+  flex-shrink: 0;
 }
 
 /* A table's rows as cards on a phone (ResponsiveTable). */
@@ -591,8 +611,8 @@ body {
   --ansi-15: #111111;
 }
 
-/* Long text in a panel header's aside (the settings file's path) truncates. */
-.panel-aside > * {
+/* Text that truncates rather than wrap or push its neighbours (a settings file's path). */
+.truncate {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;

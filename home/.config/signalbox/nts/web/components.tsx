@@ -67,9 +67,11 @@ export function Section({
   return (
     <Card className={`panel ${className}`} padding={0}>
       <div className="panel-head">
-        <Text type="label" weight="semibold">
-          {title}
-        </Text>
+        <span className="panel-title" title={title}>
+          <Text type="label" weight="semibold">
+            {title}
+          </Text>
+        </span>
         {count !== undefined && (
           <Text type="supporting" color="secondary">
             {count}

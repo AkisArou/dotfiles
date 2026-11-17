@@ -7,7 +7,7 @@
 import { basename, dirname } from "node:path";
 import type { Project } from "../shared/use-project.ts";
 import type { AgentRole, Harness, Pick, SettingsView } from "../shared/model.ts";
-import { modelsLine, pickLabels } from "../shared/model.ts";
+import { modelsLine, pickLabels, sharePercents } from "../shared/model.ts";
 import { Line, Section } from "./components.tsx";
 import { colors as c } from "./theme.ts";
 import type { TerminalCommand } from "./tools.ts";
@@ -190,7 +190,7 @@ export function settingAction(
   const share = /^setting:share:(.+)$/.exec(row.id)?.[1];
   const group = settings.shares?.find((each) => each.name === share);
   if (group) {
-    const percents = range(0, 10).map((step) => step * 10);
+    const percents = sharePercents(group.percent);
     return {
       kind: "one",
       lines: percents.map(
