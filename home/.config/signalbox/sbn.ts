@@ -43,6 +43,9 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
                     disable the others
   links             link the project folders that live in other repositories
                     (links.json: name -> folder) into this directory
+  sdk               build the Signalbox SDK checkout's packages (~/Projects/signalbox, or
+                    SIGNALBOX_SDK), then install the projects: each one's copy of the SDK
+                    is the build's
   hosts here <project...>
                     make those this machine's hosts, then sync
   <verb> ...        any other verb goes to the project's scripts/cli.ts
@@ -220,6 +223,31 @@ export function workspaceWithLinks(
   ];
   return yaml.replace(section, `${lines.join("\n")}\n`);
 }
+/**
+ * Builds the SDK checkout's packages, then installs the projects' workspace, which copies
+ * each project's SDK packages from that build. pnpm runs in those two folders, so it
+ * takes their Node and pnpm: never a project's own repository's (nable-solutions pins
+ * others).
+ */
+function sdkCommand(): number {
+  const sdk = expand(process.env.SIGNALBOX_SDK ?? "~/Projects/signalbox");
+  const steps: [string, readonly string[], string][] = [
+    ["the SDK's packages install", ["install"], sdk],
+    ["the SDK builds", ["-r", "--if-present", "run", "build"], sdk],
+    ["the projects install", ["install", "--offline"], home],
+  ];
+  for (const [what, args, cwd] of steps) {
+    const result = spawnSync("pnpm", args, { cwd, stdio: "inherit" });
+    if (result.error || result.status !== 0) {
+      console.error(
+        `sbn sdk: ${what} failed (pnpm ${args.join(" ")} in ${cwd})`,
+      );
+      return 1;
+    }
+  }
+  return 0;
+}
+
 function linksCommand(): number {
   const path = join(home, "links.json");
   const links = existsSync(path) ? parseLinks(readFileSync(path, "utf8")) : {};
@@ -470,6 +498,7 @@ function main(argv: readonly string[]): number {
   const all = projects();
   if (command === "hosts") return hostsCommand(args, all);
   if (command === "links") return linksCommand();
+  if (command === "sdk") return sdkCommand();
   if (command === "list") {
     for (const project of all) {
       const state = spawnSync(
