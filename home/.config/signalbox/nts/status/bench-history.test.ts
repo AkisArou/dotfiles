@@ -130,3 +130,14 @@ test("a case's runs, newest first, with real times and ratios; another workload 
   );
   assert.equal(caseHistoryTable(runs, "missing"), undefined);
 });
+
+test("every row of the Benchmarks report has its own id, so up and down step through each", async () => {
+  const { benchmarkReport } = await import("./records.ts");
+  const { tableRows } = await import("./model.ts");
+  const runs = [run(1, 1, { a: 125, b: 250 }), run(2, 1, { a: 100, b: 250 })];
+  const ids = tableRows(benchmarkReport({ run: null, counts: null, rows: [] }, 0, runs)).map(
+    (row) => row.id,
+  );
+  assert.equal(new Set(ids).size, ids.length, `duplicates in ${ids.join(", ")}`);
+  assert.ok(ids.includes("bench-progress/C vs Bun AOT"));
+});

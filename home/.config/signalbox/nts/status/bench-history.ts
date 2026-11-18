@@ -187,6 +187,8 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
       const color: Color | undefined = !beyond ? undefined : change > 1 ? "red" : "green";
       const cell = (text: string, tint?: Color): TableCell => (tint ? { text, color: tint } : text);
       return {
+        // The row's identity: one per backend and comparator (selection steps by it).
+        pair: `${label} vs ${comparator}`,
         backend: label,
         versus: comparator,
         now: Number.isFinite(now) ? { text: now.toFixed(2), bold: true } : "—",
@@ -207,7 +209,7 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
     id: "bench-progress",
     title:
       "Against each comparator: the geometric mean of nts's time over theirs (lower is better)",
-    key: "backend",
+    key: "pair",
     columns: [
       { key: "backend", label: "nts" },
       { key: "versus", label: "versus" },
