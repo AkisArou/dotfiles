@@ -15,8 +15,8 @@ import { discoverTerminals } from "@signalbox/kit/host/discovery";
 import { pushNotifications } from "@signalbox/kit/host/push";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
-import { gitHub } from "../orchestration/needs.ts";
-import { orchestrationEndpoints, managedAgentViews } from "../orchestration/endpoints.ts";
+import { gitHub } from "../orchestration/github.ts";
+import { orchestrationEndpoints, managedAgentViews } from "@signalbox/kit/orchestration/endpoints";
 import { nativeAttachment } from "signalbox/ext/agents";
 import { TERMINAL_KEY } from "signalbox/ext/terminals";
 import type { TerminalTarget } from "signalbox/ext/terminals";
@@ -156,7 +156,7 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
               context.get(orchestration.assignments),
             ] as const,
             (terminals, managed, assignments) => [
-              ...managedAgentViews(managed, assignments, settings.root),
+              ...managedAgentViews(managed, assignments, settings.root, orchestration.route.id),
               ...terminals,
             ],
           ),

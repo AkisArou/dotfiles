@@ -1,6 +1,6 @@
-// Needs you: every entry is a question or an issue waiting for one; asking about
-// an issue labels it, answering posts on it and moves it where the answer says,
-// and a failed GitHub write is reported and tried again, never lost.
+// The GitHub tracker on the kit's Needs you: asking labels the issue
+// state:needs-user, answering comments and relabels it, and a failed write is
+// retried, never repeated once done.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
@@ -18,7 +18,13 @@ import type { Readable } from "signalbox/core";
 import { decisionRequests } from "signalbox/ext/decisions";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { Issue, NeedsView } from "@signalbox/kit/shared/protocol";
-import { answerFor, needs, needsView, questionAnswer, questionInput } from "./needs.ts";
+import {
+  answerFor,
+  needs,
+  questionAnswer,
+  questionInput,
+} from "@signalbox/kit/orchestration/needs";
+import { gitHubTracker } from "./github.ts";
 
 const issue = (number: number, state: Issue["state"]): Issue =>
   ({
@@ -29,81 +35,6 @@ const issue = (number: number, state: Issue["state"]): Issue =>
     state,
     labels: state === "needs-user" ? ["task", "state:needs-user"] : ["task"],
   }) as Issue;
-const request = (id: string, status: "pending" | "decided", input: object, decided?: object) =>
-  ({
-    id,
-    input: { question: `Q ${id}`, context: "", ...input },
-    status,
-    revision: 1,
-    requestedAt: 1,
-    expiresAt: null,
-    result: decided ? { decision: decided, by: {}, time: 50 } : null,
-  }) as never;
-
-test("an issue waits for a question unless one is open about it or its answer already reached GitHub", () => {
-  const issues = [
-    issue(1, "needs-user"),
-    issue(2, "needs-user"),
-    issue(3, "needs-user"),
-    issue(4, "ready"),
-  ];
-  const view = needsView(
-    [
-      request("asked", "pending", { issue: 1 }),
-      // Answered and posted after the issues were read (at 100): its label is already gone.
-      request("posted", "decided", { issue: 2 }, { answer: "go", then: "ready" }),
-    ],
-    issues,
-    100,
-    { posted: { posted: 150 } },
-  );
-  assert.deepEqual(
-    view.questions.map((q) => q.id),
-    ["asked"],
-  );
-  assert.deepEqual(
-    view.unasked.map((i) => i.number),
-    [3],
-    "only #3 waits with nobody asking",
-  );
-  assert.equal(view.answered[0]!.posted, "done");
-  assert.equal(view.questions[0]!.issue?.title, "Issue 1");
-  // Once the issues are read again with #2 still labelled, it waits for a question again.
-  assert.deepEqual(
-    needsView(
-      [request("posted", "decided", { issue: 2 }, { answer: "go" })],
-      [issue(2, "needs-user")],
-      200,
-      {
-        posted: { posted: 150 },
-      },
-    ).unasked.map((i) => i.number),
-    [2],
-  );
-});
-
-test("an option answers with its label and state; written text takes the chosen state", () => {
-  const input = questionInput.parse({
-    question: "Buy a Mac mini?",
-    context: "",
-    issue: 583,
-    options: [{ label: "No, leave it unrun", then: "parked" }, { label: "Yes" }],
-  });
-  assert.deepEqual(answerFor(input, { option: 0 }), {
-    answer: "No, leave it unrun",
-    option: 0,
-    then: "parked",
-  });
-  assert.deepEqual(answerFor(input, { option: 1 }), { answer: "Yes", option: 1, then: "ready" });
-  assert.deepEqual(answerFor(input, { answer: " Only for CI ", then: "held" }), {
-    answer: "Only for CI",
-    then: "held",
-  });
-  assert.throws(() => answerFor(input, { option: 5 }), /no option 6/);
-  assert.deepEqual(answerFor({ question: "q", context: "" }, { answer: "fine" }), {
-    answer: "fine",
-  });
-});
 
 test("asking labels the issue; answering posts, relabels, and a failed write is retried", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "nts-needs-"));
@@ -139,10 +70,11 @@ test("asking labels the issue; answering posts, relabels, and a failed write is 
   const issuesKey = capability<Readable<Issue[]>>("issues");
   let refreshed = 0;
   const waiting = needs({
+    project: "nts",
     state: state.state,
     questions: questions.service,
     issues: issuesKey,
-    gitHub,
+    tracker: gitHubTracker(gitHub),
     refreshIssues: async () => void refreshed++,
     retryMs: 300,
   });
