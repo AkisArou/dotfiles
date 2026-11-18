@@ -153,3 +153,40 @@ test("sbn links names each linked project's folder in the workspace, and leaves 
     "an unlinked project leaves the list",
   );
 });
+
+test("sbn's projects are its folders and its links to folders elsewhere, each with a project.json", async () => {
+  const { projects } = await import("./sbn.ts");
+  const { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } =
+    await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const directory = mkdtempSync(join(tmpdir(), "sbn-projects-"));
+  const elsewhere = mkdtempSync(join(tmpdir(), "sbn-repo-"));
+  try {
+    const manifest = (name: string) =>
+      JSON.stringify({
+        name,
+        title: name,
+        roots: [directory],
+        apiPort: 1,
+        coordinator: false,
+      });
+    mkdirSync(join(directory, "nts"));
+    writeFileSync(join(directory, "nts/project.json"), manifest("nts"));
+    writeFileSync(join(elsewhere, "project.json"), manifest("nable"));
+    symlinkSync(elsewhere, join(directory, "nable"));
+    mkdirSync(join(directory, "console"));
+    writeFileSync(join(directory, "hosts.json"), "{}");
+    symlinkSync(join(directory, "gone"), join(directory, "dangling"));
+    assert.deepEqual(
+      projects(directory)
+        .map((project) => project.name)
+        .sort(),
+      ["nable", "nts"],
+      "a linked project counts; a folder without project.json, a file and a dangling link do not",
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+    rmSync(elsewhere, { recursive: true, force: true });
+  }
+});

@@ -1,3 +1,9 @@
 #!/bin/sh
 # sbn: Signalbox for the project of the current directory (~/.config/signalbox/sbn.ts).
-exec node "$HOME/.config/signalbox/sbn.ts" "$@"
+# It runs on the Node the Signalbox projects declare (their folder's .tool-versions),
+# whatever the current directory pins for its own code (nable-solutions pins another);
+# what it starts (the terminal app, the verbs) runs on the same Node. Nothing is set in
+# the environment, so tools started from here keep their own directories' versions.
+projects="$HOME/.config/signalbox"
+node=$(cd "$projects" && asdf which node 2>/dev/null) || node=node
+exec "$node" "$projects/sbn.ts" "$@"

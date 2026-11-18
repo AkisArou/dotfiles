@@ -11,6 +11,7 @@ import {
   readlinkSync,
   realpathSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -55,20 +56,27 @@ const home = dirname(fileURLToPath(import.meta.url));
 const expand = (path: string) => resolve(path.replace(/^~(?=$|\/)/, homedir()));
 const real = (path: string) => (existsSync(path) ? realpathSync(path) : path);
 
-function projects(): Project[] {
-  return readdirSync(home, { withFileTypes: true })
-    .filter(
-      (entry) =>
-        entry.isDirectory() &&
-        existsSync(join(home, entry.name, "project.json")),
-    )
-    .map((entry) => {
+/** The projects here: each folder, or link to a folder elsewhere (links.json), with a project.json. */
+export function projects(directory: string = home): Project[] {
+  const isProject = (name: string) => {
+    try {
+      return (
+        statSync(join(directory, name)).isDirectory() &&
+        existsSync(join(directory, name, "project.json"))
+      );
+    } catch {
+      return false;
+    }
+  };
+  return readdirSync(directory)
+    .filter(isProject)
+    .map((name) => {
       const manifest = JSON.parse(
-        readFileSync(join(home, entry.name, "project.json"), "utf8"),
+        readFileSync(join(directory, name, "project.json"), "utf8"),
       ) as Omit<Project, "directory">;
       return {
         ...manifest,
-        directory: join(home, entry.name),
+        directory: join(directory, name),
         roots: manifest.roots.map((root) => real(expand(root))),
       };
     });
