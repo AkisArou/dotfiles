@@ -7,16 +7,9 @@ import { ntsConfig } from "./config.ts";
 await requireCheckout(ntsConfig);
 await serveProject({
   directory: fileURLToPath(new URL("./", import.meta.url)),
-  title: "NTS",
+  title: ntsConfig.title,
   root: ntsConfig.root,
   state: ntsConfig.state,
-  webPort: ntsConfig.webPort,
   apiPort: ntsConfig.apiPort,
-  ...(ntsConfig.apiUrl ? { apiUrl: ntsConfig.apiUrl } : {}),
-  // A tailnet that proxies to this host (tailscale serve) is read from Tailscale, not config.
-  config: ({ web, tailnet }) =>
-    createNtsProject(
-      { ...ntsConfig, publicOrigins: [...ntsConfig.publicOrigins, ...tailnet] },
-      web,
-    ),
+  config: (served) => createNtsProject(ntsConfig, served),
 });

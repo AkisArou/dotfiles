@@ -9,14 +9,14 @@ Requires Node 26.4+, pnpm, tmux, a GitHub CLI login with access to `AkisArou/nts
 ```sh
 sbn enable          # the host (signalbox@nts) at login, and now
 sbn                 # the TUI
-sbn web             # the browser UI, http://127.0.0.1:4310
+sbn web             # nts in the console, http://127.0.0.1:4310/nts/
 sbn status          # host, and each task's phase, time in it and what it waits for
 sbn show 817        # one task: design, latest report, commit
 sbn approve 817     # steer by issue number: approve, return, message, rework, retry, cancel
 sbn doctor          # read-only prerequisites
 ```
 
-Settings: [`project.json`](project.json) holds the roots, ports (4310 browser, 4311 API) and whether the coordinator runs; [`config.ts`](config.ts) holds the rest (pool, polling, terminal programs, initial profiles). Environment variables override for one host: `NTS_ROOT`, `SIGNALBOX_NTS_PORT`, `SIGNALBOX_NTS_API_PORT`, `SIGNALBOX_NTS_STATE`, `SIGNALBOX_NTS_COORDINATOR=0|1`. State lives in `~/.local/state/signalbox/nts/<project-id>` unless `project.json`'s `state` names another directory; one host owns it at a time. Agents' tmux sessions and execution receipts are tied to that directory, so it moves only while no agent runs.
+Settings: [`project.json`](project.json) holds the title, roots, API port (4311; the console serves the pages) and whether the coordinator runs; [`config.ts`](config.ts) holds the rest (pool, polling, terminal programs, initial profiles). Environment variables override for one host: `NTS_ROOT`, `SIGNALBOX_NTS_API_PORT`, `SIGNALBOX_NTS_STATE`, `SIGNALBOX_NTS_COORDINATOR=0|1`. State lives in `~/.local/state/signalbox/nts/<project-id>` unless `project.json`'s `state` names another directory; one host owns it at a time. Agents' tmux sessions and execution receipts are tied to that directory, so it moves only while no agent runs.
 
 `pnpm sdk` rebuilds the SDK and refreshes the workspace's injected copy; `pnpm check` type-checks; `pnpm test` and `pnpm test:tui` run the tests, which use isolated fixtures and never touch the NTS checkout, GitHub or running agents.
 
@@ -30,7 +30,7 @@ Settings: [`project.json`](project.json) holds the roots, ports (4310 browser, 4
 | `status/`        | NTS status contracts and readers: landing, full check, pool, machine, records      |
 | `orchestration/` | Agent profiles, the task and review routes, the coordinator, its tools and wakeups |
 | `shared/`        | DTOs and endpoint references shared by the host and both clients                   |
-| `tui/`, `web/`   | The OpenTUI and React DOM clients                                                  |
+| `tui/`, `web/`   | nts in the terminal app, and its pages in the console (`web/console.tsx`)          |
 
 ## Orchestration
 

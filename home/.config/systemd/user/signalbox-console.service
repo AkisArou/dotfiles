@@ -1,0 +1,19 @@
+[Unit]
+Description=Signalbox console (every project's web pages and notifications)
+Documentation=file://%h/.config/signalbox/README.md
+After=default.target
+
+[Service]
+Type=simple
+# One app for the projects in ~/.config/signalbox/hosts.json, on this machine's
+# console.json ports; tailscale serve puts it at this machine's tailnet address.
+WorkingDirectory=%h/.config/signalbox/console
+ExecStart=/usr/bin/zsh -lc 'exec node server.ts'
+Restart=on-failure
+RestartSec=10
+# CPUs 4-5 are NTS's measurement cores.
+CPUAffinity=0-3 6-31
+Nice=5
+
+[Install]
+WantedBy=default.target

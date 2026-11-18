@@ -1,12 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { projectFor, serveCommands } from "./sbn.ts";
+import { projectFor, serveCommands, serveRoutes } from "./sbn.ts";
 
 const project = (name: string, roots: string[]) => ({
   name,
   directory: `/apps/${name}`,
   roots,
-  webPort: 1,
   apiPort: 2,
 });
 
@@ -29,22 +28,31 @@ test("sbn picks the project whose root contains the directory, deepest root firs
   assert.equal(projectFor(all, "/elsewhere"), undefined);
 });
 
-test("sbn tailnet serves the page, its API and its terminals on the tailnet; off removes only those", () => {
-  const ports = { webPort: 4310, apiPort: 4311 };
-  assert.deepEqual(serveCommands(ports, true), [
+test("sbn tailnet serves the console and this machine's hosts on the tailnet; off removes only those", () => {
+  const routes = serveRoutes({ webPort: 4310, apiPort: 4300 }, [
+    { name: "nts", apiPort: 4311 },
+  ]);
+  assert.deepEqual(serveCommands(routes, true), [
     ["serve", "--bg", "--set-path", "/", "http://127.0.0.1:4310"],
-    ["serve", "--bg", "--set-path", "/rpc", "http://127.0.0.1:4311/rpc"],
     [
       "serve",
       "--bg",
       "--set-path",
-      "/terminals",
+      "/console/rpc",
+      "http://127.0.0.1:4300/rpc",
+    ],
+    ["serve", "--bg", "--set-path", "/nts/rpc", "http://127.0.0.1:4311/rpc"],
+    [
+      "serve",
+      "--bg",
+      "--set-path",
+      "/nts/terminals",
       "http://127.0.0.1:4311/terminals",
     ],
   ]);
   assert.deepEqual(
-    serveCommands(ports, false).map((command) => command.at(-1)),
-    ["off", "off", "off"],
+    serveCommands(routes, false).map((command) => command.at(-1)),
+    ["off", "off", "off", "off"],
   );
 });
 

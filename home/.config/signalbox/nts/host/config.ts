@@ -11,20 +11,21 @@ import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
 import { gitHub } from "../orchestration/github.ts";
 
-/** The nts host; `web` is the built browser UI it serves on the web port. */
-export function createNtsProject(settings: NtsConfig, web: { readonly directory: string }) {
+/** The nts host; `origins` are the console's pages that may call it. */
+export function createNtsProject(
+  settings: NtsConfig,
+  served: { readonly origins: readonly string[] },
+) {
   const planPath = join(settings.root, settings.plan);
   const plan = () => readFile(planPath, "utf8");
   return projectHost({
     name: settings.name,
-    title: "NTS",
+    title: settings.title,
     root: settings.root,
     repo: settings.repo,
     state: settings.state,
-    webPort: settings.webPort,
     apiPort: settings.apiPort,
-    publicOrigins: settings.publicOrigins,
-    web,
+    origins: served.origins,
     issues: {
       intervalMs: settings.issueIntervalMs,
       async read(signal) {

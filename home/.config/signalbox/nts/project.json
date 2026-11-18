@@ -1,7 +1,7 @@
 {
   "name": "nts",
+  "title": "NTS",
   "roots": ["~/Projects/nts", "~/.cache/nts-pool"],
-  "webPort": 4310,
   "apiPort": 4311,
   "coordinator": true,
   "state": "~/.cache/signalbox-nts-pilot"

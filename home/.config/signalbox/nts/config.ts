@@ -10,22 +10,22 @@ import type { AttachedTerminal, TerminalProgram } from "@signalbox/kit/host/term
 /** The project's identity, shared with sbn: its roots, ports and coordinator choice. */
 const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.url), "utf8")) as {
   name: string;
+  /** How it names itself to people (the console's header). */
+  title: string;
   roots: string[];
-  webPort: number;
   apiPort: number;
   coordinator: boolean;
   /** Where this project's state lives, when not the per-root default. Agents' tmux
    * sessions and execution receipts are tied to it, so it moves only while no agent runs. */
   state?: string;
-  /** Other addresses that proxy to this host, whose pages may use it. This machine's
-   * tailnet address (tailscale serve) is read from Tailscale and needs no entry. */
-  publicOrigins?: string[];
 };
 const path = (value: string) => resolve(expandPath(value));
 const root = path(process.env.NTS_ROOT ?? project.roots[0]!);
 export interface NtsConfig {
   /** The project's name (project.json): where its records sit, and what it is called. */
   readonly name: string;
+  /** How it names itself to people (project.json). */
+  readonly title: string;
   readonly root: string;
   readonly repo: string;
   readonly poolRoot: string;
@@ -33,11 +33,7 @@ export interface NtsConfig {
   readonly issueLimit: number;
   readonly issueIntervalMs: number;
   readonly state: string;
-  readonly webPort: number;
   readonly apiPort: number;
-  /** Pages that may talk to the host beyond its loopback addresses (a proxy's address). */
-  readonly publicOrigins: readonly string[];
-  readonly apiUrl?: string;
   readonly terminalPrograms: readonly TerminalProgram[];
   readonly discoverTerminals: boolean;
   readonly orchestration: OrchestrationSettings;
@@ -45,6 +41,7 @@ export interface NtsConfig {
 }
 export const ntsConfig: NtsConfig = {
   name: project.name,
+  title: project.title,
   root,
   repo: process.env.NTS_GITHUB_REPO ?? "AkisArou/nts",
   poolRoot: path(process.env.NTS_POOL_ROOT ?? "~/.cache/nts-pool"),
@@ -57,14 +54,7 @@ export const ntsConfig: NtsConfig = {
     projectRoot: root,
     override: process.env.SIGNALBOX_NTS_STATE ?? project.state,
   }),
-  webPort: Number(process.env.SIGNALBOX_NTS_PORT ?? project.webPort),
   apiPort: Number(process.env.SIGNALBOX_NTS_API_PORT ?? project.apiPort),
-  // Only local clients are accepted. Remote deployment supplies its own gate/proxy.
-  publicOrigins: [
-    ...(project.publicOrigins ?? []),
-    ...(process.env.SIGNALBOX_NTS_ORIGIN ? [process.env.SIGNALBOX_NTS_ORIGIN] : []),
-  ],
-  apiUrl: process.env.SIGNALBOX_NTS_API_URL,
   // Native CLI flags belong here; launch is always an explicit user action.
   terminalPrograms: [
     { id: "codex", label: "Codex", command: "codex", args: [] },

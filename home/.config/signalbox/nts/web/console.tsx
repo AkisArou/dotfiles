@@ -1,7 +1,7 @@
-// nts's web console: the kit's shell and standard pages, with nts's own pages
+// nts's pages in the Signalbox console: the kit's standard pages, with nts's own
 // (its status readings: Landing, Full check, Benchmarks, Conformance, Machine,
 // Health) in the TUI's tab order, and what needs attention on Now.
-import { createProjectRouter } from "@signalbox/kit/web/router";
+import { consoleProject } from "@signalbox/kit/web/console";
 import type { Page } from "@signalbox/kit/web/pages";
 import {
   agentsPage,
@@ -22,8 +22,7 @@ const status = (name: NtsPage, path: string): Page<Project> => ({
   render: (project) => <NtsView project={project} page={name} />,
 });
 
-export const router = createProjectRouter<Project>({
-  name: "nts",
+export default consoleProject<Project>({
   useProject,
   readings: (project) => project.nts.readings,
   pages: [
