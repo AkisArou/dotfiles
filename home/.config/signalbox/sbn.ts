@@ -662,10 +662,17 @@ function main(argv: readonly string[]): number {
       );
       return 0;
     }
-    case "doctor":
+    case "doctor": {
+      if (!existsSync(join(project.directory, "scripts/doctor.ts"))) {
+        console.error(
+          `${project.name} has no scripts/doctor.ts here (is its checkout current? sbn update)`,
+        );
+        return 1;
+      }
       return run(process.execPath, ["scripts/doctor.ts"], {
         cwd: project.directory,
       });
+    }
     case "status": {
       const state = spawnSync("systemctl", ["--user", "is-active", unit], {
         encoding: "utf8",
