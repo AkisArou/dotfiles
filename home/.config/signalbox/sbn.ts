@@ -674,14 +674,25 @@ function main(argv: readonly string[]): number {
       const on = args[0] !== "off";
       const mine = readHosts()[hostname()] ?? [];
       const hosts = all.filter((candidate) => mine.includes(candidate.name));
-      for (const serve of serveCommands(
-        serveRoutes(consolePorts(), hosts),
-        on,
-      )) {
-        const code = run("tailscale", serve);
-        if (code !== 0) return code;
+      const routes = serveRoutes(consolePorts(), hosts);
+      // The first call shows tailscale's own output: a tailnet without serve yet is
+      // asked to enable it there. The others are quiet unless they fail.
+      for (const [index, serve] of serveCommands(routes, on).entries()) {
+        if (index === 0) {
+          const code = run("tailscale", serve);
+          if (code !== 0) return code;
+          continue;
+        }
+        const result = spawnSync("tailscale", serve, { encoding: "utf8" });
+        if (result.status !== 0) {
+          console.error(`${result.stdout ?? ""}${result.stderr ?? ""}`.trim());
+          return result.status ?? 1;
+        }
       }
       if (!on) return 0;
+      console.log(
+        `\nServing:\n${routes.map((route) => `  ${route.path.padEnd(22)} ${route.target}`).join("\n")}`,
+      );
       const status = spawnSync("tailscale", ["status", "--json"], {
         encoding: "utf8",
       });
