@@ -2,7 +2,7 @@
 // settings their launches follow, as two routes under /agents (a task's own
 // steps are in the issue drawer). A session working on an issue opens it in the issue drawer;
 // ended sessions are kept out of the list and open in a drawer of their own.
-import { agentStates } from "../../shared/glossary.ts";
+import { agentStates } from "@signalbox/kit/shared/glossary";
 import { agentLines, agentTone } from "../../shared/model.ts";
 import type { Agent } from "../../shared/model.ts";
 import { useState } from "react";

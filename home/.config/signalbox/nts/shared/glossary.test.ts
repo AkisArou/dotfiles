@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { phases } from "../orchestration/task-model.ts";
-import { agentStates, issueStates, taskConditions, taskPhases } from "./glossary.ts";
+import { agentStates, issueStates, taskConditions, taskPhases } from "@signalbox/kit/shared/glossary";
 
 test("the glossary names and explains every phase, issue state and agent state", () => {
   for (const phase of phases) assert.ok(taskPhases[phase]?.meaning, `phase ${phase}`);

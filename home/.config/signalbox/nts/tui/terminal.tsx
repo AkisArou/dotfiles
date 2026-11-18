@@ -4,7 +4,7 @@ import { extend } from "@opentui/react";
 import { EmbeddedTerminalRenderable } from "@opentui/core";
 import { connectTerminal } from "signalbox/client/terminal";
 import type { TerminalClient, TerminalState } from "signalbox/client/terminal";
-import { useTerminalEndpoint } from "../shared/terminal.ts";
+import { useTerminalEndpoint } from "@signalbox/kit/shared/terminal";
 import { colors as c } from "./theme.ts";
 
 extend({ "agent-terminal": EmbeddedTerminalRenderable });

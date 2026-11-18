@@ -2,8 +2,8 @@
 // facet and AND between facets. Task states and workflow policy remain owned by
 // the project.
 import type { Issue } from "./model.ts";
-import { assignedValues, issueStates } from "./glossary.ts";
-import type { Term } from "./glossary.ts";
+import { assignedValues, issueStates } from "@signalbox/kit/shared/glossary";
+import type { Term } from "@signalbox/kit/shared/glossary";
 export interface Facet<T> {
   readonly id: string;
   readonly label: string;

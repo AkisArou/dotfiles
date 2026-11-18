@@ -4,7 +4,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { Button } from "@astryxdesign/core/Button";
 import { connectTerminal } from "signalbox/client/terminal";
 import type { TerminalClient, TerminalState } from "signalbox/client/terminal";
-import { useTerminalEndpoint } from "../shared/terminal.ts";
+import { useTerminalEndpoint } from "@signalbox/kit/shared/terminal";
 import "@xterm/xterm/css/xterm.css";
 
 export function NativeTerminal({ id }: { id: string }) {

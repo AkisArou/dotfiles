@@ -31,4 +31,6 @@ const viaPnpm = (args: readonly string[], cwd: string) =>
 // The SDK's own build (a clean compile), then the workspace root (one level up)
 // refreshes every project's injected copy offline.
 viaPnpm(["run", "build"], sdk);
+// The kit (the default project-app assembly) lives beside the SDK and builds on it.
+viaPnpm(["run", "build"], resolve(sdk, "../kit"));
 viaPnpm(["install", "--offline", "--silent"], resolve(root, ".."));

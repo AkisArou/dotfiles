@@ -1,6 +1,6 @@
 // Now: what needs you, the tasks in flight and what each waits for, what needs
 // attention, the live agents, and the streams' size. Everything is one line.
-import { agentStates } from "../../shared/glossary.ts";
+import { agentStates } from "@signalbox/kit/shared/glossary";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@astryxdesign/core/Button";
 import { List, ListItem } from "@astryxdesign/core/List";

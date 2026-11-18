@@ -1,7 +1,7 @@
 // NTS application data shared by the host, web client and terminal client.
 import { operation, source } from "signalbox/core/remote";
-import { issueStates, taskConditions, taskPhases } from "./glossary.ts";
-import type { Term } from "./glossary.ts";
+import { issueStates, taskConditions, taskPhases } from "@signalbox/kit/shared/glossary";
+import type { Term } from "@signalbox/kit/shared/glossary";
 
 export type Issue = {
   id: string;
@@ -130,7 +130,7 @@ export type AssignmentView = {
   worker: string | null;
   reviewer: string | null;
   error: string | null;
-  /** Why the task route can no longer run it (shared/glossary.ts "stranded"), or null. */
+  /** Why the task route can no longer run it (@signalbox/kit/shared/glossary "stranded"), or null. */
   stranded: string | null;
   acceptedAt: number;
 };

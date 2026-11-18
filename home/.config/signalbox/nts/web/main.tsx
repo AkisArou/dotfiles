@@ -8,15 +8,15 @@ import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
 import "@astryxdesign/theme-neutral/theme.css";
 import "./theme.css";
-import { TerminalProvider } from "../shared/terminal.ts";
+import { TerminalProvider } from "@signalbox/kit/shared/terminal";
 import { terminalUrl } from "signalbox/client/terminal";
-import { apiAddress } from "../shared/address.ts";
+import { apiAddress } from "@signalbox/kit/shared/address";
 import { followAppHeight } from "./viewport.ts";
 
 declare const SIGNALBOX_API_URL: string;
 declare const SIGNALBOX_WEB_PORT: number;
 declare const SIGNALBOX_API_PORT: number;
-// The API's address from where this page loaded (shared/address.ts), unless one is configured.
+// The API's address from where this page loaded (@signalbox/kit/shared/address), unless one is configured.
 const api = apiAddress(
   window.location,
   { web: SIGNALBOX_WEB_PORT, api: SIGNALBOX_API_PORT },

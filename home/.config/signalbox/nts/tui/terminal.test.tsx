@@ -14,7 +14,7 @@ import { exposeTerminals } from "signalbox/ext/terminals/web";
 import { tmuxTerminal } from "signalbox/ext/integrations/tmux/terminal";
 import { createClient } from "signalbox/client";
 import { SignalboxProvider } from "signalbox/client/react";
-import { TerminalProvider } from "../shared/terminal.ts";
+import { TerminalProvider } from "@signalbox/kit/shared/terminal";
 import { TerminalTheme } from "./selection.tsx";
 import { TerminalApp } from "./app.tsx";
 

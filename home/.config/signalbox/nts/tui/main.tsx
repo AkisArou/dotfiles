@@ -8,7 +8,7 @@ import { colors } from "./theme.ts";
 import { terminalConfig } from "./config.ts";
 import { createTerminalTools } from "./tools.ts";
 import { TerminalTheme } from "./selection.tsx";
-import { TerminalProvider } from "../shared/terminal.ts";
+import { TerminalProvider } from "@signalbox/kit/shared/terminal";
 import { terminalUrl } from "signalbox/client/terminal";
 
 // scripts/tui.ts passes this project's host (project.json), or sbn --api's.

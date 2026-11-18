@@ -12,7 +12,7 @@ const { webPort: port, apiPort, state: directory } = ntsConfig;
 for (const value of [port, apiPort])
   if (!Number.isInteger(value) || value < 1 || value > 65535)
     throw new Error("NTS ports must be between 1 and 65535");
-// The page finds the API from where it loaded (shared/address.ts); an explicit URL overrides.
+// The page finds the API from where it loaded (@signalbox/kit/shared/address); an explicit URL overrides.
 const pageDefines = {
   SIGNALBOX_API_URL: JSON.stringify(ntsConfig.apiUrl ?? ""),
   SIGNALBOX_WEB_PORT: String(port),
