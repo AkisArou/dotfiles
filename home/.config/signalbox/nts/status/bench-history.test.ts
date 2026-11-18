@@ -107,7 +107,17 @@ test("against each comparator: the geometric mean now, last run, the change and 
   assert.equal(cellText(row.now), "0.63");
   assert.equal(cellText(row.before), "0.71");
   assert.equal(cellText(row.change), "−10.6%");
-  assert.equal(cellText(row.trend), "█▁ 0.63–0.71", "the glyphs and the range they span");
+  assert.equal(
+    cellText(row.trend),
+    "█▁ best 0.63 · worst 0.71",
+    "the glyphs and the best and worst they span",
+  );
+  // Its own language: C over C++ (100 ns in each run): geomean(1, 2.5), with no won or lost.
+  const own = table.rows.find(
+    (each) => cellText(each.backend) === "C" && cellText(each.versus) === "C++ (own language)",
+  )!;
+  assert.equal(cellText(own.now), "1.58");
+  assert.equal(cellText(own.won), "—");
   assert.equal(sparkline([3, undefined, 1]), "█ ▁");
 });
 

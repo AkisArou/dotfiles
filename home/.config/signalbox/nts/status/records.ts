@@ -5,6 +5,7 @@ import {
   caseProgress,
   changesTable,
   progressTable,
+  ratioOf,
   regressionCount,
 } from "./bench-history.ts";
 import type { Run } from "./bench-history.ts";
@@ -138,6 +139,13 @@ const VERDICT_COLOR: Readonly<Partial<Record<Kind, "green" | "yellow" | "red" | 
 };
 
 /** A ratio with its verdict's color: below 1 is faster than the comparator. */
+/** C's time over C++'s in the newest run, where the case is written in C++: no verdict, only how close. */
+function ownLanguageCell(runs: readonly Run[], name: string): TableCell {
+  const each = runs.at(-1)?.cases.get(name);
+  const ratio = each && ratioOf(each, "nts C", "C++");
+  return ratio === undefined ? { text: "—", color: "gray" } : ratio.toFixed(2);
+}
+
 function ratioCell(verdict: Verdict | undefined): TableCell {
   if (!verdict || verdict.ratio === null)
     return { text: verdict?.kind === "NOT_COMPARABLE" ? "n/c" : "—", color: "gray" };
@@ -259,6 +267,7 @@ function rowsTable(summary: BenchmarksSummary, runs: readonly Run[] = []): Table
       })),
       { key: "aot", label: "C/Bun AOT", align: "right" },
       { key: "scriptc", label: "C/ScriptC", align: "right" },
+      ...(runs.length ? [{ key: "cpp", label: "C/C++", align: "right" as const }] : []),
       { key: "slower", label: "slower than its best" },
     ],
     // Enter on a case shows its last runs.
@@ -303,6 +312,7 @@ function rowsTable(summary: BenchmarksSummary, runs: readonly Run[] = []): Table
             : {}),
           aot: ratioCell(row.backends.c?.versus["Bun AOT"]),
           scriptc: ratioCell(row.backends.c?.versus.ScriptC),
+          ...(runs.length ? { cpp: ownLanguageCell(runs, row.name) } : {}),
           slower: slower.length ? { text: slower.join(", "), color: "yellow" } : "",
         };
       }),

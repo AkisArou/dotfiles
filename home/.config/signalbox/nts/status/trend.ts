@@ -17,7 +17,10 @@ export function sparkline(values: readonly (number | undefined)[]): string {
     )
     .join("");
 }
-/** A series' range, low–high: a line drawn to its own range says how far it really moved. */
+/**
+ * A series' best and worst (lower is better): a line drawn to its own range looks as
+ * steep for 2% as for 50%, so the range says how far it really moved.
+ */
 export function seriesRange(values: readonly (number | undefined | null)[]): string {
   const present = values.filter(
     (value): value is number => typeof value === "number" && Number.isFinite(value),
@@ -25,7 +28,7 @@ export function seriesRange(values: readonly (number | undefined | null)[]): str
   if (!present.length) return "";
   const low = Math.min(...present);
   const high = Math.max(...present);
-  return low === high ? low.toFixed(2) : `${low.toFixed(2)}–${high.toFixed(2)}`;
+  return low === high ? low.toFixed(2) : `best ${low.toFixed(2)} · worst ${high.toFixed(2)}`;
 }
 /** A trend in glyphs and its range, for the terminal. */
 export const trendText = (values: readonly (number | undefined)[]) =>

@@ -15,6 +15,32 @@ export const BACKENDS = [
   ["jvm", "JVM", "nts JVM"],
 ] as const;
 export const COMPARATORS = ["node", "Bun JIT", "Bun AOT", "ScriptC"] as const;
+/**
+ * Each nts backend's own target language, C++ for native code and Java for the JVM: nts
+ * comes as close to it as it can (the bar sets no win against it, so it has no verdict).
+ * Built the same way and measured in the same run, it is also the backend's reference for
+ * the machine's drift: native code moves with native code, and a JIT's time differently.
+ */
+export const REFERENCE: Readonly<Record<string, string>> = {
+  "nts C": "C++",
+  "nts LLVM": "C++",
+  "nts JVM": "Java",
+};
+/** What an nts column is compared with: the comparators the bar judges, then its own language. */
+export const comparedWith = (column: string): readonly string[] => [
+  ...COMPARATORS,
+  ...(REFERENCE[column] ? [REFERENCE[column]] : []),
+];
+
+/**
+ * An nts column's time over another's in one case (lower is better): the harness's ratio
+ * is exactly this quotient, so every comparison, its own language's included, is one.
+ */
+export function ratioOf(each: RunCase, column: string, against: string): number | undefined {
+  const own = each.times[column]?.ns;
+  const theirs = each.times[against]?.ns;
+  return own && theirs ? own / theirs : undefined;
+}
 
 /** One case's time in a column: nanoseconds per operation, and its run-to-run spread (×). */
 export type Time = { readonly ns: number; readonly spread: number };
@@ -134,16 +160,17 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
   const previous = runs.at(-2);
   const series = (column: string, comparator: string, run: Run) => {
     const ratios: number[] = [];
-    for (const name of latest.cases.keys()) {
+    for (const [name, now] of latest.cases) {
+      if (ratioOf(now, column, comparator) === undefined) continue;
       const pair = same(run, latest, name);
-      const ratio = pair?.[0].versus[column]?.[comparator]?.ratio;
-      if (ratio !== undefined && latest.cases.get(name)!.versus[column]?.[comparator])
-        ratios.push(ratio);
+      const ratio = pair && ratioOf(pair[0], column, comparator);
+      if (ratio !== undefined) ratios.push(ratio);
     }
     return geomean(ratios);
   };
   const rows = BACKENDS.flatMap(([, label, column]) =>
-    COMPARATORS.map((comparator) => {
+    comparedWith(column).map((comparator) => {
+      const own = comparator === REFERENCE[column];
       const now = series(column, comparator, latest);
       const before = previous ? series(column, comparator, previous) : NaN;
       const trend = runs.map((run) => series(column, comparator, run));
@@ -176,7 +203,7 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
         // The row's identity: one per backend and comparator (selection steps by it).
         pair: `${label} vs ${comparator}`,
         backend: label,
-        versus: comparator,
+        versus: own ? { text: `${comparator} (own language)`, color: "blue" as const } : comparator,
         now: Number.isFinite(now) ? { text: now.toFixed(2), bold: true } : "—",
         before: Number.isFinite(before) ? before.toFixed(2) : "—",
         change: Number.isFinite(change) ? cell(percent(change), color) : "—",
@@ -185,9 +212,13 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
           color: "cyan" as const,
           series: trend.map((value) => (Number.isFinite(value) ? value : null)),
         },
-        won: cell(String(count("WON")), "green"),
-        short: count("SHORT") ? cell(String(count("SHORT")), "yellow") : "0",
-        lost: count("LOSS") ? cell(String(count("LOSS")), "red") : "0",
+        ...(own
+          ? { won: "—", short: "—", lost: "—" }
+          : {
+              won: cell(String(count("WON")), "green"),
+              short: count("SHORT") ? cell(String(count("SHORT")), "yellow") : "0",
+              lost: count("LOSS") ? cell(String(count("LOSS")), "red") : "0",
+            }),
       };
     }),
   );
@@ -210,6 +241,10 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
     rows,
     facts: [
       ["newest run", shortId(latest)],
+      [
+        "own language",
+        "C++ for C and LLVM, Java for the JVM, over the cases written in it; nts comes as close as it can, with no won or lost",
+      ],
       ...(previous ? ([["compared with", shortId(previous)]] as const) : []),
       ...comparatorChanges(previous, latest),
     ],
@@ -228,14 +263,6 @@ function comparatorChanges(previous: Run | undefined, latest: Run): (readonly [s
         [`${name} changed`, `${previous.comparators[name]} → ${version}`] as const,
     );
 }
-
-/** Each nts backend's reference: the comparator built the same way, measured in the same
- * run (native code moves with native code; a JIT's time moves differently). */
-export const REFERENCE: Readonly<Record<string, string>> = {
-  "nts C": "C++",
-  "nts LLVM": "C++",
-  "nts JVM": "Java",
-};
 
 /**
  * How much faster or slower a reference ran in one run against another: the geometric
@@ -412,7 +439,10 @@ export function caseProgress(runs: readonly Run[], name: string) {
   const latest = runs.at(-1);
   const previous = runs.at(-2);
   if (!latest?.cases.has(name)) return undefined;
-  const ratio = (run: Run) => same(run, latest, name)?.[0].versus["nts C"]?.node?.ratio;
+  const ratio = (run: Run) => {
+    const pair = same(run, latest, name);
+    return pair && ratioOf(pair[0], "nts C", "node");
+  };
   const noise = caseNoise(runs, name, "nts C");
   const factor = previous ? netChange(previous, latest, name, "nts C") : undefined;
   return {
@@ -438,7 +468,7 @@ export function regressionCount(runs: readonly Run[]): number | undefined {
 }
 
 /**
- * One case's runs, newest first: the real times and the harness's ratios each run
+ * One case's runs, newest first: the real times and the ratios each run
  * recorded. A run whose workload differs from the newest says so: its numbers are of
  * another program.
  */
@@ -446,7 +476,7 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
   const latest = runs.at(-1)?.cases.get(name);
   if (!latest) return undefined;
   const ratio = (each: RunCase, column: string, comparator: string): TableCell => {
-    const value = each.versus[column]?.[comparator]?.ratio;
+    const value = ratioOf(each, column, comparator);
     return value === undefined ? "—" : value.toFixed(2);
   };
   const time = (each: RunCase, column: string): TableCell => {
@@ -470,6 +500,8 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
         jvmNode: ratio(each, "nts JVM", "node"),
         cAot: ratio(each, "nts C", "Bun AOT"),
         cScriptc: ratio(each, "nts C", "ScriptC"),
+        cCpp: ratio(each, "nts C", "C++"),
+        jvmJava: ratio(each, "nts JVM", "Java"),
         cpp: time(each, "C++"),
       },
     ];
@@ -488,6 +520,8 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
       { key: "jvmNode", label: "JVM/node", align: "right" },
       { key: "cAot", label: "C/Bun AOT", align: "right" },
       { key: "cScriptc", label: "C/ScriptC", align: "right" },
+      { key: "cCpp", label: "C/C++", align: "right" },
+      { key: "jvmJava", label: "JVM/Java", align: "right" },
       { key: "cpp", label: "C++ time", align: "right" },
     ],
     rows,
