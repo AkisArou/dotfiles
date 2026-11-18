@@ -11,7 +11,7 @@ import type { AgentToolContext } from "signalbox/ext/agents";
 import { assignmentRequest } from "signalbox/ext/assignments";
 import type { Assignment, Assignments } from "signalbox/ext/assignments";
 import type { AgentService, Mailbox } from "signalbox/ext/orchestration";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 import { toolInput } from "./agents.ts";
 import type { TaskRoute } from "./task.ts";
 import { questionInput } from "./needs.ts";

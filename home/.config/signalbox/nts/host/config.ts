@@ -7,7 +7,7 @@ import type { Readable } from "signalbox/core";
 import type { Json, SourceRef } from "signalbox/core/remote";
 import { exposeOperation, exposeSource, staticListener, webListener } from "signalbox/host";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
-import * as refs from "../shared/model.ts";
+import * as refs from "@signalbox/kit/shared/protocol";
 import type { NtsConfig } from "../config.ts";
 import { ntsObservations } from "../status/host.ts";
 import { nativeTerminals } from "./terminals.ts";

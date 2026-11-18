@@ -7,7 +7,7 @@ import { exposeOperation, exposeSource } from "signalbox/host";
 import { assignmentRequest } from "signalbox/ext/assignments";
 import type { Assignment } from "signalbox/ext/assignments";
 import type { AgentInstance } from "signalbox/ext/agents";
-import * as refs from "../shared/model.ts";
+import * as refs from "@signalbox/kit/shared/protocol";
 import type { ntsOrchestration } from "./index.ts";
 import { catalog, harnesses, profileFromId, profileId, profileLabel, roles } from "./models.ts";
 import type { Profile } from "./models.ts";

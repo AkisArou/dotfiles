@@ -9,7 +9,7 @@ import type { Assignment, Assignments, WorkflowStore } from "signalbox/ext/assig
 import { assignmentService } from "signalbox/ext/assignments";
 import { decisionRequests } from "signalbox/ext/decisions";
 import { openWorkflowSqlite } from "signalbox/ext/integrations/openworkflow";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 import { fullCheckStatus, landingStatus } from "../status/commands.ts";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";

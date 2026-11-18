@@ -8,7 +8,7 @@ import { startHost, connectClient } from "signalbox/host";
 import { ntsConfig } from "../config.ts";
 import { createNtsProject, requireCheckout } from "./config.ts";
 import type { RemoteReading } from "signalbox/core/remote";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 
 async function until<T>(read: () => Promise<T>, ready: (value: T) => boolean): Promise<T> {
   const deadline = Date.now() + 10_000;

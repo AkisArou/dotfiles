@@ -6,10 +6,11 @@ import { act } from "react";
 import { testRender } from "@opentui/react/test-utils";
 import { createClient } from "signalbox/client";
 import { SignalboxProvider } from "signalbox/client/react";
-import { TerminalApp } from "./app.tsx";
-import type { Overview, Agent } from "../shared/model.ts";
-import { colors } from "./theme.ts";
-import { TerminalTheme } from "./selection.tsx";
+import { TerminalApp } from "@signalbox/kit/tui/app";
+import { app } from "./project.tsx";
+import type { Overview, Agent } from "@signalbox/kit/shared/protocol";
+import { colors } from "@signalbox/kit/tui/theme";
+import { TerminalTheme } from "@signalbox/kit/tui/selection";
 import { ntsPages, ntsSources } from "../status/model.ts";
 import { sampleReports } from "../status/tests/fixtures.ts";
 import type { RemoteReading } from "signalbox/core/remote";
@@ -160,6 +161,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     <SignalboxProvider client={client}>
       <TerminalTheme>
         <TerminalApp
+          app={app}
           tools={{
             find: (lines, title) => pick(lines, title),
             findMany: (lines, title, chosen) => pickMany(lines, title, chosen),
@@ -482,6 +484,7 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
     <SignalboxProvider client={client}>
       <TerminalTheme>
         <TerminalApp
+          app={app}
           onExit={() => {}}
           tools={{
             find: async () => undefined,

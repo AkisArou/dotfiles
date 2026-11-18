@@ -13,7 +13,7 @@ import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import type { Questions } from "./needs.ts";
-import type { NeedsView } from "../shared/model.ts";
+import type { NeedsView } from "@signalbox/kit/shared/protocol";
 import { sourceOf, wakeupFeed, wakeups } from "./wakeups.ts";
 
 const landed = (id: string) =>

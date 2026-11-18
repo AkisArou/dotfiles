@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Assignment } from "signalbox/ext/assignments";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 import { parseSettings } from "./settings.ts";
 import { groupOf, percents, shareRank, uncoveredAreas, withPercent } from "./shares.ts";
 

@@ -17,7 +17,7 @@ import {
 } from "signalbox/ext/agents";
 import type { AgentInstance } from "signalbox/ext/agents";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 import type { ManagedAgents } from "./agents.ts";
 import { ntsOrchestration } from "./index.ts";
 

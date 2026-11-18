@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { capability, Cell, defineConfig, provide, startExtensions } from "signalbox/core";
 import type { Readable } from "signalbox/core";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
-import type { Issue, NeedsView, PushDevice, QuestionView } from "../shared/model.ts";
+import type { Issue, NeedsView, PushDevice, QuestionView } from "@signalbox/kit/shared/protocol";
 import { fresh, notices, pushNotifications, pushService } from "./push.ts";
 import type { PushPayload } from "./push.ts";
 

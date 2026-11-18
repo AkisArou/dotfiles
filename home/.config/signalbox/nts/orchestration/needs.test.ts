@@ -17,7 +17,7 @@ import {
 import type { Readable } from "signalbox/core";
 import { decisionRequests } from "signalbox/ext/decisions";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
-import type { Issue, NeedsView } from "../shared/model.ts";
+import type { Issue, NeedsView } from "@signalbox/kit/shared/protocol";
 import { answerFor, needs, needsView, questionAnswer, questionInput } from "./needs.ts";
 
 const issue = (number: number, state: Issue["state"]): Issue =>

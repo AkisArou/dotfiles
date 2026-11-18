@@ -39,8 +39,8 @@ import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { connectClient } from "signalbox/host";
 import type { HostClient } from "signalbox/host";
-import type { AssignmentView } from "../shared/model.ts";
-import type { NeedsView, SettingsView } from "../shared/model.ts";
+import type { AssignmentView } from "@signalbox/kit/shared/protocol";
+import type { NeedsView, SettingsView } from "@signalbox/kit/shared/protocol";
 import {
   assignmentPhase,
   assignmentSays,
@@ -49,7 +49,7 @@ import {
   needsCount,
   pickLabels,
   settingsLine,
-} from "../shared/model.ts";
+} from "@signalbox/kit/shared/protocol";
 
 const project = JSON.parse(readFileSync(new URL("../project.json", import.meta.url), "utf8")) as {
   apiPort: number;

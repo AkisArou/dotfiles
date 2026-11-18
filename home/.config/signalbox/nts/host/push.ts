@@ -12,8 +12,8 @@ import type { Capability, Extension, Readable } from "signalbox/core";
 import { hash, toJson } from "signalbox/core/utils";
 import type { WorkflowStore } from "signalbox/ext/assignments";
 import { exposeOperation, exposeSource } from "signalbox/host";
-import * as refs from "../shared/model.ts";
-import type { Issue, NeedsView, PushDevice } from "../shared/model.ts";
+import * as refs from "@signalbox/kit/shared/protocol";
+import type { Issue, NeedsView, PushDevice } from "@signalbox/kit/shared/protocol";
 
 const NAMESPACE = "nts/push";
 /** Who runs this push sender, as push services ask (a contact is required, not checked). */

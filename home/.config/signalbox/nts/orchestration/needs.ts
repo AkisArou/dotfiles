@@ -17,7 +17,7 @@ import type { Capability, Extension, Readable } from "signalbox/core";
 import type { Json } from "signalbox/core/remote";
 import type { WorkflowStore } from "signalbox/ext/assignments";
 import type { DecisionRequest, Decisions } from "signalbox/ext/decisions";
-import type { Issue, IssueState, NeedsView, QuestionView } from "../shared/model.ts";
+import type { Issue, IssueState, NeedsView, QuestionView } from "@signalbox/kit/shared/protocol";
 
 export const issueStates = ["ready", "parked", "held"] as const;
 const LABEL: Record<IssueState, string | null> = {

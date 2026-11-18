@@ -6,7 +6,7 @@ import { proportional } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import { Timestamp } from "@astryxdesign/core/Timestamp";
 import { ntsPages, gaugeState, cellText } from "../../status/model.ts";
-import { gaugeTone } from "../../shared/model.ts";
+import { gaugeTone } from "@signalbox/kit/shared/protocol";
 import type { NtsPage, Reading, TableCell } from "../../status/model.ts";
 import { reportOf } from "../../status/use-nts.ts";
 import type { Project } from "../../shared/use-project.ts";

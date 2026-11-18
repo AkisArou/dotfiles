@@ -6,7 +6,7 @@ import type { WorkflowStore } from "signalbox/ext/assignments";
 import { tmux } from "signalbox/ext/integrations/tmux";
 import { exposeTerminals } from "signalbox/ext/terminals/web";
 import type { TerminalTarget } from "signalbox/ext/terminals";
-import type { Agent } from "../shared/model.ts";
+import type { Agent } from "@signalbox/kit/shared/protocol";
 import type { NtsConfig } from "../config.ts";
 import { discoverTerminals } from "./discovery.ts";
 

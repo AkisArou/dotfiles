@@ -23,7 +23,7 @@ import { assignmentRequest, assignmentService } from "signalbox/ext/assignments"
 import type { Assignment } from "signalbox/ext/assignments";
 import { openWorkflowSqlite } from "signalbox/ext/integrations/openworkflow";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import type { ManagedAgents } from "./agents.ts";

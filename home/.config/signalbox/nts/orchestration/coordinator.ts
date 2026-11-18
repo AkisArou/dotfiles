@@ -7,7 +7,7 @@ import type { Json } from "signalbox/core/remote";
 import type { AgentToolset } from "signalbox/ext/agents";
 import type { Assignments, DurableEngine, WorkflowStore } from "signalbox/ext/assignments";
 import { agentMailbox, agentService } from "signalbox/ext/orchestration";
-import type { Issue, NeedsView } from "../shared/model.ts";
+import type { Issue, NeedsView } from "@signalbox/kit/shared/protocol";
 import type { ManagedAgents } from "./agents.ts";
 import { coordinatorInstructions } from "./briefs.ts";
 import type { Profiles } from "./profiles.ts";

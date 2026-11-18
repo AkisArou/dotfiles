@@ -14,7 +14,7 @@ import { latestValue } from "signalbox/core";
 import { taskState } from "./task-model.ts";
 import type { TaskState } from "./task-model.ts";
 import type { Questions } from "./needs.ts";
-import type { NeedsView } from "../shared/model.ts";
+import type { NeedsView } from "@signalbox/kit/shared/protocol";
 
 export type Wakeup = { readonly id: string; readonly text: string };
 

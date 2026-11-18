@@ -2,7 +2,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { z } from "zod";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 
 const run = promisify(execFile);
 const listedIssue = z.object({

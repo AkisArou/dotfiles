@@ -1,7 +1,7 @@
 // What each role is told. The repository is the source of truth for rules
 // (AGENTS.md, docs/workflow.md, docs/contributing/lessons/); these briefs only
 // say what this session is for and which Signalbox tools carry its results.
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 
 /** docs/workflow.md sections and docs/contributing/lessons/ topics for a card's area.
  * Every agent already has AGENTS.md (CLAUDE.md loads it). */

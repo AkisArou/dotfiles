@@ -9,7 +9,7 @@ import { Conflict, hash } from "signalbox/core/utils";
 import { messaging, terminate, textInput } from "signalbox/ext/agents";
 import type { AgentRuntime, AgentToolset } from "signalbox/ext/agents";
 import type { Assignment, AssignmentContext, AssignmentStep } from "signalbox/ext/assignments";
-import type { Issue } from "../shared/model.ts";
+import type { Issue } from "@signalbox/kit/shared/protocol";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import { landingFor, landingStatus, poolStatus, runNts, treeForIssue } from "../status/commands.ts";

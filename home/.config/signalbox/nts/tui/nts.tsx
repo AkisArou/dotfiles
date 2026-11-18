@@ -1,12 +1,11 @@
 /** @jsxImportSource @opentui/react */
 import { TextAttributes } from "@opentui/core";
 import { cellText, isNtsPage, tableRows } from "../status/model.ts";
-import type { Color, Table } from "../status/model.ts";
+import type { Color, NtsPage, Table } from "../status/model.ts";
 import type { Project } from "../shared/use-project.ts";
-import type { Tab } from "../shared/model.ts";
-import { Heading, Line, Section } from "./components.tsx";
-import { useSelection } from "./selection.tsx";
-import { colors as c } from "./theme.ts";
+import { Heading, Line, Section } from "@signalbox/kit/tui/components";
+import { useSelection } from "@signalbox/kit/tui/selection";
+import { colors as c } from "@signalbox/kit/tui/theme";
 
 const color = (name: Color | undefined) =>
   name === "red"
@@ -135,7 +134,7 @@ export function NtsContent({
   onSelect,
 }: {
   project: Project;
-  page: Tab;
+  page: NtsPage | "Health";
   width: number;
   selected?: string;
   details: boolean;
