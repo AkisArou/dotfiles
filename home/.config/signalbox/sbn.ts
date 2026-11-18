@@ -444,6 +444,37 @@ function hostUnits(): { enabled: string[]; active: string[] } {
   };
 }
 
+/** The units sbn runs, kept with it in the dotfiles (../systemd/user). */
+const UNITS = ["signalbox@.service", "signalbox-console.service"];
+/** The user's unit folder: where systemd finds them. */
+const unitFolder = () =>
+  join(
+    process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"),
+    "systemd/user",
+  );
+
+/**
+ * Makes the units sbn starts known to systemd: one not in the user's unit folder yet
+ * (a machine whose dotfiles were deployed before it existed) is linked there, as the
+ * dotfiles' deploy would, and the manager reloaded.
+ */
+function installUnits(): number {
+  const missing = UNITS.filter(
+    (unit) =>
+      !existsSync(join(unitFolder(), unit)) &&
+      existsSync(join(home, "../systemd/user", unit)),
+  );
+  for (const unit of missing) {
+    const code = run("systemctl", [
+      "--user",
+      "link",
+      join(home, "../systemd/user", unit),
+    ]);
+    if (code !== 0) return code;
+  }
+  return missing.length ? run("systemctl", ["--user", "daemon-reload"]) : 0;
+}
+
 function hostsCommand(
   args: readonly string[],
   all: readonly Project[],
@@ -465,6 +496,8 @@ function hostsCommand(
   }
   const hosts = readHosts();
   if (verb === "sync") {
+    const installed = installUnits();
+    if (installed !== 0) return installed;
     const wanted = hosts[machine];
     if (!wanted) {
       console.log(
