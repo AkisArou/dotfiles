@@ -15,7 +15,8 @@ Brave local extensions
 
 Tailscale
 ---------
-- Log in once: sudo tailscale up (open the link it prints).
+- Log in once: sudo tailscale up --operator=$USER (open the link it prints). The
+  operator lets sbn tailnet change serve without root.
 - Serve the signalbox web UI on the tailnet: sbn tailnet. The first time, it prints a
   link to enable serve and HTTPS for the tailnet; open it, then run sbn tailnet again.
   It prints this machine's address; sbn tailnet off removes the routes.
