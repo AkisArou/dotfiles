@@ -4,7 +4,12 @@ import { useClient } from "signalbox/client/react";
 import { earlierTasks, runTaskAction, taskActions } from "@signalbox/kit/shared/actions";
 import type { ActionValues } from "@signalbox/kit/shared/actions";
 import { written } from "./compose.ts";
-import { agentStates, issueStates, taskConditions, taskPhases } from "@signalbox/kit/shared/glossary";
+import {
+  agentStates,
+  issueStates,
+  taskConditions,
+  taskPhases,
+} from "@signalbox/kit/shared/glossary";
 import * as refs from "../shared/model.ts";
 import { useKeyboard, useTerminalDimensions } from "@opentui/react";
 import { TextAttributes } from "@opentui/core";

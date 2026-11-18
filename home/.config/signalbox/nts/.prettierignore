@@ -1,3 +1,5 @@
 .cache
 .signalbox
 node_modules
+# Written by the host (orchestration/settings.ts), in its own JSON layout.
+settings.json

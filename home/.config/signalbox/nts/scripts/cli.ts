@@ -304,7 +304,10 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     };
     if (verb === "next") {
       if (text && text !== "off") throw new Error("next takes an issue and, to take it off, off");
-      const { next } = (await call(client, "project.tasks.next", { issue, on: text !== "off" })) as {
+      const { next } = (await call(client, "project.tasks.next", {
+        issue,
+        on: text !== "off",
+      })) as {
         next: number[];
       };
       return console.log(
@@ -315,7 +318,10 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     }
     if (verb === "prioritize") {
       const urgency = Number(needsText("an urgency from -9 to 9"));
-      const { urgency: all } = (await call(client, "project.tasks.prioritize", { issue, urgency })) as {
+      const { urgency: all } = (await call(client, "project.tasks.prioritize", {
+        issue,
+        urgency,
+      })) as {
         urgency: Record<string, number>;
       };
       return console.log(`#${issue}: urgency ${urgency}; set: ${JSON.stringify(all)}`);
@@ -361,7 +367,11 @@ async function main(verb: Verb, args: string[]): Promise<void> {
         });
         break;
       case "signoff":
-        await call(client, "project.assignments.sign-off", { assignment, accept: true, notes: text });
+        await call(client, "project.assignments.sign-off", {
+          assignment,
+          accept: true,
+          notes: text,
+        });
         break;
       case "refuse":
         await call(client, "project.assignments.sign-off", {
@@ -384,7 +394,10 @@ async function main(verb: Verb, args: string[]): Promise<void> {
         await call(client, "project.assignments.retry", { assignment });
         break;
       case "cancel":
-        await call(client, "project.assignments.cancel", { assignment, reason: needsText("a reason") });
+        await call(client, "project.assignments.cancel", {
+          assignment,
+          reason: needsText("a reason"),
+        });
         break;
     }
     console.log(`#${issue}: ${verb} sent`);
