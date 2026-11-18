@@ -34,16 +34,16 @@ test("the embedded native terminal owns keys and paste; Ctrl+] returns to naviga
     exits = 0;
   const calls: string[] = [];
   const values: Record<string, unknown> = {
-    "nts.overview": {
+    "project.overview": {
       name: "test",
       root,
       repo: "AkisArou/nts",
       startedAt: 1,
     },
-    "nts.issues": [],
-    "nts.plan": "# Plan",
-    "nts.terminal-programs": [],
-    "nts.agents": [
+    "project.issues": [],
+    "project.plan": "# Plan",
+    "project.terminal-programs": [],
+    "project.agents": [
       {
         id: "native",
         name: "Native fixture",

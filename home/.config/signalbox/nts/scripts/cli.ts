@@ -97,7 +97,7 @@ async function read<T>(client: HostClient, ref: string): Promise<T> {
 async function assignments(client: HostClient): Promise<AssignmentView[]> {
   const reading = await client.request<{ status: string; value?: AssignmentView[] }>({
     type: "read",
-    ref: "nts.assignments",
+    ref: "project.assignments",
   });
   if (reading.status !== "ready" || !reading.value)
     throw new Error(`Assignments are ${reading.status}`);
@@ -125,9 +125,9 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       if (args.length !== 1 || !Number.isInteger(value)) throw new Error(`${verb} needs ${what}`);
       return value;
     };
-    const settings = () => read<SettingsView>(client, "nts.settings");
+    const settings = () => read<SettingsView>(client, "project.settings");
     const change = async (input: object) => {
-      await call(client, "nts.settings.set", { ...input, version: (await settings()).version });
+      await call(client, "project.settings.set", { ...input, version: (await settings()).version });
       return console.log(settingsLine(await settings()));
     };
     if (verb === "workers" || verb === "rounds")
@@ -155,11 +155,11 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     if (verb === "pause") {
       const reason = args.join(" ").trim();
       if (!reason) throw new Error("pause needs a reason");
-      await call(client, "nts.tasks.pause", { reason });
+      await call(client, "project.tasks.pause", { reason });
       return console.log(settingsLine(await settings()));
     }
     if (verb === "resume") {
-      await call(client, "nts.tasks.resume", {});
+      await call(client, "project.tasks.resume", {});
       return console.log(settingsLine(await settings()));
     }
     if (verb === "models") {
@@ -167,7 +167,7 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       return;
     }
     if (verb === "needs") {
-      const now = await read<NeedsView>(client, "nts.needs");
+      const now = await read<NeedsView>(client, "project.needs");
       if (!needsCount(now)) console.log("Nothing waits on you.");
       for (const question of now.questions) {
         console.log(
@@ -191,11 +191,11 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     }
     if (verb === "withdraw") {
       const id = args.join(" ").trim();
-      const question = (await read<NeedsView>(client, "nts.needs")).questions.find(
+      const question = (await read<NeedsView>(client, "project.needs")).questions.find(
         (candidate) => candidate.id === id,
       );
       if (!question) throw new Error(`${id} is not an open question (sbn needs lists them)`);
-      await call(client, "nts.needs.withdraw", { id, revision: question.revision });
+      await call(client, "project.needs.withdraw", { id, revision: question.revision });
       return console.log(`${id}: withdrawn; the coordinator is told.`);
     }
     if (verb === "answer") {
@@ -212,7 +212,7 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       if (then !== undefined && !["ready", "parked", "held"].includes(then))
         throw new Error("--then takes ready, parked or held");
       if (target.startsWith("#")) {
-        await call(client, "nts.needs.answer-issue", {
+        await call(client, "project.needs.answer-issue", {
           issue: Number(target.slice(1)),
           answer: text,
           then: then ?? "ready",
@@ -221,13 +221,13 @@ async function main(verb: Verb, args: string[]): Promise<void> {
           `${target}: answered; it goes on the issue, and the coordinator is told.`,
         );
       }
-      const question = (await read<NeedsView>(client, "nts.needs")).questions.find(
+      const question = (await read<NeedsView>(client, "project.needs")).questions.find(
         (candidate) => candidate.id === target,
       );
       if (!question) throw new Error(`${target} is not an open question (sbn needs lists them)`);
       await call(
         client,
-        "nts.needs.answer",
+        "project.needs.answer",
         choice !== undefined
           ? { id: question.id, revision: question.revision, option: Number(choice) - 1 }
           : {
@@ -271,7 +271,7 @@ async function main(verb: Verb, args: string[]): Promise<void> {
       const listed = await client.request<{
         status: string;
         value?: { id: string; name: string; state: string }[];
-      }>({ type: "read", ref: "nts.agents" });
+      }>({ type: "read", ref: "project.agents" });
       const matches = (listed.value ?? []).filter(
         (agent) => agent.state !== "ended" && (agent.id === wanted || agent.name === wanted),
       );
@@ -279,13 +279,13 @@ async function main(verb: Verb, args: string[]): Promise<void> {
         throw new Error(
           `${matches.length} live agents match "${wanted}"; use the exact name or id`,
         );
-      await call(client, "nts.agents.end", { id: matches[0]!.id });
+      await call(client, "project.agents.end", { id: matches[0]!.id });
       return console.log(`ended ${matches[0]!.name} (${matches[0]!.id})`);
     }
     if (verb === "coordinator") {
       const reason = args.join(" ").trim();
       if (!reason) throw new Error("coordinator needs a reason");
-      await call(client, "nts.coordinator.replace", { reason });
+      await call(client, "project.coordinator.replace", { reason });
       return console.log("coordinator: replacement requested (checkpoint, then a new generation)");
     }
     const issue = Number(args.shift()?.replace(/^#/, ""));
@@ -304,7 +304,7 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     };
     if (verb === "next") {
       if (text && text !== "off") throw new Error("next takes an issue and, to take it off, off");
-      const { next } = (await call(client, "nts.tasks.next", { issue, on: text !== "off" })) as {
+      const { next } = (await call(client, "project.tasks.next", { issue, on: text !== "off" })) as {
         next: number[];
       };
       return console.log(
@@ -315,13 +315,13 @@ async function main(verb: Verb, args: string[]): Promise<void> {
     }
     if (verb === "prioritize") {
       const urgency = Number(needsText("an urgency from -9 to 9"));
-      const { urgency: all } = (await call(client, "nts.tasks.prioritize", { issue, urgency })) as {
+      const { urgency: all } = (await call(client, "project.tasks.prioritize", { issue, urgency })) as {
         urgency: Record<string, number>;
       };
       return console.log(`#${issue}: urgency ${urgency}; set: ${JSON.stringify(all)}`);
     }
     if (verb === "assign") {
-      const { id } = (await call(client, "nts.tasks.assign", {
+      const { id } = (await call(client, "project.tasks.assign", {
         issue,
         instructions: text,
         ...(model ? { model } : {}),
@@ -347,44 +347,44 @@ async function main(verb: Verb, args: string[]): Promise<void> {
             .join("\n"),
         );
       case "approve":
-        await call(client, "nts.assignments.decide-design", {
+        await call(client, "project.assignments.decide-design", {
           assignment,
           accept: true,
           notes: text,
         });
         break;
       case "return":
-        await call(client, "nts.assignments.decide-design", {
+        await call(client, "project.assignments.decide-design", {
           assignment,
           accept: false,
           notes: needsText("notes"),
         });
         break;
       case "signoff":
-        await call(client, "nts.assignments.sign-off", { assignment, accept: true, notes: text });
+        await call(client, "project.assignments.sign-off", { assignment, accept: true, notes: text });
         break;
       case "refuse":
-        await call(client, "nts.assignments.sign-off", {
+        await call(client, "project.assignments.sign-off", {
           assignment,
           accept: false,
           notes: needsText("notes"),
         });
         break;
       case "message":
-        await call(client, "nts.assignments.message-worker", {
+        await call(client, "project.assignments.message-worker", {
           assignment,
           text: needsText("a message"),
           from: as ?? "user",
         });
         break;
       case "rework":
-        await call(client, "nts.assignments.rework", { assignment, notes: needsText("notes") });
+        await call(client, "project.assignments.rework", { assignment, notes: needsText("notes") });
         break;
       case "retry":
-        await call(client, "nts.assignments.retry", { assignment });
+        await call(client, "project.assignments.retry", { assignment });
         break;
       case "cancel":
-        await call(client, "nts.assignments.cancel", { assignment, reason: needsText("a reason") });
+        await call(client, "project.assignments.cancel", { assignment, reason: needsText("a reason") });
         break;
     }
     console.log(`#${issue}: ${verb} sent`);

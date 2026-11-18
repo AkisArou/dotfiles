@@ -70,13 +70,13 @@ test("NTS application reads GitHub and plan, exposes real failures and no simula
     client = await connectClient({ url: `ws://127.0.0.1:${port}/rpc` });
     const connected = client;
     const issues = await until(
-      () => connected.request<RemoteReading<Issue[]>>({ type: "read", ref: "nts.issues" }),
+      () => connected.request<RemoteReading<Issue[]>>({ type: "read", ref: "project.issues" }),
       (value) => value.status === "ready",
     );
     assert.equal(issues.status === "ready" && issues.value[0]?.number, 807);
     assert.equal(issues.status === "ready" && issues.value.length, 1);
     const plan = await until(
-      () => connected.request<RemoteReading<string>>({ type: "read", ref: "nts.plan" }),
+      () => connected.request<RemoteReading<string>>({ type: "read", ref: "project.plan" }),
       (value) => value.status === "ready",
     );
     assert.match(plan.status === "ready" ? plan.value : "", /Existing work/);
@@ -90,7 +90,7 @@ test("NTS application reads GitHub and plan, exposes real failures and no simula
       /Unknown endpoint/,
     );
     assert.equal(
-      (await connected.request<RemoteReading<unknown[]>>({ type: "read", ref: "nts.agents" }))
+      (await connected.request<RemoteReading<unknown[]>>({ type: "read", ref: "project.agents" }))
         .status,
       "ready",
     );

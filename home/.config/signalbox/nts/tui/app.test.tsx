@@ -75,8 +75,8 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     progress: null,
   };
   const values: Record<string, unknown> = {
-    "nts.overview": { name: "nts", root: "/nts", repo: "AkisArou/nts", startedAt: 1 },
-    "nts.issues": [
+    "project.overview": { name: "nts", root: "/nts", repo: "AkisArou/nts", startedAt: 1 },
+    "project.issues": [
       issue,
       {
         ...issue,
@@ -87,9 +87,9 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         state: "held",
       },
     ],
-    "nts.settings": settingsView({ reason: "usage low" }),
-    "nts.assignments": [],
-    "nts.needs": {
+    "project.settings": settingsView({ reason: "usage low" }),
+    "project.assignments": [],
+    "project.needs": {
       questions: [
         {
           id: "mac",
@@ -110,7 +110,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
       unasked: [{ number: 777, title: "Share the recipes", url: "https://example/777" }],
       answered: [],
     },
-    "nts.agents": [
+    "project.agents": [
       {
         id: "worker",
         name: "Codex worker",
@@ -128,8 +128,8 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
         issue: 807,
       },
     ],
-    "nts.plan": "# Plan",
-    "nts.terminal-programs": [],
+    "project.plan": "# Plan",
+    "project.terminal-programs": [],
   };
   const client = createClient({
     reconnect: false,
@@ -269,7 +269,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
       offeredActions.includes("Start the task, with a note…"),
       "a note is offered, not forced",
     );
-    assert.equal(calls.at(-1), "nts.tasks.assign");
+    assert.equal(calls.at(-1), "project.tasks.assign");
     assert.deepEqual(inputs.at(-1), {
       issue: Number(/#(\d+)/.exec(actTitle)?.[1]),
       instructions: "",
@@ -322,7 +322,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     });
     assert.equal(offered?.title, "Worker slots");
     assert.ok(offered?.lines.includes("✓ 2 worker slots"), "the current value is marked");
-    assert.equal(calls.at(-1), "nts.settings.set");
+    assert.equal(calls.at(-1), "project.settings.set");
     assert.deepEqual(inputs.at(-1), { workerSlots: 3, version: "v1" });
     // A role's models row offers every model at every effort, the listed ones ticked;
     // the ticked lines come back in the order ticked.
@@ -378,7 +378,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     await answered(before + 1);
     assert.ok(offered?.lines.includes("1. No, leave it unrun  → parked (waits on your word)"));
     assert.equal(offered?.lines.at(-1), "✎ Write a different answer");
-    assert.equal(calls.at(-1), "nts.needs.answer");
+    assert.equal(calls.at(-1), "project.needs.answer");
     assert.deepEqual(inputs.at(-1), { id: "mac", revision: 1, option: 0 });
     // An issue nobody asked about: the answer is written in the editor, then where it goes.
     pick = async (lines, title) => {
@@ -392,7 +392,7 @@ test("tasks use NTS issue data, fzf filters and workspace-aware lazygit without 
     });
     await answered(before + 1);
     assert.equal(offered?.title, "Then #777");
-    assert.equal(calls.at(-1), "nts.needs.answer-issue");
+    assert.equal(calls.at(-1), "project.needs.answer-issue");
     assert.deepEqual(inputs.at(-1), { issue: 777, answer: "Leave it unrun", then: "parked" });
   } finally {
     await act(async () => {
@@ -415,13 +415,13 @@ test("Vim motions follow the focused pane, preserve selections and keep one live
     issue: null,
   }));
   const values: Record<string, unknown> = {
-    "nts.overview": overview,
-    "nts.issues": [],
-    "nts.settings": settingsView(null),
-    "nts.assignments": [],
-    "nts.needs": { questions: [], unasked: [], answered: [] },
-    "nts.agents": agents,
-    "nts.plan": "# Plan",
+    "project.overview": overview,
+    "project.issues": [],
+    "project.settings": settingsView(null),
+    "project.assignments": [],
+    "project.needs": { questions: [], unasked: [], answered: [] },
+    "project.agents": agents,
+    "project.plan": "# Plan",
   };
   const samples = sampleReports();
   for (const page of ntsPages)

@@ -41,13 +41,8 @@ export type Gauge = {
   };
   readonly why?: string;
 };
-export type WorkClaim = {
-  readonly issue: number;
-  readonly what: string;
-  readonly path?: string;
-  /** How long a tree's work has been untouched, when known. */
-  readonly idleMs?: number;
-};
+import type { WorkClaim } from "@signalbox/kit/shared/protocol";
+export type { WorkClaim };
 export type Report = {
   readonly claims?: readonly WorkClaim[];
   readonly tables: readonly Table[];
