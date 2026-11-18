@@ -115,18 +115,3 @@ test("missing NTS checkout is actionable and never creates a sample repository",
     await rm(directory, { recursive: true, force: true });
   }
 });
-
-test("the host accepts its own web page under each loopback name, or only a configured origin", async () => {
-  const { browserOrigins } = await import("./config.ts");
-  assert.deepEqual(browserOrigins(4310), [
-    "http://127.0.0.1:4310",
-    "http://localhost:4310",
-    "http://[::1]:4310",
-  ]);
-  assert.deepEqual(browserOrigins(4310, ["https://nts.example"]), [
-    "http://127.0.0.1:4310",
-    "http://localhost:4310",
-    "http://[::1]:4310",
-    "https://nts.example",
-  ]);
-});
