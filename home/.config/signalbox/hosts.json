@@ -1,3 +1,4 @@
 {
-  "arch-desktop": ["nts"]
+  "arch-desktop": ["nts"],
+  "arch-laptop": ["nable"]
 }
