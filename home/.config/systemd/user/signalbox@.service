@@ -12,8 +12,9 @@ WorkingDirectory=%h/.config/signalbox/%i
 # variables by name (NTS's gate requires ANDROID_HOME and JAVA_HOME). A unit's
 # environment is minimal, so the host runs in a zsh login shell. JAVA_HOME is
 # set by .zshrc (interactive only) from asdf's current java, so the same
-# derivation runs here.
-ExecStart=/usr/bin/zsh -lc 'java=$$(asdf which java) && export JAVA_HOME=$${java:A:h:h} JDK_HOME=$${java:A:h:h}; exec node server.ts'
+# derivation runs here. The project's own start script says how its host runs
+# (its Node flags included).
+ExecStart=/usr/bin/zsh -lc 'java=$$(asdf which java) && export JAVA_HOME=$${java:A:h:h} JDK_HOME=$${java:A:h:h}; exec node --run start'
 # Agent sessions run in their own systemd scope (tmux), so stopping or
 # restarting this unit never ends them; the host recovers them on start.
 Restart=on-failure

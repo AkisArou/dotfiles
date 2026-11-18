@@ -15,7 +15,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir, hostname, userInfo } from "node:os";
-import { dirname, join, resolve, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 interface Project {
@@ -182,6 +182,36 @@ export function linkPlan(
   }
   return plan;
 }
+/**
+ * The apps workspace's package list with the linked projects in it. pnpm does not
+ * install a project through a folder link, and would count it twice beside its
+ * own folder, so each link is left out of "*" and its folder is named, relative
+ * to the workspace (the same on every machine with the same layout).
+ */
+export function workspaceWithLinks(
+  yaml: string,
+  links: Links,
+  workspace: string,
+): string {
+  const section = /^packages:\n(?:  .*\n)*/m;
+  if (!section.test(yaml))
+    throw new Error("pnpm-workspace.yaml has no packages list");
+  const linked = Object.entries(links).sort(([a], [b]) => a.localeCompare(b));
+  const lines = [
+    "packages:",
+    '  - "*"',
+    ...(linked.length
+      ? [
+          "  # Kept by sbn links from links.json: each linked project installs from its own folder.",
+          ...linked.flatMap(([name, folder]) => [
+            `  - "!${name}"`,
+            `  - "${relative(workspace, expand(folder))}"`,
+          ]),
+        ]
+      : []),
+  ];
+  return yaml.replace(section, `${lines.join("\n")}\n`);
+}
 function linksCommand(): number {
   const path = join(home, "links.json");
   const links = existsSync(path) ? parseLinks(readFileSync(path, "utf8")) : {};
@@ -204,6 +234,23 @@ function linksCommand(): number {
     rmSync(join(home, name), { force: true });
     symlinkSync(target, join(home, name));
     console.log(`linked ${name} -> ${target}`);
+  }
+  const workspacePath = join(home, "pnpm-workspace.yaml");
+  const listed = readFileSync(workspacePath, "utf8");
+  const withLinks = workspaceWithLinks(listed, links, home);
+  if (withLinks !== listed) {
+    writeFileSync(workspacePath, withLinks);
+    console.log("pnpm-workspace.yaml lists the linked projects' folders");
+  }
+  if (withLinks !== listed || plan.make.length || plan.repoint.length) {
+    const installed = spawnSync("pnpm", ["install"], {
+      cwd: home,
+      stdio: "inherit",
+    });
+    if (installed.status !== 0) {
+      console.error("pnpm install failed; run it in ~/.config/signalbox");
+      return 1;
+    }
   }
   for (const [name, target] of plan.absent)
     console.log(

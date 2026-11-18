@@ -124,3 +124,32 @@ test("sbn links makes the missing links, repoints stale ones, and never replaces
   );
   assert.throws(() => parseLinks("[]"), /maps each project name/);
 });
+
+test("sbn links names each linked project's folder in the workspace, and leaves its link out", async () => {
+  const { workspaceWithLinks } = await import("./sbn.ts");
+  const yaml =
+    '# One folder per project.\npackages:\n  - "*"\n\nallowBuilds:\n  esbuild: true\n';
+  const linked = workspaceWithLinks(
+    yaml,
+    { nable: "/home/me/repos/nable/signalbox" },
+    "/home/me/dotfiles/signalbox",
+  );
+  assert.equal(
+    linked,
+    '# One folder per project.\npackages:\n  - "*"\n  # Kept by sbn links from links.json: each linked project installs from its own folder.\n  - "!nable"\n  - "../../repos/nable/signalbox"\n\nallowBuilds:\n  esbuild: true\n',
+  );
+  assert.equal(
+    workspaceWithLinks(
+      linked,
+      { nable: "/home/me/repos/nable/signalbox" },
+      "/home/me/dotfiles/signalbox",
+    ),
+    linked,
+    "linking again changes nothing",
+  );
+  assert.equal(
+    workspaceWithLinks(linked, {}, "/w"),
+    yaml,
+    "an unlinked project leaves the list",
+  );
+});

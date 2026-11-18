@@ -2,8 +2,15 @@
 # project.json, host unit instance (signalbox@<folder>) and state.
 packages:
   - "*"
+  # Kept by sbn links from links.json: each linked project installs from its own folder.
+  - "!nable"
+  - "../../../../nable-solutions/signalbox"
 
 allowBuilds:
   "@astryxdesign/core": false
   esbuild: true
   node-pty: true
+  # Huly's packages (@signalbox/huly): core-js's postinstall only prints a message;
+  # msgpackr-extract is an optional native speed-up that msgpackr does without.
+  core-js: false
+  msgpackr-extract: false

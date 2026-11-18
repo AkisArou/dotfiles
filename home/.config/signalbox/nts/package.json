@@ -9,6 +9,7 @@
   },
   "scripts": {
     "sdk": "node scripts/sdk.ts",
+    "start": "node server.ts",
     "dev": "node scripts/sdk.ts && node server.ts",
     "tui": "node scripts/sdk.ts && node scripts/tui.ts",
     "check": "node scripts/sdk.ts && tsc -p tsconfig.json && tsc -p tsconfig.tui.json",
