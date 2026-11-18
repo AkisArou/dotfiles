@@ -12,17 +12,17 @@ import { assignmentRequest } from "signalbox/ext/assignments";
 import type { Assignment, Assignments } from "signalbox/ext/assignments";
 import type { AgentService, Mailbox } from "signalbox/ext/orchestration";
 import type { Issue } from "@signalbox/kit/shared/protocol";
-import { toolInput } from "./agents.ts";
+import { toolInput } from "@signalbox/kit/orchestration/agents";
 import type { TaskRoute } from "./task.ts";
 import { questionInput } from "./needs.ts";
 import type { Questions } from "./needs.ts";
-import { profileId, profileLabel } from "./models.ts";
-import type { Settings, SettingsFile } from "./settings.ts";
+import { profileId, profileLabel } from "@signalbox/kit/orchestration/models";
+import type { Settings, SettingsFile } from "@signalbox/kit/orchestration/settings";
 import type { TaskState } from "./task-model.ts";
-import { urgencyValue } from "./priorities.ts";
-import type { Priorities } from "./priorities.ts";
+import { urgencyValue } from "@signalbox/kit/orchestration/priorities";
+import type { Priorities } from "@signalbox/kit/orchestration/priorities";
 import { taskState } from "./task-model.ts";
-import { configuredCodexModel } from "./codex-config.ts";
+import { configuredCodexModel } from "@signalbox/kit/orchestration/codex-config";
 
 /** A capability that exists only once later wiring creates it; checked on use. */
 export class Late<T> {

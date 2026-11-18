@@ -8,10 +8,10 @@ import type { AgentToolset } from "signalbox/ext/agents";
 import type { Assignments, DurableEngine, WorkflowStore } from "signalbox/ext/assignments";
 import { agentMailbox, agentService } from "signalbox/ext/orchestration";
 import type { Issue, NeedsView } from "@signalbox/kit/shared/protocol";
-import type { ManagedAgents } from "./agents.ts";
+import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
 import { coordinatorInstructions } from "./briefs.ts";
-import type { Profiles } from "./profiles.ts";
-import type { SettingsFile } from "./settings.ts";
+import type { Profiles } from "@signalbox/kit/orchestration/profiles";
+import type { SettingsFile } from "@signalbox/kit/orchestration/settings";
 import { workerModels } from "./tools.ts";
 
 export function coordinator(options: {

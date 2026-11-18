@@ -197,7 +197,7 @@ test("managed sessions become Agents rows: role and issue from the label, state 
 });
 
 test("priorities: set, clear and rank issues; higher urgency ranks lower (goes first)", async () => {
-  const { priorities } = await import("./priorities.ts");
+  const { priorities } = await import("@signalbox/kit/orchestration/priorities");
   const { sqliteWorkflowState } = await import("signalbox/ext/integrations/sqlite");
   const { defineConfig, startExtensions } = await import("signalbox/core");
   const { mkdtemp, rm } = await import("node:fs/promises");
@@ -205,7 +205,7 @@ test("priorities: set, clear and rank issues; higher urgency ranks lower (goes f
   const { join } = await import("node:path");
   const directory = await mkdtemp(join(tmpdir(), "nts-priorities-"));
   const state = sqliteWorkflowState({ path: join(directory, "state.sqlite") });
-  const store = priorities({ state: state.state });
+  const store = priorities({ project: "nts", state: state.state });
   const app = await startExtensions(
     defineConfig({
       id: "p",

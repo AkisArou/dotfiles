@@ -1,11 +1,10 @@
-// Composes NTS orchestration from its parts. Wiring order matters only for the
+// Composes NTS orchestration from its parts (the general ones from the kit). Wiring order matters only for the
 // late references the tools hold; everything else is declared by capability.
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { latestValue, polledSource } from "signalbox/core";
 import type { Capability, Extension, Readable } from "signalbox/core";
-import { poll } from "signalbox/core/utils";
-import type { Assignment, Assignments, WorkflowStore } from "signalbox/ext/assignments";
+import type { Assignment, WorkflowStore } from "signalbox/ext/assignments";
 import { assignmentService } from "signalbox/ext/assignments";
 import { decisionRequests } from "signalbox/ext/decisions";
 import { openWorkflowSqlite } from "signalbox/ext/integrations/openworkflow";
@@ -13,52 +12,21 @@ import type { Issue } from "@signalbox/kit/shared/protocol";
 import { fullCheckStatus, landingStatus } from "../status/commands.ts";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
-import { managedAgents } from "./agents.ts";
-import type { ManagedAgents } from "./agents.ts";
+import { managedAgents } from "@signalbox/kit/orchestration/agents";
+import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
 import type { AgentToolset } from "signalbox/ext/agents";
 import { coordinator } from "./coordinator.ts";
-import { profiles } from "./profiles.ts";
-import type { Profiles } from "./profiles.ts";
-import { priorities } from "./priorities.ts";
-import type { Priorities } from "./priorities.ts";
-import { settingsFile } from "./settings.ts";
-import { shareRank } from "./shares.ts";
-import type { SettingsFile } from "./settings.ts";
-import { probeClaudeMessaging } from "signalbox/ext/integrations/claude";
+import { claudeMessagingProbe, profiles } from "@signalbox/kit/orchestration/profiles";
+import { nextLeavesOnStart, priorities } from "@signalbox/kit/orchestration/priorities";
+import { capacityFollowsSettings, settingsFile } from "@signalbox/kit/orchestration/settings";
+import { shareRank } from "@signalbox/kit/orchestration/shares";
+
 import { taskRoute } from "./task.ts";
 import { coordinatorTools, Late, reviewerTools, workerTools } from "./tools.ts";
 import { needs, questionAnswer, questionInput } from "./needs.ts";
 import type { GitHub } from "./needs.ts";
 import type { Wiring } from "./tools.ts";
 import { wakeupFeed } from "./wakeups.ts";
-
-/**
- * Claude Code's messaging rests on CLI features that an upgrade can change. The
- * host checks them at start and every few hours; a failure marks the harness
- * unavailable with the exact reason, and a later pass clears only that mark.
- */
-function claudeMessagingProbe(root: string, profilesKey: Capability<Profiles>): Extension {
-  const PREFIX = "messaging probe failed: ";
-  return {
-    id: "nts-claude-messaging-probe",
-    requires: [profilesKey],
-    start(context) {
-      const store = context.get(profilesKey);
-      const check = async () => {
-        const result = await probeClaudeMessaging({ cwd: root, signal: context.signal });
-        const marked = latestValue(store.unavailable)?.claude?.reason.startsWith(PREFIX);
-        if (!result.ok) await store.setAvailability("claude", { reason: PREFIX + result.reason });
-        else if (marked) await store.setAvailability("claude", null);
-      };
-      context.afterStart(() => {
-        const loop = poll(check, 6 * 3_600_000, context.signal, (error) =>
-          context.log.error("claude probe", error),
-        );
-        context.onStop(() => loop);
-      });
-    },
-  };
-}
 
 export interface OrchestrationSettings {
   /** Install the coordinator and its wake-ups. Off, the routes still run assignments submitted by hand. */
@@ -82,63 +50,9 @@ function repositoryAreas(root: string): string[] {
   }
 }
 
-/** A raised worker count wakes the waiting tasks, whoever raised it (a client or a hand edit). */
-/** A task on the next-slot list leaves it once it holds a worker: the list is a one-time jump. */
-export function nextLeavesOnStart(
-  priorities: Capability<Priorities>,
-  assignments: Capability<Readable<readonly Assignment[]>>,
-): Extension {
-  return {
-    id: "nts-next-leaves-on-start",
-    requires: [priorities, assignments],
-    start(context) {
-      const service = context.get(priorities);
-      const list = context.get(assignments);
-      const check = () => {
-        const reading = list.get();
-        const next = service.next.get();
-        if (reading.status !== "ready" || next.status !== "ready") return;
-        for (const issue of next.value)
-          if (
-            reading.value.some(
-              (assignment) =>
-                (assignment.input as { issue?: number }).issue === issue &&
-                assignment.heldResources.some((held) => held.resource === "worker"),
-            )
-          )
-            void service.setNext(issue, false).catch((error) => context.log.error("next", error));
-      };
-      const stops = [list.subscribe(check), service.next.subscribe(check)];
-      context.onStop(() => stops.forEach((stop) => stop()));
-      check();
-    },
-  };
-}
-function capacityFollowsSettings(
-  settings: Capability<SettingsFile>,
-  work: Capability<Assignments>,
-): Extension {
-  return {
-    id: "nts-capacity-follows-settings",
-    requires: [settings, work],
-    start(context) {
-      const file = context.get(settings);
-      let slots = file.current().workerSlots;
-      const stop = file.reading.subscribe(() => {
-        const next = file.current().workerSlots;
-        if (next > slots)
-          void context
-            .get(work)
-            .capacityChanged(["worker"])
-            .catch((error) => context.log.error("capacity", error));
-        slots = next;
-      });
-      context.onStop(stop);
-    },
-  };
-}
-
 export function ntsOrchestration(options: {
+  /** The project's name: its records sit under it. */
+  readonly project: string;
   readonly root: string;
   readonly directory: string;
   readonly state: Capability<WorkflowStore>;
@@ -169,8 +83,12 @@ export function ntsOrchestration(options: {
     const issue = issuesNow()?.find((candidate) => candidate.number === issueOf(assignment));
     return issue && { area: issue.area, stream: issue.streamNumber };
   };
-  const profileStore = profiles({ state: options.state, settings: file.service });
-  const urgency = priorities({ state: options.state });
+  const profileStore = profiles({
+    project: options.project,
+    state: options.state,
+    settings: file.service,
+  });
+  const urgency = priorities({ project: options.project, state: options.state });
   const settingsNow = file.current;
   const assignmentList = new Late<Capability<Readable<readonly Assignment[]>>>();
   const decisions = decisionRequests({
@@ -216,7 +134,12 @@ export function ntsOrchestration(options: {
   const toolsets = [tools.worker, tools.reviewer, tools.coordinator];
   const agents = options.agents
     ? options.agents(toolsets)
-    : managedAgents({ state: options.state, directory: options.directory, toolsets });
+    : managedAgents({
+        project: options.project,
+        state: options.state,
+        directory: options.directory,
+        toolsets,
+      });
   const route = taskRoute({
     root: options.root,
     issues: options.issues,

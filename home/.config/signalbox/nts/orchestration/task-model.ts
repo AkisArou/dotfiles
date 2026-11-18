@@ -2,8 +2,8 @@
 // phases and its durable state. The route (task.ts) and its phases
 // (task-phases.ts) act on it; tools, wake-ups and views read it.
 import { z } from "zod";
-import { profileId, profileSchema } from "./models.ts";
-import { watchState } from "./stall.ts";
+import { profileId, profileSchema } from "@signalbox/kit/orchestration/models";
+import { watchState } from "@signalbox/kit/orchestration/stall";
 
 const sha = z.string().regex(/^[0-9a-f]{40}$/);
 

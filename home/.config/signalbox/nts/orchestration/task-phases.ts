@@ -13,8 +13,8 @@ import type { Issue } from "@signalbox/kit/shared/protocol";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import { landingFor, landingStatus, poolStatus, runNts, treeForIssue } from "../status/commands.ts";
-import type { ManagedAgents } from "./agents.ts";
-import type { Profiles } from "./profiles.ts";
+import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
+import type { Profiles } from "@signalbox/kit/orchestration/profiles";
 import {
   reviewerBrief,
   reviewerInstructions,
@@ -22,7 +22,7 @@ import {
   workerInstructions,
   workerResumeBrief,
 } from "./briefs.ts";
-import { progressed, STALL, stallStep } from "./stall.ts";
+import { progressed, STALL, stallStep } from "@signalbox/kit/orchestration/stall";
 import { awaitedAgent, cardPaths, liveProfiles } from "./task-model.ts";
 import type { Phase, TaskInput, TaskReport, TaskReportOf, TaskState } from "./task-model.ts";
 

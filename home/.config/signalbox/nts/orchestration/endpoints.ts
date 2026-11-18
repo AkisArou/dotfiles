@@ -9,17 +9,24 @@ import type { Assignment } from "signalbox/ext/assignments";
 import type { AgentInstance } from "signalbox/ext/agents";
 import * as refs from "@signalbox/kit/shared/protocol";
 import type { ntsOrchestration } from "./index.ts";
-import { catalog, harnesses, profileFromId, profileId, profileLabel, roles } from "./models.ts";
-import type { Profile } from "./models.ts";
-import { picks } from "./settings.ts";
-import { groupOf, percents, withPercent } from "./shares.ts";
-import type { Share } from "./shares.ts";
+import {
+  catalog,
+  harnesses,
+  profileFromId,
+  profileId,
+  profileLabel,
+  roles,
+} from "@signalbox/kit/orchestration/models";
+import type { Profile } from "@signalbox/kit/orchestration/models";
+import { picks } from "@signalbox/kit/orchestration/settings";
+import { groupOf, percents, withPercent } from "@signalbox/kit/orchestration/shares";
+import type { Share } from "@signalbox/kit/orchestration/shares";
 import { checkTaskModel, knownIssue } from "./tools.ts";
 import { answerFor, issueStates } from "./needs.ts";
 import { terminate } from "signalbox/ext/agents";
 import { taskState } from "./task-model.ts";
-import { urgencyValue } from "./priorities.ts";
-import { configuredCodexModel } from "./codex-config.ts";
+import { urgencyValue } from "@signalbox/kit/orchestration/priorities";
+import { configuredCodexModel } from "@signalbox/kit/orchestration/codex-config";
 
 type Orchestration = ReturnType<typeof ntsOrchestration>;
 

@@ -79,6 +79,7 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
     return projectIssues(listed, plan);
   });
   const orchestration = ntsOrchestration({
+    project: settings.name,
     root: settings.root,
     directory: settings.state,
     state: state.state,

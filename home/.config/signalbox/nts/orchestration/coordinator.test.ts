@@ -18,7 +18,7 @@ import {
 import type { AgentInstance } from "signalbox/ext/agents";
 import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { Issue } from "@signalbox/kit/shared/protocol";
-import type { ManagedAgents } from "./agents.ts";
+import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
 import { ntsOrchestration } from "./index.ts";
 
 async function until<T>(read: () => T | undefined, timeout = 30_000): Promise<T> {
@@ -112,6 +112,7 @@ test("the coordinator starts with its brief and receives each event once through
   const issuesKey = capability<Readable<Issue[]>>("issues");
   const state = sqliteWorkflowState({ path: join(directory, "state.sqlite") });
   const orchestration = ntsOrchestration({
+    project: "nts",
     root: directory,
     directory,
     state: state.state,

@@ -26,12 +26,12 @@ import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import type { Issue } from "@signalbox/kit/shared/protocol";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
-import type { ManagedAgents } from "./agents.ts";
-import { profiles } from "./profiles.ts";
-import { settingsFile } from "./settings.ts";
+import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
+import { profiles } from "@signalbox/kit/orchestration/profiles";
+import { settingsFile } from "@signalbox/kit/orchestration/settings";
 import { taskRoute } from "./task.ts";
 import { taskState } from "./task-model.ts";
-import { STALL } from "./stall.ts";
+import { STALL } from "@signalbox/kit/orchestration/stall";
 
 const run = promisify(execFile);
 const git = (cwd: string, ...args: string[]) =>
@@ -179,7 +179,7 @@ test("a task goes from tree to verified through design approval, review and land
     }),
   );
   const file = settingsFile({ path: join(directory, "settings.json") });
-  const store = profiles({ state: state.state, settings: file.service });
+  const store = profiles({ project: "nts", state: state.state, settings: file.service });
   const tools = { id: "none", tools: [] };
   const route = taskRoute({
     root,
