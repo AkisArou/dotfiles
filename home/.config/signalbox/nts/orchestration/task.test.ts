@@ -29,8 +29,9 @@ import type { FullCheckStatus } from "../status/full-check.ts";
 import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
 import { profiles } from "@signalbox/kit/orchestration/profiles";
 import { settingsFile } from "@signalbox/kit/orchestration/settings";
-import { taskRoute } from "./task.ts";
-import { taskState } from "./task-model.ts";
+import { taskRoute } from "@signalbox/kit/orchestration/task";
+import { ntsTaskParts } from "./task-parts.ts";
+import { taskState } from "@signalbox/kit/orchestration/task-model";
 import { STALL } from "@signalbox/kit/orchestration/stall";
 
 const run = promisify(execFile);
@@ -182,10 +183,9 @@ test("a task goes from tree to verified through design approval, review and land
   const store = profiles({ project: "nts", state: state.state, settings: file.service });
   const tools = { id: "none", tools: [] };
   const route = taskRoute({
-    root,
+    project: "nts",
     issues: issues.key,
-    landing: landing.key,
-    fullCheck: fullCheck.key,
+    parts: ntsTaskParts({ root, landing: landing.key, fullCheck: fullCheck.key }),
     profiles: store.service,
     assignments: () => work.assignments,
     agents,

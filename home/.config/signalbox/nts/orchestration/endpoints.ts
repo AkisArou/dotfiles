@@ -24,7 +24,7 @@ import type { Share } from "@signalbox/kit/orchestration/shares";
 import { checkTaskModel, knownIssue } from "./tools.ts";
 import { answerFor, issueStates } from "./needs.ts";
 import { terminate } from "signalbox/ext/agents";
-import { taskState } from "./task-model.ts";
+import { taskState } from "@signalbox/kit/orchestration/task-model";
 import { urgencyValue } from "@signalbox/kit/orchestration/priorities";
 import { configuredCodexModel } from "@signalbox/kit/orchestration/codex-config";
 

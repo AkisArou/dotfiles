@@ -12,7 +12,7 @@
     "dev": "node scripts/sdk.ts && node server.ts --watch",
     "tui": "node scripts/sdk.ts && node scripts/tui.ts",
     "check": "node scripts/sdk.ts && tsc -p tsconfig.json && tsc -p tsconfig.tui.json",
-    "test": "node scripts/sdk.ts && node --test host/*.test.ts status/*.test.ts orchestration/*.test.ts shared/*.test.ts",
+    "test": "node scripts/sdk.ts && node --test host/*.test.ts status/*.test.ts orchestration/*.test.ts",
     "test:tui": "node scripts/sdk.ts && node scripts/tui.ts --test",
     "doctor": "node scripts/sdk.ts && node scripts/doctor.ts",
     "format": "prettier --write .",

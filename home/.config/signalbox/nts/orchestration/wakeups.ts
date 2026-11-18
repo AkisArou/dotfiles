@@ -11,8 +11,8 @@ import type { Mailbox } from "signalbox/ext/orchestration";
 import type { LandingStatus } from "../status/landing.ts";
 import type { FullCheckStatus } from "../status/full-check.ts";
 import { latestValue } from "signalbox/core";
-import { taskState } from "./task-model.ts";
-import type { TaskState } from "./task-model.ts";
+import { taskState } from "@signalbox/kit/orchestration/task-model";
+import type { TaskState } from "@signalbox/kit/orchestration/task-model";
 import type { Questions } from "./needs.ts";
 import type { NeedsView } from "@signalbox/kit/shared/protocol";
 

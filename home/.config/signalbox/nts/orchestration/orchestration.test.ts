@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { cardPaths } from "./task-model.ts";
+import { cardPaths } from "@signalbox/kit/orchestration/task-model";
 import { PHASE_BUDGET, PROGRESS_GRACE_MS, wakeups } from "./wakeups.ts";
 import type { Assignment } from "signalbox/ext/assignments";
 
@@ -141,7 +141,7 @@ test("each area's reading list names workflow sections and lessons that exist", 
 
 test("a task's worker and reviewer work in its tree; the coordinator in the project root", async () => {
   const { managedAgentViews } = await import("./endpoints.ts");
-  const { initialTaskState } = await import("./task-model.ts");
+  const { initialTaskState } = await import("@signalbox/kit/orchestration/task-model");
   const task = (issue: number, worker: string | null, tree: string, acceptedAt: number) =>
     ({
       route: "nts/task",

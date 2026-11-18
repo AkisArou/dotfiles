@@ -21,7 +21,8 @@ import { nextLeavesOnStart, priorities } from "@signalbox/kit/orchestration/prio
 import { capacityFollowsSettings, settingsFile } from "@signalbox/kit/orchestration/settings";
 import { shareRank } from "@signalbox/kit/orchestration/shares";
 
-import { taskRoute } from "./task.ts";
+import { taskRoute } from "@signalbox/kit/orchestration/task";
+import { ntsTaskParts } from "./task-parts.ts";
 import { coordinatorTools, Late, reviewerTools, workerTools } from "./tools.ts";
 import { needs, questionAnswer, questionInput } from "./needs.ts";
 import type { GitHub } from "./needs.ts";
@@ -141,10 +142,9 @@ export function ntsOrchestration(options: {
         toolsets,
       });
   const route = taskRoute({
-    root: options.root,
+    project: options.project,
     issues: options.issues,
-    landing: landing.key,
-    fullCheck: fullCheck.key,
+    parts: ntsTaskParts({ root: options.root, landing: landing.key, fullCheck: fullCheck.key }),
     profiles: profileStore.service,
     assignments: () => assignmentList.get(),
     agents,
