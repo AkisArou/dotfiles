@@ -96,3 +96,31 @@ test("a machine runs exactly the hosts hosts.json gives it: start what is missin
     /maps each hostname to a list/,
   );
 });
+
+test("sbn links makes the missing links, repoints stale ones, and never replaces a folder", async () => {
+  const { linkPlan, parseLinks } = await import("./sbn.ts");
+  const links = parseLinks(
+    JSON.stringify({
+      a: "/repos/a",
+      b: "/repos/b",
+      c: "/repos/c",
+      d: "/repos/gone",
+    }),
+  );
+  const here = (name: string) =>
+    name === "a"
+      ? ({ kind: "missing" } as const)
+      : name === "b"
+        ? ({ kind: "link", to: "/old/b" } as const)
+        : ({ kind: "other" } as const);
+  const plan = linkPlan(links, here, (folder) => folder !== "/repos/gone");
+  assert.deepEqual(plan.make, [["a", "/repos/a"]]);
+  assert.deepEqual(plan.repoint, [["b", "/repos/b"]]);
+  assert.deepEqual(plan.blocked, ["c"], "a real folder is the owner's to move");
+  assert.deepEqual(
+    plan.absent,
+    [["d", "/repos/gone"]],
+    "a repository not cloned here is reported",
+  );
+  assert.throws(() => parseLinks("[]"), /maps each project name/);
+});

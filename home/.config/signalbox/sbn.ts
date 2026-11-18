@@ -5,9 +5,13 @@
 import { spawnSync } from "node:child_process";
 import {
   existsSync,
+  lstatSync,
   readdirSync,
   readFileSync,
+  readlinkSync,
   realpathSync,
+  rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { homedir, hostname, userInfo } from "node:os";
@@ -36,6 +40,8 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
   hosts             which machine runs which project's host (hosts.json, by hostname)
   hosts sync        start and enable this machine's hosts and the console; stop and
                     disable the others
+  links             link the project folders that live in other repositories
+                    (links.json: name -> folder) into this directory
   hosts here <project...>
                     make those this machine's hosts, then sync
   <verb> ...        any other verb goes to the project's scripts/cli.ts
@@ -129,6 +135,92 @@ export function serveCommands(
       ? ["serve", "--bg", "--set-path", route.path, route.target]
       : ["serve", "--https=443", "--set-path", route.path, "off"],
   );
+}
+
+/** Projects whose folder lives in another repository (links.json: name -> folder):
+ * each is linked in here, so it joins this workspace beside the others. */
+export type Links = Record<string, string>;
+export function parseLinks(text: string): Links {
+  const value: unknown = JSON.parse(text);
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    !Object.values(value).every(
+      (folder) => typeof folder === "string" && folder.length > 0,
+    )
+  )
+    throw new Error("links.json maps each project name to its folder");
+  return value as Links;
+}
+/** What linking needs here: links to make, links to repoint, and what cannot be linked. */
+export function linkPlan(
+  links: Links,
+  here: (
+    name: string,
+  ) => { kind: "missing" } | { kind: "link"; to: string } | { kind: "other" },
+  exists: (folder: string) => boolean,
+): {
+  make: [string, string][];
+  repoint: [string, string][];
+  absent: [string, string][];
+  blocked: string[];
+} {
+  const plan = {
+    make: [] as [string, string][],
+    repoint: [] as [string, string][],
+    absent: [] as [string, string][],
+    blocked: [] as string[],
+  };
+  for (const [name, folder] of Object.entries(links)) {
+    const target = expand(folder);
+    const current = here(name);
+    if (!exists(target)) plan.absent.push([name, target]);
+    else if (current.kind === "missing") plan.make.push([name, target]);
+    else if (current.kind === "other") plan.blocked.push(name);
+    else if (current.to !== target) plan.repoint.push([name, target]);
+  }
+  return plan;
+}
+function linksCommand(): number {
+  const path = join(home, "links.json");
+  const links = existsSync(path) ? parseLinks(readFileSync(path, "utf8")) : {};
+  const plan = linkPlan(
+    links,
+    (name) => {
+      const at = join(home, name);
+      try {
+        const stat = lstatSync(at);
+        return stat.isSymbolicLink()
+          ? { kind: "link", to: resolve(home, readlinkSync(at)) }
+          : { kind: "other" };
+      } catch {
+        return { kind: "missing" };
+      }
+    },
+    existsSync,
+  );
+  for (const [name, target] of [...plan.make, ...plan.repoint]) {
+    rmSync(join(home, name), { force: true });
+    symlinkSync(target, join(home, name));
+    console.log(`linked ${name} -> ${target}`);
+  }
+  for (const [name, target] of plan.absent)
+    console.log(
+      `${name}: ${target} is not on this machine (clone its repository, then sbn links)`,
+    );
+  for (const name of plan.blocked)
+    console.error(
+      `${name}: ${join(home, name)} is a folder, not a link; move it away to link ${links[name]}`,
+    );
+  if (
+    !plan.make.length &&
+    !plan.repoint.length &&
+    !plan.absent.length &&
+    !plan.blocked.length
+  )
+    console.log("every linked project is in place");
+  return plan.blocked.length ? 1 : 0;
 }
 
 /** Which machine runs which projects' hosts: hosts.json, by hostname, in the dotfiles.
@@ -322,6 +414,7 @@ function main(argv: readonly string[]): number {
   const command = args.shift() ?? "tui";
   const all = projects();
   if (command === "hosts") return hostsCommand(args, all);
+  if (command === "links") return linksCommand();
   if (command === "list") {
     for (const project of all) {
       const state = spawnSync(

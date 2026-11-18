@@ -89,6 +89,11 @@ else
   echo "signalbox isn't built in ~/Projects/signalbox yet: run 'signalbox setup' once it is"
 fi
 
+print_info "Linking signalbox projects that live in other repositories..."
+# links.json (in the dotfiles) names each such project's folder; a repository not
+# cloned yet is reported, and the next sbn links picks it up.
+"$HOME/.local/bin/sbn" links || echo "sbn links failed; run it again"
+
 print_info "Starting this machine's signalbox hosts..."
 # hosts.json (in the dotfiles) names, by hostname, which projects' hosts run where.
 # A machine it does not name is left alone; add it with: sbn hosts here <project...>

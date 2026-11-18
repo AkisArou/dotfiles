@@ -1,3 +1,5 @@
 .signalbox/
 .cache/
 node_modules/
+# Projects that live in other repositories, linked in by sbn links (links.json).
+/nable
