@@ -8,7 +8,7 @@ importers:
 
   .: {}
 
-  ../../../../nable-solutions/signalbox:
+  ../../../../nable-solutions/tools/signalbox:
     dependencies:
       '@astryxdesign/core':
         specifier: 0.7.16
