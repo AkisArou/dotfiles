@@ -7,11 +7,11 @@ import { router } from "./router.tsx";
 import "@astryxdesign/core/reset.css";
 import "@astryxdesign/core/astryx.css";
 import "@astryxdesign/theme-neutral/theme.css";
-import "./theme.css";
+import "@signalbox/kit/web/theme.css";
 import { TerminalProvider } from "@signalbox/kit/shared/terminal";
 import { terminalUrl } from "signalbox/client/terminal";
 import { apiAddress } from "@signalbox/kit/shared/address";
-import { followAppHeight } from "./viewport.ts";
+import { followAppHeight } from "@signalbox/kit/web/viewport";
 
 declare const SIGNALBOX_API_URL: string;
 declare const SIGNALBOX_WEB_PORT: number;

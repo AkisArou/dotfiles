@@ -18,10 +18,10 @@ import {
   taskWord,
 } from "../../shared/model.ts";
 import { gaugeState } from "../../status/model.ts";
-import { Empty, Section, Status } from "../components.tsx";
+import { Empty, Section, Status } from "@signalbox/kit/web/components";
 import { viewPath } from "../project.ts";
-import { useNarrow } from "../narrow.ts";
-import { useOverlay } from "../overlay.ts";
+import { useNarrow } from "@signalbox/kit/web/narrow";
+import { useOverlay } from "@signalbox/kit/web/overlay";
 
 const SEVERITY = { red: 0, amber: 1, ok: 2 } as const;
 

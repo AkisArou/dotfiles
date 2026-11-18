@@ -7,11 +7,11 @@ import type { Project } from "../shared/use-project.ts";
 import { Shell } from "./app.tsx";
 import { useProjectContext } from "./project.ts";
 import { Now } from "./views/now.tsx";
-import { NeedsYou } from "./views/needs.tsx";
-import { Tasks } from "./views/tasks.tsx";
-import { AgentPanes, Sessions } from "./views/agents.tsx";
-import { Settings } from "./views/orchestration.tsx";
-import { Plan } from "./views/plan.tsx";
+import { NeedsYou } from "@signalbox/kit/web/views/needs";
+import { Tasks } from "@signalbox/kit/web/views/tasks";
+import { AgentPanes, Sessions } from "@signalbox/kit/web/views/agents";
+import { Settings } from "@signalbox/kit/web/views/orchestration";
+import { Plan } from "@signalbox/kit/web/views/plan";
 import { NtsHealth, NtsView } from "./views/nts.tsx";
 
 const text = (value: unknown) => (typeof value === "string" && value ? value : undefined);
