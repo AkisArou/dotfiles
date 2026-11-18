@@ -1,0 +1,51 @@
+#!/usr/bin/zsh
+# Wakes the desktop's Radeon RX 580 (1002:67df) when its monitor stays dark: runtime
+# power management can suspend the card while the monitor sleeps, and a suspended card
+# misses the monitor's hot-plug. This keeps the card awake until the next boot
+# (power/control=on), then asks each of its connectors to detect the monitor again.
+#   wake-gpu           wake it (asks for sudo)
+#   wake-gpu --status  show the card's power state and its connectors, change nothing
+
+emulate -L zsh
+setopt err_return no_unset
+
+local vendor=0x1002 device=0x67df
+local card=""
+for dir in /sys/bus/pci/devices/*; do
+  if [[ "$(<$dir/vendor)" == $vendor && "$(<$dir/device)" == $device ]]; then
+    card=$dir
+    break
+  fi
+done
+if [[ -z $card ]]; then
+  print -u2 "No Radeon RX 580 ($vendor:$device) on this machine"
+  return 1
+fi
+
+show() {
+  print "card ${card:t}: power/control $(<$card/power/control), runtime $(<$card/power/runtime_status)"
+  local connector
+  for connector in $card/drm/card*/card*-*(N); do
+    print "  ${connector:t}: $(<$connector/status)"
+  done
+}
+
+if [[ ${1:-} == --status ]]; then
+  show
+  return 0
+fi
+if [[ $# -gt 0 ]]; then
+  print -u2 "Usage: wake-gpu [--status]"
+  return 2
+fi
+
+show
+print on | sudo tee $card/power/control >/dev/null
+local connector
+for connector in $card/drm/card*/card*-*(N); do
+  print detect | sudo tee $connector/status >/dev/null
+done
+# The connectors report what they found once the card answers.
+sleep 1
+print "after:"
+show
