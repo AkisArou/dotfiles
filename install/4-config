@@ -89,6 +89,11 @@ else
   echo "signalbox isn't built in ~/Projects/signalbox yet: run 'signalbox setup' once it is"
 fi
 
+print_info "Starting this machine's signalbox hosts..."
+# hosts.json (in the dotfiles) names, by hostname, which projects' hosts run where.
+# A machine it does not name is left alone; add it with: sbn hosts here <project...>
+"$HOME/.local/bin/sbn" hosts sync || echo "sbn hosts sync failed; run it again once node and the user manager are up"
+
 print_info "Setting xdg default web browser..."
 ORIGINAL_BROWSER=$BROWSER
 unset BROWSER

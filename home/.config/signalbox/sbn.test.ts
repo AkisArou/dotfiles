@@ -47,3 +47,44 @@ test("sbn tailnet serves the page, its API and its terminals on the tailnet; off
     ["off", "off", "off"],
   );
 });
+
+test("a machine runs exactly the hosts hosts.json gives it: start what is missing, stop the rest", async () => {
+  const { hostPlan, parseHosts } = await import("./sbn.ts");
+  const known = ["nts", "nable"];
+  assert.deepEqual(
+    hostPlan(["nts"], { enabled: ["nts"], active: ["nts"] }, known),
+    {
+      enable: [],
+      disable: [],
+      unknown: [],
+    },
+  );
+  assert.deepEqual(
+    hostPlan(["nable"], { enabled: ["nts"], active: ["nts"] }, known),
+    {
+      enable: ["nable"],
+      disable: ["nts"],
+      unknown: [],
+    },
+  );
+  assert.deepEqual(
+    hostPlan(["nts", "nable"], { enabled: ["nts"], active: [] }, known).enable,
+    ["nts", "nable"],
+    "an enabled host that is not running is started",
+  );
+  assert.deepEqual(
+    hostPlan(["nts", "lab"], { enabled: [], active: [] }, known).unknown,
+    ["lab"],
+  );
+  assert.deepEqual(
+    parseHosts('{"arch-desktop":["nts"],"arch-laptop":["nable"]}'),
+    {
+      "arch-desktop": ["nts"],
+      "arch-laptop": ["nable"],
+    },
+  );
+  assert.throws(
+    () => parseHosts('{"arch-desktop":"nts"}'),
+    /maps each hostname to a list/,
+  );
+});

@@ -2,8 +2,14 @@
 // It finds the project from the current directory (each project's project.json
 // names its roots), and runs that project's host unit, TUI, browser and checks.
 import { spawnSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync, realpathSync } from "node:fs";
-import { homedir, userInfo } from "node:os";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from "node:fs";
+import { homedir, hostname, userInfo } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,6 +32,10 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
   tailnet [off]     serve the browser UI on your tailnet (tailscale serve), or stop
   doctor            the project's read-only prerequisites
   list              the projects and their hosts
+  hosts             which machine runs which project's host (hosts.json, by hostname)
+  hosts sync        start and enable this machine's hosts; stop and disable the others
+  hosts here <project...>
+                    make those this machine's hosts, then sync
   <verb> ...        any other verb goes to the project's scripts/cli.ts
                     (nts: show, assign, approve, return, message, rework, retry, cancel)
 
@@ -97,6 +107,146 @@ export function serveCommands(
   );
 }
 
+/** Which machine runs which projects' hosts: hosts.json, by hostname, in the dotfiles.
+ * A hostname is a label the owner chooses (hostnamectl): keep it generic and unique. */
+export type Hosts = Record<string, string[]>;
+const hostsPath = () => join(home, "hosts.json");
+export function parseHosts(text: string): Hosts {
+  const value: unknown = JSON.parse(text);
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    !Object.values(value).every(
+      (projects) =>
+        Array.isArray(projects) &&
+        projects.every((name) => typeof name === "string"),
+    )
+  )
+    throw new Error("hosts.json maps each hostname to a list of project names");
+  return value as Hosts;
+}
+const readHosts = (): Hosts =>
+  existsSync(hostsPath()) ? parseHosts(readFileSync(hostsPath(), "utf8")) : {};
+function writeHosts(hosts: Hosts): void {
+  const sorted = Object.fromEntries(
+    Object.keys(hosts)
+      .sort()
+      .map((name) => [name, [...new Set(hosts[name])].sort()]),
+  );
+  writeFileSync(hostsPath(), `${JSON.stringify(sorted, null, 2)}\n`);
+}
+
+/** What makes this machine run exactly `wanted`: hosts to start, and running or enabled ones to stop. */
+export function hostPlan(
+  wanted: readonly string[],
+  current: {
+    readonly enabled: readonly string[];
+    readonly active: readonly string[];
+  },
+  known: readonly string[],
+): { enable: string[]; disable: string[]; unknown: string[] } {
+  const unknown = wanted.filter((name) => !known.includes(name));
+  const want = wanted.filter((name) => known.includes(name));
+  const running = new Set([...current.enabled, ...current.active]);
+  return {
+    enable: want.filter(
+      (name) =>
+        !current.enabled.includes(name) || !current.active.includes(name),
+    ),
+    disable: [...running].filter((name) => !want.includes(name)).sort(),
+    unknown,
+  };
+}
+
+/** This machine's signalbox host instances, enabled or running. */
+function hostUnits(): { enabled: string[]; active: string[] } {
+  const names = (args: string[]) =>
+    spawnSync(
+      "systemctl",
+      ["--user", ...args, "signalbox@*.service", "--no-legend", "--plain"],
+      {
+        encoding: "utf8",
+      },
+    )
+      .stdout.split("\n")
+      .map((line) => /^signalbox@([^.\s]+)\.service/.exec(line.trim())?.[1])
+      .filter((name): name is string => Boolean(name));
+  return {
+    enabled: names(["list-unit-files", "--state=enabled"]),
+    active: names(["list-units", "--state=active"]),
+  };
+}
+
+function hostsCommand(
+  args: readonly string[],
+  all: readonly Project[],
+): number {
+  const machine = hostname();
+  const known = all.map((project) => project.name);
+  const [verb, ...rest] = args;
+  if (verb === "here") {
+    if (!rest.length)
+      throw new Error("hosts here needs the projects this machine runs");
+    const unknown = rest.filter((name) => !known.includes(name));
+    if (unknown.length)
+      throw new Error(
+        `No project ${unknown.join(", ")}; projects: ${known.join(", ")}`,
+      );
+    writeHosts({ ...readHosts(), [machine]: [...rest] });
+    console.log(`${machine} runs ${rest.join(", ")} (hosts.json)`);
+    return hostsCommand(["sync"], all);
+  }
+  const hosts = readHosts();
+  if (verb === "sync") {
+    const wanted = hosts[machine];
+    if (!wanted) {
+      console.log(
+        `${machine} is not in hosts.json: nothing changed. Choose its hosts with sbn hosts here <project...>.`,
+      );
+      return 0;
+    }
+    const plan = hostPlan(wanted, hostUnits(), known);
+    for (const name of plan.unknown)
+      console.error(`hosts.json names ${name}, which is not a project here`);
+    for (const name of plan.enable) {
+      const code = run("systemctl", [
+        "--user",
+        "enable",
+        "--now",
+        `signalbox@${name}`,
+      ]);
+      if (code !== 0) return code;
+      console.log(`started and enabled signalbox@${name}`);
+    }
+    for (const name of plan.disable) {
+      const code = run("systemctl", [
+        "--user",
+        "disable",
+        "--now",
+        `signalbox@${name}`,
+      ]);
+      if (code !== 0) return code;
+      console.log(
+        `stopped and disabled signalbox@${name} (not this machine's)`,
+      );
+    }
+    if (!plan.enable.length && !plan.disable.length)
+      console.log(`${machine} already runs exactly ${wanted.join(", ")}`);
+    return plan.unknown.length ? 1 : 0;
+  }
+  if (verb !== undefined)
+    throw new Error(`Unknown hosts command ${verb}\n\n${HELP}`);
+  const units = hostUnits();
+  for (const [name, projects] of Object.entries(hosts))
+    console.log(
+      `${name === machine ? "* " : "  "}${name}\t${projects.join(", ")}`,
+    );
+  if (!hosts[machine]) console.log(`* ${machine}\t(not in hosts.json)`);
+  console.log(`running here: ${units.active.join(", ") || "none"}`);
+  return 0;
+}
+
 function run(
   command: string,
   args: readonly string[],
@@ -136,6 +286,7 @@ function main(argv: readonly string[]): number {
     api = option("--api");
   const command = args.shift() ?? "tui";
   const all = projects();
+  if (command === "hosts") return hostsCommand(args, all);
   if (command === "list") {
     for (const project of all) {
       const state = spawnSync(
