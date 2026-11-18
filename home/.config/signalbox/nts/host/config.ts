@@ -14,7 +14,7 @@ import { gitHub } from "../orchestration/github.ts";
 /** The nts host; `origins` are the console's pages that may call it. */
 export function createNtsProject(
   settings: NtsConfig,
-  served: { readonly origins: readonly string[] },
+  served: { readonly origins: () => readonly string[] },
 ) {
   const planPath = join(settings.root, settings.plan);
   const plan = () => readFile(planPath, "utf8");

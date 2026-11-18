@@ -63,7 +63,7 @@ test("NTS application reads GitHub and plan, exposes real failures and no simula
       discoverTerminals: false,
       issueIntervalMs: 60_000,
     };
-    host = await startHost(createNtsProject(settings, { origins: [] }), {
+    host = await startHost(createNtsProject(settings, { origins: () => [] }), {
       stateDirectory: settings.state,
     });
     client = await connectClient({ url: `ws://127.0.0.1:${port}/rpc` });
