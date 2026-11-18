@@ -11,6 +11,9 @@ export type TableCell =
       readonly bold?: boolean;
       /** The issue the cell is about: a page may open it. */
       readonly issue?: number;
+      /** A trend, oldest first (null where a run had none): the web draws it as a line;
+       * the text says it in glyphs for the terminal. */
+      readonly series?: readonly (number | null)[];
     };
 export type TableRow = Readonly<Record<string, TableCell>>;
 export type Table = {

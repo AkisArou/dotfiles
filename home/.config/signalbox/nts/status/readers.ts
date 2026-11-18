@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { readFile, stat } from "node:fs/promises";
 import { benchmarkReport, conformanceCommits, conformanceReport } from "./records.ts";
+import { benchmarkHistory } from "./bench-history.ts";
 import type { BenchmarksSummary, ConformanceSummary } from "./records.ts";
 import { machineReport } from "./machine.ts";
 import type { LedgerStatus } from "./machine.ts";
@@ -44,6 +45,9 @@ export function liveReaders(
           [2],
           "benchmarks",
         ),
+        Date.now(),
+        // Progress across the newest complete runs (each run file read once).
+        await benchmarkHistory(root),
       );
     },
     async Conformance() {

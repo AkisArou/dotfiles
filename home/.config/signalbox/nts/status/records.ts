@@ -1,5 +1,7 @@
 // NTS benchmark and conformance projections, ported from ~/.config/signalbox/nts/records.ts.
 import type { Gauge, Report, Table, TableCell } from "./model.ts";
+import { caseProgress, changesTable, progressTable, regressionCount } from "./bench-history.ts";
+import type { Run } from "./bench-history.ts";
 
 type Backend = "c" | "llvm" | "jvm";
 const BACKENDS: readonly Backend[] = ["c", "llvm", "jvm"];
@@ -108,7 +110,13 @@ interface CensusTotals {
 
 export const BENCHMARKS = "nts-benchmarks";
 export const CONFORMANCE = "nts-conformance";
-export const BENCHMARK_TABLES = ["bench-run", "bench-counts", "bench-rows"];
+export const BENCHMARK_TABLES = [
+  "bench-progress",
+  "bench-changes",
+  "bench-run",
+  "bench-counts",
+  "bench-rows",
+];
 export const CONFORMANCE_TABLES = ["conformance-suite", "conformance"];
 
 const DAY = 86_400_000;
@@ -221,7 +229,7 @@ function countsTable(summary: BenchmarksSummary): Table {
 }
 
 /** Every case, worst first: each backend's ratio to node, C's to Bun AOT and ScriptC, and which are slower than their own best. */
-function rowsTable(summary: BenchmarksSummary): Table {
+function rowsTable(summary: BenchmarksSummary, runs: readonly Run[] = []): Table {
   const worst = (row: BenchmarksSummary["rows"][number]) =>
     Math.max(...BACKENDS.map((backend) => row.backends[backend]?.versus.node?.ratio ?? 0));
   return {
@@ -230,7 +238,15 @@ function rowsTable(summary: BenchmarksSummary): Table {
     key: "case",
     columns: [
       { key: "case", label: "case" },
-      ...BACKENDS.map((backend) => ({
+      { key: "c", label: "C/node", align: "right" as const },
+      ...(runs.length
+        ? [
+            { key: "noise", label: "C noise", align: "right" as const },
+            { key: "since", label: "C change", align: "right" as const },
+            { key: "trend", label: `C/node, last ${runs.length} runs` },
+          ]
+        : []),
+      ...BACKENDS.filter((backend) => backend !== "c").map((backend) => ({
         key: backend,
         label: `${NAME[backend]}/node`,
         align: "right" as const,
@@ -245,11 +261,29 @@ function rowsTable(summary: BenchmarksSummary): Table {
         const slower = BACKENDS.filter((backend) => row.backends[backend]?.slowerThanBest).map(
           (backend) => NAME[backend],
         );
+        const progress = runs.length ? caseProgress(runs, row.name) : undefined;
+        const change = progress?.change;
         return {
           case: row.name,
           ...Object.fromEntries(
             BACKENDS.map((backend) => [backend, ratioCell(row.backends[backend]?.versus.node)]),
           ),
+          ...(runs.length
+            ? {
+                noise: progress?.band ?? "—",
+                since: change
+                  ? {
+                      text: `${change.factor >= 1 ? "+" : "−"}${Math.abs((change.factor - 1) * 100).toFixed(1)}%`,
+                      ...(change.beyondNoise
+                        ? { color: change.factor > 1 ? ("red" as const) : ("green" as const) }
+                        : { color: "gray" as const }),
+                    }
+                  : "—",
+                trend: progress?.trend
+                  ? { text: progress.trend, color: "cyan" as const, series: progress.series }
+                  : "",
+              }
+            : {}),
           aot: ratioCell(row.backends.c?.versus["Bun AOT"]),
           scriptc: ratioCell(row.backends.c?.versus.ScriptC),
           slower: slower.length ? { text: slower.join(", "), color: "yellow" } : "",
@@ -588,10 +622,42 @@ export function conformanceGauges(
   ];
 }
 
-export function benchmarkReport(summary: BenchmarksSummary, now = Date.now()): Report {
+/**
+ * The benchmarks page: progress across the newest complete runs first (against each
+ * comparator, and what changed since the last run beyond its noise), then the newest
+ * run's identity, its verdict counts, and each case with its noise and trend.
+ */
+export function benchmarkReport(
+  summary: BenchmarksSummary,
+  now = Date.now(),
+  runs: readonly Run[] = [],
+): Report {
+  const progress = progressTable(runs);
+  const changed = changesTable(runs);
+  const regressions = regressionCount(runs);
   return {
-    tables: [runTable(summary, now), countsTable(summary), rowsTable(summary)],
-    gauges: benchmarkGauges(summary, now),
+    tables: [
+      ...(progress ? [progress] : []),
+      ...(changed ? [changed] : []),
+      runTable(summary, now),
+      countsTable(summary),
+      rowsTable(summary, runs),
+    ],
+    gauges: [
+      ...benchmarkGauges(summary, now),
+      ...(regressions === undefined
+        ? []
+        : [
+            {
+              id: "bench-regressions",
+              label: "cases slower than the last run, beyond their noise",
+              section: "benchmarks",
+              value: regressions,
+              limits: { amber: 1, red: 10, worse: "higher" as const },
+              why: "per case and backend, nts's own time between the two newest complete runs",
+            },
+          ]),
+    ],
   };
 }
 export function conformanceReport(

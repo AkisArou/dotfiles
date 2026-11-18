@@ -13,10 +13,71 @@ import type { Project } from "../../shared/use-project.ts";
 import { Empty, ResponsiveTable, Section, Status } from "@signalbox/kit/web/components";
 import { useOverlay } from "@signalbox/kit/web/overlay";
 
+/** A trend as a small line: lower is drawn lower, gaps where a run had no value, and a
+ * dot on the newest. */
+function Trend({ values, label }: { values: readonly (number | null)[]; label: string }) {
+  const present = values.filter((value): value is number => value !== null);
+  if (present.length < 2) return <span title={label}>{label}</span>;
+  const width = 104;
+  const height = 22;
+  const pad = 3;
+  const low = Math.min(...present);
+  const high = Math.max(...present);
+  const x = (index: number) => pad + (index * (width - 2 * pad)) / Math.max(1, values.length - 1);
+  const y = (value: number) =>
+    high === low ? height / 2 : height - pad - ((value - low) / (high - low)) * (height - 2 * pad);
+  const segments: string[] = [];
+  let current = "";
+  values.forEach((value, index) => {
+    if (value === null) {
+      if (current) segments.push(current);
+      current = "";
+      return;
+    }
+    current += `${current ? "L" : "M"}${x(index).toFixed(1)},${y(value).toFixed(1)}`;
+  });
+  if (current) segments.push(current);
+  const lastIndex = values.findLastIndex((value) => value !== null);
+  const last = values[lastIndex] as number;
+  return (
+    <svg
+      className="nts-trend"
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      role="img"
+      aria-label={label}
+    >
+      <title>{label}</title>
+      {segments.map((path) => (
+        <path
+          key={path}
+          d={path}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.6}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      ))}
+      <circle cx={x(lastIndex)} cy={y(last)} r={2.6} fill="currentColor" />
+    </svg>
+  );
+}
+
 function Cell({ value }: { value: TableCell | undefined }) {
   const overlay = useOverlay();
   const style = value && typeof value === "object" ? value : undefined;
   const text = cellText(value);
+  if (style?.series)
+    return (
+      <span className={style.color ? `nts-${style.color}` : undefined}>
+        <Trend
+          values={style.series}
+          label={style.series.map((each) => (each === null ? "—" : each.toFixed(2))).join(" → ")}
+        />
+      </span>
+    );
   // A cell about an issue opens it, as a task does anywhere.
   if (style?.issue)
     return (
