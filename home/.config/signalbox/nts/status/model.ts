@@ -28,6 +28,8 @@ export type Table = {
   readonly key?: string;
   readonly facts?: readonly (readonly [string, string])[];
   readonly at?: number;
+  /** A row's own table, by the row's key: what its details show (a case's runs). */
+  readonly details?: Readonly<Record<string, Table>>;
 };
 export type Gauge = {
   readonly id: string;

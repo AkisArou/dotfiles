@@ -398,6 +398,12 @@ export function changesTable(runs: readonly Run[]): Table | undefined {
         node: ratio === undefined ? "—" : ratio.toFixed(2),
       };
     }),
+    details: Object.fromEntries(
+      found.flatMap((each) => {
+        const history = caseHistoryTable(runs, each.name);
+        return history ? [[`${each.name} (${each.backend})`, history]] : [];
+      }),
+    ),
     facts: [
       ["compared", `${shortId(previous)} → ${shortId(latest)}`],
       [
@@ -441,4 +447,62 @@ export function regressionCount(runs: readonly Run[]): number | undefined {
   const previous = runs.at(-2);
   if (!latest || !previous) return undefined;
   return changes(runs).filter((each) => each.change > 1).length;
+}
+
+/**
+ * One case's runs, newest first: the real times and the harness's ratios each run
+ * recorded. A run whose workload differs from the newest says so: its numbers are of
+ * another program.
+ */
+export function caseHistoryTable(runs: readonly Run[], name: string): Table | undefined {
+  const latest = runs.at(-1)?.cases.get(name);
+  if (!latest) return undefined;
+  const ratio = (each: RunCase, column: string, comparator: string): TableCell => {
+    const value = each.versus[column]?.[comparator]?.ratio;
+    return value === undefined ? "—" : value.toFixed(2);
+  };
+  const time = (each: RunCase, column: string): TableCell => {
+    const value = each.times[column];
+    return value ? `${nanoseconds(value.ns)} ${band(value.spread)}` : "—";
+  };
+  const rows = [...runs].reverse().flatMap((run) => {
+    const each = run.cases.get(name);
+    if (!each) return [];
+    const other = each.workload !== latest.workload;
+    return [
+      {
+        run: other
+          ? { text: `${run.startedAt.slice(0, 10)} (another workload)`, color: "gray" as const }
+          : run.startedAt.slice(0, 10),
+        commit: run.commit.slice(0, 12),
+        c: time(each, "nts C"),
+        node: time(each, "node"),
+        cNode: ratio(each, "nts C", "node"),
+        llvmNode: ratio(each, "nts LLVM", "node"),
+        jvmNode: ratio(each, "nts JVM", "node"),
+        cAot: ratio(each, "nts C", "Bun AOT"),
+        cScriptc: ratio(each, "nts C", "ScriptC"),
+        cpp: time(each, "C++"),
+      },
+    ];
+  });
+  return {
+    id: `bench-case/${name}`,
+    title: `${name}: its last ${rows.length} runs, newest first`,
+    key: "run",
+    columns: [
+      { key: "run", label: "run" },
+      { key: "commit", label: "compiler" },
+      { key: "c", label: "C time", align: "right" },
+      { key: "node", label: "node time", align: "right" },
+      { key: "cNode", label: "C/node", align: "right" },
+      { key: "llvmNode", label: "LLVM/node", align: "right" },
+      { key: "jvmNode", label: "JVM/node", align: "right" },
+      { key: "cAot", label: "C/Bun AOT", align: "right" },
+      { key: "cScriptc", label: "C/ScriptC", align: "right" },
+      { key: "cpp", label: "C++ time", align: "right" },
+    ],
+    rows,
+    facts: [["times", "nanoseconds per operation, with each run's own spread"]],
+  };
 }

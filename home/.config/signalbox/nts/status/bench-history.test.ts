@@ -110,3 +110,23 @@ test("against each comparator: the geometric mean now, last run, the change and 
   assert.equal(cellText(row.trend), "█▁");
   assert.equal(sparkline([3, undefined, 1]), "█ ▁");
 });
+
+test("a case's runs, newest first, with real times and ratios; another workload says so", async () => {
+  const { caseHistoryTable } = await import("./bench-history.ts");
+  const runs = [
+    run(1, 1, { a: 200 }, { a: "w-old" }),
+    run(2, 1, { a: 125 }),
+    run(3, 1, { a: 100 }),
+  ];
+  const table = caseHistoryTable(runs, "a")!;
+  assert.equal(table.title, "a: its last 3 runs, newest first");
+  assert.deepEqual(
+    table.rows.map((row) => [cellText(row.run), cellText(row.c), cellText(row.cNode)]),
+    [
+      ["2026-11-03", "100.0 ns ±1.0%", "0.40"],
+      ["2026-11-02", "125.0 ns ±1.0%", "0.50"],
+      ["2026-11-01 (another workload)", "200.0 ns ±1.0%", "0.80"],
+    ],
+  );
+  assert.equal(caseHistoryTable(runs, "missing"), undefined);
+});

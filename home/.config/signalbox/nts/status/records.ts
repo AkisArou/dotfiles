@@ -1,6 +1,12 @@
 // NTS benchmark and conformance projections, ported from ~/.config/signalbox/nts/records.ts.
 import type { Gauge, Report, Table, TableCell } from "./model.ts";
-import { caseProgress, changesTable, progressTable, regressionCount } from "./bench-history.ts";
+import {
+  caseHistoryTable,
+  caseProgress,
+  changesTable,
+  progressTable,
+  regressionCount,
+} from "./bench-history.ts";
 import type { Run } from "./bench-history.ts";
 
 type Backend = "c" | "llvm" | "jvm";
@@ -255,6 +261,17 @@ function rowsTable(summary: BenchmarksSummary, runs: readonly Run[] = []): Table
       { key: "scriptc", label: "C/ScriptC", align: "right" },
       { key: "slower", label: "slower than its best" },
     ],
+    // Enter on a case shows its last runs.
+    ...(runs.length
+      ? {
+          details: Object.fromEntries(
+            summary.rows.flatMap((row) => {
+              const history = caseHistoryTable(runs, row.name);
+              return history ? [[row.name, history]] : [];
+            }),
+          ),
+        }
+      : {}),
     rows: [...summary.rows]
       .sort((a, b) => worst(b) - worst(a))
       .map((row) => {

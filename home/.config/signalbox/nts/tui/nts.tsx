@@ -57,7 +57,7 @@ function DataTable({
   table: Table;
   width: number;
   selected?: string;
-  onSelect(id: string): void;
+  onSelect?(id: string): void;
 }) {
   const selection = useSelection(),
     widths = columnWidths(table, width);
@@ -93,7 +93,7 @@ function DataTable({
             gap={2}
             height={1}
             flexShrink={0}
-            onMouseDown={() => onSelect(item.id)}
+            onMouseDown={() => onSelect?.(item.id)}
           >
             {table.columns.map((column, index) => {
               const value = item.row[column.key],
@@ -185,6 +185,11 @@ export function NtsContent({
           {row.table.facts?.map(([label, value]) => (
             <Line key={label}>{`${label}: ${value}`}</Line>
           ))}
+          {/* A row with its own table (a benchmark case's runs) shows it under its cells. */}
+          {(() => {
+            const own = row.table.key && row.table.details?.[cellText(row.row[row.table.key])];
+            return own ? <DataTable table={own} width={width} /> : null;
+          })()}
         </Section>
       ) : (
         report.tables.map((table) => (
