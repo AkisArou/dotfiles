@@ -46,6 +46,11 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
   sdk               build the Signalbox SDK checkout's packages (~/Projects/signalbox, or
                     SIGNALBOX_SDK), then install the projects: each one's copy of the SDK
                     is the build's
+  update [--no-pull]
+                    after pulling, or to pull: fast-forward the dotfiles, the SDK and the
+                    linked projects' repositories (one with local changes or its own
+                    commits is left as it is), sbn sdk, reload the units, and restart
+                    this machine's hosts and the console
   hosts here <project...>
                     make those this machine's hosts, then sync
   <verb> ...        any other verb goes to the project's scripts/cli.ts
@@ -246,6 +251,68 @@ function sdkCommand(): number {
     }
   }
   return 0;
+}
+
+/** The repositories sbn update pulls: each folder's repository, once (a missing folder has none). */
+export function updateRepositories(
+  folders: readonly string[],
+  toplevel: (folder: string) => string | undefined,
+): string[] {
+  return [
+    ...new Set(
+      folders.flatMap((folder) => {
+        const top = toplevel(folder);
+        return top ? [top] : [];
+      }),
+    ),
+  ];
+}
+
+/**
+ * Brings this machine's Signalbox to its checkouts: pulls them (fast-forward only), builds
+ * the SDK and installs the projects, reloads the units, and restarts what runs here. A
+ * host or console that is stopped stays stopped.
+ */
+function updateCommand(args: readonly string[]): number {
+  const sdk = expand(process.env.SIGNALBOX_SDK ?? "~/Projects/signalbox");
+  const git = (cwd: string, gitArgs: readonly string[]) =>
+    spawnSync("git", ["-C", cwd, ...gitArgs], { encoding: "utf8" });
+  if (!args.includes("--no-pull")) {
+    const linksPath = join(home, "links.json");
+    const links = existsSync(linksPath)
+      ? parseLinks(readFileSync(linksPath, "utf8"))
+      : {};
+    const repositories = updateRepositories(
+      [home, sdk, ...Object.values(links).map(expand)],
+      (folder) =>
+        existsSync(folder)
+          ? git(folder, ["rev-parse", "--show-toplevel"]).stdout.trim() ||
+            undefined
+          : undefined,
+    );
+    for (const repository of repositories) {
+      if (git(repository, ["status", "--porcelain"]).stdout.trim()) {
+        console.log(`${repository}: has local changes, not pulled`);
+        continue;
+      }
+      const pulled = git(repository, ["pull", "--ff-only", "--quiet"]);
+      console.log(
+        pulled.status === 0
+          ? `${repository}: pulled`
+          : `${repository}: not pulled (${(pulled.stderr || pulled.stdout).trim().split("\n")[0] || "no fast-forward"})`,
+      );
+    }
+  }
+  const built = sdkCommand();
+  if (built !== 0) return built;
+  run("systemctl", ["--user", "daemon-reload"]);
+  const units = [
+    ...(readHosts()[hostname()] ?? []).map((name) => `signalbox@${name}`),
+    "signalbox-console",
+  ];
+  const restarted = run("systemctl", ["--user", "try-restart", ...units]);
+  console.log(`restarted what runs here, of: ${units.join(", ")}`);
+  return restarted;
 }
 
 function linksCommand(): number {
@@ -499,6 +566,7 @@ function main(argv: readonly string[]): number {
   if (command === "hosts") return hostsCommand(args, all);
   if (command === "links") return linksCommand();
   if (command === "sdk") return sdkCommand();
+  if (command === "update") return updateCommand(args);
   if (command === "list") {
     for (const project of all) {
       const state = spawnSync(

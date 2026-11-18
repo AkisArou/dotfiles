@@ -190,3 +190,20 @@ test("sbn's projects are its folders and its links to folders elsewhere, each wi
     rmSync(elsewhere, { recursive: true, force: true });
   }
 });
+
+test("sbn update pulls each folder's repository once, and nothing for a folder that is not there", async () => {
+  const { updateRepositories } = await import("./sbn.ts");
+  const tops: Record<string, string> = {
+    "/home/me/dotfiles/home/.config/signalbox": "/home/me/dotfiles",
+    "/home/me/Projects/signalbox": "/home/me/Projects/signalbox",
+    "/home/me/nable/tools/signalbox": "/home/me/nable",
+    "/home/me/dotfiles/home/.config/signalbox/other": "/home/me/dotfiles",
+  };
+  assert.deepEqual(
+    updateRepositories(
+      [...Object.keys(tops), "/home/me/not-cloned"],
+      (folder) => tops[folder],
+    ),
+    ["/home/me/dotfiles", "/home/me/Projects/signalbox", "/home/me/nable"],
+  );
+});

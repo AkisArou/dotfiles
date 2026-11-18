@@ -7,11 +7,48 @@ one command for all of them.
 | Path                     | What                                                                |
 | ------------------------ | ------------------------------------------------------------------- |
 | `nts/`                   | NTS: its config, orchestration, status readers, TUI and its pages   |
+| `nable` (a link)         | Nable FrontEnd: `tools/signalbox` in the nable-solutions repository |
 | `console/`               | the console: every project's pages and notifications in one web app |
 | `hosts.json`             | which machine runs which project's host, by hostname                |
 | `<project>/project.json` | name, title, roots, API port, whether its coordinator runs          |
 | `sbn.ts`                 | the CLI (`~/.local/bin/sbn`)                                        |
 | `pnpm-workspace.yaml`    | the workspace, the SDK's injected copy and its patch                |
+| `links.json`             | projects that live in other repositories: name -> folder            |
+| `.tool-versions`         | the Node every project and sbn run on (26), whatever a repo pins    |
+
+## On a new machine
+
+The dotfiles' install (`install/4-config`) turns on lingering (user units run
+without a login), installs Node with asdf, clones the SDK to
+`~/Projects/signalbox`, links the projects that live elsewhere (`sbn links`),
+builds the SDK and installs the projects (`sbn sdk`), and starts this machine's
+hosts and the console (`sbn hosts sync`). Then, once, by hand:
+
+1. Clone each linked project's repository where `links.json` says
+   (nable-solutions at `~/nable-solutions`), then `sbn update --no-pull`.
+2. Copy each project's secrets from a machine that has them, e.g. nable's:
+   `scp -rp <machine>:.config/nable ~/.config/ && chmod -R go-rwx ~/.config/nable`.
+3. `sbn doctor --project <name>` for each project: every ✗ says how to fix it.
+4. Choose this machine's hosts: `sbn hosts here <project...>`, and commit
+   `hosts.json`.
+5. For the console on your other devices: `sbn tailnet`.
+
+## After pulling: sbn update
+
+`sbn update` is the one command after any change to the dotfiles, the SDK or a
+linked project: it fast-forwards those repositories (one with local changes or
+its own commits is left as it is, and said), builds the SDK and installs the
+projects (`sbn sdk`), reloads the units, and restarts this machine's hosts and
+the console (a stopped one stays stopped). `sbn update --no-pull` does the same
+after pulling by hand. Agents' sessions outlive the restart.
+
+## What runs where
+
+Everything is a user unit, so a sway or i3 session starts nothing for
+Signalbox: `signalbox@<project>` for each host `hosts.json` gives this machine,
+and `signalbox-console` for the web app. Agents run in tmux, each in its own
+systemd scope. To look: `sbn` (the terminal app), `sbn web` (the console),
+`sbn logs` (a host's log).
 
 ## sbn
 
@@ -26,6 +63,8 @@ sbn status          # the host unit and the project's assignments
 sbn start | stop | restart | enable | disable   # signalbox@<project>
 sbn logs            # follow the host's log
 sbn doctor          # read-only prerequisites
+sbn update          # pull, build the SDK, install, restart what runs here
+sbn sdk             # build the SDK and install the projects (no pull, no restart)
 sbn list            # every project and its host
 sbn --api ws://127.0.0.1:4321/rpc   # the TUI (or any verb) on another host, e.g. a pilot
 ```
@@ -59,5 +98,8 @@ whose session ended, briefed from the assignment's state.
 
 Copy `nts/` as a starting point, give its `project.json` a new name, roots and
 ports, add it to nothing else (the workspace includes every folder), run
-`pnpm install` here, then `sbn --project <name> start`. State, tmux sockets
+`sbn sdk`, then `sbn --project <name> start`. A project kept in its own
+repository goes in `links.json` instead (`sbn links` links it and lists it in the
+workspace); run its scripts with `node --run`, since pnpm inside another
+repository takes that repository's workspace. State, tmux sockets
 and agents are per project root, so two hosts never share them.
