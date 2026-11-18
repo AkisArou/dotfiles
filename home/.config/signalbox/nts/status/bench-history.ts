@@ -5,6 +5,9 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 import type { Color, Table, TableCell } from "./model.ts";
+import { trendText } from "./trend.ts";
+
+export { seriesRange, sparkline, trendText } from "./trend.ts";
 
 export const BACKENDS = [
   ["c", "C", "nts C"],
@@ -111,23 +114,6 @@ const geomean = (values: readonly number[]) =>
 const percent = (factor: number) =>
   `${factor >= 1 ? "+" : "−"}${Math.abs((factor - 1) * 100).toFixed(1)}%`;
 const band = (spread: number) => `±${((spread - 1) * 100).toFixed(1)}%`;
-const BARS = "▁▂▃▄▅▆▇█";
-/** A series as bars, lowest to highest (lower is better for every series here). */
-export function sparkline(values: readonly (number | undefined)[]): string {
-  const present = values.filter(
-    (value): value is number => value !== undefined && Number.isFinite(value),
-  );
-  if (!present.length) return "";
-  const low = Math.min(...present);
-  const high = Math.max(...present);
-  return values
-    .map((value) =>
-      value === undefined || !Number.isFinite(value)
-        ? " "
-        : BARS[high === low ? 3 : Math.round(((value - low) / (high - low)) * (BARS.length - 1))]!,
-    )
-    .join("");
-}
 const shortId = (run: Run) => `${run.startedAt.slice(0, 10)} ${run.commit.slice(0, 12)}`;
 
 /** A case ran the same workload in both runs: only then are its times comparable. */
@@ -195,7 +181,7 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
         before: Number.isFinite(before) ? before.toFixed(2) : "—",
         change: Number.isFinite(change) ? cell(percent(change), color) : "—",
         trend: {
-          text: sparkline(trend),
+          text: trendText(trend),
           color: "cyan" as const,
           series: trend.map((value) => (Number.isFinite(value) ? value : null)),
         },
@@ -438,7 +424,7 @@ export function caseProgress(runs: readonly Run[], name: string) {
             factor,
             beyondNoise: noise !== undefined && (factor > noise || factor < 1 / noise),
           },
-    trend: sparkline(runs.map(ratio)),
+    trend: trendText(runs.map(ratio)),
     series: runs.map((run) => ratio(run) ?? null),
   };
 }

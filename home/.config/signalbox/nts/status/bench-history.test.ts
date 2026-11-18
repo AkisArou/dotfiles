@@ -107,7 +107,7 @@ test("against each comparator: the geometric mean now, last run, the change and 
   assert.equal(cellText(row.now), "0.63");
   assert.equal(cellText(row.before), "0.71");
   assert.equal(cellText(row.change), "−10.6%");
-  assert.equal(cellText(row.trend), "█▁");
+  assert.equal(cellText(row.trend), "█▁ 0.63–0.71", "the glyphs and the range they span");
   assert.equal(sparkline([3, undefined, 1]), "█ ▁");
 });
 

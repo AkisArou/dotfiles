@@ -9,6 +9,7 @@ import { ntsPages, gaugeState, cellText } from "../../status/model.ts";
 import { gaugeTone } from "@signalbox/kit/shared/protocol";
 import type { NtsPage, Reading, TableCell } from "../../status/model.ts";
 import { reportOf } from "../../status/use-nts.ts";
+import { seriesRange } from "../../status/trend.ts";
 import type { Project } from "../../shared/use-project.ts";
 import { Empty, ResponsiveTable, Section, Status } from "@signalbox/kit/web/components";
 import { useOverlay } from "@signalbox/kit/web/overlay";
@@ -71,11 +72,13 @@ function Cell({ value }: { value: TableCell | undefined }) {
   const text = cellText(value);
   if (style?.series)
     return (
-      <span className={style.color ? `nts-${style.color}` : undefined}>
+      <span className={`nts-trend-cell${style.color ? ` nts-${style.color}` : ""}`}>
         <Trend
           values={style.series}
           label={style.series.map((each) => (each === null ? "—" : each.toFixed(2))).join(" → ")}
         />
+        {/* Drawn to its own range: the range says how far it really moved. */}
+        <span className="nts-trend-range">{seriesRange(style.series)}</span>
       </span>
     );
   // A cell about an issue opens it, as a task does anywhere.
