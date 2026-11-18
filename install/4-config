@@ -21,6 +21,8 @@ sudo systemctl enable --now systemd-timesyncd.service
 sudo systemctl enable --now iwd
 sudo systemctl enable --now bluetooth
 sudo systemctl enable --now sshd
+# Removes the old kernels' modules that kernel-modules-hook kept, once they are not running.
+sudo systemctl enable linux-modules-cleanup.service
 sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now power-profiles-daemon
 sudo systemctl enable --now performance.service

@@ -80,6 +80,7 @@ packages=(
   "iwd"
   "jq"
   "just"
+  "kernel-modules-hook" # Keeps the running kernel's modules after an upgrade (tun for Tailscale, until a reboot)
   "kitty"
   "lazydocker"
   "lazygit"
