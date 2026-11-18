@@ -16,7 +16,7 @@ import {
   keysOf,
   matches,
   taskFacets,
-} from "../../shared/filters.ts";
+} from "@signalbox/kit/shared/filters";
 import {
   assignmentTone,
   issueStateTerm,

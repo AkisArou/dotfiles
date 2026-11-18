@@ -1,119 +1,15 @@
-import { useCallback, useState } from "react";
-import { useCommand, useConnection, useSource } from "signalbox/client/react";
-import type { RemoteReading } from "signalbox/core/remote";
-import { claimedIssues } from "./claims.ts";
-import * as refs from "./model.ts";
+// nts's project data: the kit's, with its status pages' readings. Their trees (Machine)
+// and landings (Landing) are work on issues too, so they mark issues in progress.
+import { useProject as useKitProject } from "@signalbox/kit/shared/use-project";
 import { useNts } from "../status/use-nts.ts";
 
-export function current<T>(reading: RemoteReading<T>): T | undefined {
-  return reading.status === "ready"
-    ? reading.value
-    : reading.status === "error"
-      ? reading.previous
-      : undefined;
-}
+export { current } from "@signalbox/kit/shared/use-project";
+
 export function useProject() {
   const nts = useNts();
-  const connection = useConnection();
-  const overview = useSource(refs.overview),
-    issues = useSource(refs.issues),
-    agents = useSource(refs.agents),
-    plan = useSource(refs.plan),
-    labels = useSource(refs.labels);
-  const terminalPrograms = useSource(refs.terminalPrograms);
-  const startTerminal = useCommand(refs.startTerminal);
-  const settings = useSource(refs.settings),
-    assignments = useSource(refs.assignments),
-    needs = useSource(refs.needs);
-  const setSettings = useCommand(refs.setSettings),
-    pauseTasks = useCommand(refs.pauseTasks),
-    resumeTasks = useCommand(refs.resumeTasks);
-  const setAvailability = useCommand(refs.setAvailability),
-    assignTask = useCommand(refs.assignTask),
-    cancelAssignment = useCommand(refs.cancelAssignment),
-    answerQuestion = useCommand(refs.answerQuestion),
-    answerIssue = useCommand(refs.answerIssue),
-    withdrawQuestion = useCommand(refs.withdrawQuestion);
-  // A task's own steps (shared/actions.ts offers them where its state allows).
-  const decideDesign = useCommand(refs.decideDesign),
-    signOff = useCommand(refs.signOff),
-    reworkAssignment = useCommand(refs.reworkAssignment),
-    retryAssignment = useCommand(refs.retryAssignment),
-    messageWorker = useCommand(refs.messageWorker),
-    prioritizeTask = useCommand(refs.prioritizeTask),
-    takeNextSlot = useCommand(refs.takeNextSlot);
-  const [error, setError] = useState<string>();
-  const perform = useCallback(async <T>(action: () => Promise<T>): Promise<T | undefined> => {
-    setError(undefined);
-    try {
-      return await action();
-    } catch (error) {
-      setError(error instanceof Error ? error.message : String(error));
-      return undefined;
-    }
-  }, []);
-  return {
-    nts,
-    connection,
-    overview,
-    issues,
-    agents,
-    plan,
-    terminalPrograms: current(terminalPrograms) ?? [],
-    data: {
-      overview: current(overview),
-      issues: claimedIssues(current(issues) ?? [], current(agents) ?? [], [
-        ...(nts.page("Machine")?.claims ?? []),
-        ...(nts.page("Landing")?.claims ?? []),
-      ]),
-      agents: current(agents) ?? [],
-      plan: current(plan),
-      labels: current(labels) ?? {},
-      settings: current(settings),
-      assignments: current(assignments) ?? [],
-      needs: current(needs) ?? { questions: [], unasked: [], answered: [] },
-    },
-    commands: {
-      startTerminal,
-      setSettings,
-      pauseTasks,
-      resumeTasks,
-      setAvailability,
-      assignTask,
-      cancelAssignment,
-      answerQuestion,
-      answerIssue,
-      withdrawQuestion,
-      decideDesign,
-      signOff,
-      reworkAssignment,
-      retryAssignment,
-      messageWorker,
-      prioritizeTask,
-      takeNextSlot,
-    },
-    perform,
-    error,
-    dismissError: () => setError(undefined),
-    busy:
-      startTerminal.pending ||
-      setSettings.pending ||
-      pauseTasks.pending ||
-      resumeTasks.pending ||
-      setAvailability.pending ||
-      assignTask.pending ||
-      cancelAssignment.pending ||
-      answerQuestion.pending ||
-      answerIssue.pending ||
-      withdrawQuestion.pending ||
-      decideDesign.pending ||
-      signOff.pending ||
-      reworkAssignment.pending ||
-      retryAssignment.pending ||
-      messageWorker.pending ||
-      prioritizeTask.pending ||
-      takeNextSlot.pending,
-    online: connection.status === "connected",
-  };
+  const project = useKitProject({
+    claims: [...(nts.page("Machine")?.claims ?? []), ...(nts.page("Landing")?.claims ?? [])],
+  });
+  return { ...project, nts };
 }
 export type Project = ReturnType<typeof useProject>;

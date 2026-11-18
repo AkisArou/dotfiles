@@ -1,4 +1,4 @@
-// What you can do to a task, as the TUI's a offers it (shared/actions.ts): a
+// What you can do to a task, as the TUI's a offers it (@signalbox/kit/shared/actions): a
 // button per action its state allows. One that needs words opens a short form;
 // one whose note is optional runs at once, or with a note from "with a note".
 import { useState } from "react";
@@ -7,8 +7,8 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
-import { runTaskAction, taskActions } from "../shared/actions.ts";
-import type { ActionValues, TaskAction } from "../shared/actions.ts";
+import { runTaskAction, taskActions } from "@signalbox/kit/shared/actions";
+import type { ActionValues, TaskAction } from "@signalbox/kit/shared/actions";
 import type { AssignmentView, Issue } from "../shared/model.ts";
 import type { Project } from "../shared/use-project.ts";
 

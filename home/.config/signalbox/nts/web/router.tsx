@@ -39,7 +39,7 @@ const view = (path: string, render: (project: Project) => ReactNode) =>
 const tasksRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tasks",
-  // The filters as facet:value keys (see shared/filters.ts), several at once.
+  // The filters as facet:value keys (see @signalbox/kit/shared/filters), several at once.
   validateSearch: (search: Record<string, unknown>): { q?: string; filter?: string[] } => {
     const filter = (Array.isArray(search.filter) ? search.filter : [search.filter]).filter(
       (key): key is string => typeof key === "string" && key.length > 0,

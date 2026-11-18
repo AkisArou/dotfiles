@@ -1,8 +1,8 @@
 /** @jsxImportSource @opentui/react */
 import { useEffect, useRef, useState } from "react";
 import { useClient } from "signalbox/client/react";
-import { earlierTasks, runTaskAction, taskActions } from "../shared/actions.ts";
-import type { ActionValues } from "../shared/actions.ts";
+import { earlierTasks, runTaskAction, taskActions } from "@signalbox/kit/shared/actions";
+import type { ActionValues } from "@signalbox/kit/shared/actions";
 import { written } from "./compose.ts";
 import { agentStates, issueStates, taskConditions, taskPhases } from "@signalbox/kit/shared/glossary";
 import * as refs from "../shared/model.ts";
@@ -31,8 +31,8 @@ import {
   filterOptions,
   matches,
   taskFacets,
-} from "../shared/filters.ts";
-import type { Chosen } from "../shared/filters.ts";
+} from "@signalbox/kit/shared/filters";
+import type { Chosen } from "@signalbox/kit/shared/filters";
 import type { TerminalTools } from "./tools.ts";
 import { Line, ListDetail, ListRow, ScrollPane, Section } from "./components.tsx";
 import {
@@ -219,7 +219,7 @@ export function TerminalApp({ onExit, tools }: { onExit(): void; tools: Terminal
       setFocus("list");
     });
   }
-  // What you can do to the selected task (shared/actions.ts): an action whose note is
+  // What you can do to the selected task (@signalbox/kit/shared/actions): an action whose note is
   // optional is offered plain and "with a note…"; words open the editor; urgency is a pick.
   function act() {
     if (!task) return setMessage("Select a task first.");

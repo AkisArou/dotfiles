@@ -1,5 +1,5 @@
 /** @jsxImportSource @opentui/react */
-import type { TaskAction } from "../shared/actions.ts";
+import type { TaskAction } from "@signalbox/kit/shared/actions";
 import type { Project } from "../shared/use-project.ts";
 import type { Agent, AssignmentView, Issue, Tone } from "../shared/model.ts";
 import {

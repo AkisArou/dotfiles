@@ -63,7 +63,7 @@ test("NTS terminal discovery stays within project roots and deduplicates linked 
 });
 
 test("pool and landing claims project active work without changing held task policy", async () => {
-  const { claimedIssues } = await import("../shared/claims.ts");
+  const { claimedIssues } = await import("@signalbox/kit/shared/claims");
   const tasks = projectIssues([issue(807, ["task"]), issue(808, ["state:held"])], "");
   const agent = {
     id: "native",

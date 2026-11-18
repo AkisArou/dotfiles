@@ -11,7 +11,7 @@ import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList"
 import { Text } from "@astryxdesign/core/Text";
 import type { Project } from "../shared/use-project.ts";
 import { current } from "../shared/use-project.ts";
-import { earlierTasks } from "../shared/actions.ts";
+import { earlierTasks } from "@signalbox/kit/shared/actions";
 import {
   assignmentPhase,
   assignmentSays,
