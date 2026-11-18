@@ -2,11 +2,10 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ntsStateDirectory } from "./host/state-directory.ts";
+import { projectStateDirectory } from "@signalbox/kit/host/state-directory";
 import { expandPath } from "signalbox/core/utils";
-import type { CommandSpec } from "signalbox/ext/execution";
-import type { TerminalTarget } from "signalbox/ext/terminals";
 import type { OrchestrationSettings } from "./orchestration/index.ts";
+import type { AttachedTerminal, TerminalProgram } from "@signalbox/kit/host/terminals";
 
 /** The project's identity, shared with sbn: its roots, ports and coordinator choice. */
 const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.url), "utf8")) as {
@@ -25,6 +24,8 @@ const project = JSON.parse(readFileSync(new URL("./project.json", import.meta.ur
 const path = (value: string) => resolve(expandPath(value));
 const root = path(process.env.NTS_ROOT ?? project.roots[0]!);
 export interface NtsConfig {
+  /** The project's name (project.json): where its records sit, and what it is called. */
+  readonly name: string;
   readonly root: string;
   readonly repo: string;
   readonly poolRoot: string;
@@ -37,17 +38,13 @@ export interface NtsConfig {
   /** Pages that may talk to the host beyond its loopback addresses (a proxy's address). */
   readonly publicOrigins: readonly string[];
   readonly apiUrl?: string;
-  readonly terminalPrograms: readonly (CommandSpec & { id: string; label: string })[];
+  readonly terminalPrograms: readonly TerminalProgram[];
   readonly discoverTerminals: boolean;
   readonly orchestration: OrchestrationSettings;
-  readonly attachedTerminals: readonly {
-    id: string;
-    label: string;
-    path: string | null;
-    target: TerminalTarget;
-  }[];
+  readonly attachedTerminals: readonly AttachedTerminal[];
 }
 export const ntsConfig: NtsConfig = {
+  name: project.name,
   root,
   repo: process.env.NTS_GITHUB_REPO ?? "AkisArou/nts",
   poolRoot: path(process.env.NTS_POOL_ROOT ?? "~/.cache/nts-pool"),
@@ -55,7 +52,8 @@ export const ntsConfig: NtsConfig = {
   issueLimit: 400,
   issueIntervalMs: 120_000,
   // One state directory per project root, under XDG_STATE_HOME.
-  state: ntsStateDirectory({
+  state: projectStateDirectory({
+    project: project.name,
     projectRoot: root,
     override: process.env.SIGNALBOX_NTS_STATE ?? project.state,
   }),

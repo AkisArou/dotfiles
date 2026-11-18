@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { projectIssues } from "./tasks.ts";
 import type { ListedIssue } from "./tasks.ts";
-import { projectPanes } from "./discovery.ts";
 
 const issue = (number: number, labels: string[], parent?: number): ListedIssue => ({
   number,
@@ -40,26 +39,6 @@ test("NTS issues retain hierarchy, scope, questions, blockers, owners and empty 
   assert.deepEqual(active.blockedBy, [7, 8]);
   assert.equal(tasks.find((task) => task.number === 6)?.state, "unscoped");
   assert.equal(tasks.find((task) => task.number === 8)?.state, "parked");
-});
-test("NTS terminal discovery stays within project roots and deduplicates linked panes", () => {
-  const panes = projectPanes(
-    [
-      "main\t%1\t/home/me/nts\tclaude\tMainClaude",
-      "main\t%2\t/home/me/nts-old\tcodex\tOther project",
-      "main\t%3\t/pool/1\tcodex\tWorker",
-      "main\t%4\t/pool/2\tbash\tShell",
-      "sb_view_123\t%5\t/pool/3\tclaude\tViewer",
-      "linked\t%1\t/home/me/nts\tclaude\tMainClaude",
-    ].join("\n"),
-    ["/home/me/nts", "/pool"],
-  );
-  assert.deepEqual(
-    panes.map(({ id, label, path }) => ({ id, label, path })),
-    [
-      { id: "tmux/%1", label: "MainClaude", path: "/home/me/nts" },
-      { id: "tmux/%3", label: "Worker", path: "/pool/1" },
-    ],
-  );
 });
 
 test("pool and landing claims project active work without changing held task policy", async () => {

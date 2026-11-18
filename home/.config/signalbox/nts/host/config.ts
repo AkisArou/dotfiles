@@ -10,8 +10,9 @@ import { sqliteWorkflowState } from "signalbox/ext/integrations/sqlite";
 import * as refs from "@signalbox/kit/shared/protocol";
 import type { NtsConfig } from "../config.ts";
 import { ntsObservations } from "../status/host.ts";
-import { nativeTerminals } from "./terminals.ts";
-import { pushNotifications } from "./push.ts";
+import { nativeTerminals } from "@signalbox/kit/host/terminals";
+import { discoverTerminals } from "@signalbox/kit/host/discovery";
+import { pushNotifications } from "@signalbox/kit/host/push";
 import { projectIssues, readIssues } from "./tasks.ts";
 import { ntsOrchestration } from "../orchestration/index.ts";
 import { gitHub } from "../orchestration/needs.ts";
@@ -37,9 +38,16 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
   const state = sqliteWorkflowState({ path: join(settings.state, "runtime.sqlite") });
   let resolveManaged: ((id: string) => Promise<TerminalTarget | undefined>) | undefined;
   const native = nativeTerminals({
+    project: settings.name,
     state: state.state,
     directory: settings.state,
-    config: settings,
+    root: settings.root,
+    programs: settings.terminalPrograms,
+    attached: settings.attachedTerminals,
+    // Agents the user runs in their own tmux, in the checkout or a pool tree.
+    ...(settings.discoverTerminals
+      ? { discover: (signal) => discoverTerminals([settings.root, settings.poolRoot], signal) }
+      : {}),
     fallback: (id) => resolveManaged?.(id) ?? Promise.resolve(undefined),
   });
   const startedAt = Date.now();
@@ -121,6 +129,7 @@ export function createNtsProject(settings: NtsConfig, web: { readonly directory:
       ...orchestration.extensions,
       ...orchestrationEndpoints(orchestration),
       ...pushNotifications({
+        project: settings.name,
         state: state.state,
         needs: orchestration.needs,
         issues: orchestration.issues,

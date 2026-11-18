@@ -1444,6 +1444,7 @@ snapshots:
   '@signalbox/kit@file:../../../../Projects/signalbox/kit(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@astryxdesign/theme-neutral@0.7.16(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@opentui/core@0.9.0(typescript@7.0.2)(web-tree-sitter@0.25.10))(@opentui/react@0.9.0(react-devtools-core@7.0.1)(react@19.3.1)(typescript@7.0.2)(web-tree-sitter@0.25.10)(ws@8.22.1))(@tanstack/react-router@1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@xterm/addon-fit@0.11.0)(@xterm/xterm@6.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(signalbox@file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1))(zod@4.6.7)':
     dependencies:
       signalbox: file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1)
+      web-push: 3.6.7
       zod: 4.6.7
     optionalDependencies:
       '@astryxdesign/core': 0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -1455,6 +1456,8 @@ snapshots:
       '@xterm/xterm': 6.0.0
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
+    transitivePeerDependencies:
+      - supports-color
 
   '@stablelib/base64@1.0.1': {}
 

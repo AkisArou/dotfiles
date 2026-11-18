@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { startHost } from "signalbox/host";
 import { createNtsProject, requireCheckout } from "./host/config.ts";
 import { ntsConfig } from "./config.ts";
-import { readTailnetOrigins } from "./host/tailnet.ts";
+import { readTailnetOrigins } from "@signalbox/kit/host/tailnet";
 
 const project = fileURLToPath(new URL("./", import.meta.url));
 const { webPort: port, apiPort, state: directory } = ntsConfig;
