@@ -22,6 +22,9 @@ importers:
       '@opentui/react':
         specifier: 0.9.0
         version: 0.9.0(react-devtools-core@7.0.1)(react@19.3.1)(typescript@7.0.2)(web-tree-sitter@0.25.10)(ws@8.22.1)
+      '@signalbox/azure-devops':
+        specifier: file:/home/akisarou/Projects/signalbox/azure-devops
+        version: file:../../../../Projects/signalbox/azure-devops(@signalbox/kit@file:../../../../Projects/signalbox/kit(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@astryxdesign/theme-neutral@0.7.16(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@opentui/core@0.9.0(typescript@7.0.2)(web-tree-sitter@0.25.10))(@opentui/react@0.9.0(react-devtools-core@7.0.1)(react@19.3.1)(typescript@7.0.2)(web-tree-sitter@0.25.10)(ws@8.22.1))(@tanstack/react-router@1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@xterm/addon-fit@0.11.0)(@xterm/xterm@6.0.0)(esbuild@0.28.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(signalbox@file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1))(zod@4.6.7))(signalbox@file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1))(zod@4.6.7)
       '@signalbox/huly':
         specifier: file:/home/akisarou/Projects/signalbox/huly
         version: file:../../../../Projects/signalbox/huly(076efe6dbcffa90c071e3120a2047331)
@@ -59,6 +62,8 @@ importers:
         specifier: ^4.3.6
         version: 4.6.7
     dependenciesMeta:
+      '@signalbox/azure-devops':
+        injected: true
       '@signalbox/huly':
         injected: true
       '@signalbox/kit':
@@ -702,6 +707,14 @@ packages:
 
   '@remirror/core-constants@3.0.0':
     resolution: {integrity: sha512-42aWfPrimMfDKDi4YegyS7x+/0tlzaqwPQCULLanv3DMIlu96KTJR0fM5isWX2UViOqlGnX6YFgqWepcX+XMNg==}
+
+  '@signalbox/azure-devops@file:../../../../Projects/signalbox/azure-devops':
+    resolution: {directory: ../../../../Projects/signalbox/azure-devops, type: directory}
+    engines: {node: '>=26.4.0'}
+    peerDependencies:
+      '@signalbox/kit': '*'
+      signalbox: '*'
+      zod: '*'
 
   '@signalbox/huly@file:../../../../Projects/signalbox/huly':
     resolution: {directory: ../../../../Projects/signalbox/huly, type: directory}
@@ -2606,6 +2619,12 @@ snapshots:
       - web-tree-sitter
 
   '@remirror/core-constants@3.0.0': {}
+
+  ? '@signalbox/azure-devops@file:../../../../Projects/signalbox/azure-devops(@signalbox/kit@file:../../../../Projects/signalbox/kit(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@astryxdesign/theme-neutral@0.7.16(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@opentui/core@0.9.0(typescript@7.0.2)(web-tree-sitter@0.25.10))(@opentui/react@0.9.0(react-devtools-core@7.0.1)(react@19.3.1)(typescript@7.0.2)(web-tree-sitter@0.25.10)(ws@8.22.1))(@tanstack/react-router@1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@xterm/addon-fit@0.11.0)(@xterm/xterm@6.0.0)(esbuild@0.28.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(signalbox@file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1))(zod@4.6.7))(signalbox@file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1))(zod@4.6.7)'
+  : dependencies:
+      '@signalbox/kit': file:../../../../Projects/signalbox/kit(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@astryxdesign/theme-neutral@0.7.16(@astryxdesign/core@0.7.16(@stylexjs/stylex@0.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@opentui/core@0.9.0(typescript@7.0.2)(web-tree-sitter@0.25.10))(@opentui/react@0.9.0(react-devtools-core@7.0.1)(react@19.3.1)(typescript@7.0.2)(web-tree-sitter@0.25.10)(ws@8.22.1))(@tanstack/react-router@1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@xterm/addon-fit@0.11.0)(@xterm/xterm@6.0.0)(esbuild@0.28.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(signalbox@file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1))(zod@4.6.7)
+      signalbox: file:../../../../Projects/signalbox/signalbox(@anthropic-ai/sdk@1.8.0(zod@4.6.7))(@opentelemetry/api@1.10.0)(react@19.3.1)
+      zod: 4.6.7
 
   '@signalbox/huly@file:../../../../Projects/signalbox/huly(076efe6dbcffa90c071e3120a2047331)':
     dependencies:
