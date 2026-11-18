@@ -1,0 +1,5 @@
+# The desktop's Radeon RX 580 (1002:67df) drives its monitor over DisplayPort. Left to
+# runtime power management, it suspends while the monitor sleeps and misses the
+# monitor's hot-plug when it wakes, so the screen stays dark until a reboot. This
+# card stays awake; other GPUs (a laptop's) keep their power management.
+ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x1002", ATTR{device}=="0x67df", ATTR{power/control}="on"
