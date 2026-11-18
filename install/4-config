@@ -81,18 +81,27 @@ corepack enable pnpm
 corepack enable yarn
 asdf reshim nodejs
 
-print_info "Linking signalbox's types into its configuration..."
-# The configuration is in home/.config/signalbox; only node_modules/signalbox is the machine's own.
-if [ -f "$HOME/Projects/signalbox/dist/cli.js" ]; then
-  "$HOME/.local/bin/signalbox" setup
+print_info "Building the signalbox SDK..."
+# The projects in ~/.config/signalbox install the SDK's packages (the runtime, the kit,
+# and the Huly, Sentry and Azure DevOps packages) from this checkout, built: build them
+# before the projects install.
+if [ -d "$HOME/Projects/signalbox" ]; then
+  (cd "$HOME/Projects/signalbox" && pnpm install && pnpm -r --if-present run build) ||
+    echo "the signalbox SDK did not build; run pnpm install && pnpm -r --if-present run build in ~/Projects/signalbox"
 else
-  echo "signalbox isn't built in ~/Projects/signalbox yet: run 'signalbox setup' once it is"
+  echo "~/Projects/signalbox is not cloned yet: clone it, then run this step again"
 fi
 
 print_info "Linking signalbox projects that live in other repositories..."
 # links.json (in the dotfiles) names each such project's folder; a repository not
 # cloned yet is reported, and the next sbn links picks it up.
 "$HOME/.local/bin/sbn" links || echo "sbn links failed; run it again"
+
+print_info "Installing the signalbox projects' packages..."
+# One pnpm workspace for every project (linked ones included), so they share one copy
+# of the SDK, the kit and React, which the console's bundle needs.
+(cd "$HOME/.config/signalbox" && pnpm install) ||
+  echo "the signalbox projects did not install; run pnpm install in ~/.config/signalbox"
 
 print_info "Starting this machine's signalbox hosts..."
 # hosts.json (in the dotfiles) names, by hostname, which projects' hosts run where.

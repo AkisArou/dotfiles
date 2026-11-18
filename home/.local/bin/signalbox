@@ -1,2 +1,2 @@
 #!/bin/sh
-exec node "$HOME/Projects/signalbox/dist/cli.js" "$@"
+exec node "$HOME/Projects/signalbox/signalbox/bin/signalbox.js" "$@"
