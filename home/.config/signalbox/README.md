@@ -36,10 +36,12 @@ hosts and the console (`sbn hosts sync`). Then, once, by hand:
 ## After pulling: sbn update
 
 `sbn update` is the one command after any change to the dotfiles, the SDK or a
-linked project: it fast-forwards those repositories (one with local changes or
-its own commits is left as it is, and said), builds the SDK and installs the
-projects (`sbn sdk`), reloads the units, and restarts this machine's hosts and
-the console (a stopped one stays stopped). `sbn update --no-pull` does the same
+linked project: it fast-forwards those repositories, keeping their local changes
+(one whose local changes an incoming commit would overwrite, or with commits of
+its own, is left as it is, and said), builds the SDK and installs the projects
+(`sbn sdk`: from the pnpm store, fetching only what this machine lacks), reloads
+the units, and restarts this machine's hosts and the console (a stopped one stays
+stopped). `sbn update --no-pull` does the same
 after pulling by hand. Agents' sessions outlive the restart.
 
 ## What runs where

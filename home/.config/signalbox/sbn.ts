@@ -48,9 +48,10 @@ const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
                     is the build's
   update [--no-pull]
                     after pulling, or to pull: fast-forward the dotfiles, the SDK and the
-                    linked projects' repositories (one with local changes or its own
-                    commits is left as it is), sbn sdk, reload the units, and restart
-                    this machine's hosts and the console
+                    linked projects' repositories (local changes are kept; one whose
+                    changes an incoming commit would overwrite, or with commits of its
+                    own, is left as it is), sbn sdk, reload the units, and restart this
+                    machine's hosts and the console
   hosts here <project...>
                     make those this machine's hosts, then sync
   <verb> ...        any other verb goes to the project's scripts/cli.ts
@@ -239,7 +240,9 @@ function sdkCommand(): number {
   const steps: [string, readonly string[], string][] = [
     ["the SDK's packages install", ["install"], sdk],
     ["the SDK builds", ["-r", "--if-present", "run", "build"], sdk],
-    ["the projects install", ["install", "--offline"], home],
+    // From the store when it has a package; a package this machine never fetched (a new
+    // SDK dependency) is fetched, with the metadata pnpm's release-age policy checks.
+    ["the projects install", ["install", "--prefer-offline"], home],
   ];
   for (const [what, args, cwd] of steps) {
     const result = spawnSync("pnpm", args, { cwd, stdio: "inherit" });
@@ -290,15 +293,14 @@ function updateCommand(args: readonly string[]): number {
             undefined
           : undefined,
     );
+    // A fast-forward keeps local changes: git refuses it, and changes nothing, only
+    // when an incoming change would overwrite one, and that refusal is said.
     for (const repository of repositories) {
-      if (git(repository, ["status", "--porcelain"]).stdout.trim()) {
-        console.log(`${repository}: has local changes, not pulled`);
-        continue;
-      }
+      const local = git(repository, ["status", "--porcelain"]).stdout.trim() !== "";
       const pulled = git(repository, ["pull", "--ff-only", "--quiet"]);
       console.log(
         pulled.status === 0
-          ? `${repository}: pulled`
+          ? `${repository}: pulled${local ? " (its local changes kept)" : ""}`
           : `${repository}: not pulled (${(pulled.stderr || pulled.stdout).trim().split("\n")[0] || "no fast-forward"})`,
       );
     }
