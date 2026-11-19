@@ -293,6 +293,13 @@ function updateCommand(args: readonly string[]): number {
             undefined
           : undefined,
     );
+    // sbn itself is in one of them: when a pull changes it, the rest of the update is
+    // the new sbn's, so a fix to the update reaches this very run.
+    // Its real path: ~/.config/signalbox is a link into the dotfiles, outside which git
+    // knows no file.
+    const self = realpathSync(fileURLToPath(import.meta.url));
+    const revisionOf = () => git(dirname(self), ["log", "-1", "--format=%H", "--", self]).stdout.trim();
+    const before = revisionOf();
     // A fast-forward keeps local changes: git refuses it, and changes nothing, only
     // when an incoming change would overwrite one, and that refusal is said.
     for (const repository of repositories) {
@@ -303,6 +310,15 @@ function updateCommand(args: readonly string[]): number {
           ? `${repository}: pulled${local ? " (its local changes kept)" : ""}`
           : `${repository}: not pulled (${(pulled.stderr || pulled.stdout).trim().split("\n")[0] || "no fast-forward"})`,
       );
+    }
+    if (revisionOf() !== before) {
+      console.log("sbn changed: the rest of the update runs on the new sbn");
+      const rest = spawnSync(
+        process.execPath,
+        [...process.execArgv, self, "update", "--no-pull", ...args.filter((arg) => arg !== "--no-pull")],
+        { stdio: "inherit" },
+      );
+      return rest.status ?? 1;
     }
   }
   const built = sdkCommand();

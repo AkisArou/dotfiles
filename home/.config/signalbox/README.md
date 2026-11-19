@@ -41,7 +41,8 @@ linked project: it fast-forwards those repositories, keeping their local changes
 its own, is left as it is, and said), builds the SDK and installs the projects
 (`sbn sdk`: from the pnpm store, fetching only what this machine lacks), reloads
 the units, and restarts this machine's hosts and the console (a stopped one stays
-stopped). `sbn update --no-pull` does the same
+stopped). When its pull changes sbn itself, the rest of the update runs on the
+new sbn. `sbn update --no-pull` does the same
 after pulling by hand. Agents' sessions outlive the restart.
 
 ## What runs where
