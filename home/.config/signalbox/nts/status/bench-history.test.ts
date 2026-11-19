@@ -2,7 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   caseNoise,
+  caseProgress,
   changes,
+  changesTable,
   machineDrift,
   progressTable,
   runOf,
@@ -84,6 +86,10 @@ test("a machine that ran faster changes nothing; a case that slowed beyond its l
     caseNoise(runs, "jittery", "nts C")! > 1.08,
     "the jittery case's noise is learnt from its history",
   );
+  // A regression's noise ends at +x%; a case's band says both ends, which differ.
+  const table = changesTable(runs)!;
+  assert.match(cellText(table.rows[0]!.noise), /^\+\d+\.\d%$/);
+  assert.match(caseProgress(runs, "jittery")!.band!, /^\+\d+\.\d \/ −\d+\.\d%$/);
   assert.equal(
     caseNoise(runs.slice(0, 4), "steady", "nts C"),
     undefined,

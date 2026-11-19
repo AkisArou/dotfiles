@@ -140,6 +140,12 @@ const geomean = (values: readonly number[]) =>
 const percent = (factor: number) =>
   `${factor >= 1 ? "+" : "−"}${Math.abs((factor - 1) * 100).toFixed(1)}%`;
 const band = (spread: number) => `±${((spread - 1) * 100).toFixed(1)}%`;
+/**
+ * A noise factor as the moves it allows, which are not symmetric in percent: a case is
+ * slower beyond ×noise (+15.3% for 1.153) and faster beyond ÷noise (−13.3%).
+ */
+export const noiseBounds = (noise: number) =>
+  `+${((noise - 1) * 100).toFixed(1)} / −${((1 - 1 / noise) * 100).toFixed(1)}%`;
 const shortId = (run: Run) => `${run.startedAt.slice(0, 10)} ${run.commit.slice(0, 12)}`;
 
 /** A case ran the same workload in both runs: only then are its times comparable. */
@@ -391,14 +397,15 @@ export function changesTable(runs: readonly Run[]): Table | undefined {
       { key: "case", label: "case" },
       { key: "backend", label: "nts" },
       { key: "change", label: "change", align: "right" },
-      { key: "noise", label: "noise", align: "right" },
+      { key: "noise", label: "noise ends at", align: "right" },
       { key: "now", label: "now", align: "right" },
       { key: "before", label: "last run", align: "right" },
       { key: "node", label: "/node now", align: "right" },
     ],
     rows: found.map((each) => {
       const column = BACKENDS.find(([, label]) => label === each.backend)![2];
-      const ratio = latest.cases.get(each.name)?.versus[column]?.node?.ratio;
+      const now = latest.cases.get(each.name);
+      const ratio = now && ratioOf(now, column, "node");
       return {
         case: `${each.name} (${each.backend})`,
         backend: each.backend,
@@ -407,7 +414,8 @@ export function changesTable(runs: readonly Run[]): Table | undefined {
           color: each.change > 1 ? ("red" as const) : ("green" as const),
           ...(each.change > 1.1 ? { bold: true } : {}),
         },
-        noise: band(each.noise),
+        // The noise's end in the change's own direction: ×noise slower, ÷noise faster.
+        noise: percent(each.change > 1 ? each.noise : 1 / each.noise),
         now: nanoseconds(each.now),
         before: nanoseconds(each.before),
         node: ratio === undefined ? "—" : ratio.toFixed(2),
@@ -446,7 +454,7 @@ export function caseProgress(runs: readonly Run[], name: string) {
   const noise = caseNoise(runs, name, "nts C");
   const factor = previous ? netChange(previous, latest, name, "nts C") : undefined;
   return {
-    band: noise === undefined ? undefined : band(noise),
+    band: noise === undefined ? undefined : noiseBounds(noise),
     change:
       factor === undefined
         ? undefined
