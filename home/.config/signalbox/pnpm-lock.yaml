@@ -2631,6 +2631,7 @@ snapshots:
       '@hcengineering/api-client': 0.7.423(prosemirror-inputrules@1.6.0)(prosemirror-model@1.25.13)(prosemirror-state@1.4.4)(prosemirror-view@1.42.9)
       '@hcengineering/chunter': 0.7.423
       '@hcengineering/client': 0.7.423
+      '@hcengineering/collaborator-client': 0.7.423
       '@hcengineering/contact': 0.7.423
       '@hcengineering/core': 0.7.423
       '@hcengineering/rank': 0.7.423
