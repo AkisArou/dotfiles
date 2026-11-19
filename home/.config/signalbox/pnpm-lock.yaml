@@ -2633,6 +2633,7 @@ snapshots:
       '@hcengineering/client': 0.7.423
       '@hcengineering/contact': 0.7.423
       '@hcengineering/core': 0.7.423
+      '@hcengineering/rank': 0.7.423
       '@hcengineering/tags': 0.7.423
       '@hcengineering/task': 0.7.423
       '@hcengineering/text': 0.7.423(prosemirror-inputrules@1.6.0)(prosemirror-model@1.25.13)(prosemirror-state@1.4.4)(prosemirror-view@1.42.9)
