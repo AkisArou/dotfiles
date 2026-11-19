@@ -42,10 +42,16 @@ export function ratioOf(each: RunCase, column: string, against: string): number 
   return own && theirs ? own / theirs : undefined;
 }
 
-/** One case's time in a column: nanoseconds per operation, and its run-to-run spread (×). */
+/**
+ * One case's measure in a column, and its run-to-run spread (×): nanoseconds per operation
+ * (a launch row's, one process from launch to exit), or a peak-RSS row's peak resident bytes.
+ */
 export type Time = { readonly ns: number; readonly spread: number };
+/** What a row measures: time per operation, one launch's time, or peak memory. */
+export type RowKind = "throughput" | "launch" | "peak-rss";
 export type RunCase = {
   readonly workload: string;
+  readonly kind: RowKind;
   readonly times: Readonly<Record<string, Time>>;
   /** nts column -> comparator -> the harness's ratio (nts time over theirs) and verdict. */
   readonly versus: Readonly<
@@ -71,7 +77,16 @@ type RunFile = {
   rows?: {
     name: string;
     workloadIdentity?: string;
-    cells?: Record<string, { status?: string; nanoseconds?: number; spread?: number } | null>;
+    kind?: "launch" | "peak-rss";
+    cells?: Record<
+      string,
+      {
+        status?: string;
+        nanoseconds?: number;
+        spread?: number;
+        peakRss?: { bytes?: number; spread?: number } | null;
+      } | null
+    >;
     verdicts?: Record<string, Record<string, { kind?: string; ratio?: number | null } | null>>;
   }[];
 };
@@ -82,10 +97,16 @@ export function runOf(file: RunFile): Run | null {
   if (file.provenance?.kind !== "official nts-bench" || !Array.isArray(file.rows)) return null;
   const cases = new Map<string, RunCase>();
   for (const row of file.rows) {
+    const kind: RowKind = row.kind ?? "throughput";
     const times: Record<string, Time> = {};
-    for (const [column, cell] of Object.entries(row.cells ?? {}))
-      if (cell?.status === "OK" && typeof cell.nanoseconds === "number" && cell.nanoseconds > 0)
-        times[column] = { ns: cell.nanoseconds, spread: Math.max(1, cell.spread ?? 1) };
+    for (const [column, cell] of Object.entries(row.cells ?? {})) {
+      if (cell?.status !== "OK") continue;
+      // A peak-RSS row ranks by its peak resident bytes; every other row by time.
+      const value = kind === "peak-rss" ? cell.peakRss?.bytes : cell.nanoseconds;
+      const spread = kind === "peak-rss" ? cell.peakRss?.spread : cell.spread;
+      if (typeof value === "number" && value > 0)
+        times[column] = { ns: value, spread: Math.max(1, spread ?? 1) };
+    }
     const versus: Record<string, Record<string, { ratio: number; kind: string }>> = {};
     for (const [column, against] of Object.entries(row.verdicts ?? {}))
       for (const [comparator, verdict] of Object.entries(against ?? {}))
@@ -94,7 +115,7 @@ export function runOf(file: RunFile): Run | null {
             ratio: verdict.ratio,
             kind: verdict.kind ?? "",
           };
-    cases.set(row.name, { workload: row.workloadIdentity ?? "", times, versus });
+    cases.set(row.name, { workload: row.workloadIdentity ?? "", kind, times, versus });
   }
   return {
     id: file.id ?? "",
@@ -167,7 +188,8 @@ export function progressTable(runs: readonly Run[]): Table | undefined {
   const series = (column: string, comparator: string, run: Run) => {
     const ratios: number[] = [];
     for (const [name, now] of latest.cases) {
-      if (ratioOf(now, column, comparator) === undefined) continue;
+      // The headline is time per operation: launch and peak-memory rows have their own.
+      if (now.kind !== "throughput" || ratioOf(now, column, comparator) === undefined) continue;
       const pair = same(run, latest, name);
       const ratio = pair && ratioOf(pair[0], column, comparator);
       if (ratio !== undefined) ratios.push(ratio);
@@ -277,7 +299,9 @@ function comparatorChanges(previous: Run | undefined, latest: Run): (readonly [s
  */
 export function machineDrift(previous: Run, latest: Run, column: string): number {
   const logs: number[] = [];
-  for (const name of latest.cases.keys()) {
+  for (const [name, each] of latest.cases) {
+    // How fast the machine ran: time per operation only (memory does not drift with it).
+    if (each.kind !== "throughput") continue;
     const pair = same(previous, latest, name);
     const before = pair?.[0].times[column];
     const now = pair?.[1].times[column];
@@ -303,7 +327,10 @@ function netChange(previous: Run, latest: Run, name: string, column: string): nu
   const pair = same(previous, latest, name);
   const before = pair?.[0].times[column];
   const now = pair?.[1].times[column];
-  return before && now ? now.ns / before.ns / driftOf(previous, latest, column) : undefined;
+  if (!before || !now) return undefined;
+  // Peak memory does not move with the machine's speed: its change is its own.
+  const drift = pair![1].kind === "peak-rss" ? 1 : driftOf(previous, latest, column);
+  return now.ns / before.ns / drift;
 }
 
 /** Earlier run pairs a case's noise is learnt from, at the fewest. */
@@ -382,6 +409,15 @@ const nanoseconds = (ns: number) =>
     : ns >= 1e3
       ? `${(ns / 1e3).toFixed(2)} µs`
       : `${ns.toFixed(1)} ns`;
+const bytes = (count: number) =>
+  count >= 1 << 30
+    ? `${(count / (1 << 30)).toFixed(2)} GiB`
+    : count >= 1 << 20
+      ? `${(count / (1 << 20)).toFixed(1)} MiB`
+      : `${(count / 1024).toFixed(0)} KiB`;
+/** A measure as its row shows it: time, or a peak-RSS row's bytes. */
+const measured = (kind: RowKind | undefined, value: number) =>
+  kind === "peak-rss" ? bytes(value) : nanoseconds(value);
 
 export function changesTable(runs: readonly Run[]): Table | undefined {
   const latest = runs.at(-1);
@@ -416,8 +452,8 @@ export function changesTable(runs: readonly Run[]): Table | undefined {
         },
         // The noise's end in the change's own direction: ×noise slower, ÷noise faster.
         noise: percent(each.change > 1 ? each.noise : 1 / each.noise),
-        now: nanoseconds(each.now),
-        before: nanoseconds(each.before),
+        now: measured(now?.kind, each.now),
+        before: measured(now?.kind, each.before),
         node: ratio === undefined ? "—" : ratio.toFixed(2),
       };
     }),
@@ -489,8 +525,9 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
   };
   const time = (each: RunCase, column: string): TableCell => {
     const value = each.times[column];
-    return value ? `${nanoseconds(value.ns)} ${band(value.spread)}` : "—";
+    return value ? `${measured(each.kind, value.ns)} ${band(value.spread)}` : "—";
   };
+  const measure = latest.kind === "peak-rss" ? "peak RSS" : "time";
   const rows = [...runs].reverse().flatMap((run) => {
     const each = run.cases.get(name);
     if (!each) return [];
@@ -516,13 +553,13 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
   });
   return {
     id: `bench-case/${name}`,
-    title: `${name}: its last ${rows.length} runs, newest first`,
+    title: `${name}: its last ${rows.length} runs, newest first${latest.kind === "peak-rss" ? " (peak memory)" : latest.kind === "launch" ? " (launch to exit)" : ""}`,
     key: "run",
     columns: [
       { key: "run", label: "run" },
       { key: "commit", label: "compiler" },
-      { key: "c", label: "C time", align: "right" },
-      { key: "node", label: "node time", align: "right" },
+      { key: "c", label: `C ${measure}`, align: "right" },
+      { key: "node", label: `node ${measure}`, align: "right" },
       { key: "cNode", label: "C/node", align: "right" },
       { key: "llvmNode", label: "LLVM/node", align: "right" },
       { key: "jvmNode", label: "JVM/node", align: "right" },
@@ -530,9 +567,18 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
       { key: "cScriptc", label: "C/ScriptC", align: "right" },
       { key: "cCpp", label: "C/C++", align: "right" },
       { key: "jvmJava", label: "JVM/Java", align: "right" },
-      { key: "cpp", label: "C++ time", align: "right" },
+      { key: "cpp", label: `C++ ${measure}`, align: "right" },
     ],
     rows,
-    facts: [["times", "nanoseconds per operation, with each run's own spread"]],
+    facts: [
+      [
+        measure,
+        latest.kind === "peak-rss"
+          ? "the peak resident set of the case's launches, with each run's own spread"
+          : latest.kind === "launch"
+            ? "one process from launch to exit, with each run's own spread"
+            : "nanoseconds per operation, with each run's own spread",
+      ],
+    ],
   };
 }

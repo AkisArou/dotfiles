@@ -1,4 +1,5 @@
 // NTS benchmark and conformance projections, ported from ~/.config/signalbox/nts/records.ts.
+import { cellText } from "./model.ts";
 import type { Gauge, Report, Table, TableCell } from "./model.ts";
 import {
   caseHistoryTable,
@@ -15,7 +16,8 @@ const BACKENDS: readonly Backend[] = ["c", "llvm", "jvm"];
 const NAME: Readonly<Record<Backend, string>> = { c: "C", llvm: "LLVM", jvm: "JVM" };
 const COMPARATORS = ["node", "Bun JIT", "Bun AOT", "ScriptC"] as const;
 type Comparator = (typeof COMPARATORS)[number];
-type Kind = "WON" | "SHORT" | "LOSS" | "TIE" | "UNAVAILABLE" | "NOT_COMPARABLE";
+/** SUSPECT (version 3): a peak-RSS comparison whose column does not grow with input; never ranked. */
+type Kind = "WON" | "SHORT" | "LOSS" | "TIE" | "UNAVAILABLE" | "NOT_COMPARABLE" | "SUSPECT";
 
 interface Verdict {
   readonly kind: Kind;
@@ -46,6 +48,8 @@ export interface BenchmarksSummary {
   > | null;
   readonly rows: readonly {
     readonly name: string;
+    /** Version 3: what the row measures; its ratios are of bytes on a peak-RSS row. */
+    readonly kind?: "throughput" | "launch" | "peak-rss";
     readonly backends: Readonly<
       Record<
         Backend,
@@ -136,9 +140,17 @@ const VERDICT_COLOR: Readonly<Partial<Record<Kind, "green" | "yellow" | "red" | 
   LOSS: "red",
   UNAVAILABLE: "gray",
   NOT_COMPARABLE: "gray",
+  SUSPECT: "gray",
 };
 
 /** A ratio with its verdict's color: below 1 is faster than the comparator. */
+/** A case as its row names it: a launch or peak-memory row says so (its ratios are of one launch, or of bytes). */
+function caseCell(row: BenchmarksSummary["rows"][number]): TableCell {
+  if (row.kind === "peak-rss") return { text: `${row.name} · peak memory`, color: "blue" };
+  if (row.kind === "launch") return { text: `${row.name} · launch`, color: "blue" };
+  return row.name;
+}
+
 /** C's time over C++'s in the newest run, where the case is written in C++: no verdict, only how close. */
 function ownLanguageCell(runs: readonly Run[], name: string): TableCell {
   const each = runs.at(-1)?.cases.get(name);
@@ -221,7 +233,7 @@ function countsTable(summary: BenchmarksSummary): Table {
       { key: "tie", label: "tie", align: "right" },
       { key: "short", label: "short", align: "right" },
       { key: "lost", label: "lost", align: "right" },
-      { key: "none", label: "no time", align: "right" },
+      { key: "none", label: "not ranked", align: "right" },
     ],
     rows: counts
       ? BACKENDS.flatMap((backend) =>
@@ -234,7 +246,9 @@ function countsTable(summary: BenchmarksSummary): Table {
               tie: number(kinds.TIE),
               short: number(kinds.SHORT),
               lost: number(kinds.LOSS, "red"),
-              none: number((kinds.UNAVAILABLE ?? 0) + (kinds.NOT_COMPARABLE ?? 0)),
+              none: number(
+                (kinds.UNAVAILABLE ?? 0) + (kinds.NOT_COMPARABLE ?? 0) + (kinds.SUSPECT ?? 0),
+              ),
             };
           }),
         )
@@ -276,7 +290,8 @@ function rowsTable(summary: BenchmarksSummary, runs: readonly Run[] = []): Table
           details: Object.fromEntries(
             summary.rows.flatMap((row) => {
               const history = caseHistoryTable(runs, row.name);
-              return history ? [[row.name, history]] : [];
+              // Keyed as the row's case cell reads, which names the row.
+              return history ? [[cellText(caseCell(row)), history]] : [];
             }),
           ),
         }
@@ -290,7 +305,7 @@ function rowsTable(summary: BenchmarksSummary, runs: readonly Run[] = []): Table
         const progress = runs.length ? caseProgress(runs, row.name) : undefined;
         const change = progress?.change;
         return {
-          case: row.name,
+          case: caseCell(row),
           ...Object.fromEntries(
             BACKENDS.map((backend) => [backend, ratioCell(row.backends[backend]?.versus.node)]),
           ),

@@ -41,8 +41,9 @@ export function liveReaders(
         checked<BenchmarksSummary>(
           await json(["tooling/records/summary.ts", "benchmarks"]),
           "benchmarks",
-          // Version 2 added fields this projection does not read (references, ownBest).
-          [2],
+          // Version 2 added fields this projection does not read (references, ownBest);
+          // version 3 adds each row's kind (launch, peak-rss: ratios of bytes) and cells' peakRss.
+          [2, 3],
           "benchmarks",
         ),
         Date.now(),

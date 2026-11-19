@@ -157,3 +157,73 @@ test("every row of the Benchmarks report has its own id, so up and down step thr
   assert.equal(new Set(ids).size, ids.length, `duplicates in ${ids.join(", ")}`);
   assert.ok(ids.includes("bench-progress/C vs Bun AOT"));
 });
+
+test("a peak-memory row is read by its bytes, left out of the headline and the machine's drift", async () => {
+  const { caseHistoryTable, changes, progressTable } = await import("./bench-history.ts");
+  const peak = (day: number, speed: number, bytes: number) => {
+    const base = run(day, speed, { a: 100 });
+    const file = {
+      schemaVersion: 1,
+      complete: true,
+      id: `peak-${day}`,
+      startedAt: base.startedAt,
+      compiler: { commit: base.commit },
+      provenance: { kind: "official nts-bench" },
+      comparators: { node: { version: "v26" } },
+      rows: [
+        ...[...base.cases].map(([name, each]) => ({
+          name,
+          workloadIdentity: each.workload,
+          cells: Object.fromEntries(
+            Object.entries(each.times).map(([column, time]) => [
+              column,
+              { status: "OK", nanoseconds: time.ns, spread: 1.01 },
+            ]),
+          ),
+        })),
+        {
+          name: "rss",
+          workloadIdentity: "w-rss",
+          kind: "peak-rss" as const,
+          cells: {
+            // Its time moves with the machine; its bytes are what it is ranked by.
+            "nts C": {
+              status: "OK",
+              nanoseconds: 5000 * speed,
+              spread: 1.01,
+              peakRss: { bytes, spread: 1.01 },
+            },
+            "C++": {
+              status: "OK",
+              nanoseconds: 5000 * speed,
+              spread: 1.01,
+              peakRss: { bytes: 1 << 20, spread: 1.01 },
+            },
+            node: {
+              status: "OK",
+              nanoseconds: 9000 * speed,
+              spread: 1.01,
+              peakRss: { bytes: 40 << 20, spread: 1.01 },
+            },
+          },
+        },
+      ],
+    };
+    return runOf(file)!;
+  };
+  const runs = [1, 2, 3, 4, 5, 6].map((day) => peak(day, 1, 4 << 20));
+  runs.push(peak(7, 0.8, 6 << 20));
+  const latest = runs.at(-1)!.cases.get("rss")!;
+  assert.equal(latest.kind, "peak-rss");
+  assert.equal(latest.times["nts C"]!.ns, 6 << 20, "its bytes, not its time");
+  const found = changes(runs).find((each) => each.name === "rss" && each.backend === "C");
+  assert.ok(
+    found && Math.abs(found.change - 1.5) < 1e-9,
+    "+50% bytes, not corrected by the faster night",
+  );
+  const headline = progressTable(runs)!.rows.find((row) => cellText(row.pair) === "C vs node")!;
+  assert.equal(cellText(headline.now), "0.40", "the headline is the throughput case alone");
+  const history = caseHistoryTable(runs, "rss")!;
+  assert.match(history.title, /peak memory/);
+  assert.equal(cellText(history.rows[0]!.c), "6.0 MiB ±1.0%");
+});
