@@ -54,7 +54,9 @@ export const poolStatus = async (root: string, signal?: AbortSignal) =>
   checked<PoolStatus>(
     await json(root, ["tooling/landing/pool.ts", "status", "--json"], signal),
     "pool",
-    [1],
+    // Version 2 (#884) adds held and landed trees' worker presence; their other
+    // fields, which this application reads, are unchanged.
+    [1, 2],
   );
 export const landingStatus = async (root: string, signal?: AbortSignal) =>
   checked<LandingStatus>(

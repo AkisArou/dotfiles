@@ -13,7 +13,10 @@ const ago = (seconds: number) =>
       ? `${Math.round(seconds / 3600)}h`
       : `${Math.round(seconds / 86_400)}d`;
 
-/** What `pool.ts status --json` prints (its `version: 1`). */
+/**
+ * What `pool.ts status --json` prints (`version: 1`, or 2 from #884, which adds a held or
+ * landed tree's worker presence; this application does not read it yet).
+ */
 export interface PoolStatus {
   readonly pool: string;
   readonly room: {
@@ -33,6 +36,10 @@ export interface PoolStatus {
     readonly uncommitted: number;
     readonly idle_ms: number | null;
     readonly target_bytes: number | null;
+    /** Version 2, held and landed trees: whether a worker is present in the tree. */
+    readonly worker_presence?: "attached" | "detached" | "unknown";
+    readonly detached_at?: number | null;
+    readonly presence_diagnostic?: string | null;
   }[];
 }
 
