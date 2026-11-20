@@ -16,11 +16,6 @@
       "pick": "spread",
       "models": [
         {
-          "harness": "claude",
-          "model": "claude-opus-5-5",
-          "effort": "high"
-        },
-        {
           "harness": "codex",
           "effort": "high"
         }
