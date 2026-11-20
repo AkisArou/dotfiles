@@ -2,6 +2,7 @@
 // tree from its pool, the coordinator's sign-off for core paths (AGENTS.md), the
 // landing check, the full check's verified, and briefs in its own terms.
 import { execFile } from "node:child_process";
+import { setTimeout as sleep } from "node:timers/promises";
 import { promisify } from "node:util";
 import { latestValue, mapReadable } from "signalbox/core";
 import type { Capability, Readable } from "signalbox/core";
@@ -27,6 +28,56 @@ export const CORE_PATHS = ["compiler/", "runtime/c/", "tooling/gate/", "tooling/
 
 const failed = (what: string, result: { code: number | null; stdout: string; stderr: string }) =>
   new Error(`${what} exited ${result.code}: ${(result.stderr || result.stdout).trim()}`);
+
+/** pool.ts's exit code when the machine cannot host another tree's build yet (EX_TEMPFAIL). */
+const TEMPFAIL = 75;
+
+/**
+ * A worker returns to a kept tree (#884): its build output is the task's again. When the
+ * machine cannot host its build yet, it waits for room, as a fresh take does.
+ */
+export async function attach(
+  root: string,
+  branch: string,
+  signal: AbortSignal,
+  pauseMs = 30_000,
+): Promise<void> {
+  for (;;) {
+    const result = await runNts(root, ["tooling/landing/pool.ts", "attach", branch], {
+      signal,
+      timeout: 600_000,
+    });
+    if (result.code === 0) return;
+    if (result.code !== TEMPFAIL) throw failed(`pool.ts attach ${branch}`, result);
+    await sleep(pauseMs, undefined, { signal });
+  }
+}
+
+/**
+ * No worker works in a kept tree any more (#884): the pool may reclaim its build output
+ * under disk pressure. The pool refuses while anything still uses the tree, as a stopped
+ * worker's processes may for a few seconds; after two minutes of refusals the tree stays
+ * attached, which reclaims nothing and is always safe.
+ */
+export async function detach(
+  root: string,
+  branch: string,
+  signal: AbortSignal,
+  pauseMs = 15_000,
+): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    const result = await runNts(root, ["tooling/landing/pool.ts", "detach", branch], {
+      signal,
+      timeout: 120_000,
+    });
+    if (result.code === 0) return;
+    if (attempt === 8) {
+      console.warn(failed(`pool.ts detach ${branch} (left attached)`, result).message);
+      return;
+    }
+    await sleep(pauseMs, undefined, { signal });
+  }
+}
 
 export function ntsTaskParts(options: {
   readonly root: string;
@@ -57,6 +108,8 @@ export function ntsTaskParts(options: {
         if (!tree) throw failed("pool.ts take", taken);
         return tree;
       },
+      detach: (workspace, signal) => detach(root, workspace.branch, signal),
+      attach: (workspace, signal) => attach(root, workspace.branch, signal),
     },
     // The core paths a commit changes since it left main.
     async signoff(tree, commit) {
