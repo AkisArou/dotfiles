@@ -227,3 +227,59 @@ test("a peak-memory row is read by its bytes, left out of the headline and the m
   assert.match(history.title, /peak memory/);
   assert.equal(cellText(history.rows[0]!.c), "6.0 MiB ±1.0%");
 });
+
+test("an executable-size row is read by its shipped bytes, exact, and left out of the machine's drift", async () => {
+  const { caseHistoryTable, changes, progressTable } = await import("./bench-history.ts");
+  const sized = (day: number, speed: number, shipped: number) => {
+    const base = run(day, speed, { a: 100 });
+    const size = (bytes: number) => ({
+      status: "OK",
+      // A size row's cell may carry a time too; its shipped bytes are what it is ranked by.
+      nanoseconds: 5000 * speed,
+      spread: 1.01,
+      executableSize: { shipped: { bytes }, stripped: { bytes: bytes / 2 }, sharedLibraryBytes: 0 },
+    });
+    return runOf({
+      schemaVersion: 1,
+      complete: true,
+      id: `size-${day}`,
+      startedAt: base.startedAt,
+      compiler: { commit: base.commit },
+      provenance: { kind: "official nts-bench" },
+      comparators: { node: { version: "v26" } },
+      rows: [
+        ...[...base.cases].map(([name, each]) => ({
+          name,
+          workloadIdentity: each.workload,
+          cells: Object.fromEntries(
+            Object.entries(each.times).map(([column, time]) => [
+              column,
+              { status: "OK", nanoseconds: time.ns, spread: 1.01 },
+            ]),
+          ),
+        })),
+        {
+          name: "binary",
+          workloadIdentity: "w-size",
+          kind: "executable-size" as const,
+          cells: { "nts C": size(shipped), "Bun AOT": size(60 << 20) },
+        },
+      ],
+    })!;
+  };
+  const runs = [1, 2, 3, 4, 5, 6].map((day) => sized(day, 1, 2 << 20));
+  runs.push(sized(7, 0.8, 3 << 20));
+  const latest = runs.at(-1)!.cases.get("binary")!;
+  assert.equal(latest.kind, "executable-size");
+  assert.deepEqual(latest.times["nts C"], { ns: 3 << 20, spread: 1 }, "shipped bytes, exact");
+  const found = changes(runs).find((each) => each.name === "binary" && each.backend === "C");
+  assert.ok(
+    found && Math.abs(found.change - 1.5) < 1e-9,
+    "+50% bytes, not corrected by the faster night",
+  );
+  const headline = progressTable(runs)!.rows.find((row) => cellText(row.pair) === "C vs node")!;
+  assert.equal(cellText(headline.now), "0.40", "the headline is the throughput case alone");
+  const history = caseHistoryTable(runs, "binary")!;
+  assert.match(history.title, /executable size/);
+  assert.equal(cellText(history.rows[0]!.c), "3.0 MiB", "an exact size has no band");
+});

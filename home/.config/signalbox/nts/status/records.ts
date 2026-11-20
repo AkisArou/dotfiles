@@ -48,8 +48,11 @@ export interface BenchmarksSummary {
   > | null;
   readonly rows: readonly {
     readonly name: string;
-    /** Version 3: what the row measures; its ratios are of bytes on a peak-RSS row. */
-    readonly kind?: "throughput" | "launch" | "peak-rss";
+    /**
+     * Version 3: what the row measures; its ratios are of bytes on a peak-RSS row, and
+     * (version 4) of shipped file bytes on an executable-size row.
+     */
+    readonly kind?: "throughput" | "launch" | "peak-rss" | "executable-size";
     readonly backends: Readonly<
       Record<
         Backend,
@@ -143,10 +146,14 @@ const VERDICT_COLOR: Readonly<Partial<Record<Kind, "green" | "yellow" | "red" | 
   SUSPECT: "gray",
 };
 
-/** A ratio with its verdict's color: below 1 is faster than the comparator. */
-/** A case as its row names it: a launch or peak-memory row says so (its ratios are of one launch, or of bytes). */
+/**
+ * A case as its row names it: a launch, peak-memory or executable-size row says so
+ * (its ratios are of one launch, or of bytes).
+ */
 function caseCell(row: BenchmarksSummary["rows"][number]): TableCell {
   if (row.kind === "peak-rss") return { text: `${row.name} · peak memory`, color: "blue" };
+  if (row.kind === "executable-size")
+    return { text: `${row.name} · executable size`, color: "blue" };
   if (row.kind === "launch") return { text: `${row.name} · launch`, color: "blue" };
   return row.name;
 }

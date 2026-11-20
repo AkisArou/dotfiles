@@ -44,11 +44,21 @@ export function ratioOf(each: RunCase, column: string, against: string): number 
 
 /**
  * One case's measure in a column, and its run-to-run spread (×): nanoseconds per operation
- * (a launch row's, one process from launch to exit), or a peak-RSS row's peak resident bytes.
+ * (a launch row's, one process from launch to exit), a peak-RSS row's peak resident bytes,
+ * or an executable-size row's shipped file bytes.
  */
 export type Time = { readonly ns: number; readonly spread: number };
-/** What a row measures: time per operation, one launch's time, or peak memory. */
-export type RowKind = "throughput" | "launch" | "peak-rss";
+/** What a row measures: time per operation, one launch's time, peak memory, or executable size. */
+export type RowKind = "throughput" | "launch" | "peak-rss" | "executable-size";
+/** What a case's history title adds for a row that is not time per operation. */
+const KIND_NOTE: Readonly<Record<RowKind, string>> = {
+  throughput: "",
+  launch: " (launch to exit)",
+  "peak-rss": " (peak memory)",
+  "executable-size": " (executable size)",
+};
+/** A row measured in bytes, not time: it does not move with the machine's speed. */
+const inBytes = (kind: RowKind | undefined) => kind === "peak-rss" || kind === "executable-size";
 export type RunCase = {
   readonly workload: string;
   readonly kind: RowKind;
@@ -77,7 +87,7 @@ type RunFile = {
   rows?: {
     name: string;
     workloadIdentity?: string;
-    kind?: "launch" | "peak-rss";
+    kind?: "launch" | "peak-rss" | "executable-size";
     cells?: Record<
       string,
       {
@@ -85,6 +95,7 @@ type RunFile = {
         nanoseconds?: number;
         spread?: number;
         peakRss?: { bytes?: number; spread?: number } | null;
+        executableSize?: { shipped?: { bytes?: number } } | null;
       } | null
     >;
     verdicts?: Record<string, Record<string, { kind?: string; ratio?: number | null } | null>>;
@@ -101,9 +112,16 @@ export function runOf(file: RunFile): Run | null {
     const times: Record<string, Time> = {};
     for (const [column, cell] of Object.entries(row.cells ?? {})) {
       if (cell?.status !== "OK") continue;
-      // A peak-RSS row ranks by its peak resident bytes; every other row by time.
-      const value = kind === "peak-rss" ? cell.peakRss?.bytes : cell.nanoseconds;
-      const spread = kind === "peak-rss" ? cell.peakRss?.spread : cell.spread;
+      // A peak-RSS row ranks by its peak resident bytes, an executable-size row by its
+      // shipped file's bytes (exact: spread 1), every other row by time.
+      const value =
+        kind === "peak-rss"
+          ? cell.peakRss?.bytes
+          : kind === "executable-size"
+            ? cell.executableSize?.shipped?.bytes
+            : cell.nanoseconds;
+      const spread =
+        kind === "peak-rss" ? cell.peakRss?.spread : kind === "executable-size" ? 1 : cell.spread;
       if (typeof value === "number" && value > 0)
         times[column] = { ns: value, spread: Math.max(1, spread ?? 1) };
     }
@@ -328,8 +346,8 @@ function netChange(previous: Run, latest: Run, name: string, column: string): nu
   const before = pair?.[0].times[column];
   const now = pair?.[1].times[column];
   if (!before || !now) return undefined;
-  // Peak memory does not move with the machine's speed: its change is its own.
-  const drift = pair![1].kind === "peak-rss" ? 1 : driftOf(previous, latest, column);
+  // Bytes do not move with the machine's speed: their change is their own.
+  const drift = inBytes(pair![1].kind) ? 1 : driftOf(previous, latest, column);
   return now.ns / before.ns / drift;
 }
 
@@ -415,9 +433,9 @@ const bytes = (count: number) =>
     : count >= 1 << 20
       ? `${(count / (1 << 20)).toFixed(1)} MiB`
       : `${(count / 1024).toFixed(0)} KiB`;
-/** A measure as its row shows it: time, or a peak-RSS row's bytes. */
+/** A measure as its row shows it: time, or a peak-RSS or executable-size row's bytes. */
 const measured = (kind: RowKind | undefined, value: number) =>
-  kind === "peak-rss" ? bytes(value) : nanoseconds(value);
+  inBytes(kind) ? bytes(value) : nanoseconds(value);
 
 export function changesTable(runs: readonly Run[]): Table | undefined {
   const latest = runs.at(-1);
@@ -525,9 +543,14 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
   };
   const time = (each: RunCase, column: string): TableCell => {
     const value = each.times[column];
-    return value ? `${measured(each.kind, value.ns)} ${band(value.spread)}` : "—";
+    if (!value) return "—";
+    // An exact measure (a file's size) has no band to show.
+    return value.spread > 1
+      ? `${measured(each.kind, value.ns)} ${band(value.spread)}`
+      : measured(each.kind, value.ns);
   };
-  const measure = latest.kind === "peak-rss" ? "peak RSS" : "time";
+  const measure =
+    latest.kind === "peak-rss" ? "peak RSS" : latest.kind === "executable-size" ? "size" : "time";
   const rows = [...runs].reverse().flatMap((run) => {
     const each = run.cases.get(name);
     if (!each) return [];
@@ -553,7 +576,7 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
   });
   return {
     id: `bench-case/${name}`,
-    title: `${name}: its last ${rows.length} runs, newest first${latest.kind === "peak-rss" ? " (peak memory)" : latest.kind === "launch" ? " (launch to exit)" : ""}`,
+    title: `${name}: its last ${rows.length} runs, newest first${KIND_NOTE[latest.kind]}`,
     key: "run",
     columns: [
       { key: "run", label: "run" },
@@ -577,7 +600,9 @@ export function caseHistoryTable(runs: readonly Run[], name: string): Table | un
           ? "the peak resident set of the case's launches, with each run's own spread"
           : latest.kind === "launch"
             ? "one process from launch to exit, with each run's own spread"
-            : "nanoseconds per operation, with each run's own spread",
+            : latest.kind === "executable-size"
+              ? "the shipped executable's whole file; its stripped size and shared libraries are in the run's full report"
+              : "nanoseconds per operation, with each run's own spread",
       ],
     ],
   };

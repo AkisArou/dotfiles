@@ -42,8 +42,9 @@ export function liveReaders(
           await json(["tooling/records/summary.ts", "benchmarks"]),
           "benchmarks",
           // Version 2 added fields this projection does not read (references, ownBest);
-          // version 3 adds each row's kind (launch, peak-rss: ratios of bytes) and cells' peakRss.
-          [2, 3],
+          // version 3 adds each row's kind (launch, peak-rss: ratios of bytes) and cells' peakRss;
+          // version 4 adds executable-size rows (ratios of shipped file bytes) and their sizes.
+          [2, 3, 4],
           "benchmarks",
         ),
         Date.now(),
