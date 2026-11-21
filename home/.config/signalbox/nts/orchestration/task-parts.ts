@@ -53,6 +53,42 @@ export async function attach(
   }
 }
 
+/** The pool tree holding issue N's branch, if any. */
+async function held(root: string, issue: number, signal: AbortSignal) {
+  const tree = treeForIssue(await poolStatus(root, signal), issue);
+  return tree && { path: tree.path, branch: tree.task! };
+}
+
+/**
+ * A tree for issue N from the pool, at the newest main on its branch. When the machine
+ * cannot host another tree's build yet (exit 75), it waits for room and asks again, as
+ * attach does: the refusal changed nothing.
+ */
+export async function take(
+  root: string,
+  issue: number,
+  signal: AbortSignal,
+  pauseMs = 30_000,
+): Promise<{ path: string; branch: string }> {
+  for (;;) {
+    const taken = await runNts(
+      root,
+      ["tooling/landing/pool.ts", "take", "--issue", String(issue)],
+      {
+        signal,
+        timeout: 600_000,
+      },
+    );
+    if (taken.code === TEMPFAIL) {
+      await sleep(pauseMs, undefined, { signal });
+      continue;
+    }
+    const tree = await held(root, issue, signal);
+    if (!tree) throw failed("pool.ts take", taken);
+    return tree;
+  }
+}
+
 /**
  * No worker works in a kept tree any more (#884): the pool may reclaim its build output
  * under disk pressure. The pool refuses while anything still uses the tree, as a stopped
@@ -85,10 +121,6 @@ export function ntsTaskParts(options: {
   readonly fullCheck: Capability<Readable<FullCheckStatus>>;
 }): TaskParts {
   const { root } = options;
-  const held = async (issue: number, signal: AbortSignal) => {
-    const tree = treeForIssue(await poolStatus(root, signal), issue);
-    return tree && { path: tree.path, branch: tree.task! };
-  };
   return {
     blocked(issue) {
       const label = issue.labels.find((name) => BLOCKING.includes(name));
@@ -97,17 +129,8 @@ export function ntsTaskParts(options: {
       return undefined;
     },
     workspace: {
-      find: held,
-      async take(issue, signal) {
-        const taken = await runNts(
-          root,
-          ["tooling/landing/pool.ts", "take", "--issue", String(issue)],
-          { signal, timeout: 600_000 },
-        );
-        const tree = await held(issue, signal);
-        if (!tree) throw failed("pool.ts take", taken);
-        return tree;
-      },
+      find: (issue, signal) => held(root, issue, signal),
+      take: (issue, signal) => take(root, issue, signal),
       detach: (workspace, signal) => detach(root, workspace.branch, signal),
       attach: (workspace, signal) => attach(root, workspace.branch, signal),
     },

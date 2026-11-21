@@ -5,21 +5,31 @@ import { test } from "node:test";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { attach, detach } from "./task-parts.ts";
+import { attach, detach, take } from "./task-parts.ts";
 
 async function pool(t: { after(fn: () => unknown): void }, codes: readonly number[]) {
   const root = await mkdtemp(join(tmpdir(), "nts-presence-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(join(root, "tooling/landing"), { recursive: true });
   await writeFile(join(root, "codes.json"), JSON.stringify(codes));
+  await writeFile(join(root, "trees.json"), "[]");
   await writeFile(
     join(root, "tooling/landing/pool.ts"),
     `import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 const codes = JSON.parse(readFileSync("codes.json", "utf8"));
-appendFileSync("calls.log", process.argv.slice(2).join(" ") + "\\n");
-writeFileSync("codes.json", JSON.stringify(codes.slice(1)));
-if (codes[0]) console.error("cannot " + process.argv[2] + ": a process still uses the tree");
-process.exitCode = codes[0] ?? 0;
+if (process.argv[2] !== "status") {
+  appendFileSync("calls.log", process.argv.slice(2).join(" ") + "\\n");
+  writeFileSync("codes.json", JSON.stringify(codes.slice(1)));
+}
+if (process.argv[2] === "status") {
+  const trees = JSON.parse(readFileSync("trees.json", "utf8"));
+  console.log(JSON.stringify({ version: 2, pool: ".", room: { ok: true, free_bytes: 0, floor_bytes: 0, unbuilt: 0, why: null }, trees }));
+} else {
+  if (codes[0]) console.error("cannot " + process.argv[2] + ": a process still uses the tree");
+  if (process.argv[2] === "take" && !codes[0])
+    writeFileSync("trees.json", JSON.stringify([{ name: "3", path: "/pool/3", state: "held", task: process.argv[4], ahead: 0, behind: 0, uncommitted: 0, idle_ms: null, target_bytes: null }]));
+  process.exitCode = codes[0] ?? 0;
+}
 `,
   );
   const calls = async () => (await readFile(join(root, "calls.log"), "utf8")).trim().split("\n");
@@ -52,4 +62,15 @@ test("any other attach failure is the task's, named", async (t) => {
     attach(root, "907", signal, 1),
     /pool\.ts attach 907 exited 1: cannot attach/,
   );
+});
+
+test("take waits while the machine cannot host another tree (exit 75), then takes it", async (t) => {
+  const { root, calls } = await pool(t, [75, 75, 0]);
+  assert.deepEqual(await take(root, 909, signal, 1), { path: "/pool/3", branch: "909" });
+  assert.deepEqual(await calls(), ["take --issue 909", "take --issue 909", "take --issue 909"]);
+});
+
+test("any other take failure is the task's, named", async (t) => {
+  const { root } = await pool(t, [1]);
+  await assert.rejects(take(root, 909, signal, 1), /pool\.ts take exited 1: cannot take/);
 });
