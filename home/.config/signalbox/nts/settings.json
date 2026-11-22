@@ -1,5 +1,5 @@
 {
-  "workerSlots": 4,
+  "workerSlots": 5,
   "maxRounds": 4,
   "roles": {
     "coordinator": {
@@ -18,6 +18,11 @@
         {
           "harness": "codex",
           "effort": "high"
+        },
+        {
+          "harness": "claude",
+          "model": "claude-opus-5-5",
+          "effort": "high"
         }
       ]
     },
@@ -35,7 +40,7 @@
   "shares": [
     {
       "name": "foundations",
-      "share": 50,
+      "share": 40,
       "areas": [],
       "streams": [
         468
@@ -43,7 +48,7 @@
     },
     {
       "name": "correctness",
-      "share": 25,
+      "share": 20,
       "areas": [
         "compiler",
         "runtime",
@@ -59,7 +64,7 @@
     },
     {
       "name": "tooling",
-      "share": 25,
+      "share": 40,
       "areas": [
         "tooling",
         "docs"
