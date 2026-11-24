@@ -46,7 +46,8 @@
           "enum",
           "function-overload",
           "return",
-          "throw"
+          "throw",
+          "export"
         ]
       },
       {
