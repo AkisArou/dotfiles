@@ -10,7 +10,7 @@ import type { Capability, Readable } from "signalbox/core";
 import type { WorkflowStore } from "signalbox/ext/assignments";
 import type { AgentToolset } from "signalbox/ext/agents";
 import type { Issue } from "@signalbox/kit/shared/protocol";
-import type { ManagedAgents } from "@signalbox/kit/orchestration/agents";
+import type { AgentEnvironment, ManagedAgents } from "@signalbox/kit/orchestration/agents";
 import { projectOrchestration } from "@signalbox/kit/orchestration/project";
 import type { OrchestrationSettings } from "@signalbox/kit/orchestration/project";
 import { fullCheckStatus, landingStatus } from "../status/commands.ts";
@@ -53,6 +53,8 @@ export function ntsOrchestration(options: {
   readonly refreshIssues: () => Promise<void>;
   /** Tests supply stand-in agents; production uses Claude Code and Codex in tmux. */
   readonly agents?: (toolsets: readonly AgentToolset[]) => ManagedAgents;
+  /** How the agents' environment differs from the host's (production: config.ts). */
+  readonly agentEnvironment?: AgentEnvironment;
 }) {
   // The task route and wake-ups watch both, so they stay current; the status pages project them.
   const landing = polledSource<LandingStatus>({
@@ -86,6 +88,7 @@ export function ntsOrchestration(options: {
     wakeups: ntsWakeups({ landing: landing.key, fullCheck: fullCheck.key }),
     extensions: [landing.extension, fullCheck.extension],
     ...(options.agents ? { agents: options.agents } : {}),
+    ...(options.agentEnvironment ? { agentEnvironment: options.agentEnvironment } : {}),
   });
   return { ...orchestration, landing: landing.key, fullCheck: fullCheck.key };
 }

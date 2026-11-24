@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { projectStateDirectory } from "@signalbox/kit/host/state-directory";
 import { expandPath } from "signalbox/core/utils";
+import type { AgentEnvironment } from "@signalbox/kit/orchestration/agents";
+import { agentEnvironment } from "./host/agent-environment.ts";
 import type { OrchestrationSettings } from "./orchestration/index.ts";
 import type { AttachedTerminal, TerminalProgram } from "@signalbox/kit/host/terminals";
 
@@ -37,6 +39,8 @@ export interface NtsConfig {
   readonly terminalPrograms: readonly TerminalProgram[];
   readonly discoverTerminals: boolean;
   readonly orchestration: OrchestrationSettings;
+  /** How the agents' environment differs from the host's: each tree's own node (host/agent-environment.ts). */
+  readonly agentEnvironment: AgentEnvironment;
   readonly attachedTerminals: readonly AttachedTerminal[];
 }
 export const ntsConfig: NtsConfig = {
@@ -77,4 +81,5 @@ export const ntsConfig: NtsConfig = {
     // source. Edit it by hand or from the TUI, web view or sbn; the host applies it live.
     file: fileURLToPath(new URL("./settings.json", import.meta.url)),
   },
+  agentEnvironment: agentEnvironment(),
 };

@@ -65,6 +65,7 @@ export function createNtsProject(
         directory: settings.state,
         ...inputs,
         settings: settings.orchestration,
+        agentEnvironment: settings.agentEnvironment,
         gitHub: gitHub(settings.repo),
       }),
     extensions: (orchestration) => [
