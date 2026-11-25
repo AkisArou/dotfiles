@@ -40,7 +40,7 @@
   "shares": [
     {
       "name": "foundations",
-      "share": 40,
+      "share": 30,
       "areas": [],
       "streams": [
         468
@@ -48,7 +48,7 @@
     },
     {
       "name": "correctness",
-      "share": 20,
+      "share": 40,
       "areas": [
         "compiler",
         "runtime",
@@ -64,7 +64,7 @@
     },
     {
       "name": "tooling",
-      "share": 40,
+      "share": 30,
       "areas": [
         "tooling",
         "docs"
