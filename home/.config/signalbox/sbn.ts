@@ -37,9 +37,10 @@ interface Project {
 
 const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
 
-  init [--name <n>] [--title <t>] [--check <command>] [--setup <command>] [--tasks local|github]
+  init [--name <n>] [--title <t>] [--check <command>] [--setup <command>] [--tasks local|github] [--global]
                     make the git repository here a project: the kit's git project in its
-                    .signalbox/ folder, linked and installed. Tasks are this machine's
+                    .signalbox/ folder, linked and installed (--global: in
+                    ~/.config/signalbox/<name> instead, with the dotfiles). Tasks are this machine's
                     board (sbn task add) unless --tasks github; a reviewed change lands
                     as it is unless --check names a command it must pass first
 
@@ -629,6 +630,9 @@ function initCommand(args: string[], all: readonly Project[]): number {
     check = option("--check"),
     setup = option("--setup"),
     tasks = option("--tasks") ?? "local";
+  // --global keeps the folder here, beside nts's, instead of in the repository.
+  const global = args.includes("--global");
+  if (global) args.splice(args.indexOf("--global"), 1);
   if (args.length) throw new Error(`sbn init takes no ${args.join(" ")}\n\n${HELP}`);
   if (tasks !== "local" && tasks !== "github")
     throw new Error("--tasks is local (this machine's board) or github (the repository's issues)");
@@ -641,7 +645,7 @@ function initCommand(args: string[], all: readonly Project[]): number {
     throw new Error(`${name} is not a project name (lower case, letters, digits and -): use --name`);
   if (all.some((project) => project.name === name) || existsSync(join(home, name)))
     throw new Error(`There is a project ${name} already: use --name`);
-  const folder = join(top, ".signalbox");
+  const folder = global ? join(home, name) : join(top, ".signalbox");
   if (existsSync(folder)) throw new Error(`${folder} is there already`);
   const remote = "origin";
   const url = gitValue(top, ["remote", "get-url", remote]);
@@ -678,22 +682,39 @@ function initCommand(args: string[], all: readonly Project[]): number {
     mkdirSync(dirname(join(folder, path)), { recursive: true });
     writeFileSync(join(folder, path), text);
   }
-  console.log(`wrote ${tilde(folder)}: ${Object.keys(files).length} files (commit them with ${name})`);
-  const linksPath = join(home, "links.json");
-  const links = existsSync(linksPath) ? parseLinks(readFileSync(linksPath, "utf8")) : {};
-  writeFileSync(
-    linksPath,
-    `${JSON.stringify(
-      Object.fromEntries(
-        Object.entries({ ...links, [name]: tilde(folder) }).sort(([a], [b]) => a.localeCompare(b)),
-      ),
-      null,
-      2,
-    )}\n`,
+  console.log(
+    `wrote ${tilde(folder)}: ${Object.keys(files).length} files (commit them with ${global ? "the dotfiles" : name})`,
   );
-  console.log(`links.json links ${name} to ${tilde(folder)}`);
-  const linked = linksCommand();
-  if (linked !== 0) return linked;
+  if (global) {
+    // A folder here is in the workspace already ("*"): installing it is enough.
+    const installed = spawnSync("pnpm", ["install", "--prefer-offline"], {
+      cwd: home,
+      stdio: "inherit",
+    });
+    if (installed.status !== 0) {
+      console.error("pnpm install failed; run it in ~/.config/signalbox");
+      return 1;
+    }
+  } else {
+    // In the repository, the folder joins this directory by a link (links.json).
+    const linksPath = join(home, "links.json");
+    const links = existsSync(linksPath) ? parseLinks(readFileSync(linksPath, "utf8")) : {};
+    writeFileSync(
+      linksPath,
+      `${JSON.stringify(
+        Object.fromEntries(
+          Object.entries({ ...links, [name]: tilde(folder) }).sort(([a], [b]) =>
+            a.localeCompare(b),
+          ),
+        ),
+        null,
+        2,
+      )}\n`,
+    );
+    console.log(`links.json links ${name} to ${tilde(folder)}`);
+    const linked = linksCommand();
+    if (linked !== 0) return linked;
+  }
   // The console bundles each project's pages as it starts.
   spawnSync("systemctl", ["--user", "try-restart", "signalbox-console"]);
   const mine = readHosts()[hostname()] ?? [];

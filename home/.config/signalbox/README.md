@@ -105,8 +105,9 @@ In the project's git repository, `sbn init` makes it one: the kit's git project
 unless `--tasks github` (the repository's issues); a reviewed change is pushed as it
 is unless `--check "<command>"` names what it must pass first; `--setup` overrides
 the install found from the lockfile. Everything it chose is in its `project.json`.
-Then `sbn doctor`, `sbn hosts here <projects...>`, and commit `.signalbox/` with the
-project. Claude Code must trust the checkout once (run `claude` there): each task's
+With `--global` the folder is `~/.config/signalbox/<name>` instead, kept with these
+dotfiles (which are public: its project.json names the checkout and its commands).
+Then `sbn doctor`, `sbn hosts here <projects...>`, and commit the folder. Claude Code must trust the checkout once (run `claude` there): each task's
 worktree inherits it.
 
 A project with ways of its own (nts, nable) assembles the kit's parts itself: copy
