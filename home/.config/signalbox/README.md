@@ -99,10 +99,20 @@ whose session ended, briefed from the assignment's state.
 
 ## A new project
 
-Copy `nts/` as a starting point, give its `project.json` a new name, roots and
-ports, add it to nothing else (the workspace includes every folder), run
-`sbn sdk`, then `sbn --project <name> start`. A project kept in its own
-repository goes in `links.json` instead (`sbn links` links it and lists it in the
-workspace); run its scripts with `node --run`, since pnpm inside another
-repository takes that repository's workspace. State, tmux sockets
-and agents are per project root, so two hosts never share them.
+In the project's git repository, `sbn init` makes it one: the kit's git project
+(`@signalbox/kit/project/git`) in the repository's `.signalbox/` folder, linked here
+(`links.json`) and installed. Its tasks are this machine's board (`sbn task add`)
+unless `--tasks github` (the repository's issues); a reviewed change is pushed as it
+is unless `--check "<command>"` names what it must pass first; `--setup` overrides
+the install found from the lockfile. Everything it chose is in its `project.json`.
+Then `sbn doctor`, `sbn hosts here <projects...>`, and commit `.signalbox/` with the
+project. Claude Code must trust the checkout once (run `claude` there): each task's
+worktree inherits it.
+
+A project with ways of its own (nts, nable) assembles the kit's parts itself: copy
+`nts/` as a starting point, give its `project.json` a new name, roots and ports, run
+`sbn sdk`, then `sbn --project <name> start`. A project kept in its own repository
+goes in `links.json` (`sbn links` links it and lists it in the workspace); run its
+scripts with `node --run`, since pnpm inside another repository takes that
+repository's workspace. State, tmux sockets and agents are per project root, so two
+hosts never share them.

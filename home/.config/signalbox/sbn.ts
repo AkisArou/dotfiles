@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import {
   existsSync,
   lstatSync,
+  mkdirSync,
   readdirSync,
   readFileSync,
   readlinkSync,
@@ -16,8 +17,16 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir, hostname, userInfo } from "node:os";
-import { dirname, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  gitHubRepo,
+  nextApiPort,
+  projectName,
+  projectTitle,
+  scaffold,
+  setupFor,
+} from "./init.ts";
 
 interface Project {
   readonly name: string;
@@ -27,6 +36,12 @@ interface Project {
 }
 
 const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
+
+  init [--name <n>] [--title <t>] [--check <command>] [--setup <command>] [--tasks local|github]
+                    make the git repository here a project: the kit's git project in its
+                    .signalbox/ folder, linked and installed. Tasks are this machine's
+                    board (sbn task add) unless --tasks github; a reviewed change lands
+                    as it is unless --check names a command it must pass first
 
   (none) | tui      the terminal UI on the project's running host
   web               open the project in the console (the browser UI)
@@ -589,6 +604,121 @@ function run(
   return result.status ?? 1;
 }
 
+/** Reads one git value in `cwd`, or undefined when git has none. */
+function gitValue(cwd: string, args: readonly string[]): string | undefined {
+  const result = spawnSync("git", ["-C", cwd, ...args], { encoding: "utf8" });
+  return result.status === 0 ? result.stdout.trim() || undefined : undefined;
+}
+
+/**
+ * Makes the git repository around the current directory a Signalbox project: the
+ * kit's git project in its .signalbox/ folder, linked here (links.json) and
+ * installed. Its tasks are this machine's board unless --tasks github; a change
+ * lands as reviewed unless --check names what it must pass.
+ */
+function initCommand(args: string[], all: readonly Project[]): number {
+  const option = (name: string) => {
+    const index = args.indexOf(name);
+    if (index < 0) return undefined;
+    const [, value] = args.splice(index, 2);
+    if (!value) throw new Error(`${name} needs a value`);
+    return value;
+  };
+  const named = option("--name"),
+    title = option("--title"),
+    check = option("--check"),
+    setup = option("--setup"),
+    tasks = option("--tasks") ?? "local";
+  if (args.length) throw new Error(`sbn init takes no ${args.join(" ")}\n\n${HELP}`);
+  if (tasks !== "local" && tasks !== "github")
+    throw new Error("--tasks is local (this machine's board) or github (the repository's issues)");
+  const top = gitValue(process.cwd(), ["rev-parse", "--show-toplevel"]);
+  if (!top) throw new Error("sbn init runs inside a git repository");
+  const already = projectFor(all, top);
+  if (already) throw new Error(`${top} is already ${already.name}'s`);
+  const name = named ?? projectName(basename(top));
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(name))
+    throw new Error(`${name} is not a project name (lower case, letters, digits and -): use --name`);
+  if (all.some((project) => project.name === name) || existsSync(join(home, name)))
+    throw new Error(`There is a project ${name} already: use --name`);
+  const folder = join(top, ".signalbox");
+  if (existsSync(folder)) throw new Error(`${folder} is there already`);
+  const remote = "origin";
+  const url = gitValue(top, ["remote", "get-url", remote]);
+  if (!url) throw new Error(`${top} has no remote ${remote}: its changes land by being pushed there`);
+  const branch =
+    gitValue(top, ["symbolic-ref", "--short", `refs/remotes/${remote}/HEAD`])?.replace(
+      `${remote}/`,
+      "",
+    ) ??
+    gitValue(top, ["branch", "--show-current"]) ??
+    "main";
+  const github = tasks === "github" ? gitHubRepo(url) : undefined;
+  if (tasks === "github" && !github)
+    throw new Error(`--tasks github needs a GitHub remote; ${remote} is ${url}`);
+  const tilde = (path: string) =>
+    path === homedir() || path.startsWith(homedir() + sep)
+      ? `~${path.slice(homedir().length)}`
+      : path;
+  const installs = setup ?? setupFor(readdirSync(top));
+  const files = scaffold({
+    name,
+    title: title ?? projectTitle(name),
+    root: tilde(top),
+    trees: `~/.cache/${name}-trees`,
+    apiPort: nextApiPort(all.map((project) => project.apiPort)),
+    remote,
+    branch,
+    tasks: github ? { github } : "local",
+    ...(installs ? { setup: installs } : {}),
+    ...(check ? { check } : {}),
+    sdk: expand(process.env.SIGNALBOX_SDK ?? "~/Projects/signalbox"),
+  });
+  for (const [path, text] of Object.entries(files)) {
+    mkdirSync(dirname(join(folder, path)), { recursive: true });
+    writeFileSync(join(folder, path), text);
+  }
+  console.log(`wrote ${tilde(folder)}: ${Object.keys(files).length} files (commit them with ${name})`);
+  const linksPath = join(home, "links.json");
+  const links = existsSync(linksPath) ? parseLinks(readFileSync(linksPath, "utf8")) : {};
+  writeFileSync(
+    linksPath,
+    `${JSON.stringify(
+      Object.fromEntries(
+        Object.entries({ ...links, [name]: tilde(folder) }).sort(([a], [b]) => a.localeCompare(b)),
+      ),
+      null,
+      2,
+    )}\n`,
+  );
+  console.log(`links.json links ${name} to ${tilde(folder)}`);
+  const linked = linksCommand();
+  if (linked !== 0) return linked;
+  // The console bundles each project's pages as it starts.
+  spawnSync("systemctl", ["--user", "try-restart", "signalbox-console"]);
+  const mine = readHosts()[hostname()] ?? [];
+  console.log(
+    [
+      "",
+      `${name} is a Signalbox project. Next:`,
+      `  sbn doctor --project ${name}: what this machine still lacks`,
+      `  sbn hosts here ${[...mine, name].join(" ")}: run its host here (then commit hosts.json)`,
+      github
+        ? `  its tasks: the open issues of ${github}`
+        : "  sbn task add <title...> [--body <text>]: a task on its board",
+      "  sbn assign <n>: a worker takes task n",
+      "  sbn web: the console",
+      ...(check
+        ? []
+        : [
+            "",
+            'No --check: a reviewed change lands as it is. Set "check" in project.json to make it pass a command first.',
+          ]),
+    ].join("\n"),
+  );
+  return 0;
+}
+
 /** A project's own verbs (scripts/cli.ts), if it has any. */
 function projectVerb(
   project: Project,
@@ -618,6 +748,7 @@ function main(argv: readonly string[]): number {
     api = option("--api");
   const command = args.shift() ?? "tui";
   const all = projects();
+  if (command === "init") return initCommand(args, all);
   if (command === "hosts") return hostsCommand(args, all);
   if (command === "links") return linksCommand();
   if (command === "sdk") return sdkCommand();

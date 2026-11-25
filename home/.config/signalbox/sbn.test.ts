@@ -207,3 +207,40 @@ test("sbn update pulls each folder's repository once, and nothing for a folder t
     ["/home/me/dotfiles", "/home/me/Projects/signalbox", "/home/me/nable"],
   );
 });
+
+test("sbn init names the project and its port, finds its install, and reads a GitHub remote", async () => {
+  const { gitHubRepo, nextApiPort, projectName, projectTitle, scaffold, setupFor } = await import("./init.ts");
+  assert.equal(projectName("Zync"), "zync");
+  assert.equal(projectName("My App_2"), "my-app-2");
+  assert.equal(projectTitle("my-app"), "My app");
+  assert.equal(nextApiPort([4311, 4321]), 4331);
+  assert.equal(nextApiPort([]), 4311);
+  assert.equal(setupFor(["README.md", "pnpm-lock.yaml"]), "pnpm install --frozen-lockfile --prefer-offline");
+  assert.equal(setupFor(["package-lock.json"]), "npm ci");
+  assert.equal(setupFor(["Cargo.toml"]), undefined);
+  assert.equal(gitHubRepo("git@github.com:me/zync.git"), "me/zync");
+  assert.equal(gitHubRepo("https://github.com/me/zync"), "me/zync");
+  assert.equal(gitHubRepo("https://gitlab.com/me/zync.git"), undefined);
+  const base = {
+    name: "zync",
+    title: "Zync",
+    root: "~/Projects/zync",
+    trees: "~/.cache/zync-trees",
+    apiPort: 4331,
+    remote: "origin",
+    branch: "main",
+    tasks: "local" as const,
+    sdk: "/sdk",
+  };
+  const files = scaffold(base);
+  const manifest = JSON.parse(files["project.json"]!);
+  // No --check and no install: neither is written, so the kit's defaults hold.
+  assert.equal("check" in manifest || "setup" in manifest, false);
+  assert.deepEqual([manifest.tasks, manifest.coordinator], ["local", false]);
+  assert.equal(JSON.parse(files["package.json"]!).dependencies["@signalbox/kit"], "file:/sdk/kit");
+  assert.match(files["server.ts"]!, /serveGitProject/);
+  const checked = JSON.parse(
+    scaffold({ ...base, tasks: { github: "me/zync" }, check: "pnpm check", setup: "npm ci" })["project.json"]!,
+  );
+  assert.deepEqual([checked.tasks, checked.check, checked.setup], [{ github: "me/zync" }, "pnpm check", "npm ci"]);
+});
