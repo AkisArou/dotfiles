@@ -230,13 +230,14 @@ test("sbn init names the project and its port, finds its install, and reads a Gi
     remote: "origin",
     branch: "main",
     tasks: "local" as const,
+    coordinator: true,
     sdk: "/sdk",
   };
   const files = scaffold(base);
   const manifest = JSON.parse(files["project.json"]!);
   // No --check and no install: neither is written, so the kit's defaults hold.
   assert.equal("check" in manifest || "setup" in manifest, false);
-  assert.deepEqual([manifest.tasks, manifest.coordinator], ["local", false]);
+  assert.deepEqual([manifest.tasks, manifest.coordinator], ["local", true]);
   assert.equal(JSON.parse(files["package.json"]!).dependencies["@signalbox/kit"], "file:/sdk/kit");
   assert.match(files["server.ts"]!, /serveGitProject/);
   const checked = JSON.parse(

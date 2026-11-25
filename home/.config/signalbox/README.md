@@ -107,7 +107,9 @@ is unless `--check "<command>"` names what it must pass first; `--setup` overrid
 the install found from the lockfile. Everything it chose is in its `project.json`.
 With `--global` the folder is `~/.config/signalbox/<name>` instead, kept with these
 dotfiles (which are public: its project.json names the checkout and its commands).
-Then `sbn doctor`, `sbn hosts here <projects...>`, and commit the folder. Claude Code must trust the checkout once (run `claude` there): each task's
+The coordinator runs (it writes, assigns and steers the tasks, on the board or on
+GitHub) unless `--no-coordinator`. Then `sbn doctor`, `sbn hosts here <projects...>`,
+and commit the folder. Claude Code must trust the checkout once (run `claude` there): each task's
 worktree inherits it.
 
 A project with ways of its own (nts, nable) assembles the kit's parts itself: copy

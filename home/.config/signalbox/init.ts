@@ -15,6 +15,8 @@ export type InitOptions = {
   readonly tasks: "local" | { readonly github: string };
   readonly setup?: string;
   readonly check?: string;
+  /** Whether the coordinator runs (it writes and assigns the tasks), as on nts. */
+  readonly coordinator: boolean;
   /** The SDK checkout the project's packages come from. */
   readonly sdk: string;
 };
@@ -67,7 +69,7 @@ export function scaffold(options: InitOptions): Record<string, string> {
       title: options.title,
       roots: [options.root, options.trees],
       apiPort: options.apiPort,
-      coordinator: false,
+      coordinator: options.coordinator,
       remote: options.remote,
       branch: options.branch,
       tasks: options.tasks,
@@ -146,7 +148,7 @@ Made by \`sbn init\`. The kit's git project (\`@signalbox/kit/project/git\`) run
 | \`tasks\`        | \`"local"\`: this machine's board (\`sbn task ...\`), or \`{ "github": "owner/name" }\` |
 | \`setup\`        | run in each new task tree and before the check (an install)          |
 | \`check\`        | what a reviewed change must pass before it is pushed; none lands it as reviewed |
-| \`coordinator\`  | \`true\` runs the coordinator; \`false\`, you assign tasks (\`sbn assign <n>\`) |
+| \`coordinator\`  | \`true\`: the coordinator writes, assigns and steers the tasks; \`false\`: you do (\`sbn assign <n>\`) |
 | \`instructions\` | the repository's rules for its agents (\`AGENTS.md\`)                  |
 
     sbn task add <title...> [--body <text>]   a task on the board

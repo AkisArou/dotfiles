@@ -37,12 +37,13 @@ interface Project {
 
 const HELP = `sbn [--project <name>] [--api <ws-url>] [command]
 
-  init [--name <n>] [--title <t>] [--check <command>] [--setup <command>] [--tasks local|github] [--global]
+  init [--name <n>] [--title <t>] [--check <command>] [--setup <command>] [--tasks local|github] [--no-coordinator] [--global]
                     make the git repository here a project: the kit's git project in its
                     .signalbox/ folder, linked and installed (--global: in
                     ~/.config/signalbox/<name> instead, with the dotfiles). Tasks are this machine's
                     board (sbn task add) unless --tasks github; a reviewed change lands
-                    as it is unless --check names a command it must pass first
+                    as it is unless --check names a command it must pass first; the
+                    coordinator runs unless --no-coordinator
 
   (none) | tui      the terminal UI on the project's running host
   web               open the project in the console (the browser UI)
@@ -631,8 +632,13 @@ function initCommand(args: string[], all: readonly Project[]): number {
     setup = option("--setup"),
     tasks = option("--tasks") ?? "local";
   // --global keeps the folder here, beside nts's, instead of in the repository.
-  const global = args.includes("--global");
-  if (global) args.splice(args.indexOf("--global"), 1);
+  const flag = (name: string) => {
+    const index = args.indexOf(name);
+    if (index >= 0) args.splice(index, 1);
+    return index >= 0;
+  };
+  const global = flag("--global"),
+    coordinator = !flag("--no-coordinator");
   if (args.length) throw new Error(`sbn init takes no ${args.join(" ")}\n\n${HELP}`);
   if (tasks !== "local" && tasks !== "github")
     throw new Error("--tasks is local (this machine's board) or github (the repository's issues)");
@@ -676,6 +682,7 @@ function initCommand(args: string[], all: readonly Project[]): number {
     tasks: github ? { github } : "local",
     ...(installs ? { setup: installs } : {}),
     ...(check ? { check } : {}),
+    coordinator,
     sdk: expand(process.env.SIGNALBOX_SDK ?? "~/Projects/signalbox"),
   });
   for (const [path, text] of Object.entries(files)) {
@@ -727,7 +734,9 @@ function initCommand(args: string[], all: readonly Project[]): number {
       github
         ? `  its tasks: the open issues of ${github}`
         : "  sbn task add <title...> [--body <text>]: a task on its board",
-      "  sbn assign <n>: a worker takes task n",
+      coordinator
+        ? "  sbn tell <text...>: ask the coordinator (it writes, assigns and steers the tasks)"
+        : "  sbn assign <n>: a worker takes task n",
       "  sbn web: the console",
       ...(check
         ? []
