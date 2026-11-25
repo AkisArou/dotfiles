@@ -550,13 +550,17 @@ function hostsCommand(
     }
     if (!plan.enable.length && !plan.disable.length)
       console.log(`${machine} already runs exactly ${wanted.join(", ")}`);
-    // The console shows every project, so it runs wherever any host does.
+    // The console shows every project, so it runs wherever any host does: like a
+    // host, running now and enabled, or it is gone after the next boot.
     const consoleUnit = "signalbox-console";
-    const consoleActive =
-      spawnSync("systemctl", ["--user", "is-active", consoleUnit], {
+    const consoleIs = (query: "is-active" | "is-enabled") =>
+      spawnSync("systemctl", ["--user", query, consoleUnit], {
         encoding: "utf8",
-      }).stdout.trim() === "active";
-    if (!consoleActive) {
+      }).stdout.trim();
+    if (
+      consoleIs("is-active") !== "active" ||
+      consoleIs("is-enabled") !== "enabled"
+    ) {
       const code = run("systemctl", ["--user", "enable", "--now", consoleUnit]);
       if (code !== 0) return code;
       console.log(`started and enabled ${consoleUnit}`);
