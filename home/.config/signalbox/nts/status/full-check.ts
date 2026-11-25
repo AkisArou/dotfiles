@@ -51,6 +51,10 @@ interface BenchmarksRun {
   readonly result: string;
   /** Whether the run kept a record. */
   readonly measured: boolean;
+  /** The run record's path, once it kept one. */
+  readonly record?: string;
+  /** The run's folder of logs. */
+  readonly run?: string;
   /** How the night ended (`record`, `no-record`, `interrupted`, `not-run`), then, with #604, where its results commit stands. */
   readonly outcome?:
     | "record"

@@ -1,7 +1,7 @@
 // nts's orchestration: the kit's, with nts's own ways. Its tasks take pool trees
 // and land through the landing check, verified by the full check (task-parts.ts);
 // its questions are written to GitHub (github.ts); the coordinator also hears of
-// landing answers and full-check culprits (wakeup-sources.ts); its agents are
+// landing answers, full-check culprits and each night's benchmarks (wakeup-sources.ts); its agents are
 // briefed in nts's terms (briefs.ts).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";

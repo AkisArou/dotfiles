@@ -1,7 +1,10 @@
 // nts's own wake-ups for the coordinator, beside the kit's: each landing answer
 // that needs a look (a refusal, a hold, a withdrawal, or a landing that names no
-// issue) and each full-check culprit. Their names keep the marks of what was
-// already announced (seeded/landing, seeded/fullCheck).
+// issue), each full-check culprit, and each night's benchmarks once they end:
+// a run record landed on main, or a night that published none. Their names keep
+// the marks of what was already announced (seeded/landing, seeded/fullCheck,
+// seeded/benchmarks).
+import { basename } from "node:path";
 import { latestValue } from "signalbox/core";
 import type { Capability, Readable } from "signalbox/core";
 import type { Wakeup, WakeupSource } from "@signalbox/kit/orchestration/wakeups";
@@ -24,6 +27,33 @@ export function culpritEvents(status: FullCheckStatus | undefined): Wakeup[] {
   }));
 }
 
+/** How a night ends without a record on main; a failed publication is tried again, so it is not one. */
+const UNPUBLISHED = new Set(["no-record", "interrupted", "not-run", "given-up", "withdrawn"]);
+
+/** A night's benchmarks, once they are over: its run record landed, or the night published none. */
+export function benchmarkEvents(status: FullCheckStatus | undefined): Wakeup[] {
+  const night = status?.benchmarks.last;
+  if (!night?.outcome) return [];
+  const commit = night.commit.slice(0, 12);
+  if (night.outcome === "landed" && night.record) {
+    const run = basename(night.record, ".json");
+    const slower = status?.benchmarks.slower ?? [];
+    return [
+      {
+        id: `benchmarks/${run}/landed`,
+        text: `Nightly benchmarks landed: run ${run} at ${commit}, ${night.result}. Slower than their own best: ${slower.length ? slower.join(", ") : "none flagged"}. Results: results/benchmarks/full.md.`,
+      },
+    ];
+  }
+  if (!UNPUBLISHED.has(night.outcome)) return [];
+  return [
+    {
+      id: `benchmarks/${commit}/${night.at}/${night.outcome}`,
+      text: `Nightly benchmarks at ${commit} ended without a record on main (${night.outcome}): ${night.result}${night.run ? `\nLogs: ${night.run}` : ""}`,
+    },
+  ];
+}
+
 export function ntsWakeups(options: {
   readonly landing: Capability<Readable<LandingStatus>>;
   readonly fullCheck: Capability<Readable<FullCheckStatus>>;
@@ -42,6 +72,13 @@ export function ntsWakeups(options: {
       requires: [options.fullCheck],
       status: (get) => get(options.fullCheck).get().status,
       events: (get) => culpritEvents(latestValue(get(options.fullCheck))),
+    },
+    {
+      name: "benchmarks",
+      prefixes: ["benchmarks/"],
+      requires: [options.fullCheck],
+      status: (get) => get(options.fullCheck).get().status,
+      events: (get) => benchmarkEvents(latestValue(get(options.fullCheck))),
     },
   ];
 }
