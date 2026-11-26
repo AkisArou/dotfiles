@@ -38,16 +38,16 @@ if (process.argv[2] === "status") {
 
 const signal = new AbortController().signal;
 
-test("detach retries while something still uses the tree, then holds", async (t) => {
-  const { root, calls } = await pool(t, [1, 1, 0]);
-  await detach(root, "907", signal, 1);
-  assert.deepEqual(await calls(), ["detach 907", "detach 907", "detach 907"]);
+test("detach asks the pool once: it detaches the tree or records the pending detach (#1066)", async (t) => {
+  const { root, calls } = await pool(t, [0]);
+  await detach(root, "907", signal);
+  assert.deepEqual(await calls(), ["detach 907"]);
 });
 
-test("a tree that never frees up stays attached: detach gives up without failing the task", async (t) => {
-  const { root, calls } = await pool(t, Array(10).fill(1));
-  await detach(root, "907", signal, 1);
-  assert.equal((await calls()).length, 8, "eight tries, then the tree stays attached");
+test("a detach the pool could neither do nor record is the task's fault, named, not a success", async (t) => {
+  const { root, calls } = await pool(t, [1, 0]);
+  await assert.rejects(detach(root, "907", signal), /pool\.ts detach 907 exited 1: cannot detach/);
+  assert.deepEqual(await calls(), ["detach 907"], "asked once: the pool owns any later retry");
 });
 
 test("attach waits while the machine cannot host the tree's build, then attaches", async (t) => {

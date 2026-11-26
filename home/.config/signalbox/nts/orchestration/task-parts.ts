@@ -91,28 +91,18 @@ export async function take(
 
 /**
  * No worker works in a kept tree any more (#884): the pool may reclaim its build output
- * under disk pressure. The pool refuses while anything still uses the tree, as a stopped
- * worker's processes may for a few seconds; after two minutes of refusals the tree stays
- * attached, which reclaims nothing and is always safe.
+ * under disk pressure. The pool owns when that is safe (#1066): it detaches the tree at
+ * once, or records a durable detach-pending request that its upkeep completes once no
+ * process, unit, build claim or resource lock uses it (a worker's own nts-<N>-* unit can
+ * outlive its pane), and a resume replaces the request. Either way it exits 0; it exits
+ * nonzero only when it could do neither, which is the task's fault, named.
  */
-export async function detach(
-  root: string,
-  branch: string,
-  signal: AbortSignal,
-  pauseMs = 15_000,
-): Promise<void> {
-  for (let attempt = 1; ; attempt++) {
-    const result = await runNts(root, ["tooling/landing/pool.ts", "detach", branch], {
-      signal,
-      timeout: 120_000,
-    });
-    if (result.code === 0) return;
-    if (attempt === 8) {
-      console.warn(failed(`pool.ts detach ${branch} (left attached)`, result).message);
-      return;
-    }
-    await sleep(pauseMs, undefined, { signal });
-  }
+export async function detach(root: string, branch: string, signal: AbortSignal): Promise<void> {
+  const result = await runNts(root, ["tooling/landing/pool.ts", "detach", branch], {
+    signal,
+    timeout: 120_000,
+  });
+  if (result.code !== 0) throw failed(`pool.ts detach ${branch}`, result);
 }
 
 export function ntsTaskParts(options: {
