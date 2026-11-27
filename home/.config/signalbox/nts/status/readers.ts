@@ -7,7 +7,7 @@ import { benchmarkHistory } from "./bench-history.ts";
 import type { BenchmarksSummary, ConformanceSummary } from "./records.ts";
 import { machineReport } from "./machine.ts";
 import type { LedgerStatus } from "./machine.ts";
-import { poolStatus } from "./commands.ts";
+import { pinnedNode, poolStatus } from "./commands.ts";
 import type { NtsPage, Report, TableCell } from "./model.ts";
 import { checked } from "./status.ts";
 
@@ -34,7 +34,7 @@ export function liveReaders(
     return result.stdout;
   }
   const json = async (args: readonly string[]) =>
-    JSON.parse(await run(process.execPath, args, 60_000)) as unknown;
+    JSON.parse(await run(await pinnedNode(root), args, 60_000)) as unknown;
   return {
     async Benchmarks() {
       return benchmarkReport(

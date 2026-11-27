@@ -2,6 +2,8 @@
 // Readers and orchestration both go through here, so a command's arguments,
 // working directory and output contract live in one place.
 import { execFile } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { LandingStatus } from "./landing.ts";
 import type { PoolStatus } from "./machine.ts";
 import type { FullCheckStatus } from "./full-check.ts";
@@ -14,15 +16,49 @@ export interface CommandResult {
   readonly stderr: string;
 }
 
-/** Runs `node <args>` in `cwd`. A nonzero exit is a result, not an exception. */
-export function runNts(
+/** Asks asdf for the `node` a directory's .tool-versions selects: its binary's path. */
+function asdfNode(cwd: string): Promise<string> {
+  return new Promise((resolve, reject) =>
+    execFile("asdf", ["which", "node"], { cwd, timeout: 30_000 }, (error, stdout, stderr) =>
+      error
+        ? reject(new Error(`asdf which node in ${cwd}: ${stderr.trim() || error.message}`))
+        : resolve(stdout.trim()),
+    ),
+  );
+}
+
+const pinned = new Map<string, { readonly pin: string; readonly node: Promise<string> }>();
+/**
+ * The Node the repository pins for `cwd` (its .tool-versions, as asdf resolves it there),
+ * never this host's own: nts tooling records which Node ran it (a tree's installation
+ * catalog names its installer), so one run on another Node writes another record. Kept
+ * per directory while its pin reads the same; a pin that is not installed fails, named.
+ */
+export function pinnedNode(cwd: string, resolve: (cwd: string) => Promise<string> = asdfNode) {
+  let pin = "";
+  try {
+    pin = readFileSync(join(cwd, ".tool-versions"), "utf8");
+  } catch {
+    // No pin of its own here: asdf resolves it from a parent, as it would for anyone.
+  }
+  const known = pinned.get(cwd);
+  if (known && known.pin === pin) return known.node;
+  const node = resolve(cwd);
+  pinned.set(cwd, { pin, node });
+  node.catch(() => pinned.delete(cwd));
+  return node;
+}
+
+/** Runs `node <args>` in `cwd` on the repository's pinned Node. A nonzero exit is a result, not an exception. */
+export async function runNts(
   cwd: string,
   args: readonly string[],
   options: { readonly signal?: AbortSignal; readonly timeout?: number } = {},
 ): Promise<CommandResult> {
+  const node = await pinnedNode(cwd);
   return new Promise((resolve, reject) => {
     execFile(
-      process.execPath,
+      node,
       [...args],
       {
         cwd,
