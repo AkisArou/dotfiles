@@ -5,6 +5,8 @@ packages:
   # Kept by sbn links from links.json: each linked project installs from its own folder.
   - "!nable"
   - "../../../../nable-solutions/tools/signalbox"
+  - "!zync"
+  - "../../../../Projects/zync/.signalbox"
 
 allowBuilds:
   "@astryxdesign/core": false
