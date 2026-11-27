@@ -102,7 +102,12 @@ export async function detach(root: string, branch: string, signal: AbortSignal):
     signal,
     timeout: 120_000,
   });
-  if (result.code !== 0) throw failed(`pool.ts detach ${branch}`, result);
+  if (result.code === 0) return;
+  // A tree the pool reset once its change landed holds the branch no more: nothing is
+  // left to detach (detach is idempotent). The pool's own status says so, not its words.
+  const pool = await poolStatus(root, signal);
+  if (!pool.trees.some((tree) => tree.task === branch)) return;
+  throw failed(`pool.ts detach ${branch}`, result);
 }
 
 export function ntsTaskParts(options: {

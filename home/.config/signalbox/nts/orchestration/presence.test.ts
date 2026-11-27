@@ -44,8 +44,31 @@ test("detach asks the pool once: it detaches the tree or records the pending det
   assert.deepEqual(await calls(), ["detach 907"]);
 });
 
+test("a tree reset after its change landed holds the branch no more: it is detached already", async (t) => {
+  // trees.json is empty: no tree holds 907, as after a landing reset its tree.
+  const { root, calls } = await pool(t, [1]);
+  await detach(root, "907", signal);
+  assert.deepEqual(await calls(), ["detach 907"]);
+});
+
 test("a detach the pool could neither do nor record is the task's fault, named, not a success", async (t) => {
   const { root, calls } = await pool(t, [1, 0]);
+  await writeFile(
+    join(root, "trees.json"),
+    JSON.stringify([
+      {
+        name: "3",
+        path: "/pool/3",
+        state: "held",
+        task: "907",
+        ahead: 0,
+        behind: 0,
+        uncommitted: 0,
+        idle_ms: null,
+        target_bytes: null,
+      },
+    ]),
+  );
   await assert.rejects(detach(root, "907", signal), /pool\.ts detach 907 exited 1: cannot detach/);
   assert.deepEqual(await calls(), ["detach 907"], "asked once: the pool owns any later retry");
 });
