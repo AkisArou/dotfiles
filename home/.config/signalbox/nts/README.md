@@ -43,7 +43,7 @@ NTS's workflow (AGENTS.md, `docs/workflow.md`) is enforced by durable routes, no
 1. **workspace**: `pool.ts take --issue N`, recovered from `pool.ts status --json` by the task's branch.
 2. **design**: a worker launched in the tree with the issue card and the rules; it reports a design.
 3. **approve**: the coordinator accepts or returns the design through its tools.
-4. **build**: the worker implements and proves the change (focused tests, `inner.ts`, the landing check `--here`), then reports the commit and its record.
+4. **build**: the worker implements and proves the change (focused tests, `inner.ts` for a compiler or runtime change, the card's proof), then reports the commit and its record.
 5. **review**: a fresh reviewer agent (`nts/review`, keyed by commit) reads the diff and the evidence and reports accept or findings. Findings return to build.
 6. **queue**: one `check.ts <commit>` submission per commit, recovered from `check.ts status --json`.
 7. **land**: a refusal returns to build with its failing steps and logs; a hold waits.
