@@ -213,7 +213,7 @@ export function ntsTaskParts(options: {
       workerResume: workerResumeBrief,
       reviewer: reviewerBrief,
       approved: (notes) =>
-        `Design approved. ${notes}\nBuild it, prove it (focused tests, inner.ts, check.ts --here), commit, then report_ready.`,
+        `Design approved. ${notes}\nBuild it, prove it (focused tests, inner.ts --no-agree, and your card's proof), commit, then report_ready. The landing service runs the landing check; run check.ts --here only to diagnose a landing it refused.`,
     },
   };
 }
