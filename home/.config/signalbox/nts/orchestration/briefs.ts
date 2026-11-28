@@ -75,7 +75,7 @@ export function workerBrief(task: {
     readingList(task.issue.labels),
     "",
     "Now: read what the card points at, then send your design with report_design: the cause, the change at that cause, the files, and the controls that prove it. Do not edit code until the design is approved.",
-    `After approval: build it, prove it (focused tests, node tooling/gate/inner.ts, node tooling/landing/check.ts <commit> --here), commit everything, and call report_ready with the commit and what the proof showed. Do not queue the landing yourself; Signalbox queues the exact commit after review.`,
+    `After approval: build it, prove it (focused tests, node tooling/gate/inner.ts --no-agree, and the proof your card or AGENTS.md names for this kind of change: instruction counts, the test262 records, hir-compare), commit everything, and call report_ready with the commit and what the proof showed. Do not queue the landing yourself; Signalbox queues the exact commit after review, and the landing service runs the landing check on it. Do not run check.ts --here as routine proof: it repeats that check in your tree at several times its cost. Run it only to diagnose a landing the service refused.`,
   ]
     .filter((line) => line !== null)
     .join("\n");
