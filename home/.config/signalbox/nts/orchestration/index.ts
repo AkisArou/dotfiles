@@ -81,7 +81,7 @@ export function ntsOrchestration(options: {
     parts: ntsTaskParts({ root: options.root, landing: landing.key, fullCheck: fullCheck.key }),
     coordinatorInstructions,
     words: {
-      proof: "the focused tests, inner.ts --no-agree and the card's proof",
+      proof: "the focused tests, inner.ts --no-agree for a compiler or runtime change, and the card's proof",
       waits: "a build, inner.ts, a landing check",
       signoff: "the compiler core, runtime/c, the gate or the landing tools",
     },
