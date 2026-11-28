@@ -94,14 +94,29 @@ export async function take(
  * under disk pressure. The pool owns when that is safe (#1066): it detaches the tree at
  * once, or records a durable detach-pending request that its upkeep completes once no
  * process, unit, build claim or resource lock uses it (a worker's own nts-<N>-* unit can
- * outlive its pane), and a resume replaces the request. Either way it exits 0; it exits
- * nonzero only when it could do neither, which is the task's fault, named.
+ * outlive its pane), and a resume replaces the request. Either way it exits 0. A held
+ * tree lock (exit 75) is asked again once it ends; any other nonzero exit, when it could do
+ * neither, is the task's fault, named.
  */
-export async function detach(root: string, branch: string, signal: AbortSignal): Promise<void> {
-  const result = await runNts(root, ["tooling/landing/pool.ts", "detach", branch], {
+export async function detach(
+  root: string,
+  branch: string,
+  signal: AbortSignal,
+  pauseMs = 30_000,
+): Promise<void> {
+  let result = await runNts(root, ["tooling/landing/pool.ts", "detach", branch], {
     signal,
     timeout: 120_000,
   });
+  // The tree's resource lock is held (a gate run or disk reclamation uses it): the refusal
+  // changed nothing, so ask again once it ends, as attach and take do (EX_TEMPFAIL).
+  while (result.code === TEMPFAIL) {
+    await sleep(pauseMs, undefined, { signal });
+    result = await runNts(root, ["tooling/landing/pool.ts", "detach", branch], {
+      signal,
+      timeout: 120_000,
+    });
+  }
   if (result.code === 0) return;
   // A tree the pool reset once its change landed holds the branch no more: nothing is
   // left to detach (detach is idempotent). The pool's own status says so, not its words.

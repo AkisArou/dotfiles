@@ -44,6 +44,12 @@ test("detach asks the pool once: it detaches the tree or records the pending det
   assert.deepEqual(await calls(), ["detach 907"]);
 });
 
+test("a held tree lock (exit 75) is asked again once it ends, not a fault", async (t) => {
+  const { root, calls } = await pool(t, [75, 75, 0]);
+  await detach(root, "907", signal, 1);
+  assert.deepEqual(await calls(), ["detach 907", "detach 907", "detach 907"]);
+});
+
 test("a tree reset after its change landed holds the branch no more: it is detached already", async (t) => {
   // trees.json is empty: no tree holds 907, as after a landing reset its tree.
   const { root, calls } = await pool(t, [1]);
